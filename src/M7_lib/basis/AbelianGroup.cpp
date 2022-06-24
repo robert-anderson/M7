@@ -59,13 +59,13 @@ bool AbelianGroup::operator==(const AbelianGroup &other) const {
 PointGroup::PointGroup() : AbelianGroup({"0", "1", "2", "3", "4", "5", "6", "7"},
                                         [](const uint_t& i, const uint_t& j){return i^j;}){}
 
-AbelianGroupMap::AbelianGroupMap(AbelianGroup grp, defs::uintv_t site_irreps) :
+AbelianGroupMap::AbelianGroupMap(AbelianGroup grp, uintv_t site_irreps) :
         m_grp(grp), m_site_irreps(site_irreps), m_nsite(m_site_irreps.size()) {
     REQUIRE_TRUE(std::all_of(m_site_irreps.cbegin(), m_site_irreps.cend(),
                        [&](uint_t i){return i<m_grp.nirrep();}), "irrep label OOB");
 }
 
-AbelianGroupMap::AbelianGroupMap(uint_t nsite) : AbelianGroupMap({}, defs::uintv_t(nsite, 0)){}
+AbelianGroupMap::AbelianGroupMap(uint_t nsite) : AbelianGroupMap({}, uintv_t(nsite, 0)){}
 
 bool AbelianGroupMap::operator==(const AbelianGroupMap &other) const {
     return (m_grp == other.m_grp) && (m_site_irreps == other.m_site_irreps) && (m_nsite == other.m_nsite);

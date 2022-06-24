@@ -11,7 +11,6 @@
 #include "M7_lib/defs.h"
 #include "Datatype.h"
 
-using namespace defs;
 
 /**
  * defines overloaded and templated functions to deal with complex/real arithmetic appropriately

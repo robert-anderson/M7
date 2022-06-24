@@ -12,22 +12,22 @@ class SpfTwfBase {
 protected:
     const Hamiltonian& m_ham;
     ConnForeachGroup m_conn_iters;
-    std::vector<defs::ham_t> m_numerator;
-    std::vector<defs::ham_t> m_denominator;
+    std::vector<ham_t> m_numerator;
+    std::vector<ham_t> m_denominator;
 
 public:
-    std::vector<defs::ham_t> m_numerator_total;
-    std::vector<defs::ham_t> m_denominator_total;
+    std::vector<ham_t> m_numerator_total;
+    std::vector<ham_t> m_denominator_total;
 
     SpfTwfBase(const Hamiltonian &ham, uint_t npart);
 
-    virtual void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+    virtual void add(const field::Numbers<wf_t, ndim_wf> &weight,
                      const field::FrmOnv &onv) = 0;
 
-    virtual void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+    virtual void add(const field::Numbers<wf_t, ndim_wf> &weight,
                      const field::FrmBosOnv &onv) = 0;
 
-    virtual void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+    virtual void add(const field::Numbers<wf_t, ndim_wf> &weight,
                      const field::BosOnv &onv) = 0;
 
     virtual void reduce();

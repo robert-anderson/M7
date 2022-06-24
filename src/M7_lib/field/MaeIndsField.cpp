@@ -22,13 +22,13 @@ uinta_t<4> MaeIndsField::make_nop_offsets() const {
 }
 
 MaeIndsField::MaeIndsField(Row *row, uint_t exsig, std::string name) :
-    NdNumberField<defs::mev_ind_t, 1>(row, {exsig::decode_nop(exsig)}, name),
+    NdNumberField<mev_ind_t, 1>(row, {exsig::decode_nop(exsig)}, name),
     m_exsig(exsig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
     m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
     m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}
 
 MaeIndsField::MaeIndsField(const MaeIndsField &other) :
-    NdNumberField<defs::mev_ind_t, 1>(other), m_exsig(other.m_exsig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
+    NdNumberField<mev_ind_t, 1>(other), m_exsig(other.m_exsig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
     m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
     m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}
 
@@ -70,7 +70,7 @@ bool MaeIndsField::is_ordered() const {
     return is_ordered(0, true) && is_ordered(1, true) && is_ordered(2, false) && is_ordered(3, false);
 }
 
-void MaeIndsField::common_frm_inds(defs::uintv_t &common) const {
+void MaeIndsField::common_frm_inds(uintv_t &common) const {
     common.clear();
     uint_t icre = 0ul;
     uint_t iann = 0ul;

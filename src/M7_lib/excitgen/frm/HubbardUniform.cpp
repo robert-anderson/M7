@@ -9,7 +9,7 @@ HubbardUniform::HubbardUniform(const FrmHam &h, PRNG &prng) :
     REQUIRE_TRUE(h.is<HubbardFrmHam>(), "given hamiltonian is not of HubbardFrmHam type");
 }
 
-bool HubbardUniform::draw_frm(uint_t, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
+bool HubbardUniform::draw_frm(uint_t, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) {
     const auto& h = *m_h.as<HubbardFrmHam>();
     /*
      * the number of adjacent sites accessible is not decided till the occupied index has been chosen. If the integer
@@ -44,7 +44,7 @@ bool HubbardUniform::draw_frm(uint_t, const field::FrmOnv &src, defs::prob_t &pr
     return true;
 }
 
-defs::prob_t HubbardUniform::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
+prob_t HubbardUniform::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
     const auto &occs = src.m_decoded.m_simple_occs.get();
     const auto nelec = occs.size();
     const auto isite = src.m_basis.isite(conn.m_ann[0]);

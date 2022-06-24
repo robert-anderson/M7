@@ -55,7 +55,7 @@ TEST(PRNG, StochasticThreshold) {
     PRNG prng(0, 1000);
     double rounding_magnitude = 2.7;
     ASSERT_EQ(prng.stochastic_threshold(123.34, rounding_magnitude), 123.34);
-    defs::prob_t accept_prob;
+    prob_t accept_prob;
     prng.stochastic_threshold(2.5, rounding_magnitude, accept_prob);
     ASSERT_FLOAT_EQ(accept_prob, 2.5 / 2.7);
 

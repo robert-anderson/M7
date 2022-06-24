@@ -48,8 +48,8 @@ TEST(NumericCsvFileReader, ParseScientific){
 TEST(NumericCsvFileReader, ParseSingleReal){
     const uint_t nreal = 1;
     std::vector<std::string> line = {"-0.001368384767972724", "4", "3", "9", "9"};
-    defs::uintv_t inds;
-    defs::uintv_t chk_inds = {4, 3, 9, 9};
+    uintv_t inds;
+    uintv_t chk_inds = {4, 3, 9, 9};
     NumericCsvFileReader::parse(line.cbegin()+nreal, line.cend(), inds);
     ASSERT_EQ(inds, chk_inds);
     std::vector<double> real_values;
@@ -65,8 +65,8 @@ TEST(NumericCsvFileReader, ParseSingleReal){
 TEST(NumericCsvFileReader, ParseMultiReal){
     const uint_t nreal = 5;
     std::vector<std::string> line = {"-0.00134", "12.22", "-1.33", "4.5463", "-9.012", "4", "3", "9", "9"};
-    defs::uintv_t inds;
-    defs::uintv_t chk_inds = {4, 3, 9, 9};
+    uintv_t inds;
+    uintv_t chk_inds = {4, 3, 9, 9};
     NumericCsvFileReader::parse(line.cbegin()+nreal, line.cend(), inds);
     ASSERT_EQ(inds, chk_inds);
     std::vector<double> real_values;

@@ -20,7 +20,6 @@
 #include <M7_lib/defs.h>
 #include "M7_lib/util/Convert.h"
 
-using namespace defs;
 /**
  * With MPI, we potentially have a typing issue. By default MPI libraries are typically
  * compiled with the displacement and count types set to 32-bit signed ints. This is
@@ -36,7 +35,7 @@ using namespace defs;
  * count_t and counts_t are the scalar and vector typedefs for the MPI integer
  *
  * The cleanest way to achieve this aim is to expose only the overloads that use uint_t and
- * std::vector<uint_t> (defs::uintv_t) to define counts and displs. if sizeof(count_t)
+ * std::vector<uint_t> (uintv_t) to define counts and displs. if sizeof(count_t)
  * is less than sizeof(uint_t), a narrowing conversion is required, but since this is at the
  * level of communication, and not inside a main loop, this minor overhead will more than
  * pay for itself in code clarity. Hence, **count_t and counts_t should never
@@ -615,7 +614,7 @@ namespace mpi {
 
     template<typename T>
     static bool gatherv(const T *send, uint_t sendcount, T *recv,
-                        const defs::uintv_t &recvcounts, const defs::uintv_t &recvdispls, const uint_t &iroot) {
+                        const uintv_t &recvcounts, const uintv_t &recvdispls, const uint_t &iroot) {
         auto tmp_recvcounts = snrw(recvcounts);
         auto tmp_recvdispls = snrw(recvdispls);
         return gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data(), iroot);
@@ -624,7 +623,7 @@ namespace mpi {
     template<typename T>
     static bool all_gatherv(
             const T *send, uint_t sendcount,
-            T *recv, const defs::uintv_t &recvcounts, const defs::uintv_t &recvdispls) {
+            T *recv, const uintv_t &recvcounts, const uintv_t &recvdispls) {
         auto tmp_recvcounts = snrw(recvcounts);
         auto tmp_recvdispls = snrw(recvdispls);
         return all_gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data());
@@ -662,7 +661,7 @@ namespace mpi {
     }
 
     template<typename T>
-    static bool scatterv(const T *send, const defs::uintv_t sendcounts, const defs::uintv_t &senddispls,
+    static bool scatterv(const T *send, const uintv_t sendcounts, const uintv_t &senddispls,
                          T *recv, const uint_t &recvcount, const uint_t &iroot) {
         auto tmp_sendcounts = snrw(sendcounts);
         auto tmp_senddispls = snrw(senddispls);
@@ -700,8 +699,8 @@ namespace mpi {
 
     template<typename T>
     static bool all_to_allv(
-            const T *send, const defs::uintv_t &sendcounts, const defs::uintv_t &senddispls,
-            T *recv, const defs::uintv_t &recvcounts, const defs::uintv_t &recvdispls) {
+            const T *send, const uintv_t &sendcounts, const uintv_t &senddispls,
+            T *recv, const uintv_t &recvcounts, const uintv_t &recvdispls) {
         auto tmp_sendcounts = snrw(sendcounts);
         auto tmp_senddispls = snrw(senddispls);
         auto tmp_recvcounts = snrw(recvcounts);

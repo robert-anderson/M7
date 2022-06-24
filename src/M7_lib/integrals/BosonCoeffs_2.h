@@ -19,15 +19,15 @@ class BosonCoeffs_2 {
 
     const uint_t m_nmode;
 public:
-    SharedArray<defs::ham_t> m_v;
+    SharedArray<ham_t> m_v;
 
     BosonCoeffs_2(uint_t nmode);
 
-    void set(uint_t i, uint_t j, uint_t k, uint_t l, defs::ham_t value);
+    void set(uint_t i, uint_t j, uint_t k, uint_t l, ham_t value);
 
-    defs::ham_t get(uint_t i, uint_t j, uint_t k, uint_t l) const;
+    ham_t get(uint_t i, uint_t j, uint_t k, uint_t l) const;
 
-    defs::ham_t phys_element(uint_t i, uint_t j, uint_t k, uint_t l) const;
+    ham_t phys_element(uint_t i, uint_t j, uint_t k, uint_t l) const;
 };
 
 

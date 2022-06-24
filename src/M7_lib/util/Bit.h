@@ -8,7 +8,6 @@
 #include <x86intrin.h>
 #include "M7_lib/defs.h"
 
-using namespace defs;
 
 /**
  * utilities relating to the manipulation of integral types as bitsets

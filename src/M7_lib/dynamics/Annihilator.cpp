@@ -50,7 +50,7 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
 }
 
 Annihilator::Annihilator(Wavefunction &wf, const Propagator &prop, const References &refs,
-                         Rdms &rdms, const uint_t &icycle, defs::wf_comp_t nadd) :
+                         Rdms &rdms, const uint_t &icycle, wf_comp_t nadd) :
         m_wf(wf), m_prop(prop), m_refs(refs), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
         m_work_row1(wf.m_comm.recv().m_row), m_work_row2(wf.m_comm.recv().m_row),
         m_sort_cmp_fn(make_sort_cmp_fn()) {
@@ -63,7 +63,7 @@ void Annihilator::sort_recv() {
     qs.reorder_sort(m_wf.recv());
 }
 
-void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
+void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
                                  bool allow_initiation, WalkerTableRow &dst_row) {
     if (m_nadd == 0.0) {
         DEBUG_ASSERT_TRUE(allow_initiation,
@@ -90,7 +90,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
         m_wf.set_weight(dst_ipart, delta_weight);
 
     } else {
-        defs::wf_t weight_before = dst_row.m_weight[dst_ipart];
+        wf_t weight_before = dst_row.m_weight[dst_ipart];
         if (fptol::numeric_zero(weight_before) && !allow_initiation) {
             // the row exists, but that does not necessarily mean that each part has non-zero occupation
             //m_aborted_weight += std::abs(*delta_weight);
@@ -102,7 +102,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
 }
 
 void Annihilator::handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &next_block_begin,
-                                   const defs::wf_t &total_delta, WalkerTableRow &dst_row) {
+                                   const wf_t &total_delta, WalkerTableRow &dst_row) {
     DEBUG_ASSERT_FALSE(in_same_dst_block(block_begin, next_block_begin),
                        "start of block and start of next block should not be in the same block");
     DEBUG_ASSERT_LT(block_begin.index(), next_block_begin.index(),
@@ -120,7 +120,7 @@ void Annihilator::handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &ne
         uint_t irow_next_begin = next_block_begin.index();
 
         auto &current = next_block_begin;
-        defs::wf_t src_weight = block_begin.m_src_weight;
+        wf_t src_weight = block_begin.m_src_weight;
         DEBUG_ONLY(src_weight);
 
         for (current.jump(block_begin);; current.step()) {
@@ -140,7 +140,7 @@ void Annihilator::handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &ne
                 DEBUG_ASSERT_EQ(current.m_dst_mbf, block_begin.m_dst_mbf, "dst MBFs should be the same");
                 DEBUG_ASSERT_EQ(current.m_ipart_dst, block_begin.m_ipart_dst, "dst iparts should be the same");
                 DEBUG_ASSERT_EQ(current.m_src_mbf, block_begin.m_src_mbf, "src MBFs should be the same");
-                DEBUG_ASSERT_EQ(src_weight, defs::wf_t(current.m_src_weight),
+                DEBUG_ASSERT_EQ(src_weight, wf_t(current.m_src_weight),
                     "all spawns with the same dst_mbf, ipart_dst, and src_mbf should have exactly the same src_weight");
             }
         }
@@ -199,7 +199,7 @@ void Annihilator::loop_over_dst_mbfs() {
      */
     DstFinder dst_finder(m_wf, block_begin);
 
-    defs::wf_t total_delta = 0.0;
+    wf_t total_delta = 0.0;
     dst_finder.find();
 
     auto &current = m_work_row2;

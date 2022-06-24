@@ -48,7 +48,7 @@ public:
 
     uint_t ncase_excit_gen() const override;
 
-    std::vector<defs::prob_t> excit_gen_case_probs() const override;
+    std::vector<prob_t> excit_gen_case_probs() const override;
 
     void update(const uint_t &icycle, const Wavefunction &wf) override;
 

@@ -38,11 +38,11 @@
 struct Bilinears {
     Rdms m_rdms;
     SpecMoms m_spec_moms;
-    buffered::Numbers<defs::wf_t, defs::ndim_root> m_total_norm;
+    buffered::Numbers<wf_t, ndim_root> m_total_norm;
     //const bool m_explicit_hf_conns;
 
-    //std::array<std::unique_ptr<SpectralMoment>, defs::c_ndistinct> m_specmoms;
-    //const defs::uintv_t m_specmom_exsigs;
+    //std::array<std::unique_ptr<SpectralMoment>, c_ndistinct> m_specmoms;
+    //const uintv_t m_specmom_exsigs;
 
 private:
     /**
@@ -74,8 +74,8 @@ private:
      * @return
      *  integer excitation signatures
      */
-    static defs::uintv_t parse_exsigs(const std::vector<std::string> &strings) {
-        defs::uintv_t out;
+    static uintv_t parse_exsigs(const std::vector<std::string> &strings) {
+        uintv_t out;
         for (auto &string: strings) out.push_back(parse_exsig(string));
         DEBUG_ASSERT_EQ(out.size(), strings.size(),
                         "output should have the same number of exsigs as specification");
@@ -107,7 +107,7 @@ public:
         return m_rdms;
     }
 
-    Bilinears(const conf::AvEsts &opts, defs::uintv_t rdm_ranksigs, defs::uintv_t /*specmom_exsigs*/,
+    Bilinears(const conf::AvEsts &opts, uintv_t rdm_ranksigs, uintv_t /*specmom_exsigs*/,
               sys::Size extents, uint_t nelec, const Epoch &epoch) :
             m_rdms(opts.m_rdm, rdm_ranksigs, extents, nelec, epoch),
             m_spec_moms(opts.m_spec_mom), m_total_norm({1}) {}
@@ -132,12 +132,12 @@ public:
      *  the end of the calculation has been reached (all WF rows are about to be removed)
      * @param mbf
      */
-    void make_contribs(const field::Mbf &onv, const defs::wf_t &ci_product) {
+    void make_contribs(const field::Mbf &onv, const wf_t &ci_product) {
         m_total_norm[0] += ci_product;
         m_rdms.make_contribs(onv, onv, ci_product);
     }
 
-    defs::ham_comp_t estimate_energy(const Hamiltonian &ham) {
+    ham_comp_t estimate_energy(const Hamiltonian &ham) {
         return m_rdms.get_energy(ham);
     }
 };

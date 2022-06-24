@@ -9,9 +9,9 @@ TEST(BosdumpFileReader, ReadFile){
     std::string fname = PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP";
     BosdumpFileReader file_reader(fname);
     ASSERT_EQ(file_reader.m_header.m_nmode, 5ul);
-    defs::uintv_t inds(4);
-    defs::uintv_t test_inds(4);
-    defs::ham_t value;
+    uintv_t inds(4);
+    uintv_t test_inds(4);
+    ham_t value;
 
     test_inds = {0, 0, 0, 0};
     file_reader.next(inds, value);

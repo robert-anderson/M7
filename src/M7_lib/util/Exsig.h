@@ -8,7 +8,6 @@
 #include "M7_lib/defs.h"
 #include "Integer.h"
 
-using namespace defs;
 /**
  * functions related to "excitation signatures" of connections between many-body basis functions
  * "exsigs" encode in a single word the number of each type of second-quantised operator in an operator product.

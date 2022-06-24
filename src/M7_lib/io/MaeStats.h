@@ -11,8 +11,8 @@
 
 struct MaeStatsRow : StatsRow {
     statistic::Number<uint_t> m_icycle;
-    statistic::Number<defs::wf_t> m_total_norm;
-    statistic::Number<defs::ham_comp_t> m_rdm_energy;
+    statistic::Number<wf_t> m_total_norm;
+    statistic::Number<ham_comp_t> m_rdm_energy;
 
     MaeStatsRow(bool rdms, bool spec_moms);
 };

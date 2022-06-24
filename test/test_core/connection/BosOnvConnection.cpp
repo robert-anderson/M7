@@ -24,7 +24,7 @@ namespace bos_onv_connection_test {
      * @return
      *  square of the occupation factor
      */
-    uint_t chk_occ_fac_square(const field::BosOnv& src, const defs::uintv_t& icres, const defs::uintv_t& ianns){
+    uint_t chk_occ_fac_square(const field::BosOnv& src, const uintv_t& icres, const uintv_t& ianns){
         buffered::BosOnv work(src);
         uint_t tot = 1;
         for (auto& iann : ianns) {
@@ -38,7 +38,7 @@ namespace bos_onv_connection_test {
         return tot;
     }
 
-    bool one_conn(const field::BosOnv& src, defs::uintv_t icres, defs::uintv_t ianns){
+    bool one_conn(const field::BosOnv& src, uintv_t icres, uintv_t ianns){
         auto chk = chk_occ_fac_square(src, icres, ianns);
         conn::BosOnv conn(src.m_basis.m_nmode);
         BosOps com(src.m_basis.m_nmode);
@@ -91,8 +91,8 @@ TEST(BosonOnvConnection, NoChange) {
     buffered::BosOnv ket(nmode);
     buffered::BosOnv bra(nmode);
 
-    ket = defs::uintv_t{2, 4, 0, 1};
-    bra =  defs::uintv_t{2, 4, 0, 1};
+    ket = uintv_t{2, 4, 0, 1};
+    bra =  uintv_t{2, 4, 0, 1};
 
     conn::BosOnv pc(ket);
     pc.connect(ket, bra);

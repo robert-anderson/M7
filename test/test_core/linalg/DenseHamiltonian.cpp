@@ -22,7 +22,7 @@ TEST(DenseHamiltonian, N2Rhf) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"}, true);
     Hamiltonian ham(&frm_ham);
     DenseHamiltonian hmat(ham);
-    std::vector<defs::ham_t> evals;
+    std::vector<ham_t> evals;
     dense::diag(hmat, evals);
     ASSERT_NEARLY_EQ(evals[0], -108.916561245585);
 }
@@ -31,8 +31,8 @@ TEST(DenseHamiltonian, HeisenbergFrmHam) {
     /*
      * https://doi.org/10.1016/0378-4363(78)90115-8
      */
-    defs::uintv_t nsites = {4, 6, 8, 10, 12};
-    std::vector<defs::ham_comp_t> energies = {-2.0, -2.8027756375, -3.6510934085, -4.515446354, -5.387390917};
+    uintv_t nsites = {4, 6, 8, 10, 12};
+    std::vector<ham_comp_t> energies = {-2.0, -2.8027756375, -3.6510934085, -4.515446354, -5.387390917};
     for (uint_t i=0ul; i<nsites.size(); ++i){
         auto nsite = nsites[i];
         auto energy = energies[i];

@@ -10,8 +10,8 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, uint_t occ_cutoff) :
         m_coeffs_1(m_basis.m_nmode), m_coeffs_2(m_basis.m_nmode) {
 
     BosdumpFileReader file_reader(header.m_fname);
-    defs::uintv_t inds(4);
-    defs::ham_t value;
+    uintv_t inds(4);
+    ham_t value;
 
     log::info("Reading Boson Hamiltonian coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
@@ -34,23 +34,23 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, uint_t occ_cutoff) :
 GeneralBosHam::GeneralBosHam(opt_pair_t opts) :
         GeneralBosHam(BosdumpHeader(opts.m_ham.m_bosdump.m_path), opts.m_basis.m_bos_occ_cutoff){}
 
-defs::ham_t GeneralBosHam::get_coeff_0011(uint_t i, uint_t j) const {
+ham_t GeneralBosHam::get_coeff_0011(uint_t i, uint_t j) const {
     return m_coeffs_1.get(i, j);
 }
 
-defs::ham_t GeneralBosHam::get_coeff_0022(uint_t i, uint_t j, uint_t k, uint_t l) const {
+ham_t GeneralBosHam::get_coeff_0022(uint_t i, uint_t j, uint_t k, uint_t l) const {
     return m_coeffs_2.get(i, j, k, l) + m_coeffs_2.get(i, j, l, k);
 }
 
-defs::ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
-    defs::ham_t h = 0;
+ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
+    ham_t h = 0;
     for (uint_t imode = 0ul; imode < m_basis.m_nmode; ++imode) {
         if (!onv[imode]) continue;
-        defs::ham_comp_t occi = onv[imode];
+        ham_comp_t occi = onv[imode];
         h += m_coeffs_1.get(imode, imode) * occi;
         for (uint_t jmode = 0ul; jmode < imode; ++jmode) {
             if (!onv[jmode]) continue;
-            defs::ham_comp_t occj = onv[jmode];
+            ham_comp_t occj = onv[jmode];
             // imode and jmode are different
             // i, j -> i, j
             h += 2 * m_coeffs_2.get(imode, imode, jmode, jmode) * occi * occj;
@@ -60,7 +60,7 @@ defs::ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
     return h;
 }
 
-defs::ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
+ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
     DEBUG_ASSERT_NE(conn.m_ann.size(), conn.m_cre.size(), "this Hamiltonian conserves boson number");
     DEBUG_ASSERT_EQ(conn.size(), uint_t(2), "incorrectly sized connection passed to get_element_0011");
     // get mode indices
@@ -75,7 +75,7 @@ defs::ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn
     return std::sqrt((na+1)*ni);
 }
 
-defs::ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {
+ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {
     DEBUG_ASSERT_NE(conn.m_ann.size(), conn.m_cre.size(), "this Hamiltonian conserves boson number");
     DEBUG_ASSERT_NE(conn.size(), uint_t(2), "single number-conserving boson operator passed to get_element_0022");
     DEBUG_ASSERT_NE(conn.size(), uint_t(0), "empty connection passed to get_element_0022");
@@ -91,7 +91,7 @@ defs::ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn
     uint_t nk = onv[k];
     uint_t nl = onv[l];
 
-    defs::ham_comp_t occ_fac = 1.0;
+    ham_comp_t occ_fac = 1.0;
     if (i == j) {
         if (k == l) {
             DEBUG_ASSERT_NE(i, k, "ii <- ii case implies diagonal element, not double excitation");

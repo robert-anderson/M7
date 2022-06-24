@@ -15,13 +15,13 @@ class BosonCoeffs_1 {
 
 public:
     const uint_t m_nmode;
-    SharedArray<defs::ham_t> m_v;
+    SharedArray<ham_t> m_v;
 
     BosonCoeffs_1(uint_t nmode);
 
-    void set(uint_t n, uint_t m, defs::ham_t value);
+    void set(uint_t n, uint_t m, ham_t value);
 
-    defs::ham_t get(uint_t n, uint_t m) const;
+    ham_t get(uint_t n, uint_t m) const;
 };
 
 

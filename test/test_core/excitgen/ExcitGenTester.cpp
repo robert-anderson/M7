@@ -12,22 +12,22 @@ bool excit_gen_tester::ExcitGenTester::all_drawn_at_least_once() const {
     return true;
 }
 
-bool excit_gen_tester::ExcitGenTester::all_correct_weights(uint_t ndraw, double cutoff, defs::prob_t tol) const {
+bool excit_gen_tester::ExcitGenTester::all_correct_weights(uint_t ndraw, double cutoff, prob_t tol) const {
     auto &row = m_results.m_row;
     for (row.restart(); row.in_range(); row.step()){
         auto ratio = double(row.m_occur)/ndraw;
         if (ratio<cutoff) continue;
-        auto norm_weight = defs::prob_t(row.m_weight)/ndraw;
+        auto norm_weight = prob_t(row.m_weight)/ndraw;
         if (std::abs(norm_weight-1.0) > tol) return false;
     }
     return true;
 }
 
-defs::prob_t excit_gen_tester::ExcitGenTester::mean_abs_error(uint_t ndraw) const {
+prob_t excit_gen_tester::ExcitGenTester::mean_abs_error(uint_t ndraw) const {
     auto &row = m_results.m_row;
-    defs::prob_t error = 0.0;
+    prob_t error = 0.0;
     for (row.restart(); row.in_range(); row.step()){
-        auto norm_weight = defs::prob_t(row.m_weight)/ndraw;
+        auto norm_weight = prob_t(row.m_weight)/ndraw;
         error += std::abs(norm_weight-1.0);
     }
     return error/m_results.m_hwm;

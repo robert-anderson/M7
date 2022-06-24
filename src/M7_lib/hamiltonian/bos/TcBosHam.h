@@ -26,18 +26,18 @@ struct TcBosHam : TcHam, GeneralBosHam {
     /**
      * @brief Get the coeff of type 0033 (Bosonic "triple excitation")
      */
-    defs::ham_t get_coeff_0033(uint_t a, uint_t b, uint_t c, uint_t i, uint_t j,
+    ham_t get_coeff_0033(uint_t a, uint_t b, uint_t c, uint_t i, uint_t j,
                                uint_t k) const;
 
-    defs::ham_t get_element_0000(const field::BosOnv &onv) const override;
+    ham_t get_element_0000(const field::BosOnv &onv) const override;
 
-    defs::ham_t get_element_0011(const field::BosOnv &onv,
+    ham_t get_element_0011(const field::BosOnv &onv,
                                  const conn::BosOnv &conn) const override;
 
-    defs::ham_t get_element_0022(const field::BosOnv &onv,
+    ham_t get_element_0022(const field::BosOnv &onv,
                                  const conn::BosOnv &conn) const override;
 
-    defs::ham_t get_element_0033(const field::BosOnv &onv,
+    ham_t get_element_0033(const field::BosOnv &onv,
                                  const conn::BosOnv &conn) const;
 };
 

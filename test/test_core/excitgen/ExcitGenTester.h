@@ -13,8 +13,8 @@ namespace excit_gen_tester {
     struct ResultRow : Row {
         field::MaeInds m_inds;
         field::Number<uint_t> m_occur;
-        field::Number<defs::prob_t> m_weight;
-        field::Number<defs::ham_t> m_helem;
+        field::Number<prob_t> m_weight;
+        field::Number<ham_t> m_helem;
 
         ResultRow(uint_t exsig) :
                 m_inds(this, exsig, "excitation indices"),
@@ -84,8 +84,8 @@ namespace excit_gen_tester {
             uint_t nnull = 0ul;
 
             REQUIRE_FALSE(m_results.is_cleared(), "no connections were found by the excitation iterator");
-            defs::prob_t prob = 0.0;
-            defs::ham_t helem = 0.0;
+            prob_t prob = 0.0;
+            ham_t helem = 0.0;
             auto &row = m_results.m_row;
             for (uint_t idraw = 0ul; idraw < ndraw; ++idraw) {
                 auto success = m_excit_gen.draw(exsig, src_mbf, prob, helem, conn);
@@ -105,7 +105,7 @@ namespace excit_gen_tester {
                 row.jump(irow);
                 row.m_occur++;
                 row.m_weight += 1 / prob;
-                if (!fptol::numeric_equal(defs::ham_t(row.m_helem), helem))
+                if (!fptol::numeric_equal(ham_t(row.m_helem), helem))
                     return {"excit gen returned the wrong H matrix element"};
             }
             return {nnull};
@@ -128,7 +128,7 @@ namespace excit_gen_tester {
          * @return
          *  true if all weights are correct within tolerance
          */
-        bool all_correct_weights(uint_t ndraw, double cutoff = 1e-2, defs::prob_t tol = 1e-2) const;
+        bool all_correct_weights(uint_t ndraw, double cutoff = 1e-2, prob_t tol = 1e-2) const;
 
         /**
          * @param ndraw
@@ -136,7 +136,7 @@ namespace excit_gen_tester {
          * @return
          *  the average absolute error in the normalized weights
          */
-        defs::prob_t mean_abs_error(uint_t ndraw) const;
+        prob_t mean_abs_error(uint_t ndraw) const;
     };
 }
 

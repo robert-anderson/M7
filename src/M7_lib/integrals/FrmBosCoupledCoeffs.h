@@ -38,7 +38,7 @@ public:
     /**
      * array of "integrals" only stored on the root-rank of each node
      */
-    SharedArray<defs::ham_t> m_v;
+    SharedArray<ham_t> m_v;
 
     FrmBosCoupledCoeffs(sys::Size sizes, bool spin_resolved);
 
@@ -53,7 +53,7 @@ public:
      * @param value
      *  coefficient value
      */
-    void set(uint_t n, uint_t p, uint_t q, defs::ham_t value);
+    void set(uint_t n, uint_t p, uint_t q, ham_t value);
 
     /**
      * access the coefficient value (called on any rank)
@@ -66,7 +66,7 @@ public:
      * @return
      *  coefficient value
      */
-    defs::ham_t get(uint_t n, uint_t p, uint_t q) const;
+    ham_t get(uint_t n, uint_t p, uint_t q) const;
 
 };
 

@@ -5,7 +5,7 @@
 #include "M7_lib/util/Probability.h"
 #include "MagnitudeLogger.h"
 
-MagnitudeLogger::MagnitudeLogger(defs::ham_comp_t max_bloom, uint_t ndraw_min, uint_t nexcase, bool static_tau,
+MagnitudeLogger::MagnitudeLogger(ham_comp_t max_bloom, uint_t ndraw_min, uint_t nexcase, bool static_tau,
                                  bool static_probs, double tau_min, double tau_max, double prob_min, uint_t period) :
         m_max_bloom(max_bloom), m_ndraw_min(ndraw_min), m_static_tau(static_tau), m_static_probs(static_probs),
         m_tau_min(tau_min), m_tau_max(tau_max), m_prob_min(prob_min), m_period(period), m_ndraw({nexcase}),
@@ -19,7 +19,7 @@ MagnitudeLogger::MagnitudeLogger(defs::ham_comp_t max_bloom, uint_t ndraw_min, u
         log::info("Dynamic excitation level probabilities to be kept above {}", m_prob_min);
 }
 
-void MagnitudeLogger::log(uint_t icase, const defs::ham_t &helem, const defs::prob_t &prob) {
+void MagnitudeLogger::log(uint_t icase, const ham_t &helem, const prob_t &prob) {
     DEBUG_ASSERT_NE(prob, 0.0, "null draw should never be logged");
     auto& hi = m_gamma.m_local[icase];
     auto mag = std::abs(helem) / prob;
@@ -27,7 +27,7 @@ void MagnitudeLogger::log(uint_t icase, const defs::ham_t &helem, const defs::pr
     ++m_ndraw.m_local[icase];
 }
 
-void MagnitudeLogger::update_tau(double &tau, const defs::ham_comp_t &gamma_sum) {
+void MagnitudeLogger::update_tau(double &tau, const ham_comp_t &gamma_sum) {
     if (m_static_tau) return;
     tau = m_max_bloom / gamma_sum;
     if (tau < m_tau_min) tau = m_tau_min;

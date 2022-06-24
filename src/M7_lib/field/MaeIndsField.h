@@ -13,18 +13,18 @@
  * accesses an operator-type specific partition of a field containing all indices of the MAE element
  */
 class MaeIndsPartition {
-    NdNumberField<defs::mev_ind_t, 1> &m_field;
+    NdNumberField<mev_ind_t, 1> &m_field;
     const uint_t m_offset, m_size;
 public:
-    MaeIndsPartition(NdNumberField<defs::mev_ind_t, 1> &field, uint_t offset, uint_t size) :
+    MaeIndsPartition(NdNumberField<mev_ind_t, 1> &field, uint_t offset, uint_t size) :
         m_field(field), m_offset(offset), m_size(size) {}
 
-    const defs::mev_ind_t &operator[](const uint_t &iind) const {
+    const mev_ind_t &operator[](const uint_t &iind) const {
         DEBUG_ASSERT_LT(iind, m_size, "operator index OOB in partition");
         return m_field[m_offset + iind];
     };
 
-    defs::mev_ind_t &operator[](const uint_t &iind) {
+    mev_ind_t &operator[](const uint_t &iind) {
         DEBUG_ASSERT_LT(iind, m_size, "operator index OOB in partition");
         return m_field[m_offset + iind];
     };
@@ -44,7 +44,7 @@ public:
      * @return
      *  reference to this
      */
-    MaeIndsPartition &operator=(const defs::uintv_t &inds) {
+    MaeIndsPartition &operator=(const uintv_t &inds) {
         DEBUG_ASSERT_EQ(inds.size(), m_size, "uintv_t vector size incompatible");
         uint_t iind = 0ul;
         for (auto &ind: inds) (*this)[iind++] = ind;
@@ -59,12 +59,12 @@ struct MaeIndsPair {
     MaeIndsPartition m_cre;
     MaeIndsPartition m_ann;
 
-    MaeIndsPair(NdNumberField<defs::mev_ind_t, 1> &field, uint_t cre_offset,
+    MaeIndsPair(NdNumberField<mev_ind_t, 1> &field, uint_t cre_offset,
                 uint_t cre_size, uint_t ann_offset, uint_t ann_size) :
             m_cre(field, cre_offset, cre_size),
             m_ann(field, ann_offset, ann_size) {}
 
-    MaeIndsPair &operator=(const std::pair<defs::uintv_t, defs::uintv_t> &inds) {
+    MaeIndsPair &operator=(const std::pair<uintv_t, uintv_t> &inds) {
         m_cre = inds.first;
         m_ann = inds.second;
         return *this;
@@ -84,8 +84,8 @@ struct MaeIndsPair {
  * will simply not be accessed, since neither view is considered in hashing and comparison operations, the underlying
  * field is.
  */
-struct MaeIndsField : NdNumberField<defs::mev_ind_t, 1> {
-    typedef NdNumberField<defs::mev_ind_t, 1> base_t;
+struct MaeIndsField : NdNumberField<mev_ind_t, 1> {
+    typedef NdNumberField<mev_ind_t, 1> base_t;
     using base_t::operator=;
     const uint_t m_exsig;
     const uinta_t<4> m_nops;
@@ -114,7 +114,7 @@ private:
 public:
     bool is_ordered() const;
 
-    void common_frm_inds(defs::uintv_t &common) const;
+    void common_frm_inds(uintv_t &common) const;
 
     std::string get_exsig_string() const;
 };

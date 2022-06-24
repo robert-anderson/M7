@@ -23,13 +23,13 @@ struct SumFrmHam : FrmHam {
     /**
      * scalar multiple of m_h2
      */
-    defs::ham_t m_weight;
+    ham_t m_weight;
 
 private:
 
 public:
 
-    SumFrmHam(ham_t1&& h1, ham_t2&& h2, defs::ham_t weight):
+    SumFrmHam(ham_t1&& h1, ham_t2&& h2, ham_t weight):
             FrmHam(static_cast<const FrmHam&>(h1).m_basis), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){
         /*
          * combine attributes of the components
@@ -41,23 +41,23 @@ public:
         m_kramers_attrs = ham::KramersAttributes(h1_base.m_kramers_attrs, h2_base.m_kramers_attrs);
     }
 
-    defs::ham_t get_coeff_1100(uint_t a, uint_t i) const override {
+    ham_t get_coeff_1100(uint_t a, uint_t i) const override {
         return m_h1.get_coeff_1100(a, i) + m_weight * m_h2.get_coeff_1100(a, i);
     }
 
-    defs::ham_t get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const override {
+    ham_t get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const override {
         return m_h1.get_coeff_2200(a, b, i, j) + m_weight * m_h2.get_coeff_2200(a, b, i, j);
     }
 
-    defs::ham_t get_element_0000(const field::FrmOnv &onv) const override {
+    ham_t get_element_0000(const field::FrmOnv &onv) const override {
         return m_h1.get_element_0000(onv) + m_weight * m_h2.get_element_0000(onv);
     }
 
-    defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override {
+    ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override {
         return m_h1.get_element_1100(onv, conn) + m_weight * m_h2.get_element_1100(onv, conn);
     }
 
-    defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override{
+    ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override{
         return m_h1.get_element_2200(onv, conn) + m_weight * m_h2.get_element_2200(onv, conn);
     }
 

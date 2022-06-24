@@ -71,7 +71,7 @@ struct RankDynamic {
      * @param irank_recv
      *  MPI rank to which the rows will be transferred
      */
-    virtual void before_block_transfer(const defs::uintv_t &irows_send, uint_t irank_send, uint_t irank_recv) = 0;
+    virtual void before_block_transfer(const uintv_t &irows_send, uint_t irank_send, uint_t irank_recv) = 0;
 
     /**
      * called after each row is inserted into the MappedTable on the recving rank
@@ -111,7 +111,7 @@ struct RankAllocatorBase {
     /**
      * A map from block index to MPI rank index
      */
-    defs::uintv_t m_block_to_rank;
+    uintv_t m_block_to_rank;
     /**
      * A map from MPI rank index to a list of all currently allocated blocks
      * push inward-transferred blocks indices to front

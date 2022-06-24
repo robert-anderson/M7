@@ -7,7 +7,7 @@
 #include "M7_lib/hamiltonian/frm/HeisenbergFrmHam.h"
 
 namespace heisenberg_test {
-    static std::vector<defs::uintv_t> spinvecs() {
+    static std::vector<uintv_t> spinvecs() {
         return {{1, 1, 1, 0, 0, 0}, {1, 1, 0, 1, 0, 0}, {1, 1, 0, 0, 1, 0}, {1, 1, 0, 0, 0, 1},
                 {1, 0, 1, 1, 0, 0}, {1, 0, 1, 0, 1, 0}, {1, 0, 1, 0, 0, 1}, {1, 0, 0, 1, 1, 0},
                 {1, 0, 0, 1, 0, 1}, {1, 0, 0, 0, 1, 1}, {0, 1, 1, 1, 0, 0}, {0, 1, 1, 0, 1, 0},
@@ -15,12 +15,12 @@ namespace heisenberg_test {
                 {0, 0, 1, 1, 1, 0}, {0, 0, 1, 1, 0, 1}, {0, 0, 1, 0, 1, 1}, {0, 0, 0, 1, 1, 1}};
     }
 
-    static std::vector<defs::ham_comp_t> energies() {
+    static std::vector<ham_comp_t> energies() {
         return {0.5, -0.5, -0.5,  0.5, -0.5, -1.5, -0.5, -0.5, -0.5,  0.5,  0.5,
                 -0.5, -0.5, -0.5, -1.5, -0.5,  0.5, -0.5, -0.5,  0.5};
     }
 
-    static void set_onv_from_spinvec(field::FrmOnv& onv, const defs::uintv_t& spinvec){
+    static void set_onv_from_spinvec(field::FrmOnv& onv, const uintv_t& spinvec){
         onv.zero();
         uint_t isite = 0ul;
         for (auto &spin: spinvec) onv.set({spin, isite++});

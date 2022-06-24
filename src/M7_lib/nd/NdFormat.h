@@ -12,7 +12,6 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/foreach/BasicForeach.h>
 
-using namespace defs;
 
 struct NdFormatBase{
     virtual std::string to_string() const = 0;
@@ -143,7 +142,7 @@ public:
      * @return
      *  the shape array converted to a vector instance
      */
-    defs::uintv_t shape_vector() const {
+    uintv_t shape_vector() const {
         return array::to_vector(m_shape);
     }
 

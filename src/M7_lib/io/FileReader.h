@@ -9,7 +9,6 @@
 #include <fstream>
 #include "M7_lib/defs.h"
 
-using namespace defs;
 
 class FileReader {
 protected:

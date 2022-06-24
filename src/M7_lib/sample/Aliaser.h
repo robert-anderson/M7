@@ -16,33 +16,33 @@
 struct Aliaser {
     const uint_t m_nrow, m_nprob;
 private:
-    SharedMatrix<defs::prob_t> m_prob_table;
+    SharedMatrix<prob_t> m_prob_table;
     SharedMatrix<uint_t> m_alias_table;
-    SharedArray<defs::prob_t> m_norm;
+    SharedArray<prob_t> m_norm;
 
 public:
     Aliaser(uint_t nrow, uint_t nprob);
 
-    void update(uint_t irow, const defs::prob_t *probs, uint_t nprob);
+    void update(uint_t irow, const prob_t *probs, uint_t nprob);
 
-    void update(uint_t irow, const std::vector<defs::prob_t> &probs);
+    void update(uint_t irow, const std::vector<prob_t> &probs);
 
     uint_t draw(uint_t irow, PRNG &prng) const;
 
-    defs::prob_t norm(uint_t irow) const;
+    prob_t norm(uint_t irow) const;
 };
 
 class SingleAliaser : public Aliaser {
 public:
     SingleAliaser(uint_t nprob);
 
-    SingleAliaser(const std::vector<defs::prob_t> &probs);
+    SingleAliaser(const std::vector<prob_t> &probs);
 
-    void update(const std::vector<defs::prob_t> &probs);
+    void update(const std::vector<prob_t> &probs);
 
     uint_t draw(PRNG &prng) const;
 
-    defs::prob_t norm() const;
+    prob_t norm() const;
 };
 
 #endif //M7_ALIASER_H

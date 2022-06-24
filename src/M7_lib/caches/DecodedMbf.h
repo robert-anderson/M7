@@ -16,7 +16,6 @@ struct FrmOnvField;
 struct BosOnvField;
 struct FrmBosOnvField;
 
-using namespace defs;
 
 /**
  * provides a store which only updates the flat and spin/sym-partitioned occupied and vacant spin orbital indices when
@@ -47,7 +46,7 @@ namespace decoded_mbf {
      */
     struct SimpleContainer {
     protected:
-        defs::uintv_t m_inds;
+        uintv_t m_inds;
 
     public:
 

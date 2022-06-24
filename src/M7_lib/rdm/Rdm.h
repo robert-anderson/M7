@@ -14,8 +14,8 @@
 #if 0
 struct Rdm {};
 
-struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, Archivable {
-    typedef Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true> base_t;
+struct FermionRdm : Communicator<MaeRow<wf_t>, MaeRow<wf_t>, true>, Archivable {
+    typedef Communicator<MaeRow<wf_t>, MaeRow<wf_t>, true> base_t;
     const uint_t m_nann, m_ncre, m_nelec;
     /**
      * working indices for building promotions and looking up the MEV tables
@@ -40,21 +40,21 @@ struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, 
     FermionRdm(opts, nrow_estimate(opts.m_rank, opts.m_rank, nsite), nsite, nelec){}
 
     void make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv &conn, const FrmOps &com,
-                       const defs::wf_t &src_weight, const defs::wf_t &dst_weight);
+                       const wf_t &src_weight, const wf_t &dst_weight);
 
-    void make_contribs(const fields::FrmOnv &src_onv, const defs::wf_t &src_weight,
-                       const fields::FrmOnv &dst_onv, const defs::wf_t &dst_weight) {
+    void make_contribs(const fields::FrmOnv &src_onv, const wf_t &src_weight,
+                       const fields::FrmOnv &dst_onv, const wf_t &dst_weight) {
         m_conn.connect(src_onv, dst_onv, m_com);
         make_contribs(src_onv, m_conn, m_com, src_weight, dst_weight);
     }
 
-    void make_contribs(const fields::FrmBosOnv &src_onv, const defs::wf_t &src_weight,
-                       const fields::FrmBosOnv &dst_onv, const defs::wf_t &dst_weight) {
+    void make_contribs(const fields::FrmBosOnv &src_onv, const wf_t &src_weight,
+                       const fields::FrmBosOnv &dst_onv, const wf_t &dst_weight) {
         make_contribs(src_onv.m_frm, src_weight, dst_onv.m_frm, dst_weight);
     }
 
-    void make_contribs(const fields::FrmOnv &src_onv, const defs::wf_t &src_weight,
-                       const fields::FrmOnv &dst_onv, const defs::wf_t &dst_weight, const uint_t &nop_conn) {
+    void make_contribs(const fields::FrmOnv &src_onv, const wf_t &src_weight,
+                       const fields::FrmOnv &dst_onv, const wf_t &dst_weight, const uint_t &nop_conn) {
         m_conn.connect(src_onv, dst_onv, m_com);
         if (m_conn.size() != nop_conn) return;
         make_contribs(src_onv, m_conn, m_com, src_weight, dst_weight);
@@ -76,9 +76,9 @@ struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, 
 
     void h5_read(hdf5::GroupReader &parent) {
         m_store.clear();
-        BufferedTable<MevRow<defs::wf_t>> m_buffer("", {{m_nann, m_ncre}});
+        BufferedTable<MevRow<wf_t>> m_buffer("", {{m_nann, m_ncre}});
         m_buffer.push_back();
-        RowHdf5Reader<MevRow<defs::wf_t>> row_reader(m_buffer.m_row, parent, std::to_string(nop()), h5_field_names());
+        RowHdf5Reader<MevRow<wf_t>> row_reader(m_buffer.m_row, parent, std::to_string(nop()), h5_field_names());
 
         row_reader.restart();
         for (uint_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
@@ -114,7 +114,7 @@ public:
 
 struct RdmGroup {
     // particle number-conserving, fermion RDMs
-    std::array<std::unique_ptr<FermionRdm>, defs::c_nop_mask_frm> m_frm_rdms;
+    std::array<std::unique_ptr<FermionRdm>, c_nop_mask_frm> m_frm_rdms;
 
     RdmGroup(const conf::FermionRdm &opts, uint_t nsite, uint_t nelec){
         for (auto rank: opts.m_ranks.get())
@@ -130,11 +130,11 @@ struct RdmGroup {
      *
      *  rdm1[i,j] = sum_k rdm2[i,k,j,k] / (n_elec - 1)
      */
-    defs::ham_comp_t get_energy(const FermionHamiltonian& ham) const {
+    ham_comp_t get_energy(const FermionHamiltonian& ham) const {
         REQUIRE_TRUE_ALL(m_frm_rdms[2]!=nullptr, "cannot compute energy without the 2RDM");
-        defs::ham_t e1 = 0.0;
-        defs::ham_t e2 = 0.0;
-        defs::wf_t trace = 0.0;
+        ham_t e1 = 0.0;
+        ham_t e2 = 0.0;
+        wf_t trace = 0.0;
         auto row = m_frm_rdms[2]->m_store.m_row;
 
         for (row.restart(); row.in_range(); row.step()){

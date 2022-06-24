@@ -7,7 +7,6 @@
 
 #include <M7_lib/defs.h>
 
-using namespace defs;
 
 namespace hash {
 

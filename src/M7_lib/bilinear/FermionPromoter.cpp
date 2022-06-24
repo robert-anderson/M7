@@ -14,7 +14,7 @@ FermionPromoter::FermionPromoter(uint_t ncom, uint_t nop_insert) :
 
     basic_foreach::rtnd::Ordered<> foreach_comb(ncom, nop_insert);
     uint_t icomb = 0ul;
-    auto fn = [&](const defs::uintv_t& inds) {
+    auto fn = [&](const uintv_t& inds) {
         for (uint_t i = 0ul; i < nop_insert; ++i) {
             auto j = icomb * nop_insert + i;
             ASSERT(j < m_all_combs.size());
@@ -25,7 +25,7 @@ FermionPromoter::FermionPromoter(uint_t ncom, uint_t nop_insert) :
     foreach_comb.loop(fn);
 }
 
-const defs::mev_ind_t *FermionPromoter::begin(const uint_t &icomb) const {
+const mev_ind_t *FermionPromoter::begin(const uint_t &icomb) const {
     ASSERT(icomb < m_ncomb);
     return m_all_combs.data() + icomb * m_nop_insert;
 }

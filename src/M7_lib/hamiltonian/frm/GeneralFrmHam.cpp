@@ -30,17 +30,17 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo& info, bool 
     m_complex_valued = file_reader.m_complex_valued;
 
     using namespace ham;
-    defs::uintv_t inds(4);
-    defs::ham_t value;
+    uintv_t inds(4);
+    ham_t value;
 
     /*
      * initialize permutational symmetries.
      * if the source is complex-valued, then it cannot have DHR symmetry (and still represent a physical Hamiltonian)
      */
-    auto ints_1e = integrals_1e::make<defs::ham_t>(m_basis.ncoeff_ind(), integrals_1e::syms::H);
+    auto ints_1e = integrals_1e::make<ham_t>(m_basis.ncoeff_ind(), integrals_1e::syms::H);
     log_ints_sym(ints_1e->sym(), true);
     REQUIRE_TRUE(ints_1e.get(), "1e integral array object unallocated");
-    auto ints_2e = integrals_2e::make<defs::ham_t>(m_basis.ncoeff_ind(), m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR);
+    auto ints_2e = integrals_2e::make<ham_t>(m_basis.ncoeff_ind(), m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR);
     log_ints_sym(ints_2e->sym(), true);
     REQUIRE_TRUE(ints_2e.get(), "2e integral array object unallocated");
 
@@ -107,13 +107,13 @@ GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
         GeneralFrmHam({FortranNamelistReader(opts.m_ham.m_fcidump.m_path)},
                       opts.m_ham.m_fcidump.m_spin_major) {}
 
-defs::ham_t GeneralFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
+ham_t GeneralFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
     if (m_basis.m_spin_resolved) return m_ints.m_1e->get(a, i);
     if (m_basis.ispin(i)!=m_basis.ispin(a)) return 0.0;
     return m_ints.m_1e->get(m_basis.isite(a), m_basis.isite(i));
 }
 
-defs::ham_t GeneralFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const {
+ham_t GeneralFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const {
     if (m_basis.m_spin_resolved) return m_ints.m_2e->get(a, b, i, j)-m_ints.m_2e->get(a, b, j, i);
     const auto aspin = m_basis.ispin(a);
     const auto bspin = m_basis.ispin(b);
@@ -129,8 +129,8 @@ defs::ham_t GeneralFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j
     return -m_ints.m_2e->get(a, b, j, i);
 }
 
-defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv& onv) const {
-    defs::ham_t element = m_e_core;
+ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv& onv) const {
+    ham_t element = m_e_core;
     auto singles_fn = [&](uint_t i) { element += GeneralFrmHam::get_coeff_1100(i, i); };
     auto doubles_fn = [&](uint_t i, uint_t j) {
         element += GeneralFrmHam::get_coeff_2200(i, j, i, j);
@@ -139,12 +139,12 @@ defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv& onv) const {
     return element;
 }
 
-defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv& onv, const conn::FrmOnv& conn) const {
+ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv& onv, const conn::FrmOnv& conn) const {
     DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_single, "expected 1100 (aka fermion single) exsig");
     const auto& ann = conn.m_ann[0];
     const auto& cre = conn.m_cre[0];
 
-    defs::ham_t element = GeneralFrmHam::get_coeff_1100(cre, ann);
+    ham_t element = GeneralFrmHam::get_coeff_1100(cre, ann);
     auto fn = [&](uint_t ibit) {
         if (ibit != ann) element += GeneralFrmHam::get_coeff_2200(cre, ibit, ann, ibit);
     };
@@ -152,7 +152,7 @@ defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv& onv, const conn
     return conn.phase(onv) ? -element : element;
 }
 
-defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv& onv, const conn::FrmOnv& conn) const {
+ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv& onv, const conn::FrmOnv& conn) const {
     DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_double, "expected 2200 (aka fermion double) exsig");
     const auto element = GeneralFrmHam::get_coeff_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
     return conn.phase(onv) ? -element : element;

@@ -10,7 +10,7 @@ HeisenbergExchange::HeisenbergExchange(const FrmHam& h, PRNG& prng) :
 }
 
 bool HeisenbergExchange::draw_frm(uint_t exsig, const field::FrmOnv& src,
-                                  defs::prob_t& prob, conn::FrmOnv& conn) {
+                                  prob_t& prob, conn::FrmOnv& conn) {
     DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
     const auto& lattice = m_h.m_basis.m_lattice;
     /*
@@ -41,9 +41,9 @@ bool HeisenbergExchange::draw_frm(uint_t exsig, const field::FrmOnv& src,
     return true;
 }
 
-defs::prob_t HeisenbergExchange::prob_frm(const field::FrmOnv& src, const conn::FrmOnv& conn) const {
+prob_t HeisenbergExchange::prob_frm(const field::FrmOnv& src, const conn::FrmOnv& conn) const {
     const auto& basis = src.m_basis;
-    defs::prob_t prob = 0.0;
+    prob_t prob = 0.0;
     // either site could have been the one from which the other was generated, so sum the probs
     basis.m_lattice->get_adj_row(basis.isite(conn.m_ann[0]), m_work_adj_row);
     prob += 1.0/m_work_adj_row.size();

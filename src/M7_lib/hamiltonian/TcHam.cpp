@@ -27,9 +27,9 @@ TcHam::~TcHam() {
 /**
  * @brief wrapper to TCHInt's L matrix (6-index integrals)
  *
- * @return defs::ham_t the corresponding L matrix element
+ * @return ham_t the corresponding L matrix element
  */
-defs::ham_t TcHam::get_lmat_coeff(uint_t a, uint_t b, uint_t c, uint_t i,
+ham_t TcHam::get_lmat_coeff(uint_t a, uint_t b, uint_t c, uint_t i,
                                   uint_t j, uint_t k) const {
 #ifdef ENABLE_TCHINT
     const int ia = a+1, ib = b+1, ic = c+1, ii = i+1, ij = j+1, ik = k+1;  // convert to int

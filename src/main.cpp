@@ -14,9 +14,9 @@ int main(int argc, char **argv) {
     /*
      * log compile-time defintions
      */
-    log::info("M7 {} build", defs::c_enable_debug ? "DEBUG" : "RELEASE");
-    log::info("Many-body basis definition: {}", dtype::mbf_type_name<defs::mbf_type_ind>());
-    log::info("Walker arithmetic type: {}", defs::c_enable_complex_wf ? "complex" : "real");
+    log::info("M7 {} build", c_enable_debug ? "DEBUG" : "RELEASE");
+    log::info("Many-body basis definition: {}", dtype::mbf_type_name<mbf_type_ind>());
+    log::info("Walker arithmetic type: {}", c_enable_complex_wf ? "complex" : "real");
 
     if (argc == 1) {
         // input file not provided, print out help string

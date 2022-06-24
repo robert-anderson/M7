@@ -13,15 +13,15 @@
 
 
 struct WalkerTableRow : public Row {
-    const NdFormat<defs::ndim_wf> m_wf_format;
-    const NdFormat<defs::ndim_root> m_root_format;
+    const NdFormat<ndim_wf> m_wf_format;
+    const NdFormat<ndim_root> m_root_format;
     field::Mbf m_mbf;
-    field::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
-    field::Number<defs::ham_comp_t> m_hdiag;
-    field::Flags<defs::ndim_wf> m_initiator;
-    field::Flags<defs::ndim_root> m_deterministic;
-    field::Flags<defs::ndim_wf> m_ref_conn;
-    field::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
+    field::Numbers<wf_t, ndim_wf> m_weight;
+    field::Number<ham_comp_t> m_hdiag;
+    field::Flags<ndim_wf> m_initiator;
+    field::Flags<ndim_root> m_deterministic;
+    field::Flags<ndim_wf> m_ref_conn;
+    field::Numbers<wf_t, ndim_wf> m_average_weight;
     field::Number<uint_t> m_icycle_occ;
 
     field::Mbf &key_field();

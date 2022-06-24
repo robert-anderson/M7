@@ -13,7 +13,7 @@ TEST(Fields, HashUniformityTrueRandom){
     const uint_t nbucket = 20;
     const uint_t ndraw = 10000000;
 
-    defs::uintv_t freqs(nbucket, 0ul);
+    uintv_t freqs(nbucket, 0ul);
     PRNG prng(14, 10000);
 
     buffered::FrmOnv fonv(nsite);
@@ -46,9 +46,9 @@ TEST(Fields, HashUniformityLowIndexMoreLikely){
     const uint_t nelec = 28;
     const uint_t nbucket = 20;
     const uint_t ndraw = 10000000;
-    const defs::prob_t prob = 0.6;
+    const prob_t prob = 0.6;
 
-    defs::uintv_t freqs(nbucket, 0ul);
+    uintv_t freqs(nbucket, 0ul);
     PRNG prng(14, 10000);
 
     buffered::FrmOnv fonv(nsite);

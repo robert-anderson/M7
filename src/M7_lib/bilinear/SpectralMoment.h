@@ -11,7 +11,7 @@
 #include <M7_lib/util/Exsig.h>
 
 
-//Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>
+//Communicator<MaeRow<wf_t>, MaeRow<wf_t>, true>
 struct SpectralMoment {
     const uint_t m_exsig, m_order;
     SpectralMoment(uint_t exsig, uint_t order): m_exsig(exsig), m_order(order){

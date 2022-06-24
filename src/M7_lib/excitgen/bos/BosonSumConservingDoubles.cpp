@@ -69,11 +69,11 @@ bool BosonSumConservingDoubles::draw_bos(uint_t, const field::BosOnv &src, prob_
     return true;
 }
 
-defs::prob_t BosonSumConservingDoubles::prob_bos(const field::BosOnv &src, const conn::BosOnv &conn) const {
+prob_t BosonSumConservingDoubles::prob_bos(const field::BosOnv &src, const conn::BosOnv &conn) const {
     const auto nboson_pair = integer::nspair(src.m_decoded.m_expanded.get().size());
     const auto i = conn.m_ann[0].m_imode;
     const auto j = conn.m_ann[0].m_imode==1 ? conn.m_ann[1].m_imode : i;
-    defs::prob_t prob;
+    prob_t prob;
     if (i == j) {
         prob = src[i] * (src[i] - 1) / double(2 * nboson_pair);
     } else {

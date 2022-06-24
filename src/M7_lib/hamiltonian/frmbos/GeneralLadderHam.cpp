@@ -13,8 +13,8 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, uint
                "if the number of sites is non-zero, so also must be the number of boson modes. "
                "NMODE definition may be missing from EBDUMP file info");
 
-    defs::uintv_t inds(3);
-    defs::ham_t value;
+    uintv_t inds(3);
+    ham_t value;
     EbdumpFileReader file_reader(info.m_fname, spin_major);
 
     log::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
@@ -33,17 +33,17 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, uint
     log_data();
 }
 
-defs::ham_t GeneralLadderHam::get_coeff_1110(uint_t imode, uint_t i, uint_t j) const {
+ham_t GeneralLadderHam::get_coeff_1110(uint_t imode, uint_t i, uint_t j) const {
     return m_v.get(imode, i, j);
 }
 
-defs::ham_t GeneralLadderHam::get_coeff_1101(uint_t imode, uint_t i, uint_t j) const {
+ham_t GeneralLadderHam::get_coeff_1101(uint_t imode, uint_t i, uint_t j) const {
     return m_v.get(imode, j, i);
 }
 
-defs::ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, uint_t imode, bool cre) const {
+ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, uint_t imode, bool cre) const {
     const auto occ_fac = std::sqrt(uint_t(onv.m_bos[imode]) + cre);
-    defs::ham_t helem = 0.0;
+    ham_t helem = 0.0;
     // fermion ONVs do not differ, so sum over occupied spin orbitals
     auto fn = [&](uint_t i) {
         helem += m_v.get(imode, i, i);
@@ -52,15 +52,15 @@ defs::ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, uint
     return helem * occ_fac;
 }
 
-defs::ham_t GeneralLadderHam::get_element_0010(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+ham_t GeneralLadderHam::get_element_0010(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
     return get_element_pure(onv, conn.m_bos.m_cre[0].m_imode, true);
 }
 
-defs::ham_t GeneralLadderHam::get_element_0001(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+ham_t GeneralLadderHam::get_element_0001(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
     return get_element_pure(onv, conn.m_bos.m_ann[0].m_imode, false);
 }
 
-defs::ham_t GeneralLadderHam::get_element_coupled(const field::FrmBosOnv &onv,
+ham_t GeneralLadderHam::get_element_coupled(const field::FrmBosOnv &onv,
                                                   const conn::FrmOnv &frm_conn, uint_t imode, bool cre) const {
     DEBUG_ASSERT_TRUE(onv.m_frm.get(frm_conn.m_ann[0]), "annihilated op not occupied in ONV")
     DEBUG_ASSERT_FALSE(onv.m_frm.get(frm_conn.m_cre[0]), "created op occupied in ONV")
@@ -76,10 +76,10 @@ defs::ham_t GeneralLadderHam::get_element_coupled(const field::FrmBosOnv &onv,
     return frm_conn.phase(onv.m_frm) ? -element : element;
 }
 
-defs::ham_t GeneralLadderHam::get_element_1110(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+ham_t GeneralLadderHam::get_element_1110(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
     return get_element_coupled(onv, conn.m_frm, conn.m_bos.m_cre[0].m_imode, true);
 }
 
-defs::ham_t GeneralLadderHam::get_element_1101(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+ham_t GeneralLadderHam::get_element_1101(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
     return get_element_coupled(onv, conn.m_frm, conn.m_bos.m_ann[0].m_imode, false);
 }

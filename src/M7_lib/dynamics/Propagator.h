@@ -21,7 +21,7 @@ class Propagator : public Archivable {
 protected:
     double m_tau;
 public:
-    const NdFormat<defs::ndim_wf> m_wf_fmt;
+    const NdFormat<ndim_wf> m_wf_fmt;
     const Hamiltonian &m_ham;
     Shift m_shift;
     const sys::Sector m_sector;
@@ -52,7 +52,7 @@ public:
 
     virtual void off_diagonal(Wavefunction &wf, const uint_t &ipart) = 0;
 
-    virtual defs::ham_t round(const defs::ham_t &weight) {
+    virtual ham_t round(const ham_t &weight) {
         return weight;
     }
 
@@ -66,7 +66,7 @@ public:
         return 0;
     }
 
-    virtual std::vector<defs::prob_t> excit_gen_case_probs() const {
+    virtual std::vector<prob_t> excit_gen_case_probs() const {
         return {};
     }
 
@@ -79,9 +79,9 @@ public:
      * @param src_energy
      *  energy of the source MBF is in practice cached in the wavefunction table, so no need to recompute
      */
-    void imp_samp_delta(defs::wf_t& delta, const field::Mbf& dst_mbf, defs::ham_comp_t src_energy) const;
+    void imp_samp_delta(wf_t& delta, const field::Mbf& dst_mbf, ham_comp_t src_energy) const;
 
-    void imp_samp_delta(defs::wf_t& delta, const field::Mbf& src_mbf, const field::Mbf& dst_mbf) const;
+    void imp_samp_delta(wf_t& delta, const field::Mbf& src_mbf, const field::Mbf& dst_mbf) const;
 
 private:
     void load_fn(hdf5::GroupReader &parent) override;

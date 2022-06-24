@@ -26,7 +26,7 @@ namespace decoded_mbf {
          */
         struct SimpleBase : Base, SimpleContainer {
         protected:
-            const defs::uintv_t &validated() const;
+            const uintv_t &validated() const;
 
         public:
             explicit SimpleBase(const FrmOnvField &mbf);
@@ -38,7 +38,7 @@ namespace decoded_mbf {
         struct SimpleOccs : SimpleBase {
             explicit SimpleOccs(const FrmOnvField &mbf);
 
-            const defs::uintv_t &get();
+            const uintv_t &get();
         };
 
         /**
@@ -47,7 +47,7 @@ namespace decoded_mbf {
         struct SimpleVacs : SimpleBase {
             explicit SimpleVacs(const FrmOnvField &mbf);
 
-            const defs::uintv_t &get();
+            const uintv_t &get();
         };
 
 
@@ -61,20 +61,20 @@ namespace decoded_mbf {
             /**
              * ragged array of vectors to store set or clear positions. one vector per label
              */
-            std::vector<defs::uintv_t> m_inds;
+            std::vector<uintv_t> m_inds;
             /**
              * map from the spinorb index to the "label"
              */
-            const defs::uintv_t m_map;
+            const uintv_t m_map;
             /**
              * the simple decoding is cached at the same time, since it is often useful and available at small
              * additional cost
              */
-            defs::uintv_t m_simple_inds;
+            uintv_t m_simple_inds;
 
-            LabelledBase(uint_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
+            LabelledBase(uint_t nelement, const uintv_t &map, const FrmOnvField &mbf);
 
-            const std::vector<defs::uintv_t> &validated() const;
+            const std::vector<uintv_t> &validated() const;
 
         public:
             /**
@@ -84,7 +84,7 @@ namespace decoded_mbf {
              * @return
              *  spin orbital irrep map with 2*nirrep labels
              */
-            static defs::uintv_t make_spinorb_map(const defs::uintv_t &site_irreps, uint_t nirrep);
+            static uintv_t make_spinorb_map(const uintv_t &site_irreps, uint_t nirrep);
 
             void clear();
 
@@ -98,12 +98,12 @@ namespace decoded_mbf {
          */
         struct LabelledOccs : LabelledBase {
         protected:
-            LabelledOccs(uint_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
+            LabelledOccs(uint_t nelement, const uintv_t &map, const FrmOnvField &mbf);
 
         public:
-            const std::vector<defs::uintv_t> &get();
+            const std::vector<uintv_t> &get();
 
-            const defs::uintv_t &simple();
+            const uintv_t &simple();
         };
 
         /**
@@ -111,12 +111,12 @@ namespace decoded_mbf {
          */
         struct LabelledVacs : LabelledBase {
         protected:
-            LabelledVacs(uint_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
+            LabelledVacs(uint_t nelement, const uintv_t &map, const FrmOnvField &mbf);
 
         public:
-            const std::vector<defs::uintv_t> &get();
+            const std::vector<uintv_t> &get();
 
-            const defs::uintv_t &simple();
+            const uintv_t &simple();
         };
 
 
@@ -134,10 +134,10 @@ namespace decoded_mbf {
             /**
              * ragged array of indices from a LabelledOccs or LabelledVacs instance
              */
-            const std::vector<defs::uintv_t> &m_inds_ref;
+            const std::vector<uintv_t> &m_inds_ref;
 
         public:
-            NdBase(uinta_t<nind> shape, const std::vector<defs::uintv_t> &inds) :
+            NdBase(uinta_t<nind> shape, const std::vector<uintv_t> &inds) :
                     m_format(shape), m_inds_ref(inds) {}
 
             uint_t size(const uint_t &i) const {
@@ -148,11 +148,11 @@ namespace decoded_mbf {
                 return m_inds_ref[m_format.flatten(inds)].size();
             }
 
-            const defs::uintv_t &operator[](const uint_t &i) const {
+            const uintv_t &operator[](const uint_t &i) const {
                 return m_inds_ref[i];
             }
 
-            const defs::uintv_t &operator[](const uinta_t<nind> &inds) const {
+            const uintv_t &operator[](const uinta_t<nind> &inds) const {
                 return m_inds_ref[m_format.flatten(inds)];
             }
         };
@@ -168,7 +168,7 @@ namespace decoded_mbf {
         protected:
             NdBase<nind> m_nd_inds;
         public:
-            NdLabelledOccs(uinta_t<nind> shape, const defs::uintv_t &map, const FrmOnvField &mbf) :
+            NdLabelledOccs(uinta_t<nind> shape, const uintv_t &map, const FrmOnvField &mbf) :
                     LabelledOccs(NdFormat<nind>(shape).m_nelement, map, mbf),
                     m_nd_inds(shape, m_inds) {}
 
@@ -195,7 +195,7 @@ namespace decoded_mbf {
         protected:
             NdBase<nind> m_nd_inds;
         public:
-            NdLabelledVacs(uinta_t<nind> shape, const defs::uintv_t &map, const FrmOnvField &mbf) :
+            NdLabelledVacs(uinta_t<nind> shape, const uintv_t &map, const FrmOnvField &mbf) :
                     LabelledVacs(NdFormat<nind>(shape).m_nelement, map, mbf),
                     m_nd_inds(shape, m_inds) {}
 
@@ -237,25 +237,25 @@ namespace decoded_mbf {
         struct NonEmptyPairLabels : SimpleBase {
             NonEmptyPairLabels(const FrmOnvField &mbf);
 
-            const defs::uintv_t &get();
+            const uintv_t &get();
         };
 
         struct OccSites : SimpleBase {
             OccSites(const FrmOnvField &mbf);
 
-            const defs::uintv_t &get();
+            const uintv_t &get();
         };
 
         struct DoublyOccSites : SimpleBase {
             DoublyOccSites(const FrmOnvField &mbf);
 
-            const defs::uintv_t &get();
+            const uintv_t &get();
         };
 
         struct NotSinglyOccSites : SimpleBase {
             NotSinglyOccSites(const FrmOnvField &mbf);
 
-            const defs::uintv_t &get();
+            const uintv_t &get();
         };
 
     }

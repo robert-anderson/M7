@@ -17,8 +17,8 @@ const std::vector<BosOpPair> &BosOps::pairs() const {
     return m_pairs;
 }
 
-defs::uintv_t BosOps::get() const {
-    defs::uintv_t vec;
+uintv_t BosOps::get() const {
+    uintv_t vec;
     vec.reserve(size());
     for (auto& pair: m_pairs) {
         for (uint_t iop=0ul; iop<pair.m_nop; ++iop) vec.push_back(pair.m_imode);
@@ -27,7 +27,7 @@ defs::uintv_t BosOps::get() const {
     return vec;
 }
 
-void BosOps::set(const defs::uintv_t &imodes) {
+void BosOps::set(const uintv_t &imodes) {
     clear();
     if (imodes.empty()) return;
     uint_t istart = 0;

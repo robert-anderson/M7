@@ -35,15 +35,15 @@ class ExcitGenGroup {
     /**
      * mapping from the excitation signature to a vector case indices that can generate it
      */
-    std::vector<defs::uintv_t> m_exsig_icases;
+    std::vector<uintv_t> m_exsig_icases;
     /**
      * probability of attempting to draw from each of the active excitation cases
      */
-    std::vector<defs::prob_t> m_probs;
+    std::vector<prob_t> m_probs;
     /**
      * cached cumulative probability for all the active excitation cases for slight performance benefit
      */
-    std::vector<defs::prob_t> m_cumprobs;
+    std::vector<prob_t> m_cumprobs;
 
     void update_cumprobs();
 
@@ -67,7 +67,7 @@ public:
      * set the m_probs and m_cumprobs arrays
      * @param probs
      */
-    void set_probs(const std::vector<defs::prob_t> &probs);
+    void set_probs(const std::vector<prob_t> &probs);
 
     /**
      * set probs in accordance with the approximate number of connections of each excitation case.
@@ -77,9 +77,9 @@ public:
      */
     void set_probs(const sys::Particles& particles);
 
-    defs::prob_t get_prob(uint_t icase) const;
+    prob_t get_prob(uint_t icase) const;
 
-    const std::vector<defs::prob_t>& get_probs() const;
+    const std::vector<prob_t>& get_probs() const;
 
     /**
      * when there is strictly one excitation generator per exsig, the probability of drawing the connection is

@@ -30,7 +30,7 @@ void RefExcitsOneExsig::save(hdf5::GroupWriter& gw) const {
     Table<MaeRow>::save(gw, exsig::to_string(m_working_inds.m_exsig), h5_field_names());
 }
 
-void RefExcitsOneExsig::make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, uint_t iroot) {
+void RefExcitsOneExsig::make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot) {
     DEBUG_ASSERT_EQ(conn.exsig(), m_working_inds.m_exsig, "incompatible connection");
     auto irow = *(*this)[conn];
     if (irow==~0ul) irow = insert(conn);
@@ -49,18 +49,18 @@ RefExcits::RefExcits(const conf::RefExcits& opts, sys::Size extents, uint_t nroo
     }
 }
 
-void RefExcits::make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, uint_t iroot) {
+void RefExcits::make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot) {
     auto exsig = conn.exsig();
     if (!exsig) m_av_ref[iroot] += contrib;
     if (exsig==~0ul || !m_ref_excits[exsig]) return;
     m_ref_excits[exsig]->make_contribs(conn, contrib, iroot);
 }
 
-void RefExcits::make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, uint_t iroot) {
+void RefExcits::make_contribs(const conn::FrmBosOnv& conn, const wf_t& contrib, uint_t iroot) {
     make_contribs(conn.m_frm, contrib, iroot);
 }
 
-void RefExcits::make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib,
+void RefExcits::make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const wf_t& contrib,
                               uint_t iroot) {
     m_conn.connect(ref_mbf, mbf);
     make_contribs(m_conn, contrib, iroot);
@@ -79,7 +79,7 @@ RefExcits::operator bool() const {
 }
 
 void RefExcits::save_fn(hdf5::GroupWriter& parent) {
-    defs::wf_t av_ref;
+    wf_t av_ref;
     av_ref = mpi::all_sum(m_av_ref[0]);
     hdf5::GroupWriter gw("ref_excits", parent);
     gw.save("0000", av_ref);

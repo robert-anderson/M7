@@ -16,19 +16,19 @@ TableBase::TableBase(uint_t row_size) :
 TableBase::TableBase(const TableBase &other) :
         TableBase(other.m_bw.m_row_size){}
 
-defs::buf_t *TableBase::begin() {
+buf_t *TableBase::begin() {
     return m_bw.m_begin;
 }
 
-const defs::buf_t *TableBase::begin() const {
+const buf_t *TableBase::begin() const {
     return m_bw.m_begin;
 }
 
-defs::buf_t *TableBase::begin(const uint_t &irow) {
+buf_t *TableBase::begin(const uint_t &irow) {
     return m_bw.m_begin + irow * row_size();
 }
 
-const defs::buf_t *TableBase::begin(const uint_t &irow) const {
+const buf_t *TableBase::begin(const uint_t &irow) const {
     return m_bw.m_begin + irow * row_size();
 }
 
@@ -95,7 +95,7 @@ void TableBase::expand(uint_t nrow, double factor) {
     resize(this->nrow()+nrow, factor);
 }
 
-void TableBase::clear_rows(const defs::uintv_t &irows) {
+void TableBase::clear_rows(const uintv_t &irows) {
     for (auto irow : irows) {
         clear(irow);
     }
@@ -109,7 +109,7 @@ void TableBase::insert_rows(const Buffer::Window &recv, uint_t nrow, const std::
         for (auto f: callbacks) f(irow);
     }
 }
-void TableBase::transfer_rows(const defs::uintv_t &irows, uint_t irank_send, uint_t irank_recv, const std::list<recv_cb_t>& callbacks){
+void TableBase::transfer_rows(const uintv_t &irows, uint_t irank_send, uint_t irank_recv, const std::list<recv_cb_t>& callbacks){
     DEBUG_ASSERT_NE_ALL(irank_recv, irank_send, "sending and recving ranks should never be the same");
     if (!m_transfer) m_transfer = smart_ptr::make_unique<RowTransfer>(m_bw.name());
     uint_t nrow = 0;
@@ -165,7 +165,7 @@ void TableBase::swap_rows(const uint_t &irow, const uint_t &jrow) {
     std::swap_ranges(iptr, iptr+row_size(), jptr);
 }
 
-std::string TableBase::to_string(const defs::uintv_t *ordering) const {
+std::string TableBase::to_string(const uintv_t *ordering) const {
     std::string out;
     auto begin_ptr = begin();
     for (uint_t i=0ul; i<m_hwm; ++i){
@@ -181,9 +181,9 @@ std::string TableBase::to_string(const defs::uintv_t *ordering) const {
 
 void TableBase::all_gatherv(const TableBase &src) {
     clear();
-    defs::uintv_t nrows(mpi::nrank());
-    defs::uintv_t counts(mpi::nrank());
-    defs::uintv_t displs(mpi::nrank());
+    uintv_t nrows(mpi::nrank());
+    uintv_t counts(mpi::nrank());
+    uintv_t displs(mpi::nrank());
     DEBUG_ASSERT_EQ(src.row_size(), row_size(),
                     "the size of rows being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.m_hwm, nrows);
@@ -198,9 +198,9 @@ void TableBase::all_gatherv(const TableBase &src) {
 
 void TableBase::gatherv(const TableBase &src, uint_t irank) {
     if (mpi::i_am(irank)) clear();
-    defs::uintv_t nrows(mpi::nrank());
-    defs::uintv_t counts(mpi::nrank());
-    defs::uintv_t displs(mpi::nrank());
+    uintv_t nrows(mpi::nrank());
+    uintv_t counts(mpi::nrank());
+    uintv_t displs(mpi::nrank());
     DEBUG_ASSERT_EQ(src.row_size(), row_size(),
                     "the size of rows being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.m_hwm, nrows);

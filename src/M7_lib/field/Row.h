@@ -56,7 +56,7 @@ private:
      *
      * TODO: investigate whether dbegin needs to be cached with regard to performance
      */
-    mutable defs::buf_t *m_begin = nullptr;
+    mutable buf_t *m_begin = nullptr;
     mutable uint_t m_i = 0ul;
 
 public:
@@ -99,13 +99,13 @@ public:
         return (m_begin >= m_table->begin()) && (m_begin < m_table->begin() + m_table->m_hwm * m_size);
     }
 
-    defs::buf_t *begin() {
+    buf_t *begin() {
         DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
         DEBUG_ASSERT_TRUE(ptr_in_range(), "the row is not pointing to memory in the permitted range");
         return m_begin;
     }
 
-    const defs::buf_t *begin() const {
+    const buf_t *begin() const {
         DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
         DEBUG_ASSERT_TRUE(ptr_in_range(), "the row is not pointing to memory in the permitted range");
         return m_begin;

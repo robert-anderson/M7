@@ -6,14 +6,14 @@
 
 BosonCoeffs_2::BosonCoeffs_2(uint_t nmode) : m_nmode(nmode), m_v(integer::npair(nmode*nmode)){}
 
-void BosonCoeffs_2::set(uint_t i, uint_t j, uint_t k, uint_t l, defs::ham_t value) {
+void BosonCoeffs_2::set(uint_t i, uint_t j, uint_t k, uint_t l, ham_t value) {
     m_v.set(index(i, j, k, l), value);
 }
 
-defs::ham_t BosonCoeffs_2::get(uint_t i, uint_t j, uint_t k, uint_t l) const {
+ham_t BosonCoeffs_2::get(uint_t i, uint_t j, uint_t k, uint_t l) const {
     return m_v[index(i, j, k, l)];
 }
 
-defs::ham_t BosonCoeffs_2::phys_element(uint_t i, uint_t j, uint_t k, uint_t l) const {
+ham_t BosonCoeffs_2::phys_element(uint_t i, uint_t j, uint_t k, uint_t l) const {
     return get(i, k, j, l);
 }

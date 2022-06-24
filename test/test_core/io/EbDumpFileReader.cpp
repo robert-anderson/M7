@@ -12,9 +12,9 @@ TEST(EbDumpFileReader, ReadFile){
     ASSERT_FALSE(file_reader.m_info.m_uhf);
     ASSERT_EQ(file_reader.m_info.m_nmode, 4ul);
     ASSERT_EQ(file_reader.m_info.m_nsite, 4ul);
-    defs::uintv_t inds(3);
-    defs::uintv_t test_inds(3);
-    defs::ham_t value;
+    uintv_t inds(3);
+    uintv_t test_inds(3);
+    ham_t value;
 
     test_inds = {0, 0, 0};
     file_reader.next(inds, value);
@@ -41,9 +41,9 @@ TEST(EbDumpFileReader, SpinResolved){
     ASSERT_EQ(file_reader.m_info.m_nmode, 6ul);
     ASSERT_EQ(file_reader.m_info.m_nsite, 6ul);
 
-    defs::uintv_t inds(3);
-    defs::uintv_t test_inds(3);
-    defs::ham_t value;
+    uintv_t inds(3);
+    uintv_t test_inds(3);
+    ham_t value;
 
     // 1 1 7 -> 0 0 6 -> 0 0 3
     test_inds = {0, 0, 3};

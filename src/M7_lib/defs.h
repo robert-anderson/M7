@@ -31,101 +31,90 @@
 #endif
 
 /**
- * a small collection of basic and frequently-used definitions.
- * due to its small size and the ubiquity of some members, "using namespace defs" at the header file level is encouraged
- * this advice does not apply to any other namespace
+ * the integral type used throughout the code to count and number items. thus, it is unsigned
  */
-namespace defs {
-    /**
-     * the integral type used throughout the code to count and number items. thus, it is unsigned
-     */
-    typedef uint64_t uint_t;
-    /**
-     * vector of such integers
-     */
-    typedef std::vector<uint_t> uintv_t;
-    /**
-     * array of such integers
-     */
-    template<uint_t n>
-    using uinta_t = std::array<uint_t, n>;
-    /**
-     * pair of such integers
-     */
-    typedef std::pair<uint_t, uint_t> uintp_t;
+typedef uint64_t uint_t;
+/**
+ * vector of such integers
+ */
+typedef std::vector<uint_t> uintv_t;
+/**
+ * array of such integers
+ */
+template<uint_t n>
+using uinta_t = std::array<uint_t, n>;
+/**
+ * pair of such integers
+ */
+typedef std::pair<uint_t, uint_t> uintp_t;
 
 #ifndef NDEBUG
-    constexpr bool c_enable_debug = true;
+constexpr bool c_enable_debug = true;
 #else
-    constexpr bool c_enable_debug = false;
+constexpr bool c_enable_debug = false;
 #endif
 
 #ifdef ENABLE_COMPLEX_HAM
-    constexpr bool c_enable_complex_ham = true;
+constexpr bool c_enable_complex_ham = true;
 #else
-    constexpr bool c_enable_complex_ham = false;
+constexpr bool c_enable_complex_ham = false;
 #endif
 
 #ifdef ENABLE_COMPLEX_WF
-    constexpr bool c_enable_complex_wf = true;
+constexpr bool c_enable_complex_wf = true;
 #else
-    constexpr bool c_enable_complex_wf = false;
+constexpr bool c_enable_complex_wf = false;
 #endif
 
-    // type of each arithmetic component of the Hamiltonian matrix elements
-    typedef double ham_comp_t;
-    // overall type of the Hamiltonian matrix elements (taking possible complex enabling into account)
-    typedef std::conditional<c_enable_complex_ham, std::complex<ham_comp_t>, ham_comp_t>::type ham_t;
+// type of each arithmetic component of the Hamiltonian matrix elements
+typedef double ham_comp_t;
+// overall type of the Hamiltonian matrix elements (taking possible complex enabling into account)
+typedef std::conditional<c_enable_complex_ham, std::complex<ham_comp_t>, ham_comp_t>::type ham_t;
 
-    // type of each arithmetic component of the wavefunctions (also MAEs and spawns emitted by the propagators)
-    typedef ham_comp_t wf_comp_t;
-    // overall type of the wavefunction elements (taking possible complex enabling into account)
-    typedef std::conditional<c_enable_complex_wf, std::complex<wf_comp_t>, wf_comp_t>::type wf_t;
+// type of each arithmetic component of the wavefunctions (also MAEs and spawns emitted by the propagators)
+typedef ham_comp_t wf_comp_t;
+// overall type of the wavefunction elements (taking possible complex enabling into account)
+typedef std::conditional<c_enable_complex_wf, std::complex<wf_comp_t>, wf_comp_t>::type wf_t;
 
-    typedef std::map<std::string, std::string> info_map_t;
-    typedef double prob_t;
-    typedef char buf_t;
-    typedef unsigned char mev_ind_t;
-    typedef unsigned char bos_occ_t;
+typedef std::map<std::string, std::string> info_map_t;
+typedef double prob_t;
+typedef char buf_t;
+typedef unsigned char mev_ind_t;
+typedef unsigned char bos_occ_t;
 
-    enum MbfTypeInd {Frm, FrmBos, Bos};
-    /**
-     * Many-body basis function definitions
-     *  0: fermion only (determinant basis)
-     *  1: fermion-boson (determinant-permanent product basis)
-     *  2: boson only (permanent basis)
-     *  3: fermion only spin-adapted (CSF basis) (TODO: not currently implemented)
-     */
+enum MbfTypeInd {Frm, FrmBos, Bos};
+/**
+ * Many-body basis function definitions
+ *  0: fermion only (determinant basis)
+ *  1: fermion-boson (determinant-permanent product basis)
+ *  2: boson only (permanent basis)
+ *  3: fermion only spin-adapted (CSF basis) (TODO: not currently implemented)
+ */
 #ifndef MBF_TYPE
-    #define MBF_TYPE 0
+#define MBF_TYPE 0
 #endif
 
 #if (MBF_TYPE==1) || (MBF_TYPE==2)
-    #define ENABLE_BOSONS 1
+#define ENABLE_BOSONS 1
 #endif
 
 #if (MBF_TYPE==0) || (MBF_TYPE==1)
-    #define ENABLE_FERMIONS
+#define ENABLE_FERMIONS
 #endif
 
-    constexpr uint_t mbf_type_ind = MBF_TYPE;
+constexpr uint_t mbf_type_ind = MBF_TYPE;
 
 #ifdef ENABLE_BOSONS
-    constexpr bool enable_bosons = true;
+constexpr bool enable_bosons = true;
 #else
-    constexpr bool enable_bosons = false;
+constexpr bool enable_bosons = false;
 #endif
 
 #ifdef ENABLE_FERMIONS
-    constexpr bool enable_fermions = true;
+constexpr bool enable_fermions = true;
 #else
-    constexpr bool enable_fermions = false;
+constexpr bool enable_fermions = false;
 #endif
 
-    //  nroot, nreplica
-    constexpr uint_t ndim_wf = 2;
-    //  nroot
-    constexpr uint_t ndim_root = 1;
-    typedef uinta_t<ndim_wf> wf_inds_t;
-}
+
 #endif //M7_DEFS_H

@@ -29,9 +29,9 @@ private:
 
 public:
 
-    bool draw_bos(uint_t /*exsig*/, const field::BosOnv &src, defs::prob_t &prob, conn::BosOnv &conn) override;
+    bool draw_bos(uint_t /*exsig*/, const field::BosOnv &src, prob_t &prob, conn::BosOnv &conn) override;
 
-    defs::prob_t prob_bos(const field::BosOnv &src, const conn::BosOnv &conn) const override;
+    prob_t prob_bos(const field::BosOnv &src, const conn::BosOnv &conn) const override;
 
 };
 

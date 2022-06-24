@@ -12,7 +12,7 @@ TEST(InteractingBosGasBosHam, DiagonalMatrixElements) {
     Hamiltonian ham_src(&bos_ham);
     buffered::BosOnv mbf(ham_src.m_basis);
     mbf = {0, 0, 0, 0, 0, 0, 3};
-    defs::ham_t helem;
+    ham_t helem;
     helem = ham_src.get_element(mbf);
     ASSERT_NEARLY_EQ(helem, 5.07);
 }

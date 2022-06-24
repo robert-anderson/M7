@@ -29,7 +29,7 @@ struct ExtremalIndices {
      * after a reset, this is ordered and consecutive. After a find, the first m_nfound are the extremal indices in the
      * requested order
      */
-    defs::uintv_t m_inds;
+    uintv_t m_inds;
     /**
      * the comparator - the lambda technique is powerful because the calling scope can declare a lambda which captures
      * any working objects required and to evaluate the relative order of two elements without this class needing to be
@@ -72,7 +72,7 @@ struct ExtremalIndices {
      * @param inds_ignore
      *  unsorted vector of indices which should be ignored in the partial sort
      */
-    void reset(uint_t hwm, defs::uintv_t inds_ignore={});
+    void reset(uint_t hwm, uintv_t inds_ignore={});
     /**
      * @param table
      *  table object from which the m_hwm and free row indices are accessed

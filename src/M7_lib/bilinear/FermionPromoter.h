@@ -50,7 +50,7 @@ struct FermionPromoter {
     /**
      * enumeration of all possible combinations
      */
-    std::vector<defs::mev_ind_t> m_all_combs;
+    std::vector<mev_ind_t> m_all_combs;
 
     FermionPromoter(uint_t ncom, uint_t nop_insert);
 
@@ -61,7 +61,7 @@ private:
      * @return
      *  const pointer to beginning of combination in m_all_combs
      */
-    const defs::mev_ind_t *begin(const uint_t &icomb) const;
+    const mev_ind_t *begin(const uint_t &icomb) const;
 
 public:
     /**

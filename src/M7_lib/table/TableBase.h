@@ -46,7 +46,7 @@ struct TableBase {
      */
     /**
      * The contents of the Table are ultimately stored in a Buffer, which is just a wrapper for a dynamically
-     * allocated array of defs::data_t elements. Buffers can be shared by many Tables though, so a table is instead
+     * allocated array of data_t elements. Buffers can be shared by many Tables though, so a table is instead
      * given access to a "window" of that Buffer. All tables which have windows on the same buffer have the ability
      * to resize, and in response to this, the Buffer will ensure that table row data is moved to new positions
      * in the resized buffer, and that each of the other windows are pointed to the beginning of that data.
@@ -98,13 +98,13 @@ struct TableBase {
      * @return
      *  pointer to the first data word of the BufferWindow
      */
-    defs::buf_t *begin();
+    buf_t *begin();
 
     /**
      * @return
      * const pointer to the first data word of the BufferWindow
      */
-    const defs::buf_t *begin() const;
+    const buf_t *begin() const;
 
     /**
      * @param irow
@@ -112,7 +112,7 @@ struct TableBase {
      * @return
      *  pointer to the first data word of the indexed row in the BufferWindow
      */
-    defs::buf_t *begin(const uint_t& irow);
+    buf_t *begin(const uint_t& irow);
 
     /**
      * @param irow
@@ -120,7 +120,7 @@ struct TableBase {
      * @return
      *  const pointer to the first data word of the indexed row in the BufferWindow
      */
-    const defs::buf_t *begin(const uint_t& irow) const;
+    const buf_t *begin(const uint_t& irow) const;
 
     /**
      * Associate the table with a buffer by assigning the table an available BufferWindow
@@ -202,7 +202,7 @@ struct TableBase {
      * @param irows
      *  all row indices marked for erasure
      */
-    void clear_rows(const defs::uintv_t& irows);
+    void clear_rows(const uintv_t& irows);
 
     /**
      * in some derived classes, there is more to adding new rows than simply copying their contents into the hwm. In
@@ -230,7 +230,7 @@ struct TableBase {
      * function pointer type for the callback associated with row transfers.
      * see RankAllocator.h
      */
-    typedef std::function<void(const defs::uintv_t& , uint_t, uint_t)> transfer_cb_t;
+    typedef std::function<void(const uintv_t& , uint_t, uint_t)> transfer_cb_t;
     /**
      * function pointer type for the callback associated with receipt of a single row in a transfer operation
      * see RankAllocator.h
@@ -260,7 +260,7 @@ struct TableBase {
      * @param callbacks
      *  functions to call on irank_recv each time a received row is processed
      */
-    void transfer_rows(const defs::uintv_t& irows, uint_t irank_send, uint_t irank_recv,
+    void transfer_rows(const uintv_t& irows, uint_t irank_send, uint_t irank_recv,
                        const std::list<recv_cb_t>& callbacks = {});
 
     /**
@@ -320,7 +320,7 @@ struct TableBase {
      * @return
      *  string representing table's contents
      */
-    virtual std::string to_string(const defs::uintv_t* ordering = nullptr) const;
+    virtual std::string to_string(const uintv_t* ordering = nullptr) const;
 
     /**
      * gather contents of another table over all MPI ranks into this table on all ranks

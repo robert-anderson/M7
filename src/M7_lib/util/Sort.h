@@ -49,8 +49,8 @@ namespace sort {
      *  index vector which would sort v to the desired ordering
      */
     template<typename T>
-    defs::uintv_t inds(const std::vector<T> &v, bool asc, bool abs_val) {
-        defs::uintv_t out(v.size());
+    uintv_t inds(const std::vector<T> &v, bool asc, bool abs_val) {
+        uintv_t out(v.size());
         std::iota(out.begin(), out.end(), 0);
         if (asc) {
             if (abs_val)

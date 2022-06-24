@@ -13,7 +13,7 @@ struct ParallelStatsRow : StatsRow {
     statistic::Number<uint_t> m_icycle;
     statistic::Number<double> m_synchronization_overhead;
     statistic::Number<uint_t> m_nblock_wf_ra;
-    statistic::Number<defs::wf_comp_t> m_nwalker_total;
+    statistic::Number<wf_comp_t> m_nwalker_total;
     statistic::Number<uint_t> m_nwalker_lookup_skip;
     statistic::Number<uint_t> m_nwalker_lookup;
     statistic::Number<uint_t> m_nrow_free_walker_list;

@@ -17,8 +17,8 @@ struct BosOnvConnection;
 class BosOps;
 
 
-struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
-    typedef NdNumberField<defs::bos_occ_t, 1> base_t;
+struct BosOnvField : NdNumberField<bos_occ_t, 1> {
+    typedef NdNumberField<bos_occ_t, 1> base_t;
     /**
      * single-particle basis data is all the system-related data that this class needs to retain
      */
@@ -49,14 +49,14 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
         return *this;
     }
 
-    BosOnvField &operator=(const defs::uintv_t &inds);
+    BosOnvField &operator=(const uintv_t &inds);
 
     /**
      * set based on the (repeated) boson operator indices
      * @param iops
      *  operator indices (one for each boson in the state)
      */
-    void set_ops(const defs::uintv_t &iops);
+    void set_ops(const uintv_t &iops);
 
     uint_t nboson() const;
 

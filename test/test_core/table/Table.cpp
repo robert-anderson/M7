@@ -33,7 +33,7 @@ TEST(Table, CommonFieldOffset) {
     CommonFieldTypeTable t2(8, 5);
     ASSERT_EQ(t2.m_shorts.m_column.m_offset, 0);
     ASSERT_EQ(t2.m_shorts.m_column.m_size, 8 * sizeof(short));
-    ASSERT_EQ(t2.m_more_shorts.m_column.m_offset, 2 * sizeof(defs::data_t));
+    ASSERT_EQ(t2.m_more_shorts.m_column.m_offset, 2 * sizeof(data_t));
     ASSERT_EQ(t2.m_more_shorts.m_column.m_size, 5 * sizeof(short));
 }
 
@@ -54,7 +54,7 @@ TEST(Table, DifferentFieldOffset) {
      * check that the differently-typed second field is offset to the
      * next whole dataword
      */
-    ASSERT_EQ(t1.m_floats.m_column.m_offset, sizeof(defs::data_t));
+    ASSERT_EQ(t1.m_floats.m_column.m_offset, sizeof(data_t));
     ASSERT_EQ(t1.m_floats.m_column.m_size, 4 * sizeof(float));
 
     ASSERT_EQ(t1.m_shorts.m_column.m_table, &t1);
@@ -178,7 +178,7 @@ TEST(Table, PointToPointTransfer) {
     bt.push_back(ngen);
     for (uint_t i=0ul; i<ngen; ++i) bt.m_shorts(i, 0) = 55*(i+1)+mpi::irank();
     bt.print_contents();
-    defs::uintv_t send;
+    uintv_t send;
     if (mpi::i_am(0)) send = {1, 2, 4};
     bt.transfer_rows(send, 0, 1);
     if (mpi::i_am(1)) {

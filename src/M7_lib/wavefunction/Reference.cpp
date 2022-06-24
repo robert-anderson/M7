@@ -27,7 +27,7 @@ void Reference::update_ref_conn_flags() {
 }
 
 void Reference::accept_candidate(double redefinition_thresh) {
-    std::vector<defs::wf_comp_t> gather(mpi::nrank());
+    std::vector<wf_comp_t> gather(mpi::nrank());
     mpi::all_gather(m_candidate_abs_weight, gather);
     DEBUG_ASSERT_EQ(m_candidate_abs_weight, gather[mpi::irank()], "Gather error");
     uint_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
@@ -77,28 +77,28 @@ uint_t Reference::exsig(const field::Mbf &mbf) const {
     return m_conn[mbf].exsig();
 }
 
-void Reference::make_numerator_contribs(const field::Mbf &mbf, const defs::wf_t& weight) {
+void Reference::make_numerator_contribs(const field::Mbf &mbf, const wf_t& weight) {
     m_conn[mbf].connect(get_mbf(), mbf);
     m_proj_energy_num.m_local += m_ham.get_element(get_mbf(), m_conn[mbf]) * weight;
     m_nwalker_at_doubles.m_local += std::abs(weight);
 }
 
-const defs::wf_comp_t& Reference::nwalker_at_doubles() {
+const wf_comp_t& Reference::nwalker_at_doubles() {
     return m_nwalker_at_doubles.m_reduced;
 }
 
-const defs::ham_t& Reference::proj_energy_num() const {
+const ham_t& Reference::proj_energy_num() const {
     return m_proj_energy_num.m_reduced;
 }
 
 
-const defs::wf_t &Reference::weight() const {
+const wf_t &Reference::weight() const {
     return m_global.m_row.m_weight[m_ipart];
 }
 
-defs::wf_t Reference::norm_average_weight(const uint_t& icycle, const uint_t& ipart) const {
+wf_t Reference::norm_average_weight(const uint_t& icycle, const uint_t& ipart) const {
     auto unnorm = m_global.m_row.m_average_weight[ipart]+m_global.m_row.m_weight[ipart];
-    return unnorm/static_cast<defs::wf_comp_t>(m_global.m_row.occupied_ncycle(icycle));
+    return unnorm/static_cast<wf_comp_t>(m_global.m_row.occupied_ncycle(icycle));
 }
 
 References::References(const conf::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf,
@@ -135,13 +135,13 @@ std::vector<bool> References::is_connected(const field::Mbf &mbf) const {
     return out;
 }
 
-const field::Numbers<defs::ham_t, defs::ndim_wf> &References::proj_energy_nums() {
+const field::Numbers<ham_t, ndim_wf> &References::proj_energy_nums() {
     uint_t ipart = 0ul;
     for (auto& ref: m_refs) m_proj_energy_nums[ipart++] = ref.proj_energy_num();
     return m_proj_energy_nums;
 }
 
-const field::Numbers<defs::wf_t, defs::ndim_wf> &References::weights() {
+const field::Numbers<wf_t, ndim_wf> &References::weights() {
     uint_t ipart = 0ul;
     for (auto& ref: m_refs) m_weights[ipart++] = ref.weight();
     return m_weights;

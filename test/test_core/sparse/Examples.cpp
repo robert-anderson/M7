@@ -14,7 +14,7 @@ sparse_matrix_examples::rect_double(const uint_t &nrow, const uint_t &ncol, cons
     sparse::Matrix<double> out;
     out.resize(nrow);
 
-    defs::uintv_t icols;
+    uintv_t icols;
     std::vector<double> values;
 
     for (uint_t irow = 0ul; irow < nrow; ++irow) {

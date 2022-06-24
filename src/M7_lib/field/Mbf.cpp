@@ -37,7 +37,7 @@ void mbf::set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
     }
 }
 
-void mbf::set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::uintv_t> &def, uint_t idef) {
+void mbf::set_from_def_array(field::FrmOnv &mbf, const std::vector<uintv_t> &def, uint_t idef) {
     if (def.empty()) return;
     REQUIRE_LT(idef, def.size(), "MBF definition index OOB");
     mbf.zero();
@@ -59,7 +59,7 @@ void mbf::set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::uintv_t
     }
 }
 
-void mbf::set_from_def_array(field::BosOnv &mbf, const std::vector<defs::uintv_t> &def, uint_t idef) {
+void mbf::set_from_def_array(field::BosOnv &mbf, const std::vector<uintv_t> &def, uint_t idef) {
     if (def.empty()) return;
     REQUIRE_LT(idef, def.size(), "MBF definition index OOB");
     mbf.zero();

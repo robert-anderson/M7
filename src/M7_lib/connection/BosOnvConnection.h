@@ -31,14 +31,14 @@ public:
      * @return
      *  vector of mode indices
      */
-    defs::uintv_t get() const;
+    uintv_t get() const;
 
     /**
      * set from vector of mode indices (adjacent like indices will be rolled together in the pair vector).
      * @param imodes
      *  vector of mode indices
      */
-    void set(const defs::uintv_t& imodes);
+    void set(const uintv_t& imodes);
 
     /**
      * set from mode indices (adjacent like indices will be rolled together in the pair vector).

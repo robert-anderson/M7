@@ -53,7 +53,7 @@ struct FrmHam : HamOpTerm {
     /**
      * core energy
      */
-    defs::ham_t m_e_core = 0.0;
+    ham_t m_e_core = 0.0;
     /**
      * zero or non-zero status of exsig contributions (0000, 1100) to the term of ranksig 1100 i.e. whether the
      * one-electron Hamiltonian has non-zero coefficients corresponding to diagonal elements, and/or single excitations
@@ -71,7 +71,7 @@ struct FrmHam : HamOpTerm {
     ham::KramersAttributes m_kramers_attrs;
     /**
      * the only compile time constant depended upon by the Hamiltonian is ENABLE_COMPLEX. The program should still
-     * behave properly if a real-valued Hamiltonian is provided to a binary with defs::ham_t compiled as a complex type.
+     * behave properly if a real-valued Hamiltonian is provided to a binary with ham_t compiled as a complex type.
      * this flag indicates whether complex arithmetic is required in order to correctly express the coefficients of the
      * fermion Hamiltonian.
      * An error is thrown if the data source for the coefficients is complex valued but the code is compiled for real-
@@ -105,7 +105,7 @@ public:
      * @return
      *  one-electron coefficient of H given by the 2D array T
      */
-    virtual defs::ham_t get_coeff_1100(uint_t /*a*/, uint_t /*i*/) const {return 0;}
+    virtual ham_t get_coeff_1100(uint_t /*a*/, uint_t /*i*/) const {return 0;}
     /**
      * coefficient of the "2-body" term
      * @param a
@@ -119,7 +119,7 @@ public:
      * @return
      *  two-electron coefficient of H given by the 4D array U
      */
-    virtual defs::ham_t get_coeff_2200(uint_t /*a*/, uint_t /*b*/, uint_t /*i*/, uint_t /*j*/) const {return 0;}
+    virtual ham_t get_coeff_2200(uint_t /*a*/, uint_t /*b*/, uint_t /*i*/, uint_t /*j*/) const {return 0;}
     /**
      * coefficient of the "3-body" term
      * @param a
@@ -137,7 +137,7 @@ public:
      * @return
      *  three-electron coefficient of H given by the 6D array L
      */
-    virtual defs::ham_t get_coeff_3300(uint_t /*a*/, uint_t /*b*/, uint_t /*c*/,
+    virtual ham_t get_coeff_3300(uint_t /*a*/, uint_t /*b*/, uint_t /*c*/,
                                        uint_t /*i*/, uint_t /*j*/, uint_t /*k*/) const {return 0;}
     /**
      * @param onv
@@ -145,7 +145,7 @@ public:
      * @return
      *  diagonal matrix element of H in terms of all ranks of coefficients
      */
-    virtual defs::ham_t get_element_0000(const field::FrmOnv& /*onv*/) const {return 0;}
+    virtual ham_t get_element_0000(const field::FrmOnv& /*onv*/) const {return 0;}
     /**
      * @param ket
      *  fermionic occupation number vector (Slater determinant)
@@ -154,7 +154,7 @@ public:
      * @return
      *  single-replacement matrix element of H
      */
-    virtual defs::ham_t get_element_1100(const field::FrmOnv& /*ket*/, const conn::FrmOnv& /*conn*/) const {return 0;}
+    virtual ham_t get_element_1100(const field::FrmOnv& /*ket*/, const conn::FrmOnv& /*conn*/) const {return 0;}
     /**
      * @param ket
      *  fermionic occupation number vector (Slater determinant)
@@ -163,7 +163,7 @@ public:
      * @return
      *  double-replacement matrix element of H
      */
-    virtual defs::ham_t get_element_2200(const field::FrmOnv& /*ket*/, const conn::FrmOnv& /*conn*/) const {return 0;}
+    virtual ham_t get_element_2200(const field::FrmOnv& /*ket*/, const conn::FrmOnv& /*conn*/) const {return 0;}
     /**
      * @param ket
      *  fermionic occupation number vector (Slater determinant)
@@ -172,13 +172,13 @@ public:
      * @return
      *  triple-replacement matrix element of H
      */
-    virtual defs::ham_t get_element_3300(const field::FrmOnv& /*ket*/, const conn::FrmOnv& /*conn*/) const {return 0;}
+    virtual ham_t get_element_3300(const field::FrmOnv& /*ket*/, const conn::FrmOnv& /*conn*/) const {return 0;}
 
-    defs::ham_t get_element(const field::FrmOnv &onv) const;
+    ham_t get_element(const field::FrmOnv &onv) const;
 
-    defs::ham_comp_t get_energy(const field::FrmOnv &onv) const;
+    ham_comp_t get_energy(const field::FrmOnv &onv) const;
 
-    defs::ham_t get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const;
+    ham_t get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const;
 
     /**
      * output some useful logs identifying the kind of H detected

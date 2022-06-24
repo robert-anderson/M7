@@ -25,7 +25,7 @@ TEST(DenseTcFermionHamiltonian, TcBe631G) {
     Hamiltonian gham(&ham_src);
     DenseHamiltonian ham(gham);
     // non-symmetric real matrices have (in general) complex eigenvalues
-    std::vector<std::complex<defs::ham_t>> evals;
+    std::vector<std::complex<ham_t>> evals;
     dense::diag(ham, evals); // dense diagonalisation
     // unlike hermitian case, we need to sort the eigenvalue array by the real part (lowest first)
     sort::inplace(evals, false, false);

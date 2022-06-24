@@ -12,7 +12,7 @@
 
 struct LambdaQuickSorter {
 
-    defs::uintv_t m_inds;
+    uintv_t m_inds;
     comparators::index_cmp_fn_t m_cmp_fn;
 
     LambdaQuickSorter(comparators::index_cmp_fn_t cmp_fn);

@@ -26,17 +26,17 @@ class Planewaves {
     const uint_t m_ndim;
     const std::vector<std::vector<int>> m_momvecs;
     mutable std::vector<int> m_momvec_work;
-    mutable defs::uintv_t m_inds_work;
+    mutable uintv_t m_inds_work;
 
 
-    static defs::uintv_t make_momentum_shape(const defs::uintv_t& wave_shape);
-    static std::vector<std::vector<int>> make_momvecs(const defs::uintv_t& wave_shape);
+    static uintv_t make_momentum_shape(const uintv_t& wave_shape);
+    static std::vector<std::vector<int>> make_momvecs(const uintv_t& wave_shape);
 
 public:
-    static uint_t size(const defs::uintv_t& wave_shape);
+    static uint_t size(const uintv_t& wave_shape);
     static uint_t size(uint_t ndim, uint_t nwave);
 
-    explicit Planewaves(const defs::uintv_t& wave_shape);
+    explicit Planewaves(const uintv_t& wave_shape);
 
     Planewaves(uint_t ndim, uint_t nwave);
 

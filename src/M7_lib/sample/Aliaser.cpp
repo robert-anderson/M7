@@ -11,7 +11,7 @@ Aliaser::Aliaser(uint_t nrow, uint_t nprob) :
         m_alias_table(m_nrow, m_nprob),
         m_norm(m_nrow) {}
 
-void Aliaser::update(uint_t irow, const defs::prob_t *probs, const uint_t nprob) {
+void Aliaser::update(uint_t irow, const prob_t *probs, const uint_t nprob) {
     DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
     m_norm.set(irow, std::accumulate(probs, probs + nprob, 0.0));
     std::stack<uint_t> smaller;
@@ -35,7 +35,7 @@ void Aliaser::update(uint_t irow, const defs::prob_t *probs, const uint_t nprob)
     }
 }
 
-void Aliaser::update(uint_t irow, const std::vector<defs::prob_t> &probs) {
+void Aliaser::update(uint_t irow, const std::vector<prob_t> &probs) {
     update(irow, probs.data(), probs.size());
 }
 
@@ -47,18 +47,18 @@ uint_t Aliaser::draw(uint_t irow, PRNG &prng) const {
     else return m_alias_table.get(irow, iprob);
 }
 
-defs::prob_t Aliaser::norm(uint_t irow) const {
+prob_t Aliaser::norm(uint_t irow) const {
     DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
     return m_norm[irow];
 }
 
 SingleAliaser::SingleAliaser(uint_t nprob) : Aliaser(1, nprob){}
 
-SingleAliaser::SingleAliaser(const std::vector<defs::prob_t> &probs) : Aliaser(1, probs.size()) {
+SingleAliaser::SingleAliaser(const std::vector<prob_t> &probs) : Aliaser(1, probs.size()) {
     update(probs);
 }
 
-void SingleAliaser::update(const std::vector<defs::prob_t> &probs) {
+void SingleAliaser::update(const std::vector<prob_t> &probs) {
     Aliaser::update(0ul, probs);
 }
 
@@ -66,6 +66,6 @@ uint_t SingleAliaser::draw(PRNG &prng) const {
     return Aliaser::draw(0ul, prng);
 }
 
-defs::prob_t SingleAliaser::norm() const {
+prob_t SingleAliaser::norm() const {
     return Aliaser::norm(0ul);
 }

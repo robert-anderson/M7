@@ -4,16 +4,16 @@
 
 #include "Planewaves.h"
 
-defs::uintv_t Planewaves::make_momentum_shape(const defs::uintv_t &wave_shape) {
-    defs::uintv_t shape;
+uintv_t Planewaves::make_momentum_shape(const uintv_t &wave_shape) {
+    uintv_t shape;
     for (auto extent: wave_shape) shape.push_back(2*extent+1);
     return shape;
 }
-std::vector<std::vector<int>> Planewaves::make_momvecs(const defs::uintv_t &wave_shape) {
+std::vector<std::vector<int>> Planewaves::make_momvecs(const uintv_t &wave_shape) {
     std::vector<std::vector<int>> momvecs;
     auto momentum_shape = make_momentum_shape(wave_shape);
     momvecs.reserve(size(wave_shape));
-    auto fn = [&wave_shape, &momvecs](const defs::uintv_t& inds){
+    auto fn = [&wave_shape, &momvecs](const uintv_t& inds){
         momvecs.emplace_back();
         for (uint_t idim=0ul; idim < wave_shape.size(); ++idim){
             momvecs.back().push_back(int(inds[idim]) - wave_shape[idim]);
@@ -25,21 +25,21 @@ std::vector<std::vector<int>> Planewaves::make_momvecs(const defs::uintv_t &wave
     return momvecs;
 }
 
-uint_t Planewaves::size(const defs::uintv_t &wave_shape) {
+uint_t Planewaves::size(const uintv_t &wave_shape) {
     const auto shape = make_momentum_shape(wave_shape);
     return NdFormatD(shape).m_nelement;
 }
 
 uint_t Planewaves::size(uint_t ndim, uint_t nwave) {
-    return size(defs::uintv_t(ndim, nwave));
+    return size(uintv_t(ndim, nwave));
 }
 
-Planewaves::Planewaves(const defs::uintv_t& wave_shape) :
+Planewaves::Planewaves(const uintv_t& wave_shape) :
     m_wave_format(wave_shape), m_momentum_format(make_momentum_shape(wave_shape)),
     m_size(m_momentum_format.m_nelement), m_ndim(m_momentum_format.m_nind),
     m_momvecs(make_momvecs(wave_shape)){}
 
-Planewaves::Planewaves(uint_t ndim, uint_t nwave) : Planewaves(defs::uintv_t(ndim, nwave)){}
+Planewaves::Planewaves(uint_t ndim, uint_t nwave) : Planewaves(uintv_t(ndim, nwave)){}
 
 const std::vector<int> &Planewaves::operator[](const uint_t &i) const {
     DEBUG_ASSERT_LT(i, m_size, "basis function index OOB");

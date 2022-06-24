@@ -33,13 +33,13 @@ public:
     Rdm(const conf::Rdms& opts, uint_t ranksig, sys::Size basis_size, uint_t nelec, uint_t nvalue);
 
     void make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
-                       const com_ops::Frm& com, const defs::wf_t& contrib);
+                       const com_ops::Frm& com, const wf_t& contrib);
 
     void make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
-                       const com_ops::FrmBos& com, const defs::wf_t& contrib);
+                       const com_ops::FrmBos& com, const wf_t& contrib);
 
     void make_contribs(const field::BosOnv& /*src_onv*/, const conn::BosOnv& /*conn*/,
-                       const com_ops::Bos& /*com*/, const defs::wf_t& /*contrib*/) {
+                       const com_ops::Bos& /*com*/, const wf_t& /*contrib*/) {
         ABORT("not yet implemented");
     }
 
@@ -50,21 +50,21 @@ public:
 
 class Rdms : public Archivable {
     std::array<std::unique_ptr<Rdm>, exsig::c_ndistinct> m_rdms;
-    const defs::uintv_t m_active_ranksigs;
-    const std::array<defs::uintv_t, exsig::c_ndistinct> m_exsig_ranks;
+    const uintv_t m_active_ranksigs;
+    const std::array<uintv_t, exsig::c_ndistinct> m_exsig_ranks;
 
     suite::Conns m_work_conns;
     suite::ComOps m_work_com_ops;
 
-    std::array<defs::uintv_t, exsig::c_ndistinct> make_exsig_ranks() const;
+    std::array<uintv_t, exsig::c_ndistinct> make_exsig_ranks() const;
 
 public:
     const bool m_explicit_ref_conns;
     const Epoch& m_accum_epoch;
-    Reduction<defs::wf_t> m_total_norm;
+    Reduction<wf_t> m_total_norm;
     const uint_t m_nelec;
 
-    Rdms(const conf::Rdms& opts, defs::uintv_t ranksigs,
+    Rdms(const conf::Rdms& opts, uintv_t ranksigs,
          sys::Size extents, uint_t nelec, const Epoch& accum_epoch);
 
     operator bool() const;
@@ -72,9 +72,9 @@ public:
     bool takes_contribs_from(uint_t exsig) const;
 
     void make_contribs(const field::Mbf& src_onv, const conn::Mbf& conn,
-                       const com_ops::Mbf& com, const defs::wf_t& contrib);
+                       const com_ops::Mbf& com, const wf_t& contrib);
 
-    void make_contribs(const field::Mbf& src_onv, const field::Mbf& dst_onv, const defs::wf_t& contrib);
+    void make_contribs(const field::Mbf& src_onv, const field::Mbf& dst_onv, const wf_t& contrib);
 
     void make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& dst_row, const Propagator& prop);
 
@@ -99,7 +99,7 @@ public:
      * @param refs
      * @param ipart_dst
      */
-//    void make_contribs(const field::Mbf& src_mbf, const defs::wf_t& src_weight, const WalkerTableRow& dst_row,
+//    void make_contribs(const field::Mbf& src_mbf, const wf_t& src_weight, const WalkerTableRow& dst_row,
 //                       const Propagator& prop, const References& refs, const uint_t& ipart_dst) {
 //        if (!*this) return;
 //        if (!m_accum_epoch) return;
@@ -136,7 +136,7 @@ public:
      *
      *  rdm1[i,j] = sum_k rdm2[i,k,j,k] / (n_elec - 1)
      */
-    defs::ham_comp_t get_energy(const FrmHam& ham) const;
+    ham_comp_t get_energy(const FrmHam& ham) const;
 
     /**
      * compute the RDM energy contribution from the boson number-nonconserving terms
@@ -144,9 +144,9 @@ public:
      *  boson ladder-operator (pure and coupled) hamiltonian
      * @return
      */
-    defs::ham_comp_t get_energy(const FrmBosHam& ham, uint_t nelec, uint_t exsig) const;
+    ham_comp_t get_energy(const FrmBosHam& ham, uint_t nelec, uint_t exsig) const;
 
-    defs::ham_comp_t get_energy(const FrmBosHam& ham, uint_t nelec) const {
+    ham_comp_t get_energy(const FrmBosHam& ham, uint_t nelec) const {
         return get_energy(ham, nelec, exsig::ex_1101) + get_energy(ham, nelec, exsig::ex_1110);
     }
 
@@ -156,7 +156,7 @@ public:
      *  boson number conserving hamiltonian
      * @return
      */
-    defs::ham_comp_t get_energy(const BosHam& ham) const;
+    ham_comp_t get_energy(const BosHam& ham) const;
 
     /**
      * @param ham
@@ -164,7 +164,7 @@ public:
      * @return
      *  E_RDM = E_2RDM + E_RDM_ladder + E_RDM_boson
      */
-    defs::ham_comp_t get_energy(const Hamiltonian& ham) const {
+    ham_comp_t get_energy(const Hamiltonian& ham) const {
         if (!is_energy_sufficient(ham)) return 0.0;
         return get_energy(ham.m_frm) + get_energy(ham.m_frmbos, m_nelec) + get_energy(ham.m_bos);
     }

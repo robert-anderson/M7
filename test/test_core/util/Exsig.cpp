@@ -63,7 +63,7 @@ TEST(UtilExsig, RanksigContribs) {
 #if 0
 TEST(Utils, SetAllExsigsFromRanksig) {
     uint_t ranksig;
-    std::array<bool, defs::c_ndistinct> exsigs{};
+    std::array<bool, c_ndistinct> exsigs{};
 
     ranksig = conn_utils::encode_exsig(4, 4, 1, 1);
     exsigs.fill(false);

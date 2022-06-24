@@ -83,10 +83,10 @@ namespace conf {
     };
 
     struct MbfDef : Section {
-        Param<std::vector<defs::uintv_t>> m_frm;
-        Param<std::vector<defs::uintv_t>> m_bos;
+        Param<std::vector<uintv_t>> m_frm;
+        Param<std::vector<uintv_t>> m_bos;
         Param<bool> m_neel;
-        //Param<std::vector<defs::uintv_t>> m_csf;
+        //Param<std::vector<uintv_t>> m_csf;
 
         explicit MbfDef(Group *parent, std::string name);
 
@@ -245,8 +245,8 @@ namespace conf {
         Param<bool> m_stochastic;
         Param<std::string> m_excit_gen;
         Param<double> m_nw_target;
-        Param<defs::wf_comp_t> m_max_bloom;
-        Param<defs::wf_comp_t> m_nadd;
+        Param<wf_comp_t> m_max_bloom;
+        Param<wf_comp_t> m_nadd;
         Param<double> m_tau_init;
         Param<double> m_tau_min;
         Param<double> m_tau_max;

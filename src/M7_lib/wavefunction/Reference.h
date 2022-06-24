@@ -34,7 +34,7 @@ class Reference : public Wavefunction::SharedRow {
     /**
      * candidate weights are averaged over replicas so that replicas on the same root will redefine to the same row
      */
-    defs::wf_comp_t m_candidate_abs_weight = 0.0;
+    wf_comp_t m_candidate_abs_weight = 0.0;
     /**
      * default scale factor defining when the candidate weight has grown to the magnitude at which it must be made the
      * new reference for this WF part
@@ -42,8 +42,8 @@ class Reference : public Wavefunction::SharedRow {
     const double m_redefinition_thresh;
 
     ReductionSyndicate m_summables;
-    Reduction<defs::ham_t> m_proj_energy_num;
-    Reduction<defs::wf_comp_t> m_nwalker_at_doubles;
+    Reduction<ham_t> m_proj_energy_num;
+    Reduction<wf_comp_t> m_nwalker_at_doubles;
 
 public:
     Reference(const conf::Reference &opts, const Hamiltonian &ham,
@@ -101,13 +101,13 @@ public:
      * @param onv
      * @param weights
      */
-    void make_numerator_contribs(const field::Mbf &onv, const defs::wf_t& weight);
+    void make_numerator_contribs(const field::Mbf &onv, const wf_t& weight);
 
-    const defs::wf_comp_t &nwalker_at_doubles();
+    const wf_comp_t &nwalker_at_doubles();
 
-    const defs::ham_t& proj_energy_num() const;
+    const ham_t& proj_energy_num() const;
 
-    const defs::wf_t& weight() const;
+    const wf_t& weight() const;
 
     /**
      * this method includes the current weight in the average, bringing the normalized average up to date.
@@ -118,7 +118,7 @@ public:
      * @return
      *  normalized average weight
      */
-    defs::wf_t norm_average_weight(const uint_t& icycle, const uint_t& ipart) const;
+    wf_t norm_average_weight(const uint_t& icycle, const uint_t& ipart) const;
 
     const WalkerTableRow& row() const {
         return m_global.m_row;
@@ -131,8 +131,8 @@ public:
  */
 struct References {
     std::vector<Reference> m_refs;
-    buffered::Numbers<defs::ham_t, defs::ndim_wf> m_proj_energy_nums;
-    buffered::Numbers<defs::wf_t, defs::ndim_wf> m_weights;
+    buffered::Numbers<ham_t, ndim_wf> m_proj_energy_nums;
+    buffered::Numbers<wf_t, ndim_wf> m_weights;
 
     References(const conf::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs);
 
@@ -146,9 +146,9 @@ struct References {
 
     std::vector<bool> is_connected(const field::Mbf &onv) const;
 
-    const field::Numbers<defs::ham_t, defs::ndim_wf>& proj_energy_nums();
+    const field::Numbers<ham_t, ndim_wf>& proj_energy_nums();
 
-    const field::Numbers<defs::wf_t, defs::ndim_wf>& weights();
+    const field::Numbers<wf_t, ndim_wf>& weights();
 
 };
 

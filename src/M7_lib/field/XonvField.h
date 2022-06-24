@@ -36,7 +36,7 @@ struct FrmXonvField : XonvField<FrmOnvField> {
     FrmXonvField(Row *row, const sys::Sector& sector, std::string name = "") :
             FrmXonvField(row, sector.basis(), std::move(name)){}
 
-    FrmXonvField &operator=(const std::pair<defs::uintv_t, defs::uintv_t> &inds) {
+    FrmXonvField &operator=(const std::pair<uintv_t, uintv_t> &inds) {
         m_ket = inds.first;
         m_bra = inds.second;
         return *this;
@@ -52,7 +52,7 @@ struct BosXonvField : XonvField<BosOnvField> {
     BosXonvField(Row *row, const sys::Sector& sector, std::string name = "") :
             BosXonvField(row, sector.basis(), std::move(name)){}
 
-    BosXonvField &operator=(const std::pair<defs::uintv_t, defs::uintv_t> &inds) {
+    BosXonvField &operator=(const std::pair<uintv_t, uintv_t> &inds) {
         m_ket = inds.first;
         m_bra = inds.second;
         return *this;
@@ -69,7 +69,7 @@ struct FrmBosXonvField : XonvField<FrmBosOnvField> {
     FrmBosXonvField(Row *row, const sys::Sector& sector, std::string name = "") :
             FrmBosXonvField(row, sector.basis(), std::move(name)){}
 
-    typedef std::pair<defs::uintv_t, defs::uintv_t> pair_t;
+    typedef std::pair<uintv_t, uintv_t> pair_t;
     FrmBosXonvField& operator=(const std::pair<pair_t, pair_t> &inds) {
         m_ket = inds.first;
         m_bra = inds.second;

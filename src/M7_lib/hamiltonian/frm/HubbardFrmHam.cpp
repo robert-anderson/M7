@@ -6,7 +6,7 @@
 #include "M7_lib/excitgen/frm/HubbardUniform.h"
 
 
-HubbardFrmHam::HubbardFrmHam(defs::ham_t u, const std::shared_ptr<lattice::Base>& lattice) :
+HubbardFrmHam::HubbardFrmHam(ham_t u, const std::shared_ptr<lattice::Base>& lattice) :
         FrmHam(lattice), m_u(u){
     m_contribs_1100.set_nonzero(exsig::ex_single);
     m_contribs_2200.set_nonzero(0);
@@ -16,14 +16,14 @@ HubbardFrmHam::HubbardFrmHam(defs::ham_t u, const std::shared_ptr<lattice::Base>
 HubbardFrmHam::HubbardFrmHam(opt_pair_t opts) :
         HubbardFrmHam(opts.m_ham.m_hubbard.m_repulsion, lattice::make(opts.m_ham.m_hubbard)){}
 
-defs::ham_t HubbardFrmHam::get_element_0000(const field::FrmOnv &onv) const {
-    defs::ham_t h = 0.0;
+ham_t HubbardFrmHam::get_element_0000(const field::FrmOnv &onv) const {
+    ham_t h = 0.0;
     for (uint_t isite = 0ul; isite < m_basis.m_nsite; ++isite)
         if (onv.get({0, isite}) && onv.get({1, isite})) h += m_u;
     return h;
 }
 
-defs::ham_t HubbardFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+ham_t HubbardFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
     DEBUG_ASSERT_EQ(conn.size(), 2ul, "incorrect connection exsig");
     auto isite = m_basis.isite(conn.m_ann[0]);
     auto jsite = m_basis.isite(conn.m_cre[0]);
@@ -37,7 +37,7 @@ void HubbardFrmHam::log_data() const {
     FrmHam::log_data();
 }
 
-defs::ham_t HubbardFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
+ham_t HubbardFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
     // hopping coeff is always -t
     return -m_basis.m_lattice->phase(a, i);
 }

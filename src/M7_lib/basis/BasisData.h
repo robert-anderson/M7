@@ -11,7 +11,6 @@
 #include "AbelianGroup.h"
 #include "Lattice.h"
 
-using namespace defs;
 
 namespace conservation {
     enum State {Undefined, Yes, No, Hint};
@@ -69,7 +68,7 @@ namespace conservation {
             return m_value==other.m_value && m_conserve==other.m_conserve;
         }
 
-        defs::info_map_t info() const {
+        info_map_t info() const {
             return {{"value", m_value}, {"conserved", m_conserve}};
         }
 
@@ -203,7 +202,7 @@ namespace sys {
 
             uint_t ncoeff_ind() const;
 
-            defs::info_map_t info() const;
+            info_map_t info() const;
 
             std::string to_string() const;
         };
@@ -251,7 +250,7 @@ namespace sys {
 
             bool operator==(const Electrons& other) const;
 
-            defs::info_map_t info() const;
+            info_map_t info() const;
             std::string to_string() const;
         };
 
@@ -315,7 +314,7 @@ namespace sys {
 
             bool operator==(const Basis& other) const;
             
-            defs::info_map_t info() const;
+            info_map_t info() const;
 
             std::string to_string() const;
         };

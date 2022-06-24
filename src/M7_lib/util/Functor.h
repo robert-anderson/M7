@@ -8,7 +8,6 @@
 #include <functional>
 #include "M7_lib/defs.h"
 
-using namespace defs;
 
 namespace functor {
     template<typename signature_t, typename T>

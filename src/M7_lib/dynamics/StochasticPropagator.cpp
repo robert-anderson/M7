@@ -24,11 +24,11 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian& ham, const conf::D
 
 void StochasticPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     const auto& row = wf.m_store.m_row;
-    const defs::wf_t& weight = row.m_weight[ipart];
+    const wf_t& weight = row.m_weight[ipart];
     /*
      * for bilinear estimators based on the consolidated annihilation of spawned contributions
      */
-    defs::prob_t p_succeed_at_least_once = 1.0;
+    prob_t p_succeed_at_least_once = 1.0;
 
     DEBUG_ASSERT_NE(weight, 0.0, "should not attempt off-diagonal propagation from zero weight");
     DEBUG_ASSERT_TRUE(m_ham.complex_valued() || fptol::numeric_real(weight),
@@ -37,9 +37,9 @@ void StochasticPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     bool flag_initiator = row.m_initiator.get(ipart);
     bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
 
-    const defs::wf_comp_t abs_weight = std::abs(weight);
-    defs::prob_t prob_nattempt_floor, prob_gen, prob_thresh_accept;
-    defs::ham_t helem;
+    const wf_comp_t abs_weight = std::abs(weight);
+    prob_t prob_nattempt_floor, prob_gen, prob_thresh_accept;
+    ham_t helem;
 
     auto nattempt = uint_t(m_prng.stochastic_round(abs_weight, 1.0, prob_nattempt_floor));
     if (!nattempt) return;
@@ -89,7 +89,7 @@ void StochasticPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
              *  2. generate a connected MBF (prob_gen)
              *  3. *accept* or reject based on the magnitude of the candidate walker (prob_thresh_accept)
              */
-            defs::prob_t p_fail_one_attempt, p_fail_all_attempts;
+            prob_t p_fail_one_attempt, p_fail_all_attempts;
             /*
              * failure to generate this connection at one attempt could be due to either
              *  1. generating some other connection via the excitation generator
@@ -120,7 +120,7 @@ void StochasticPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
 void StochasticPropagator::diagonal(Wavefunction& wf, const uint_t& ipart) {
     auto& row = wf.m_store.m_row;
     bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
-    const defs::ham_comp_t& hdiag = row.m_hdiag;
+    const ham_comp_t& hdiag = row.m_hdiag;
     if (flag_deterministic) {
         wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
     } else {
@@ -141,7 +141,7 @@ uint_t StochasticPropagator::ncase_excit_gen() const {
     return m_excit_gen_group.ncase();
 }
 
-std::vector<defs::prob_t> StochasticPropagator::excit_gen_case_probs() const {
+std::vector<prob_t> StochasticPropagator::excit_gen_case_probs() const {
     return m_excit_gen_group.get_probs();
 }
 

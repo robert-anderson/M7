@@ -8,7 +8,7 @@
 TEST(UtilSort, RealAsc) {
     const bool asc = true, abs_val = false;
     std::vector<double> v = {1.0, 2.3, 4.0, -2.3, 9.0, -10.3};
-    defs::uintv_t inds_chk = {5, 3, 0, 1, 2, 4};
+    uintv_t inds_chk = {5, 3, 0, 1, 2, 4};
     auto inds = sort::inds(v, asc, abs_val);
     ASSERT_EQ(inds, inds_chk);
     std::vector<double> v_chk;
@@ -24,7 +24,7 @@ TEST(UtilSort, RealAsc) {
 TEST(UtilSort, RealDesc) {
     const bool asc = false, abs_val = false;
     std::vector<double> v = {1.0, 2.3, 4.0, -2.3, 9.0, -10.3};
-    defs::uintv_t inds_chk = {4, 2, 1, 0, 3, 5};
+    uintv_t inds_chk = {4, 2, 1, 0, 3, 5};
     auto inds = sort::inds(v, asc, abs_val);
     ASSERT_EQ(inds, inds_chk);
     std::vector<double> v_chk;
@@ -40,7 +40,7 @@ TEST(UtilSort, RealDesc) {
 TEST(UtilSort, RealAscAbs) {
     const bool asc = true, abs_val = true;
     std::vector<double> v = {1.0, 2.3, 4.0, -2.3, 9.0, -10.3};
-    defs::uintv_t inds_chk = {0, 1, 3, 2, 4, 5};
+    uintv_t inds_chk = {0, 1, 3, 2, 4, 5};
     auto inds = sort::inds(v, asc, abs_val);
     ASSERT_EQ(inds, inds_chk);
     std::vector<double> v_chk;
@@ -56,7 +56,7 @@ TEST(UtilSort, RealAscAbs) {
 TEST(UtilSort, RealDescAbs) {
     const bool asc = false, abs_val = true;
     std::vector<double> v = {1.0, 2.3, 4.0, -2.3, 9.0, -10.3};
-    defs::uintv_t inds_chk = {5, 4, 2, 1, 3, 0};
+    uintv_t inds_chk = {5, 4, 2, 1, 3, 0};
     auto inds = sort::inds(v, asc, abs_val);
     ASSERT_EQ(inds, inds_chk);
     std::vector<double> v_chk;

@@ -23,20 +23,20 @@ public:
 
     HamiltonianFileReader(const std::string &fname, uint_t nind);
 
-    bool next(defs::uintv_t &inds, defs::ham_t &v);
+    bool next(uintv_t &inds, ham_t &v);
 
-    static uint_t nset_ind(const defs::uintv_t &inds);
+    static uint_t nset_ind(const uintv_t &inds);
 
-    virtual uint_t ranksig(const defs::uintv_t &inds) const = 0;
+    virtual uint_t ranksig(const uintv_t &inds) const = 0;
 
-    virtual uint_t exsig(const defs::uintv_t &inds, uint_t ranksig) const = 0;
+    virtual uint_t exsig(const uintv_t &inds, uint_t ranksig) const = 0;
 
-    uint_t exsig(const defs::uintv_t &inds) const;
+    uint_t exsig(const uintv_t &inds) const;
 
-    virtual bool inds_in_range(const defs::uintv_t& inds) const = 0;
+    virtual bool inds_in_range(const uintv_t& inds) const = 0;
 
 private:
-    static void decrement_inds(defs::uintv_t& inds);
+    static void decrement_inds(uintv_t& inds);
 };
 
 

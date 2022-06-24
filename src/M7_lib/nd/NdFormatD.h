@@ -22,16 +22,16 @@
 
 struct NdFormatD {
 
-    const defs::uintv_t m_shape;
-    const defs::uintv_t m_strides;
+    const uintv_t m_shape;
+    const uintv_t m_strides;
     const std::vector<std::string> m_dim_names;
     const uint_t m_nelement;
     const uint_t m_nind;
 
-    static defs::uintv_t make_strides(const defs::uintv_t& shape){
+    static uintv_t make_strides(const uintv_t& shape){
         const auto nind = shape.size();
         if (shape.empty()) return {};
-        defs::uintv_t strides(shape.size());
+        uintv_t strides(shape.size());
         strides.back() = 1ul;
         for (auto i = 2ul; i <= nind; i++) {
             strides[nind - i] = strides[nind - i + 1] * shape[nind - i + 1];
@@ -39,15 +39,15 @@ struct NdFormatD {
         return strides;
     }
 
-    NdFormatD(const defs::uintv_t& shape, std::vector<std::string> dim_names): m_shape(shape),
+    NdFormatD(const uintv_t& shape, std::vector<std::string> dim_names): m_shape(shape),
                                                                                m_strides(make_strides(shape)), m_dim_names(std::move(dim_names)),
                                                                                m_nelement(shape.empty() ? 1ul: m_strides.front()*m_shape.front()), m_nind(shape.size()){}
 
-    NdFormatD(const defs::uintv_t& shape): NdFormatD(shape, std::vector<std::string>(shape.size(), "")){}
+    NdFormatD(const uintv_t& shape): NdFormatD(shape, std::vector<std::string>(shape.size(), "")){}
 
-    NdFormatD(uint_t nind, uint_t extent): NdFormatD(defs::uintv_t(nind, extent)){}
+    NdFormatD(uint_t nind, uint_t extent): NdFormatD(uintv_t(nind, extent)){}
 
-    uint_t flatten(const defs::uintv_t& inds) const {
+    uint_t flatten(const uintv_t& inds) const {
         uint_t iflat = 0ul;
         for (uint_t i=0ul; i<std::min(inds.size(), m_nind); ++i) {
             ASSERT(inds[i] < m_shape[i]);
@@ -71,13 +71,13 @@ struct NdFormatD {
 
 struct NdEnumerationD : NdFormatD {
 private:
-    const std::vector<defs::uintv_t> m_inds;
+    const std::vector<uintv_t> m_inds;
 
-    static std::vector<defs::uintv_t> make_inds(const NdFormatD& format) {
+    static std::vector<uintv_t> make_inds(const NdFormatD& format) {
         using namespace basic_foreach::rtnd;
-        std::vector<defs::uintv_t> out(format.m_nelement);
+        std::vector<uintv_t> out(format.m_nelement);
         uint_t i=0ul;
-        auto fn = [&out, &i](const defs::uintv_t& inds){
+        auto fn = [&out, &i](const uintv_t& inds){
             out[i] = inds;
             ++i;
         };
@@ -89,7 +89,7 @@ private:
 public:
     NdEnumerationD(const NdFormatD& format): NdFormatD(format), m_inds(make_inds(format)){}
 
-    const defs::uintv_t& operator[](uint_t i) const {
+    const uintv_t& operator[](uint_t i) const {
         DEBUG_ASSERT_LT(i, m_inds.size(), "index OOB");
         return m_inds[i];
     }

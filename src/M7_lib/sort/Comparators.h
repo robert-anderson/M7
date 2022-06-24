@@ -138,7 +138,7 @@ namespace comparators {
     static index_cmp_fn_t make_num_field_row_cmp_fn(
             row_t &row1, field::Numbers<T, nind> &field1,
             row_t &row2, field::Numbers<T, nind> &field2,
-            value_cmp_fn_t<T> value_cmp_fn, defs::uintv_t inds_to_cmp) {
+            value_cmp_fn_t<T> value_cmp_fn, uintv_t inds_to_cmp) {
         REQUIRE_TRUE(static_cast<FieldBase &>(field1).belongs_to_row(row1), "specified row-field pair must correspond");
         REQUIRE_TRUE(static_cast<FieldBase &>(field2).belongs_to_row(row2), "specified row-field pair must correspond");
         DEBUG_ASSERT_FALSE(inds_to_cmp.empty(), "need at least one numeric field index for comparison");

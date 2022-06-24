@@ -20,7 +20,7 @@ KramersSectorOccupation::~KramersSectorOccupation() {
     }
 }
 
-void KramersSectorOccupation::add(const DeterminantElement &det, const defs::wf_t &weight) {
+void KramersSectorOccupation::add(const DeterminantElement &det, const wf_t &weight) {
     /*
      * n = 4
      *            s   (n+s)/2

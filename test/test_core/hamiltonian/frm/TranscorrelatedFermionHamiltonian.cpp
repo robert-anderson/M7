@@ -147,7 +147,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     conn.apply(onv, other);
     std::cout << other << std::endl;
 
-    defs::ham_t matel33 = ham.get_element_3300(onv, conn);
+    ham_t matel33 = ham.get_element_3300(onv, conn);
     // must /3 if the TCDUMP input is in ASCII format
     // expect element (1,2,1|3,4,10)=(1,1,1|3,10,4) (1-based indexing)
     // Also has a phase of -1

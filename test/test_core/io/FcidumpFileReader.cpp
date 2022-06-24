@@ -20,10 +20,10 @@ TEST(FcidumpFileReader, Real_6orb) {
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 6);
-    defs::uintv_t inds(4);
-    defs::ham_t v;
+    uintv_t inds(4);
+    ham_t v;
     file_reader.next(inds, v);
-    defs::uintv_t test_inds(4);
+    uintv_t test_inds(4);
     // first entry
     test_inds = {0, 0, 0, 0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
@@ -45,10 +45,10 @@ TEST(FcidumpFileReader, Integer_8orb) {
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 8);
-    defs::uintv_t inds(4);
-    defs::ham_t v;
+    uintv_t inds(4);
+    ham_t v;
     file_reader.next(inds, v);
-    defs::uintv_t test_inds(4);
+    uintv_t test_inds(4);
     // core energy is the first entry
     test_inds = {~0ul, ~0ul, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
@@ -70,10 +70,10 @@ TEST(FcidumpFileReader, Molcas) {
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 6);
-    defs::uintv_t inds(4);
-    defs::ham_t v;
+    uintv_t inds(4);
+    ham_t v;
     file_reader.next(inds, v);
-    defs::uintv_t test_inds(4);
+    uintv_t test_inds(4);
 
     test_inds = {0, 0, 0, 0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
@@ -88,10 +88,10 @@ TEST(FcidumpFileReader, Molcas) {
 TEST(FcidumpFileReader, Complex_10orb){
     FcidumpFileReader file_reader(PROJECT_ROOT"/assets/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_EQ(file_reader.m_nspatorb, 5);
-    defs::uintv_t uintv_t(4);
-    defs::ham_t v;
+    uintv_t uintv_t(4);
+    ham_t v;
     file_reader.next(uintv_t, v);
-    defs::uintv_t test_inds(4);
+    uintv_t test_inds(4);
     // first entry
     test_inds = {0,0,0,0};
     ASSERT_TRUE(std::equal(uintv_t.begin(), uintv_t.end(), test_inds.begin()));

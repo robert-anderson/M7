@@ -69,7 +69,7 @@ class TrialWavefunction {
     //DeterminantList m_full_subspace;
     MappedDeterminantList m_connected_space;
 
-    std::vector<defs::wf_t> m_local_weights;
+    std::vector<wf_t> m_local_weights;
     */
 
 

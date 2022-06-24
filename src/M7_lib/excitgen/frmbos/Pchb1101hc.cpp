@@ -10,7 +10,7 @@ Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
         m_pick_n_given_pq(math::pow<2>(h.m_basis.m_frm.m_nspinorb), h.m_basis.m_bos.m_nmode) {
     const auto nmode = m_h.m_basis.m_bos.m_nmode;
     const auto nspinorb = m_h.m_basis.m_frm.m_nspinorb;
-    std::vector<defs::prob_t> weights(nmode, 0.0);
+    std::vector<prob_t> weights(nmode, 0.0);
     uint_t pq = 0ul;
     log::info("Initializing pre-computed samplers for fermion-boson kinetic term...");
     if (mpi::on_node_i_am_root()) {
@@ -33,7 +33,7 @@ Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
 }
 
 bool Pchb1101hc::draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
-                             defs::prob_t& prob, conn::FrmBosOnv& conn) {
+                             prob_t& prob, conn::FrmBosOnv& conn) {
     /*
      * draw random occupied and vacant fermion indices
      */
@@ -61,8 +61,8 @@ bool Pchb1101hc::draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
     return true;
 }
 
-defs::prob_t Pchb1101hc::prob_h_frmbos(const field::FrmBosOnv& src,
-                                       const conn::FrmBosOnv& conn, defs::ham_t helem) const {
+prob_t Pchb1101hc::prob_h_frmbos(const field::FrmBosOnv& src,
+                                       const conn::FrmBosOnv& conn, ham_t helem) const {
     auto prob = UniformSingles::prob_spin_conserve_fn(src.m_frm, conn.m_frm);
     const bool cre = exsig::decode_nbos_cre(conn.exsig());
     const auto p = cre ? conn.m_frm.m_cre[0]: conn.m_frm.m_ann[0];
@@ -71,7 +71,7 @@ defs::prob_t Pchb1101hc::prob_h_frmbos(const field::FrmBosOnv& src,
     return prob * std::abs(helem) / (m_pick_n_given_pq.norm(pq));
 }
 
-defs::prob_t Pchb1101hc::prob_frmbos(const field::FrmBosOnv& src, const conn::FrmBosOnv& conn) const {
+prob_t Pchb1101hc::prob_frmbos(const field::FrmBosOnv& src, const conn::FrmBosOnv& conn) const {
     return prob_h_frmbos(src, conn, m_h.get_element(src, conn));
 }
 

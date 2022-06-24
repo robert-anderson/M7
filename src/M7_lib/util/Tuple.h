@@ -7,7 +7,6 @@
 
 #include "M7_lib/defs.h"
 
-using namespace defs;
 
 /**
  * functions acting on Tuples: structures containing diversely-typed data identified only by a constexpr index

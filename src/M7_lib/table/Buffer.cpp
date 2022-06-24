@@ -31,7 +31,7 @@ bool Buffer::Window::allocated() const {
     return m_buffer && m_buffer->size();
 }
 
-void Buffer::Window::move(defs::buf_t *begin, uint_t new_size) {
+void Buffer::Window::move(buf_t *begin, uint_t new_size) {
     DEBUG_ASSERT_FALSE(begin==nullptr, "moving to invalid buffer pointer");
     if (m_begin) std::memmove(begin, m_begin, m_size);
     m_begin = begin;
@@ -96,7 +96,7 @@ void Buffer::resize(uint_t size, double factor) {
         log::info_("Reallocating buffer \"{}\" {} -> {}",
                    m_name, capacity_string(), capacity_string(size));
     }
-    std::vector<defs::buf_t> tmp;
+    std::vector<buf_t> tmp;
     try {
         tmp.resize(size, 0);
     }

@@ -11,17 +11,17 @@ FrmHam::FrmHam(const sys::frm::Basis& basis):
         m_basis(basis), m_contribs_1100(exsig::ex_single), m_contribs_2200(exsig::ex_double),
         m_work_conn({99, 99}){}
 
-defs::ham_t FrmHam::get_element(const field::FrmOnv &onv) const {
+ham_t FrmHam::get_element(const field::FrmOnv &onv) const {
     return get_element_0000(onv);
 }
 
-defs::ham_comp_t FrmHam::get_energy(const field::FrmOnv &onv) const {
+ham_comp_t FrmHam::get_energy(const field::FrmOnv &onv) const {
     auto elem = get_element_0000(onv);
     DEBUG_ASSERT_TRUE(fptol::numeric_real(elem), "energies should be purely real");
     return arith::real(elem);
 }
 
-defs::ham_t FrmHam::get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+ham_t FrmHam::get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
     switch (conn.size()) {
         case 0:
             return get_element_0000(onv);

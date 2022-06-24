@@ -39,7 +39,7 @@ namespace conf {
 
     struct LatticeModel : Section {
         Param<std::string> m_topology;
-        Param<defs::uintv_t> m_site_shape;
+        Param<uintv_t> m_site_shape;
         Param<std::vector<int>> m_boundary_conds;
 
         LatticeModel(Group *parent, std::string name, std::string description);
@@ -50,14 +50,14 @@ namespace conf {
     };
 
     struct Hubbard : LatticeModel {
-        Param<defs::ham_comp_t> m_repulsion;
+        Param<ham_comp_t> m_repulsion;
 
         explicit Hubbard(Group *parent);
     };
 
 
     struct Heisenberg : LatticeModel {
-        Param<defs::ham_comp_t> m_coupling;
+        Param<ham_comp_t> m_coupling;
 
         explicit Heisenberg(Group *parent);
     };
@@ -78,7 +78,7 @@ namespace conf {
 
     struct FrmBosHam : Section {
         Ebdump m_ebdump;
-        Param<defs::ham_t> m_holstein_coupling;
+        Param<ham_t> m_holstein_coupling;
 
         explicit FrmBosHam(Group *parent);
 
@@ -88,7 +88,7 @@ namespace conf {
     struct InteractingBoseGas : Section {
         Param<uint_t> m_ndim;
         Param<uint_t> m_nwave;
-        Param<defs::ham_t> m_ek_scale;
+        Param<ham_t> m_ek_scale;
 
         explicit InteractingBoseGas(Group *parent);
 
@@ -97,7 +97,7 @@ namespace conf {
 
     struct BosHam : Section {
         Bosdump m_bosdump;
-        Param<defs::ham_comp_t> m_num_op_weight;
+        Param<ham_comp_t> m_num_op_weight;
         InteractingBoseGas m_interacting_bose_gas;
 
         explicit BosHam(Group *parent);

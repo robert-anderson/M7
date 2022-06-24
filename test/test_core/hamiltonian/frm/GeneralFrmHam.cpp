@@ -10,7 +10,7 @@
 #ifdef ENABLE_COMPLEX
 TEST(FermionHamiltonian, DhfEnergy) {
     const auto benchmark = -14.354220448530139;
-    FermionHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
+    FermionHamiltonian ham(assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.m_kramers_attrs.conserving());
     buffered::FrmOnv onv(ham.m_nsite);
     onv = {0, 1, ham.m_nsite, ham.m_nsite + 1};
@@ -72,7 +72,7 @@ TEST(GeneralFrmHam, RhfEnergy) {
     const auto benchmark = -108.76171800006861;
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"}, true);
     Hamiltonian ham(&frm_ham);
-    defs::uintv_t chk_orbsyms = {0, 2, 1, 5, 6, 4};
+    uintv_t chk_orbsyms = {0, 2, 1, 5, 6, 4};
     ASSERT_EQ(ham.m_basis.m_frm.m_abgrp_map.m_site_irreps, chk_orbsyms);
     ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::FrmOnv onv(ham.m_basis);

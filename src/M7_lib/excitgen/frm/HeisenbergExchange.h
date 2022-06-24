@@ -13,9 +13,9 @@ struct HeisenbergExchange : FrmLatticeExcitGen {
 
     virtual ~HeisenbergExchange() {}
 
-    bool draw_frm(uint_t exsig, const field::FrmOnv& src, defs::prob_t& prob, conn::FrmOnv& conn) override;
+    bool draw_frm(uint_t exsig, const field::FrmOnv& src, prob_t& prob, conn::FrmOnv& conn) override;
 
-    defs::prob_t prob_frm(const field::FrmOnv& src, const conn::FrmOnv& conn) const override;
+    prob_t prob_frm(const field::FrmOnv& src, const conn::FrmOnv& conn) const override;
 
     uint_t approx_nconn(uint_t /*exsig*/, sys::Particles /*particles*/) const override;
 

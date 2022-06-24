@@ -29,11 +29,11 @@ public:
         return static_cast<const TableBase &>(m_tables[0]).nrow();
     }
 
-    defs::buf_t *begin() {
+    buf_t *begin() {
         return m_tables[0].begin();
     }
 
-    const defs::buf_t *begin() const {
+    const buf_t *begin() const {
         return m_tables[0].begin();
     }
 
@@ -96,14 +96,14 @@ public:
         return m_tables[itable];
     }
 
-    defs::uintv_t hwms() const {
-        defs::uintv_t res(ntable());
+    uintv_t hwms() const {
+        uintv_t res(ntable());
         for (uint_t i = 0ul; i < ntable(); ++i) res[i] = (*this)[i].m_hwm;
         return res;
     }
 
-    defs::uintv_t displs() const {
-        defs::uintv_t res(ntable());
+    uintv_t displs() const {
+        uintv_t res(ntable());
         for (uint_t i = 0ul; i < ntable(); ++i) res[i] = bw_size() * i;
         return res;
     }

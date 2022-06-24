@@ -29,7 +29,7 @@
  * are the called the "spawning lists"
  */
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
-    typedef GlobalExtremalRows<WalkerTableRow, defs::wf_t, defs::ndim_wf> weights_gxr_t;
+    typedef GlobalExtremalRows<WalkerTableRow, wf_t, ndim_wf> weights_gxr_t;
 
     const conf::Document &m_opts;
     const sys::Sector m_sector;
@@ -37,7 +37,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * all multidimensional array indices of the multidimensional fields of the m_store row
      */
-    NdEnumeration<defs::ndim_wf> m_format;
+    NdEnumeration<ndim_wf> m_format;
 
     /**
      * collection of all reductions which are summed at the end of every cycle
@@ -47,11 +47,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * number of initiator ONVs in each part of the WF
      */
-    NdReduction<uint_t, defs::ndim_wf> m_ninitiator;
+    NdReduction<uint_t, ndim_wf> m_ninitiator;
     /**
      * change over the last cycle in the number of initiator ONVs
      */
-    NdReduction<int, defs::ndim_wf> m_delta_ninitiator;
+    NdReduction<int, ndim_wf> m_delta_ninitiator;
     /**
      * number of ONVs with any associated weight in any part
      */
@@ -63,27 +63,27 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * L1 norm of each part of the WF
      */
-    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
+    NdReduction<wf_comp_t, ndim_wf> m_nwalker;
     /**
      * change in the L1 norm
      */
-    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
+    NdReduction<wf_comp_t, ndim_wf> m_delta_nwalker;
     /**
      * square of the L2 norm of each part of the WF
      */
-    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
+    NdReduction<wf_comp_t, ndim_wf> m_l2_norm_square;
     /**
      * change in the L2 norm
      */
-    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
+    NdReduction<wf_comp_t, ndim_wf> m_delta_l2_norm_square;
     /**
      * number of walkers received in spawning process
      */
-    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nspawned;
+    NdReduction<wf_comp_t, ndim_wf> m_nspawned;
     /**
      * number of walkers annihilated in the loop_over_spawned method for each part
      */
-    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
+    NdReduction<wf_comp_t, ndim_wf> m_nannihilated;
 
     Wavefunction(const conf::Document &opts, const sys::Sector& sector);
 
@@ -131,9 +131,9 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
         return ipart/2;
     }
 
-    defs::wf_comp_t square_norm(const uint_t& ipart) const;
+    wf_comp_t square_norm(const uint_t& ipart) const;
 
-    defs::wf_comp_t l1_norm(const uint_t& ipart) const;
+    wf_comp_t l1_norm(const uint_t& ipart) const;
 
     /**
      * allow the current ONV in m_store.m_row to change the weight on ONVs to which it generates
@@ -159,13 +159,13 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param new_weight
      *  value to which this part weight is to be set
      */
-    void set_weight(const uint_t &ipart, const defs::wf_t &new_weight);
+    void set_weight(const uint_t &ipart, const wf_t &new_weight);
 
-    void set_weight(const defs::wf_t &new_weight) {
+    void set_weight(const wf_t &new_weight) {
         for (uint_t ipart=0ul; ipart<m_format.m_nelement; ++ipart) set_weight(ipart, new_weight);
     }
 
-    void set_weight(const field::Numbers<defs::wf_t, defs::ndim_wf> &new_weight){
+    void set_weight(const field::Numbers<wf_t, ndim_wf> &new_weight){
         for (uint_t i=0ul; i < m_format.m_nelement; ++i) set_weight(i, new_weight[i]);
     }
 
@@ -177,7 +177,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param delta
      *  change in the weight
      */
-    void change_weight(const uint_t &ipart, const defs::wf_t &delta);
+    void change_weight(const uint_t &ipart, const wf_t &delta);
 
     /**
      * convenience method to set_weight based on a scalar factor relative to current weight
@@ -214,11 +214,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @return
      */
     uint_t create_row_(const uint_t &icycle, const field::Mbf &mbf,
-                       const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns);
+                       const ham_comp_t &hdiag, const std::vector<bool>& refconns);
 
 
     uint_t create_row_(const uint_t &icycle, const field::Mbf &mbf,
-                       const defs::ham_comp_t &hdiag, bool refconn) {
+                       const ham_comp_t &hdiag, bool refconn) {
         return create_row_(icycle, mbf, hdiag, std::vector<bool>(npart(), refconn));
     }
 
@@ -226,20 +226,20 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * Called on all ranks, dispatching create_row_ on the assigned rank only
      */
     TableBase::Loc create_row(const uint_t& icycle, const field::Mbf &mbf,
-                              const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns);
+                              const ham_comp_t &hdiag, const std::vector<bool>& refconns);
 
 
     TableBase::Loc create_row(const uint_t& icycle, const field::Mbf &mbf,
-                              const defs::ham_comp_t &hdiag, bool refconn) {
+                              const ham_comp_t &hdiag, bool refconn) {
         return create_row(icycle, mbf, hdiag, std::vector<bool>(npart(), refconn));
     }
 
-    uint_t add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delta,
+    uint_t add_spawn(const field::Mbf &dst_mbf, const wf_t &delta,
                      bool initiator, bool deterministic, uint_t dst_ipart);
 
-    uint_t add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delta,
+    uint_t add_spawn(const field::Mbf &dst_mbf, const wf_t &delta,
                      bool initiator, bool deterministic, uint_t dst_ipart,
-                     const field::Mbf &src_mbf, const defs::wf_t &src_weight);
+                     const field::Mbf &src_mbf, const wf_t &src_weight);
 
     const uint_t& npart() const {
         return m_format.m_nelement;
@@ -247,7 +247,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
 private:
 
-    void orthogonalize(NdReduction<defs::wf_t, 3>& overlaps,
+    void orthogonalize(NdReduction<wf_t, 3>& overlaps,
                        const uint_t& iroot, const uint_t& jroot, const uint_t& ireplica) {
         ASSERT(iroot<=jroot);
         auto& row = m_store.m_row;
@@ -294,7 +294,7 @@ public:
      */
     void orthogonalize() {
         // bra root, ket root, replica
-        NdReduction<defs::wf_t, 3> overlaps({nroot(), nroot(), nreplica()});
+        NdReduction<wf_t, 3> overlaps({nroot(), nroot(), nreplica()});
         auto& row = m_store.m_row;
         for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
             for (uint_t jroot = iroot; jroot < nroot(); ++jroot) {

@@ -6,15 +6,15 @@
 
 UniformTwf::UniformTwf(const Hamiltonian& ham, uint_t npart) : SpfTwfBase(ham, npart){}
 
-void UniformTwf::add(const Numbers<defs::wf_t, defs::ndim_wf> &weight, defs::ham_t helem_sum) {
+void UniformTwf::add(const Numbers<wf_t, ndim_wf> &weight, ham_t helem_sum) {
     for (uint_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
         m_numerator[ipart] += std::abs(weight[ipart]) * helem_sum;
     }
 }
 
-void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+void UniformTwf::add(const field::Numbers<wf_t, ndim_wf> &weight,
                      const field::FrmOnv &onv) {
-    defs::ham_t helem_sum = m_ham.get_element(onv);
+    ham_t helem_sum = m_ham.get_element(onv);
     conn::FrmOnv conn(m_ham.m_basis.size());
     auto fn = [&](){
         auto helem = m_ham.get_element(onv, conn);
@@ -24,9 +24,9 @@ void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
     add(weight, helem_sum);
 }
 
-void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+void UniformTwf::add(const field::Numbers<wf_t, ndim_wf> &weight,
                      const field::FrmBosOnv &onv) {
-    defs::ham_t helem_sum = m_ham.get_element(onv);
+    ham_t helem_sum = m_ham.get_element(onv);
     conn::FrmBosOnv conn(m_ham.m_basis.size());
     auto fn = [&](){
         auto helem = m_ham.get_element(onv, conn);
@@ -36,7 +36,7 @@ void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
     add(weight, helem_sum);
 }
 
-void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &/*weight*/,
+void UniformTwf::add(const field::Numbers<wf_t, ndim_wf> &/*weight*/,
                      const field::BosOnv &/*onv*/) {
     ABORT("not yet implemented");
 }

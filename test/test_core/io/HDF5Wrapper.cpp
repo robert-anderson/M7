@@ -32,7 +32,7 @@ TEST(HDF5Wrapper, String) {
 
 TEST(HDF5Wrapper, FloatArray) {
     auto definitive_irank = hash::in_range(99, 0, mpi::nrank());
-    defs::uintv_t shape = {2, 3};
+    uintv_t shape = {2, 3};
     std::vector<float> v = {0.1, 4.5, 1.2, 3, 2.3, 4};
     // make each rank's v differ by one element
     v[2] = hash::in_range(mpi::irank(), 4, 18);
@@ -58,7 +58,7 @@ TEST(HDF5Wrapper, FloatArray) {
 
 TEST(HDF5Wrapper, ComplexArray) {
     auto definitive_irank = hash::in_range(99, 0, mpi::nrank());
-    defs::uintv_t shape = {2, 3};
+    uintv_t shape = {2, 3};
     std::vector<std::complex<float>> v = {{0.1, 1}, {4.5, 2}, {1.2, 3}, {3, 4}, {2.3, 5}, {4, 6}};
     // make each rank's v differ by one element
     v[2].imag(hash::in_range(mpi::irank(), 4, 18));

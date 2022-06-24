@@ -33,7 +33,7 @@ struct Annihilator {
     const Propagator& m_prop;
     const References& m_refs;
     Rdms& m_rdms;
-    const defs::wf_comp_t m_nadd;
+    const wf_comp_t m_nadd;
     const uint_t& m_icycle;
 
 private:
@@ -74,7 +74,7 @@ private:
 public:
 
     Annihilator(Wavefunction &wf, const Propagator& prop, const References& refs, Rdms& rdms,
-                const uint_t& icycle, defs::wf_comp_t nadd);
+                const uint_t& icycle, wf_comp_t nadd);
 
     /**
      * using the comparator implementation, sort the m_recv table of the referenced wavefunction
@@ -96,7 +96,7 @@ public:
      *  is said to be aborted. Allow initiation is true if any of the contributing src_mbfs are initiators, or if there
      *  are multiple src_mbfs spawning to the same zero-weighted part in the same cycle
      */
-    void annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
+    void annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
                         bool allow_initiation, WalkerTableRow& dst_row);
     /**
      * given that all rows between block_start (inclusively) and current (exclusively) correspond the the same (dst_mbf,
@@ -112,7 +112,7 @@ public:
      *  row in m_wf.m_store which stores the dst_mbf if found
      */
     void handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &next_block_begin,
-                          const defs::wf_t &total_delta, WalkerTableRow& dst_row);
+                          const wf_t &total_delta, WalkerTableRow& dst_row);
 
     void handle_src_block(SpawnTableRow &block_begin, WalkerTableRow& dst_row);
 

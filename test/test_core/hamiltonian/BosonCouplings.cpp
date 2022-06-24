@@ -10,7 +10,7 @@
 #if 0
 TEST(BosonCouplings, Element_b0) {
     uint_t nboson_cutoff = 4, nsite = 4;
-    defs::ham_t v = 0.5, omega = 0.025;
+    ham_t v = 0.5, omega = 0.025;
     conn::FrmBosOnv conn(nsite);
 
     BosonCouplings bc(nsite, nboson_cutoff, v);
@@ -31,7 +31,7 @@ TEST(BosonCouplings, Element_b0) {
     dst = {{1, 2, 3, 4},
            {0, 0, 0, 0}};
     conn.connect(src, dst);
-    defs::ham_t helement;
+    ham_t helement;
 
     helement = bc.get_element(src, conn);
     ASSERT_EQ(helement, 0.0);
@@ -54,7 +54,7 @@ TEST(BosonCouplings, Element_b0) {
 
 TEST(BosonCouplings, Element_f0_b1){
     uint_t nboson_cutoff = 4, nsite = 4;
-    defs::ham_t v = 0.5, omega = 0.025;
+    ham_t v = 0.5, omega = 0.025;
     conn::FrmBosOnv conn(nsite);
 
     BosonCouplings bc(nsite, nboson_cutoff, v);
@@ -74,7 +74,7 @@ TEST(BosonCouplings, Element_f0_b1){
     ASSERT_EQ(conn.m_bos.m_cre[0].m_nop, 1ul);
     ASSERT_EQ(conn.m_bos.m_ann.size(), 0ul);
 
-    defs::ham_t helement;
+    ham_t helement;
 
     helement = bc.get_element(src, conn);
     ASSERT_EQ(helement, v*std::sqrt(2.0));
@@ -117,7 +117,7 @@ TEST(BosonCouplings, Element_f0_b1){
 
 TEST(BosonCouplings, Element_f1_b1){
     uint_t nboson_cutoff = 4, nsite = 4;
-    defs::ham_t v = 0.5, omega = 0.025;
+    ham_t v = 0.5, omega = 0.025;
     conn::FrmBosOnv conn(nsite);
 
     BosonCouplings bc(nsite, nboson_cutoff, v);
@@ -132,7 +132,7 @@ TEST(BosonCouplings, Element_f1_b1){
            {2, 4, 0, 2}};
 
     conn.connect(src, dst);
-    defs::ham_t helement;
+    ham_t helement;
     helement = bc.get_element(src, conn);
     ASSERT_EQ(helement, 0.0);
 }

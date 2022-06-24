@@ -38,7 +38,7 @@ public:
          * Current number of whole rows that can be stored in the window
          */
         uint_t m_nrow = 0ul;
-        defs::buf_t *m_begin = nullptr;
+        buf_t *m_begin = nullptr;
         uint_t m_size = 0ul;
 
         Window(uint_t row_size=1): m_row_size(row_size) {}
@@ -60,7 +60,7 @@ public:
          * @param new_size
          *  new size in bytes for the redefined window
          */
-        void move(defs::buf_t *begin, uint_t new_size);
+        void move(buf_t *begin, uint_t new_size);
         /**
          * delegate to the buffer's resize method so that all associated windows, not just this one, are moved
          * @param size
@@ -83,7 +83,7 @@ public:
     const std::string m_name;
 private:
     const uint_t m_nwindow_max;
-    std::vector<defs::buf_t> m_data;
+    std::vector<buf_t> m_data;
     std::vector<Window *> m_windows;
 
 public:

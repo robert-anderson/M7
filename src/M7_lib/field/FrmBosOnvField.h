@@ -39,7 +39,7 @@ struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
         return *this;
     }
 
-    FrmBosOnvField& operator=(const std::pair<defs::uintv_t, defs::uintv_t>& inds);
+    FrmBosOnvField& operator=(const std::pair<uintv_t, uintv_t>& inds);
 
 };
 

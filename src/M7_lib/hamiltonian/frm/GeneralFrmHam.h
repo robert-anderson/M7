@@ -12,8 +12,8 @@
 
 struct GeneralFrmHam : FrmHam {
 
-    typedef integrals_1e::Array<defs::ham_t> ints_1e_t;
-    typedef integrals_2e::Array<defs::ham_t> ints_2e_t;
+    typedef integrals_1e::Array<ham_t> ints_1e_t;
+    typedef integrals_2e::Array<ham_t> ints_2e_t;
     typedef std::unique_ptr<ints_1e_t> ints_1e_ptr_t;
     typedef std::unique_ptr<ints_2e_t> ints_2e_ptr_t;
 
@@ -39,16 +39,16 @@ public:
 
     explicit GeneralFrmHam(opt_pair_t opts);
 
-    defs::ham_t get_coeff_1100(uint_t a, uint_t i) const override;
+    ham_t get_coeff_1100(uint_t a, uint_t i) const override;
 
-    defs::ham_t get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const override;
+    ham_t get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const override;
 
 
-    defs::ham_t get_element_0000(const field::FrmOnv &onv) const override;
+    ham_t get_element_0000(const field::FrmOnv &onv) const override;
 
-    defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
+    ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
 
-    defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
+    ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
 
     /**
      * @param prng

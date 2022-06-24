@@ -130,8 +130,8 @@ void Rdm::save(hdf5::GroupWriter& gw) const {
     m_store.save(gw, to_string(m_ranksig));
 }
 
-std::array<defs::uintv_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
-    std::array<defs::uintv_t, exsig::c_ndistinct> exsig_ranks;
+std::array<uintv_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
+    std::array<uintv_t, exsig::c_ndistinct> exsig_ranks;
     for (const auto& ranksig: m_active_ranksigs) {
         auto nfrm_cre = decode_nfrm_cre(ranksig);
         auto nfrm_ann = decode_nfrm_cre(ranksig);
@@ -152,7 +152,7 @@ std::array<defs::uintv_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
     return exsig_ranks;
 }
 
-Rdms::Rdms(const conf::Rdms& opts, defs::uintv_t ranksigs,
+Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs,
            sys::Size extents, uint_t nelec, const Epoch& accum_epoch) :
         Archivable("rdms", opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
@@ -194,7 +194,7 @@ void Rdms::make_contribs(const Mbf& src_onv, const Mbf& dst_onv, const wf_t& con
 void Rdms::make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& dst_row, const Propagator& prop) {
     DEBUG_ASSERT_EQ(recv_row.m_dst_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
     auto ipart_replica = dst_row.ipart_replica(recv_row.m_ipart_dst);
-    defs::wf_t contrib = dst_row.m_weight[ipart_replica];
+    wf_t contrib = dst_row.m_weight[ipart_replica];
     // recover pre-death value of replica population (on average)
     contrib /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[ipart_replica]);
     contrib = arith::conj(contrib);
@@ -229,13 +229,13 @@ bool Rdms::is_energy_sufficient(const Hamiltonian& ham) const {
 }
 
 
-defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
+ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     if (!ham) return 0.0;
     auto& rdm2 = m_rdms[ex_2200];
     REQUIRE_TRUE_ALL(rdm2!=nullptr, "cannot compute energy without the 2RDM");
-    defs::ham_t e1 = 0.0;
-    defs::ham_t e2 = 0.0;
-    defs::wf_t trace = 0.0;
+    ham_t e1 = 0.0;
+    ham_t e2 = 0.0;
+    wf_t trace = 0.0;
     auto& row = rdm2->m_store.m_row;
 
     for (row.restart(); row.in_range(); row.step()){
@@ -269,7 +269,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     return arith::real(ham.m_e_core) + (arith::real(e1) + arith::real(e2)) / norm;
 }
 
-defs::ham_comp_t Rdms::get_energy(const FrmBosHam& /*ham*/, uint_t /*nelec*/, uint_t /*exsig*/) const {
+ham_comp_t Rdms::get_energy(const FrmBosHam& /*ham*/, uint_t /*nelec*/, uint_t /*exsig*/) const {
     return 0.0;
     // TODO: update for new HamOpTerm partitioning
 #if 0
@@ -278,8 +278,8 @@ defs::ham_comp_t Rdms::get_energy(const FrmBosHam& /*ham*/, uint_t /*nelec*/, ui
     REQUIRE_TRUE_ALL(exsig::decode_nbos(exsig)==1,
                      "currently only supporting linear boson operators in the ladder term");
     REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the "+exsig::to_string(exsig)+"-RDM");
-    defs::ham_t e_uncoupled = 0.0; // 0001 and 0010
-    defs::ham_t e_coupled = 0.0; // 1101 and 1110
+    ham_t e_uncoupled = 0.0; // 0001 and 0010
+    ham_t e_coupled = 0.0; // 1101 and 1110
     auto& row = rdm->m_store.m_row;
     bool cre = exsig::decode_nbos_cre(exsig);
 
@@ -307,11 +307,11 @@ defs::ham_comp_t Rdms::get_energy(const FrmBosHam& /*ham*/, uint_t /*nelec*/, ui
 #endif
 }
 
-defs::ham_comp_t Rdms::get_energy(const BosHam& ham) const {
+ham_comp_t Rdms::get_energy(const BosHam& ham) const {
     if (!ham) return 0.0;
     auto& rdm = m_rdms[exsig::ex_0011];
     REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the 0011-RDM");
-    defs::ham_t e = 0.0;
+    ham_t e = 0.0;
     auto& row = rdm->m_store.m_row;
 
     for (row.restart(); row.in_range(); row.step()){

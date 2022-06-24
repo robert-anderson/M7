@@ -13,7 +13,7 @@
 
 class KramersSectorOccupation {
     const uint_t m_nelec;
-    std::vector<Reducible<defs::wf_comp_t>> m_sum;
+    std::vector<Reducible<wf_comp_t>> m_sum;
 
 public:
     explicit KramersSectorOccupation(uint_t nelec);
@@ -22,7 +22,7 @@ public:
 
     ~KramersSectorOccupation();
 
-    void add(const DeterminantElement& det, const defs::wf_t& weight);
+    void add(const DeterminantElement& det, const wf_t& weight);
 
 };
 

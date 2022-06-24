@@ -11,19 +11,19 @@ struct HubbardFrmHam : FrmHam {
     /**
      * on-site repulsion scalar in units of the hopping
      */
-    const defs::ham_t m_u;
+    const ham_t m_u;
 
-    HubbardFrmHam(defs::ham_t u, const std::shared_ptr<lattice::Base>& lattice);
+    HubbardFrmHam(ham_t u, const std::shared_ptr<lattice::Base>& lattice);
 
     HubbardFrmHam(opt_pair_t opts);
 
-    defs::ham_t get_coeff_1100(uint_t a, uint_t i) const override;
+    ham_t get_coeff_1100(uint_t a, uint_t i) const override;
 
-    defs::ham_t get_element_0000(const field::FrmOnv& onv) const override;
+    ham_t get_element_0000(const field::FrmOnv& onv) const override;
 
-    defs::ham_t get_element_1100(const field::FrmOnv& onv, const conn::FrmOnv& conn) const override;
+    ham_t get_element_1100(const field::FrmOnv& onv, const conn::FrmOnv& conn) const override;
 
-    defs::ham_t get_element_2200(const field::FrmOnv& /*onv*/, const conn::FrmOnv& /*conn*/) const override {
+    ham_t get_element_2200(const field::FrmOnv& /*onv*/, const conn::FrmOnv& /*conn*/) const override {
         return 0;
     }
 

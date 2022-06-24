@@ -151,7 +151,7 @@ conf::SpfWeightedTwf::SpfWeightedTwf(Group *parent) :
 
 void conf::SpfWeightedTwf::verify() {
     Section::verify();
-    if (!defs::enable_bosons) {
+    if (!enable_bosons) {
         REQUIRE_EQ_ALL(m_boson_fac, 0.0,
                        "Boson exponential parameter is non-zero but bosons are compile time disabled. "
                        "Set CMake variable -DMBF_TYPE_IND to 1 or 2 and recompile");

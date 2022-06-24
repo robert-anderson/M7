@@ -75,11 +75,11 @@ struct NdSequence {
         }
         REQUIRE_LE(format.m_nelement, limit, "shape product is too large, highly likely NdSequence is misapplied");
         std::vector<uinta_t<nind>> tmp;
-        defs::uintv_t shape(nind);
+        uintv_t shape(nind);
         std::copy_n(format.m_shape.cbegin(), nind, shape.begin());
         ProductEnumerator enumerator(std::move(shape));
         tmp.resize(format.m_nelement);
-        defs::uintv_t inds(nind);
+        uintv_t inds(nind);
         uint_t iflat = ~0ul;
         while (enumerator.next(inds, iflat)) std::copy_n(inds.begin(), nind, tmp[iflat].begin());
         ASSERT(iflat == tmp.size());

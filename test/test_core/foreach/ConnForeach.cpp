@@ -7,17 +7,17 @@
 
 namespace conn_foreach_test {
     struct Result {
-        const defs::uintv_t m_ann, m_cre;
+        const uintv_t m_ann, m_cre;
 
-        Result(defs::uintv_t ann, defs::uintv_t cre) : m_ann(std::move(ann)), m_cre(std::move(cre)) {}
+        Result(uintv_t ann, uintv_t cre) : m_ann(std::move(ann)), m_cre(std::move(cre)) {}
 
         Result(uint_t ann, uint_t cre) : m_ann({ann}), m_cre({cre}) {}
     };
 
     typedef std::vector<Result> results_t;
 
-    results_t product_results(const std::vector<defs::uintv_t> &anns, const std::vector<defs::uintv_t> &cres) {
-        const std::vector<defs::uintv_t> default_ops = {{}};
+    results_t product_results(const std::vector<uintv_t> &anns, const std::vector<uintv_t> &cres) {
+        const std::vector<uintv_t> default_ops = {{}};
         const auto &anns_ref = anns.empty() ? default_ops : anns;
         const auto &cres_ref = cres.empty() ? default_ops : cres;
 
@@ -31,8 +31,8 @@ namespace conn_foreach_test {
         return results;
     }
 
-    static defs::uintv_t creatable_mode_indices(const field::BosOnv &mbf, uint_t nboson_max) {
-        defs::uintv_t inds;
+    static uintv_t creatable_mode_indices(const field::BosOnv &mbf, uint_t nboson_max) {
+        uintv_t inds;
         for (uint_t imode = 0ul; imode < mbf.m_basis.m_nmode; ++imode) {
             uint_t nocc = mbf[imode];
             if (nocc < nboson_max) inds.push_back(imode);
@@ -40,8 +40,8 @@ namespace conn_foreach_test {
         return inds;
     }
 
-    static defs::uintv_t annihilatable_mode_indices(const field::BosOnv &mbf) {
-        defs::uintv_t inds;
+    static uintv_t annihilatable_mode_indices(const field::BosOnv &mbf) {
+        uintv_t inds;
         for (uint_t imode = 0ul; imode < mbf.m_basis.m_nmode; ++imode) if (mbf[imode]) inds.push_back(imode);
         return inds;
     }
@@ -49,7 +49,7 @@ namespace conn_foreach_test {
 
 TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
     const uint_t nsite = 8;
-    defs::uintv_t setbits = {1, 4, 6, 9, 12};
+    uintv_t setbits = {1, 4, 6, 9, 12};
     buffered::FrmOnv mbf(nsite);
     mbf = setbits;
     auto &clrbits = mbf.m_decoded.m_simple_vacs.get();
@@ -79,7 +79,7 @@ TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
 
 TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
     const uint_t nsite = 8;
-    defs::uintv_t setbits = {1, 4, 6, 9, 12};
+    uintv_t setbits = {1, 4, 6, 9, 12};
     buffered::FrmBosOnv mbf(nsite, 0ul);
     mbf.m_frm = setbits;
     auto &clrbits = mbf.m_frm.m_decoded.m_simple_vacs.get();
@@ -108,18 +108,18 @@ TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
 
 TEST(ConnForeach, FrmGeneralEx2200) {
     const uint_t nsite = 4;
-    defs::uintv_t setbits = {1, 3, 5, 6};
+    uintv_t setbits = {1, 3, 5, 6};
     buffered::FrmOnv mbf(nsite);
     mbf = setbits;
-    defs::uintv_t clrbits = {0, 2, 4, 7};
+    uintv_t clrbits = {0, 2, 4, 7};
     ASSERT_EQ(mbf.m_decoded.m_simple_vacs.get(), clrbits);
-    std::vector<defs::uintv_t> setbit_pairs = {{1, 3},
+    std::vector<uintv_t> setbit_pairs = {{1, 3},
                                                {1, 5},
                                                {3, 5},
                                                {1, 6},
                                                {3, 6},
                                                {5, 6}};
-    std::vector<defs::uintv_t> clrbit_pairs = {{0, 2},
+    std::vector<uintv_t> clrbit_pairs = {{0, 2},
                                                {0, 4},
                                                {2, 4},
                                                {0, 7},
@@ -246,8 +246,8 @@ TEST(ConnForeach, FrmHeisenbergEx2200) {
 
 TEST(ConnForeach, FrmMs2ConserveEx1100) {
     const uint_t nsite = 8;
-    defs::uintv_t alpha_setbits = {1, 4, 6};
-    defs::uintv_t beta_setbits = {3, 4, 7};
+    uintv_t alpha_setbits = {1, 4, 6};
+    uintv_t beta_setbits = {3, 4, 7};
     buffered::FrmOnv mbf(nsite);
     mbf = {alpha_setbits, beta_setbits};
     const auto &occs = mbf.m_decoded.m_spin_occs.get();
@@ -293,8 +293,8 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
 
 TEST(ConnForeach, FrmMs2ConserveEx2200) {
     const uint_t nsite = 8;
-    defs::uintv_t alpha_setbits = {1, 2, 5};
-    defs::uintv_t beta_setbits = {0, 2, 4, 6};
+    uintv_t alpha_setbits = {1, 2, 5};
+    uintv_t beta_setbits = {0, 2, 4, 6};
     buffered::FrmOnv mbf(nsite);
     mbf = {alpha_setbits, beta_setbits};
 
@@ -344,7 +344,7 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
 
 TEST(ConnForeach, BosEx0001) {
     const uint_t nmode = 6;
-    defs::uintv_t occs = {0, 2, 0, 1, 5, 1};
+    uintv_t occs = {0, 2, 0, 1, 5, 1};
     buffered::BosOnv mbf(nmode);
     mbf = occs;
     auto &chk_modes = mbf.m_decoded.m_occ_modes.get();
@@ -369,13 +369,13 @@ TEST(ConnForeach, BosEx0001) {
 
 TEST(ConnForeach, BosEx0010BosOnv) {
     const uint_t nmode = 6;
-    defs::uintv_t occs = {0, 2, 0, 1, 5, 1};
+    uintv_t occs = {0, 2, 0, 1, 5, 1};
 
     {
         const uint_t occ_cutoff = 10;
         buffered::BosOnv mbf(nmode, occ_cutoff);
         mbf = occs;
-        defs::uintv_t chk_modes = {0, 1, 2, 3, 4, 5};
+        uintv_t chk_modes = {0, 1, 2, 3, 4, 5};
         auto iiter = 0ul;
         conn::BosOnv conn(mbf);
         auto fn = [&]() {
@@ -399,7 +399,7 @@ TEST(ConnForeach, BosEx0010BosOnv) {
         // lower maximum occupation
         buffered::BosOnv mbf(nmode, occ_cutoff);
         mbf = occs;
-        defs::uintv_t chk_modes = {0, 1, 2, 3, 5};
+        uintv_t chk_modes = {0, 1, 2, 3, 5};
         auto iiter = 0ul;
         conn::BosOnv conn(mbf);
         auto fn = [&]() {
@@ -422,11 +422,11 @@ TEST(ConnForeach, BosEx0010BosOnv) {
 TEST(ConnForeach, BosEx0010FrmBosOnv) {
     const uint_t nmode = 6;
     const uint_t bos_occ_cutoff = 5;
-    defs::uintv_t occs = {0, 2, 0, 1, 5, 1};
+    uintv_t occs = {0, 2, 0, 1, 5, 1};
     // lower maximum occupation
     buffered::FrmBosOnv mbf(0ul, nmode, bos_occ_cutoff);
     mbf.m_bos = occs;
-    defs::uintv_t chk_modes = {0, 1, 2, 3, 5};
+    uintv_t chk_modes = {0, 1, 2, 3, 5};
     auto iiter = 0ul;
     conn::FrmBosOnv conn(mbf);
     auto fn = [&]() {

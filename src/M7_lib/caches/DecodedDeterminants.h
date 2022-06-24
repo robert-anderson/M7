@@ -12,7 +12,7 @@
 #if 0
 
 /*
- * void updater_fn (const views::FermionOnv&, defs::uintv_t&)
+ * void updater_fn (const views::FermionOnv&, uintv_t&)
  */
 
 template<typename updater_fn>
@@ -20,7 +20,7 @@ struct FlatOrbs {
     /**
      * spin orbital indices
      */
-    defs::uintv_t m_inds;
+    uintv_t m_inds;
 
 public:
     explicit FlatOrbs(Size sites) {
@@ -55,7 +55,7 @@ public:
         return m_inds[i];
     }
 
-    const defs::uintv_t& uintv_t() const{
+    const uintv_t& uintv_t() const{
         return m_inds;
     }
 
@@ -80,12 +80,12 @@ public:
 
 
 struct OccupiedUpdater {
-    void operator()(const field::FrmOnv &mbf, defs::uintv_t &uintv_t);
+    void operator()(const field::FrmOnv &mbf, uintv_t &uintv_t);
 };
 
 
 struct VacantUpdater {
-    void operator()(const field::FrmOnv &mbf, defs::uintv_t &uintv_t);
+    void operator()(const field::FrmOnv &mbf, uintv_t &uintv_t);
 };
 
 typedef FlatOrbs<OccupiedUpdater> OccOrbs;
@@ -95,11 +95,11 @@ typedef FlatOrbs<VacantUpdater> VacOrbs;
 template<typename updater_fn, uint_t nind>
 struct NdOrbs__ {
     const NdFormat<nind> m_format;
-    std::vector<defs::uintv_t> m_inds;
-    const defs::uintv_t m_map;
+    std::vector<uintv_t> m_inds;
+    const uintv_t m_map;
 
     FlatOrbs<updater_fn> m_flat;
-    NdOrbs__(uinta_t<nind> shape, uint_t nsite, const defs::uintv_t& map):
+    NdOrbs__(uinta_t<nind> shape, uint_t nsite, const uintv_t& map):
         m_format(shape), m_inds(m_format.m_nelement), m_map(map), m_flat(nsite){
         if (!nsite) return;
         for (auto& v: m_inds) v.reserve(2*nsite);
@@ -107,12 +107,12 @@ struct NdOrbs__ {
         ASSERT(*std::max_element(map.cbegin(), map.cend())<m_format.m_nelement);
     }
 
-    NdOrbs__(uinta_t<nind> shape, const field::FrmOnv &mbf, const defs::uintv_t& map) :
+    NdOrbs__(uinta_t<nind> shape, const field::FrmOnv &mbf, const uintv_t& map) :
             NdOrbs__(shape, mbf.m_bd.m_nsite, map) {
         update(mbf);
     }
 
-    NdOrbs__(uinta_t<nind> shape, const field::FrmBosOnv &mbf, const defs::uintv_t& map) :
+    NdOrbs__(uinta_t<nind> shape, const field::FrmBosOnv &mbf, const uintv_t& map) :
             NdOrbs__(shape, mbf.m_frm.m_bd.m_nsite, map) {}
 
 
@@ -137,12 +137,12 @@ struct NdOrbs__ {
         return m_inds[m_format.flatten(uintv_t)].size();
     }
 
-    const defs::uintv_t& operator[](const uint_t& i) const{
+    const uintv_t& operator[](const uint_t& i) const{
         ASSERT(i<m_inds.size());
         return m_inds[i];
     }
 
-    const defs::uintv_t& operator[](const uinta_t<nind>& uintv_t) const{
+    const uintv_t& operator[](const uinta_t<nind>& uintv_t) const{
         return m_inds[m_format.flatten(uintv_t)];
     }
 
@@ -178,8 +178,8 @@ struct NdOccupiedUpdater {
      * @param nd_inds
      *  the vector of vectors storing set bits in each label
      */
-    void operator()(const field::FrmOnv &mbf, const defs::uintv_t& map,
-            defs::uintv_t& flat_inds, std::vector<defs::uintv_t> &nd_inds);
+    void operator()(const field::FrmOnv &mbf, const uintv_t& map,
+            uintv_t& flat_inds, std::vector<uintv_t> &nd_inds);
 };
 
 
@@ -195,8 +195,8 @@ struct NdVacantUpdater {
      * @param nd_inds
      *  the vector of vectors storing clear bits in each label
      */
-    void operator()(const field::FrmOnv &mbf, const defs::uintv_t& map,
-            defs::uintv_t& flat_inds, std::vector<defs::uintv_t> &nd_inds);
+    void operator()(const field::FrmOnv &mbf, const uintv_t& map,
+            uintv_t& flat_inds, std::vector<uintv_t> &nd_inds);
 };
 
 template<uint_t nind>
@@ -206,8 +206,8 @@ using NdVacOrbs__ = NdOrbs__<NdVacantUpdater, nind>;
 
 template<typename updater_fn>
 class SpinNdOrbs__ : public NdOrbs__<updater_fn, 1> {
-    defs::uintv_t make_spin_map(uint_t nsite) {
-        defs::uintv_t out(2*nsite, 0);
+    uintv_t make_spin_map(uint_t nsite) {
+        uintv_t out(2*nsite, 0);
         for (auto it = out.begin()+nsite; it!=out.end(); ++it) *it = 1ul;
         return out;
     }
@@ -223,8 +223,8 @@ typedef SpinNdOrbs__<NdVacantUpdater> SpinVacOrbs;
 template<typename updater_fn>
 class SpinSymNdOrbs__ : public NdOrbs__<updater_fn, 2> {
 
-    defs::uintv_t make_map(const AbelianGroupMap& grp_map) {
-        defs::uintv_t out(2*grp_map.m_nsite, 0);
+    uintv_t make_map(const AbelianGroupMap& grp_map) {
+        uintv_t out(2*grp_map.m_nsite, 0);
         std::copy(grp_map.m_site_irreps.cbegin(), grp_map.m_site_irreps.cend(), out.begin());
         std::copy(grp_map.m_site_irreps.cbegin(), grp_map.m_site_irreps.cend(), out.begin()+grp_map.m_nsite);
         for (uint_t i=grp_map.m_nsite; i<grp_map.m_nsite*2; ++i) out[i]+=grp_map.m_grp.nirrep();

@@ -25,7 +25,7 @@ namespace basic_foreach {
      */
     namespace ctnd {
         template<uint_t nind>
-        using inds_t = defs::uinta_t<nind>;
+        using inds_t = uinta_t<nind>;
 
         template<uint_t nind>
         struct Base {
@@ -48,7 +48,7 @@ namespace basic_foreach {
         struct Unrestricted : Base<nind> {
             using Base<nind>::m_value;
             using Base<nind>::m_niter;
-            const defs::uinta_t<nind> m_shape;
+            const uinta_t<nind> m_shape;
         private:
             /**
              * loop through the values of the ilevel element of m_value between 0 and the extent of that dimension
@@ -161,7 +161,7 @@ namespace basic_foreach {
      * "run time number of dimensions"
      */
     namespace rtnd {
-        using inds_t = defs::uintv_t;
+        using inds_t = uintv_t;
 
         struct Base {
             /**

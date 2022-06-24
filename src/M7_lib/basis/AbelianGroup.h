@@ -73,10 +73,10 @@ struct PointGroup : AbelianGroup {
 
 struct AbelianGroupMap {
     const AbelianGroup m_grp;
-    const defs::uintv_t m_site_irreps;
+    const uintv_t m_site_irreps;
     const uint_t m_nsite;
 
-    AbelianGroupMap(AbelianGroup grp, defs::uintv_t site_irreps);
+    AbelianGroupMap(AbelianGroup grp, uintv_t site_irreps);
 
     AbelianGroupMap(uint_t nsite);
 

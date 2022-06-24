@@ -18,7 +18,7 @@
  */
 struct DeterministicDataRow : Row {
     field::Mbf m_mbf;
-    field::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
+    field::Numbers<wf_t, ndim_wf> m_weight;
 
     field::Mbf &key_field();
 
@@ -48,7 +48,7 @@ struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataR
      * all the non-zero Hamiltonian connections and their matrix elements for the locally-stored rows (with respect to
      * columns distributed across all ranks)
      */
-    sparse::Matrix<defs::ham_t> m_ham_matrix;
+    sparse::Matrix<ham_t> m_ham_matrix;
     /**
      * in general RDMs take contributions from MBF connections which correspond to H matrix elements of zero. These
      * are stored here. We do NOT duplicate elements from the sparse_ham here, only those MBF pairs which may
@@ -63,11 +63,11 @@ private:
     /**
      * the part indices associated with this subspace, will contain two entries if WF uses replication, else one
      */
-    const defs::uintv_t m_iparts;
+    const uintv_t m_iparts;
 
-    defs::uintv_t make_iparts();
+    uintv_t make_iparts();
 
-    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref, const defs::uintv_t& icol_list);
+    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref, const uintv_t& icol_list);
 
 
 public:

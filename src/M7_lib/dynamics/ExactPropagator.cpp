@@ -15,7 +15,7 @@ ExactPropagator::ExactPropagator(
 void ExactPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     const auto& row = wf.m_store.m_row;
     auto& src_mbf = row.m_mbf;
-    const defs::wf_t& weight = row.m_weight[ipart];
+    const wf_t& weight = row.m_weight[ipart];
     bool src_initiator = row.m_initiator.get(ipart);
     bool src_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
     src_mbf.m_decoded.clear();
@@ -38,7 +38,7 @@ void ExactPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
 
 void ExactPropagator::diagonal(Wavefunction& wf, const uint_t& ipart) {
     auto& row = wf.m_store.m_row;
-    const defs::ham_comp_t& hdiag = row.m_hdiag;
+    const ham_comp_t& hdiag = row.m_hdiag;
     DEBUG_ASSERT_NEARLY_EQ(hdiag, m_ham.get_energy(row.m_mbf), "incorrect diagonal H element cached");
     wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }

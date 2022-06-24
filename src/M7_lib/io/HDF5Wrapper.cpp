@@ -8,7 +8,7 @@ hdf5::Group hdf5::File::subgroup(std::string name) {
     return Group(m_handle, name, m_writemode);
 }
 
-hdf5::AttributeWriterBase::AttributeWriterBase(hid_t parent_handle, std::string name, const defs::uintv_t &shape,
+hdf5::AttributeWriterBase::AttributeWriterBase(hid_t parent_handle, std::string name, const uintv_t &shape,
                                                hid_t h5type) :
         m_parent_handle(parent_handle), m_h5type(h5type), m_shape(shape),
         m_nelement(nd::nelement(shape)) {
@@ -136,7 +136,7 @@ uint_t hdf5::GroupReader::get_dataset_ndim(std::string name) {
     return rank;
 }
 
-defs::uintv_t hdf5::GroupReader::get_dataset_shape(std::string name) {
+uintv_t hdf5::GroupReader::get_dataset_shape(std::string name) {
     auto ndim = get_dataset_ndim(name);
     auto dataset = H5Dopen1(m_handle, name.c_str());
     REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));
@@ -145,7 +145,7 @@ defs::uintv_t hdf5::GroupReader::get_dataset_shape(std::string name) {
     H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
     H5Sclose(dataspace);
     H5Dclose(dataset);
-    defs::uintv_t out;
+    uintv_t out;
     out.reserve(dims.size());
     for (const auto &i: dims) out.push_back(i);
     return out;
@@ -173,7 +173,7 @@ void hdf5::NdDistListWriter::write_h5item_bytes(const uint_t &iitem, const void 
     log::debug_("data written");
 }
 
-hdf5::NdDistListWriter::NdDistListWriter(hid_t parent_handle, std::string name, const defs::uintv_t &item_dims,
+hdf5::NdDistListWriter::NdDistListWriter(hid_t parent_handle, std::string name, const uintv_t &item_dims,
                                          const uint_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels)
         :NdDistListBase(parent_handle, name, item_dims, nitem, true, h5type) {
     if (!dim_labels.empty()) {
@@ -208,7 +208,7 @@ hsize_t hdf5::NdDistListBase::get_item_offset() {
     return out;
 }
 
-hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, std::string name, const defs::uintv_t &item_dims, const uint_t &nitem,
+hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, std::string name, const uintv_t &item_dims, const uint_t &nitem,
                                      bool writemode, hid_t h5type) :
         m_parent_handle(parent_handle),
         m_item_dims(convert_dims(item_dims)),

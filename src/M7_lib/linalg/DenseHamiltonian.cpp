@@ -87,7 +87,7 @@ uint_t DenseHamiltonian::nrow(const Hamiltonian &h, sys::Particles particles, bo
 }
 
 DenseHamiltonian::DenseHamiltonian(const Hamiltonian &h, sys::Particles particles, bool force_general) :
-        dense::SquareMatrix<defs::ham_t>(nrow(h, particles, force_general)) {
+        dense::SquareMatrix<ham_t>(nrow(h, particles, force_general)) {
     auto ptr = make_pair_iterator(h, particles, force_general);
 
     if (h.m_basis.m_frm && h.m_basis.m_bos) {

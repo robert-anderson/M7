@@ -67,7 +67,7 @@ struct Options {
     double boson_frequency = 0.0;
     double spf_twf_fermion_factor = 1.0;
     double spf_twf_boson_factor = 1.0;
-    defs::prob_t psingle_initial = 0.0;
+    prob_t psingle_initial = 0.0;
     uint_t rdm_rank = 0;
     std::string write_hdf5_fname = "";
     std::string read_hdf5_fname = "";

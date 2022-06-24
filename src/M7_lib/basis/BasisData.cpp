@@ -76,9 +76,9 @@ bool sys::frm::Basis::operator==(const sys::frm::Basis &other) const {
 BosHilbertSpace::BosHilbertSpace(uint_t nboson, uint_t nmode, bool nboson_conserve, uint_t occ_cutoff) :
         m_nboson(nboson), m_nmode(nmode), m_nboson_conserve(nboson_conserve), m_occ_cutoff(occ_cutoff){}
 
-BosHilbertSpace::BosHilbertSpace(uint_t nboson, uint_t nmode) : BosHilbertSpace(nboson, nmode, true, defs::max_bos_occ){}
+BosHilbertSpace::BosHilbertSpace(uint_t nboson, uint_t nmode) : BosHilbertSpace(nboson, nmode, true, max_bos_occ){}
 
-BosHilbertSpace::BosHilbertSpace(uint_t nmode) : BosHilbertSpace(0ul, nmode, false, defs::max_bos_occ){}
+BosHilbertSpace::BosHilbertSpace(uint_t nmode) : BosHilbertSpace(0ul, nmode, false, max_bos_occ){}
 
 BosHilbertSpace::BosHilbertSpace() : BosHilbertSpace(0ul){}
 
@@ -171,8 +171,8 @@ uint_t sys::frm::Basis::ncoeff_ind() const {
     return Size::ncoeff_ind(m_spin_resolved);
 }
 
-defs::info_map_t sys::frm::Basis::info() const {
-    defs::info_map_t map;
+info_map_t sys::frm::Basis::info() const {
+    info_map_t map;
     map.insert({"nsite", convert::to_string(m_nsite)});
     map.insert({"point group irreps", convert::to_string(m_abgrp_map.m_site_irreps)});
     map.insert({"spin resolved", convert::to_string(m_spin_resolved)});
@@ -249,7 +249,7 @@ bool sys::bos::Basis::operator==(const sys::bos::Basis &other) const {
     return (m_occ_cutoff == other.m_occ_cutoff) && (m_nmode == other.m_nmode);
 }
 
-defs::info_map_t sys::bos::Basis::info() const {
+info_map_t sys::bos::Basis::info() const {
     return {
             {"nmode",      convert::to_string(m_nmode)},
             {"occ_cutoff", convert::to_string(m_occ_cutoff)}

@@ -17,15 +17,15 @@ struct GeneralBosHam : BosHam {
 
     GeneralBosHam(opt_pair_t opts);
 
-    defs::ham_t get_coeff_0011(uint_t i, uint_t j) const override;
+    ham_t get_coeff_0011(uint_t i, uint_t j) const override;
 
-    defs::ham_t get_coeff_0022(uint_t i, uint_t j, uint_t k, uint_t l) const override;
+    ham_t get_coeff_0022(uint_t i, uint_t j, uint_t k, uint_t l) const override;
 
-    defs::ham_t get_element_0000(const field::BosOnv &onv) const override;
+    ham_t get_element_0000(const field::BosOnv &onv) const override;
 
-    defs::ham_t get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
+    ham_t get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
 
-    defs::ham_t get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
+    ham_t get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
 
 };
 

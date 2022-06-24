@@ -149,11 +149,11 @@ void FrmOnvConnection::clear() {
     m_ann.clear();
 }
 
-const defs::uintv_t &FrmOnvConnection::ann() const {
+const uintv_t &FrmOnvConnection::ann() const {
     return m_ann.inds();
 }
 
-const defs::uintv_t &FrmOnvConnection::cre() const {
+const uintv_t &FrmOnvConnection::cre() const {
     return m_cre.inds();
 }
 

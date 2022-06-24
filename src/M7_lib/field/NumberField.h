@@ -85,7 +85,7 @@ struct NdNumberField : NumberFieldBase {
         return FieldBase::operator==(other);
     }
 
-    T sum_over(const defs::uintv_t& inds) const {
+    T sum_over(const uintv_t& inds) const {
         T tot{};
         for (const auto& ind: inds) tot+=(*this)[ind];
         return tot;
@@ -284,7 +284,7 @@ public:
     /*
      * HDF5 related
      */
-    defs::uintv_t h5_shape() const override {
+    uintv_t h5_shape() const override {
         return {m_format.m_shape.cbegin(), m_format.m_shape.cend()};
     }
 

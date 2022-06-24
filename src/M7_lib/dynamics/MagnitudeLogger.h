@@ -17,7 +17,7 @@ struct MagnitudeLogger {
     /**
      * desired maximum number of walkers spawned from an integer walker
      */
-    const defs::ham_comp_t m_max_bloom;
+    const ham_comp_t m_max_bloom;
     /**
      * number of draws required to be made from each case before it is allowed to affect dynamic probabilities and tau
      */
@@ -29,16 +29,16 @@ struct MagnitudeLogger {
     /**
      * number of draws made in each excitation case
      */
-    NdReduction<defs::ham_comp_t, 1ul> m_ndraw;
+    NdReduction<ham_comp_t, 1ul> m_ndraw;
     /**
      * largest generated magnitude (|helement|/prob) from a single integerized walker
      */
-    NdReduction<defs::ham_comp_t, 1ul> m_gamma;
+    NdReduction<ham_comp_t, 1ul> m_gamma;
     /**
      * working array for assigning new probability values to excitation generator group object
      */
-    mutable std::vector<defs::prob_t> m_new_probs;
-    MagnitudeLogger(defs::ham_comp_t max_bloom, uint_t ndraw_min, uint_t nexcase, bool static_tau, bool static_probs,
+    mutable std::vector<prob_t> m_new_probs;
+    MagnitudeLogger(ham_comp_t max_bloom, uint_t ndraw_min, uint_t nexcase, bool static_tau, bool static_probs,
                     double tau_min, double tau_max, double prob_min, uint_t period);
 
     /**
@@ -52,7 +52,7 @@ struct MagnitudeLogger {
      *  probability that this excitation was drawn *given* icase (i.e. prob of attempting an icase excitation is not
      *  factored in)
      */
-    void log(uint_t icase, const defs::ham_t& helem, const defs::prob_t& prob);
+    void log(uint_t icase, const ham_t& helem, const prob_t& prob);
 
 private:
     /**
@@ -74,7 +74,7 @@ private:
      * @param tau
      *  reference to timestep value to update
      */
-    void update_tau(double& tau, const defs::ham_comp_t& gamma_sum);
+    void update_tau(double& tau, const ham_comp_t& gamma_sum);
 
 public:
 

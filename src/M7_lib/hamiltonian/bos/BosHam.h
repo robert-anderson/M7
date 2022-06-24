@@ -42,23 +42,23 @@ struct BosHam : HamOpTerm {
 
 	virtual ~BosHam(){}
 
-    virtual defs::ham_t get_coeff_0011(uint_t /*i*/, uint_t /*j*/) const {return 0;}
-    virtual defs::ham_t get_coeff_0022(uint_t /*i*/, uint_t /*j*/,
+    virtual ham_t get_coeff_0011(uint_t /*i*/, uint_t /*j*/) const {return 0;}
+    virtual ham_t get_coeff_0022(uint_t /*i*/, uint_t /*j*/,
                                        uint_t /*k*/, uint_t /*l*/) const {return 0;}
 
-    virtual defs::ham_t get_element_0000(const field::BosOnv& /*onv*/) const {return 0;}
-    virtual defs::ham_t get_element_0011(const field::BosOnv& /*onv*/, const conn::BosOnv& /*conn*/) const {return 0;}
-    virtual defs::ham_t get_element_0022(const field::BosOnv& /*onv*/, const conn::BosOnv& /*conn*/) const {return 0;}
+    virtual ham_t get_element_0000(const field::BosOnv& /*onv*/) const {return 0;}
+    virtual ham_t get_element_0011(const field::BosOnv& /*onv*/, const conn::BosOnv& /*conn*/) const {return 0;}
+    virtual ham_t get_element_0022(const field::BosOnv& /*onv*/, const conn::BosOnv& /*conn*/) const {return 0;}
 
-    defs::ham_t get_element(const field::BosOnv& onv) const {
+    ham_t get_element(const field::BosOnv& onv) const {
         return get_element_0000(onv);
     }
 
-    defs::ham_comp_t get_energy(const field::BosOnv& onv) const {
+    ham_comp_t get_energy(const field::BosOnv& onv) const {
         return arith::real(get_element(onv));
     }
 
-    defs::ham_t get_element(const field::BosOnv& src, const conn::BosOnv& conn) const {
+    ham_t get_element(const field::BosOnv& src, const conn::BosOnv& conn) const {
         switch (conn.size()) {
             case 0: return get_element_0000(src);
             case 2: return get_element_0011(src, conn);

@@ -32,15 +32,15 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
     using Table<MaeRow>::save;
     void save(hdf5::GroupWriter& gw) const;
 
-    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, uint_t iroot);
+    void make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot);
 };
 
 
 struct RefExcits : Archivable {
     const conf::RefExcits& m_opts;
-    buffered::Numbers<defs::wf_t, 1> m_av_ref;
+    buffered::Numbers<wf_t, 1> m_av_ref;
     std::array<std::unique_ptr<RefExcitsOneExsig>, exsig::c_ndistinct> m_ref_excits;
-    defs::uintv_t m_active_exsigs;
+    uintv_t m_active_exsigs;
     /**
      * work space for computing connections between reference and contributing ONVs
      */
@@ -48,15 +48,15 @@ struct RefExcits : Archivable {
 
     RefExcits(const conf::RefExcits& opts, sys::Size extents, uint_t nroot);
 
-    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, uint_t iroot);
+    void make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot);
 
-    void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, uint_t iroot);
+    void make_contribs(const conn::FrmBosOnv& conn, const wf_t& contrib, uint_t iroot);
 
-    void make_contribs(const conn::BosOnv& /*conn*/, const defs::wf_t& /*contrib*/, uint_t /*iroot*/){
+    void make_contribs(const conn::BosOnv& /*conn*/, const wf_t& /*contrib*/, uint_t /*iroot*/){
         ABORT("not yet implemented");
     }
 
-    void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib, uint_t iroot);
+    void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const wf_t& contrib, uint_t iroot);
 
     bool all_stores_empty() const;
 

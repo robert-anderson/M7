@@ -13,7 +13,7 @@
 
 
 using namespace mbf_foreach;
-class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
+class DenseHamiltonian : public dense::SquareMatrix<ham_t> {
     typedef std::unique_ptr<PairBase> unique_t;
     /**
      * examine the requirements of the given Hamiltonian, and build an iterator over the row and column spaces

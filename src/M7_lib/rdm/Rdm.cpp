@@ -45,7 +45,7 @@ base_t(
 }
 
 void FermionRdm::make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv &conn, const FrmOps &com,
-                               const defs::wf_t &src_weight, const defs::wf_t &dst_weight) {
+                               const wf_t &src_weight, const wf_t &dst_weight) {
     const auto exlvl = conn.m_cre.size();
     if (conn.m_ann.size() > m_nann && conn.m_cre.size() > m_ncre) return;
     const auto nins = nop() - exlvl;

@@ -57,14 +57,14 @@ struct GlobalExtremalRows {
      */
     global_sort_table_t m_global_sorter;
 
-    GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, defs::uintv_t inds_to_cmp) :
+    GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, uintv_t inds_to_cmp) :
             m_lxr(row, field, largest, absval, inds_to_cmp),
             m_global_sorter("Global extremal rows sorter", {{}}) {
         reset();
     }
 
     GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, uint_t ind_to_cmp) :
-            GlobalExtremalRows(row, field, largest, absval, defs::uintv_t{ind_to_cmp}){}
+            GlobalExtremalRows(row, field, largest, absval, uintv_t{ind_to_cmp}){}
 
     /**
      * @return
@@ -100,7 +100,7 @@ private:
         mpi::all_gather(local_worst_value, local_worst_values);
         mpi::all_gather(m_lxr.nfound(), local_nfounds);
         mpi::all_gather(m_lxr.nrow_nonzero(), local_nrow_nonzero);
-        defs::uintv_t ignored_ranks;
+        uintv_t ignored_ranks;
         for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
             if (local_nfounds[irank]==local_nrow_nonzero[irank]) ignored_ranks.push_back(irank);
         }
@@ -217,7 +217,7 @@ private:
      */
     void sort(uint_t nrow) {
         nrow = std::min(nrow, m_ninclude.m_reduced);
-        defs::uintv_t ninclude_each_rank(mpi::nrank(), 0ul);
+        uintv_t ninclude_each_rank(mpi::nrank(), 0ul);
         if (mpi::i_am_root()) {
             REQUIRE_EQ(m_global_sorter.m_hwm, m_ninclude.m_reduced,
                        "global sorting table should have as many filled rows as total found rows across all ranks");

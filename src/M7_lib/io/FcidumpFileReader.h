@@ -29,8 +29,8 @@ struct FcidumpInfo {
     const bool m_uhf, m_relativistic, m_spin_resolved;
     const uint_t m_nelec, m_nsite, m_nspinorb, m_norb_distinct;
     const int m_ms2;
-    const defs::uintv_t m_orbsym;
-    FcidumpInfo(std::string fname, bool uhf, bool relativistic, uint_t nelec, uint_t nsite, int ms2, defs::uintv_t orbsym);
+    const uintv_t m_orbsym;
+    FcidumpInfo(std::string fname, bool uhf, bool relativistic, uint_t nelec, uint_t nsite, int ms2, uintv_t orbsym);
     FcidumpInfo(const FortranNamelistReader& reader);
 
     FcidumpInfo(std::string fname);
@@ -58,15 +58,15 @@ struct FcidumpFileReader : public HamiltonianFileReader {
      * @param inds
      *  indices to convert to the storage convention
      */
-    void convert_inds(defs::uintv_t &inds);
+    void convert_inds(uintv_t &inds);
 
-    bool next(defs::uintv_t &inds, defs::ham_t &v);
+    bool next(uintv_t &inds, ham_t &v);
 
-    uint_t ranksig(const defs::uintv_t &inds) const override;
+    uint_t ranksig(const uintv_t &inds) const override;
 
-    uint_t exsig(const defs::uintv_t &inds, uint_t ranksig) const override;
+    uint_t exsig(const uintv_t &inds, uint_t ranksig) const override;
 
-    bool inds_in_range(const defs::uintv_t &inds) const override;
+    bool inds_in_range(const uintv_t &inds) const override;
 
 };
 

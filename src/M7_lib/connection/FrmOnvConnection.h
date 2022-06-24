@@ -14,7 +14,7 @@
  */
 class FrmOps {
     const sys::frm::Size m_sites;
-    defs::uintv_t m_inds;
+    uintv_t m_inds;
 public:
     FrmOps(uint_t nsite): m_sites(nsite) {
         m_inds.reserve(2*m_sites);
@@ -27,16 +27,16 @@ public:
         return *this;
     }
 
-    FrmOps& operator=(const defs::uintv_t& inds){
+    FrmOps& operator=(const uintv_t& inds){
         m_inds = inds;
         return *this;
     }
 
-    const defs::uintv_t & inds() const {
+    const uintv_t & inds() const {
         return m_inds;
     }
 
-    bool operator==(const defs::uintv_t &v) const {
+    bool operator==(const uintv_t &v) const {
         return m_inds==v;
     }
 
@@ -71,7 +71,7 @@ public:
      * @param inds
      *  positions in the orbs vector of the selected spin orbitals
      */
-    void set_selection(const defs::uintv_t& orbs, const defs::uintv_t& inds) {
+    void set_selection(const uintv_t& orbs, const uintv_t& inds) {
         clear();
         for (const auto& ind: inds) {
             DEBUG_ASSERT_LT(ind, orbs.size(), "index OOB");
@@ -119,11 +119,11 @@ public:
         set_in_order(m_sites.ispinorb(pair1), m_sites.ispinorb(pair2));
     }
 
-    defs::uintv_t::const_iterator cbegin() const {
+    uintv_t::const_iterator cbegin() const {
         return m_inds.cbegin();
     }
 
-    defs::uintv_t::const_iterator cend() const {
+    uintv_t::const_iterator cend() const {
         return m_inds.cend();
     }
     /**
@@ -249,12 +249,12 @@ public:
      * @return
      *  the annihilation string cast to a vector
      */
-    const defs::uintv_t& ann() const;
+    const uintv_t& ann() const;
     /**
      * @return
      *  the creation string cast to a vector
      */
-    const defs::uintv_t& cre() const;
+    const uintv_t& cre() const;
 
     /**
      * @return

@@ -19,7 +19,7 @@
  */
 struct Reweighter {
     const conf::Shift &m_opts;
-    buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_const_shift;
+    buffered::Numbers<ham_comp_t, ndim_wf> m_const_shift;
     /**
      * the reweighting epochs begin some specified number of cycles after variable shift mode begins
      */
@@ -28,12 +28,12 @@ struct Reweighter {
      * values of exp(tau* (const_shift - inst_shift)) for at most the past n cycles
      * where n is m_opts.ncycle_reweight_lookback.
      */
-    std::vector<std::queue<defs::ham_comp_t>> m_histories;
+    std::vector<std::queue<ham_comp_t>> m_histories;
     /**
      * products over all histories
      */
-    buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_total;
-    Reweighter(const conf::Shift& opts, const NdFormat<defs::ndim_wf>& wf_fmt);
+    buffered::Numbers<ham_comp_t, ndim_wf> m_total;
+    Reweighter(const conf::Shift& opts, const NdFormat<ndim_wf>& wf_fmt);
     /**
      * decide whether the reweighting epoch should begin, and if it should, fix the constant shift to the current
      * average shift value
@@ -46,7 +46,7 @@ struct Reweighter {
      * @param av_shift
      *  average shift value over some number of historical instantaneous values
      */
-    void update(uint_t icycle, uint_t ipart, bool begin_cond, defs::ham_comp_t av_shift);
+    void update(uint_t icycle, uint_t ipart, bool begin_cond, ham_comp_t av_shift);
     /**
      * if the reweighting adapation is in use, and the epoch is active, then add to histories
      * @param ipart
@@ -56,7 +56,7 @@ struct Reweighter {
      * @param tau
      *  current timestep
      */
-    void add(uint_t ipart, defs::ham_comp_t shift, double tau);
+    void add(uint_t ipart, ham_comp_t shift, double tau);
 
 private:
     /**
@@ -66,7 +66,7 @@ private:
      * @param v
      *  instantaneous shift
      */
-    void add_to_history(uint_t ipart, const defs::ham_comp_t& v);
+    void add_to_history(uint_t ipart, const ham_comp_t& v);
 
     /**
      * @return
@@ -84,20 +84,20 @@ struct Shift {
     /**
      * the numbers of walkers on each WF part in the last period is stored so that the growth rate can be computed
      */
-    buffered::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_last_period;
+    buffered::Numbers<wf_comp_t, ndim_wf> m_nwalker_last_period;
     /**
      * values of the diagonal shift for each WF part
      */
-    buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_values;
+    buffered::Numbers<ham_comp_t, ndim_wf> m_values;
     /**
      * queues storing the most recent values of the shift in order to enable constant time
      * computation of the rolling average shift values
      */
-    std::vector<std::queue<defs::ham_comp_t>> m_avg_value_histories;
+    std::vector<std::queue<ham_comp_t>> m_avg_value_histories;
     /**
      * total unnormalized average shift values
      */
-    buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_avg_values;
+    buffered::Numbers<ham_comp_t, ndim_wf> m_avg_values;
     /**
      * the shift is initially held constant until the L1 norm of the wavefunction reaches
      * a user-defined level, at this point the shift is allowed to vary such that the L1
@@ -107,12 +107,12 @@ struct Shift {
     /**
      * the target walker number can be changed by the user on the fly
      */
-    InteractiveVariable<defs::wf_comp_t> m_nwalker_target;
+    InteractiveVariable<wf_comp_t> m_nwalker_target;
     Reweighter m_reweighter;
 
-    Shift(const conf::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt);
+    Shift(const conf::Document &opts, const NdFormat<ndim_wf>& wf_fmt);
 
-    const defs::ham_comp_t & operator[](const uint_t& ipart);
+    const ham_comp_t & operator[](const uint_t& ipart);
 
     /**
      * compute the change in all parts of the shift value based on the current values of wf.m_nwalkers
@@ -143,7 +143,7 @@ private:
      * @return
      *  normalized average for ipart
      */
-    defs::ham_comp_t get_average(const uint_t& ipart) const;
+    ham_comp_t get_average(const uint_t& ipart) const;
 
 };
 

@@ -20,12 +20,12 @@ HamiltonianFileReader::HamiltonianFileReader(const std::string &fname, uint_t ni
         m_complex_valued(m_ncolumn==nind+2) {
     REQUIRE_GT(m_ncolumn, nind, "not enough columns in body of file "+fname);
     REQUIRE_LE(m_ncolumn, nind+2, "too many columns in body of file "+fname);
-    if (!dtype::is_complex<defs::ham_t>()){
+    if (!dtype::is_complex<ham_t>()){
         REQUIRE_FALSE(m_complex_valued, "can't read complex-valued array into a real container");
     }
 }
 
-bool HamiltonianFileReader::next(defs::uintv_t &inds, defs::ham_t &v) {
+bool HamiltonianFileReader::next(uintv_t &inds, ham_t &v) {
     auto result = NumericCsvFileReader::next(m_work_tokens);
     if (!result) return false;
     REQUIRE_EQ(m_work_tokens.size(), m_ncolumn, "invalid line found in file "+m_fname);
@@ -39,14 +39,14 @@ bool HamiltonianFileReader::next(defs::uintv_t &inds, defs::ham_t &v) {
     return true;
 }
 
-uint_t HamiltonianFileReader::nset_ind(const defs::uintv_t &inds) {
+uint_t HamiltonianFileReader::nset_ind(const uintv_t &inds) {
     return std::count_if(inds.begin(), inds.end(), [](const uint_t &a) { return a != ~0ul; });
 }
 
-uint_t HamiltonianFileReader::exsig(const defs::uintv_t &inds) const {
+uint_t HamiltonianFileReader::exsig(const uintv_t &inds) const {
     return exsig(inds, ranksig(inds));
 }
 
-void HamiltonianFileReader::decrement_inds(defs::uintv_t &inds) {
+void HamiltonianFileReader::decrement_inds(uintv_t &inds) {
     for (auto &i:inds) i = ((i == 0 || i == ~0ul) ? ~0ul : i - 1);
 }

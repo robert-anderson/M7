@@ -13,7 +13,6 @@
 
 #include "Row.h"
 
-using namespace defs;
 
 /**
  * Base class for the basic containers of data within Rows, which in turn reference locations within a Buffer via Table.
