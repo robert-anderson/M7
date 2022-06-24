@@ -2,9 +2,9 @@
 // Created by Robert J. Anderson on 27/02/2020.
 //
 
-#include "ExactPropagator.h"
+#include "LinearExact.h"
 
-ExactPropagator::ExactPropagator(
+LinearExact::LinearExact(
         const Hamiltonian& ham, const conf::Document& opts,
         const Wavefunction& wf, bool only_nonzero_h_spawns) :
         Propagator(opts, ham, wf), m_only_nonzero_h_spawns(only_nonzero_h_spawns),
@@ -12,7 +12,7 @@ ExactPropagator::ExactPropagator(
         m_mag_log(opts.m_propagator.m_max_bloom, 0, 1, opts.m_propagator.m_static_tau, true,
                   opts.m_propagator.m_tau_min, opts.m_propagator.m_tau_max, 0.0, opts.m_propagator.m_period) {}
 
-void ExactPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
+void LinearExact::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     const auto& row = wf.m_store.m_row;
     auto& src_mbf = row.m_mbf;
     const wf_t& weight = row.m_weight[ipart];
@@ -36,14 +36,14 @@ void ExactPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     m_conn_iters.loop(conn, src_mbf, body);
 }
 
-void ExactPropagator::diagonal(Wavefunction& wf, const uint_t& ipart) {
+void LinearExact::diagonal(Wavefunction& wf, const uint_t& ipart) {
     auto& row = wf.m_store.m_row;
     const ham_comp_t& hdiag = row.m_hdiag;
     DEBUG_ASSERT_NEARLY_EQ(hdiag, m_ham.get_energy(row.m_mbf), "incorrect diagonal H element cached");
     wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }
 
-void ExactPropagator::update(const uint_t& icycle, const Wavefunction &wf) {
+void LinearExact::update(const uint_t& icycle, const Wavefunction &wf) {
     Propagator::update(icycle, wf);
     m_mag_log.update(icycle, m_tau);
 }

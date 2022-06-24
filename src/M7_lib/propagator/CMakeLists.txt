@@ -1,0 +1,10 @@
+target_sources(M7_lib
+    PRIVATE
+        LinearExact.cpp
+        LinearExact.h
+        LinearStoch.cpp
+        LinearStoch.h
+        Propagator.cpp
+        Propagator.h
+        Propagators.h
+)

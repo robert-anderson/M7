@@ -7,7 +7,7 @@
 
 #include <M7_lib/basis/Suites.h>
 #include <M7_lib/wavefunction/Reference.h>
-#include <M7_lib/dynamics/Propagator.h>
+#include <M7_lib/propagator/Propagator.h>
 #include <M7_lib/mae/MaeTable.h>
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/table/Communicator.h>

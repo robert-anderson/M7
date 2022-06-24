@@ -9,7 +9,7 @@
 #include <M7_lib/io/Archivable.h>
 #include <M7_lib/basis/Suites.h>
 
-#include "Shift.h"
+#include "M7_lib/dynamics/Shift.h"
 
 /**
  * This class is not optionally archivable,
@@ -44,7 +44,7 @@ public:
             m_sector(wf.m_sector),
             m_imp_samp_exp(opts.m_propagator.m_imp_samp_exp),
             m_dst(m_sector),
-            m_conn(ham.m_basis.size()){}
+            m_conn(ham.m_basis.size()) {}
 
     virtual ~Propagator() {}
 
@@ -79,15 +79,14 @@ public:
      * @param src_energy
      *  energy of the source MBF is in practice cached in the wavefunction table, so no need to recompute
      */
-    void imp_samp_delta(wf_t& delta, const field::Mbf& dst_mbf, ham_comp_t src_energy) const;
+    void imp_samp_delta(wf_t &delta, const field::Mbf &dst_mbf, ham_comp_t src_energy) const;
 
-    void imp_samp_delta(wf_t& delta, const field::Mbf& src_mbf, const field::Mbf& dst_mbf) const;
+    void imp_samp_delta(wf_t &delta, const field::Mbf &src_mbf, const field::Mbf &dst_mbf) const;
 
 private:
     void load_fn(hdf5::GroupReader &parent) override;
 
     void save_fn(hdf5::GroupWriter &parent) override;
-
 };
 
 #endif //M7_PROPAGATOR_H

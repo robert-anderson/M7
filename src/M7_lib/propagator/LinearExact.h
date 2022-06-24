@@ -2,15 +2,15 @@
 // Created by Robert J. Anderson on 27/02/2020.
 //
 
-#ifndef M7_EXACTPROPAGATOR_H
-#define M7_EXACTPROPAGATOR_H
+#ifndef M7_LINEAR_EXACT_PROPAGATOR_H
+#define M7_LINEAR_EXACT_PROPAGATOR_H
 
 #include <M7_lib/conf/Conf.h>
 
-#include "Propagator.h"
+#include "M7_lib/propagator/Propagator.h"
 #include "M7_lib/foreach/ConnForeachGroup.h"
 
-class ExactPropagator : public Propagator {
+class LinearExact : public Propagator {
     /**
      * sends the generated excitations even if the corresponding hamiltonian matrix element is zero. Useful for testing
      * rank-2 RDMs since these spawns will make the exact contributions.
@@ -20,7 +20,7 @@ class ExactPropagator : public Propagator {
     MagnitudeLogger m_mag_log;
 
 public:
-    ExactPropagator(const Hamiltonian& ham, const conf::Document& opts, const Wavefunction& wf,
+    LinearExact(const Hamiltonian& ham, const conf::Document& opts, const Wavefunction& wf,
                     bool only_nonzero_h_spawns=true);
 
     void diagonal(Wavefunction &wf, const uint_t& ipart) override;
@@ -30,4 +30,4 @@ public:
     void update(const uint_t &icycle, const Wavefunction &wf) override;
 };
 
-#endif //M7_EXACTPROPAGATOR_H
+#endif //M7_LINEAR_EXACT_PROPAGATOR_H

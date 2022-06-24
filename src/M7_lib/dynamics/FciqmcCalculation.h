@@ -9,7 +9,7 @@
 #include <M7_lib/conf/Conf.h>
 #include <M7_lib/wavefunction/Wavefunction.h>
 
-#include "StochasticPropagator.h"
+#include "M7_lib/propagator/LinearStoch.h"
 #include "Solver.h"
 
 class FciqmcCalculation {

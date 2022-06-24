@@ -2,9 +2,9 @@
 // Created by Robert John Anderson on 2020-04-11.
 //
 
-#include "StochasticPropagator.h"
+#include "LinearStoch.h"
 
-StochasticPropagator::StochasticPropagator(const Hamiltonian& ham, const conf::Document& opts,
+LinearStoch::LinearStoch(const Hamiltonian& ham, const conf::Document& opts,
                                            const Wavefunction& wf) :
         Propagator(opts, ham, wf), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
         m_excit_gen_group(ham, opts.m_propagator, m_prng, wf.m_sector.particles()),
@@ -22,7 +22,7 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian& ham, const conf::D
 }
 
 
-void StochasticPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
+void LinearStoch::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     const auto& row = wf.m_store.m_row;
     const wf_t& weight = row.m_weight[ipart];
     /*
@@ -117,7 +117,7 @@ void StochasticPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     }
 }
 
-void StochasticPropagator::diagonal(Wavefunction& wf, const uint_t& ipart) {
+void LinearStoch::diagonal(Wavefunction& wf, const uint_t& ipart) {
     auto& row = wf.m_store.m_row;
     bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
     const ham_comp_t& hdiag = row.m_hdiag;
@@ -137,15 +137,15 @@ void StochasticPropagator::diagonal(Wavefunction& wf, const uint_t& ipart) {
     }
 }
 
-uint_t StochasticPropagator::ncase_excit_gen() const {
+uint_t LinearStoch::ncase_excit_gen() const {
     return m_excit_gen_group.ncase();
 }
 
-std::vector<prob_t> StochasticPropagator::excit_gen_case_probs() const {
+std::vector<prob_t> LinearStoch::excit_gen_case_probs() const {
     return m_excit_gen_group.get_probs();
 }
 
-void StochasticPropagator::update(const uint_t& icycle, const Wavefunction& wf) {
+void LinearStoch::update(const uint_t& icycle, const Wavefunction& wf) {
     Propagator::update(icycle, wf);
     m_mag_log.update(icycle, m_tau, m_excit_gen_group);
 }
