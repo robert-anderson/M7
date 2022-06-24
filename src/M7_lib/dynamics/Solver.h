@@ -20,7 +20,7 @@
 #include <M7_lib/wavefunction/Reference.h>
 #include <M7_lib/wavefunction/DeterministicSubspace.h>
 
-#include "Propagator.h"
+#include "M7_lib/propagator/Propagator.h"
 #include "Annihilator.h"
 
 /**

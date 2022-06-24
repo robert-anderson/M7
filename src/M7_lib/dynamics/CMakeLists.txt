@@ -2,19 +2,12 @@ target_sources(M7_lib
     PRIVATE
         Annihilator.cpp
         Annihilator.h
-        ExactPropagator.cpp
-        ExactPropagator.h
         FciqmcCalculation.cpp
         FciqmcCalculation.h
         MagnitudeLogger.cpp
         MagnitudeLogger.h
-        Propagator.cpp
-        Propagator.h
-        Propagators.h
         Shift.cpp
         Shift.h
         Solver.cpp
         Solver.h
-        StochasticPropagator.cpp
-        StochasticPropagator.h
 )

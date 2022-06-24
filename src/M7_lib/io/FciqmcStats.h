@@ -5,7 +5,7 @@
 #ifndef M7_FCIQMCSTATS_H
 #define M7_FCIQMCSTATS_H
 
-#include <M7_lib/dynamics/Propagator.h>
+#include <M7_lib/propagator/Propagator.h>
 #include <M7_lib/field/Row.h>
 
 #include "StatsTable.h"

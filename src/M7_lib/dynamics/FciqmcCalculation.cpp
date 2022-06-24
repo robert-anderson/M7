@@ -6,7 +6,7 @@
 #include <M7_lib/field/Mbf.h>
 
 #include "FciqmcCalculation.h"
-#include "Propagators.h"
+#include "M7_lib/propagator/Propagators.h"
 
 FciqmcCalculation::FciqmcCalculation(const conf::Document &opts) :
         m_opts(opts), m_ham({opts.m_hamiltonian, opts.m_basis}),

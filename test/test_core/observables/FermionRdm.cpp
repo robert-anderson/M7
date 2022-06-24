@@ -4,7 +4,7 @@
 
 #include <M7_lib/io/Options.h>
 #include <M7_lib/wavefunction/Wavefunction.h>
-#include <M7_lib/dynamics/ExactPropagator.h>
+#include <M7_lib/propagator/ExactLinear.h>
 #include <M7_lib/dynamics/Solver.h>
 #include <M7_lib/field/Mbf.h>
 #include "gtest/gtest.h"
@@ -25,7 +25,7 @@ ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explicit_hf_
     mbf::set_aufbau_mbf(ref_onv, particles);
 
     Wavefunction wf(opts, {ham.m_basis, particles});
-    ExactPropagator prop(ham, opts, wf, explicit_hf_conns);
+    ExactLinear prop(ham, opts, wf, explicit_hf_conns);
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);

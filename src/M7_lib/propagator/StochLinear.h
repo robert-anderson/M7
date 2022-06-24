@@ -2,15 +2,15 @@
 // Created by Robert John Anderson on 2020-04-11.
 //
 
-#ifndef M7_STOCHASTICPROPAGATOR_H
-#define M7_STOCHASTICPROPAGATOR_H
+#ifndef M7_LINEAR_STOCH_PROPAGATOR_H
+#define M7_LINEAR_STOCH_PROPAGATOR_H
 
 #include <M7_lib/sample/PRNG.h>
 #include <M7_lib/excitgen/ExcitGenGroup.h>
 
-#include "Propagator.h"
+#include "M7_lib/propagator/Propagator.h"
 
-class StochasticPropagator : public Propagator {
+class StochLinear : public Propagator {
 protected:
     PRNG m_prng;
     ExcitGenGroup m_excit_gen_group;
@@ -29,7 +29,7 @@ protected:
     }
 
 public:
-    StochasticPropagator(const Hamiltonian &ham, const conf::Document &opts, const Wavefunction& wf);
+    StochLinear(const Hamiltonian &ham, const conf::Document &opts, const Wavefunction& wf);
 
     void diagonal(Wavefunction &wf, const uint_t& ipart) override;
 
@@ -54,4 +54,4 @@ public:
 
 };
 
-#endif //M7_STOCHASTICPROPAGATOR_H
+#endif //M7_LINEAR_STOCH_PROPAGATOR_H
