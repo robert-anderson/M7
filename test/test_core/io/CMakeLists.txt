@@ -6,6 +6,7 @@ target_sources(unittest
         FcidumpFileReader.cpp
         FileReader.cpp
         FortranNamelistReader.cpp
+        Hdf5FcidumpReader.cpp
         HDF5Wrapper.cpp
         InteractiveVariable.cpp
 )

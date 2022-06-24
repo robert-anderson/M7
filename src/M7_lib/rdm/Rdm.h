@@ -76,9 +76,9 @@ struct FermionRdm : Communicator<MaeRow<wf_t>, MaeRow<wf_t>, true>, Archivable {
 
     void h5_read(hdf5::GroupReader &parent) {
         m_store.clear();
-        BufferedTable<MevRow<wf_t>> m_buffer("", {{m_nann, m_ncre}});
-        m_buffer.push_back();
-        RowHdf5Reader<MevRow<wf_t>> row_reader(m_buffer.m_row, parent, std::to_string(nop()), h5_field_names());
+        BufferedTable<MevRow<wf_t>> m_buf("", {{m_nann, m_ncre}});
+        m_buf.push_back();
+        RowHdf5Reader<MevRow<wf_t>> row_reader(m_buf.m_row, parent, std::to_string(nop()), h5_field_names());
 
         row_reader.restart();
         for (uint_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {

@@ -108,3 +108,7 @@ TEST(GeneralFrmHam, NonHermitian) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/TC_Be_6-31G/FCIDUMP"}, true);
     ASSERT_EQ(frm_ham.m_ints.m_2e->sym(), integrals_2e::syms::D);
 }
+
+TEST(GeneralFrmHam, FromMolcasHdf5Archive) {
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5"}, true);
+}

@@ -27,7 +27,7 @@ namespace hdf5 {
 #ifdef H5_HAVE_PARALLEL
     constexpr bool have_parallel = true;
 #else
-    constexpr bool have_parallel = false;
+    constexpr bool c_have_parallel = false;
 #endif
 
     static_assert(have_parallel, "HDF5 must be compiled with parallel functionality");
