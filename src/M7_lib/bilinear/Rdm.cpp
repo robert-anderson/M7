@@ -21,7 +21,7 @@ size_t Rdm::nrow_estimate(size_t exsig, sys::Size extents) {
                          decode_nbos_cre(exsig), decode_nbos_ann(exsig), extents);
 }
 
-Rdm::Rdm(const conf::Rdms &opts, size_t ranksig, sys::Size basis_size, size_t nelec, size_t nvalue) :
+Rdm::Rdm(const conf::Rdms& opts, size_t ranksig, sys::Size basis_size, size_t nelec, size_t nvalue) :
         Communicator<MaeRow, MaeRow, true>(
                 "rdm_" + to_string(ranksig), nrow_estimate(ranksig, basis_size),
                 nrow_estimate(ranksig, basis_size), opts.m_buffers, opts.m_load_balancing,
@@ -43,8 +43,8 @@ Rdm::Rdm(const conf::Rdms &opts, size_t ranksig, sys::Size basis_size, size_t ne
         m_frm_promoters.emplace_back(nelec + nins - rank, nins);
 }
 
-void Rdm::make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
-                        const FrmOps &com, const wf_t &contrib) {
+void Rdm::make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
+                        const FrmOps& com, const wf_t& contrib) {
     const auto exlvl = conn.m_cre.size();
     DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
                       "this method should not have been delegated given the exsig of the contribution");
@@ -55,7 +55,7 @@ void Rdm::make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
     /*
      * this determines the precomputed promoter required
      */
-    const auto &promoter = m_frm_promoters[nins];
+    const auto& promoter = m_frm_promoters[nins];
     /*
      * apply each combination of the promoter deterministically
      */
@@ -65,7 +65,7 @@ void Rdm::make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
         auto irank_send = m_ra.get_rank(m_lookup_inds);
         DEBUG_ASSERT_TRUE(m_lookup_inds.is_ordered(),
             "operators of each kind should be stored in ascending order of their orbital (or mode) index");
-        auto &send_table = send(irank_send);
+        auto& send_table = send(irank_send);
         size_t irow = *send_table[m_lookup_inds];
         if (irow == ~0ul) irow = send_table.insert(m_lookup_inds);
         send_table.m_row.jump(irow);
@@ -77,8 +77,8 @@ void Rdm::make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
     }
 }
 
-void Rdm::make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &conn,
-                        const com_ops::FrmBos &com, const wf_t &contrib) {
+void Rdm::make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
+                        const com_ops::FrmBos& com, const wf_t& contrib) {
     auto exsig = conn.exsig();
     m_lookup_inds.zero();
     if (is_pure_frm(exsig) && is_pure_frm(m_ranksig))
@@ -115,7 +115,7 @@ void Rdm::make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &
 void Rdm::end_cycle() {
     if (!send().buffer_size()) return;
     communicate();
-    auto &row = m_comm.recv().m_row;
+    auto& row = m_comm.recv().m_row;
     if (!m_comm.recv().m_hwm) return;
     for (row.restart(); row.in_range(); row.step()) {
         auto irow_store = *m_store[row.m_inds];
@@ -126,13 +126,13 @@ void Rdm::end_cycle() {
     m_comm.recv().clear();
 }
 
-void Rdm::save(hdf5::GroupWriter &gw) const {
+void Rdm::save(hdf5::GroupWriter& gw) const {
     m_store.save(gw, to_string(m_ranksig));
 }
 
 std::array<defs::ivec_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
     std::array<defs::ivec_t, exsig::c_ndistinct> exsig_ranks;
-    for (const auto &ranksig: m_active_ranksigs) {
+    for (const auto& ranksig: m_active_ranksigs) {
         auto nfrm_cre = decode_nfrm_cre(ranksig);
         auto nfrm_ann = decode_nfrm_cre(ranksig);
         while (nfrm_cre != ~0ul && nfrm_ann != ~0ul) {
@@ -152,13 +152,13 @@ std::array<defs::ivec_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
     return exsig_ranks;
 }
 
-Rdms::Rdms(const conf::Rdms &opts, defs::ivec_t ranksigs,
-           sys::Size extents, size_t nelec, const Epoch &accum_epoch) :
+Rdms::Rdms(const conf::Rdms& opts, defs::ivec_t ranksigs,
+           sys::Size extents, size_t nelec, const Epoch& accum_epoch) :
         Archivable("rdms", opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
         m_work_conns(extents), m_work_com_ops(extents), m_explicit_ref_conns(opts.m_explicit_ref_conns),
         m_accum_epoch(accum_epoch), m_nelec(nelec) {
-    for (const auto &ranksig: m_active_ranksigs) {
+    for (const auto& ranksig: m_active_ranksigs) {
         REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
         REQUIRE_TRUE(conserves_nfrm(ranksig), "fermion non-conserving RDMs are not yet supported");
         REQUIRE_LE(decode_nbos_cre(ranksig), 1ul,
@@ -175,23 +175,23 @@ Rdms::operator bool() const {
     return !m_active_ranksigs.empty();
 }
 
-bool Rdms::takes_contribs_from(const size_t &exsig) const {
+bool Rdms::takes_contribs_from(size_t exsig) const {
     if (exsig > exsig::c_ndistinct) return false;
     return !m_exsig_ranks[exsig].empty();
 }
 
-void Rdms::make_contribs(const Mbf &src_onv, const conn::Mbf &conn, const com_ops::Mbf &com, const wf_t &contrib) {
+void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_ops::Mbf& com, const wf_t& contrib) {
     auto exsig = conn.exsig();
     if (!exsig) m_total_norm.m_local+=contrib;
     for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
 }
 
-void Rdms::make_contribs(const Mbf &src_onv, const Mbf &dst_onv, const wf_t &contrib) {
+void Rdms::make_contribs(const Mbf& src_onv, const Mbf& dst_onv, const wf_t& contrib) {
     m_work_conns[src_onv].connect(src_onv, dst_onv, m_work_com_ops[src_onv]);
     make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops[src_onv], contrib);
 }
 
-void Rdms::make_contribs(const SpawnTableRow &recv_row, const WalkerTableRow &dst_row, const Propagator &prop) {
+void Rdms::make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& dst_row, const Propagator& prop) {
     DEBUG_ASSERT_EQ(recv_row.m_dst_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
     auto ipart_replica = dst_row.ipart_replica(recv_row.m_ipart_dst);
     defs::wf_t contrib = dst_row.m_weight[ipart_replica];
@@ -203,18 +203,18 @@ void Rdms::make_contribs(const SpawnTableRow &recv_row, const WalkerTableRow &ds
 }
 
 bool Rdms::all_stores_empty() const {
-    for (auto &ranksig: m_active_ranksigs)
+    for (auto& ranksig: m_active_ranksigs)
         if (!m_rdms[ranksig]->m_store.is_cleared())
             return false;
     return true;
 }
 
 void Rdms::end_cycle() {
-    for (auto &ranksig: m_active_ranksigs) m_rdms[ranksig]->end_cycle();
+    for (auto& ranksig: m_active_ranksigs) m_rdms[ranksig]->end_cycle();
     m_total_norm.all_sum();
 }
 
-bool Rdms::is_energy_sufficient(const Hamiltonian &ham) const {
+bool Rdms::is_energy_sufficient(const Hamiltonian& ham) const {
     if (ham.m_bos.m_contribs_0011.is_nonzero(0ul)){
         if (!m_rdms[exsig::ex_0011]) return false;
     }
@@ -269,7 +269,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     return arith::real(ham.m_e_core) + (arith::real(e1) + arith::real(e2)) / norm;
 }
 
-defs::ham_comp_t Rdms::get_energy(const FrmBosHam &ham, size_t nelec, size_t exsig) const {
+defs::ham_comp_t Rdms::get_energy(const FrmBosHam& /*ham*/, size_t /*nelec*/, size_t /*exsig*/) const {
     return 0.0;
     // TODO: update for new HamOpTerm partitioning
 #if 0
@@ -307,7 +307,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmBosHam &ham, size_t nelec, size_t exs
 #endif
 }
 
-defs::ham_comp_t Rdms::get_energy(const BosHam &ham) const {
+defs::ham_comp_t Rdms::get_energy(const BosHam& ham) const {
     if (!ham) return 0.0;
     auto& rdm = m_rdms[exsig::ex_0011];
     REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the 0011-RDM");

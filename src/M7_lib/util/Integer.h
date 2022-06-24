@@ -62,7 +62,7 @@ namespace integer {
     size_t combinatorial_with_repetition(size_t n, size_t r);
 
     template<size_t n>
-    static typename std::enable_if<n == 0ul, size_t>::type ntup_num(size_t extent) {
+    static typename std::enable_if<n == 0ul, size_t>::type ntup_num(size_t /*extent*/) {
         return 1ul;
     }
 
@@ -74,6 +74,20 @@ namespace integer {
     template<size_t n>
     static size_t ntup(size_t extent) {
         return ntup_num<n>(extent) / ntup_num<n>(n);
+    }
+
+    template<typename T>
+    static std::vector<T> inc(const std::vector<T>& v) {
+        auto out = v;
+        for (auto& it: out) ++it;
+        return out;
+    }
+
+    template<typename T>
+    static std::vector<T> dec(const std::vector<T>& v) {
+        auto out = v;
+        for (auto& it: out) --it;
+        return out;
     }
 }
 

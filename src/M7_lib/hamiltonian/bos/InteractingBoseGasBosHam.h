@@ -24,7 +24,7 @@ struct InteractingBoseGasBosHam : BosHam {
                     opts.m_ham.m_interacting_bose_gas.m_nwave,
                     opts.m_ham.m_interacting_bose_gas.m_ek_scale){}
 
-    defs::ham_t get_coeff_0011(size_t i, size_t j) const override {
+    defs::ham_t get_coeff_0011(size_t /*i*/, size_t /*j*/) const override {
         return 0.0;
     }
 
@@ -32,7 +32,7 @@ struct InteractingBoseGasBosHam : BosHam {
         return m_planewaves.conserving(i, j, k, l) ? 1.0 : 0.0;
     }
 
-    defs::ham_t get_element_0000(const field::BosOnv &onv) const override {
+    defs::ham_t get_element_0000(const field::BosOnv& onv) const override {
         // total linear momentum
         defs::ham_t tot = 0.0;
         for (size_t imode=0ul; imode<m_basis.m_nmode; ++imode){
@@ -43,11 +43,11 @@ struct InteractingBoseGasBosHam : BosHam {
         return tot * m_ek_scale;
     }
 
-    defs::ham_t get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const override {
+    defs::ham_t get_element_0011(const field::BosOnv& /*onv*/, const conn::BosOnv& /*conn*/) const override {
         return 0.0;
     }
 
-    defs::ham_t get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const override {
+    defs::ham_t get_element_0022(const field::BosOnv& /*onv*/, const conn::BosOnv& conn) const override {
         const auto i = conn.m_cre.get_imode(0);
         const auto j = conn.m_cre.get_imode(1);
         const auto k = conn.m_ann.get_imode(0);

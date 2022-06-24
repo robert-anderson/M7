@@ -134,6 +134,7 @@ namespace setbit_foreach {
             work = get_work_fn(idataword);
             while (work) {
                 size_t kbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                if (kbit==ibit) return;
                 if (kbit==jbit) return;
                 fn_3(kbit, jbit, ibit);
             }
@@ -154,6 +155,7 @@ namespace setbit_foreach {
             while (work) {
                 size_t jbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 if (jbit==ibit) return;
+                fn_2(jbit, ibit);
                 triple_2<T>(dsize, ibit, jbit, fn_3, get_work_fn);
             }
         }

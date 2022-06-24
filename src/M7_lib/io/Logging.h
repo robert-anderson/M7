@@ -15,6 +15,7 @@
 #include <spdlog/fmt/ostr.h>
 
 #include <M7_lib/parallel/MPIWrapper.h>
+#include <M7_lib/util/Datatype.h>
 
 
 /*
@@ -72,6 +73,7 @@ struct log {
         if (mpi::nrank()==1) info(fmt_string, args...);
         g_local_file_logger->info(fmt_string, args...);
 #endif
+        datatype::unused(fmt_string, args...);
     }
 
     static void info_lines(const std::vector<std::string>& lines);
@@ -118,6 +120,7 @@ struct log {
         if (mpi::nrank()==1) warn(fmt_string, args...);
         g_local_file_logger->warn(fmt_string, args...);
 #endif
+        datatype::unused(fmt_string, args...);
     }
 
     template<typename ...Args>
@@ -133,6 +136,7 @@ struct log {
         if (mpi::nrank()==1) error(fmt_string, args...);
         g_local_file_logger->error(fmt_string, args...);
 #endif
+        datatype::unused(fmt_string, args...);
     }
 
     static void error_backtrace_(size_t depth=20);
@@ -150,6 +154,7 @@ struct log {
         if (mpi::nrank()==1) critical(fmt_string, args...);
         g_local_file_logger->critical(fmt_string, args...);
 #endif
+        datatype::unused(fmt_string, args...);
     }
 
     template<typename ...Args>
@@ -159,6 +164,7 @@ struct log {
         g_reduced_stdout_logger->debug(fmt_string, args...);
         g_reduced_file_logger->debug(fmt_string, args...);
 #endif
+        datatype::unused(fmt_string, args...);
     }
 
     template<typename ...Args>
@@ -169,6 +175,7 @@ struct log {
         g_local_file_logger->debug(fmt_string, args...);
 #endif
 #endif
+        datatype::unused(fmt_string, args...);
     }
 };
 

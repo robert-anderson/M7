@@ -19,18 +19,17 @@ struct HubbardFrmHam : FrmHam {
 
     defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
 
-    defs::ham_t get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const override;
+    defs::ham_t get_element_0000(const field::FrmOnv& onv) const override;
 
+    defs::ham_t get_element_1100(const field::FrmOnv& onv, const conn::FrmOnv& conn) const override;
 
-    defs::ham_t get_element_0000(const field::FrmOnv &onv) const override;
-
-    defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
-
-    defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
+    defs::ham_t get_element_2200(const field::FrmOnv& /*onv*/, const conn::FrmOnv& /*conn*/) const override {
+        return 0;
+    }
 
     void log_data() const override;
 
-    excit_gen_list_t make_excit_gens(PRNG& prng, const conf::Propagator& opts) const override;
+    excit_gen_list_t make_excit_gens(PRNG& prng, const conf::Propagator& /*opts*/) const override;
 
     conn_foreach_list_t make_foreach_iters() const override;
 };

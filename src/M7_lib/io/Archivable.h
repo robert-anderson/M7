@@ -98,7 +98,7 @@ public:
 
     void save();
 
-    void chkpt(const size_t &icycle);
+    void chkpt(size_t icycle);
 
     void add_member(Archivable &item);
 

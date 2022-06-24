@@ -92,7 +92,7 @@ public:
 
     FrmHam(const FrmHam& other): FrmHam(other.m_basis){}
 
-    FrmHam& operator=(const FrmHam& other){return *this;}
+    FrmHam& operator=(const FrmHam&){return *this;}
 
 	virtual ~FrmHam(){}
 
@@ -105,7 +105,7 @@ public:
      * @return
      *  one-electron coefficient of H given by the 2D array T
      */
-    virtual defs::ham_t get_coeff_1100(size_t a, size_t i) const {return 0;}
+    virtual defs::ham_t get_coeff_1100(size_t /*a*/, size_t /*i*/) const {return 0;}
     /**
      * coefficient of the "2-body" term
      * @param a
@@ -119,7 +119,7 @@ public:
      * @return
      *  two-electron coefficient of H given by the 4D array U
      */
-    virtual defs::ham_t get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {return 0;}
+    virtual defs::ham_t get_coeff_2200(size_t /*a*/, size_t /*b*/, size_t /*i*/, size_t /*j*/) const {return 0;}
     /**
      * coefficient of the "3-body" term
      * @param a
@@ -137,14 +137,15 @@ public:
      * @return
      *  three-electron coefficient of H given by the 6D array L
      */
-    virtual defs::ham_t get_coeff_3300(size_t a, size_t b, size_t c, size_t i, size_t j, size_t k) const {return 0;}
+    virtual defs::ham_t get_coeff_3300(size_t /*a*/, size_t /*b*/, size_t /*c*/,
+                                       size_t /*i*/, size_t /*j*/, size_t /*k*/) const {return 0;}
     /**
      * @param onv
      *  fermionic occupation number vector (Slater determinant)
      * @return
      *  diagonal matrix element of H in terms of all ranks of coefficients
      */
-    virtual defs::ham_t get_element_0000(const field::FrmOnv &onv) const {return 0;}
+    virtual defs::ham_t get_element_0000(const field::FrmOnv& /*onv*/) const {return 0;}
     /**
      * @param ket
      *  fermionic occupation number vector (Slater determinant)
@@ -153,7 +154,7 @@ public:
      * @return
      *  single-replacement matrix element of H
      */
-    virtual defs::ham_t get_element_1100(const field::FrmOnv &ket, const conn::FrmOnv &conn) const {return 0;}
+    virtual defs::ham_t get_element_1100(const field::FrmOnv& /*ket*/, const conn::FrmOnv& /*conn*/) const {return 0;}
     /**
      * @param ket
      *  fermionic occupation number vector (Slater determinant)
@@ -162,7 +163,7 @@ public:
      * @return
      *  double-replacement matrix element of H
      */
-    virtual defs::ham_t get_element_2200(const field::FrmOnv &ket, const conn::FrmOnv &conn) const {return 0;}
+    virtual defs::ham_t get_element_2200(const field::FrmOnv& /*ket*/, const conn::FrmOnv& /*conn*/) const {return 0;}
     /**
      * @param ket
      *  fermionic occupation number vector (Slater determinant)
@@ -171,7 +172,7 @@ public:
      * @return
      *  triple-replacement matrix element of H
      */
-    virtual defs::ham_t get_element_3300(const field::FrmOnv &ket, const conn::FrmOnv &conn) const {return 0;}
+    virtual defs::ham_t get_element_3300(const field::FrmOnv& /*ket*/, const conn::FrmOnv& /*conn*/) const {return 0;}
 
     defs::ham_t get_element(const field::FrmOnv &onv) const;
 

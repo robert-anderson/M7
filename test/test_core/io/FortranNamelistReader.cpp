@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "M7_lib/io/FortranNamelistReader.h"
+#include "M7_lib/util/Integer.h"
 
 TEST(FortranNamelistReader, IsolateValue) {
     std::string line = " &FCI NORB=  12,NELEC=12,MS2=0, TREL=.TRUE., ORBSYM=3,2,1,1,4,1,5,3,2,1,5,6";
@@ -25,5 +26,6 @@ TEST(FortranNamelistReader, FromFile) {
     ASSERT_EQ(header.read_uint("NELEC"), 6);
     ASSERT_EQ(header.read_int("MS2", 2), 0);
     defs::ivec_t orbsym = {0, 2, 1, 5, 6, 4};
-    ASSERT_EQ(header.read_uints("ORBSYM", -1), orbsym);
+    ASSERT_EQ(integer::dec(header.read_uints("ORBSYM")), orbsym);
+    ASSERT_EQ(header.read_uints("ORBSYM"), integer::inc(orbsym));
 }

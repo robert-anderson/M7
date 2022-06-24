@@ -10,14 +10,14 @@ void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
     m_shift.update(wf, icycle, tau());
 }
 
-void Propagator::load_fn(hdf5::GroupReader &parent) {
+void Propagator::load_fn(hdf5::GroupReader& parent) {
     REQUIRE_EQ_ALL(parent.load<size_t>("nsite"), m_ham.m_frm.m_basis.m_nsite,
                    "number of fermion sites is not consistent with HDF5 archive");
     REQUIRE_EQ_ALL(parent.load<size_t>("nmode"), m_ham.m_bos.m_basis.m_nmode,
                    "number of boson modes is not consistent with HDF5 archive");
 }
 
-void Propagator::save_fn(hdf5::GroupWriter &parent) {
+void Propagator::save_fn(hdf5::GroupWriter& parent) {
     hdf5::GroupWriter gw("propagator", parent);
     gw.save("nsite", size_t(m_ham.m_frm.m_basis.m_nsite));
     gw.save("nmode", m_ham.m_bos.m_basis.m_nmode);
@@ -26,11 +26,11 @@ void Propagator::save_fn(hdf5::GroupWriter &parent) {
     //gw.save("psingle", m_magnitude_logger.m_psingle);
 }
 
-void Propagator::imp_samp_delta(wf_t &delta, const Mbf &src_mbf, const Mbf &dst_mbf, const ham_comp_t &src_energy) const {
+void Propagator::imp_samp_delta(wf_t& delta, const Mbf& dst_mbf, ham_comp_t src_energy) const {
     // check that importance sampling is in use at all before evaluating energies
     if (m_imp_samp_exp) delta*=std::exp(m_imp_samp_exp*(src_energy-m_ham.get_energy(dst_mbf)));
 }
 
-void Propagator::imp_samp_delta(wf_t &delta, const Mbf &src_mbf, const Mbf &dst_mbf) const {
-    imp_samp_delta(delta, src_mbf, dst_mbf, m_ham.get_energy(src_mbf));
+void Propagator::imp_samp_delta(wf_t& delta, const Mbf& src_mbf, const Mbf& dst_mbf) const {
+    imp_samp_delta(delta, dst_mbf, m_ham.get_energy(src_mbf));
 }

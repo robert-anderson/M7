@@ -7,13 +7,13 @@
 Archivable::Archivable(std::string name, bool load, bool save, bool chkpt) :
         m_name(std::move(name)), m_load(load), m_save(save), m_chkpt(chkpt) {}
 
-Archivable::Archivable(std::string name, const conf::Archivable &opts) :
+Archivable::Archivable(std::string name, const conf::Archivable& opts) :
         Archivable(std::move(name), opts.m_load, opts.m_save, opts.m_chkpt) {}
 
-Archivable::Archivable(std::string name, const conf::Archive &opts) :
+Archivable::Archivable(std::string name, const conf::Archive& opts) :
         Archivable(std::move(name), opts.do_load(), opts.do_save(), opts.do_chkpts()) {}
 
-void Archivable::load(hdf5::GroupReader &parent) {
+void Archivable::load(hdf5::GroupReader& parent) {
     if (m_load) {
         REQUIRE_TRUE_ALL(parent.child_exists(m_name),
                          log::format("Load failed: \"{}\" does not exist in archive", m_name));
@@ -22,21 +22,21 @@ void Archivable::load(hdf5::GroupReader &parent) {
     }
 }
 
-void Archivable::save(hdf5::GroupWriter &parent) {
+void Archivable::save(hdf5::GroupWriter& parent) {
     if (m_save) {
         log::info("saving \"{}\" to archive", m_name);
         save_fn(parent);
     }
 }
 
-void Archivable::chkpt(hdf5::GroupWriter &parent) {
+void Archivable::chkpt(hdf5::GroupWriter& parent) {
     if (m_chkpt) {
         log::info("saving \"{}\" checkpoint to archive", m_name);
         save_fn(parent);
     }
 }
 
-Archive::Archive(const conf::Document &opts) :
+Archive::Archive(const conf::Document& opts) :
         m_opts(opts), m_do_load(m_opts.m_archive.do_load()),
         m_do_save(opts.m_archive.do_save()), m_do_chkpts(opts.m_archive.do_chkpts()) {
     m_timer.unpause();
@@ -57,16 +57,16 @@ Archive::~Archive() {
     save();
 }
 
-void Archive::save_metadata(hdf5::FileWriter &fw) {
+void Archive::save_metadata(hdf5::FileWriter& fw) {
     hdf5::GroupWriter gw("metadata", fw);
     gw.save("timestamp", std::round(std::chrono::steady_clock::now().time_since_epoch().count()));
 }
 
-void Archive::verify_metadata(hdf5::FileReader &fr) {
+void Archive::verify_metadata(hdf5::FileReader& /*fr*/) {
 
 }
 
-void Archive::save(hdf5::FileWriter &fw) {
+void Archive::save(hdf5::FileWriter& fw) {
     save_metadata(fw);
     hdf5::GroupWriter gw("archive", fw);
     for (auto ptr: m_members) ptr->save(gw);
@@ -86,7 +86,7 @@ void Archive::save() {
     save(fw);
 }
 
-void Archive::chkpt(const size_t &icycle) {
+void Archive::chkpt(size_t icycle) {
     if (m_do_chkpts) return;
     bool output = false;
     output = m_opts.m_archive.m_period_mins && m_timer / 60 >= m_opts.m_archive.m_period_mins;
@@ -101,6 +101,6 @@ void Archive::chkpt(const size_t &icycle) {
     save(fw);
 }
 
-void Archive::add_member(Archivable &item) {
+void Archive::add_member(Archivable& item) {
     m_members.push_back(&item);
 }

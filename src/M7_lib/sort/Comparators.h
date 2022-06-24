@@ -46,7 +46,7 @@ namespace comparators {
      *  value comparator
      */
     template<typename T>
-    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, Int<true> absval) {
+    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, Int<true> /*absval*/) {
         if (largest)
             return [](const T &v, const T &v_cmp) { return std::abs(v) > std::abs(v_cmp); };
         else
@@ -63,7 +63,7 @@ namespace comparators {
      *  value comparator
      */
     template<typename T>
-    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, Int<false> absval) {
+    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, Int<false> /*absval*/) {
         if (largest)
             return [](const T &v, const T &v_cmp) { return v > v_cmp; };
         else
@@ -75,20 +75,20 @@ namespace comparators {
      */
     template<typename T>
     static std::function<bool(const T &, const T &)>
-    make_value_cmp_fn(bool absval, bool largest, Int<Any> category) {
+    make_value_cmp_fn(bool absval, bool largest, Int<Any> /*category*/) {
         if (absval) return make_value_cmp_fn<T>(largest, Int<true>());
         else return make_value_cmp_fn<T>(largest, Int<false>());
     }
 
     template<typename T>
     static std::function<bool(const T &, const T &)>
-    make_value_cmp_fn(bool absval, bool largest, Int<Only> category) {
+    make_value_cmp_fn(bool /*absval*/, bool largest, Int<Only> /*category*/) {
         return make_value_cmp_fn<T>(largest, Int<true>());
     }
 
     template<typename T>
     static std::function<bool(const T &, const T &)>
-    make_value_cmp_fn(bool absval, bool largest, Int<Invalid> category) {
+    make_value_cmp_fn(bool /*absval*/, bool largest, Int<Invalid> /*category*/) {
         return make_value_cmp_fn<T>(largest, Int<false>());
     }
 

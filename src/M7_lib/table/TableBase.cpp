@@ -101,8 +101,6 @@ void TableBase::clear_rows(const defs::ivec_t &irows) {
     }
 }
 
-void TableBase::post_insert(const size_t& iinsert) {}
-
 void TableBase::insert_rows(const Buffer::Window &recv, size_t nrow, const std::list<recv_cb_t> &callbacks) {
     for (size_t irow_recv = 0; irow_recv < nrow; ++irow_recv) {
         auto irow = get_free_row();
@@ -169,12 +167,13 @@ void TableBase::swap_rows(const size_t &irow, const size_t &jrow) {
 
 std::string TableBase::to_string(const defs::ivec_t *ordering) const {
     std::string out;
-    auto row_ptr = begin();
-    for (size_t irow=0ul; irow<m_hwm; ++irow){
-        for (size_t idword=0ul; idword<row_size(); ++idword){
-            out+=std::to_string(static_cast<int>(row_ptr[idword]))+" ";
+    auto begin_ptr = begin();
+    for (size_t i=0ul; i<m_hwm; ++i){
+        auto irow = ordering ? ordering->at(i) : i;
+        auto row_ptr = begin_ptr+irow*row_size();
+        for (size_t ibyte=0ul; ibyte < row_size(); ++ibyte){
+            out+= std::to_string(static_cast<int>(row_ptr[ibyte])) + " ";
         }
-        row_ptr+=row_size();
         out+="\n";
     }
     return out;
@@ -225,7 +224,7 @@ bool TableBase::is_protected() const {
                        [](const RowProtector* rp){return rp->is_protected();});
 }
 
-bool TableBase::is_protected(const size_t& irow) const {
+bool TableBase::is_protected(size_t irow) const {
     return std::any_of(m_row_protectors.cbegin(), m_row_protectors.cend(),
                        [&](const RowProtector* rp){return rp->is_protected(irow);});
 }

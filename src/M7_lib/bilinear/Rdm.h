@@ -30,22 +30,22 @@ public:
     const sys::Size m_basis_size;
     const size_t m_nelec;
 
-    Rdm(const conf::Rdms &opts, size_t ranksig, sys::Size basis_size, size_t nelec, size_t nvalue);
+    Rdm(const conf::Rdms& opts, size_t ranksig, sys::Size basis_size, size_t nelec, size_t nvalue);
 
-    void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
-                       const com_ops::Frm &com, const defs::wf_t &contrib);
+    void make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
+                       const com_ops::Frm& com, const defs::wf_t& contrib);
 
-    void make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &conn,
-                       const com_ops::FrmBos &com, const defs::wf_t &contrib);
+    void make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
+                       const com_ops::FrmBos& com, const defs::wf_t& contrib);
 
-    void make_contribs(const field::BosOnv &src_onv, const conn::BosOnv &conn,
-                       const com_ops::Bos &com, const defs::wf_t &contrib) {
+    void make_contribs(const field::BosOnv& /*src_onv*/, const conn::BosOnv& /*conn*/,
+                       const com_ops::Bos& /*com*/, const defs::wf_t& /*contrib*/) {
         ABORT("not yet implemented");
     }
 
     void end_cycle();
 
-    void save(hdf5::GroupWriter &gw) const;
+    void save(hdf5::GroupWriter& gw) const;
 };
 
 class Rdms : public Archivable {
@@ -60,23 +60,23 @@ class Rdms : public Archivable {
 
 public:
     const bool m_explicit_ref_conns;
-    const Epoch &m_accum_epoch;
+    const Epoch& m_accum_epoch;
     Reduction<defs::wf_t> m_total_norm;
     const size_t m_nelec;
 
-    Rdms(const conf::Rdms &opts, defs::ivec_t ranksigs,
-         sys::Size extents, size_t nelec, const Epoch &accum_epoch);
+    Rdms(const conf::Rdms& opts, defs::ivec_t ranksigs,
+         sys::Size extents, size_t nelec, const Epoch& accum_epoch);
 
     operator bool() const;
 
-    bool takes_contribs_from(const size_t &exsig) const;
+    bool takes_contribs_from(size_t exsig) const;
 
-    void make_contribs(const field::Mbf &src_onv, const conn::Mbf &conn,
-                       const com_ops::Mbf &com, const defs::wf_t &contrib);
+    void make_contribs(const field::Mbf& src_onv, const conn::Mbf& conn,
+                       const com_ops::Mbf& com, const defs::wf_t& contrib);
 
-    void make_contribs(const field::Mbf &src_onv, const field::Mbf &dst_onv, const defs::wf_t &contrib);
+    void make_contribs(const field::Mbf& src_onv, const field::Mbf& dst_onv, const defs::wf_t& contrib);
 
-    void make_contribs(const SpawnTableRow &recv_row, const WalkerTableRow &dst_row, const Propagator &prop);
+    void make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& dst_row, const Propagator& prop);
 
     /**
      * TODO: remove. this is now done in the Annihilator class
@@ -99,8 +99,8 @@ public:
      * @param refs
      * @param ipart_dst
      */
-//    void make_contribs(const field::Mbf &src_mbf, const defs::wf_t &src_weight, const WalkerTableRow &dst_row,
-//                       const Propagator &prop, const References &refs, const size_t &ipart_dst) {
+//    void make_contribs(const field::Mbf& src_mbf, const defs::wf_t& src_weight, const WalkerTableRow& dst_row,
+//                       const Propagator& prop, const References& refs, const size_t& ipart_dst) {
 //        if (!*this) return;
 //        if (!m_accum_epoch) return;
 //
@@ -124,7 +124,7 @@ public:
      *  true only if the ranks of RDMs estimated are sufficient for pseudo-variational energy estimation via contraction
      *  of the RDMs with the Hamiltonian coefficients.
      */
-    bool is_energy_sufficient(const Hamiltonian &ham) const;
+    bool is_energy_sufficient(const Hamiltonian& ham) const;
 
     /**
      * compute the fermion 2-RDM energy
@@ -136,7 +136,7 @@ public:
      *
      *  rdm1[i,j] = sum_k rdm2[i,k,j,k] / (n_elec - 1)
      */
-    defs::ham_comp_t get_energy(const FrmHam &ham) const;
+    defs::ham_comp_t get_energy(const FrmHam& ham) const;
 
     /**
      * compute the RDM energy contribution from the boson number-nonconserving terms
@@ -144,9 +144,9 @@ public:
      *  boson ladder-operator (pure and coupled) hamiltonian
      * @return
      */
-    defs::ham_comp_t get_energy(const FrmBosHam &ham, size_t nelec, size_t exsig) const;
+    defs::ham_comp_t get_energy(const FrmBosHam& ham, size_t nelec, size_t exsig) const;
 
-    defs::ham_comp_t get_energy(const FrmBosHam &ham, size_t nelec) const {
+    defs::ham_comp_t get_energy(const FrmBosHam& ham, size_t nelec) const {
         return get_energy(ham, nelec, exsig::ex_1101) + get_energy(ham, nelec, exsig::ex_1110);
     }
 
@@ -156,7 +156,7 @@ public:
      *  boson number conserving hamiltonian
      * @return
      */
-    defs::ham_comp_t get_energy(const BosHam &ham) const;
+    defs::ham_comp_t get_energy(const BosHam& ham) const;
 
     /**
      * @param ham
@@ -164,24 +164,24 @@ public:
      * @return
      *  E_RDM = E_2RDM + E_RDM_ladder + E_RDM_boson
      */
-    defs::ham_comp_t get_energy(const Hamiltonian &ham) const {
+    defs::ham_comp_t get_energy(const Hamiltonian& ham) const {
         if (!is_energy_sufficient(ham)) return 0.0;
         return get_energy(ham.m_frm) + get_energy(ham.m_frmbos, m_nelec) + get_energy(ham.m_bos);
     }
 
 private:
-    void load_fn(hdf5::GroupReader &parent) override {
+    void load_fn(hdf5::GroupReader& /*parent*/) override {
 
     }
 
-    void save_fn(hdf5::GroupWriter &parent) override {
+    void save_fn(hdf5::GroupWriter& parent) override {
         if (!m_accum_epoch) {
             log::warn("MAE accumulation epoch was not reached in this calculation: omitting RDM save");
             return;
         }
         hdf5::GroupWriter gw("rdms", parent);
         gw.save("norm", m_total_norm.m_reduced);
-        for (const auto &i: m_active_ranksigs) {
+        for (const auto& i: m_active_ranksigs) {
             DEBUG_ASSERT_TRUE(m_rdms[i].get(), "active ranksig was not allocated!");
             m_rdms[i]->save(gw);
         }

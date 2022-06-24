@@ -78,13 +78,13 @@ namespace basic_foreach {
              * in the edge case that the nind is 0, do nothing
              */
             template<typename fn_t>
-            void top_loop(const fn_t &fn, tag::Int<true>) {}
+            void top_loop(const fn_t& /*fn*/, tag::Int<true>) {}
 
             /**
              * if nind is nonzero, start at the first index
              */
             template<typename fn_t>
-            void top_loop(const fn_t &fn, tag::Int<false>) {
+            void top_loop(const fn_t& fn, tag::Int<false>) {
                 level_loop(fn, tag::Int<1>());
             }
 
@@ -138,7 +138,7 @@ namespace basic_foreach {
             }
 
             template<typename fn_t>
-            void top_loop(const fn_t &fn, tag::Int<true>) {}
+            void top_loop(const fn_t& /*fn*/, tag::Int<true>) {}
 
             template<typename fn_t>
             void top_loop(const fn_t &fn, tag::Int<false>) {

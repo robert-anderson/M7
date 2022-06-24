@@ -11,7 +11,7 @@ void ExcitGenGroup::update_cumprobs() {
     DEBUG_ASSERT_NUM_EQ(m_cumprobs.back(), 1.0, "cumulative probability should be 1.0");
 }
 
-ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng) :
+ExcitGenGroup::ExcitGenGroup(const Hamiltonian& ham, const conf::Propagator& opts, PRNG& prng) :
         m_prng(prng){
     ExcitGen::excit_gen_list_t list;
     list = ham.m_frm.make_excit_gens(prng, opts);
@@ -52,11 +52,11 @@ size_t ExcitGenGroup::draw_icase() {
     return ncase() - 1;
 }
 
-ExcitCase &ExcitGenGroup::operator[](size_t icase) {
+ExcitCase& ExcitGenGroup::operator[](size_t icase) {
     return m_excit_cases[icase];
 }
 
-void ExcitGenGroup::set_probs(const std::vector<defs::prob_t> &probs) {
+void ExcitGenGroup::set_probs(const std::vector<defs::prob_t>& probs) {
     DEBUG_ASSERT_EQ(probs.size(), ncase(), "incorrect number of probabilities given");
     defs::prob_t norm = std::accumulate(probs.cbegin(), probs.cend(), 0.0);
     DEBUG_ASSERT_GE(norm, 1e-8, "prob vector norm is too small");
@@ -87,7 +87,7 @@ void ExcitGenGroup::log() const {
     log::info_table("Excitation generation breakdown", rows, true);
 }
 
-void ExcitGenGroup::set_probs(const sys::Particles &particles) {
+void ExcitGenGroup::set_probs(const sys::Particles& particles) {
     std::vector<defs::prob_t> probs;
     probs.reserve(ncase());
     for (const auto& excase: m_excit_cases)

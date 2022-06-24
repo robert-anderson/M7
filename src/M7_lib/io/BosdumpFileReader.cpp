@@ -16,7 +16,7 @@ size_t BosdumpFileReader::ranksig(const defs::ivec_t &inds) const {
     return inds[2] == ~0ul ? exsig::ex_0011 : exsig::ex_0022;
 }
 
-size_t BosdumpFileReader::exsig(const defs::ivec_t &inds, const size_t &ranksig) const {
+size_t BosdumpFileReader::exsig(const defs::ivec_t &inds, size_t ranksig) const {
     DEBUG_ASSERT_EQ(inds.size(), 4ul, "incorrect maximum number of SQ operator indices");
     switch (ranksig) {
         case 0ul:

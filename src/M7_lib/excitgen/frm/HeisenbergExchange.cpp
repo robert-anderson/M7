@@ -4,13 +4,13 @@
 
 #include "HeisenbergExchange.h"
 
-HeisenbergExchange::HeisenbergExchange(const FrmHam &h, PRNG &prng) :
+HeisenbergExchange::HeisenbergExchange(const FrmHam& h, PRNG& prng) :
         FrmLatticeExcitGen(h, prng, {exsig::ex_double}, "lattice local exchange"){
     REQUIRE_TRUE(h.is<HeisenbergFrmHam>(), "given hamiltonian is not of HeisenbergFrmHam type");
 }
 
-bool HeisenbergExchange::draw_frm(const size_t &exsig, const field::FrmOnv &src,
-                                  defs::prob_t &prob, conn::FrmOnv &conn) {
+bool HeisenbergExchange::draw_frm(size_t exsig, const field::FrmOnv& src,
+                                  defs::prob_t& prob, conn::FrmOnv& conn) {
     DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
     const auto& lattice = m_h.m_basis.m_lattice;
     /*
@@ -41,7 +41,7 @@ bool HeisenbergExchange::draw_frm(const size_t &exsig, const field::FrmOnv &src,
     return true;
 }
 
-defs::prob_t HeisenbergExchange::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
+defs::prob_t HeisenbergExchange::prob_frm(const field::FrmOnv& src, const conn::FrmOnv& conn) const {
     const auto& basis = src.m_basis;
     defs::prob_t prob = 0.0;
     // either site could have been the one from which the other was generated, so sum the probs
@@ -52,6 +52,6 @@ defs::prob_t HeisenbergExchange::prob_frm(const field::FrmOnv &src, const conn::
     return prob / basis.m_nsite;
 }
 
-size_t HeisenbergExchange::approx_nconn(size_t exsig, sys::Particles particles) const {
+size_t HeisenbergExchange::approx_nconn(size_t, sys::Particles) const {
     return 1ul<<m_h.m_basis.m_lattice->m_nadj_max;
 }

@@ -309,6 +309,10 @@ void hdf5::GroupWriter::save(std::string name, const std::vector<std::string>&v,
      */
     std::vector<hsize_t> shape = {v.size()};
     auto dspace_handle = H5Screate_simple(1, shape.data(), NULL);
+    /**
+     * make a null selection if this is not the rank we want to output the value of
+     */
+    if (!mpi::i_am(irank)) H5Sselect_none(dspace_handle);
     auto dset_handle = H5Dcreate (m_handle, name.c_str(), memtype, dspace_handle, H5P_DEFAULT,
                       H5P_DEFAULT, H5P_DEFAULT);
 

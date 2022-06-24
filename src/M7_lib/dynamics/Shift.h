@@ -53,12 +53,10 @@ struct Reweighter {
      *  part index
      * @param shift
      *  instantaneous shift
-     * @param icycle
-     *  MC cycle index
      * @param tau
      *  current timestep
      */
-    void add(size_t ipart, defs::ham_comp_t shift, size_t icycle, double tau);
+    void add(size_t ipart, defs::ham_comp_t shift, double tau);
 
 private:
     /**

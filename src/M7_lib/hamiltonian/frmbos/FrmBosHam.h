@@ -40,20 +40,24 @@ struct FrmBosHam : HamOpTerm {
 
     virtual ~FrmBosHam(){}
 
-    virtual defs::ham_t get_coeff_1110(size_t imode, size_t i, size_t j) const {return 0;}
-    virtual defs::ham_t get_coeff_1101(size_t imode, size_t i, size_t j) const {return 0;}
+    virtual defs::ham_t get_coeff_1110(size_t /*imode*/, size_t /*i*/, size_t /*j*/) const {return 0;}
+    virtual defs::ham_t get_coeff_1101(size_t /*imode*/, size_t /*i*/, size_t /*j*/) const {return 0;}
 
-    virtual defs::ham_t get_element_0010(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {return 0;}
-    virtual defs::ham_t get_element_0001(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {return 0;}
-    virtual defs::ham_t get_element_1110(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {return 0;}
-    virtual defs::ham_t get_element_1101(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {return 0;}
+    virtual defs::ham_t get_element_0010(const field::FrmBosOnv& /*onv*/,
+                                         const conn::FrmBosOnv& /*conn*/) const {return 0;}
+    virtual defs::ham_t get_element_0001(const field::FrmBosOnv& /*onv*/,
+                                         const conn::FrmBosOnv& /*conn*/) const {return 0;}
+    virtual defs::ham_t get_element_1110(const field::FrmBosOnv& /*onv*/,
+                                         const conn::FrmBosOnv& /*conn*/) const {return 0;}
+    virtual defs::ham_t get_element_1101(const field::FrmBosOnv& /*onv*/,
+                                         const conn::FrmBosOnv& /*conn*/) const {return 0;}
 
 
-    defs::ham_t get_element(const field::BosOnv &onv, const conn::BosOnv &conn) const {
+    defs::ham_t get_element(const field::BosOnv& /*onv*/, const conn::BosOnv& /*conn*/) const {
         return 0.0;
     }
 
-    defs::ham_t get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+    defs::ham_t get_element(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {
         switch (conn.exsig()) {
             case exsig::ex_0001: return get_element_0001(onv, conn);
             case exsig::ex_0010: return get_element_0010(onv, conn);

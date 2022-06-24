@@ -21,7 +21,7 @@ void Reweighter::update(size_t icycle, size_t ipart, bool begin_cond, defs::ham_
     }
 }
 
-void Reweighter::add(size_t ipart, defs::ham_comp_t shift, size_t icycle, double tau) {
+void Reweighter::add(size_t ipart, defs::ham_comp_t shift, double tau) {
     if (m_opts.m_reweight.m_ncycle == 0) return;
     if (!m_active[ipart]) return;
     add_to_history(ipart, std::exp(tau * (m_const_shift[ipart] - shift)));
@@ -100,7 +100,7 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
             if (m_opts.m_shift.m_reweight.enabled()) {
                 bool reweight_begin_cond = icycle >= variable_mode.icycle_start() + m_opts.m_shift.m_reweight.m_delay;
                 m_reweighter.update(icycle, ipart, reweight_begin_cond, get_average(ipart));
-                m_reweighter.add(ipart, m_values[ipart], icycle, tau);
+                m_reweighter.add(ipart, m_values[ipart], tau);
             }
 
         }

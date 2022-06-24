@@ -74,15 +74,12 @@ public:
      * do Gutzwiller-like importance sampling (if enabled) of the spawning probability "delta"
      * @param delta
      *  reference to the normal spawning probability
-     * @param src_mbf
-     *  source MBF
      * @param dst_mbf
      *  destination MBF
      * @param src_energy
      *  energy of the source MBF is in practice cached in the wavefunction table, so no need to recompute
      */
-    void imp_samp_delta(defs::wf_t& delta, const field::Mbf& src_mbf, const field::Mbf& dst_mbf,
-                        const defs::ham_comp_t& src_energy) const;
+    void imp_samp_delta(defs::wf_t& delta, const field::Mbf& dst_mbf, defs::ham_comp_t src_energy) const;
 
     void imp_samp_delta(defs::wf_t& delta, const field::Mbf& src_mbf, const field::Mbf& dst_mbf) const;
 

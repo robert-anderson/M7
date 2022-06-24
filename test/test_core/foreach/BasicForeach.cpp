@@ -16,7 +16,7 @@ TEST(BasicForeach, CtndUnrestricted0) {
     ctnd::Unrestricted<0> foreach({});
     ASSERT_EQ(foreach.m_niter, 0);
     size_t iiter = 0ul;
-    auto fn = [&](const ctnd::inds_t<0> &inds) { ++iiter; };
+    auto fn = [&](const ctnd::inds_t<0>&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
 }
@@ -98,7 +98,7 @@ TEST(BasicForeach, CtndOrderedStrictAsc0) {
     ctnd::Ordered<0, true, true> foreach(0);
     ASSERT_EQ(foreach.m_niter, 0);
     size_t iiter = 0ul;
-    auto fn = [&](const ctnd::inds_t<0> &inds) { ++iiter; };
+    auto fn = [&](const ctnd::inds_t<0>&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
 }
@@ -168,7 +168,7 @@ TEST(BasicForeach, CtndOrderedStrictDesc0) {
     ctnd::Ordered<0, true, false> foreach(0);
     ASSERT_EQ(foreach.m_niter, 0);
     size_t iiter = 0ul;
-    auto fn = [&](const ctnd::inds_t<0> &inds) { ++iiter; };
+    auto fn = [&](const ctnd::inds_t<0>&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
 }
@@ -205,7 +205,7 @@ TEST(BasicForeach, CtndOrderedAsc0) {
     ctnd::Ordered<0, false, true> foreach(0);
     ASSERT_EQ(foreach.m_niter, 0);
     size_t iiter = 0ul;
-    auto fn = [&](const ctnd::inds_t<0> &inds) { ++iiter; };
+    auto fn = [&](const ctnd::inds_t<0>&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
 }
@@ -242,7 +242,7 @@ TEST(BasicForeach, CtndOrderedDesc0) {
     ctnd::Ordered<0, false, false> foreach(0);
     ASSERT_EQ(foreach.m_niter, 0);
     size_t iiter = 0ul;
-    auto fn = [&](const ctnd::inds_t<0> &inds) { ++iiter; };
+    auto fn = [&](const ctnd::inds_t<0>&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
 }
@@ -266,7 +266,7 @@ TEST(BasicForeach, CtndOrderedDesc3) {
     ctnd::Ordered<nind, false, false> foreach(n);
     auto it = chk_inds.cbegin();
     bool all_correct = true;
-    auto fn = [&](const ctnd::inds_t<nind> &inds) {
+    auto fn = [&](const ctnd::inds_t<nind>& inds) {
         if (inds != *it++) all_correct = false;
     };
     foreach.loop(fn);
@@ -282,7 +282,7 @@ TEST(BasicForeach, RtndUnrestricted0) {
     rtnd::Unrestricted foreach({});
     ASSERT_EQ(foreach.m_niter, 0);
     size_t iiter = 0ul;
-    auto fn = [&](const rtnd::inds_t &inds) { ++iiter; };
+    auto fn = [&](const rtnd::inds_t&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
 }
@@ -364,7 +364,7 @@ TEST(BasicForeach, RtndOrderedStrictAsc0) {
     rtnd::Ordered<true, true> foreach(0, 0);
     ASSERT_EQ(foreach.m_niter, 0);
     size_t iiter = 0ul;
-    auto fn = [&](const rtnd::inds_t &inds) { ++iiter; };
+    auto fn = [&](const rtnd::inds_t&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
 }
@@ -434,7 +434,7 @@ TEST(BasicForeach, RtndOrderedStrictDesc0) {
     rtnd::Ordered<true, false> foreach(0, 0);
     ASSERT_EQ(foreach.m_niter, 0);
     size_t iiter = 0ul;
-    auto fn = [&](const rtnd::inds_t &inds) { ++iiter; };
+    auto fn = [&](const rtnd::inds_t&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
 }
@@ -471,7 +471,7 @@ TEST(BasicForeach, RtndOrderedAsc0) {
     rtnd::Ordered<false, true> foreach(0, 0);
     ASSERT_EQ(foreach.m_niter, 0);
     size_t iiter = 0ul;
-    auto fn = [&](const rtnd::inds_t &inds) { ++iiter; };
+    auto fn = [&](const rtnd::inds_t&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
 }
@@ -508,7 +508,7 @@ TEST(BasicForeach, RtndOrderedDesc0) {
     rtnd::Ordered<false, false> foreach(0, 0);
     ASSERT_EQ(foreach.m_niter, 0);
     size_t iiter = 0ul;
-    auto fn = [&](const rtnd::inds_t &inds) { ++iiter; };
+    auto fn = [&](const rtnd::inds_t&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
 }
@@ -532,7 +532,7 @@ TEST(BasicForeach, RtndOrderedDesc3) {
     rtnd::Ordered<false, false> foreach(n, nind);
     auto it = chk_inds.cbegin();
     bool all_correct = true;
-    auto fn = [&](const rtnd::inds_t &inds) {
+    auto fn = [&](const rtnd::inds_t& inds) {
         if (inds != *it++) all_correct = false;
     };
     foreach.loop(fn);

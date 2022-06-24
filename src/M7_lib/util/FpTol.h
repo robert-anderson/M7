@@ -39,9 +39,9 @@ namespace fptol {
     static constexpr arith::comp_t<T> default_atol_near(const T&) {return default_atol_near<T>();}
 
     template<typename T>
-    static constexpr T default_atol_num(const float& v) {return T(0);}
-    static constexpr float default_atol_num(const float& v) {return 1e-7;}
-    static constexpr double default_atol_num(const double & v) {return 1e-14;}
+    static constexpr T default_atol_num(const float&) {return T(0);}
+    static constexpr float default_atol_num(const float&) {return 1e-7;}
+    static constexpr double default_atol_num(const double&) {return 1e-14;}
 
     template<typename T>
     static constexpr arith::comp_t<T> default_atol_num(const T&) {return default_atol_num<T>();}

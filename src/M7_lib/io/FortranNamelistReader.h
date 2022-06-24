@@ -31,21 +31,21 @@ public:
     std::vector<std::string> read(const std::string &label) const;
 
     template<typename T>
-    void read(std::vector<T>& v, const std::string &label, long offset=0, std::vector<T> default_ = {}) const {
+    void read(std::vector<T>& v, const std::string &label, std::vector<T> default_ = {}) const {
         v = default_;
         auto tokens = read(label);
         if (tokens.empty()) return;
         NumericCsvFileReader::parse(tokens.cbegin(), tokens.cend(), v);
-        for (auto &i: v) i+=offset;
+        //for (auto &i: v) i+=offset;
     }
 
-    void read(std::vector<bool>& v, const std::string &label, long offset=0, std::vector<bool> default_ = {}) const;
+    void read(std::vector<bool>& v, const std::string &label, std::vector<bool> default_ = {}) const;
 
-    std::vector<long> read_ints(const std::string &label, long offset=0, std::vector<long> default_ = {}) const;
+    std::vector<long> read_ints(const std::string &label, std::vector<long> default_ = {}) const;
 
-    std::vector<size_t> read_uints(const std::string &label, long offset=0, std::vector<size_t> default_ = {}) const;
+    std::vector<size_t> read_uints(const std::string &label, std::vector<size_t> default_ = {}) const;
 
-    std::vector<bool> read_bools(const std::string &label, long offset=0, std::vector<bool> default_ = {}) const;
+    std::vector<bool> read_bools(const std::string &label, std::vector<bool> default_ = {}) const;
 
     long read_int(const std::string &label, long default_ = 0l) const;
 

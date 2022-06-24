@@ -23,7 +23,7 @@ TEST(DistMvProd, SparseRealSym) {
     if (mpi::i_am_root()) convert::vector(hash::in_range(0, nrow, 0, 12, false), in);
 
     dist_mv_prod::Sparse<T> prod(local_mat);
-    prod.parallel_multiply(in, out);
+    prod.parallel_multiply(in, out, false);
 
     if (mpi::i_am_root()) {
         global_mat.multiply(in, out_chk);

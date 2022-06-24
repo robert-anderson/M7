@@ -9,7 +9,7 @@ HubbardUniform::HubbardUniform(const FrmHam &h, PRNG &prng) :
     REQUIRE_TRUE(h.is<HubbardFrmHam>(), "given hamiltonian is not of HubbardFrmHam type");
 }
 
-bool HubbardUniform::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
+bool HubbardUniform::draw_frm(size_t, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
     const auto& h = *m_h.as<HubbardFrmHam>();
     /*
      * the number of adjacent sites accessible is not decided till the occupied index has been chosen. If the integer
@@ -51,6 +51,6 @@ defs::prob_t HubbardUniform::prob_frm(const field::FrmOnv &src, const conn::FrmO
     return 1.0/(src.m_basis.m_lattice->m_nadjs[isite]*nelec);
 }
 
-size_t HubbardUniform::approx_nconn(size_t exsig, sys::Particles particles) const {
+size_t HubbardUniform::approx_nconn(size_t, sys::Particles particles) const {
     return particles.m_frm;
 }

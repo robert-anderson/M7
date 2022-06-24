@@ -29,13 +29,13 @@ namespace suite {
         Mbfs(const sys::Basis& basis);
         Mbfs(const sys::Sector& sector);
 
-        field::FrmOnv& operator[](const field::FrmOnv& mbf){
+        field::FrmOnv& operator[](const field::FrmOnv&){
             return m_row.m_frm;
         }
-        field::FrmBosOnv& operator[](const field::FrmBosOnv& mbf){
+        field::FrmBosOnv& operator[](const field::FrmBosOnv&){
             return m_row.m_frmbos;
         }
-        field::BosOnv& operator[](const field::BosOnv& mbf){
+        field::BosOnv& operator[](const field::BosOnv&){
             return m_row.m_bos;
         }
     };
@@ -46,13 +46,13 @@ namespace suite {
         conn::FrmBosOnv m_frmbosonv;
         explicit Conns(const sys::Size& size);
 
-        conn::FrmOnv& operator[](const field::FrmOnv& mbf){
+        conn::FrmOnv& operator[](const field::FrmOnv&){
             return m_frmonv;
         }
-        conn::BosOnv& operator[](const field::BosOnv& mbf){
+        conn::BosOnv& operator[](const field::BosOnv&){
             return m_bosonv;
         }
-        conn::FrmBosOnv& operator[](const field::FrmBosOnv& mbf){
+        conn::FrmBosOnv& operator[](const field::FrmBosOnv&){
             return m_frmbosonv;
         }
     };
@@ -63,13 +63,13 @@ namespace suite {
         com_ops::Bos m_bos;
         ComOps(const sys::Size& size);
 
-        com_ops::Frm& operator[](const field::FrmOnv& mbf){
+        com_ops::Frm& operator[](const field::FrmOnv&){
             return m_frm;
         }
-        com_ops::FrmBos& operator[](const field::FrmBosOnv& mbf){
+        com_ops::FrmBos& operator[](const field::FrmBosOnv&){
             return m_frmbos;
         }
-        com_ops::Bos& operator[](const field::BosOnv& mbf){
+        com_ops::Bos& operator[](const field::BosOnv&){
             return m_bos;
         }
     };

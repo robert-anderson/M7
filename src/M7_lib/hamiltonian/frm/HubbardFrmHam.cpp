@@ -33,10 +33,6 @@ defs::ham_t HubbardFrmHam::get_element_1100(const field::FrmOnv &onv, const conn
     return conn.phase(onv) ? -t_mat_element : t_mat_element;
 }
 
-defs::ham_t HubbardFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
-    return 0;
-}
-
 void HubbardFrmHam::log_data() const {
     FrmHam::log_data();
 }
@@ -46,11 +42,7 @@ defs::ham_t HubbardFrmHam::get_coeff_1100(size_t a, size_t i) const {
     return -m_basis.m_lattice->phase(a, i);
 }
 
-defs::ham_t HubbardFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
-    return 0.0;
-}
-
-HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const conf::Propagator& opts) const {
+HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const conf::Propagator&) const {
     excit_gen_list_t list;
     list.emplace_front(new HubbardUniform(*this, prng));
     return list;

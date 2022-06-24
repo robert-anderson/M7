@@ -17,7 +17,7 @@ TEST(Foreach, CtndUnrestricted0) {
     using namespace basic_foreach::ctnd;
     Unrestricted<0> foreach(shape);
     size_t i = 0ul;
-    auto fn = [&](const inds_t<0>& inds) {++i;};
+    auto fn = [&](const inds_t<0>&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0);
     ASSERT_EQ(foreach.m_niter, 0);
@@ -64,7 +64,7 @@ TEST(Foreach, CtndOrderedStrictAsc0) {
     using namespace basic_foreach::ctnd;
     Ordered<0, true, true> foreach(n);
     size_t i = 0ul;
-    auto fn = [&](const inds_t<0>& inds) {++i;};
+    auto fn = [&](const inds_t<0>&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_niter, 0ul);
@@ -97,7 +97,7 @@ TEST(Foreach, CtndOrderedStrictDesc0) {
     using namespace basic_foreach::ctnd;
     Ordered<0, true, false> foreach(n);
     size_t i = 0ul;
-    auto fn = [&](const inds_t<0>& inds) {++i;};
+    auto fn = [&](const inds_t<0>&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_niter, 0ul);
@@ -130,7 +130,7 @@ TEST(Foreach, CtndOrderedAsc0) {
     using namespace basic_foreach::ctnd;
     Ordered<0, false, true> foreach(n);
     size_t i = 0ul;
-    auto fn = [&](const inds_t<0>& inds) {++i;};
+    auto fn = [&](const inds_t<0>&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_niter, 0ul);
@@ -163,7 +163,7 @@ TEST(Foreach, CtndOrderedDesc0) {
     using namespace basic_foreach::ctnd;
     Ordered<0, false, false> foreach(n);
     size_t i = 0ul;
-    auto fn = [&](const inds_t<0>& inds) {++i;};
+    auto fn = [&](const inds_t<0>&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_niter, 0ul);
@@ -205,7 +205,7 @@ TEST(Foreach, RtndUnrestricted0) {
     using namespace basic_foreach::rtnd;
     Unrestricted foreach(shape);
     size_t i = 0ul;
-    auto fn = [&](const inds_t& inds) {++i;};
+    auto fn = [&](const inds_t&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0);
     ASSERT_EQ(foreach.m_niter, 0);
@@ -252,7 +252,7 @@ TEST(Foreach, RtndOrderedStrictAsc0) {
     using namespace basic_foreach::rtnd;
     Ordered<true, true> foreach(n, 0);
     size_t i = 0ul;
-    auto fn = [&](const inds_t& inds) {++i;};
+    auto fn = [&](const inds_t&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_niter, 0ul);
@@ -285,7 +285,7 @@ TEST(Foreach, RtndOrderedStrictDesc0) {
     using namespace basic_foreach::rtnd;
     Ordered<true, false> foreach(n, 0);
     size_t i = 0ul;
-    auto fn = [&](const inds_t& inds) {++i;};
+    auto fn = [&](const inds_t&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_niter, 0ul);
@@ -318,7 +318,7 @@ TEST(Foreach, RtndOrderedAsc0) {
     using namespace basic_foreach::rtnd;
     Ordered<false, true> foreach(n, 0);
     size_t i = 0ul;
-    auto fn = [&](const inds_t& inds) {++i;};
+    auto fn = [&](const inds_t&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_niter, 0ul);
@@ -351,7 +351,7 @@ TEST(Foreach, RtndOrderedDesc0) {
     using namespace basic_foreach::rtnd;
     Ordered<false, false> foreach(n, 0);
     size_t i = 0ul;
-    auto fn = [&](const inds_t& inds) {++i;};
+    auto fn = [&](const inds_t&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_niter, 0ul);

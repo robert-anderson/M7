@@ -181,7 +181,7 @@ TEST(FrmOnvField, ForeachSetBitTriple) {
 
 
 TEST(FrmOnvField, ForeachAlphaSetBit) {
-    auto include_fn = [](bool alpha, bool beta){
+    auto include_fn = [](bool alpha, bool /*beta*/){
         return alpha;
     };
     auto count_fn = [](const field::FrmOnv& mbf){
@@ -194,7 +194,7 @@ TEST(FrmOnvField, ForeachAlphaSetBit) {
 }
 
 TEST(FrmOnvField, ForeachBetaSetBit) {
-    auto include_fn = [](bool alpha, bool beta){
+    auto include_fn = [](bool /*alpha*/, bool beta){
         return beta;
     };
     auto count_fn = [](const field::FrmOnv& mbf){

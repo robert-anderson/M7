@@ -16,9 +16,9 @@ FrmOnvConnection::FrmOnvConnection(sys::Size size) : FrmOnvConnection(size.m_frm
     size.require_pure_frm();
 }
 
-FrmOnvConnection::FrmOnvConnection(const FrmOnvField &mbf) : FrmOnvConnection(mbf.m_basis){}
+FrmOnvConnection::FrmOnvConnection(const FrmOnvField& mbf) : FrmOnvConnection(mbf.m_basis){}
 
-void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
+void FrmOnvConnection::connect(const FrmOnvField& src, const FrmOnvField &dst) {
     DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
     DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
     DEBUG_ASSERT_FALSE(dst.is_zero(), "should not be computing connection to zero ONV");

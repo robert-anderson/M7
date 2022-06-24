@@ -23,16 +23,16 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
 
     RefExcitsOneExsig(size_t exsig, size_t nroot, size_t nbucket = 100);
 
-    LookupResult operator[](const conn::FrmOnv &key);
+    LookupResult operator[](const conn::FrmOnv& key);
 
-    size_t insert(const conn::FrmOnv &key);
+    size_t insert(const conn::FrmOnv& key);
 
     std::vector<std::string> h5_field_names() const;
 
     using Table<MaeRow>::save;
     void save(hdf5::GroupWriter& gw) const;
 
-    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
+    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, size_t iroot);
 };
 
 
@@ -48,13 +48,15 @@ struct RefExcits : Archivable {
 
     RefExcits(const conf::RefExcits& opts, sys::Size extents, size_t nroot);
 
-    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
+    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, size_t iroot);
 
-    void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
+    void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, size_t iroot);
 
-    void make_contribs(const conn::BosOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
+    void make_contribs(const conn::BosOnv& /*conn*/, const defs::wf_t& /*contrib*/, size_t /*iroot*/){
+        ABORT("not yet implemented");
+    }
 
-    void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& iroot);
+    void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib, size_t iroot);
 
     bool all_stores_empty() const;
 
@@ -62,9 +64,9 @@ struct RefExcits : Archivable {
 
 private:
 
-    void load_fn(hdf5::GroupReader &parent) override;
+    void load_fn(hdf5::GroupReader& /*parent*/) override {}
 
-    void save_fn(hdf5::GroupWriter &parent) override;
+    void save_fn(hdf5::GroupWriter& parent) override;
 };
 
 #endif //M7_REFEXCITS_H

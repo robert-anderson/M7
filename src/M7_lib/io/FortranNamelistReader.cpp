@@ -58,47 +58,44 @@ std::vector<std::string> FortranNamelistReader::read(const std::string &label) c
     return {};
 }
 
-std::vector<long> FortranNamelistReader::read_ints(const std::string &label,
-                                                   long offset, std::vector<long> default_) const {
+std::vector<long> FortranNamelistReader::read_ints(const std::string &label, std::vector<long> default_) const {
     std::vector<long> tmp;
-    read(tmp, label, offset, default_);
+    read(tmp, label, default_);
     return tmp;
 }
 
 std::vector<size_t>
-FortranNamelistReader::read_uints(const std::string &label, long offset, std::vector<size_t> default_) const {
+FortranNamelistReader::read_uints(const std::string &label, std::vector<size_t> default_) const {
     std::vector<size_t> tmp;
-    read(tmp, label, offset, default_);
+    read(tmp, label, default_);
     return tmp;
 }
 
-std::vector<bool> FortranNamelistReader::read_bools(const std::string &label,
-                                                    long offset, std::vector<bool> default_) const {
+std::vector<bool> FortranNamelistReader::read_bools(const std::string &label, std::vector<bool> default_) const {
     std::vector<bool> tmp;
-    read(tmp, label, offset, default_);
+    read(tmp, label, default_);
     return tmp;
 }
 
 long FortranNamelistReader::read_int(const std::string &label, long default_) const {
-    auto tmp = read_ints(label, 0, {default_});
+    auto tmp = read_ints(label, {default_});
     REQUIRE_EQ(tmp.size(), 1ul, "found more than one value for scalar");
     return tmp[0];
 }
 
 size_t FortranNamelistReader::read_uint(const std::string &label, size_t default_) const {
-    auto tmp = read_uints(label, 0, {default_});
+    auto tmp = read_uints(label, {default_});
     REQUIRE_EQ(tmp.size(), 1ul, "found more than one value for scalar");
     return tmp[0];
 }
 
 bool FortranNamelistReader::read_bool(const std::string &label, bool default_) const {
-    auto tmp = read_bools(label, 0, {default_});
+    auto tmp = read_bools(label, {default_});
     REQUIRE_EQ(tmp.size(), 1ul, "found more than one value for scalar");
     return tmp[0];
 }
 
-void FortranNamelistReader::read(std::vector<bool> &v, const std::string &label,
-                                 long offset, std::vector<bool> default_) const {
+void FortranNamelistReader::read(std::vector<bool> &v, const std::string &label, std::vector<bool> default_) const {
     v = default_;
     auto tokens = read(label);
     if (tokens.empty()) return;

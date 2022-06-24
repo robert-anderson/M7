@@ -48,7 +48,7 @@ namespace math {
      *
      */
     template<size_t exp, typename T=void>
-    static typename std::enable_if<exp == 0ul, T>::type pow(T x) {
+    static typename std::enable_if<exp == 0ul, T>::type pow(T /*x*/) {
         return 1ul;
     }
 

@@ -27,20 +27,20 @@ struct NdReduction : ReductionBase<T> {
     using ReductionBase<T>::m_nelement;
 
 private:
-    NdReduction(const NdFormat<nind> &format, tag::Int<1>) :
+    NdReduction(const NdFormat<nind>& /*format*/, tag::Int<true> /*zero_dims*/) :
             ReductionBase<T>(1) {
         m_local_ptr = &m_local;
         m_reduced_ptr = &m_reduced;
     }
 
-    NdReduction(const NdFormat<nind> &format, tag::Int<0>) :
+    NdReduction(const NdFormat<nind>& format, tag::Int<false> /*zero_dims*/) :
             ReductionBase<T>(format.m_nelement), m_local(format.m_shape), m_reduced(format.m_shape) {
         m_local_ptr = reinterpret_cast<T *>(m_local.begin());
         m_reduced_ptr = reinterpret_cast<T *>(m_reduced.begin());
     }
 
 public:
-    NdReduction(const std::array<size_t, nind> &shape) :
+    NdReduction(const std::array<size_t, nind>& shape) :
             NdReduction({shape}, tag::Int<nind == 0>()){}
 
     NdReduction() : NdReduction({}, tag::Int<nind == 0>()){
@@ -89,7 +89,7 @@ struct ReductionSyndicateGroup : ReductionSyndicateGroupBase {
 
     ReductionSyndicateGroup() {}
 
-    void add_member(ReductionBase<T> &member) {
+    void add_member(ReductionBase<T>& member) {
         m_members.push_back(&member);
         m_local_buffer.resize(m_local_buffer.size() + member.m_nelement);
         m_reduced_buffer.resize(m_local_buffer.size());
@@ -153,7 +153,7 @@ struct ReductionSyndicate {
     std::array<std::unique_ptr<ReductionSyndicateGroupBase>, mpi_types.size()> m_groups;
 
     template<typename T>
-    void add_member(ReductionBase<T> &member) {
+    void add_member(ReductionBase<T>& member) {
         auto igroup = mpi_type_ind<T>();
         if (!m_groups[igroup])
             m_groups[igroup] = smart_ptr::make_unique<ReductionSyndicateGroup<T>>();
@@ -163,33 +163,33 @@ struct ReductionSyndicate {
     void add_members() {}
 
     template<typename T, typename ...Args>
-    void add_members(ReductionBase<T> &first, Args &... rest) {
+    void add_members(ReductionBase<T>& first, Args& ... rest) {
         add_member(first);
-        add_members(std::forward<Args &>(rest)...);
+        add_members(std::forward<Args&>(rest)...);
     }
 
     void zero_all_local() {
-        for (auto &group: m_groups) if (group) group->zero_all_local();
+        for (auto& group: m_groups) if (group) group->zero_all_local();
     }
 
     void zero_all_reduced() {
-        for (auto &group: m_groups) if (group) group->zero_all_reduced();
+        for (auto& group: m_groups) if (group) group->zero_all_reduced();
     }
 
     void zero_all() {
-        for (auto &group: m_groups) if (group) group->zero_all();
+        for (auto& group: m_groups) if (group) group->zero_all();
     }
 
     void all_sum() {
-        for (auto &group: m_groups) if (group) group->all_sum();
+        for (auto& group: m_groups) if (group) group->all_sum();
     }
 
     void all_max() {
-        for (auto &group: m_groups) if (group) group->all_max();
+        for (auto& group: m_groups) if (group) group->all_max();
     }
 
     void all_min() {
-        for (auto &group: m_groups) if (group) group->all_min();
+        for (auto& group: m_groups) if (group) group->all_min();
     }
 };
 

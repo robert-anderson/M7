@@ -100,7 +100,7 @@ void lattice::OrthoTopology::get_adj_row(size_t isite, lattice::adj_row_t &row) 
     }
 }
 
-size_t lattice::NullTopology::isite_adj(const defs::ivec_t &inds, size_t idim, size_t value) const {
+size_t lattice::NullTopology::isite_adj(const defs::ivec_t &/*inds*/, size_t /*idim*/, size_t /*value*/) const {
     return ~0ul;
 }
 
@@ -108,11 +108,11 @@ size_t lattice::NullTopology::nsite() const {
     return 0ul;
 }
 
-int lattice::NullTopology::phase(size_t isite, size_t jsite) const {
+int lattice::NullTopology::phase(size_t /*isite*/, size_t /*jsite*/) const {
     return 0;
 }
 
-void lattice::NullTopology::get_adj_row(size_t isite, lattice::adj_row_t &row) const {
+void lattice::NullTopology::get_adj_row(size_t /*isite*/, lattice::adj_row_t &row) const {
     row.clear();
 }
 

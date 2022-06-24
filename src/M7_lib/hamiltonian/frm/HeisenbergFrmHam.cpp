@@ -5,7 +5,7 @@
 #include "HeisenbergFrmHam.h"
 
 
-HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, const std::shared_ptr<lattice::Base> &lattice) :
+HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, const std::shared_ptr<lattice::Base>& lattice) :
     SpinModelFrmHam(lattice), m_j(j){
     m_contribs_2200.set_nonzero(exsig::ex_double);
     m_contribs_2200.set_nonzero(0);
@@ -41,7 +41,7 @@ defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_
     return -m_j * m_basis.m_lattice->phase(asite, bsite) / 2.0;
 }
 
-defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {
+defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv& onv) const {
     /*
      * loop over all sites i and accumulate sum of neighboring spins multiplied by the lattice phase factors (in
      * case of periodic BCs - all handled by Lattice class)
@@ -67,7 +67,7 @@ defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     return si_sj_tot*m_j/4.0;
 }
 
-defs::ham_t HeisenbergFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+defs::ham_t HeisenbergFrmHam::get_element_2200(const field::FrmOnv& , const conn::FrmOnv& conn) const {
     DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_double, "expected 2200 (aka fermion double) exsig");
     if (!conn.kramers_conserve()) return 0;
     // fermi phase is always negative

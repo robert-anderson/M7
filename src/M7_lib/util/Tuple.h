@@ -61,18 +61,10 @@ namespace tuple {
     /*
      * modifiable / modifiable
      */
-    /**
-     * @tparam ind
-     * @tparam fn_t
-     * @tparam item_ts
-     * @param t1
-     * @param t2
-     * @param f
-     * @return
-     */
     template<size_t ind = 0, typename fn_t, typename... item_ts>
     inline typename std::enable_if<ind == sizeof...(item_ts), void>::type
-    foreach(std::tuple<item_ts...> &t1, std::tuple<item_ts...> &t2, fn_t &f) {}
+    foreach(std::tuple<item_ts...>&, std::tuple<item_ts...>&, fn_t&)  // Unused arguments are given no names.
+    {}
 
     template<size_t ind = 0, typename fn_t, typename... item_ts>
     inline typename std::enable_if<ind < sizeof...(item_ts), void>::type

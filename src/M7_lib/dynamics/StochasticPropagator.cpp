@@ -4,8 +4,8 @@
 
 #include "StochasticPropagator.h"
 
-StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const conf::Document &opts,
-                                           const Wavefunction &wf) :
+StochasticPropagator::StochasticPropagator(const Hamiltonian& ham, const conf::Document& opts,
+                                           const Wavefunction& wf) :
         Propagator(opts, ham, wf), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
         m_excit_gen_group(ham, opts.m_propagator, m_prng, wf.m_sector.particles()),
         m_mag_log(opts.m_propagator.m_max_bloom,
@@ -22,9 +22,9 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const conf::D
 }
 
 
-void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
-    const auto &row = wf.m_store.m_row;
-    const defs::wf_t &weight = row.m_weight[ipart];
+void StochasticPropagator::off_diagonal(Wavefunction& wf, const size_t& ipart) {
+    const auto& row = wf.m_store.m_row;
+    const defs::wf_t& weight = row.m_weight[ipart];
     /*
      * for bilinear estimators based on the consolidated annihilation of spawned contributions
      */
@@ -33,7 +33,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     DEBUG_ASSERT_NE(weight, 0.0, "should not attempt off-diagonal propagation from zero weight");
     DEBUG_ASSERT_TRUE(m_ham.complex_valued() || fptol::numeric_real(weight),
                       "real-valued hamiltonian should never result in non-zero imaginary walker component")
-    const auto &src_mbf = row.m_mbf;
+    const auto& src_mbf = row.m_mbf;
     bool flag_initiator = row.m_initiator.get(ipart);
     bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
 
@@ -48,8 +48,8 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
      */
     src_mbf.m_decoded.clear();
 
-    auto &conn = m_conn[src_mbf];
-    auto &dst_mbf = m_dst[src_mbf];
+    auto& conn = m_conn[src_mbf];
+    auto& dst_mbf = m_dst[src_mbf];
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
 
         conn.clear();
@@ -72,7 +72,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         conn.apply(src_mbf, dst_mbf);
         auto delta = -tau() * phase(weight) * helem / prob_gen;
         if (fptol::numeric_zero(delta)) continue;
-        imp_samp_delta(delta, src_mbf, dst_mbf, row.m_hdiag);
+        imp_samp_delta(delta, dst_mbf, row.m_hdiag);
         /*
          * the stochastically-realized spawned contribution is equal to delta if delta is not lower in magnitude than
          * the minimum magnitude, otherwise it is stochastically rounded with respect to that magnitude
@@ -117,10 +117,10 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     }
 }
 
-void StochasticPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
-    auto &row = wf.m_store.m_row;
+void StochasticPropagator::diagonal(Wavefunction& wf, const size_t& ipart) {
+    auto& row = wf.m_store.m_row;
     bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
-    const defs::ham_comp_t &hdiag = row.m_hdiag;
+    const defs::ham_comp_t& hdiag = row.m_hdiag;
     if (flag_deterministic) {
         wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
     } else {
@@ -145,7 +145,7 @@ std::vector<defs::prob_t> StochasticPropagator::excit_gen_case_probs() const {
     return m_excit_gen_group.get_probs();
 }
 
-void StochasticPropagator::update(const size_t &icycle, const Wavefunction &wf) {
+void StochasticPropagator::update(const size_t& icycle, const Wavefunction& wf) {
     Propagator::update(icycle, wf);
     m_mag_log.update(icycle, m_tau, m_excit_gen_group);
 }

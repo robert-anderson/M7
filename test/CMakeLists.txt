@@ -28,9 +28,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         PUBLIC
             -g
         PRIVATE
-            -Wno-unused-function -Wno-unused-parameter
-            -rdynamic
             -Wall -Wextra
+            -Wno-unused-function -Wno-cast-function-type
+            -rdynamic
     )
     if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
@@ -47,7 +47,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
         PUBLIC
             -g
         PRIVATE
-            -Wno-unused-function -Wno-unused-parameter
+            -Wno-unused-function
             -rdynamic
             -Wall -Wextra
     )

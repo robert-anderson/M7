@@ -5,7 +5,7 @@
 #include "Pchb1101hc.h"
 #include "M7_lib/util/Math.h"
 
-Pchb1101hc::Pchb1101hc(const FrmBosHam &h, PRNG &prng) :
+Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
         FrmBosExcitGen(h, prng, {exsig::ex_1101, exsig::ex_1110}, "precomputed heatbath"),
         m_pick_n_given_pq(math::pow<2>(h.m_basis.m_frm.m_nspinorb), h.m_basis.m_bos.m_nmode) {
     const auto nmode = m_h.m_basis.m_bos.m_nmode;
@@ -32,8 +32,8 @@ Pchb1101hc::Pchb1101hc(const FrmBosHam &h, PRNG &prng) :
     mpi::barrier();
 }
 
-bool Pchb1101hc::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
-                             defs::prob_t &prob, conn::FrmBosOnv &conn) {
+bool Pchb1101hc::draw_frmbos(size_t exsig, const field::FrmBosOnv& src,
+                             defs::prob_t& prob, conn::FrmBosOnv& conn) {
     /*
      * draw random occupied and vacant fermion indices
      */
@@ -61,8 +61,8 @@ bool Pchb1101hc::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
     return true;
 }
 
-defs::prob_t Pchb1101hc::prob_h_frmbos(const field::FrmBosOnv &src,
-                                       const conn::FrmBosOnv &conn, defs::ham_t helem) const {
+defs::prob_t Pchb1101hc::prob_h_frmbos(const field::FrmBosOnv& src,
+                                       const conn::FrmBosOnv& conn, defs::ham_t helem) const {
     auto prob = UniformSingles::prob_spin_conserve_fn(src.m_frm, conn.m_frm);
     const bool cre = exsig::decode_nbos_cre(conn.exsig());
     const auto p = cre ? conn.m_frm.m_cre[0]: conn.m_frm.m_ann[0];
@@ -71,10 +71,10 @@ defs::prob_t Pchb1101hc::prob_h_frmbos(const field::FrmBosOnv &src,
     return prob * std::abs(helem) / (m_pick_n_given_pq.norm(pq));
 }
 
-defs::prob_t Pchb1101hc::prob_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn) const {
+defs::prob_t Pchb1101hc::prob_frmbos(const field::FrmBosOnv& src, const conn::FrmBosOnv& conn) const {
     return prob_h_frmbos(src, conn, m_h.get_element(src, conn));
 }
 
-size_t Pchb1101hc::approx_nconn(size_t exsig, sys::Particles particles) const {
+size_t Pchb1101hc::approx_nconn(size_t, sys::Particles) const {
     return m_h.m_basis.m_frm.m_nsite*m_h.m_basis.m_bos.m_nmode;
 }

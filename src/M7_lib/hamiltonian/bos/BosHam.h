@@ -40,49 +40,25 @@ struct BosHam : HamOpTerm {
             m_contribs_0010(exsig::ex_0010), m_contribs_0001(exsig::ex_0001),
             m_contribs_0011(exsig::ex_0011), m_contribs_0022(exsig::ex_0022) {}
 
-private:
-    /**
-     * particle sector information can derive from the hamiltonian definition or from the configuration document, and
-     * sometimes these can differ. the configuration document is treated as the authority, and any definitions it makes
-     * override any that may have already been inferred from the hamiltonian definition
-     * @param ham_elecs
-     *  bosons inferred from the H definition
-     * @param conf_elecs
-     *  bosons provided in the configuration document (authoritative)
-     * @return
-     *  combined bosons object
-     */
-//    static sys::bos::Bosons make_bosons(const sys::bos::Bosons& from_ham, const sys::bos::Bosons& from_conf){
-//        const size_t nboson = from_conf.has_value() ? from_conf : from_ham;
-//        const bool conserve = from_ham.conserve();
-//        const size_t occ_cutoff = from_conf.m_occ_cutoff;
-//        return {nboson, conserve, occ_cutoff};
-//    }
-
-public:
-
-//    BosHam(const sys::bos::Basis& sector, const sys::bos::Bosons& from_conf) :
-//            BosHam(sys::bos::Particles(sector.m_basis, make_bosons(sector.m_bosons, from_conf))){}
-
 	virtual ~BosHam(){}
 
-    virtual defs::ham_t get_coeff_0011(size_t i, size_t j) const {return 0;}
-    virtual defs::ham_t get_coeff_0022(size_t i, size_t j,
-                                       size_t k, size_t l) const {return 0;}
+    virtual defs::ham_t get_coeff_0011(size_t /*i*/, size_t /*j*/) const {return 0;}
+    virtual defs::ham_t get_coeff_0022(size_t /*i*/, size_t /*j*/,
+                                       size_t /*k*/, size_t /*l*/) const {return 0;}
 
-    virtual defs::ham_t get_element_0000(const field::BosOnv &onv) const {return 0;}
-    virtual defs::ham_t get_element_0011(const field::BosOnv &onv, const conn::BosOnv& conn) const {return 0;}
-    virtual defs::ham_t get_element_0022(const field::BosOnv &onv, const conn::BosOnv& conn) const {return 0;}
+    virtual defs::ham_t get_element_0000(const field::BosOnv& /*onv*/) const {return 0;}
+    virtual defs::ham_t get_element_0011(const field::BosOnv& /*onv*/, const conn::BosOnv& /*conn*/) const {return 0;}
+    virtual defs::ham_t get_element_0022(const field::BosOnv& /*onv*/, const conn::BosOnv& /*conn*/) const {return 0;}
 
-    defs::ham_t get_element(const field::BosOnv &onv) const {
+    defs::ham_t get_element(const field::BosOnv& onv) const {
         return get_element_0000(onv);
     }
 
-    defs::ham_comp_t get_energy(const field::BosOnv &onv) const {
+    defs::ham_comp_t get_energy(const field::BosOnv& onv) const {
         return arith::real(get_element(onv));
     }
 
-    defs::ham_t get_element(const field::BosOnv &src, const conn::BosOnv& conn) const {
+    defs::ham_t get_element(const field::BosOnv& src, const conn::BosOnv& conn) const {
         switch (conn.size()) {
             case 0: return get_element_0000(src);
             case 2: return get_element_0011(src, conn);

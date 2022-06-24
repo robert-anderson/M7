@@ -4,25 +4,14 @@
 
 #include "FrmBosExcitGen.h"
 
-FrmBosExcitGen::FrmBosExcitGen(const FrmBosHam &h, PRNG &prng, defs::ivec_t exsigs, std::string description) :
+FrmBosExcitGen::FrmBosExcitGen(const FrmBosHam& h, PRNG& prng, defs::ivec_t exsigs, std::string description) :
         ExcitGen(prng, std::move(exsigs), std::move(description)), m_h(h) {}
 
-bool FrmBosExcitGen::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,
-                                defs::ham_t &helem, conn::FrmOnv &conn) {
-    helem = 0.0;
-    return false;
-}
 
-bool FrmBosExcitGen::draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &src, defs::prob_t &prob,
-                                   defs::ham_t &helem, conn::FrmBosOnv &conn) {
+bool FrmBosExcitGen::draw_h_frmbos(size_t exsig, const field::FrmBosOnv& src, defs::prob_t& prob,
+                                   defs::ham_t& helem, conn::FrmBosOnv& conn) {
     auto result = draw(exsig, src, prob, conn);
     if (!result) return false;
     helem = m_h.get_element(src, conn);
     return ham::is_significant(helem);
-}
-
-bool FrmBosExcitGen::draw_h_bos(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob,
-                                defs::ham_t &helem, conn::BosOnv &conn) {
-    helem = 0.0;
-    return false;
 }

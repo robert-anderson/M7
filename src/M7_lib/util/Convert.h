@@ -14,9 +14,9 @@
 
 namespace convert {
 
-    constexpr size_t default_fp(tag::Int<0> is_fp) { return 0ul; }
+    constexpr size_t default_fp(tag::Int<0>) { return 0ul; }
 
-    constexpr size_t default_fp(tag::Int<1> is_fp) { return 6ul; }
+    constexpr size_t default_fp(tag::Int<1>) { return 6ul; }
 
     template<typename T>
     constexpr size_t default_fp() {
@@ -35,7 +35,7 @@ namespace convert {
      *  string representation of the integer conversion
      */
     template<typename T>
-    static std::string to_string(const T &v, tag::Int<true> is_convertible_to_size_t) {
+    static std::string to_string(const T &v, tag::Int<true> /*is_convertible_to_size_t*/) {
         return std::to_string(static_cast<size_t>(v));
     }
 
@@ -51,7 +51,7 @@ namespace convert {
      *  result of object's own to_string definition
      */
     template<typename T>
-    static std::string to_string(const T &v, tag::Int<false> is_convertible_to_size_t) {
+    static std::string to_string(const T &v, tag::Int<false> /*is_convertible_to_size_t*/) {
         return v.to_string();
     }
 
@@ -65,8 +65,13 @@ namespace convert {
      * for types that are convertible to integer
      */
     template<typename T>
-    static string_if_not_arith_t<T> to_string(const T &v, size_t fp = default_fp<T>()) {
+    static string_if_not_arith_t<T> to_string(const T &v) {
         return to_string(v, tag::Int<std::is_convertible<T, size_t>::value>());
+    }
+
+    template<typename T>
+    static string_if_not_arith_t<T> to_string(const T &v, size_t /*fp*/) {
+        return to_string(v);
     }
 
     /**
@@ -81,7 +86,7 @@ namespace convert {
     }
 
     template<typename T>
-    static std::string to_string(const T *v, size_t fp = 0ul) {
+    static std::string to_string(const T *v) {
         if (!v) return "NULL";
         std::stringstream tmp;
         tmp << v;
@@ -89,11 +94,21 @@ namespace convert {
     }
 
     template<typename T>
-    static std::string to_string(T *const v, size_t fp = 0ul) {
+    static std::string to_string(const T *v, size_t /*fp*/) {
+        return to_string(v);
+    }
+
+    template<typename T>
+    static std::string to_string(T *const v) {
         if (!v) return "NULL";
         std::stringstream tmp;
         tmp << v;
         return tmp.str();
+    }
+
+    template<typename T>
+    static std::string to_string(T *const v, size_t /*fp*/) {
+        return to_string(v);
     }
 
     template<typename T>
@@ -101,8 +116,18 @@ namespace convert {
         return "(" + to_string(v.real(), fp) + ", " + to_string(v.imag(), fp) + ")";
     }
 
-    static std::string to_string(const std::string &str, size_t fp = 0ul) {
+    static std::string to_string(const std::string &str) {
         return "\"" + str + "\"";
+    }
+
+    /**
+     * such methods must be implemented so we can rely on overloading to work for all types, not just those for which
+     * the floating point precision is meaningful
+     * @param str
+     * @return
+     */
+    static std::string to_string(const std::string &str, size_t /*fp*/) {
+        return to_string(str);
     }
 
     template<typename T>
@@ -147,8 +172,12 @@ namespace convert {
         return to_string(tmp, fp);
     }
 
-    static std::string to_string(bool v, size_t fp = 0ul) {
+    static std::string to_string(bool v) {
         return v ? "true" : "false";
+    }
+
+    static std::string to_string(bool v, size_t) {
+        return to_string(v);
     }
 
     template<typename narrow_t, typename wide_t>

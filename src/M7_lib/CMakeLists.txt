@@ -99,7 +99,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         PUBLIC
              -mbmi -g
         PRIVATE
-            -Wno-unused-function -Wno-unused-parameter -Wno-cast-function-type
+            -Wno-unused-function -Wno-cast-function-type
             -Wall -Wextra
     )
     if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
@@ -126,7 +126,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
         PUBLIC
              -mbmi -g
         PRIVATE
-            -Wno-unused-function -Wno-unused-parameter -Wno-bad-function-cast
+            -Wno-unused-function -Wno-bad-function-cast
             #-Wall -Wextra
     )
     if (${CMAKE_BUILD_TYPE} STREQUAL "Release")

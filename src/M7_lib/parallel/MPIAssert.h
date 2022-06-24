@@ -218,7 +218,11 @@ namespace asserts {
  * calling this macro on var suppresses unused variable warnings and expresses the intention to use var only in the
  * debug builds
  */
-#define DEBUG_ONLY(var) (void)(var)
+#ifndef NDEBUG
+#define DEBUG_ONLY(var)
+#else
+#define DEBUG_ONLY(var) datatype::unused(var);
+#endif
 
 #define MPI_EQ_BASE(kind, lhs, rhs, collective, reason) asserts::eq(kind, lhs, rhs, #lhs, #rhs, __FILE__, __LINE__, collective, reason);
 #define MPI_NE_BASE(kind, lhs, rhs, collective, reason) asserts::ne(kind, lhs, rhs, #lhs, #rhs, __FILE__, __LINE__, collective, reason);

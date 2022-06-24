@@ -95,6 +95,19 @@ namespace datatype {
 
     template<>
     std::string name<bool>() { return "bool"; }
+
+    /**
+     * this is a recursive parameter pack expansion which casts every element to void, this is interpreted by the
+     * compiler as the parameter being "used", and therefore suppresses the unused-parameter warnings when called, but
+     * does not entail any excess overhead and should be optimized out
+     */
+    static void unused(){}
+
+    template<typename T, typename ...Args>
+    void unused(T&& first, Args&&... args) {
+        (void)first;
+        unused(args...);
+    }
 }
 
 

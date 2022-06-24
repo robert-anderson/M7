@@ -94,7 +94,7 @@ public:
     void excite(inds_t ann1, inds_t ann2, inds_t cre1, inds_t cre2) {
         auto* dptr = reinterpret_cast<size_t *>(begin());
         clr(dptr, ann1);
-        clr(dptr, ann1);
+        clr(dptr, ann2);
         set(dptr, cre1);
         set(dptr, cre2);
     }

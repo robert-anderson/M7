@@ -76,7 +76,7 @@ namespace arith {
      * generic case: imag part is zero
      */
     template<typename T>
-    static constexpr T imag(const T &v) {
+    static constexpr T imag(const T&) {
         static_assert(!is_complex<T>(), "Imaginary part of complex values should be taken by overloads.");
         return T(0);
     }

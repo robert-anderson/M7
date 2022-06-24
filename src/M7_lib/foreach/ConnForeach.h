@@ -37,19 +37,19 @@ namespace conn_foreach {
 
         using function_t = std::function<void()>;
     protected:
-        virtual void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t &fn) {};
+        virtual void frm_loop(conn::FrmOnv& /*conn*/, const field::FrmOnv& /*src*/, const function_t& /*fn*/) {};
 
-        virtual void bos_loop(conn::BosOnv &conn, const field::BosOnv &src, const function_t &fn) {};
+        virtual void bos_loop(conn::BosOnv& /*conn*/, const field::BosOnv& /*src*/, const function_t& /*fn*/) {};
 
-        virtual void frmbos_loop(conn::FrmBosOnv &conn, const field::FrmBosOnv &src, const function_t &fn) {};
+        virtual void frmbos_loop(conn::FrmBosOnv& /*conn*/, const field::FrmBosOnv& /*src*/, const function_t& /*fn*/) {};
 
 
     public:
-        void loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t &fn);
+        void loop(conn::FrmOnv& conn, const field::FrmOnv& src, const function_t& fn);
 
-        void loop(conn::BosOnv &conn, const field::BosOnv &src, const function_t &fn);
+        void loop(conn::BosOnv& conn, const field::BosOnv& src, const function_t& fn);
 
-        void loop(conn::FrmBosOnv &conn, const field::FrmBosOnv &src, const function_t &fn);
+        void loop(conn::FrmBosOnv& conn, const field::FrmBosOnv& src, const function_t& fn);
     };
 
 
@@ -63,7 +63,7 @@ namespace conn_foreach {
             }
 
         protected:
-            void frmbos_loop(conn::FrmBosOnv &conn, const field::FrmBosOnv &src, const function_t &fn) override;
+            void frmbos_loop(conn::FrmBosOnv& conn, const field::FrmBosOnv& src, const function_t& fn) override;
         };
 
         template<size_t nop>
@@ -71,9 +71,9 @@ namespace conn_foreach {
             General() : Base(exsig::encode(nop, nop, 0, 0)) {}
 
             template<typename fn_t>
-            void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
-                const auto &occs = src.m_decoded.m_simple_occs.get();
-                const auto &vacs = src.m_decoded.m_simple_vacs.get();
+            void loop_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn) {
+                const auto& occs = src.m_decoded.m_simple_occs.get();
+                const auto& vacs = src.m_decoded.m_simple_vacs.get();
                 auto ann_fn = [&conn, &occs, &vacs, &fn](const ctnd::inds_t<nop> &ann_ops) {
                     conn.m_ann.clear();
                     for (size_t iop = 0ul; iop < nop; ++iop) conn.m_ann.add(occs[ann_ops[iop]]);
@@ -90,7 +90,7 @@ namespace conn_foreach {
             }
 
         protected:
-            void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t &fn) override {
+            void frm_loop(conn::FrmOnv& conn, const field::FrmOnv& src, const function_t& fn) override {
                 loop_fn(conn, src, fn);
             }
         };
@@ -102,7 +102,7 @@ namespace conn_foreach {
         private:
 
             template<typename fn_t, size_t nbeta, size_t nalpha>
-            void loop_one_beta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn,
+            void loop_one_beta_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn,
                                   tag::Int<nbeta>, tag::Int<nalpha>) {
                 const auto &occs = src.m_decoded.m_spin_occs.get();
                 const auto &vacs = src.m_decoded.m_spin_vacs.get();
@@ -134,20 +134,20 @@ namespace conn_foreach {
             }
 
             template<typename fn_t, size_t nbeta>
-            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tag::Int<nbeta> tag) {
+            void loop_all_nbeta_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn, tag::Int<nbeta> tag) {
                 static_assert(nop >= nbeta, "number of beta-spin operators cannot exceed excit level");
                 loop_one_beta_fn<fn_t>(conn, src, fn, tag, tag::Int<nop - nbeta>());
                 loop_all_nbeta_fn<fn_t>(conn, src, fn, tag::Int<nbeta + 1>());
             }
 
             template<typename fn_t>
-            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src,
-                                   const fn_t &fn, tag::Int<nop + 1> tag) {}
+            void loop_all_nbeta_fn(conn::FrmOnv& /*conn*/, const field::FrmOnv& /*src*/,
+                                   const fn_t& /*fn*/, tag::Int<nop + 1>) {}
 
         public:
 
             template<typename fn_t>
-            void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
+            void loop_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn) {
                 functor::assert_prototype<void()>(fn);
 
                 /*
@@ -159,7 +159,7 @@ namespace conn_foreach {
             }
 
         protected:
-            void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t &fn) override {
+            void frm_loop(conn::FrmOnv& conn, const field::FrmOnv& src, const function_t& fn) override {
                 loop_fn(conn, src, fn);
             }
         };
@@ -169,7 +169,7 @@ namespace conn_foreach {
             Hubbard() : Base(exsig::ex_single) {}
 
             template<typename fn_t>
-            void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
+            void loop_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn) {
                 functor::assert_prototype<void()>(fn);
                 const auto lattice = src.m_basis.m_lattice;
                 REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
@@ -192,7 +192,7 @@ namespace conn_foreach {
             }
 
         protected:
-            void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t &fn) override {
+            void frm_loop(conn::FrmOnv& conn, const field::FrmOnv& src, const function_t& fn) override {
                 loop_fn(conn, src, fn);
             }
         };
@@ -202,7 +202,7 @@ namespace conn_foreach {
             Heisenberg() : Base(exsig::ex_double) {}
 
             template<typename fn_t>
-            void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
+            void loop_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn) {
                 functor::assert_prototype<void()>(fn);
                 // TODO: rewrite with m_decoded.m_alpha_only_occs when implemented
                 const auto lattice = src.m_basis.m_lattice;
@@ -230,7 +230,7 @@ namespace conn_foreach {
 
 
         protected:
-            void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t &fn) override {
+            void frm_loop(conn::FrmOnv& conn, const field::FrmOnv& src, const function_t& fn) override {
                 loop_fn(conn, src, fn);
             }
         };
@@ -243,7 +243,7 @@ namespace conn_foreach {
             }
 
         protected:
-            void frmbos_loop(conn::FrmBosOnv &conn, const field::FrmBosOnv &src, const function_t &fn) override {
+            void frmbos_loop(conn::FrmBosOnv& conn, const field::FrmBosOnv& src, const function_t& fn) override {
                 bos_loop(conn.m_bos, src.m_bos, fn);
 
             }
@@ -253,7 +253,7 @@ namespace conn_foreach {
             Ann() : Base(exsig::ex_0001) {}
 
             template<typename fn_t>
-            void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
+            void loop_fn(conn::BosOnv& conn, const field::BosOnv& src, const fn_t& fn) {
                 functor::assert_prototype<void()>(fn);
                 conn.clear();
                 const auto &occs = src.m_decoded.m_occ_modes.get();
@@ -264,7 +264,7 @@ namespace conn_foreach {
             }
 
         protected:
-            void bos_loop(conn::BosOnv &conn, const field::BosOnv &src, const function_t &fn) override {
+            void bos_loop(conn::BosOnv& conn, const field::BosOnv& src, const function_t& fn) override {
                 loop_fn(conn, src, fn);
             }
         };
@@ -273,7 +273,7 @@ namespace conn_foreach {
             Cre(): Base(exsig::ex_0010) {}
 
             template<typename fn_t>
-            void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
+            void loop_fn(conn::BosOnv& conn, const field::BosOnv& src, const fn_t& fn) {
                 functor::assert_prototype<void()>(fn);
                 conn.clear();
                 for (size_t imode = 0ul; imode < src.m_size; ++imode) {
@@ -284,7 +284,7 @@ namespace conn_foreach {
             }
 
         protected:
-            void bos_loop(conn::BosOnv &conn, const field::BosOnv &src, const function_t &fn) override {
+            void bos_loop(conn::BosOnv& conn, const field::BosOnv& src, const function_t& fn) override {
                 loop_fn(conn, src, fn);
             }
         };
@@ -322,7 +322,7 @@ namespace conn_foreach {
             Product(): Base(combined_exsig()){}
 
             template<typename fn_t>
-            void loop_fn(conn::FrmBosOnv &conn, const field::FrmBosOnv &src, const fn_t &fn) {
+            void loop_fn(conn::FrmBosOnv& conn, const field::FrmBosOnv& src, const fn_t& fn) {
                 conn.clear();
                 auto frm_fn = [&](){
                     auto bos_fn = [&]() {
@@ -334,7 +334,7 @@ namespace conn_foreach {
             }
 
         protected:
-            void frmbos_loop(conn::FrmBosOnv &conn, const field::FrmBosOnv &src, const function_t &fn) override {
+            void frmbos_loop(conn::FrmBosOnv& conn, const field::FrmBosOnv& src, const function_t& fn) override {
                 loop_fn(conn, src, fn);
             }
         };

@@ -23,7 +23,7 @@ class InteractingBoseGasDoubles : BosExcitGen {
         return dynamic_cast<const InteractingBoseGasBosHam*>(m_h.m_bos.get());
     }
 
-    bool draw_h_bos(const size_t &exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem,
+    bool draw_h_bos(size_t exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem,
                     conn::BosOnv &conn) override {
         auto h = h_cast();
         DEBUG_ONLY(h);
@@ -50,7 +50,7 @@ class InteractingBoseGasDoubles : BosExcitGen {
         return true;
     }
 
-    bool draw_bos(const size_t &exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
+    bool draw_bos(size_t exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
                   conn::BosOnv &conn) override {
         defs::ham_t helem;
         return draw_h_bos(exsig, src, orbs, prob, helem, conn);

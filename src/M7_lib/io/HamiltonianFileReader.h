@@ -29,7 +29,7 @@ public:
 
     virtual size_t ranksig(const defs::ivec_t &inds) const = 0;
 
-    virtual size_t exsig(const defs::ivec_t &inds, const size_t& ranksig) const = 0;
+    virtual size_t exsig(const defs::ivec_t &inds, size_t ranksig) const = 0;
 
     size_t exsig(const defs::ivec_t &inds) const;
 

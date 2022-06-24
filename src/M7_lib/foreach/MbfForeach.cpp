@@ -65,4 +65,4 @@ void mbf_foreach::bos::GeneralOpen::bos_loop(field::BosOnv &mbf, const function_
     loop_fn(mbf, fn);
 }
 
-mbf_foreach::frm_bos::Base::Base(const sys::Sector& sector, size_t niter) : mbf_foreach::Base(niter) {}
+mbf_foreach::frm_bos::Base::Base(size_t niter) : mbf_foreach::Base(niter) {}

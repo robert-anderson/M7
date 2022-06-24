@@ -10,23 +10,14 @@ SpinSquareFrmHam::SpinSquareFrmHam(const sys::frm::Basis& basis, const sys::frm:
                  "spin square operator requires a Hilbert space restricted to a given 2*Ms sector");
 }
 
-defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
+defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv& onv) const {
     return m_sz_term + onv.nopen_shell_beta();
 }
 
-defs::ham_t SpinSquareFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
-    return 0.0;
-}
-
-
-defs::ham_t SpinSquareFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+defs::ham_t SpinSquareFrmHam::get_element_2200(const field::FrmOnv& onv, const conn::FrmOnv& conn) const {
     const auto element = this->get_coeff_2200(
                 conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
     return conn.phase(onv) ? -element : element;
-}
-
-defs::ham_t SpinSquareFrmHam::get_coeff_1100(size_t a, size_t i) const {
-    return 0.0;
 }
 
 defs::ham_t SpinSquareFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {

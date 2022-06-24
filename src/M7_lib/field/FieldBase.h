@@ -129,8 +129,7 @@ public:
 
     virtual std::string to_string() const = 0;
 
-    virtual void h5_write_attrs(hid_t parent_handle) {
-
+    virtual void h5_write_attrs(hid_t /*parent_handle*/) {
     }
 
     virtual void save(hdf5::NdDistListWriter &h5list, const size_t &iitem) const {

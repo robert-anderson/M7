@@ -154,49 +154,49 @@ size_t FrmOnvField::get_beta_dataword(size_t idataword) const {
 
 size_t FrmOnvField::nalpha() const {
     size_t count = 0ul;
-    auto fn = [&count](size_t isite){++count;};
+    auto fn = [&count](size_t){++count;};
     foreach_alpha(fn);
     return count;
 }
 
 size_t FrmOnvField::nbeta() const {
     size_t count = 0ul;
-    auto fn = [&count](size_t isite){++count;};
+    auto fn = [&count](size_t){++count;};
     foreach_beta(fn);
     return count;
 }
 
 size_t FrmOnvField::nopen_shell() const {
     size_t count = 0ul;
-    auto fn = [&count](size_t isite){++count;};
+    auto fn = [&count](size_t){++count;};
     foreach_open_shell(fn);
     return count;
 }
 
 size_t FrmOnvField::nopen_shell_alpha() const {
     size_t count = 0ul;
-    auto fn = [&count](size_t isite){++count;};
+    auto fn = [&count](size_t){++count;};
     foreach_open_shell_alpha(fn);
     return count;
 }
 
 size_t FrmOnvField::nopen_shell_beta() const {
     size_t count = 0ul;
-    auto fn = [&count](size_t isite){++count;};
+    auto fn = [&count](size_t){++count;};
     foreach_open_shell_beta(fn);
     return count;
 }
 
 size_t FrmOnvField::nclosed_shell() const {
     size_t count = 0ul;
-    auto fn = [&count](size_t isite){++count;};
+    auto fn = [&count](size_t){++count;};
     foreach_closed_shell(fn);
     return count;
 }
 
 size_t FrmOnvField::noccupied_site() const {
     size_t count = 0ul;
-    auto fn = [&count](size_t isite){++count;};
+    auto fn = [&count](size_t){++count;};
     foreach_occupied_site(fn);
     return count;
 }

@@ -18,7 +18,7 @@ FcidumpInfo::FcidumpInfo(const FortranNamelistReader &reader) :
         FcidumpInfo(reader.m_fname, reader.read_bool("UHF"), reader.read_bool("TREL"),
                     reader.read_uint("NELEC"), reader.read_uint("NORB"),
                     reader.read_int("MS2", sys::frm::c_undefined_ms2),
-                    reader.read_uints("ORBSYM", -1, {})){}
+                    integer::dec(reader.read_uints("ORBSYM", {}))){}
 
 FcidumpInfo::FcidumpInfo(std::string fname) : FcidumpInfo(FortranNamelistReader(fname)){}
 
@@ -65,7 +65,7 @@ size_t FcidumpFileReader::ranksig(const defs::ivec_t &inds) const {
     return exsig::encode(nset_inds/2, nset_inds/2, 0, 0);
 }
 
-size_t FcidumpFileReader::exsig(const defs::ivec_t &inds, const size_t& ranksig) const {
+size_t FcidumpFileReader::exsig(const defs::ivec_t &inds, size_t ranksig) const {
     switch (ranksig) {
         case 0ul: return 0ul;
         case exsig::ex_single:

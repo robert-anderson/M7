@@ -21,7 +21,7 @@ void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
     log::info("this storage scheme assumes that {} integrals are equivalent", convert::to_string(equivs));
 }
 
-GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo &info, bool spin_major) {
+GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo& info, bool spin_major) {
     if (!m_basis.m_nsite) return {nullptr, nullptr};
 
     REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),m_basis.ncoeff_ind(),"site map size incorrect");
@@ -59,7 +59,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo &info, bool 
             continue;
         }
 
-        auto &rank_contrib = ranksig == ex_single ? m_contribs_1100 : m_contribs_2200;
+        auto& rank_contrib = ranksig == ex_single ? m_contribs_1100 : m_contribs_2200;
         rank_contrib.set_nonzero(exsig);
 
         if (ranksig == ex_single) {
@@ -129,7 +129,7 @@ defs::ham_t GeneralFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j
     return -m_ints.m_2e->get(a, b, j, i);
 }
 
-defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv &onv) const {
+defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv& onv) const {
     defs::ham_t element = m_e_core;
     auto singles_fn = [&](size_t i) { element += GeneralFrmHam::get_coeff_1100(i, i); };
     auto doubles_fn = [&](size_t i, size_t j) {
@@ -139,10 +139,10 @@ defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     return element;
 }
 
-defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv& onv, const conn::FrmOnv& conn) const {
     DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_single, "expected 1100 (aka fermion single) exsig");
-    const auto &ann = conn.m_ann[0];
-    const auto &cre = conn.m_cre[0];
+    const auto& ann = conn.m_ann[0];
+    const auto& cre = conn.m_cre[0];
 
     defs::ham_t element = GeneralFrmHam::get_coeff_1100(cre, ann);
     auto fn = [&](size_t ibit) {
@@ -152,14 +152,14 @@ defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv &onv, const conn
     return conn.phase(onv) ? -element : element;
 }
 
-defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv& onv, const conn::FrmOnv& conn) const {
     DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_double, "expected 2200 (aka fermion double) exsig");
     const auto element = GeneralFrmHam::get_coeff_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
     return conn.phase(onv) ? -element : element;
 }
 
 HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
-        PRNG &prng, const conf::Propagator &opts, const FrmHam &h) {
+        PRNG& prng, const conf::Propagator& /*opts*/, const FrmHam& h) {
     using namespace exsig;
     excit_gen_list_t list;
     bool any_singles = h.m_contribs_1100.is_nonzero(ex_single) || h.m_contribs_2200.is_nonzero(ex_single);
@@ -170,7 +170,7 @@ HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
 }
 
 HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
-        PRNG &prng, const conf::Propagator &opts) const {
+        PRNG& prng, const conf::Propagator& opts) const {
     return make_excit_gens(prng, opts, *this);
 }
 

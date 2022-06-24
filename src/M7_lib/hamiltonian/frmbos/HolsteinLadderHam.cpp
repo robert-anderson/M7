@@ -27,11 +27,3 @@ defs::ham_t HolsteinLadderHam::get_element_0001(const field::FrmBosOnv &onv, con
     const auto occ_fac = onv.m_bos.occ_fac(conn.m_bos);
     return m_g*nocc_frm*occ_fac;
 }
-
-defs::ham_t HolsteinLadderHam::get_element_1110(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
-    return 0;
-}
-
-defs::ham_t HolsteinLadderHam::get_element_1101(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
-    return 0;
-}

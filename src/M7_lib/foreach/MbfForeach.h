@@ -32,28 +32,28 @@ namespace mbf_foreach {
         virtual ~Base() {}
 
     protected:
-        virtual void frm_loop(field::FrmOnv &mbf, const function_t &fn) {};
+        virtual void frm_loop(field::FrmOnv& /*mbf*/, const function_t& /*fn*/) {};
 
-        virtual void bos_loop(field::BosOnv &mbf, const function_t &fn) {};
+        virtual void bos_loop(field::BosOnv& /*mbf*/, const function_t& /*fn*/) {};
 
-        virtual void frmbos_loop(field::FrmBosOnv &mbf, const function_t &fn) {};
+        virtual void frmbos_loop(field::FrmBosOnv& /*mbf*/, const function_t& /*fn*/) {};
 
 
     public:
         template<typename fn_t>
-        void loop(field::FrmOnv &mbf, const fn_t &fn) {
+        void loop(field::FrmOnv& mbf, const fn_t &fn) {
             functor::assert_prototype<void()>(fn);
             frm_loop(mbf, fn);
         }
 
         template<typename fn_t>
-        void loop(field::BosOnv &mbf, const fn_t &fn) {
+        void loop(field::BosOnv& mbf, const fn_t &fn) {
             functor::assert_prototype<void()>(fn);
             bos_loop(mbf, fn);
         }
 
         template<typename fn_t>
-        void loop(field::FrmBosOnv &mbf, const fn_t &fn) {
+        void loop(field::FrmBosOnv& mbf, const fn_t &fn) {
             functor::assert_prototype<void()>(fn);
             frmbos_loop(mbf, fn);
         }
@@ -67,9 +67,9 @@ namespace mbf_foreach {
         const size_t m_niter;
 
     protected:
-        virtual void frm_loop(field::FrmOnv &bra, field::FrmOnv &ket, const function_t &fn) {};
-        virtual void bos_loop(field::BosOnv &bra, field::BosOnv &ket, const function_t &fn) {};
-        virtual void frmbos_loop(field::FrmBosOnv &bra, field::FrmBosOnv &ket, const function_t &fn) {};
+        virtual void frm_loop(field::FrmOnv& /*bra*/, field::FrmOnv& /*ket*/, const function_t& /*fn*/) {};
+        virtual void bos_loop(field::BosOnv& /*bra*/, field::BosOnv& /*ket*/, const function_t& /*fn*/) {};
+        virtual void frmbos_loop(field::FrmBosOnv& /*bra*/, field::FrmBosOnv& /*ket*/, const function_t& /*fn*/) {};
 
     public:
         PairBase(size_t nrow);
@@ -77,19 +77,19 @@ namespace mbf_foreach {
         virtual ~PairBase() {}
 
         template<typename fn_t>
-        void loop(field::FrmOnv &bra, field::FrmOnv &ket, const fn_t &fn) {
+        void loop(field::FrmOnv& bra, field::FrmOnv& ket, const fn_t &fn) {
             functor::assert_prototype<prototype_t>(fn);
             frm_loop(bra, ket, fn);
         }
 
         template<typename fn_t>
-        void loop(field::BosOnv &bra, field::BosOnv &ket, const fn_t &fn) {
+        void loop(field::BosOnv& bra, field::BosOnv& ket, const fn_t &fn) {
             functor::assert_prototype<prototype_t>(fn);
             bos_loop(bra, ket, fn);
         }
 
         template<typename fn_t>
-        void loop(field::FrmBosOnv &bra, field::FrmBosOnv &ket, const fn_t &fn) {
+        void loop(field::FrmBosOnv& bra, field::FrmBosOnv& ket, const fn_t &fn) {
             functor::assert_prototype<prototype_t>(fn);
             frmbos_loop(bra, ket, fn);
         }
@@ -146,7 +146,7 @@ namespace mbf_foreach {
             General(const sys::frm::Sector& sector);
 
             template<typename fn_t>
-            void loop_fn(field::FrmOnv &mbf, const fn_t &fn) {
+            void loop_fn(field::FrmOnv& mbf, const fn_t &fn) {
                 functor::assert_prototype<prototype_t>(fn);
                 verify_mbf(mbf);
                 auto loop_fn = [&mbf, &fn](const basic_foreach::rtnd::inds_t &inds) {
@@ -157,7 +157,7 @@ namespace mbf_foreach {
             }
 
         protected:
-            void frm_loop(field::FrmOnv &mbf, const function_t &fn) override;
+            void frm_loop(field::FrmOnv& mbf, const function_t& fn) override;
         };
 
 
@@ -169,7 +169,7 @@ namespace mbf_foreach {
 
         public:
             template<typename fn_t>
-            void loop_fn(field::FrmOnv &mbf, const fn_t &fn) {
+            void loop_fn(field::FrmOnv& mbf, const fn_t &fn) {
                 functor::assert_prototype<prototype_t>(fn);
                 verify_mbf(mbf);
                 auto loop_fn = [&mbf, &fn](const basic_foreach::rtnd::inds_t &inds) {
@@ -180,7 +180,7 @@ namespace mbf_foreach {
             }
 
         protected:
-            void frm_loop(field::FrmOnv &mbf, const function_t &fn) override;
+            void frm_loop(field::FrmOnv& mbf, const function_t& fn) override;
         };
 
 
@@ -194,7 +194,7 @@ namespace mbf_foreach {
 
         public:
             template<typename fn_t>
-            void loop_fn(field::FrmOnv &mbf, const fn_t &fn) {
+            void loop_fn(field::FrmOnv& mbf, const fn_t &fn) {
                 functor::assert_prototype<prototype_t>(fn);
                 verify_mbf(mbf);
                 auto alpha_fn = [this, &mbf, &fn](const basic_foreach::rtnd::inds_t &alpha_inds) {
@@ -211,7 +211,7 @@ namespace mbf_foreach {
             }
 
         protected:
-            void frm_loop(field::FrmOnv &mbf, const function_t &fn) override;
+            void frm_loop(field::FrmOnv& mbf, const function_t& fn) override;
 
         };
 
@@ -224,7 +224,7 @@ namespace mbf_foreach {
             Pair(const sys::frm::Sector &sector) : base_t(foreach_t(sector)) {}
 
         protected:
-            void frm_loop(field::FrmOnv &bra, field::FrmOnv &ket, const PairBase::function_t &fn) override {
+            void frm_loop(field::FrmOnv& bra, field::FrmOnv& ket, const PairBase::function_t& fn) override {
                 base_t::loop_fn(bra, ket, fn);
             }
         };
@@ -248,7 +248,7 @@ namespace mbf_foreach {
 
         public:
             template<typename fn_t>
-            void loop_fn(field::BosOnv &mbf, const fn_t &fn) {
+            void loop_fn(field::BosOnv& mbf, const fn_t &fn) {
                 functor::assert_prototype<prototype_t>(fn);
                 verify_mbf(mbf);
                 auto basic_fn = [&mbf, &fn](const basic_foreach::rtnd::inds_t &inds) {
@@ -259,7 +259,7 @@ namespace mbf_foreach {
             }
 
         protected:
-            void bos_loop(field::BosOnv &mbf, const function_t &fn) override;
+            void bos_loop(field::BosOnv& mbf, const function_t& fn) override;
         };
 
         struct GeneralOpen : Base {
@@ -270,7 +270,7 @@ namespace mbf_foreach {
 
         public:
             template<typename fn_t>
-            void loop_fn(field::BosOnv &mbf, const fn_t &fn) {
+            void loop_fn(field::BosOnv& mbf, const fn_t &fn) {
                 functor::assert_prototype<prototype_t>(fn);
                 verify_mbf(mbf);
                 auto basic_fn = [&mbf, &fn](const basic_foreach::rtnd::inds_t &inds) {
@@ -281,7 +281,7 @@ namespace mbf_foreach {
             }
 
         protected:
-            void bos_loop(field::BosOnv &mbf, const function_t &fn) override;
+            void bos_loop(field::BosOnv& mbf, const function_t& fn) override;
 
         };
 
@@ -294,7 +294,7 @@ namespace mbf_foreach {
             Pair(const sys::bos::Sector &sector) : base_t(foreach_t(sector)) {}
 
         protected:
-            void bos_loop(field::BosOnv &bra, field::BosOnv &ket, const PairBase::function_t &fn) override {
+            void bos_loop(field::BosOnv& bra, field::BosOnv& ket, const PairBase::function_t& fn) override {
                 base_t::loop_fn(bra, ket, fn);
             }
         };
@@ -302,7 +302,7 @@ namespace mbf_foreach {
 
     namespace frm_bos {
         struct Base : mbf_foreach::Base {
-            Base(const sys::Sector& sector, size_t niter);
+            explicit Base(size_t niter);
         };
 
         template<typename frm_foreach_t, typename bos_foreach_t>
@@ -321,19 +321,13 @@ namespace mbf_foreach {
                 Bases (const frm_foreach_t &frm, const bos_foreach_t &bos): m_frm(frm), m_bos(bos){}
             };
 
-            static sys::Sector make_sector(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
-                Bases bases(frm_foreach, bos_foreach);
-                return {bases.m_frm.m_sector, bases.m_bos.m_sector};
-            }
-
             static size_t make_niter(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
                 Bases bases(frm_foreach, bos_foreach);
                 return bases.m_frm.m_niter * bases.m_bos.m_niter;
             }
 
             Product(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) :
-                    Base(make_sector(frm_foreach, bos_foreach), make_niter(frm_foreach, bos_foreach)),
-                    m_frm_foreach(frm_foreach), m_bos_foreach(bos_foreach) {}
+                Base(make_niter(frm_foreach, bos_foreach)), m_frm_foreach(frm_foreach), m_bos_foreach(bos_foreach) {}
 
         public:
 
@@ -341,7 +335,7 @@ namespace mbf_foreach {
 
 
             template<typename fn_t>
-            void loop_fn(field::FrmBosOnv &mbf, const fn_t &fn) {
+            void loop_fn(field::FrmBosOnv& mbf, const fn_t &fn) {
                 functor::assert_prototype<prototype_t>(fn);
                 auto frm_loop_fn = [this, &mbf, &fn]() {
                     auto bos_loop_fn = [&fn]() {
@@ -353,7 +347,7 @@ namespace mbf_foreach {
             }
 
         protected:
-            void frmbos_loop(field::FrmBosOnv &mbf, const function_t &fn) override {
+            void frmbos_loop(field::FrmBosOnv& mbf, const function_t& fn) override {
                 loop_fn(mbf, fn);
             }
         };
@@ -387,7 +381,7 @@ namespace mbf_foreach {
             Pair(const sys::Sector& sector) : base_t(foreach_t(sector)) {}
 
         protected:
-            void frmbos_loop(field::FrmBosOnv &bra, field::FrmBosOnv &ket, const PairBase::function_t &fn) override {
+            void frmbos_loop(field::FrmBosOnv& bra, field::FrmBosOnv& ket, const PairBase::function_t& fn) override {
                 base_t::loop_fn(bra, ket, fn);
             }
         };

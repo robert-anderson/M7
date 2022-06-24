@@ -36,8 +36,8 @@ void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
     add(weight, helem_sum);
 }
 
-void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-                     const field::BosOnv &onv) {
+void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &/*weight*/,
+                     const field::BosOnv &/*onv*/) {
     ABORT("not yet implemented");
 }
 

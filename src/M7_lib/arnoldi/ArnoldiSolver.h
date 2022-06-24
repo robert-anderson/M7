@@ -90,7 +90,9 @@ struct ArnoldiProblemSym : ArnoldiProblemWithProduct<T> {
 
     std::unique_ptr<ARrcSymStdEig<T>> m_solver;
 
-    ArnoldiProblemSym(size_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){}
+    ArnoldiProblemSym(size_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){
+        datatype::unused(sigma);
+    }
 
 private:
     bool basis_found() override { return m_solver->ArnoldiBasisFound(); }
@@ -159,7 +161,8 @@ struct ArnoldiProblemNonSym : ArnoldiProblemWithProduct<T> {
 
     std::unique_ptr<ARrcNonSymStdEig<T>> m_solver;
 
-    ArnoldiProblemNonSym(size_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){}
+    ArnoldiProblemNonSym(size_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){
+        datatype::unused(sigma);}
 
 private:
     bool basis_found() override { return m_solver->ArnoldiBasisFound(); }

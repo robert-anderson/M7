@@ -20,7 +20,7 @@ class ExactPropagator : public Propagator {
     MagnitudeLogger m_mag_log;
 
 public:
-    ExactPropagator(const Hamiltonian &ham, const conf::Document &opts, const Wavefunction& wf,
+    ExactPropagator(const Hamiltonian& ham, const conf::Document& opts, const Wavefunction& wf,
                     bool only_nonzero_h_spawns=true);
 
     void diagonal(Wavefunction &wf, const size_t& ipart) override;

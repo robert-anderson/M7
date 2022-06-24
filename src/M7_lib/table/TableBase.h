@@ -79,12 +79,12 @@ struct TableBase {
 
     TableBase(size_t row_size);
 
-    TableBase(const TableBase &other);
+    TableBase(const TableBase& other);
 
     /**
      * the number of rows in the BufferWindow. Think of this as the Table's capacity by analogy to std::vector
      */
-    const size_t& nrow() const {
+    size_t nrow() const {
         return m_bw.m_nrow;
     }
     /**
@@ -112,7 +112,7 @@ struct TableBase {
      * @return
      *  pointer to the first data word of the indexed row in the BufferWindow
      */
-    defs::buf_t *begin(const size_t &irow);
+    defs::buf_t *begin(const size_t& irow);
 
     /**
      * @param irow
@@ -120,7 +120,7 @@ struct TableBase {
      * @return
      *  const pointer to the first data word of the indexed row in the BufferWindow
      */
-    const defs::buf_t *begin(const size_t &irow) const;
+    const defs::buf_t *begin(const size_t& irow) const;
 
     /**
      * Associate the table with a buffer by assigning the table an available BufferWindow
@@ -161,7 +161,7 @@ struct TableBase {
      * @param irow
      *  row index to clear
      */
-    virtual void clear(const size_t &irow);
+    virtual void clear(const size_t& irow);
 
     /**
      * @return
@@ -181,7 +181,7 @@ struct TableBase {
      * @return
      *  true if entire row is zero
      */
-    bool is_cleared(const size_t &irow) const;
+    bool is_cleared(const size_t& irow) const;
 
     /**
      * call the resize method on the buffer window and reflect the reallocation in m_nrow
@@ -202,7 +202,7 @@ struct TableBase {
      * @param irows
      *  all row indices marked for erasure
      */
-    void clear_rows(const defs::ivec_t &irows);
+    void clear_rows(const defs::ivec_t& irows);
 
     /**
      * in some derived classes, there is more to adding new rows than simply copying their contents into the hwm. In
@@ -211,7 +211,7 @@ struct TableBase {
      * @param iinsert
      *  row index of the already-inserted data
      */
-    virtual void post_insert(const size_t &iinsert);
+    virtual void post_insert(const size_t& /*iinsert*/){}
 
     /**
      * If we have copied a block of rows contiguously into a table with non-trivial post-insert obligations, we need to
@@ -230,7 +230,7 @@ struct TableBase {
      * function pointer type for the callback associated with row transfers.
      * see RankAllocator.h
      */
-    typedef std::function<void(const defs::ivec_t &, size_t, size_t)> transfer_cb_t;
+    typedef std::function<void(const defs::ivec_t& , size_t, size_t)> transfer_cb_t;
     /**
      * function pointer type for the callback associated with receipt of a single row in a transfer operation
      * see RankAllocator.h
@@ -246,7 +246,7 @@ struct TableBase {
      * @param callbacks
      *  functions to call each time a received row is processed
      */
-    virtual void insert_rows(const Buffer::Window &recv, size_t nrow, const std::list<recv_cb_t> &callbacks);
+    virtual void insert_rows(const Buffer::Window& recv, size_t nrow, const std::list<recv_cb_t>& callbacks);
 
     /**
      * By P2P MPI communication, send the rows identified in the first arg from irank_send to irank_recv.
@@ -260,8 +260,8 @@ struct TableBase {
      * @param callbacks
      *  functions to call on irank_recv each time a received row is processed
      */
-    void transfer_rows(const defs::ivec_t &irows, size_t irank_send, size_t irank_recv,
-                       const std::list<recv_cb_t> &callbacks = {});
+    void transfer_rows(const defs::ivec_t& irows, size_t irank_send, size_t irank_recv,
+                       const std::list<recv_cb_t>& callbacks = {});
 
     /**
      * copy a single row from another "source" table
@@ -273,7 +273,7 @@ struct TableBase {
      * @param irow_dst
      *  row in this table to which the source row is copied bytewise
      */
-    void copy_row_in(const TableBase &src, size_t irow_src, size_t irow_dst);
+    void copy_row_in(const TableBase& src, size_t irow_src, size_t irow_dst);
 
     /**
      * swap row contents dword-for-dword via std::swap
@@ -282,7 +282,7 @@ struct TableBase {
      * @param jrow
      *  row index to be swapped
      */
-    void swap_rows(const size_t &irow, const size_t &jrow);
+    void swap_rows(const size_t& irow, const size_t& jrow);
 
     /**
      * "Location" class which describes the location of a row in a distributed table i.e. by a row index and a rank index
@@ -307,27 +307,27 @@ struct TableBase {
          */
         bool is_mine() const;
 
-        bool operator==(const Loc &other);
+        bool operator==(const Loc& other);
 
-        bool operator!=(const Loc &other);
+        bool operator!=(const Loc& other);
     };
 
     /**
      * When Field-based data structure is introduced in the derived classes, this method is capable of displaying
-     * human-readable columns. here though, we don't know the data layout, so return empty string
+     * human-readable columns. here though, we don't know the data layout, so return bytes as integers
      * @param ordering
      *  optional indices to reorder table on the fly as it is printed, without the need to physically reorder rows
      * @return
      *  string representing table's contents
      */
-    virtual std::string to_string(const defs::ivec_t *ordering = nullptr) const;
+    virtual std::string to_string(const defs::ivec_t* ordering = nullptr) const;
 
     /**
      * gather contents of another table over all MPI ranks into this table on all ranks
      * @param src
      *  table whose rows are to be gathered.
      */
-    virtual void all_gatherv(const TableBase &src);
+    virtual void all_gatherv(const TableBase& src);
 
     /**
      * gather contents of another table over all MPI ranks into this table on the given rank
@@ -336,7 +336,7 @@ struct TableBase {
      * @param irank
      *  index of the only rank in the communicator to receive the data from src
      */
-    virtual void gatherv(const TableBase &src, size_t irank = 0ul);
+    virtual void gatherv(const TableBase& src, size_t irank = 0ul);
 
     /**
      * adds a rank-dynamic object to the RankAllocator
@@ -370,7 +370,7 @@ struct TableBase {
      * @return
      *  true if any of the associated RowProtectors are protecting irow
      */
-    bool is_protected(const size_t &irow) const;
+    bool is_protected(size_t irow) const;
 
     /**
      * @return

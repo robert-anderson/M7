@@ -64,7 +64,7 @@ struct FcidumpFileReader : public HamiltonianFileReader {
 
     size_t ranksig(const defs::ivec_t &inds) const override;
 
-    size_t exsig(const defs::ivec_t &inds, const size_t &ranksig) const override;
+    size_t exsig(const defs::ivec_t &inds, size_t ranksig) const override;
 
     bool inds_in_range(const defs::ivec_t &inds) const override;
 

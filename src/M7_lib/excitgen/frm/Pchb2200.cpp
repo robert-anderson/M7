@@ -4,7 +4,7 @@
 
 #include "Pchb2200.h"
 
-Pchb2200::Pchb2200(const FrmHam &h, PRNG &prng):
+Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
         FrmExcitGen(h, prng, {exsig::ex_double}, "precomputed heat-bath fermion doubles"),
         m_nspinorb_pair(m_h.m_basis.m_nspinorb_pair),
         m_pick_ab_given_ij(m_nspinorb_pair, m_nspinorb_pair) {
@@ -36,11 +36,11 @@ Pchb2200::Pchb2200(const FrmHam &h, PRNG &prng):
     mpi::barrier();
 }
 
-bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,
-                          defs::ham_t &helem, conn::FrmOnv &conn) {
+bool Pchb2200::draw_h_frm(size_t exsig, const field::FrmOnv& src, defs::prob_t& prob,
+                          defs::ham_t& helem, conn::FrmOnv& conn) {
     DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
     size_t i, j, a, b;
-    const auto &occs = src.m_decoded.m_simple_occs.get();
+    const auto& occs = src.m_decoded.m_simple_occs.get();
     const auto npair_elec = integer::nspair(occs.size());
     size_t ij = m_prng.draw_uint(npair_elec);
     integer::inv_strigmap(j, i, ij);
@@ -73,7 +73,7 @@ bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::p
     return !fptol::numeric_zero(prob);
 }
 
-bool Pchb2200::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
+bool Pchb2200::draw_frm(size_t exsig, const field::FrmOnv& src, defs::prob_t& prob, conn::FrmOnv& conn) {
     /*
      * need the helement to compute the probability so if it isn't actually needed, just dispose of it
      * in contrast to the generic case where it is not assumed that the helement must be computed to get the prob,
@@ -83,17 +83,17 @@ bool Pchb2200::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::pro
     return draw_h_frm(exsig, src, prob, helem, conn);
 }
 
-defs::prob_t Pchb2200::prob_h_frm(const field::FrmOnv &src, const conn::FrmOnv &conn, defs::ham_t helem) const {
-    const auto &occs = src.m_decoded.m_simple_occs.get();
+defs::prob_t Pchb2200::prob_h_frm(const field::FrmOnv& src, const conn::FrmOnv& conn, defs::ham_t helem) const {
+    const auto& occs = src.m_decoded.m_simple_occs.get();
     const auto npair_elec = integer::nspair(occs.size());
     auto ij = integer::strigmap(conn.m_ann[1], conn.m_ann[0]);
     return std::abs(helem) / (m_pick_ab_given_ij.norm(ij)*npair_elec);
 }
 
-defs::prob_t Pchb2200::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
+defs::prob_t Pchb2200::prob_frm(const field::FrmOnv& src, const conn::FrmOnv& conn) const {
     return prob_h_frm(src, conn, m_h.get_element_2200(src, conn));
 }
 
-size_t Pchb2200::approx_nconn(size_t exsig, sys::Particles particles) const {
+size_t Pchb2200::approx_nconn(size_t, sys::Particles particles) const {
     return particles.m_frm.m_npair * m_nspinorb_pair;
 }

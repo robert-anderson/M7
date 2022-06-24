@@ -16,15 +16,15 @@
 struct Pchb1101hc : public FrmBosExcitGen {
     Aliaser m_pick_n_given_pq;
 
-    Pchb1101hc(const FrmBosHam &h, PRNG &prng);
+    Pchb1101hc(const FrmBosHam& h, PRNG& prng);
 
-    bool draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src, defs::prob_t &prob, conn::FrmBosOnv &conn) override;
+    bool draw_frmbos(size_t exsig, const field::FrmBosOnv& src, defs::prob_t& prob, conn::FrmBosOnv& conn) override;
 
-    defs::prob_t prob_h_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn, defs::ham_t helem) const override;
+    defs::prob_t prob_h_frmbos(const field::FrmBosOnv& src, const conn::FrmBosOnv& conn, defs::ham_t helem) const override;
 
-    defs::prob_t prob_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn) const override;
+    defs::prob_t prob_frmbos(const field::FrmBosOnv& src, const conn::FrmBosOnv& conn) const override;
 
-    size_t approx_nconn(size_t exsig, sys::Particles particles) const override;
+    size_t approx_nconn(size_t /*exsig*/, sys::Particles /*particles*/) const override;
 };
 
 

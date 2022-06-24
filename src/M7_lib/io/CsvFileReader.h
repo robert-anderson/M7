@@ -36,10 +36,10 @@ public:
 
     typedef std::vector<std::string>::const_iterator c_iter_token_t;
 
-    static bool parsable_as(const std::string& str, size_t& v);
-    static bool parsable_as(const std::string& str, int& v);
-    static bool parsable_as(const std::string& str, double& v);
-    static bool parsable_as(const std::string& str, float& v);
+    static bool parsable_as(const std::string& str, size_t&);
+    static bool parsable_as(const std::string& str, int&);
+    static bool parsable_as(const std::string& /*str*/, double&);
+    static bool parsable_as(const std::string& /*str*/, float&);
 
     static void parse(const std::string& str, size_t& v);
     static void parse(const std::string& str, long& v);
@@ -48,7 +48,7 @@ public:
     static void parse(const std::string& str, float & v);
 
     template<typename T>
-    static void parse(c_iter_token_t begin, c_iter_token_t end, T& v){
+    static void parse(c_iter_token_t begin, c_iter_token_t /*end*/, T& v){
         static_assert(std::is_arithmetic<T>::value, "can only parse arithmetic types");
         parse(*begin, v);
     }

@@ -152,7 +152,7 @@ namespace sparse {
                     const auto& icol = icols[iicol];
                     const auto& value = values[iicol];
                     sym_mat.insert(irow, icol, value);
-                    if (icol != irow) sym_mat.insert(icol, irow, value);
+                    if (icol != irow) sym_mat.insert(icol, irow, conj ? arith::conj(value): value);
                 }
             }
             return sym_mat;
