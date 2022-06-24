@@ -28,7 +28,7 @@ struct NumberFieldBase : FieldBase {
 
 template<typename T, size_t nind>
 struct NdNumberField : NumberFieldBase {
-    typedef const std::array<size_t, nind> &inds_t;
+    typedef const uinta_t<nind> &inds_t;
     const NdFormat<nind> m_format;
 
     const size_t &nelement() const {

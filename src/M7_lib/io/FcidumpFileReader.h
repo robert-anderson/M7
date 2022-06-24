@@ -11,7 +11,7 @@
 #include "HamiltonianFileReader.h"
 #include "FortranNamelistReader.h"
 
-static constexpr std::array<std::array<size_t, 4>, 8> orderings{
+static constexpr std::array<uinta_t<4>, 8> orderings{
         {
                 {0, 1, 2, 3},
                 {1, 0, 2, 3},

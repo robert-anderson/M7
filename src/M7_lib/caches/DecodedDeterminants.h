@@ -99,7 +99,7 @@ struct NdOrbs__ {
     const defs::uintv_t m_map;
 
     FlatOrbs<updater_fn> m_flat;
-    NdOrbs__(std::array<size_t, nind> shape, size_t nsite, const defs::uintv_t& map):
+    NdOrbs__(uinta_t<nind> shape, size_t nsite, const defs::uintv_t& map):
         m_format(shape), m_inds(m_format.m_nelement), m_map(map), m_flat(nsite){
         if (!nsite) return;
         for (auto& v: m_inds) v.reserve(2*nsite);
@@ -107,12 +107,12 @@ struct NdOrbs__ {
         ASSERT(*std::max_element(map.cbegin(), map.cend())<m_format.m_nelement);
     }
 
-    NdOrbs__(std::array<size_t, nind> shape, const field::FrmOnv &mbf, const defs::uintv_t& map) :
+    NdOrbs__(uinta_t<nind> shape, const field::FrmOnv &mbf, const defs::uintv_t& map) :
             NdOrbs__(shape, mbf.m_bd.m_nsite, map) {
         update(mbf);
     }
 
-    NdOrbs__(std::array<size_t, nind> shape, const field::FrmBosOnv &mbf, const defs::uintv_t& map) :
+    NdOrbs__(uinta_t<nind> shape, const field::FrmBosOnv &mbf, const defs::uintv_t& map) :
             NdOrbs__(shape, mbf.m_frm.m_bd.m_nsite, map) {}
 
 
@@ -133,7 +133,7 @@ struct NdOrbs__ {
         return m_inds[ielement].size();
     }
 
-    size_t size(const std::array<size_t, nind>& uintv_t) const {
+    size_t size(const uinta_t<nind>& uintv_t) const {
         return m_inds[m_format.flatten(uintv_t)].size();
     }
 
@@ -142,7 +142,7 @@ struct NdOrbs__ {
         return m_inds[i];
     }
 
-    const defs::uintv_t& operator[](const std::array<size_t, nind>& uintv_t) const{
+    const defs::uintv_t& operator[](const uinta_t<nind>& uintv_t) const{
         return m_inds[m_format.flatten(uintv_t)];
     }
 

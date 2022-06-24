@@ -19,7 +19,7 @@ template<size_t nind>
 struct NdSelector : Selector {
     NdFormat<nind> m_format;
 
-    NdSelector(std::array<size_t, nind> shape):
+    NdSelector(uinta_t<nind> shape):
             Selector(NdFormat<nind>(shape).nelement()), m_format(shape){}
 
     template<typename T, size_t nind_other>

@@ -126,6 +126,6 @@ namespace defs {
     constexpr size_t ndim_wf = 2;
     //  nroot
     constexpr size_t ndim_root = 1;
-    typedef std::array<size_t, ndim_wf> wf_inds_t;
+    typedef uinta_t<ndim_wf> wf_inds_t;
 }
 #endif //M7_DEFS_H

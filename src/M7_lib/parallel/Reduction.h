@@ -40,7 +40,7 @@ private:
     }
 
 public:
-    NdReduction(const std::array<size_t, nind>& shape) :
+    NdReduction(const uinta_t<nind>& shape) :
             NdReduction({shape}, tag::Int<nind == 0>()){}
 
     NdReduction() : NdReduction({}, tag::Int<nind == 0>()){

@@ -12,7 +12,7 @@ template<typename T, size_t nind>
 struct BitsetField : FieldBase {
     static_assert(std::is_integral<T>::value, "Basis for bitset field must be an integral type");
 
-    typedef const std::array<size_t, nind> &inds_t;
+    typedef const uinta_t<nind> &inds_t;
 
     struct BitView {
         BitsetField &m_field;

@@ -137,14 +137,14 @@ namespace decoded_mbf {
             const std::vector<defs::uintv_t> &m_inds_ref;
 
         public:
-            NdBase(std::array<size_t, nind> shape, const std::vector<defs::uintv_t> &inds) :
+            NdBase(uinta_t<nind> shape, const std::vector<defs::uintv_t> &inds) :
                     m_format(shape), m_inds_ref(inds) {}
 
             size_t size(const size_t &i) const {
                 return m_inds_ref[i].size();
             }
 
-            size_t size(const std::array<size_t, nind> &inds) const {
+            size_t size(const uinta_t<nind> &inds) const {
                 return m_inds_ref[m_format.flatten(inds)].size();
             }
 
@@ -152,7 +152,7 @@ namespace decoded_mbf {
                 return m_inds_ref[i];
             }
 
-            const defs::uintv_t &operator[](const std::array<size_t, nind> &inds) const {
+            const defs::uintv_t &operator[](const uinta_t<nind> &inds) const {
                 return m_inds_ref[m_format.flatten(inds)];
             }
         };
@@ -168,7 +168,7 @@ namespace decoded_mbf {
         protected:
             NdBase<nind> m_nd_inds;
         public:
-            NdLabelledOccs(std::array<size_t, nind> shape, const defs::uintv_t &map, const FrmOnvField &mbf) :
+            NdLabelledOccs(uinta_t<nind> shape, const defs::uintv_t &map, const FrmOnvField &mbf) :
                     LabelledOccs(NdFormat<nind>(shape).m_nelement, map, mbf),
                     m_nd_inds(shape, m_inds) {}
 
@@ -195,7 +195,7 @@ namespace decoded_mbf {
         protected:
             NdBase<nind> m_nd_inds;
         public:
-            NdLabelledVacs(std::array<size_t, nind> shape, const defs::uintv_t &map, const FrmOnvField &mbf) :
+            NdLabelledVacs(uinta_t<nind> shape, const defs::uintv_t &map, const FrmOnvField &mbf) :
                     LabelledVacs(NdFormat<nind>(shape).m_nelement, map, mbf),
                     m_nd_inds(shape, m_inds) {}
 

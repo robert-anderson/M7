@@ -24,7 +24,7 @@ struct AbelianGroup {
     const std::string &product_label(const size_t &iirrep, const size_t &jirrep) const;
 
     template<size_t nirrep>
-    bool is_conservative(const std::array<size_t, nirrep> &iirreps) const {
+    bool is_conservative(const uinta_t<nirrep> &iirreps) const {
         static_assert(nirrep > 1, "function applies to direct products of irreps");
         size_t tmp = iirreps[0];
         for (size_t i = 1ul; i < nirrep - 1; ++i) tmp = product(tmp, iirreps[i]);
@@ -32,7 +32,7 @@ struct AbelianGroup {
     }
 
     template<size_t nirrep>
-    bool is_conservative(const std::array<size_t, nirrep> &iirreps1, const std::array<size_t, nirrep> &iirreps2) const {
+    bool is_conservative(const uinta_t<nirrep> &iirreps1, const uinta_t<nirrep> &iirreps2) const {
         static_assert(nirrep > 0, "function applies to direct products of irreps");
         size_t tmp1 = iirreps1[0];
         size_t tmp2 = iirreps2[0];

@@ -53,11 +53,11 @@ struct NdAccessor {
         return m_data[ielement];
     }
 
-    const T& operator[](const std::array<size_t, nind>& inds) const {
+    const T& operator[](const uinta_t<nind>& inds) const {
         return m_data[m_format.flatten(inds)];
     }
 
-    T& operator[](const std::array<size_t, nind>& inds) {
+    T& operator[](const uinta_t<nind>& inds) {
         return m_data[m_format.flatten(inds)];
     }
 

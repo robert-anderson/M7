@@ -88,15 +88,15 @@ struct MaeIndsField : NdNumberField<defs::mev_ind_t, 1> {
     typedef NdNumberField<defs::mev_ind_t, 1> base_t;
     using base_t::operator=;
     const size_t m_exsig;
-    const std::array<size_t, 4> m_nops;
-    const std::array<size_t, 4> m_nop_offsets;
+    const uinta_t<4> m_nops;
+    const uinta_t<4> m_nop_offsets;
     MaeIndsPair m_frm;
     MaeIndsPair m_bos;
 
 private:
-    std::array<size_t, 4> make_nops() const;
+    uinta_t<4> make_nops() const;
 
-    std::array<size_t, 4> make_nop_offsets() const;
+    uinta_t<4> make_nop_offsets() const;
 
 public:
     MaeIndsField(Row *row, size_t exsig, std::string name = "indices");
