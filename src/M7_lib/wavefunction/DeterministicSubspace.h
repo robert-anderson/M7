@@ -63,11 +63,11 @@ private:
     /**
      * the part indices associated with this subspace, will contain two entries if WF uses replication, else one
      */
-    const defs::ivec_t m_iparts;
+    const defs::uintv_t m_iparts;
 
-    defs::ivec_t make_iparts();
+    defs::uintv_t make_iparts();
 
-    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref, const defs::ivec_t& icol_list);
+    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref, const defs::uintv_t& icol_list);
 
 
 public:

@@ -35,7 +35,7 @@ class ExcitGenGroup {
     /**
      * mapping from the excitation signature to a vector case indices that can generate it
      */
-    std::vector<defs::ivec_t> m_exsig_icases;
+    std::vector<defs::uintv_t> m_exsig_icases;
     /**
      * probability of attempting to draw from each of the active excitation cases
      */

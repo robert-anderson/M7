@@ -30,30 +30,35 @@
 }
 #endif
 
+/**
+ * a small collection of basic and frequently-used definitions.
+ * due to its small size and the ubiquity of some members, "using namespace defs" at the header file level is encouraged
+ * this advice does not apply to any other namespace
+ */
 namespace defs {
+    /**
+     * the integral type used throughout the code to count and number items. thus, it is unsigned
+     */
+    typedef uint64_t uint_t;
+    /**
+     * vector of such integers
+     */
+    typedef std::vector<uint_t> uintv_t;
+    /**
+     * array of such integers
+     */
+    template<uint_t n>
+    using uinta_t = std::array<uint_t, n>;
+    /**
+     * pair of such integers
+     */
+    typedef std::pair<uint_t, uint_t> uintp_t;
 
 #ifndef NDEBUG
     constexpr bool c_enable_debug = true;
 #else
     constexpr bool c_enable_debug = false;
 #endif
-    /**
-     * the integral type used throughout the code to count and number items. thus, it is unsigned
-     */
-    typedef uint64_t i_t;
-    /**
-     * vector of such integers
-     */
-    typedef std::vector<i_t> ivec_t;
-    /**
-     * array of such integers
-     */
-    template<i_t n>
-    using iarr_t = std::array<i_t, n>;
-    /**
-     * pair of such integers
-     */
-    typedef std::pair<i_t, i_t> ipair_t;
 
 #ifdef ENABLE_COMPLEX_HAM
     constexpr bool c_enable_complex_ham = true;

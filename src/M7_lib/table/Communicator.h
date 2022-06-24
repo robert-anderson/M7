@@ -45,7 +45,7 @@ public:
      * number of rows sent and recvd in the last call to communicate()
      * retained for stats reasons
      */
-    defs::ivec_t m_last_send_counts;
+    defs::uintv_t m_last_send_counts;
     size_t m_last_recv_count = 0ul;
 
     /**
@@ -114,9 +114,9 @@ public:
      */
     void communicate() {
         m_last_send_counts = m_send.hwms();
-        defs::ivec_t sendcounts(m_last_send_counts);
+        defs::uintv_t sendcounts(m_last_send_counts);
         for (auto &it: sendcounts) it *= row_size();
-        defs::ivec_t recvcounts(mpi::nrank(), 0ul);
+        defs::uintv_t recvcounts(mpi::nrank(), 0ul);
 
         auto all_sends_empty = !std::accumulate(sendcounts.cbegin(), sendcounts.cend(), 0ul);
         DEBUG_ONLY(all_sends_empty);
@@ -127,7 +127,7 @@ public:
         mpi::all_to_all(sendcounts, recvcounts);
 
         auto senddispls = m_send.displs();
-        defs::ivec_t recvdispls(mpi::nrank(), 0ul);
+        defs::uintv_t recvdispls(mpi::nrank(), 0ul);
         for (size_t i = 1ul; i < mpi::nrank(); ++i)
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
         auto recv_size = recvdispls.back() + recvcounts.back();
@@ -209,9 +209,9 @@ struct Communicator {
          * the counts and displs determine a global index for a local dynamic row. The ith element of m_irows on MPI
          * rank j has global index m_displs[j]+i
          */
-        defs::ivec_t m_counts;
-        defs::ivec_t m_displs;
-        defs::ivec_t m_ranks_with_any_rows;
+        defs::uintv_t m_counts;
+        defs::uintv_t m_displs;
+        defs::uintv_t m_ranks_with_any_rows;
 
         std::string m_name;
         /*
@@ -221,7 +221,7 @@ struct Communicator {
          */
         const int m_ntrow_to_track_p2p_tag;
         const int m_itrows_to_track_p2p_tag;
-        defs::ivec_t m_idrows;
+        defs::uintv_t m_idrows;
         size_t m_itrow;
         size_t m_ndrow_found;
 
@@ -280,7 +280,7 @@ struct Communicator {
             return m_irows.find(irow) != m_irows.end();
         }
 
-        void before_block_transfer(const defs::ivec_t &irows_send, size_t irank_send, size_t irank_recv) override {
+        void before_block_transfer(const defs::uintv_t &irows_send, size_t irank_send, size_t irank_recv) override {
             size_t nrow_transfer;
             if (mpi::i_am(irank_send)) {
                 m_idrows.clear();

@@ -10,8 +10,8 @@ RowHdf5Base::RowHdf5Base(const Row &row, size_t nitem, std::vector<std::string> 
         m_selected_field_inds(make_selected_field_inds(row.m_fields)) {}
 
 
-defs::ivec_t RowHdf5Base::make_selected_field_inds(const std::vector<FieldBase *> &fields) const {
-    defs::ivec_t inds;
+defs::uintv_t RowHdf5Base::make_selected_field_inds(const std::vector<FieldBase *> &fields) const {
+    defs::uintv_t inds;
     inds.reserve(m_field_names.size());
     for (const auto &field_name: m_field_names) {
         REQUIRE_TRUE(!field_name.empty(), "Selected field name must be non-zero in length");

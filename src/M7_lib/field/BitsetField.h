@@ -55,7 +55,7 @@ struct BitsetField : FieldBase {
         return *this;
     }
 
-    BitsetField &operator=(const defs::ivec_t &setbits) {
+    BitsetField &operator=(const defs::uintv_t &setbits) {
         // prezero the element
         zero();
         for (const auto &ind: setbits) set(ind);
@@ -261,7 +261,7 @@ struct BitsetField : FieldBase {
         hdf5::AttributeWriterBase::write(parent_handle, "bitset dim names", m_format.dim_names_vector());
     }
 
-    defs::ivec_t h5_shape() const override {
+    defs::uintv_t h5_shape() const override {
         /*
          * bitsets are stored flat
          */

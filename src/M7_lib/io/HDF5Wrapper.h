@@ -17,7 +17,7 @@
 
 namespace hdf5 {
 
-    static std::vector<hsize_t> convert_dims(const defs::ivec_t &item_dims) {
+    static std::vector<hsize_t> convert_dims(const defs::uintv_t &item_dims) {
         std::vector<hsize_t> out;
         out.reserve(item_dims.size());
         for (auto &i: item_dims) out.push_back(i);
@@ -135,12 +135,12 @@ namespace hdf5 {
 
     struct AttributeWriterBase {
         const hid_t m_parent_handle, m_h5type;
-        const defs::ivec_t m_shape;
+        const defs::uintv_t m_shape;
         const size_t m_nelement;
         hid_t m_memspace_handle;
         hid_t m_handle;
 
-        AttributeWriterBase(hid_t parent_handle, std::string name, const defs::ivec_t &shape, hid_t h5type);
+        AttributeWriterBase(hid_t parent_handle, std::string name, const defs::uintv_t &shape, hid_t h5type);
 
         ~AttributeWriterBase();
 
@@ -162,11 +162,11 @@ namespace hdf5 {
 
     struct AttributeReaderBase {
         const hid_t m_parent_handle, m_h5type;
-        const defs::ivec_t m_shape;
+        const defs::uintv_t m_shape;
         const size_t m_nelement;
         hid_t m_handle;
 
-        AttributeReaderBase(hid_t parent_handle, std::string name, const defs::ivec_t &shape, hid_t h5type) :
+        AttributeReaderBase(hid_t parent_handle, std::string name, const defs::uintv_t &shape, hid_t h5type) :
                 m_parent_handle(parent_handle), m_h5type(h5type), m_shape(shape),
                 m_nelement(nd::nelement(shape)) {
             m_handle = H5Aopen_name(m_parent_handle, name.c_str());
@@ -179,7 +179,7 @@ namespace hdf5 {
 
     template<typename T>
     struct AttributeReader : AttributeReaderBase {
-        AttributeReader(hid_t parent_handle, std::string name, const defs::ivec_t &shape) :
+        AttributeReader(hid_t parent_handle, std::string name, const defs::uintv_t &shape) :
                 AttributeReaderBase(parent_handle, name, shape, type<T>()) {}
 
     private:
@@ -314,7 +314,7 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         save(std::string name, const std::complex<T> &v, size_t irank=0ul) {
-            defs::ivec_t shape = {2};
+            defs::uintv_t shape = {2};
             save(name, reinterpret_cast<const T*>(&v), shape, {"real_imag"}, irank);
         }
 
@@ -333,7 +333,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const T* v, const defs::ivec_t& shape, std::vector<std::string> dim_labels={}, size_t irank=0ul) {
+        save(std::string name, const T* v, const defs::uintv_t& shape, std::vector<std::string> dim_labels={}, size_t irank=0ul) {
             auto dims = convert_dims(shape);
             auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
             /**
@@ -374,7 +374,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::complex<T>* v, const defs::ivec_t& shape,
+        save(std::string name, const std::complex<T>* v, const defs::uintv_t& shape,
              std::vector<std::string> dim_labels={}, size_t irank=0ul) {
             dim_labels.push_back("real_imag");
             auto dims = shape;
@@ -388,7 +388,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::vector<T>& v, const defs::ivec_t& shape, std::vector<std::string> dim_labels={}, size_t irank=0ul){
+        save(std::string name, const std::vector<T>& v, const defs::uintv_t& shape, std::vector<std::string> dim_labels={}, size_t irank=0ul){
             REQUIRE_EQ_ALL(v.size(), nd  ::nelement(shape), "vector and shape are incompatible");
             save(name, v.data(), shape, {}, irank);
         }
@@ -441,7 +441,7 @@ namespace hdf5 {
 
         size_t get_dataset_ndim(std::string name);
 
-        defs::ivec_t get_dataset_shape(std::string name);
+        defs::uintv_t get_dataset_shape(std::string name);
 
     public:
 
@@ -498,7 +498,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, T* v, const defs::ivec_t& shape){
+        load(std::string name, T* v, const defs::uintv_t& shape){
             DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             auto file_shape = get_dataset_shape(name);
             REQUIRE_EQ_ALL(shape, file_shape, "expected a container of a different shape");
@@ -524,7 +524,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::complex<T>* v, const defs::ivec_t& shape){
+        load(std::string name, std::complex<T>* v, const defs::uintv_t& shape){
             DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             auto complex_shape = shape;
             complex_shape.push_back(2ul);
@@ -544,7 +544,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::vector<T>& v, const defs::ivec_t& shape){
+        load(std::string name, std::vector<T>& v, const defs::uintv_t& shape){
             REQUIRE_EQ_ALL(v.size(), nd::nelement(shape), "vector and shape are incompatible");
             load(name, v.data(), shape);
         }
@@ -676,7 +676,7 @@ namespace hdf5 {
          */
         hsize_t get_item_offset();
 
-        NdDistListBase(hid_t parent_handle, std::string name, const defs::ivec_t &item_dims, const size_t &nitem,
+        NdDistListBase(hid_t parent_handle, std::string name, const defs::uintv_t &item_dims, const size_t &nitem,
                        bool writemode, hid_t h5type);
 
         /**
@@ -694,15 +694,15 @@ namespace hdf5 {
      */
     struct NdDistListWriter : public NdDistListBase {
     private:
-        NdDistListWriter(hid_t parent_handle, std::string name, const defs::ivec_t &item_dims,
+        NdDistListWriter(hid_t parent_handle, std::string name, const defs::uintv_t &item_dims,
                          const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {});
 
     public:
-        NdDistListWriter(FileWriter &parent, std::string name, const defs::ivec_t &item_dims,
+        NdDistListWriter(FileWriter &parent, std::string name, const defs::uintv_t &item_dims,
                          const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
                 NdDistListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
-        NdDistListWriter(GroupWriter &parent, std::string name, const defs::ivec_t &item_dims,
+        NdDistListWriter(GroupWriter &parent, std::string name, const defs::uintv_t &item_dims,
                          const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
                 NdDistListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
@@ -755,7 +755,7 @@ namespace hdf5 {
          * @return
          *  global list shape
          */
-        static defs::ivec_t extract_list_dims(hid_t parent_handle, std::string name) {
+        static defs::uintv_t extract_list_dims(hid_t parent_handle, std::string name) {
             auto rank = extract_list_ndim(parent_handle, name);
             auto dataset = H5Dopen1(parent_handle, name.c_str());
             auto dataspace = H5Dget_space(dataset);
@@ -763,7 +763,7 @@ namespace hdf5 {
             H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
             H5Sclose(dataspace);
             H5Dclose(dataset);
-            defs::ivec_t out;
+            defs::uintv_t out;
             out.reserve(dims.size());
             for (const auto &i: dims) out.push_back(i);
             return out;
@@ -777,9 +777,9 @@ namespace hdf5 {
          * @return
          *  shape of the list items themselves
          */
-        static defs::ivec_t extract_item_dims(hid_t parent_handle, std::string name) {
+        static defs::uintv_t extract_item_dims(hid_t parent_handle, std::string name) {
             auto list_dims = extract_list_dims(parent_handle, name);
-            defs::ivec_t out;
+            defs::uintv_t out;
             out.reserve(list_dims.size() - 1);
             if (out.capacity()) out.insert(out.begin(), ++list_dims.cbegin(), list_dims.cend());
             return out;

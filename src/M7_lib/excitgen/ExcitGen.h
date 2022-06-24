@@ -13,9 +13,9 @@
 
 struct ExcitGen {
     PRNG& m_prng;
-    const defs::ivec_t m_exsigs;
+    const defs::uintv_t m_exsigs;
     const std::string m_description;
-    ExcitGen(PRNG& prng, defs::ivec_t exsigs, std::string description):
+    ExcitGen(PRNG& prng, defs::uintv_t exsigs, std::string description):
         m_prng(prng), m_exsigs(std::move(exsigs)), m_description(std::move(description)){}
 
     virtual ~ExcitGen() = default;

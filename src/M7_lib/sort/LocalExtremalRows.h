@@ -44,7 +44,7 @@ struct LocalExtremalRows {
     /**
      * the element indices of the number field to compare (via arithmetic mean)
      */
-    const defs::ivec_t m_inds_to_cmp;
+    const defs::uintv_t m_inds_to_cmp;
     /**
      * comparator used to determine order of values
      */
@@ -54,7 +54,7 @@ struct LocalExtremalRows {
      */
     ExtremalIndices m_xinds;
 
-    LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, defs::ivec_t inds_to_cmp) :
+    LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, defs::uintv_t inds_to_cmp) :
             m_work_row(row),
             m_work_row_field(field::identify(m_work_row, row, field)),
             m_work_row_cmp(row),
@@ -75,7 +75,7 @@ struct LocalExtremalRows {
     }
 
     LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, size_t ind_to_cmp):
-            LocalExtremalRows(row, field, largest, absval, defs::ivec_t{ind_to_cmp}){}
+            LocalExtremalRows(row, field, largest, absval, defs::uintv_t{ind_to_cmp}){}
 
     void reset() {
         m_xinds.reset(m_table);

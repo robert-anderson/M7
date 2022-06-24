@@ -168,7 +168,7 @@ void RankAllocatorBase::update(size_t icycle) {
     log::info("Sending block {} of rank allocator \"{}\" from rank {} to {} on cycle {}",
               *it_block_transfer, m_name, irank_send, irank_recv, icycle);
     // prepare vector of row indices to send
-    defs::ivec_t irows_send;
+    defs::uintv_t irows_send;
     if (mpi::i_am(irank_send)){
         for (size_t irow = 0; irow<table().m_hwm; ++irow){
             if (table().is_cleared(irow)) continue;

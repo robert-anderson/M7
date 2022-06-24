@@ -83,10 +83,10 @@ namespace conf {
     };
 
     struct MbfDef : Section {
-        Param<std::vector<defs::ivec_t>> m_frm;
-        Param<std::vector<defs::ivec_t>> m_bos;
+        Param<std::vector<defs::uintv_t>> m_frm;
+        Param<std::vector<defs::uintv_t>> m_bos;
         Param<bool> m_neel;
-        //Param<std::vector<defs::ivec_t>> m_csf;
+        //Param<std::vector<defs::uintv_t>> m_csf;
 
         explicit MbfDef(Group *parent, std::string name);
 

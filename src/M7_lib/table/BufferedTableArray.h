@@ -96,14 +96,14 @@ public:
         return m_tables[itable];
     }
 
-    defs::ivec_t hwms() const {
-        defs::ivec_t res(ntable());
+    defs::uintv_t hwms() const {
+        defs::uintv_t res(ntable());
         for (size_t i = 0ul; i < ntable(); ++i) res[i] = (*this)[i].m_hwm;
         return res;
     }
 
-    defs::ivec_t displs() const {
-        defs::ivec_t res(ntable());
+    defs::uintv_t displs() const {
+        defs::uintv_t res(ntable());
         for (size_t i = 0ul; i < ntable(); ++i) res[i] = bw_size() * i;
         return res;
     }

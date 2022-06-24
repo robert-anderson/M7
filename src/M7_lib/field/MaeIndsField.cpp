@@ -70,7 +70,7 @@ bool MaeIndsField::is_ordered() const {
     return is_ordered(0, true) && is_ordered(1, true) && is_ordered(2, false) && is_ordered(3, false);
 }
 
-void MaeIndsField::common_frm_inds(defs::ivec_t &common) const {
+void MaeIndsField::common_frm_inds(defs::uintv_t &common) const {
     common.clear();
     size_t icre = 0ul;
     size_t iann = 0ul;

@@ -5,11 +5,14 @@
 #ifndef M7_NDFORMAT_H
 #define M7_NDFORMAT_H
 
+#include <array>
+#include <algorithm>
+
 #include <M7_lib/defs.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/foreach/BasicForeach.h>
-#include "array"
-#include "algorithm"
+
+using namespace defs;
 
 struct NdFormatBase{
     virtual std::string to_string() const = 0;
@@ -20,17 +23,17 @@ struct NdFormatBase{
  * @tparam nind
  *  number of dimensions.
  */
-template <size_t nind>
+template <uint_t nind>
 struct NdFormat : NdFormatBase {
     /**
      * the extents of each dimension
      */
-    const std::array<size_t, nind> m_shape;
+    const uinta_t<nind> m_shape;
     /**
      * elements of the stride are computed as products of elements of the shape. this allows for the conversion of an
      * array containing multidimensional indices to a single integer ("flat" index) via a scalar product
      */
-    const std::array<size_t, nind> m_strides;
+    const uinta_t<nind> m_strides;
     /**
      * label each dimension
      */
@@ -39,13 +42,13 @@ struct NdFormat : NdFormatBase {
      * the number of elements in the indexing scheme. the largest value a flat index can take in this scheme is one less
      * than m_nelement
      */
-    const size_t m_nelement;
+    const uint_t m_nelement;
 
     /**
      * helper function to compute the strides assuming the m_shape member has already been set
      */
-    std::array<size_t, nind> make_strides() const {
-        std::array<size_t, nind> tmp{};
+    uinta_t<nind> make_strides() const {
+        uinta_t<nind> tmp{};
         if (!nind) return {};
         tmp.back() = 1ul;
         for (auto i = 2ul; i <= nind; i++) {
@@ -57,13 +60,13 @@ struct NdFormat : NdFormatBase {
     /**
      * helper function to decide the number of elements assuming the m_shape and m_stride members have already been set
      */
-    size_t make_nelement() const {
+    uint_t make_nelement() const {
         return nind ? m_shape.front()*m_strides.front() : 1ul;
     }
 
     std::array<std::string, nind> make_default_dim_names() const {
         std::array<std::string, nind> dim_names;
-        for (size_t i=0ul; i!=nind; ++i) dim_names[i] = "dim_"+std::to_string(i);
+        for (uint_t i=0ul; i != nind; ++i) dim_names[i] = "dim_" + std::to_string(i);
         return dim_names;
     }
 
@@ -73,30 +76,30 @@ public:
         static_assert(!nind, "This ctor is only valid in the scalar case");
     }
 
-    NdFormat(const std::array<size_t, nind>& shape, const std::array<std::string, nind>& dim_names):
+    NdFormat(const std::array<uint_t, nind>& shape, const std::array<std::string, nind>& dim_names):
         m_shape(shape), m_strides(make_strides()), m_dim_names(dim_names), m_nelement(make_nelement()){
         ASSERT(m_nelement!=~0ul);
     }
 
-    NdFormat(const std::array<size_t, nind>& shape): NdFormat(shape, make_default_dim_names()){}
+    NdFormat(const std::array<uint_t, nind>& shape): NdFormat(shape, make_default_dim_names()){}
 
     /**
      * construct a scheme where all extents are the same
      * @param extent
      *  value to copy to all elements of the shape
      */
-    NdFormat(size_t extent): NdFormat(array::filled<size_t, nind>(extent)){}
+    NdFormat(uint_t extent): NdFormat(array::filled<uint_t, nind>(extent)){}
 
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.m_shape, other.m_dim_names){}
 
     bool operator==(const NdFormat<nind> &other) const{
-        for (size_t iind=0ul; iind!=nind; ++iind){
+        for (uint_t iind=0ul; iind != nind; ++iind){
             if (other.m_shape[iind]!=m_shape[iind]) return false;
         }
         return true;
     }
 
-    operator const std::array<size_t, nind>&() const{
+    operator const std::array<uint_t, nind>&() const{
         return m_shape;
     }
 
@@ -108,11 +111,11 @@ public:
      * @return
      *  new NdFormat object where the major part of the shape is retained
      */
-    template <size_t nind_remain = nind-1>
+    template <uint_t nind_remain = nind - 1>
     typename std::enable_if<(nind_remain<nind), NdFormat<nind_remain>>::type
     major_dims() const {
         constexpr auto nind_diff = nind-nind_remain;
-        std::array<size_t, nind_remain> shape;
+        std::array<uint_t, nind_remain> shape;
         std::copy(m_shape.cbegin(), m_shape.cend()-nind_diff, shape.begin());
         std::array<std::string, nind_remain> dim_names;
         std::copy(m_dim_names.cbegin(), m_dim_names.cend()-nind_diff, dim_names.begin());
@@ -125,11 +128,11 @@ public:
      * @return
      *  new NdFormat object where the minor part of the shape is retained
      */
-    template <size_t nind_remain = nind-1>
+    template <uint_t nind_remain = nind - 1>
     typename std::enable_if<(nind_remain<nind), NdFormat<nind_remain>>::type
     minor_dims() const {
         constexpr auto nind_diff = nind-nind_remain;
-        std::array<size_t, nind_remain> shape;
+        std::array<uint_t, nind_remain> shape;
         std::copy(m_shape.cbegin()+nind_diff, m_shape.cend(), shape.begin());
         std::array<std::string, nind-nind_diff> dim_names;
         std::copy(m_dim_names.cbegin()+nind_diff, m_dim_names.cend(), dim_names.begin());
@@ -140,7 +143,7 @@ public:
      * @return
      *  the shape array converted to a vector instance
      */
-    defs::ivec_t shape_vector() const {
+    defs::uintv_t shape_vector() const {
         return array::to_vector(m_shape);
     }
 
@@ -159,9 +162,9 @@ public:
      * @return
      *  flat index
      */
-    size_t flatten(std::array<size_t, nind> inds) const {
-        size_t i = 0ul;
-        for (size_t iind=0ul; iind!=nind; ++iind) {
+    uint_t flatten(uinta_t<nind> inds) const {
+        uint_t i = 0ul;
+        for (uint_t iind=0ul; iind != nind; ++iind) {
             DEBUG_ASSERT_LT(inds[iind], m_shape[iind], "index OOB");
             i+=inds[iind]*m_strides[iind];
         }
@@ -181,8 +184,8 @@ public:
      */
     // TODO hierarchical flattening
 
-    template<size_t nmajor>
-    size_t combine(const size_t& iflat_major, const size_t& iflat_minor){
+    template<uint_t nmajor>
+    uint_t combine(const uint_t& iflat_major, const uint_t& iflat_minor){
         static_assert(nmajor>0, "major flat index must correspond to non-zero number of dimensions");
         ASSERT(iflat_major < major_dims<nmajor>().m_nelement);
         auto stride = m_strides[nmajor-1];
@@ -190,14 +193,14 @@ public:
         return iflat_major*stride+iflat_minor;
     }
 
-    template<size_t nminor>
-    size_t flatten(std::array<size_t, nind - nminor> major, std::array<size_t, nminor> minor) const {
-        size_t iflat = 0ul;
-        for (size_t i = 0ul; i < nind - nminor; ++i) {
+    template<uint_t nminor>
+    uint_t flatten(std::array<uint_t, nind - nminor> major, std::array<uint_t, nminor> minor) const {
+        uint_t iflat = 0ul;
+        for (uint_t i = 0ul; i < nind - nminor; ++i) {
             ASSERT(major[i]<m_shape[i]);
             iflat+= major[i] * m_strides[i];
         }
-        for (size_t i = 0ul; i < nminor; ++i) {
+        for (uint_t i = 0ul; i < nminor; ++i) {
             const auto j = i + nind - nminor;
             ASSERT(minor[i]<m_shape[j]);
             iflat+= minor[i] * m_strides[j];
@@ -205,23 +208,23 @@ public:
         return iflat;
     }
 
-    template<size_t nminor>
-    typename std::enable_if<nminor!=0, size_t>::type
-    flatten(const size_t& iflat_major, const size_t& iflat_minor) const {
+    template<uint_t nminor>
+    typename std::enable_if<nminor!=0, uint_t>::type
+    flatten(const uint_t& iflat_major, const uint_t& iflat_minor) const {
         return iflat_major*m_strides[nind-nminor-1]+iflat_minor;
     }
 
     template<typename ...Args>
-    size_t flatten(Args... inds) const {
+    uint_t flatten(Args... inds) const {
         static_assert(sizeof...(Args)==nind, "incorrect number of indices");
         return partial_offset<0>(inds...);
     }
 
     template<typename T>
-    void decode_flat(const size_t& iflat, std::array<T, nind>& inds) const {
+    void decode_flat(const uint_t& iflat, std::array<T, nind>& inds) const {
         static_assert(std::is_integral<T>::value, "index type must be integral");
-        size_t remainder = iflat;
-        for (size_t i=0ul; i!=nind; ++i){
+        uint_t remainder = iflat;
+        for (uint_t i=0ul; i != nind; ++i){
             auto& ind = inds[i];
             ind = remainder/m_strides[i];
             remainder-=ind*m_strides[i];
@@ -231,7 +234,7 @@ public:
     std::string to_string() const override {
         if (!nind) return "scalar";
         std::string tmp;
-        for (size_t i=0ul; i!=nind; ++i) {
+        for (uint_t i=0ul; i != nind; ++i) {
             tmp+=m_dim_names[i]+" ("+std::to_string(m_shape[i])+") ";
         }
         return tmp;
@@ -240,8 +243,8 @@ public:
 
 private:
 
-    template<size_t nind_unspec>
-    size_t partial_offset() const {return 0;}
+    template<uint_t nind_unspec>
+    uint_t partial_offset() const {return 0;}
 public:
 
 
@@ -249,23 +252,23 @@ public:
      *            |-------------|
      *   shape:    X  X  X  X  X
      *
-     *   ivec_t:     X  X  /  /  /
+     *   uintv_t:     X  X  /  /  /
      *            |----|
      *            nind spec
      *
      */
-    template<size_t nind_spec, typename ...Args>
-    size_t partial_offset(size_t first, Args... rest) const{
+    template<uint_t nind_spec, typename ...Args>
+    uint_t partial_offset(uint_t first, Args... rest) const{
         static_assert(1+sizeof...(rest)+nind_spec<=nind, "Indices are over-specified");
         ASSERT(first<m_shape[nind_spec]);
         return first*m_strides[nind_spec]+partial_offset<nind_spec+1>(rest...);
     }
 
-    template<size_t nind_spec>
-    size_t partial_offset(std::array<size_t, nind_spec> inds) const {
+    template<uint_t nind_spec>
+    uint_t partial_offset(std::array<uint_t, nind_spec> inds) const {
         static_assert(nind_spec<=nind, "Too many indices specified");
-        size_t iflat = 0ul;
-        for (size_t i=0ul; i!=nind_spec; ++i) {
+        uint_t iflat = 0ul;
+        for (uint_t i=0ul; i != nind_spec; ++i) {
             ASSERT(inds[i]<m_shape[i]);
             iflat+= inds[i] * m_strides[i];
         }
@@ -273,15 +276,15 @@ public:
     }
 };
 
-template <size_t nind>
+template <uint_t nind>
 struct NdEnumeration : NdFormat<nind>{
 private:
-    const std::vector<std::array<size_t, nind>> m_inds;
+    const std::vector<std::array<uint_t, nind>> m_inds;
 
-    static std::vector<std::array<size_t, nind>> make_inds(const NdFormat<nind>& format) {
+    static std::vector<std::array<uint_t, nind>> make_inds(const NdFormat<nind>& format) {
         using namespace basic_foreach::ctnd;
-        std::vector<std::array<size_t, nind>> out(format.m_nelement);
-        size_t i=0ul;
+        std::vector<std::array<uint_t, nind>> out(format.m_nelement);
+        uint_t i=0ul;
         auto fn = [&out, &i](const inds_t<nind>& inds){
             out[i] = inds;
             ++i;
@@ -294,7 +297,7 @@ private:
 public:
     NdEnumeration(const NdFormat<nind>& format): NdFormat<nind>(format), m_inds(make_inds(format)){}
 
-    const std::array<size_t, nind>& operator[](const size_t& i) const {
+    const std::array<uint_t, nind>& operator[](const uint_t& i) const {
         return m_inds[i];
     }
 

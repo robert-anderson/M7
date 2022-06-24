@@ -40,7 +40,7 @@ struct RefExcits : Archivable {
     const conf::RefExcits& m_opts;
     buffered::Numbers<defs::wf_t, 1> m_av_ref;
     std::array<std::unique_ptr<RefExcitsOneExsig>, exsig::c_ndistinct> m_ref_excits;
-    defs::ivec_t m_active_exsigs;
+    defs::uintv_t m_active_exsigs;
     /**
      * work space for computing connections between reference and contributing ONVs
      */

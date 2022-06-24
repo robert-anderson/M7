@@ -30,7 +30,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo& info, bool 
     m_complex_valued = file_reader.m_complex_valued;
 
     using namespace ham;
-    defs::ivec_t inds(4);
+    defs::uintv_t inds(4);
     defs::ham_t value;
 
     /*

@@ -72,7 +72,7 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
     buffered::BosOnv dst(ham.m_basis);
     conn::BosOnv conn(src);
 
-    std::vector<defs::ivec_t> basis =
+    std::vector<defs::uintv_t> basis =
             {{0, 0, 0, 5, 0},
              {0, 0, 1, 3, 1},
              {0, 0, 2, 1, 2},

@@ -25,7 +25,7 @@ HamiltonianFileReader::HamiltonianFileReader(const std::string &fname, size_t ni
     }
 }
 
-bool HamiltonianFileReader::next(defs::ivec_t &inds, defs::ham_t &v) {
+bool HamiltonianFileReader::next(defs::uintv_t &inds, defs::ham_t &v) {
     auto result = NumericCsvFileReader::next(m_work_tokens);
     if (!result) return false;
     REQUIRE_EQ(m_work_tokens.size(), m_ncolumn, "invalid line found in file "+m_fname);
@@ -39,14 +39,14 @@ bool HamiltonianFileReader::next(defs::ivec_t &inds, defs::ham_t &v) {
     return true;
 }
 
-size_t HamiltonianFileReader::nset_ind(const defs::ivec_t &inds) {
+size_t HamiltonianFileReader::nset_ind(const defs::uintv_t &inds) {
     return std::count_if(inds.begin(), inds.end(), [](const size_t &a) { return a != ~0ul; });
 }
 
-size_t HamiltonianFileReader::exsig(const defs::ivec_t &inds) const {
+size_t HamiltonianFileReader::exsig(const defs::uintv_t &inds) const {
     return exsig(inds, ranksig(inds));
 }
 
-void HamiltonianFileReader::decrement_inds(defs::ivec_t &inds) {
+void HamiltonianFileReader::decrement_inds(defs::uintv_t &inds) {
     for (auto &i:inds) i = ((i == 0 || i == ~0ul) ? ~0ul : i - 1);
 }

@@ -26,7 +26,7 @@ namespace decoded_mbf {
          */
         struct SimpleBase : Base, SimpleContainer {
         protected:
-            const defs::ivec_t &validated() const;
+            const defs::uintv_t &validated() const;
 
         public:
             explicit SimpleBase(const FrmOnvField &mbf);
@@ -38,7 +38,7 @@ namespace decoded_mbf {
         struct SimpleOccs : SimpleBase {
             explicit SimpleOccs(const FrmOnvField &mbf);
 
-            const defs::ivec_t &get();
+            const defs::uintv_t &get();
         };
 
         /**
@@ -47,7 +47,7 @@ namespace decoded_mbf {
         struct SimpleVacs : SimpleBase {
             explicit SimpleVacs(const FrmOnvField &mbf);
 
-            const defs::ivec_t &get();
+            const defs::uintv_t &get();
         };
 
 
@@ -61,20 +61,20 @@ namespace decoded_mbf {
             /**
              * ragged array of vectors to store set or clear positions. one vector per label
              */
-            std::vector<defs::ivec_t> m_inds;
+            std::vector<defs::uintv_t> m_inds;
             /**
              * map from the spinorb index to the "label"
              */
-            const defs::ivec_t m_map;
+            const defs::uintv_t m_map;
             /**
              * the simple decoding is cached at the same time, since it is often useful and available at small
              * additional cost
              */
-            defs::ivec_t m_simple_inds;
+            defs::uintv_t m_simple_inds;
 
-            LabelledBase(size_t nelement, const defs::ivec_t &map, const FrmOnvField &mbf);
+            LabelledBase(size_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
 
-            const std::vector<defs::ivec_t> &validated() const;
+            const std::vector<defs::uintv_t> &validated() const;
 
         public:
             /**
@@ -84,7 +84,7 @@ namespace decoded_mbf {
              * @return
              *  spin orbital irrep map with 2*nirrep labels
              */
-            static defs::ivec_t make_spinorb_map(const defs::ivec_t &site_irreps, size_t nirrep);
+            static defs::uintv_t make_spinorb_map(const defs::uintv_t &site_irreps, size_t nirrep);
 
             void clear();
 
@@ -98,12 +98,12 @@ namespace decoded_mbf {
          */
         struct LabelledOccs : LabelledBase {
         protected:
-            LabelledOccs(size_t nelement, const defs::ivec_t &map, const FrmOnvField &mbf);
+            LabelledOccs(size_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
 
         public:
-            const std::vector<defs::ivec_t> &get();
+            const std::vector<defs::uintv_t> &get();
 
-            const defs::ivec_t &simple();
+            const defs::uintv_t &simple();
         };
 
         /**
@@ -111,12 +111,12 @@ namespace decoded_mbf {
          */
         struct LabelledVacs : LabelledBase {
         protected:
-            LabelledVacs(size_t nelement, const defs::ivec_t &map, const FrmOnvField &mbf);
+            LabelledVacs(size_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
 
         public:
-            const std::vector<defs::ivec_t> &get();
+            const std::vector<defs::uintv_t> &get();
 
-            const defs::ivec_t &simple();
+            const defs::uintv_t &simple();
         };
 
 
@@ -134,10 +134,10 @@ namespace decoded_mbf {
             /**
              * ragged array of indices from a LabelledOccs or LabelledVacs instance
              */
-            const std::vector<defs::ivec_t> &m_inds_ref;
+            const std::vector<defs::uintv_t> &m_inds_ref;
 
         public:
-            NdBase(std::array<size_t, nind> shape, const std::vector<defs::ivec_t> &inds) :
+            NdBase(std::array<size_t, nind> shape, const std::vector<defs::uintv_t> &inds) :
                     m_format(shape), m_inds_ref(inds) {}
 
             size_t size(const size_t &i) const {
@@ -148,11 +148,11 @@ namespace decoded_mbf {
                 return m_inds_ref[m_format.flatten(inds)].size();
             }
 
-            const defs::ivec_t &operator[](const size_t &i) const {
+            const defs::uintv_t &operator[](const size_t &i) const {
                 return m_inds_ref[i];
             }
 
-            const defs::ivec_t &operator[](const std::array<size_t, nind> &inds) const {
+            const defs::uintv_t &operator[](const std::array<size_t, nind> &inds) const {
                 return m_inds_ref[m_format.flatten(inds)];
             }
         };
@@ -168,7 +168,7 @@ namespace decoded_mbf {
         protected:
             NdBase<nind> m_nd_inds;
         public:
-            NdLabelledOccs(std::array<size_t, nind> shape, const defs::ivec_t &map, const FrmOnvField &mbf) :
+            NdLabelledOccs(std::array<size_t, nind> shape, const defs::uintv_t &map, const FrmOnvField &mbf) :
                     LabelledOccs(NdFormat<nind>(shape).m_nelement, map, mbf),
                     m_nd_inds(shape, m_inds) {}
 
@@ -195,7 +195,7 @@ namespace decoded_mbf {
         protected:
             NdBase<nind> m_nd_inds;
         public:
-            NdLabelledVacs(std::array<size_t, nind> shape, const defs::ivec_t &map, const FrmOnvField &mbf) :
+            NdLabelledVacs(std::array<size_t, nind> shape, const defs::uintv_t &map, const FrmOnvField &mbf) :
                     LabelledVacs(NdFormat<nind>(shape).m_nelement, map, mbf),
                     m_nd_inds(shape, m_inds) {}
 
@@ -237,25 +237,25 @@ namespace decoded_mbf {
         struct NonEmptyPairLabels : SimpleBase {
             NonEmptyPairLabels(const FrmOnvField &mbf);
 
-            const defs::ivec_t &get();
+            const defs::uintv_t &get();
         };
 
         struct OccSites : SimpleBase {
             OccSites(const FrmOnvField &mbf);
 
-            const defs::ivec_t &get();
+            const defs::uintv_t &get();
         };
 
         struct DoublyOccSites : SimpleBase {
             DoublyOccSites(const FrmOnvField &mbf);
 
-            const defs::ivec_t &get();
+            const defs::uintv_t &get();
         };
 
         struct NotSinglyOccSites : SimpleBase {
             NotSinglyOccSites(const FrmOnvField &mbf);
 
-            const defs::ivec_t &get();
+            const defs::uintv_t &get();
         };
 
     }

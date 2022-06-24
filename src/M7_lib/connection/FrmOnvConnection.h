@@ -14,7 +14,7 @@
  */
 class FrmOps {
     const sys::frm::Size m_sites;
-    defs::ivec_t m_inds;
+    defs::uintv_t m_inds;
 public:
     FrmOps(size_t nsite): m_sites(nsite) {
         m_inds.reserve(2*m_sites);
@@ -27,16 +27,16 @@ public:
         return *this;
     }
 
-    FrmOps& operator=(const defs::ivec_t& inds){
+    FrmOps& operator=(const defs::uintv_t& inds){
         m_inds = inds;
         return *this;
     }
 
-    const defs::ivec_t & inds() const {
+    const defs::uintv_t & inds() const {
         return m_inds;
     }
 
-    bool operator==(const defs::ivec_t &v) const {
+    bool operator==(const defs::uintv_t &v) const {
         return m_inds==v;
     }
 
@@ -71,13 +71,13 @@ public:
      * @param inds
      *  positions in the orbs vector of the selected spin orbitals
      */
-    void set_selection(const defs::ivec_t& orbs, const defs::ivec_t& inds) {
+    void set_selection(const defs::uintv_t& orbs, const defs::uintv_t& inds) {
         clear();
         for (const auto& ind: inds) {
             DEBUG_ASSERT_LT(ind, orbs.size(), "index OOB");
             add(orbs[ind]);
         }
-        DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected ivec_t were added");
+        DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected uintv_t were added");
     }
 
     void set(size_t ispinorb){
@@ -119,11 +119,11 @@ public:
         set_in_order(m_sites.ispinorb(pair1), m_sites.ispinorb(pair2));
     }
 
-    defs::ivec_t::const_iterator cbegin() const {
+    defs::uintv_t::const_iterator cbegin() const {
         return m_inds.cbegin();
     }
 
-    defs::ivec_t::const_iterator cend() const {
+    defs::uintv_t::const_iterator cend() const {
         return m_inds.cend();
     }
     /**
@@ -249,12 +249,12 @@ public:
      * @return
      *  the annihilation string cast to a vector
      */
-    const defs::ivec_t& ann() const;
+    const defs::uintv_t& ann() const;
     /**
      * @return
      *  the creation string cast to a vector
      */
-    const defs::ivec_t& cre() const;
+    const defs::uintv_t& cre() const;
 
     /**
      * @return

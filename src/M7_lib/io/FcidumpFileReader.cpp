@@ -6,11 +6,11 @@
 #include "M7_lib/util/Exsig.h"
 #include "M7_lib/basis/BasisData.h"
 
-FcidumpInfo::FcidumpInfo(std::string fname, bool uhf, bool relativistic, size_t nelec, size_t nsite, int ms2, defs::ivec_t orbsym):
+FcidumpInfo::FcidumpInfo(std::string fname, bool uhf, bool relativistic, size_t nelec, size_t nsite, int ms2, defs::uintv_t orbsym):
         m_fname(fname), m_uhf(uhf), m_relativistic(relativistic), m_spin_resolved(m_uhf || m_relativistic),
         m_nelec(nelec), m_nsite(nsite), m_nspinorb(m_spin_resolved ? m_nsite*2 : m_nsite),
         m_norb_distinct(m_spin_resolved ? m_nspinorb : m_nsite),
-        m_ms2(ms2), m_orbsym(orbsym.empty() ? defs::ivec_t(m_nsite, 1) : orbsym){
+        m_ms2(ms2), m_orbsym(orbsym.empty() ? defs::uintv_t(m_nsite, 1) : orbsym){
     REQUIRE_EQ(m_orbsym.size(), m_nsite, "invalid ORBSYM specified in FCIDUMP file");
 }
 
@@ -26,7 +26,7 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
         HamiltonianFileReader(fname, 4), m_info(FortranNamelistReader(fname)), m_spin_major(spin_major) {
     auto nsite = m_info.m_nsite;
     if (m_info.m_spin_resolved) {
-        defs::ivec_t inds(4);
+        defs::uintv_t inds(4);
         defs::ham_t v;
         while (next(inds, v)) {
             if (fptol::numeric_zero(v)) continue;
@@ -48,24 +48,24 @@ bool FcidumpFileReader::spin_conserving() const {
     return m_spin_conserving_1e && m_spin_conserving_2e;
 }
 
-void FcidumpFileReader::convert_inds(defs::ivec_t &inds) {
+void FcidumpFileReader::convert_inds(defs::uintv_t &inds) {
     if (!m_info.m_spin_resolved || m_spin_major) return;
     for (auto &ind: inds)
         ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_info.m_nsite : 0));
 }
 
-bool FcidumpFileReader::next(defs::ivec_t &inds, defs::ham_t &v) {
+bool FcidumpFileReader::next(defs::uintv_t &inds, defs::ham_t &v) {
     if (!HamiltonianFileReader::next(inds, v)) return false;
     convert_inds(inds);
     return true;
 }
 
-size_t FcidumpFileReader::ranksig(const defs::ivec_t &inds) const {
+size_t FcidumpFileReader::ranksig(const defs::uintv_t &inds) const {
     auto nset_inds = HamiltonianFileReader::nset_ind(inds);
     return exsig::encode(nset_inds/2, nset_inds/2, 0, 0);
 }
 
-size_t FcidumpFileReader::exsig(const defs::ivec_t &inds, size_t ranksig) const {
+size_t FcidumpFileReader::exsig(const defs::uintv_t &inds, size_t ranksig) const {
     switch (ranksig) {
         case 0ul: return 0ul;
         case exsig::ex_single:
@@ -79,6 +79,6 @@ size_t FcidumpFileReader::exsig(const defs::ivec_t &inds, size_t ranksig) const 
     }
 }
 
-bool FcidumpFileReader::inds_in_range(const defs::ivec_t &inds) const {
+bool FcidumpFileReader::inds_in_range(const defs::uintv_t &inds) const {
     return std::all_of(inds.cbegin(), inds.cend(), [this](size_t i){return i<=m_info.m_norb_distinct;});
 }

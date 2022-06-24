@@ -148,7 +148,7 @@ public:
         gr.load(m_name, begin(), {m_size});
     }
 
-    virtual ivec_t h5_shape() const {
+    virtual uintv_t h5_shape() const {
         return {};
     }
 

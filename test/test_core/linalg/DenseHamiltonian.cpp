@@ -31,7 +31,7 @@ TEST(DenseHamiltonian, HeisenbergFrmHam) {
     /*
      * https://doi.org/10.1016/0378-4363(78)90115-8
      */
-    defs::ivec_t nsites = {4, 6, 8, 10, 12};
+    defs::uintv_t nsites = {4, 6, 8, 10, 12};
     std::vector<defs::ham_comp_t> energies = {-2.0, -2.8027756375, -3.6510934085, -4.515446354, -5.387390917};
     for (size_t i=0ul; i<nsites.size(); ++i){
         auto nsite = nsites[i];

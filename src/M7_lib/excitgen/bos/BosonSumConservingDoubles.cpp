@@ -31,7 +31,7 @@ bool BosonSumConservingDoubles::draw_bos(size_t, const field::BosOnv &src, prob_
     size_t ij = m_prng.draw_uint(nboson_pair);
     size_t i, j;
     integer::inv_strigmap(j, i, ij);
-    // i and j are positions in the occ list, convert to orb ivec_t:
+    // i and j are positions in the occ list, convert to orb uintv_t:
     DEBUG_ASSERT_LT(i, j, "picked i, j should be in ascending order");
     DEBUG_ASSERT_LT(i, op_inds.size(), "i index OOB");
     DEBUG_ASSERT_LT(j, op_inds.size(), "j index OOB");

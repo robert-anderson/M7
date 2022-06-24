@@ -13,7 +13,7 @@
 template<typename Fn>
 struct QuickSorter {
 
-    defs::ivec_t m_inds;
+    defs::uintv_t m_inds;
     Fn m_cmp_fn;
 
     QuickSorter(Fn cmp_fn): m_cmp_fn(cmp_fn){}

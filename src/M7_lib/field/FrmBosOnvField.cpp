@@ -25,7 +25,7 @@ FrmBosOnvField::FrmBosOnvField(Row *row, const sys::Sector& sector, std::string 
 FrmBosOnvField::FrmBosOnvField(const FrmBosOnvField &other) :
     base_t(m_frm, m_bos), m_frm(other.m_frm), m_bos(other.m_bos), m_decoded(*this){}
 
-FrmBosOnvField &FrmBosOnvField::operator=(const std::pair<defs::ivec_t, defs::ivec_t> &inds) {
+FrmBosOnvField &FrmBosOnvField::operator=(const std::pair<defs::uintv_t, defs::uintv_t> &inds) {
     m_frm = inds.first;
     m_bos = inds.second;
     return *this;

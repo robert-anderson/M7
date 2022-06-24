@@ -34,9 +34,9 @@ namespace mbf {
      */
     void set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs);
 
-    void set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::ivec_t> &def, size_t idef);
+    void set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::uintv_t> &def, size_t idef);
 
-    void set_from_def_array(field::BosOnv &mbf, const std::vector<defs::ivec_t> &def, size_t idef);
+    void set_from_def_array(field::BosOnv &mbf, const std::vector<defs::uintv_t> &def, size_t idef);
 
     void set(field::FrmOnv &mbf, sys::Particles particles, const conf::MbfDef &def, size_t idef);
 

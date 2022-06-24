@@ -33,7 +33,7 @@ void ExtremalIndices::find(size_t nfind) {
     m_nfound = limit;
 }
 
-void ExtremalIndices::reset(size_t hwm, defs::ivec_t inds_ignore) {
+void ExtremalIndices::reset(size_t hwm, defs::uintv_t inds_ignore) {
     m_nfound = 0ul;
     m_nind = hwm - inds_ignore.size();
     m_inds.reserve(m_nind);
@@ -50,7 +50,7 @@ void ExtremalIndices::reset(size_t hwm, defs::ivec_t inds_ignore) {
 
 void ExtremalIndices::reset(const TableBase &table) {
     auto stack = table.m_free_rows;
-    defs::ivec_t irows_free;
+    defs::uintv_t irows_free;
     irows_free.reserve(stack.size());
     while(!stack.empty()) {
         irows_free.push_back(stack.top());

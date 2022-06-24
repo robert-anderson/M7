@@ -72,7 +72,7 @@ TEST(GeneralFrmHam, RhfEnergy) {
     const auto benchmark = -108.76171800006861;
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"}, true);
     Hamiltonian ham(&frm_ham);
-    defs::ivec_t chk_orbsyms = {0, 2, 1, 5, 6, 4};
+    defs::uintv_t chk_orbsyms = {0, 2, 1, 5, 6, 4};
     ASSERT_EQ(ham.m_basis.m_frm.m_abgrp_map.m_site_irreps, chk_orbsyms);
     ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::FrmOnv onv(ham.m_basis);

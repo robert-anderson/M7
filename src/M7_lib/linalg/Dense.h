@@ -251,7 +251,7 @@ namespace dense {
         }
 
         void save(std::string name, hdf5::GroupWriter& gw, size_t irank=0) const {
-            defs::ivec_t shape;
+            defs::uintv_t shape;
             shape.push_back(m_nrow);
             shape.push_back(m_ncol);
             gw.save(name, m_buffer, shape, {"nrow", "ncol"}, irank);

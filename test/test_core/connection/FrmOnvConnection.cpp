@@ -34,12 +34,12 @@ namespace frm_onv_connection_test {
         connection.connect(src, dst);
         return connection.m_ann.size();
     }
-    static size_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::ivec_t ann, defs::ivec_t cre){
+    static size_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::uintv_t ann, defs::uintv_t cre){
         FrmOnvConnection connection(src);
         connection.connect(src, dst);
         return (connection.m_ann == ann) && (connection.m_cre == cre);
     }
-    static size_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::ivec_t ann, defs::ivec_t cre, defs::ivec_t com){
+    static size_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::uintv_t ann, defs::uintv_t cre, defs::uintv_t com){
         FrmOnvConnection connection(src);
         FrmOps com_chk(src.m_basis.m_nsite);
         connection.connect(src, dst, com_chk);
@@ -191,7 +191,7 @@ TEST(Connection, EntireCiPhases) {
      * this file enumerates all determinantal connections in a small CI space along with their associated phases
      */
     NumericCsvFileReader file_reader(PROJECT_ROOT"/assets/parity_test/parity_8.txt", 17);
-    defs::ivec_t inds(16);
+    defs::uintv_t inds(16);
     int value;
 
     buffered::FrmOnv bra(4);

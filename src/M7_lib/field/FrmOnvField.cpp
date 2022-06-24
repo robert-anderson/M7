@@ -24,7 +24,7 @@ FrmOnvField::FrmOnvField(const FrmOnvField &other) :
         base_t(other), m_basis(other.m_basis), m_decoded(*this),
         m_dsize_spin_channel(other.m_dsize_spin_channel){}
 
-FrmOnvField &FrmOnvField::operator=(std::pair<const defs::ivec_t &, const defs::ivec_t &> setbits) {
+FrmOnvField &FrmOnvField::operator=(std::pair<const defs::uintv_t &, const defs::uintv_t &> setbits) {
     // prezero the element
     zero();
     for (const auto &ind: setbits.first) set(ind);
@@ -32,7 +32,7 @@ FrmOnvField &FrmOnvField::operator=(std::pair<const defs::ivec_t &, const defs::
     return *this;
 }
 
-bool FrmOnvField::operator==(const defs::ivec_t &inds) const {
+bool FrmOnvField::operator==(const defs::uintv_t &inds) const {
     if (nsetbit()!=inds.size()) return false;
     for (const auto& ind: inds) if (!get(ind)) return false;
     return true;
@@ -74,22 +74,22 @@ std::string FrmOnvField::to_string() const {
     return res;
 }
 
-void FrmOnvField::set(const size_t &bit_offset, const defs::ivec_t &setbits) {
+void FrmOnvField::set(const size_t &bit_offset, const defs::uintv_t &setbits) {
     for(auto& i: setbits) set(bit_offset+i);
 }
 
-void FrmOnvField::set(const size_t &site_offset, const defs::ivec_t &setbits_alpha, const defs::ivec_t &setbits_beta) {
+void FrmOnvField::set(const size_t &site_offset, const defs::uintv_t &setbits_alpha, const defs::uintv_t &setbits_beta) {
     for(auto& i: setbits_alpha) set({0, site_offset+i});
     for(auto& i: setbits_beta) set({1, site_offset+i});
 }
 
-void FrmOnvField::set(const defs::ivec_t &setbits_alpha, const defs::ivec_t &setbits_beta) {
+void FrmOnvField::set(const defs::uintv_t &setbits_alpha, const defs::uintv_t &setbits_beta) {
     zero();
     for(auto& i: setbits_alpha) set({0, i});
     for(auto& i: setbits_beta) set({1, i});
 }
 
-void FrmOnvField::set_spins(const defs::ivec_t &alpha_sites) {
+void FrmOnvField::set_spins(const defs::uintv_t &alpha_sites) {
     DEBUG_ASSERT_LE(alpha_sites.size(), m_basis.m_nsite, "can't have more spins than sites");
     zero();
     auto it = alpha_sites.cbegin();
@@ -107,11 +107,11 @@ void FrmOnvField::put_spin_channel(const size_t &ispin, bool set) {
     put_range(ibegin, ibegin+m_basis.m_nsite, set);
 }
 
-void FrmOnvField::clr(const size_t &bit_offset, const defs::ivec_t &clrbits) {
+void FrmOnvField::clr(const size_t &bit_offset, const defs::uintv_t &clrbits) {
     for(auto& i: clrbits) clr(bit_offset+i);
 }
 
-void FrmOnvField::clr(const size_t &site_offset, const defs::ivec_t &clrbits_alpha, const defs::ivec_t &clrbits_beta) {
+void FrmOnvField::clr(const size_t &site_offset, const defs::uintv_t &clrbits_alpha, const defs::uintv_t &clrbits_beta) {
     for(auto& i: clrbits_alpha) clr({0, site_offset+i});
     for(auto& i: clrbits_beta) clr({1, site_offset+i});
 }

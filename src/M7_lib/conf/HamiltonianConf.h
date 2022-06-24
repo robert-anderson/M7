@@ -39,7 +39,7 @@ namespace conf {
 
     struct LatticeModel : Section {
         Param<std::string> m_topology;
-        Param<defs::ivec_t> m_site_shape;
+        Param<defs::uintv_t> m_site_shape;
         Param<std::vector<int>> m_boundary_conds;
 
         LatticeModel(Group *parent, std::string name, std::string description);
