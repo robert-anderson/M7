@@ -102,19 +102,24 @@ enum MbfTypeInd {Frm, FrmBos, Bos};
 #define ENABLE_FERMIONS
 #endif
 
-constexpr uint_t mbf_type_ind = MBF_TYPE;
+constexpr uint_t c_mbf_type_ind = MBF_TYPE;
 
 #ifdef ENABLE_BOSONS
-constexpr bool enable_bosons = true;
+constexpr bool c_enable_bosons = true;
 #else
-constexpr bool enable_bosons = false;
+constexpr bool c_enable_bosons = false;
 #endif
 
 #ifdef ENABLE_FERMIONS
-constexpr bool enable_fermions = true;
+constexpr bool c_enable_fermions = true;
 #else
-constexpr bool enable_fermions = false;
+constexpr bool c_enable_fermions = false;
 #endif
 
+//  nroot, nreplica
+constexpr uint_t c_ndim_wf = 2;
+//  nroot
+constexpr uint_t c_ndim_root = 1;
+typedef uinta_t<c_ndim_wf> wf_inds_t;
 
 #endif //M7_DEFS_H

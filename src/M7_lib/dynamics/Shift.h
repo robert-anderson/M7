@@ -19,7 +19,7 @@
  */
 struct Reweighter {
     const conf::Shift &m_opts;
-    buffered::Numbers<ham_comp_t, ndim_wf> m_const_shift;
+    buffered::Numbers<ham_comp_t, c_ndim_wf> m_const_shift;
     /**
      * the reweighting epochs begin some specified number of cycles after variable shift mode begins
      */
@@ -32,8 +32,8 @@ struct Reweighter {
     /**
      * products over all histories
      */
-    buffered::Numbers<ham_comp_t, ndim_wf> m_total;
-    Reweighter(const conf::Shift& opts, const NdFormat<ndim_wf>& wf_fmt);
+    buffered::Numbers<ham_comp_t, c_ndim_wf> m_total;
+    Reweighter(const conf::Shift& opts, const NdFormat<c_ndim_wf>& wf_fmt);
     /**
      * decide whether the reweighting epoch should begin, and if it should, fix the constant shift to the current
      * average shift value
@@ -84,11 +84,11 @@ struct Shift {
     /**
      * the numbers of walkers on each WF part in the last period is stored so that the growth rate can be computed
      */
-    buffered::Numbers<wf_comp_t, ndim_wf> m_nwalker_last_period;
+    buffered::Numbers<wf_comp_t, c_ndim_wf> m_nwalker_last_period;
     /**
      * values of the diagonal shift for each WF part
      */
-    buffered::Numbers<ham_comp_t, ndim_wf> m_values;
+    buffered::Numbers<ham_comp_t, c_ndim_wf> m_values;
     /**
      * queues storing the most recent values of the shift in order to enable constant time
      * computation of the rolling average shift values
@@ -97,7 +97,7 @@ struct Shift {
     /**
      * total unnormalized average shift values
      */
-    buffered::Numbers<ham_comp_t, ndim_wf> m_avg_values;
+    buffered::Numbers<ham_comp_t, c_ndim_wf> m_avg_values;
     /**
      * the shift is initially held constant until the L1 norm of the wavefunction reaches
      * a user-defined level, at this point the shift is allowed to vary such that the L1
@@ -110,7 +110,7 @@ struct Shift {
     InteractiveVariable<wf_comp_t> m_nwalker_target;
     Reweighter m_reweighter;
 
-    Shift(const conf::Document &opts, const NdFormat<ndim_wf>& wf_fmt);
+    Shift(const conf::Document &opts, const NdFormat<c_ndim_wf>& wf_fmt);
 
     const ham_comp_t & operator[](const uint_t& ipart);
 

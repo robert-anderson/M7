@@ -135,13 +135,13 @@ std::vector<bool> References::is_connected(const field::Mbf &mbf) const {
     return out;
 }
 
-const field::Numbers<ham_t, ndim_wf> &References::proj_energy_nums() {
+const field::Numbers<ham_t, c_ndim_wf> &References::proj_energy_nums() {
     uint_t ipart = 0ul;
     for (auto& ref: m_refs) m_proj_energy_nums[ipart++] = ref.proj_energy_num();
     return m_proj_energy_nums;
 }
 
-const field::Numbers<wf_t, ndim_wf> &References::weights() {
+const field::Numbers<wf_t, c_ndim_wf> &References::weights() {
     uint_t ipart = 0ul;
     for (auto& ref: m_refs) m_weights[ipart++] = ref.weight();
     return m_weights;

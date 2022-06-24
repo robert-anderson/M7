@@ -131,8 +131,8 @@ public:
  */
 struct References {
     std::vector<Reference> m_refs;
-    buffered::Numbers<ham_t, ndim_wf> m_proj_energy_nums;
-    buffered::Numbers<wf_t, ndim_wf> m_weights;
+    buffered::Numbers<ham_t, c_ndim_wf> m_proj_energy_nums;
+    buffered::Numbers<wf_t, c_ndim_wf> m_weights;
 
     References(const conf::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs);
 
@@ -146,9 +146,9 @@ struct References {
 
     std::vector<bool> is_connected(const field::Mbf &onv) const;
 
-    const field::Numbers<ham_t, ndim_wf>& proj_energy_nums();
+    const field::Numbers<ham_t, c_ndim_wf>& proj_energy_nums();
 
-    const field::Numbers<wf_t, ndim_wf>& weights();
+    const field::Numbers<wf_t, c_ndim_wf>& weights();
 
 };
 

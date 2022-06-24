@@ -38,7 +38,7 @@
 struct Bilinears {
     Rdms m_rdms;
     SpecMoms m_spec_moms;
-    buffered::Numbers<wf_t, ndim_root> m_total_norm;
+    buffered::Numbers<wf_t, c_ndim_root> m_total_norm;
     //const bool m_explicit_hf_conns;
 
     //std::array<std::unique_ptr<SpectralMoment>, c_ndistinct> m_specmoms;

@@ -21,13 +21,13 @@ public:
 
     SpfTwfBase(const Hamiltonian &ham, uint_t npart);
 
-    virtual void add(const field::Numbers<wf_t, ndim_wf> &weight,
+    virtual void add(const field::Numbers<wf_t, c_ndim_wf> &weight,
                      const field::FrmOnv &onv) = 0;
 
-    virtual void add(const field::Numbers<wf_t, ndim_wf> &weight,
+    virtual void add(const field::Numbers<wf_t, c_ndim_wf> &weight,
                      const field::FrmBosOnv &onv) = 0;
 
-    virtual void add(const field::Numbers<wf_t, ndim_wf> &weight,
+    virtual void add(const field::Numbers<wf_t, c_ndim_wf> &weight,
                      const field::BosOnv &onv) = 0;
 
     virtual void reduce();

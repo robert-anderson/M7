@@ -29,7 +29,7 @@
  * are the called the "spawning lists"
  */
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
-    typedef GlobalExtremalRows<WalkerTableRow, wf_t, ndim_wf> weights_gxr_t;
+    typedef GlobalExtremalRows<WalkerTableRow, wf_t, c_ndim_wf> weights_gxr_t;
 
     const conf::Document &m_opts;
     const sys::Sector m_sector;
@@ -37,7 +37,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * all multidimensional array indices of the multidimensional fields of the m_store row
      */
-    NdEnumeration<ndim_wf> m_format;
+    NdEnumeration<c_ndim_wf> m_format;
 
     /**
      * collection of all reductions which are summed at the end of every cycle
@@ -47,11 +47,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * number of initiator ONVs in each part of the WF
      */
-    NdReduction<uint_t, ndim_wf> m_ninitiator;
+    NdReduction<uint_t, c_ndim_wf> m_ninitiator;
     /**
      * change over the last cycle in the number of initiator ONVs
      */
-    NdReduction<int, ndim_wf> m_delta_ninitiator;
+    NdReduction<int, c_ndim_wf> m_delta_ninitiator;
     /**
      * number of ONVs with any associated weight in any part
      */
@@ -63,27 +63,27 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * L1 norm of each part of the WF
      */
-    NdReduction<wf_comp_t, ndim_wf> m_nwalker;
+    NdReduction<wf_comp_t, c_ndim_wf> m_nwalker;
     /**
      * change in the L1 norm
      */
-    NdReduction<wf_comp_t, ndim_wf> m_delta_nwalker;
+    NdReduction<wf_comp_t, c_ndim_wf> m_delta_nwalker;
     /**
      * square of the L2 norm of each part of the WF
      */
-    NdReduction<wf_comp_t, ndim_wf> m_l2_norm_square;
+    NdReduction<wf_comp_t, c_ndim_wf> m_l2_norm_square;
     /**
      * change in the L2 norm
      */
-    NdReduction<wf_comp_t, ndim_wf> m_delta_l2_norm_square;
+    NdReduction<wf_comp_t, c_ndim_wf> m_delta_l2_norm_square;
     /**
      * number of walkers received in spawning process
      */
-    NdReduction<wf_comp_t, ndim_wf> m_nspawned;
+    NdReduction<wf_comp_t, c_ndim_wf> m_nspawned;
     /**
      * number of walkers annihilated in the loop_over_spawned method for each part
      */
-    NdReduction<wf_comp_t, ndim_wf> m_nannihilated;
+    NdReduction<wf_comp_t, c_ndim_wf> m_nannihilated;
 
     Wavefunction(const conf::Document &opts, const sys::Sector& sector);
 
@@ -165,7 +165,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
         for (uint_t ipart=0ul; ipart<m_format.m_nelement; ++ipart) set_weight(ipart, new_weight);
     }
 
-    void set_weight(const field::Numbers<wf_t, ndim_wf> &new_weight){
+    void set_weight(const field::Numbers<wf_t, c_ndim_wf> &new_weight){
         for (uint_t i=0ul; i < m_format.m_nelement; ++i) set_weight(i, new_weight[i]);
     }
 

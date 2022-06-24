@@ -21,7 +21,7 @@ class Propagator : public Archivable {
 protected:
     double m_tau;
 public:
-    const NdFormat<ndim_wf> m_wf_fmt;
+    const NdFormat<c_ndim_wf> m_wf_fmt;
     const Hamiltonian &m_ham;
     Shift m_shift;
     const sys::Sector m_sector;

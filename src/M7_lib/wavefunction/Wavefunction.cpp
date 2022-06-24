@@ -57,7 +57,7 @@ Wavefunction::~Wavefunction() {
 }
 
 std::vector<std::string> Wavefunction::h5_field_names() {
-    if (!enable_bosons)
+    if (!c_enable_bosons)
         return {"mbf", "weight"};
     else
         return {"mbf (fermion)", "mbf (boson)", "weight"};

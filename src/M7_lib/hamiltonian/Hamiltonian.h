@@ -196,7 +196,7 @@ private:
             m_boson_number_conserve(boson_number_conserve()), m_work_conn(m_basis.size()){
         REQUIRE_TRUE(m_basis, "No system defined");
         if (!m_frm) log::info("Fermion Hamiltonian is disabled");
-        if (enable_bosons) {
+        if (c_enable_bosons) {
             if (!m_frmbos) log::info("Fermion-boson ladder Hamiltonian is disabled");
             if (!m_bos) log::info("Number-conserving boson Hamiltonian is disabled");
         }

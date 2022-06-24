@@ -18,7 +18,7 @@
  */
 struct DeterministicDataRow : Row {
     field::Mbf m_mbf;
-    field::Numbers<wf_t, ndim_wf> m_weight;
+    field::Numbers<wf_t, c_ndim_wf> m_weight;
 
     field::Mbf &key_field();
 
