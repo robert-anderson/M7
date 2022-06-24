@@ -25,7 +25,7 @@ TEST(DenseTcBosonHamiltonian, TcBe631G) {
     AssetSymlink tcdump("TC_Be_6-31G/TCDUMP", "TCDUMP");
     AssetSymlink bosdump("TC_Be_6-31G/BOSDUMP", "BOSDUMP");
     AssetSymlink fcidump("TC_Be_6-31G/FCIDUMP", "FCIDUMP");
-    TcBosHam ham_src({"BOSDUMP"}, defs::max_bos_occ);
+    TcBosHam ham_src({"BOSDUMP"}, sys::bos::c_max_occ);
     Hamiltonian gham(&ham_src);
     DenseHamiltonian ham(gham);
     // non-symmetric real matrices have (in general) complex eigenvalues

@@ -43,7 +43,7 @@ namespace test_defs {
 #define ASSERT_NEARLY_EQ_TOL(a, b, rtol, atol) ASSERT_EQ(test_defs::make_helper(a, rtol, atol), b);
 #define ASSERT_NEARLY_EQ(a, b) ASSERT_NEARLY_EQ_TOL(a, b, fptol::default_rtol_near(a), fptol::default_atol_near(a));
 #define ASSERT_NUM_EQ(a, b) ASSERT_NEARLY_EQ_TOL(a, b, 0.0, fptol::default_atol_num(b));
-#define ASSERT_NEARLY_ZERO(b, atol) ASSERT_NEARLY_EQ_TOL(fptol::nearly_zero, b, atol);
-#define ASSERT_NUM_ZERO(b) ASSERT_NEARLY_EQ_TOL(fptol::nearly_zero, b);
+#define ASSERT_NEARLY_ZERO(b, atol) ASSERT_NEARLY_EQ_TOL(0.0, b, 0.0, atol);
+#define ASSERT_NUM_ZERO(b) ASSERT_NEARLY_ZERO(b, fptol::default_atol_num(b));
 
 #endif //M7_TEST_DEFS_H
