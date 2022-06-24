@@ -46,6 +46,11 @@ namespace defs {
      */
     typedef std::vector<i_t> ivec_t;
     /**
+     * array of such integers
+     */
+    template<i_t n>
+    using iarr_t = std::array<i_t, n>;
+    /**
      * pair of such integers
      */
     typedef std::pair<i_t, i_t> ipair_t;
