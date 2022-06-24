@@ -1,9 +1,9 @@
 target_sources(M7_lib
     PRIVATE
-        LinearExact.cpp
-        LinearExact.h
-        LinearStoch.cpp
-        LinearStoch.h
+        ExactLinear.cpp
+        ExactLinear.h
+        StochLinear.cpp
+        StochLinear.h
         Propagator.cpp
         Propagator.h
         Propagators.h

@@ -7,14 +7,14 @@
 
 #include <memory>
 
-#include "LinearExact.h"
-#include "LinearStoch.h"
+#include "ExactLinear.h"
+#include "StochLinear.h"
 #include "M7_lib/util/SmartPtr.h"
 
 namespace props {
 
-    typedef LinearExact Exact;
-    typedef LinearStoch Stoch;
+    typedef ExactLinear Exact;
+    typedef StochLinear Stoch;
 
     static std::unique_ptr<Propagator> get(const Hamiltonian &ham, const conf::Document &opts,
                                            const Wavefunction &wf) {

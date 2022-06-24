@@ -10,7 +10,7 @@
 
 #include "M7_lib/propagator/Propagator.h"
 
-class LinearStoch : public Propagator {
+class StochLinear : public Propagator {
 protected:
     PRNG m_prng;
     ExcitGenGroup m_excit_gen_group;
@@ -29,7 +29,7 @@ protected:
     }
 
 public:
-    LinearStoch(const Hamiltonian &ham, const conf::Document &opts, const Wavefunction& wf);
+    StochLinear(const Hamiltonian &ham, const conf::Document &opts, const Wavefunction& wf);
 
     void diagonal(Wavefunction &wf, const uint_t& ipart) override;
 
