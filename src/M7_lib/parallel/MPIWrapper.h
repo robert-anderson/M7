@@ -20,6 +20,7 @@
 #include <M7_lib/defs.h>
 #include "M7_lib/util/Convert.h"
 
+using namespace defs;
 /**
  * With MPI, we potentially have a typing issue. By default MPI libraries are typically
  * compiled with the displacement and count types set to 32-bit signed ints. This is
@@ -200,11 +201,11 @@ namespace mpi {
 
     void barrier_on_node();
 
-    static count_t snrw(size_t i) {
+    static count_t snrw(i_t i) {
         return convert::safe_narrow<count_t>(i);
     }
 
-    static counts_t snrw(const std::vector<size_t> &v) {
+    static counts_t snrw(const ivec_t &v) {
         return convert::safe_narrow<count_t>(v);
     }
 
