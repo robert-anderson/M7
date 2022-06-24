@@ -8,22 +8,22 @@
 #include "gtest/gtest.h"
 
 TEST(Fields, HashUniformityTrueRandom){
-    const size_t nsite = 50;
-    const size_t nelec = 28;
-    const size_t nbucket = 20;
-    const size_t ndraw = 10000000;
+    const uint_t nsite = 50;
+    const uint_t nelec = 28;
+    const uint_t nbucket = 20;
+    const uint_t ndraw = 10000000;
 
     defs::uintv_t freqs(nbucket, 0ul);
     PRNG prng(14, 10000);
 
     buffered::FrmOnv fonv(nsite);
 
-    for (size_t idraw=0ul; idraw<ndraw; ++idraw){
+    for (uint_t idraw=0ul; idraw<ndraw; ++idraw){
         fonv.zero();
         for (auto ispin: {0ul, 1ul}) {
-            size_t nset = 0ul;
+            uint_t nset = 0ul;
             while (nset < nelec/2) {
-                size_t isite = prng.draw_uint(nsite);
+                uint_t isite = prng.draw_uint(nsite);
                 if (fonv.get({ispin, isite})) continue;
                 fonv.set({ispin, isite});
                 ++nset;
@@ -42,10 +42,10 @@ TEST(Fields, HashUniformityLowIndexMoreLikely){
     /*
      * simulates the occupation of a CI vector
      */
-    const size_t nsite = 50;
-    const size_t nelec = 28;
-    const size_t nbucket = 20;
-    const size_t ndraw = 10000000;
+    const uint_t nsite = 50;
+    const uint_t nelec = 28;
+    const uint_t nbucket = 20;
+    const uint_t ndraw = 10000000;
     const defs::prob_t prob = 0.6;
 
     defs::uintv_t freqs(nbucket, 0ul);
@@ -53,11 +53,11 @@ TEST(Fields, HashUniformityLowIndexMoreLikely){
 
     buffered::FrmOnv fonv(nsite);
 
-    for (size_t idraw=0ul; idraw<ndraw; ++idraw){
+    for (uint_t idraw=0ul; idraw<ndraw; ++idraw){
         fonv.zero();
         for (auto ispin: {0ul, 1ul}) {
-            size_t nset = 0ul;
-            size_t isite = 0ul;
+            uint_t nset = 0ul;
+            uint_t isite = 0ul;
             while (nset<nelec/2){
                 if (!fonv.get({ispin, isite})) {
                     if (prng.draw_float() < prob) {

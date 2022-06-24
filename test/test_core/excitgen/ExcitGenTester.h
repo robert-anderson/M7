@@ -12,11 +12,11 @@
 namespace excit_gen_tester {
     struct ResultRow : Row {
         field::MaeInds m_inds;
-        field::Number<size_t> m_occur;
+        field::Number<uint_t> m_occur;
         field::Number<defs::prob_t> m_weight;
         field::Number<defs::ham_t> m_helem;
 
-        ResultRow(size_t exsig) :
+        ResultRow(uint_t exsig) :
                 m_inds(this, exsig, "excitation indices"),
                 m_occur(this, "number of occurrences"),
                 m_weight(this, "sum of reciprocal probabilities"),
@@ -31,9 +31,9 @@ namespace excit_gen_tester {
 
 
     struct RunStatus {
-        const size_t m_nnull;
+        const uint_t m_nnull;
         const std::string m_error_message;
-        RunStatus(size_t nnull): m_nnull(nnull){}
+        RunStatus(uint_t nnull): m_nnull(nnull){}
         RunStatus(std::string error_message): m_nnull(~0ul), m_error_message(std::move(error_message)){}
     };
 
@@ -76,18 +76,18 @@ namespace excit_gen_tester {
         }
 
         template<typename mbf_t>
-        RunStatus run(const mbf_t &src_mbf, size_t ndraw) {
+        RunStatus run(const mbf_t &src_mbf, uint_t ndraw) {
             typedef conn::from_field_t<mbf_t> conn_t;
             conn_t conn(src_mbf);
-            size_t exsig = m_conn_iter.m_exsig;
+            uint_t exsig = m_conn_iter.m_exsig;
             buffered::MaeInds work_inds(m_conn_iter.m_exsig);
-            size_t nnull = 0ul;
+            uint_t nnull = 0ul;
 
             REQUIRE_FALSE(m_results.is_cleared(), "no connections were found by the excitation iterator");
             defs::prob_t prob = 0.0;
             defs::ham_t helem = 0.0;
             auto &row = m_results.m_row;
-            for (size_t idraw = 0ul; idraw < ndraw; ++idraw) {
+            for (uint_t idraw = 0ul; idraw < ndraw; ++idraw) {
                 auto success = m_excit_gen.draw(exsig, src_mbf, prob, helem, conn);
                 if (!success) {
                     ++nnull;
@@ -128,7 +128,7 @@ namespace excit_gen_tester {
          * @return
          *  true if all weights are correct within tolerance
          */
-        bool all_correct_weights(size_t ndraw, double cutoff = 1e-2, defs::prob_t tol = 1e-2) const;
+        bool all_correct_weights(uint_t ndraw, double cutoff = 1e-2, defs::prob_t tol = 1e-2) const;
 
         /**
          * @param ndraw
@@ -136,7 +136,7 @@ namespace excit_gen_tester {
          * @return
          *  the average absolute error in the normalized weights
          */
-        defs::prob_t mean_abs_error(size_t ndraw) const;
+        defs::prob_t mean_abs_error(uint_t ndraw) const;
     };
 }
 

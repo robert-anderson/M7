@@ -4,7 +4,7 @@
 
 #include "SignProblemFreeTwf.h"
 
-SpfTwfBase::SpfTwfBase(const Hamiltonian &ham, size_t npart) :
+SpfTwfBase::SpfTwfBase(const Hamiltonian &ham, uint_t npart) :
         m_ham(ham), m_conn_iters(ham), m_numerator(npart, 0.0), m_denominator(npart, 0.0),
         m_numerator_total(npart, 0.0), m_denominator_total(npart, 0.0) {
 }

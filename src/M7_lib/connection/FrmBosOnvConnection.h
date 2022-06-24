@@ -27,9 +27,9 @@ struct FrmBosOnvConnection {
 
     void apply(const FrmBosOnvField& src, FrmBosOnvField& dst) const;
 
-    size_t exsig() const;
+    uint_t exsig() const;
 
-    bool respects_occ_range(const FrmBosOnvField& src, size_t nboson_max) const;
+    bool respects_occ_range(const FrmBosOnvField& src, uint_t nboson_max) const;
 };
 
 static std::ostream &operator<<(std::ostream &os, const FrmBosOnvConnection &conn) {

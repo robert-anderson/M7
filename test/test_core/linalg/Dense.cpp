@@ -409,7 +409,7 @@ TEST(Dense, ComplexDoubleInnerProduct) {
 
 TEST(Dense, RealSymEig) {
     typedef double T;
-    const size_t n = 4;
+    const uint_t n = 4;
     dense::SquareMatrix<T> mat(n);
     /*
      * [[ 0,  2, -1,  2],
@@ -428,7 +428,7 @@ TEST(Dense, RealSymEig) {
 
     std::vector<T> evals_chk = {-2.84695223, -0.7346574, 4.90333541, 8.67827421};
 
-    for (size_t i = 0ul; i < n; ++i) ASSERT_NEARLY_EQ(evals[i], evals_chk[i]);
+    for (uint_t i = 0ul; i < n; ++i) ASSERT_NEARLY_EQ(evals[i], evals_chk[i]);
     /*
      * [[ 0.42674891, -0.30080954, -0.59964891, -0.6064818 ],
        [ 0.81540297, -0.2009709 ,  0.51855174,  0.16072585],
@@ -448,7 +448,7 @@ TEST(Dense, RealSymEig) {
 
 TEST(Dense, ComplexHermEig) {
     typedef double T;
-    const size_t n = 4;
+    const uint_t n = 4;
     dense::SquareMatrix<std::complex<T>> mat(n);
     /*
      * [[ 4.+0.j, -1.+0.j, -5.+2.j, -2.-5.j],
@@ -477,7 +477,7 @@ TEST(Dense, ComplexHermEig) {
 
     std::vector<T> evals_chk = {-8.50478306, -3.4626037, 3.23302049, 10.73436627};
 
-    for (size_t i = 0ul; i < n; ++i) ASSERT_FLOAT_EQ(evals[i], evals_chk[i]);
+    for (uint_t i = 0ul; i < n; ++i) ASSERT_FLOAT_EQ(evals[i], evals_chk[i]);
 
     /*
      * real:
@@ -503,7 +503,7 @@ TEST(Dense, ComplexHermEig) {
             0.08208495, -0.66880593, -0.3500776, -0.55654424};
 
     dense::SquareMatrix<std::complex<T>> evecs(n);
-    for (size_t i=0ul; i<evecs_real.size(); ++i) evecs[i] = {evecs_real[i], evecs_imag[i]};
+    for (uint_t i=0ul; i<evecs_real.size(); ++i) evecs[i] = {evecs_real[i], evecs_imag[i]};
 
     ASSERT_TRUE(mat.nearly_equal(evecs, 1e-7));
 }
@@ -512,7 +512,7 @@ TEST(Dense, ComplexHermEig) {
 #if 0
 TEST(Dense, RealNonSymEig) {
     typedef double T;
-    const size_t n=4;
+    const uint_t n=4;
     dense::SquareMatrix<T> mat(n);
     /*
      * [[-5,  0, -4,  0],
@@ -530,7 +530,7 @@ TEST(Dense, RealNonSymEig) {
     std::vector<std::complex<T>> evals_chk = {{-7.09850305, 0.94428128}, {-7.09850305, -0.94428128},
                                               0.39858951, -2.2015834};
 
-    for (size_t i=0ul; i<n; ++i) {
+    for (uint_t i=0ul; i<n; ++i) {
         ASSERT_FLOAT_EQ(evals[i].real(), evals_chk[i].real());
         ASSERT_FLOAT_EQ(evals[i].imag(), evals_chk[i].imag());
     }
@@ -539,7 +539,7 @@ TEST(Dense, RealNonSymEig) {
 
 TEST(Dense, RealNonSymEigRight) {
     typedef double T;
-    const size_t n=4;
+    const uint_t n=4;
     dense::SquareMatrix<T> mat(n);
     /*
      * [[-5,  0, -4,  0],
@@ -557,7 +557,7 @@ TEST(Dense, RealNonSymEigRight) {
     std::vector<std::complex<T>> evals_chk = {{-7.09850305, 0.94428128}, {-7.09850305, -0.94428128},
                                               0.39858951, -2.2015834};
 
-    for (size_t i=0ul; i<n; ++i) {
+    for (uint_t i=0ul; i<n; ++i) {
         ASSERT_FLOAT_EQ(evals[i].real(), evals_chk[i].real());
         ASSERT_FLOAT_EQ(evals[i].imag(), evals_chk[i].imag());
     }

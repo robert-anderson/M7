@@ -23,7 +23,7 @@ decoded_mbf::frm::SimpleOccs::SimpleOccs(const FrmOnvField &mbf) : SimpleBase(mb
 
 const defs::uintv_t& decoded_mbf::frm::SimpleOccs::get() {
     if (!empty()) return validated();
-    for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
+    for (uint_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_dataword(idataword);
         while (work) m_inds.push_back(bit::next_setbit(work) + idataword * Buffer::c_nbit_word);
     }
@@ -35,7 +35,7 @@ decoded_mbf::frm::SimpleVacs::SimpleVacs(const FrmOnvField &mbf) : SimpleBase(mb
 
 const defs::uintv_t& decoded_mbf::frm::SimpleVacs::get() {
     if (!empty()) return validated();
-    for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
+    for (uint_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_antidataword(idataword);
         while (work) m_inds.push_back(bit::next_setbit(work) + idataword * Buffer::c_nbit_word);
     }
@@ -43,7 +43,7 @@ const defs::uintv_t& decoded_mbf::frm::SimpleVacs::get() {
     return m_inds;
 }
 
-decoded_mbf::frm::LabelledBase::LabelledBase(size_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf) :
+decoded_mbf::frm::LabelledBase::LabelledBase(uint_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf) :
         Base(mbf), m_inds(nelement), m_map(map) {
     if (mbf.m_basis.m_nsite){
         REQUIRE_LT(*std::max_element(map.cbegin(), map.cend()), nelement,
@@ -56,13 +56,13 @@ const std::vector<defs::uintv_t> &decoded_mbf::frm::LabelledBase::validated() co
     return m_inds;
 }
 
-defs::uintv_t decoded_mbf::frm::LabelledBase::make_spinorb_map(const defs::uintv_t &site_irreps, size_t nirrep) {
+defs::uintv_t decoded_mbf::frm::LabelledBase::make_spinorb_map(const defs::uintv_t &site_irreps, uint_t nirrep) {
     auto nsite = site_irreps.size();
     if (!nsite) return {};
     defs::uintv_t out(2 * nsite, 0);
     std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin());
     std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin()+nsite);
-    for (size_t i=nsite; i<nsite*2; ++i) out[i]+=nirrep;
+    for (uint_t i=nsite; i<nsite*2; ++i) out[i]+=nirrep;
     return out;
 }
 
@@ -76,19 +76,19 @@ bool decoded_mbf::frm::LabelledBase::empty() {
     return m_simple_inds.empty();
 }
 
-size_t decoded_mbf::frm::LabelledBase::label(size_t ispinorb) const {
+uint_t decoded_mbf::frm::LabelledBase::label(uint_t ispinorb) const {
     DEBUG_ASSERT_LT(ispinorb, m_map.size(), "spin orbital index OOB");
     return m_map[ispinorb];
 }
 
-decoded_mbf::frm::LabelledOccs::LabelledOccs(size_t nelement, const defs::uintv_t &map, const FrmOnvField& mbf) :
+decoded_mbf::frm::LabelledOccs::LabelledOccs(uint_t nelement, const defs::uintv_t &map, const FrmOnvField& mbf) :
         LabelledBase(nelement, map, mbf){}
 
 const std::vector<defs::uintv_t>& decoded_mbf::frm::LabelledOccs::get() {
     if (!empty()) return validated();
     // simple uintv_t are all ready cleared
     for (auto& v : m_inds) v.clear();
-    for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
+    for (uint_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_dataword(idataword);
         while (work) {
             auto ibit = bit::next_setbit(work) + idataword * Buffer::c_nbit_word;
@@ -105,14 +105,14 @@ const defs::uintv_t &decoded_mbf::frm::LabelledOccs::simple() {
     return m_simple_inds;
 }
 
-decoded_mbf::frm::LabelledVacs::LabelledVacs(size_t nelement, const defs::uintv_t &map, const FrmOnvField& mbf) :
+decoded_mbf::frm::LabelledVacs::LabelledVacs(uint_t nelement, const defs::uintv_t &map, const FrmOnvField& mbf) :
         LabelledBase(nelement, map, mbf){}
 
 const std::vector<defs::uintv_t>& decoded_mbf::frm::LabelledVacs::get() {
     if (!empty()) return validated();
     // simple uintv_t are all ready cleared
     for (auto& v : m_inds) v.clear();
-    for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
+    for (uint_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_antidataword(idataword);
         while (work) {
             auto ibit = bit::next_setbit(work) + idataword * Buffer::c_nbit_word;
@@ -150,7 +150,7 @@ const defs::uintv_t &decoded_mbf::frm::NonEmptyPairLabels::get() {
     if (!empty()) return validated();
     auto &occ = m_mbf.m_decoded.m_spin_sym_occs.get();
     auto &vac = m_mbf.m_decoded.m_spin_sym_vacs.get();
-    for (size_t i = 0ul; i < occ.m_format.m_nelement; ++i) {
+    for (uint_t i = 0ul; i < occ.m_format.m_nelement; ++i) {
         if (!occ[i].empty() && !vac[i].empty()) m_inds.push_back(i);
     }
     m_last_update_hash = m_mbf.hash();
@@ -161,7 +161,7 @@ decoded_mbf::frm::OccSites::OccSites(const FrmOnvField &mbf) : SimpleBase(mbf){}
 
 const defs::uintv_t &decoded_mbf::frm::OccSites::get() {
     if (!empty()) return validated();
-    for (size_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
+    for (uint_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
         if (m_mbf.site_nocc(isite)) m_inds.push_back(isite);
     }
     m_last_update_hash = m_mbf.hash();
@@ -172,7 +172,7 @@ decoded_mbf::frm::DoublyOccSites::DoublyOccSites(const FrmOnvField &mbf) : Simpl
 
 const defs::uintv_t &decoded_mbf::frm::DoublyOccSites::get() {
     if (!empty()) return validated();
-    for (size_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
+    for (uint_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
         if (m_mbf.site_nocc(isite)==2) m_inds.push_back(isite);
     }
     m_last_update_hash = m_mbf.hash();
@@ -183,7 +183,7 @@ decoded_mbf::frm::NotSinglyOccSites::NotSinglyOccSites(const FrmOnvField &mbf) :
 
 const defs::uintv_t &decoded_mbf::frm::NotSinglyOccSites::get() {
     if (!empty()) return validated();
-    for (size_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
+    for (uint_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
         if (m_mbf.site_nocc(isite)!=1) m_inds.push_back(isite);
     }
     m_last_update_hash = m_mbf.hash();

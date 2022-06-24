@@ -10,11 +10,11 @@ TEST(UtilExsig, EncodeDecode) {
     /*
      * assert that all excitation signatures are encoded and decoded correctly
      */
-    size_t exsig;
-    for (size_t ncref = 0ul; ncref <= c_nop_mask_frm; ++ncref) {
-        for (size_t nannf = 0ul; nannf <= c_nop_mask_frm; ++nannf) {
-            for (size_t ncreb = 0ul; ncreb <= c_nop_mask_bos; ++ncreb) {
-                for (size_t nannb = 0ul; nannb <= c_nop_mask_bos; ++nannb) {
+    uint_t exsig;
+    for (uint_t ncref = 0ul; ncref <= c_nop_mask_frm; ++ncref) {
+        for (uint_t nannf = 0ul; nannf <= c_nop_mask_frm; ++nannf) {
+            for (uint_t ncreb = 0ul; ncreb <= c_nop_mask_bos; ++ncreb) {
+                for (uint_t nannb = 0ul; nannb <= c_nop_mask_bos; ++nannb) {
                     exsig = encode(ncref, nannf, ncreb, nannb);
                     ASSERT_EQ(decode_nfrm_cre(exsig), ncref);
                     ASSERT_EQ(decode_nfrm_ann(exsig), nannf);
@@ -62,7 +62,7 @@ TEST(UtilExsig, RanksigContribs) {
 }
 #if 0
 TEST(Utils, SetAllExsigsFromRanksig) {
-    size_t ranksig;
+    uint_t ranksig;
     std::array<bool, defs::c_ndistinct> exsigs{};
 
     ranksig = conn_utils::encode_exsig(4, 4, 1, 1);

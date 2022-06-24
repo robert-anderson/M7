@@ -29,9 +29,9 @@ TEST(NdFormat, SubFormats) {
     auto major = format.major_dims<2>();
     auto minor = format.minor_dims<2>();
 
-    size_t iflat = 0ul;
-    for (size_t imajor_flat = 0ul; imajor_flat<major.m_nelement; ++imajor_flat){
-        for (size_t iminor_flat = 0ul; iminor_flat<minor.m_nelement; ++iminor_flat){
+    uint_t iflat = 0ul;
+    for (uint_t imajor_flat = 0ul; imajor_flat<major.m_nelement; ++imajor_flat){
+        for (uint_t iminor_flat = 0ul; iminor_flat<minor.m_nelement; ++iminor_flat){
             ASSERT_EQ(iflat++, format.flatten<2>(imajor_flat, iminor_flat));
         }
     }
@@ -45,9 +45,9 @@ TEST(NdFormat, NamedDimensions) {
 
 TEST(NdFormat, Test1D) {
     NdFormat<1> format(9);
-    size_t iflat = 0ul;
-    std::array<size_t, 1> iarr;
-    for (size_t i0 = 0ul; i0 < format.m_shape[0]; ++i0) {
+    uint_t iflat = 0ul;
+    uinta_t<1> iarr;
+    for (uint_t i0 = 0ul; i0 < format.m_shape[0]; ++i0) {
         ASSERT_EQ(format.flatten(i0), iflat);
         format.decode_flat(iflat, iarr);
         ASSERT_EQ(iarr[0], i0);
@@ -57,10 +57,10 @@ TEST(NdFormat, Test1D) {
 
 TEST(NdFormat, Test2D) {
     NdFormat<2> format({4, 5});
-    size_t iflat = 0ul;
-    std::array<size_t, 2> iarr;
-    for (size_t i0 = 0ul; i0 < format.m_shape[0]; ++i0) {
-        for (size_t i1 = 0ul; i1 < format.m_shape[1]; ++i1) {
+    uint_t iflat = 0ul;
+    uinta_t<2> iarr;
+    for (uint_t i0 = 0ul; i0 < format.m_shape[0]; ++i0) {
+        for (uint_t i1 = 0ul; i1 < format.m_shape[1]; ++i1) {
             ASSERT_EQ(format.flatten(i0, i1), iflat);
             format.decode_flat(iflat, iarr);
             ASSERT_EQ(iarr[0], i0);
@@ -71,12 +71,12 @@ TEST(NdFormat, Test2D) {
 }
 
 TEST(NdFormat, Test2DEqualExtents) {
-    const size_t n = 7;
+    const uint_t n = 7;
     NdFormat<2> format(n);
-    size_t iflat = 0ul;
-    std::array<size_t, 2> iarr;
-    for (size_t i0 = 0ul; i0 < n; ++i0) {
-        for (size_t i1 = 0ul; i1 < n; ++i1) {
+    uint_t iflat = 0ul;
+    uinta_t<2> iarr;
+    for (uint_t i0 = 0ul; i0 < n; ++i0) {
+        for (uint_t i1 = 0ul; i1 < n; ++i1) {
             ASSERT_EQ(format.flatten(i0, i1), iflat);
             format.decode_flat(iflat, iarr);
             ASSERT_EQ(iarr[0], i0);
@@ -88,11 +88,11 @@ TEST(NdFormat, Test2DEqualExtents) {
 
 TEST(NdFormat, Test3D) {
     NdFormat<3> format({4, 5, 3});
-    size_t iflat = 0ul;
-    std::array<size_t, 3> iarr;
-    for (size_t i0 = 0ul; i0 < format.m_shape[0]; ++i0) {
-        for (size_t i1 = 0ul; i1 < format.m_shape[1]; ++i1) {
-            for (size_t i2 = 0ul; i2 < format.m_shape[2]; ++i2) {
+    uint_t iflat = 0ul;
+    uinta_t<3> iarr;
+    for (uint_t i0 = 0ul; i0 < format.m_shape[0]; ++i0) {
+        for (uint_t i1 = 0ul; i1 < format.m_shape[1]; ++i1) {
+            for (uint_t i2 = 0ul; i2 < format.m_shape[2]; ++i2) {
                 ASSERT_EQ(format.flatten(i0, i1, i2), iflat);
                 format.decode_flat(iflat, iarr);
                 ASSERT_EQ(iarr[0], i0);
@@ -105,13 +105,13 @@ TEST(NdFormat, Test3D) {
 }
 
 TEST(NdFormat, Test3DEqualExtents) {
-    const size_t n = 7;
+    const uint_t n = 7;
     NdFormat<3> format(n);
-    size_t iflat = 0ul;
-    std::array<size_t, 3> iarr;
-    for (size_t i0 = 0ul; i0 < n; ++i0) {
-        for (size_t i1 = 0ul; i1 < n; ++i1) {
-            for (size_t i2 = 0ul; i2 < n; ++i2) {
+    uint_t iflat = 0ul;
+    uinta_t<3> iarr;
+    for (uint_t i0 = 0ul; i0 < n; ++i0) {
+        for (uint_t i1 = 0ul; i1 < n; ++i1) {
+            for (uint_t i2 = 0ul; i2 < n; ++i2) {
                 ASSERT_EQ(format.flatten(i0, i1, i2), iflat);
                 format.decode_flat(iflat, iarr);
                 ASSERT_EQ(iarr[0], i0);
@@ -125,12 +125,12 @@ TEST(NdFormat, Test3DEqualExtents) {
 
 TEST(NdFormat, Test4D) {
     NdFormat<4> format({4, 5, 3, 2});
-    size_t iflat = 0ul;
-    std::array<size_t, 4> iarr;
-    for (size_t i0 = 0ul; i0 < format.m_shape[0]; ++i0) {
-        for (size_t i1 = 0ul; i1 < format.m_shape[1]; ++i1) {
-            for (size_t i2 = 0ul; i2 < format.m_shape[2]; ++i2) {
-                for (size_t i3 = 0ul; i3 < format.m_shape[3]; ++i3) {
+    uint_t iflat = 0ul;
+    uinta_t<4> iarr;
+    for (uint_t i0 = 0ul; i0 < format.m_shape[0]; ++i0) {
+        for (uint_t i1 = 0ul; i1 < format.m_shape[1]; ++i1) {
+            for (uint_t i2 = 0ul; i2 < format.m_shape[2]; ++i2) {
+                for (uint_t i3 = 0ul; i3 < format.m_shape[3]; ++i3) {
                     ASSERT_EQ(format.flatten(i0, i1, i2, i3), iflat);
                     format.decode_flat(iflat, iarr);
                     ASSERT_EQ(iarr[0], i0);
@@ -145,14 +145,14 @@ TEST(NdFormat, Test4D) {
 }
 
 TEST(NdFormat, Test4DEqualExtents) {
-    const size_t n = 5;
+    const uint_t n = 5;
     NdFormat<4> format(n);
-    size_t iflat = 0ul;
-    std::array<size_t, 4> iarr{};
-    for (size_t i0 = 0ul; i0 < n; ++i0) {
-        for (size_t i1 = 0ul; i1 < n; ++i1) {
-            for (size_t i2 = 0ul; i2 < n; ++i2) {
-                for (size_t i3 = 0ul; i3 < n; ++i3) {
+    uint_t iflat = 0ul;
+    uinta_t<4> iarr{};
+    for (uint_t i0 = 0ul; i0 < n; ++i0) {
+        for (uint_t i1 = 0ul; i1 < n; ++i1) {
+            for (uint_t i2 = 0ul; i2 < n; ++i2) {
+                for (uint_t i3 = 0ul; i3 < n; ++i3) {
                     ASSERT_EQ(format.flatten(i0, i1, i2, i3), iflat);
                     format.decode_flat(iflat, iarr);
                     ASSERT_EQ(iarr[0], i0);
@@ -173,9 +173,9 @@ TEST(NdFormat, CombineIndsFromSubformat31) {
     ASSERT_EQ(major.m_nelement, 3*4*2);
     ASSERT_EQ(minor.m_nelement, 6);
 
-    size_t i = 0ul;
-    for (size_t imajor = 0ul; imajor<major.m_nelement; ++imajor){
-        for (size_t iminor = 0ul; iminor<minor.m_nelement; ++iminor) {
+    uint_t i = 0ul;
+    for (uint_t imajor = 0ul; imajor<major.m_nelement; ++imajor){
+        for (uint_t iminor = 0ul; iminor<minor.m_nelement; ++iminor) {
             ASSERT_EQ(format.combine<3>(imajor, iminor), i);
             ++i;
         }
@@ -190,9 +190,9 @@ TEST(NdFormat, CombineIndsFromSubformat22) {
     ASSERT_EQ(major.m_nelement, 3*4);
     ASSERT_EQ(minor.m_nelement, 2*6);
 
-    size_t i = 0ul;
-    for (size_t imajor = 0ul; imajor<major.m_nelement; ++imajor){
-        for (size_t iminor = 0ul; iminor<minor.m_nelement; ++iminor) {
+    uint_t i = 0ul;
+    for (uint_t imajor = 0ul; imajor<major.m_nelement; ++imajor){
+        for (uint_t iminor = 0ul; iminor<minor.m_nelement; ++iminor) {
             ASSERT_EQ(format.combine<2>(imajor, iminor), i);
             ++i;
         }

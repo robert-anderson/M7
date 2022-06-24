@@ -13,24 +13,24 @@
 namespace sort {
 
     template<typename viewable_t>
-    std::function<bool(size_t, size_t)>
-    static make_compare_fn(std::function<typename viewable_t::cview_t(size_t)> getter_fn, bool asc, bool abs_val) {
+    std::function<bool(uint_t, uint_t)>
+    static make_compare_fn(std::function<typename viewable_t::cview_t(uint_t)> getter_fn, bool asc, bool abs_val) {
         if (asc) {
             if (abs_val)
-                return [getter_fn](size_t i1, size_t i2) {
+                return [getter_fn](uint_t i1, uint_t i2) {
                     return std::abs(getter_fn(i1)) < std::abs(getter_fn(i2));
                 };
             else
-                return [getter_fn](size_t i1, size_t i2) {
+                return [getter_fn](uint_t i1, uint_t i2) {
                     return arith::real(getter_fn(i1)) < arith::real(getter_fn(i2));
                 };
         } else {
             if (abs_val)
-                return [getter_fn](size_t i1, size_t i2) {
+                return [getter_fn](uint_t i1, uint_t i2) {
                     return std::abs(getter_fn(i1)) > std::abs(getter_fn(i2));
                 };
             else
-                return [getter_fn](size_t i1, size_t i2) {
+                return [getter_fn](uint_t i1, uint_t i2) {
                     return arith::real(getter_fn(i1)) > arith::real(getter_fn(i2));
                 };
         }
@@ -54,20 +54,20 @@ namespace sort {
         std::iota(out.begin(), out.end(), 0);
         if (asc) {
             if (abs_val)
-                std::stable_sort(out.begin(), out.end(), [&v](size_t i, size_t j) {
+                std::stable_sort(out.begin(), out.end(), [&v](uint_t i, uint_t j) {
                     return std::abs(v[i]) < std::abs(v[j]);
                 });
             else
-                std::stable_sort(out.begin(), out.end(), [&v](size_t i, size_t j) {
+                std::stable_sort(out.begin(), out.end(), [&v](uint_t i, uint_t j) {
                     return arith::real(v[i]) < arith::real(v[j]);
                 });
         } else {
             if (abs_val)
-                std::stable_sort(out.begin(), out.end(), [&v](size_t i, size_t j) {
+                std::stable_sort(out.begin(), out.end(), [&v](uint_t i, uint_t j) {
                     return std::abs(v[i]) > std::abs(v[j]);
                 });
             else
-                std::stable_sort(out.begin(), out.end(), [&v](size_t i, size_t j) {
+                std::stable_sort(out.begin(), out.end(), [&v](uint_t i, uint_t j) {
                     return arith::real(v[i]) > arith::real(v[j]);
                 });
         }

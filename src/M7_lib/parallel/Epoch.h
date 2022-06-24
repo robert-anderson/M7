@@ -31,7 +31,7 @@
 
 class Epoch {
     std::string m_name;
-    Reduction<size_t> m_icycle_start;
+    Reduction<uint_t> m_icycle_start;
 
 public:
     explicit Epoch(std::string name);
@@ -44,49 +44,49 @@ public:
      * @param condition local value of the condition for the Epoch to begin
      * @return true if Epoch begins on icycle, else false
      */
-    bool update(size_t icycle, bool condition);
+    bool update(uint_t icycle, bool condition);
 
-    void terminate(size_t icycle);
+    void terminate(uint_t icycle);
 
     /**
      * @return the MPI-synchronized cycle number on which the Epoch began
      */
-    const size_t& icycle_start() const;
+    const uint_t& icycle_start() const;
 
     /**
      * @return the MPI-synchronized state of the Epoch
      */
     operator bool() const;
 
-    bool started_last_cycle(size_t icycle) const;
+    bool started_last_cycle(uint_t icycle) const;
 
-    bool started_this_cycle(size_t icycle) const;
+    bool started_this_cycle(uint_t icycle) const;
 
 };
 
 class Epochs {
     std::vector<Epoch> m_epochs;
 public:
-    Epochs(std::string name, size_t n, std::string element_identifier="element"){
+    Epochs(std::string name, uint_t n, std::string element_identifier="element"){
         m_epochs.reserve(n);
-        for (size_t i=0ul; i<n; ++i) m_epochs.emplace_back(name+" (" +element_identifier + " " + std::to_string(i) + ")");
+        for (uint_t i=0ul; i<n; ++i) m_epochs.emplace_back(name+" (" +element_identifier + " " + std::to_string(i) + ")");
     }
 
-    size_t nelement() const {
+    uint_t nelement() const {
         return m_epochs.size();
     }
 
-    Epoch& operator[](const size_t i){
+    Epoch& operator[](const uint_t i){
         DEBUG_ASSERT_LT(i, m_epochs.size(), "Epoch index OOB");
         return m_epochs[i];
     }
 
-    const Epoch& operator[](const size_t i) const{
+    const Epoch& operator[](const uint_t i) const{
         DEBUG_ASSERT_LT(i, m_epochs.size(), "Epoch index OOB");
         return m_epochs[i];
     }
 
-    void terminate(const size_t& icycle){
+    void terminate(const uint_t& icycle){
         for (auto& epoch:m_epochs) epoch.terminate(icycle);
     }
 
@@ -94,7 +94,7 @@ public:
      * @return
      * the cycle on which the last epoch to start started, or ~0ul if any epochs have yet to start
      */
-    size_t icycle_start_last() const;
+    uint_t icycle_start_last() const;
 
     /**
      * @return

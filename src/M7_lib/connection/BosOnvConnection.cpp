@@ -5,11 +5,11 @@
 #include "BosOnvConnection.h"
 #include "M7_lib/util/Exsig.h"
 
-BosOpPair::BosOpPair(size_t imode, size_t nop) : m_imode(imode), m_nop(nop){
+BosOpPair::BosOpPair(uint_t imode, uint_t nop) : m_imode(imode), m_nop(nop){
     DEBUG_ASSERT_GT(m_nop, 0ul, "mode with no associated operators should not appear in operator product")
 }
 
-BosOps::BosOps(size_t nmode): m_pair_ptrs(nmode, nullptr){
+BosOps::BosOps(uint_t nmode): m_pair_ptrs(nmode, nullptr){
     m_pairs.reserve(nmode);
 }
 
@@ -21,7 +21,7 @@ defs::uintv_t BosOps::get() const {
     defs::uintv_t vec;
     vec.reserve(size());
     for (auto& pair: m_pairs) {
-        for (size_t iop=0ul; iop<pair.m_nop; ++iop) vec.push_back(pair.m_imode);
+        for (uint_t iop=0ul; iop<pair.m_nop; ++iop) vec.push_back(pair.m_imode);
     }
     DEBUG_ASSERT_EQ(vec.size(), size(), "incorrect number of operators in vector");
     return vec;
@@ -30,8 +30,8 @@ defs::uintv_t BosOps::get() const {
 void BosOps::set(const defs::uintv_t &imodes) {
     clear();
     if (imodes.empty()) return;
-    size_t istart = 0;
-    for(size_t i = 1; i<imodes.size(); ++i){
+    uint_t istart = 0;
+    for(uint_t i = 1; i<imodes.size(); ++i){
         if (imodes[istart]!=imodes[i]) {
             add(imodes[istart], i - istart);
             istart = i;
@@ -46,16 +46,16 @@ void BosOps::clear() {
     m_nop = 0ul;
 }
 
-size_t BosOps::size() const {
+uint_t BosOps::size() const {
     return m_nop;
 }
 
-void BosOps::set(size_t i) {
+void BosOps::set(uint_t i) {
     clear();
     add(i, 1ul);
 }
 
-void BosOps::set(size_t i, size_t j) {
+void BosOps::set(uint_t i, uint_t j) {
     clear();
     DEBUG_ASSERT_LE(i, j, "ops must be in ascending order");
     if (i==j) add(i, 2);
@@ -65,7 +65,7 @@ void BosOps::set(size_t i, size_t j) {
     }
 }
 
-void BosOps::set(size_t i, size_t j, size_t k) {
+void BosOps::set(uint_t i, uint_t j, uint_t k) {
     clear();
     DEBUG_ASSERT_LE(i, j, "ops must be in ascending order");
     DEBUG_ASSERT_LE(j, k, "ops must be in ascending order");
@@ -91,7 +91,7 @@ void BosOps::set(size_t i, size_t j, size_t k) {
     }
 }
 
-void BosOps::add(size_t imode, size_t nop){
+void BosOps::add(uint_t imode, uint_t nop){
     DEBUG_ASSERT_TRUE(m_pairs.empty() || imode > m_pairs.back().m_imode,
                       "bosonic mode indices should be added in ascending order");
     DEBUG_ASSERT_LT(imode, m_pairs.capacity(), "bosonic mode index is OOB");
@@ -106,12 +106,12 @@ void BosOps::add(size_t imode, size_t nop){
     m_nop += nop;
 }
 
-const BosOpPair &BosOps::operator[](const size_t &ipair) const {
+const BosOpPair &BosOps::operator[](const uint_t &ipair) const {
     DEBUG_ASSERT_LT(ipair, m_pairs.size(), "boson operator index OOB");
     return m_pairs[ipair];
 }
 
-size_t BosOps::get_imode(size_t iop) const {
+uint_t BosOps::get_imode(uint_t iop) const {
     DEBUG_ASSERT_LT(iop, m_nop, "Boson operator index OOB");
     for (const auto& pair: m_pairs) {
         if (iop<pair.m_nop) return pair.m_imode;
@@ -132,7 +132,7 @@ std::string BosOps::to_string() const {
     return convert::to_string(out);
 }
 
-BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
+BosOnvConnection::BosOnvConnection(uint_t nmode) : m_ann(nmode), m_cre(nmode){}
 
 BosOnvConnection::BosOnvConnection(sys::Size size) : BosOnvConnection(size.m_bos){
     size.require_pure_bos();
@@ -145,29 +145,29 @@ void BosOnvConnection::clear() {
     m_cre.clear();
 }
 
-size_t BosOnvConnection::size() const {
+uint_t BosOnvConnection::size() const {
     return m_ann.size()+m_cre.size();
 }
 
-size_t BosOnvConnection::nmode() const {
+uint_t BosOnvConnection::nmode() const {
     return m_cre.pairs().capacity();
 }
 
 void BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst) {
     DEBUG_ASSERT_EQ(src.nelement(), dst.nelement(), "src and dst ONVs are incompatible");
     clear();
-    for (size_t imode=0ul; imode<src.nelement(); ++imode){
-        if (src[imode] > dst[imode]) m_ann.add(imode, size_t(src[imode]-dst[imode]));
-        else if (src[imode] < dst[imode]) m_cre.add(imode, size_t(dst[imode]-src[imode]));
+    for (uint_t imode=0ul; imode<src.nelement(); ++imode){
+        if (src[imode] > dst[imode]) m_ann.add(imode, uint_t(src[imode]-dst[imode]));
+        else if (src[imode] < dst[imode]) m_cre.add(imode, uint_t(dst[imode]-src[imode]));
     }
 }
 
 void BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst, BosOps &com) {
     DEBUG_ASSERT_EQ(src.nelement(), dst.nelement(), "src and dst ONVs are incompatible");
     clear();
-    for (size_t imode=0ul; imode<src.nelement(); ++imode){
-        if (src[imode] > dst[imode]) m_ann.add(imode, size_t(src[imode]-dst[imode]));
-        else if (src[imode] < dst[imode]) m_cre.add(imode, size_t(dst[imode]-src[imode]));
+    for (uint_t imode=0ul; imode<src.nelement(); ++imode){
+        if (src[imode] > dst[imode]) m_ann.add(imode, uint_t(src[imode]-dst[imode]));
+        else if (src[imode] < dst[imode]) m_cre.add(imode, uint_t(dst[imode]-src[imode]));
         else com.add(imode, src[imode]);
     }
 }
@@ -182,7 +182,7 @@ void BosOnvConnection::apply(const BosOnvField &src, BosOnvField &dst) const {
 void BosOnvConnection::apply(const BosOnvField &src, BosOps &com) const {
     auto ann_iter = m_ann.pairs().cbegin();
     auto ann_end = m_ann.pairs().cend();
-    for (size_t imode=0ul; imode<src.nelement(); ++imode) {
+    for (uint_t imode=0ul; imode<src.nelement(); ++imode) {
         if (ann_iter!=ann_end && ann_iter->m_imode==imode)
             com.add(imode, src[imode]-ann_iter->m_nop);
         else com.add(imode, src[imode]);
@@ -194,11 +194,11 @@ void BosOnvConnection::apply(const BosOnvField &src, BosOnvField &dst, BosOps &c
     apply(src, com);
 }
 
-size_t BosOnvConnection::exsig() const {
+uint_t BosOnvConnection::exsig() const {
     return exsig::encode(0, 0, m_cre.size(), m_ann.size());
 }
 
-bool BosOnvConnection::respects_occ_range(const BosOnvField &src, size_t nboson_max) const {
+bool BosOnvConnection::respects_occ_range(const BosOnvField &src, uint_t nboson_max) const {
     for (auto& pair: m_cre.pairs()) if (src[pair.m_imode]+pair.m_nop > nboson_max) return false;
     for (auto& pair: m_ann.pairs()) if (src[pair.m_imode] < pair.m_nop) return false;
     return true;

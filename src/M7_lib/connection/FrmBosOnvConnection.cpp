@@ -34,10 +34,10 @@ void FrmBosOnvConnection::apply(const FrmBosOnvField& src, FrmBosOnvField& dst) 
     m_bos.apply(src.m_bos, dst.m_bos);
 }
 
-size_t FrmBosOnvConnection::exsig() const {
+uint_t FrmBosOnvConnection::exsig() const {
     return exsig::encode(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
 }
 
-bool FrmBosOnvConnection::respects_occ_range(const FrmBosOnvField& src, size_t nboson_max) const {
+bool FrmBosOnvConnection::respects_occ_range(const FrmBosOnvField& src, uint_t nboson_max) const {
     return m_bos.respects_occ_range(src.m_bos, nboson_max);
 }

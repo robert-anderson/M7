@@ -17,7 +17,7 @@ struct SpinSquareFrmHam : FrmHam, ElecSpecTerm {
      */
     SpinSquareFrmHam(const sys::frm::Basis& basis, const sys::frm::Electrons& elecs);
 
-    defs::ham_t get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const override;
+    defs::ham_t get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const override;
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override;
 

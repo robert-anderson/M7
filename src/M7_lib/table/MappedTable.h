@@ -14,17 +14,17 @@
 #include "Table.h"
 
 struct LookupResult {
-    std::forward_list<size_t> &m_bucket;
-    std::forward_list<size_t>::iterator m_prev;
+    std::forward_list<uint_t> &m_bucket;
+    std::forward_list<uint_t>::iterator m_prev;
 
-    LookupResult(std::forward_list<size_t> &bucket) :
+    LookupResult(std::forward_list<uint_t> &bucket) :
             m_bucket(bucket), m_prev(bucket.before_begin()) {}
 
     operator bool() const {
         return m_prev != m_bucket.end();
     }
 
-    size_t operator*() const {
+    uint_t operator*() const {
         if (!*this) return ~0ul;
         return *std::next(m_prev);
     }
@@ -32,20 +32,20 @@ struct LookupResult {
 
 
 struct MappedTableBase {
-    static constexpr size_t c_default_nbucket = 100;
+    static constexpr uint_t c_default_nbucket = 100;
     static constexpr double c_default_remap_ratio = 2.0;
-    static constexpr size_t c_default_remap_nlookup = 500;
+    static constexpr uint_t c_default_remap_nlookup = 500;
     /*
      * skips are counted to avoid having to loop over all buckets to count entries
      */
-    size_t m_nskip_total = 0.0;
-    size_t m_nlookup_total = 0.0;
+    uint_t m_nskip_total = 0.0;
+    uint_t m_nlookup_total = 0.0;
 
-    std::vector<std::forward_list<size_t>> m_buckets;
-    const size_t m_remap_nlookup;
+    std::vector<std::forward_list<uint_t>> m_buckets;
+    const uint_t m_remap_nlookup;
     const double m_remap_ratio;
 
-    MappedTableBase(size_t nbucket = 0ul, size_t remap_nlookup = 0ul, double remap_ratio = 0.0);
+    MappedTableBase(uint_t nbucket = 0ul, uint_t remap_nlookup = 0ul, double remap_ratio = 0.0);
 
     /**
      * Assuming uniform frequency of access, the average number of skips per lookup in a bucket containing n items is
@@ -60,12 +60,12 @@ struct MappedTableBase {
      * @return
      *  estimated number of buckets required to support the mapping of nitem items with the given skip ratio
      */
-    static size_t nbucket_guess(size_t nitem, double ratio);
+    static uint_t nbucket_guess(uint_t nitem, double ratio);
     /**
      * @return
      *  size of the m_buckets vector
      */
-    size_t nbucket() const;
+    uint_t nbucket() const;
     /**
      * clear all buckets
      */
@@ -113,7 +113,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
     using TableBase::m_hwm;
     using TableBase::m_bw;
 
-    MappedTable(const row_t &row, size_t nbucket = 0ul, size_t remap_nlookup = 0ul, double remap_ratio = 0.0) :
+    MappedTable(const row_t &row, uint_t nbucket = 0ul, uint_t remap_nlookup = 0ul, double remap_ratio = 0.0) :
             Table<row_t>(row), MappedTableBase(nbucket, remap_nlookup, remap_ratio),
             m_lookup_row(m_row), m_insert_row(m_row) {}
 
@@ -124,7 +124,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
      * @param key
      *  key to lookup
      */
-    LookupResult lookup(const key_field_t &key, std::vector<std::forward_list<size_t>>& buckets) {
+    LookupResult lookup(const key_field_t &key, std::vector<std::forward_list<uint_t>>& buckets) {
         m_nlookup_total++;
         auto nbucket = buckets.size();
         LookupResult res(buckets[key.hash() % nbucket]);
@@ -164,7 +164,7 @@ public:
         clear_map();
     }
 
-    void clear(const size_t &irow) override {
+    void clear(const uint_t &irow) override {
         m_row.jump(irow);
         auto lookup = (*this)[KeyField<row_t>::get(m_row)];
         erase(lookup);
@@ -191,7 +191,7 @@ public:
      * @return
      *  row index of the key
      */
-    size_t insert(const key_field_t &key) {
+    uint_t insert(const key_field_t &key) {
         DEBUG_ASSERT_FALSE(uncounted_lookup(key), "cannot insert when the key already exists in the table");
         auto irow = TableBase::get_free_row();
         auto &bucket = m_buckets[key.hash() % nbucket()];
@@ -207,7 +207,7 @@ public:
      * @param buckets
      *  vector of buckets into which the row indices are stored
      */
-    void post_insert_buckets(const size_t &irow, std::vector<std::forward_list<size_t>> &buckets) {
+    void post_insert_buckets(const uint_t &irow, std::vector<std::forward_list<uint_t>> &buckets) {
         DEBUG_ASSERT_FALSE(TableBase::is_cleared(irow), "cannot map to a cleared row");
         m_insert_row.jump(irow);
         // row mustn't have already been added
@@ -221,7 +221,7 @@ public:
      * @param irow
      *  index of the row to be mapped
      */
-    void post_insert(const size_t &irow) override {
+    void post_insert(const uint_t &irow) override {
         post_insert_buckets(irow, m_buckets);
     }
     /**
@@ -229,7 +229,7 @@ public:
      */
     void remap() {
         DEBUG_ASSERT_TRUE(all_nonzero_rows_mapped(*this), "mapping is inconsistent with table row content");
-        size_t nbucket_new = nbucket() * skip_lookup_ratio()/m_remap_ratio;
+        uint_t nbucket_new = nbucket() * skip_lookup_ratio()/m_remap_ratio;
         // use the same expansion factor as for the Table buffer
         nbucket_new *= 1.0 + this->m_bw.get_expansion_factor();
         if (!TableBase::name().empty()) {
@@ -239,7 +239,7 @@ public:
             log::info_("replacing current bucket vector of size {} with a new one of size {}",
                        nbucket(), nbucket_new);
         }
-        std::vector<std::forward_list<size_t>> new_buckets(nbucket_new);
+        std::vector<std::forward_list<uint_t>> new_buckets(nbucket_new);
         for (const auto &old_bucket : m_buckets) {
             for (const auto irow : old_bucket) {
                 post_insert_buckets(irow, new_buckets);
@@ -264,7 +264,7 @@ public:
 
     void load(hdf5::GroupReader &parent, std::string name) override {
         RowHdf5Reader<row_t> row_reader(m_row, parent, name);
-        size_t iitem = 0ul;
+        uint_t iitem = 0ul;
         clear();
         TableBase::push_back(row_reader.m_nitem);
         for (row_reader.restart(); row_reader.in_range(); row_reader.step()) {

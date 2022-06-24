@@ -8,7 +8,7 @@
 
 std::string Row::field_names_string() const {
     std::string tmp;
-    size_t i = 0ul;
+    uint_t i = 0ul;
     for (const FieldBase* field : m_fields)
         tmp+="field "+std::to_string(i++)+": " + field->m_name + "\n";
     return tmp;
@@ -20,7 +20,7 @@ std::string Row::to_string() const {
     return tmp;
 }
 
-size_t Row::add_field(FieldBase *field) {
+uint_t Row::add_field(FieldBase *field) {
     REQUIRE_TRUE(field, "Field pointer should not be null");
     // returns the offset in bytes for the column being added
     auto offset = 0ul;
@@ -39,7 +39,7 @@ size_t Row::add_field(FieldBase *field) {
     return offset;
 }
 
-size_t Row::nfield() const {
+uint_t Row::nfield() const {
     return m_fields.size();
 }
 

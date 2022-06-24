@@ -64,9 +64,9 @@ std::vector<long> FortranNamelistReader::read_ints(const std::string &label, std
     return tmp;
 }
 
-std::vector<size_t>
-FortranNamelistReader::read_uints(const std::string &label, std::vector<size_t> default_) const {
-    std::vector<size_t> tmp;
+std::vector<uint_t>
+FortranNamelistReader::read_uints(const std::string &label, std::vector<uint_t> default_) const {
+    std::vector<uint_t> tmp;
     read(tmp, label, default_);
     return tmp;
 }
@@ -83,7 +83,7 @@ long FortranNamelistReader::read_int(const std::string &label, long default_) co
     return tmp[0];
 }
 
-size_t FortranNamelistReader::read_uint(const std::string &label, size_t default_) const {
+uint_t FortranNamelistReader::read_uint(const std::string &label, uint_t default_) const {
     auto tmp = read_uints(label, {default_});
     REQUIRE_EQ(tmp.size(), 1ul, "found more than one value for scalar");
     return tmp[0];

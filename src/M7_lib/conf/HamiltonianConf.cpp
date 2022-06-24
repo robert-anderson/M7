@@ -70,7 +70,7 @@ conf::FrmHam::FrmHam(Group *parent) :
         m_spin_penalty_j(this, "spin_penalty_j", 0.0, "scalar multiple of the total spin operator used in the spin penalty fermion Hamiltonian modification"){}
 
 void conf::FrmHam::verify() {
-    size_t ndefined = m_fcidump.enabled() + m_hubbard.enabled() + m_heisenberg.enabled();
+    uint_t ndefined = m_fcidump.enabled() + m_hubbard.enabled() + m_heisenberg.enabled();
     REQUIRE_LE(ndefined, 1ul, "conflicting hamiltonian definitions are defined");
 }
 

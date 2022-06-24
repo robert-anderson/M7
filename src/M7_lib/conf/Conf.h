@@ -16,7 +16,7 @@ namespace conf {
 
     struct HashMapping : Section {
         Param<double> m_remap_ratio;
-        Param<size_t> m_remap_nlookup;
+        Param<uint_t> m_remap_nlookup;
 
         explicit HashMapping(Group *parent);
     };
@@ -38,8 +38,8 @@ namespace conf {
          * the period options are not mutually exclusive, the Archive class will make sure that a checkpoint file does
          * not get dumped twice on the same MC cycle
          */
-        Param<size_t> m_period;
-        Param<size_t> m_period_mins;
+        Param<uint_t> m_period;
+        Param<uint_t> m_period_mins;
 
         explicit Archive(Group *parent);
 
@@ -67,17 +67,17 @@ namespace conf {
     };
 
     struct Prng : Section {
-        Param<size_t> m_seed;
-        Param<size_t> m_ngen_block;
+        Param<uint_t> m_seed;
+        Param<uint_t> m_ngen_block;
 
         explicit Prng(Group *parent);
     };
 
     struct LoadBalancing : Section {
-        Param<size_t> m_nblock_per_rank;
-        Param<size_t> m_period;
+        Param<uint_t> m_nblock_per_rank;
+        Param<uint_t> m_period;
         Param<double> m_acceptable_imbalance;
-        Param<size_t> m_nnull_updates_deactivate;
+        Param<uint_t> m_nnull_updates_deactivate;
 
         explicit LoadBalancing(Group *parent);
     };
@@ -101,7 +101,7 @@ namespace conf {
     };
 
     struct Basis : Section {
-        Param<size_t> m_bos_occ_cutoff;
+        Param<uint_t> m_bos_occ_cutoff;
         explicit Basis(Group *parent):
         Section(parent, "basis", "options relating to the single particle basis functions and subsets thereof"),
         m_bos_occ_cutoff(this, "bos_occ_cutoff", sys::bos::c_max_occ,
@@ -114,9 +114,9 @@ namespace conf {
     };
 
     struct Particles : Section {
-        Param<size_t> m_nelec;
+        Param<uint_t> m_nelec;
         Param<int> m_ms2;
-        Param<size_t> m_nboson;
+        Param<uint_t> m_nboson;
 
         explicit Particles(Group *parent):
             Section(parent, "particles", "options relating to the particle number sector"),
@@ -127,7 +127,7 @@ namespace conf {
 
     struct Wavefunction : Section {
         Param<double> m_nw_init;
-        Param<size_t> m_nroot;
+        Param<uint_t> m_nroot;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Archivable m_archivable;
@@ -137,8 +137,8 @@ namespace conf {
     };
 
     struct Reweight : Section {
-        Param<size_t> m_ncycle;
-        Param<size_t> m_delay;
+        Param<uint_t> m_ncycle;
+        Param<uint_t> m_delay;
 
         explicit Reweight(Group *parent);
     };
@@ -146,8 +146,8 @@ namespace conf {
     struct Shift : Section {
         Param<double> m_init;
         Param<double> m_damp;
-        Param<size_t> m_period;
-        Param<size_t> m_ncycle_av;
+        Param<uint_t> m_period;
+        Param<uint_t> m_ncycle_av;
         Param<bool> m_jump;
         Reweight m_reweight;
 
@@ -156,9 +156,9 @@ namespace conf {
     };
 
     struct Semistochastic : Section {
-        Param<size_t> m_size;
+        Param<uint_t> m_size;
         Param<double> m_l1_fraction_cutoff;
-        Param<size_t> m_delay;
+        Param<uint_t> m_delay;
 
         explicit Semistochastic(Group *parent);
 
@@ -167,7 +167,7 @@ namespace conf {
 
     struct Stats : Section {
         Param<std::string> m_path;
-        Param<size_t> m_period;
+        Param<uint_t> m_period;
         Param<bool> m_parallel;
 
         explicit Stats(Group *parent);
@@ -217,7 +217,7 @@ namespace conf {
     };
 
     struct RefExcits : Section {
-        Param<size_t> m_max_exlvl;
+        Param<uint_t> m_max_exlvl;
         Buffers m_buffers;
         Archivable m_archivable;
 
@@ -225,9 +225,9 @@ namespace conf {
     };
 
     struct AvEsts : Section {
-        Param<size_t> m_delay;
-        Param<size_t> m_ncycle;
-        Param<size_t> m_stats_period;
+        Param<uint_t> m_delay;
+        Param<uint_t> m_ncycle;
+        Param<uint_t> m_stats_period;
         Param<std::string> m_stats_path;
         Rdms m_rdm;
         SpecMoms m_spec_mom;
@@ -241,7 +241,7 @@ namespace conf {
     };
 
     struct Propagator : Section {
-        Param<size_t> m_ncycle;
+        Param<uint_t> m_ncycle;
         Param<bool> m_stochastic;
         Param<std::string> m_excit_gen;
         Param<double> m_nw_target;
@@ -256,8 +256,8 @@ namespace conf {
         Param<double> m_min_death_mag;
         Param<double> m_min_exlvl_prob;
         Param<std::vector<double>> m_exlvl_probs_init;
-        Param<size_t> m_ndraw_min_for_dynamic;
-        Param<size_t> m_period;
+        Param<uint_t> m_ndraw_min_for_dynamic;
+        Param<uint_t> m_period;
         Param<double> m_imp_samp_exp;
         Semistochastic m_semistochastic;
 

@@ -23,14 +23,14 @@
 namespace lattice {
 
     struct AdjElement {
-        size_t m_isite;
+        uint_t m_isite;
         int m_phase;
         bool operator==(const AdjElement& other) const;
     };
     typedef std::vector<AdjElement> adj_row_t;
 
     struct Base {
-        const size_t m_nsite;
+        const uint_t m_nsite;
         /**
          * number of adjacent sites for each site
          */
@@ -46,16 +46,16 @@ namespace lattice {
          * when a set of connections is reached for which is not a divisor of this member, then it is multiplied by the new
          * number of connections. Thus the ultimate value of this integer is divisible by all nconns
          */
-        const size_t m_unique_nadj_product;
+        const uint_t m_unique_nadj_product;
         /**
          * maximum number of adjacent sites for any one site
          */
-        const size_t m_nadj_max;
+        const uint_t m_nadj_max;
 
         Base(const defs::uintv_t& nadjs);
         virtual ~Base() = default;
-        virtual int phase(size_t isite, size_t jsite) const = 0;
-        virtual void get_adj_row(size_t isite, adj_row_t &row) const = 0;
+        virtual int phase(uint_t isite, uint_t jsite) const = 0;
+        virtual void get_adj_row(uint_t isite, adj_row_t &row) const = 0;
         virtual std::string info() const = 0;
 
         template<typename T>
@@ -68,8 +68,8 @@ namespace lattice {
         }
 
     private:
-        size_t make_unique_nadj_product();
-        size_t make_nadj_max();
+        uint_t make_unique_nadj_product();
+        uint_t make_nadj_max();
     };
 
     struct OrthoTopology {
@@ -80,16 +80,16 @@ namespace lattice {
         OrthoTopology(const defs::uintv_t &shape, const std::vector<int> &bcs);
 
     private:
-        int one_dim_phase(size_t iind, size_t jind, size_t idim) const;
+        int one_dim_phase(uint_t iind, uint_t jind, uint_t idim) const;
 
     public:
-        size_t isite_adj(const defs::uintv_t &inds, size_t idim, size_t value) const;
+        uint_t isite_adj(const defs::uintv_t &inds, uint_t idim, uint_t value) const;
 
-        size_t nsite() const;
+        uint_t nsite() const;
 
-        int phase(size_t isite, size_t jsite) const;
+        int phase(uint_t isite, uint_t jsite) const;
 
-        void get_adj_row(size_t isite, lattice::adj_row_t &row) const;
+        void get_adj_row(uint_t isite, lattice::adj_row_t &row) const;
     };
 
     /**
@@ -98,13 +98,13 @@ namespace lattice {
     struct NullTopology {
         const std::string m_info_string = "null";
 
-        size_t isite_adj(const defs::uintv_t &inds, size_t idim, size_t value) const;
+        uint_t isite_adj(const defs::uintv_t &inds, uint_t idim, uint_t value) const;
 
-        size_t nsite() const;
+        uint_t nsite() const;
 
-        int phase(size_t isite, size_t jsite) const;
+        int phase(uint_t isite, uint_t jsite) const;
 
-        void get_adj_row(size_t isite, lattice::adj_row_t &row) const;
+        void get_adj_row(uint_t isite, lattice::adj_row_t &row) const;
     };
 
     template<typename topo_t>
@@ -119,7 +119,7 @@ namespace lattice {
             defs::uintv_t out;
             out.reserve(nsite);
             adj_row_t row;
-            for (size_t isite=0; isite < nsite; ++isite) {
+            for (uint_t isite=0; isite < nsite; ++isite) {
                 topo.get_adj_row(isite, row);
                 out.push_back(row.size());
             }
@@ -129,11 +129,11 @@ namespace lattice {
 
         Lattice(const topo_t& topo): Base(make_nadjs(topo)), m_topo(topo){}
 
-        int phase(size_t isite, size_t jsite) const override {
+        int phase(uint_t isite, uint_t jsite) const override {
             return m_topo.phase(isite, jsite);
         }
 
-        void get_adj_row(size_t isite, adj_row_t &row) const override {
+        void get_adj_row(uint_t isite, adj_row_t &row) const override {
             return m_topo.get_adj_row(isite, row);
         }
 

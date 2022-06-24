@@ -11,7 +11,7 @@ namespace conn_foreach_test {
 
         Result(defs::uintv_t ann, defs::uintv_t cre) : m_ann(std::move(ann)), m_cre(std::move(cre)) {}
 
-        Result(size_t ann, size_t cre) : m_ann({ann}), m_cre({cre}) {}
+        Result(uint_t ann, uint_t cre) : m_ann({ann}), m_cre({cre}) {}
     };
 
     typedef std::vector<Result> results_t;
@@ -31,10 +31,10 @@ namespace conn_foreach_test {
         return results;
     }
 
-    static defs::uintv_t creatable_mode_indices(const field::BosOnv &mbf, size_t nboson_max) {
+    static defs::uintv_t creatable_mode_indices(const field::BosOnv &mbf, uint_t nboson_max) {
         defs::uintv_t inds;
-        for (size_t imode = 0ul; imode < mbf.m_basis.m_nmode; ++imode) {
-            size_t nocc = mbf[imode];
+        for (uint_t imode = 0ul; imode < mbf.m_basis.m_nmode; ++imode) {
+            uint_t nocc = mbf[imode];
             if (nocc < nboson_max) inds.push_back(imode);
         }
         return inds;
@@ -42,20 +42,20 @@ namespace conn_foreach_test {
 
     static defs::uintv_t annihilatable_mode_indices(const field::BosOnv &mbf) {
         defs::uintv_t inds;
-        for (size_t imode = 0ul; imode < mbf.m_basis.m_nmode; ++imode) if (mbf[imode]) inds.push_back(imode);
+        for (uint_t imode = 0ul; imode < mbf.m_basis.m_nmode; ++imode) if (mbf[imode]) inds.push_back(imode);
         return inds;
     }
 }
 
 TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
-    const size_t nsite = 8;
+    const uint_t nsite = 8;
     defs::uintv_t setbits = {1, 4, 6, 9, 12};
     buffered::FrmOnv mbf(nsite);
     mbf = setbits;
     auto &clrbits = mbf.m_decoded.m_simple_vacs.get();
 
     conn::FrmOnv conn(mbf.m_basis);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&]() {
         const auto cre = conn.m_cre[0];
         const auto ann = conn.m_ann[0];
@@ -78,14 +78,14 @@ TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
 }
 
 TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
-    const size_t nsite = 8;
+    const uint_t nsite = 8;
     defs::uintv_t setbits = {1, 4, 6, 9, 12};
     buffered::FrmBosOnv mbf(nsite, 0ul);
     mbf.m_frm = setbits;
     auto &clrbits = mbf.m_frm.m_decoded.m_simple_vacs.get();
     conn::FrmBosOnv conn(mbf);
 
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&]() {
         const auto cre = conn.m_frm.m_cre[0];
         const auto ann = conn.m_frm.m_ann[0];
@@ -107,7 +107,7 @@ TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
 }
 
 TEST(ConnForeach, FrmGeneralEx2200) {
-    const size_t nsite = 4;
+    const uint_t nsite = 4;
     defs::uintv_t setbits = {1, 3, 5, 6};
     buffered::FrmOnv mbf(nsite);
     mbf = setbits;
@@ -154,7 +154,7 @@ TEST(ConnForeach, FrmHubbardEx1100) {
      *  periodic BCs top to bottom (major dimension: "row")
      *  open BCs left to right (minor dimension: "col")
      */
-    const size_t nrow = 3, ncol = 4;
+    const uint_t nrow = 3, ncol = 4;
     const sys::frm::Basis basis(lattice::make("ortho", {nrow, ncol}, {1, 0}));
     // horizontal neighbors
     ASSERT_TRUE(basis.m_lattice->phase(1, 2));
@@ -212,7 +212,7 @@ TEST(ConnForeach, FrmHeisenbergEx2200) {
      *  1 0 0 1 0 1 1 0
      *  periodic BCs
      */
-    const size_t nsite = 8;
+    const uint_t nsite = 8;
     const sys::frm::Basis basis(lattice::make("ortho", {nsite}, {1}));
     buffered::FrmOnv mbf(basis);
     mbf.set_spins({0, 3, 5});
@@ -245,7 +245,7 @@ TEST(ConnForeach, FrmHeisenbergEx2200) {
 }
 
 TEST(ConnForeach, FrmMs2ConserveEx1100) {
-    const size_t nsite = 8;
+    const uint_t nsite = 8;
     defs::uintv_t alpha_setbits = {1, 4, 6};
     defs::uintv_t beta_setbits = {3, 4, 7};
     buffered::FrmOnv mbf(nsite);
@@ -261,7 +261,7 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
     const auto nbeta_clrbit = nsite - nbeta_setbit;
     const auto nbeta_pair = nbeta_setbit * nbeta_clrbit;
 
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     conn::FrmOnv conn(mbf);
     auto fn = [&]() {
         if (iiter < nalpha_pair) {
@@ -292,7 +292,7 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
 }
 
 TEST(ConnForeach, FrmMs2ConserveEx2200) {
-    const size_t nsite = 8;
+    const uint_t nsite = 8;
     defs::uintv_t alpha_setbits = {1, 2, 5};
     defs::uintv_t beta_setbits = {0, 2, 4, 6};
     buffered::FrmOnv mbf(nsite);
@@ -308,11 +308,11 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
     const auto nbeta_clrbit = nsite - nbeta_setbit;
     const auto npair_beta_clrbit = integer::nspair(nbeta_clrbit);
 
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
 
-    const size_t naaaa = npair_alpha_clrbit * npair_alpha_setbit;
-    const size_t nabab = nalpha_setbit * nalpha_clrbit * nbeta_setbit * nbeta_clrbit;
-    const size_t nbbbb = npair_beta_clrbit * npair_beta_setbit;
+    const uint_t naaaa = npair_alpha_clrbit * npair_alpha_setbit;
+    const uint_t nabab = nalpha_setbit * nalpha_clrbit * nbeta_setbit * nbeta_clrbit;
+    const uint_t nbbbb = npair_beta_clrbit * npair_beta_setbit;
 
     conn::FrmOnv conn(mbf);
     auto fn = [&]() {
@@ -343,7 +343,7 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
 }
 
 TEST(ConnForeach, BosEx0001) {
-    const size_t nmode = 6;
+    const uint_t nmode = 6;
     defs::uintv_t occs = {0, 2, 0, 1, 5, 1};
     buffered::BosOnv mbf(nmode);
     mbf = occs;
@@ -368,11 +368,11 @@ TEST(ConnForeach, BosEx0001) {
 }
 
 TEST(ConnForeach, BosEx0010BosOnv) {
-    const size_t nmode = 6;
+    const uint_t nmode = 6;
     defs::uintv_t occs = {0, 2, 0, 1, 5, 1};
 
     {
-        const size_t occ_cutoff = 10;
+        const uint_t occ_cutoff = 10;
         buffered::BosOnv mbf(nmode, occ_cutoff);
         mbf = occs;
         defs::uintv_t chk_modes = {0, 1, 2, 3, 4, 5};
@@ -395,7 +395,7 @@ TEST(ConnForeach, BosEx0010BosOnv) {
     }
 
     {
-        const size_t occ_cutoff = 5;
+        const uint_t occ_cutoff = 5;
         // lower maximum occupation
         buffered::BosOnv mbf(nmode, occ_cutoff);
         mbf = occs;
@@ -420,8 +420,8 @@ TEST(ConnForeach, BosEx0010BosOnv) {
 }
 
 TEST(ConnForeach, BosEx0010FrmBosOnv) {
-    const size_t nmode = 6;
-    const size_t bos_occ_cutoff = 5;
+    const uint_t nmode = 6;
+    const uint_t bos_occ_cutoff = 5;
     defs::uintv_t occs = {0, 2, 0, 1, 5, 1};
     // lower maximum occupation
     buffered::FrmBosOnv mbf(0ul, nmode, bos_occ_cutoff);
@@ -446,8 +446,8 @@ TEST(ConnForeach, BosEx0010FrmBosOnv) {
 }
 
 TEST(ConnForeach, FrmBosEx1110) {
-    const size_t nsite = 6, nmode = 8;
-    for (size_t bos_occ_cutoff = 0ul; bos_occ_cutoff < 6; ++bos_occ_cutoff) {
+    const uint_t nsite = 6, nmode = 8;
+    for (uint_t bos_occ_cutoff = 0ul; bos_occ_cutoff < 6; ++bos_occ_cutoff) {
         buffered::FrmBosOnv mbf(nsite, nmode, bos_occ_cutoff);
 
         ASSERT_EQ(mbf.m_bos.m_basis.m_nmode, nmode);
@@ -469,7 +469,7 @@ TEST(ConnForeach, FrmBosEx1110) {
         }
 
         auto mode_inds = conn_foreach_test::creatable_mode_indices(mbf.m_bos, bos_occ_cutoff);
-        size_t iiter = 0ul;
+        uint_t iiter = 0ul;
         conn::FrmBosOnv conn(mbf);
         auto fn = [&]() {
             auto ifrm_result = iiter / mode_inds.size();
@@ -492,7 +492,7 @@ TEST(ConnForeach, FrmBosEx1110) {
 }
 
 TEST(ConnForeach, FrmBosEx1101) {
-    const size_t nsite = 6, nmode = 8;
+    const uint_t nsite = 6, nmode = 8;
     buffered::FrmBosOnv mbf(nsite, nmode);
     mbf = {{0, 4, 6, 8, 11},
            {2, 0, 1, 0, 1, 4, 0, 5}};
@@ -512,7 +512,7 @@ TEST(ConnForeach, FrmBosEx1101) {
     }
 
     auto mode_inds = conn_foreach_test::annihilatable_mode_indices(mbf.m_bos);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     conn::FrmBosOnv conn(mbf);
     auto fn = [&]() {
         auto ifrm_result = iiter / mode_inds.size();

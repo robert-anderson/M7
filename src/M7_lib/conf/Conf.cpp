@@ -42,7 +42,7 @@ void conf::Archive::verify() {
         log::warn("both cycle number and time periods are defined for checkpointing");
 
     auto &str = m_chkpt_path.get();
-    size_t token_count = std::count(str.cbegin(), str.cend(), '{');
+    uint_t token_count = std::count(str.cbegin(), str.cend(), '{');
     REQUIRE_LE_ALL(token_count, 1ul, "checkpoint paths can have at most one {} token");
     if (token_count) {
         auto it_open = std::find(str.cbegin(), str.cend(), '{');

@@ -22,11 +22,11 @@ struct WalkerTableRow : public Row {
     field::Flags<defs::ndim_root> m_deterministic;
     field::Flags<defs::ndim_wf> m_ref_conn;
     field::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
-    field::Number<size_t> m_icycle_occ;
+    field::Number<uint_t> m_icycle_occ;
 
     field::Mbf &key_field();
 
-    WalkerTableRow(const sys::Basis& basis, size_t nroot, size_t nreplica, bool average_weights);
+    WalkerTableRow(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool average_weights);
 
     bool is_h5_write_exempt() const override;
 
@@ -38,20 +38,20 @@ struct WalkerTableRow : public Row {
      * @return
      *  correct normalization for the average weight
      */
-    size_t occupied_ncycle(const size_t& icycle_current) const;
+    uint_t occupied_ncycle(const uint_t& icycle_current) const;
 
-    const size_t& nroot() const;
+    const uint_t& nroot() const;
 
-    const size_t& nreplica() const;
+    const uint_t& nreplica() const;
 
-    size_t ipart_replica(const size_t& ipart) const;
+    uint_t ipart_replica(const uint_t& ipart) const;
 };
 
 struct UniqueOnvRow : public Row {
-    field::Number<size_t> m_ind;
-    field::Number<size_t> m_nparent;
+    field::Number<uint_t> m_ind;
+    field::Number<uint_t> m_nparent;
 
-    field::Number<size_t> &key_field() {
+    field::Number<uint_t> &key_field() {
         return m_ind;
     };
 
@@ -60,7 +60,7 @@ struct UniqueOnvRow : public Row {
 
 struct OnvRow : public Row {
     field::Mbf m_mbf;
-    field::Number<size_t> m_nparent;
+    field::Number<uint_t> m_nparent;
 
     field::Mbf &key_field() {
         return m_mbf;

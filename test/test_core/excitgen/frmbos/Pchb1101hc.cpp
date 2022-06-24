@@ -26,7 +26,7 @@ TEST(Pchb1101hc, Test){
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
 
     tester.fill_results_table(src_mbf);
-    const size_t ndraw = 5000000;
+    const uint_t ndraw = 5000000;
     ASSERT_EQ(tester.run(src_mbf, ndraw).m_error_message, "");
     ASSERT_TRUE(tester.all_drawn_at_least_once());
     auto av_err1 = tester.mean_abs_error(ndraw);

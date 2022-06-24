@@ -4,10 +4,10 @@
 
 #include "HamiltonianFileReader.h"
 
-size_t HamiltonianFileReader::iline_fn(const std::string &fname) {
+uint_t HamiltonianFileReader::iline_fn(const std::string &fname) {
     FileReader file_reader(fname);
     std::string line;
-    size_t iline=0ul;
+    uint_t iline=0ul;
     while (file_reader.next(line)){
         ++iline;
         if (FortranNamelistReader::contains_terminator(line)) return iline;
@@ -15,12 +15,12 @@ size_t HamiltonianFileReader::iline_fn(const std::string &fname) {
     return ~0ul;
 }
 
-HamiltonianFileReader::HamiltonianFileReader(const std::string &fname, size_t nind) :
+HamiltonianFileReader::HamiltonianFileReader(const std::string &fname, uint_t nind) :
         NumericCsvFileReader(fname, ncolumn(fname, iline_fn)),
         m_complex_valued(m_ncolumn==nind+2) {
     REQUIRE_GT(m_ncolumn, nind, "not enough columns in body of file "+fname);
     REQUIRE_LE(m_ncolumn, nind+2, "too many columns in body of file "+fname);
-    if (!datatype::is_complex<defs::ham_t>()){
+    if (!dtype::is_complex<defs::ham_t>()){
         REQUIRE_FALSE(m_complex_valued, "can't read complex-valued array into a real container");
     }
 }
@@ -39,11 +39,11 @@ bool HamiltonianFileReader::next(defs::uintv_t &inds, defs::ham_t &v) {
     return true;
 }
 
-size_t HamiltonianFileReader::nset_ind(const defs::uintv_t &inds) {
-    return std::count_if(inds.begin(), inds.end(), [](const size_t &a) { return a != ~0ul; });
+uint_t HamiltonianFileReader::nset_ind(const defs::uintv_t &inds) {
+    return std::count_if(inds.begin(), inds.end(), [](const uint_t &a) { return a != ~0ul; });
 }
 
-size_t HamiltonianFileReader::exsig(const defs::uintv_t &inds) const {
+uint_t HamiltonianFileReader::exsig(const defs::uintv_t &inds) const {
     return exsig(inds, ranksig(inds));
 }
 

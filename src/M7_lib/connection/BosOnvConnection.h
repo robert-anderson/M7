@@ -9,9 +9,9 @@
 #include <M7_lib/parallel/MPIAssert.h>
 
 struct BosOpPair {
-    const size_t m_imode;
-    size_t m_nop;
-    BosOpPair(size_t imode, size_t nop);
+    const uint_t m_imode;
+    uint_t m_nop;
+    BosOpPair(uint_t imode, uint_t nop);
 };
 
 class BosOps {
@@ -20,9 +20,9 @@ class BosOps {
      * vector of length nmode which enables constant-time access to a pair
      */
     std::vector<BosOpPair*> m_pair_ptrs;
-    size_t m_nop = 0ul;
+    uint_t m_nop = 0ul;
 public:
-    BosOps(size_t nmode);
+    BosOps(uint_t nmode);
 
     const std::vector<BosOpPair>& pairs() const;
 
@@ -47,7 +47,7 @@ public:
      * @param i
      *  mode index
      */
-    void set(size_t i);
+    void set(uint_t i);
 
     /**
      * set from mode indices (adjacent like indices will be rolled together in the pair vector).
@@ -56,7 +56,7 @@ public:
      * @param j
      *  mode index (highest)
      */
-    void set(size_t i, size_t j);
+    void set(uint_t i, uint_t j);
 
     /**
      * set from mode indices (adjacent like indices will be rolled together in the pair vector)
@@ -67,9 +67,9 @@ public:
      * @param k
      *  mode index (highest)
      */
-    void set(size_t i, size_t j, size_t k);
+    void set(uint_t i, uint_t j, uint_t k);
 
-    void add(size_t imode, size_t nop);
+    void add(uint_t imode, uint_t nop);
 
     /**
      * add the given number of operators
@@ -80,14 +80,14 @@ public:
      * @return
      *  new total nop of imode
      */
-    size_t add_to_nonempty(size_t imode, size_t nop=1ul) {
+    uint_t add_to_nonempty(uint_t imode, uint_t nop=1ul) {
         auto ptr = m_pair_ptrs[imode];
         DEBUG_ASSERT_TRUE(ptr, "mode is not already part of the boson operator product");
         m_nop+=nop;
         return ptr->m_nop+=nop;
     }
 
-    size_t add_to(size_t imode, size_t nop=1ul) {
+    uint_t add_to(uint_t imode, uint_t nop=1ul) {
         auto ptr = m_pair_ptrs[imode];
         if (ptr) {
             m_nop+=nop;
@@ -99,9 +99,9 @@ public:
 
     void clear();
 
-    size_t size() const;
+    uint_t size() const;
 
-    const BosOpPair& operator[](const size_t& ipair) const;
+    const BosOpPair& operator[](const uint_t& ipair) const;
 
     /**
      * @param iop
@@ -109,7 +109,7 @@ public:
      * @return
      *  mode index corresponding to the operator index
      */
-    size_t get_imode(size_t iop) const;
+    uint_t get_imode(uint_t iop) const;
 
     std::string to_string() const;
 };
@@ -117,7 +117,7 @@ public:
 struct BosOnvConnection {
     BosOps m_ann, m_cre;
 
-    explicit BosOnvConnection(size_t nmode);
+    explicit BosOnvConnection(uint_t nmode);
 
     explicit BosOnvConnection(sys::Size extents);
 
@@ -125,9 +125,9 @@ struct BosOnvConnection {
 
     void clear();
 
-    size_t size() const;
+    uint_t size() const;
 
-    size_t nmode() const;
+    uint_t nmode() const;
 
     void connect(const BosOnvField& src, const BosOnvField& dst);
 
@@ -139,9 +139,9 @@ struct BosOnvConnection {
 
     void apply(const BosOnvField &src, BosOnvField &dst, BosOps &com) const;
 
-    size_t exsig() const;
+    uint_t exsig() const;
 
-    bool respects_occ_range(const BosOnvField &src, size_t nboson_max) const;
+    bool respects_occ_range(const BosOnvField &src, uint_t nboson_max) const;
 
 };
 

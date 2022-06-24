@@ -15,35 +15,35 @@ void mpi::barrier_on_node() {
     MPI_Barrier(g_node_comm);
 }
 
-mpi::count_t mpi::evenly_shared_count(size_t nitem_global, size_t irank) {
+mpi::count_t mpi::evenly_shared_count(uint_t nitem_global, uint_t irank) {
     auto remainder = nitem_global % nrank();
     return nitem_global / nrank() + (irank < remainder);
 }
 
-mpi::count_t mpi::evenly_shared_count(size_t nitem_global) {
+mpi::count_t mpi::evenly_shared_count(uint_t nitem_global) {
     return evenly_shared_count(nitem_global, mpi::irank());
 }
 
-mpi::counts_t mpi::evenly_shared_counts(size_t nitem_global) {
+mpi::counts_t mpi::evenly_shared_counts(uint_t nitem_global) {
     mpi::counts_t tmp;
     tmp.reserve(nrank());
-    for (size_t irank=0ul; irank<nrank(); ++irank) tmp.push_back(evenly_shared_count(nitem_global, irank));
+    for (uint_t irank=0ul; irank<nrank(); ++irank) tmp.push_back(evenly_shared_count(nitem_global, irank));
     return tmp;
 }
 
-size_t mpi::evenly_shared_displ(size_t nitem_global, size_t irank) {
+uint_t mpi::evenly_shared_displ(uint_t nitem_global, uint_t irank) {
     auto ntb = std::min(irank, nitem_global % nrank());
     return ntb + irank * (nitem_global / nrank());
 }
 
-size_t mpi::evenly_shared_displ(size_t nitem_global) {
+uint_t mpi::evenly_shared_displ(uint_t nitem_global) {
     return evenly_shared_displ(nitem_global, mpi::irank());
 }
 
-mpi::counts_t mpi::evenly_shared_displs(size_t nitem_global) {
+mpi::counts_t mpi::evenly_shared_displs(uint_t nitem_global) {
     mpi::counts_t tmp;
     tmp.reserve(nrank());
-    for (size_t irank=0ul; irank<nrank(); ++irank) tmp.push_back(evenly_shared_displ(nitem_global, irank));
+    for (uint_t irank=0ul; irank<nrank(); ++irank) tmp.push_back(evenly_shared_displ(nitem_global, irank));
     return tmp;
 }
 
@@ -72,7 +72,7 @@ void mpi::finalize() {
     }
 }
 
-bool mpi::i_am(const size_t& i) {
+bool mpi::i_am(const uint_t& i) {
     return irank() == i;
 }
 
@@ -80,7 +80,7 @@ bool mpi::i_am_root() {
     return i_am(0);
 }
 
-bool mpi::on_node_i_am(const size_t& i) {
+bool mpi::on_node_i_am(const uint_t& i) {
     return irank_on_node() == i;
 }
 
@@ -129,7 +129,7 @@ void mpi::setup_mpi_globals() {
 }
 
 void mpi::blocking_print(const std::string &str) {
-    for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
+    for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
         if (mpi::i_am(irank)) {
             std::cout << str << std::endl;
         }
@@ -138,10 +138,10 @@ void mpi::blocking_print(const std::string &str) {
 }
 
 
-size_t g_irank = 0;
-size_t g_nrank = 1;
+uint_t g_irank = 0;
+uint_t g_nrank = 1;
 std::string g_processor_name = "";
 MPI_Comm g_node_comm;
-size_t g_irank_on_node = 0;
-size_t g_nrank_on_node = 1;
+uint_t g_irank_on_node = 0;
+uint_t g_nrank_on_node = 1;
 int g_p2p_tag = 0;

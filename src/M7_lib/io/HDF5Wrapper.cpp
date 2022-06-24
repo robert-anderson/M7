@@ -40,7 +40,7 @@ void hdf5::AttributeWriterBase::write(hid_t parent, std::string name, const std:
 
 void hdf5::AttributeWriterBase::write(hid_t parent, std::string name, const std::vector<std::string> &src) {
     // find longest string in vector
-    size_t max_size = 0ul;
+    uint_t max_size = 0ul;
     for (const auto &str: src) max_size = (str.size() > max_size) ? str.size() : max_size;
     max_size++; // include space for null terminator
     std::string tmp(max_size * src.size(), 0);
@@ -64,7 +64,7 @@ hdf5::GroupWriter::GroupWriter(std::string name, const FileWriter &parent) :
         GroupBase(name, parent.m_handle,
                   H5Gcreate(parent.m_handle, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) {}
 
-void hdf5::GroupWriter::save(std::string name, const std::string &v, size_t irank) {
+void hdf5::GroupWriter::save(std::string name, const std::string &v, uint_t irank) {
     std::vector<std::string> vs = {v};
     save(name, vs, irank);
 }
@@ -84,34 +84,34 @@ hdf5::GroupReader::GroupReader(std::string name, const hdf5::GroupReader &parent
         GroupBase(name, parent.m_handle, H5Gopen2(parent.m_handle, name.c_str(), H5P_DEFAULT)) {}
 
 bool hdf5::GroupReader::child_exists(const std::string &name) const {
-    for (size_t i=0ul; i<nchild(); ++i) if (name==child_name(i)) return true;
+    for (uint_t i=0ul; i<nchild(); ++i) if (name==child_name(i)) return true;
     return false;
 }
 
-size_t hdf5::GroupReader::first_existing_child(const std::vector<std::string> &names) const {
-    for (size_t i=0ul; i<names.size(); ++i) if (child_exists(names[i])) return i;
+uint_t hdf5::GroupReader::first_existing_child(const std::vector<std::string> &names) const {
+    for (uint_t i=0ul; i<names.size(); ++i) if (child_exists(names[i])) return i;
     return ~0ul;
 }
 
-size_t hdf5::GroupReader::nchild() const {
+uint_t hdf5::GroupReader::nchild() const {
     hsize_t num;
     auto status = H5Gget_num_objs(m_handle, &num);
     REQUIRE_TRUE(!status, "could not get number of objects within HDF5 group");
     return status == 0;
 }
 
-std::string hdf5::GroupReader::child_name(size_t ichild) const {
-    size_t size = H5Lget_name_by_idx(m_handle, ".", H5_INDEX_NAME,
+std::string hdf5::GroupReader::child_name(uint_t ichild) const {
+    uint_t size = H5Lget_name_by_idx(m_handle, ".", H5_INDEX_NAME,
                                      H5_ITER_INC, ichild, nullptr, 0, H5P_DEFAULT);
     std::string name(size, 0);
     auto name_ptr = const_cast<char*>(name.c_str());
-    size_t size_chk = H5Lget_name_by_idx(m_handle, ".", H5_INDEX_NAME,
+    uint_t size_chk = H5Lget_name_by_idx(m_handle, ".", H5_INDEX_NAME,
                                          H5_ITER_INC, ichild, name_ptr, size+1, H5P_DEFAULT);
     REQUIRE_EQ(size, size_chk, "inconsistent number of chars in name");
     return name;
 }
 
-int hdf5::GroupReader::child_type(size_t i) const {
+int hdf5::GroupReader::child_type(uint_t i) const {
     return H5Gget_objtype_by_idx(m_handle, i);
 }
 
@@ -119,13 +119,13 @@ std::vector<std::string> hdf5::GroupReader::child_names(int type) const {
     std::vector<std::string> names;
     auto n = nchild();
     names.reserve(n);
-    for (size_t i=0ul; i<n; ++i) {
+    for (uint_t i=0ul; i<n; ++i) {
         if (type<0 || child_type(i)==type) names.push_back(child_name(i));
     }
     return names;
 }
 
-size_t hdf5::GroupReader::get_dataset_ndim(std::string name) {
+uint_t hdf5::GroupReader::get_dataset_ndim(std::string name) {
     auto status = H5Gget_objinfo(m_handle, name.c_str(), 0, nullptr);
     REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
     auto dataset = H5Dopen1(m_handle, name.c_str());
@@ -152,7 +152,7 @@ defs::uintv_t hdf5::GroupReader::get_dataset_shape(std::string name) {
 }
 
 
-void hdf5::NdDistListWriter::write_h5item_bytes(const size_t &iitem, const void *data) {
+void hdf5::NdDistListWriter::write_h5item_bytes(const uint_t &iitem, const void *data) {
     DEBUG_ASSERT_EQ(bool(data), iitem < m_nitem_local,
                "data is null and items remain, or this is a runoff write op and data is not null");
     select_hyperslab(iitem);
@@ -174,12 +174,12 @@ void hdf5::NdDistListWriter::write_h5item_bytes(const size_t &iitem, const void 
 }
 
 hdf5::NdDistListWriter::NdDistListWriter(hid_t parent_handle, std::string name, const defs::uintv_t &item_dims,
-                                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels)
+                                         const uint_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels)
         :NdDistListBase(parent_handle, name, item_dims, nitem, true, h5type) {
     if (!dim_labels.empty()) {
         DEBUG_ASSERT_EQ(dim_labels.size(), item_dims.size(),
                         "Number of dim labels does not match number of dims");
-        for (size_t idim = 0ul; idim < item_dims.size(); ++idim)
+        for (uint_t idim = 0ul; idim < item_dims.size(); ++idim)
             H5DSset_label(m_dataset_handle, idim, dim_labels[idim].c_str());
     }
 }
@@ -204,11 +204,11 @@ hsize_t hdf5::NdDistListBase::get_item_offset() {
     std::vector<hsize_t> tmp(mpi::nrank());
     mpi::all_gather(m_nitem_local, tmp);
     hsize_t out = 0ul;
-    for (size_t irank = 0ul; irank < mpi::irank(); ++irank) out += tmp[irank];
+    for (uint_t irank = 0ul; irank < mpi::irank(); ++irank) out += tmp[irank];
     return out;
 }
 
-hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, std::string name, const defs::uintv_t &item_dims, const size_t &nitem,
+hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, std::string name, const defs::uintv_t &item_dims, const uint_t &nitem,
                                      bool writemode, hid_t h5type) :
         m_parent_handle(parent_handle),
         m_item_dims(convert_dims(item_dims)),
@@ -249,7 +249,7 @@ hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, std::string name, cons
     log::debug_("Opened HDF5 NdList with {} local items", m_nitem_local);
 }
 
-void hdf5::NdDistListBase::select_hyperslab(const size_t &iitem) {
+void hdf5::NdDistListBase::select_hyperslab(const uint_t &iitem) {
     if (iitem < m_nitem_local) {
         m_hyperslab_offsets[0] = m_item_offset + iitem;
         log::debug_("selecting hyperslab with offsets: {}", convert::to_string(m_hyperslab_offsets));
@@ -292,13 +292,13 @@ hdf5::FileReader::FileReader(std::string name) : FileBase(
     REQUIRE_GE(m_handle, 0, "HDF5 file could not be opened for reading.");
 }
 
-void hdf5::GroupWriter::save(std::string name, const std::vector<std::string>&v, size_t irank) {
+void hdf5::GroupWriter::save(std::string name, const std::vector<std::string>&v, uint_t irank) {
     auto memtype = H5Tcopy (H5T_C_S1);
     auto longest = std::max_element(
             v.cbegin(), v.cend(),[](const std::string& s1, const std::string& s2){return s1.size()<s2.size();});
     auto size = longest->size();
     std::vector<char> buffer(size*v.size());
-    size_t istr = 0ul;
+    uint_t istr = 0ul;
     for (auto& str: v) std::strcpy(buffer.data()+(istr++)*size, str.c_str());
 
     auto status = H5Tset_size(memtype, size);

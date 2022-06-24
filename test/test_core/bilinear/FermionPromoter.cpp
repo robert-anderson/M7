@@ -9,8 +9,8 @@
 #include "M7_lib/util/Exsig.h"
 
 TEST(FermionPromoter, Promoter1BodyDiagonal) {
-    const size_t nsite = 5;
-    const size_t nop_insert = 1;
+    const uint_t nsite = 5;
+    const uint_t nop_insert = 1;
     buffered::FrmOnv in(nsite);
     buffered::FrmOnv out(nsite);
     FrmOps com(nsite);
@@ -30,7 +30,7 @@ TEST(FermionPromoter, Promoter1BodyDiagonal) {
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
      */
-    for (size_t icomb=0ul; icomb<fp.m_ncomb; ++icomb) {
+    for (uint_t icomb=0ul; icomb<fp.m_ncomb; ++icomb) {
         auto phase = fp.apply(0, conn, com, inds.m_frm);
         ASSERT_FALSE(phase);
         ASSERT_EQ(inds.m_frm.m_cre[0], com[0]);
@@ -39,8 +39,8 @@ TEST(FermionPromoter, Promoter1BodyDiagonal) {
 }
 
 TEST(FermionPromoter, Promoter2BodyDiagonal) {
-    const size_t nsite = 5;
-    const size_t nop_insert = 2;
+    const uint_t nsite = 5;
+    const uint_t nop_insert = 2;
     buffered::FrmOnv in(nsite);
     buffered::FrmOnv out(nsite);
     FrmOps com(nsite);
@@ -62,15 +62,15 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
      */
     using namespace basic_foreach::rtnd;
     Ordered<> foreach_comb(com.size(), nop_insert);
-    size_t icomb = 0ul;
+    uint_t icomb = 0ul;
     auto fn = [&](const inds_t& insert_inds) {
         // enumerates all ways to choose nop_insert elements of the common array
         auto phase = fp.apply(icomb, conn, com, inds.m_frm);
         ASSERT_FALSE(phase);
         // since this is a diagonal element, all indices are "inserted" and should be found in order in the com array
-        for (size_t iop = 0ul; iop < inds.m_frm.m_cre.size(); ++iop)
+        for (uint_t iop = 0ul; iop < inds.m_frm.m_cre.size(); ++iop)
             ASSERT_EQ(inds.m_frm.m_cre[iop], com[insert_inds[iop]]);
-        for (size_t iop = 0ul; iop < inds.m_frm.m_ann.size(); ++iop)
+        for (uint_t iop = 0ul; iop < inds.m_frm.m_ann.size(); ++iop)
             ASSERT_EQ(inds.m_frm.m_ann[iop], com[insert_inds[iop]]);
         ++icomb;
     };
@@ -79,8 +79,8 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
 
 
 TEST(FermionPromoter, Promoter2BodySingle) {
-    const size_t nsite = 5;
-    const size_t nop_insert = 1;
+    const uint_t nsite = 5;
+    const uint_t nop_insert = 1;
     buffered::FrmOnv in(nsite);
     buffered::FrmOnv out(nsite);
     FrmOps com(nsite);
@@ -144,8 +144,8 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
      * simple test of the edge-case where no promotion is actually performed, but we need to ensure that the connection's
      * contents are faithfully reproduced in the single contributing key (fields::FermionMevInds object) emitted.
      */
-    const size_t nsite = 5;
-    const size_t nop_insert = 0;
+    const uint_t nsite = 5;
+    const uint_t nop_insert = 0;
     buffered::FrmOnv in(nsite);
     buffered::FrmOnv out(nsite);
     FrmOps com(nsite);

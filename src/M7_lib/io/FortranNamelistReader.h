@@ -43,13 +43,13 @@ public:
 
     std::vector<long> read_ints(const std::string &label, std::vector<long> default_ = {}) const;
 
-    std::vector<size_t> read_uints(const std::string &label, std::vector<size_t> default_ = {}) const;
+    std::vector<uint_t> read_uints(const std::string &label, std::vector<uint_t> default_ = {}) const;
 
     std::vector<bool> read_bools(const std::string &label, std::vector<bool> default_ = {}) const;
 
     long read_int(const std::string &label, long default_ = 0l) const;
 
-    size_t read_uint(const std::string &label, size_t default_ = 0ul) const;
+    uint_t read_uint(const std::string &label, uint_t default_ = 0ul) const;
 
     bool read_bool(const std::string &label, bool default_ = false) const;
 

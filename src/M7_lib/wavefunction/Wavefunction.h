@@ -47,7 +47,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * number of initiator ONVs in each part of the WF
      */
-    NdReduction<size_t, defs::ndim_wf> m_ninitiator;
+    NdReduction<uint_t, defs::ndim_wf> m_ninitiator;
     /**
      * change over the last cycle in the number of initiator ONVs
      */
@@ -55,7 +55,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * number of ONVs with any associated weight in any part
      */
-    Reduction<size_t> m_nocc_mbf;
+    Reduction<uint_t> m_nocc_mbf;
     /**
      * change in the number of occupied ONVs
      */
@@ -89,7 +89,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
     ~Wavefunction();
 
-    void log_top_weighted(size_t ipart, size_t nrow=20);
+    void log_top_weighted(uint_t ipart, uint_t nrow=20);
 
     static bool need_send_parents(const conf::Document &opts) {
         return opts.m_av_ests.m_rdm.m_ranks.get().size();
@@ -115,25 +115,25 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
     void end_cycle();
 
-    const size_t& nroot() const {
+    const uint_t& nroot() const {
         return m_store.m_row.nroot();
     }
 
-    const size_t& nreplica() const {
+    const uint_t& nreplica() const {
         return m_store.m_row.nreplica();
     }
 
-    size_t ipart_replica(const size_t& ipart) const {
+    uint_t ipart_replica(const uint_t& ipart) const {
         return m_store.m_row.ipart_replica(ipart);
     }
 
-    size_t iroot_part(const size_t& ipart) const {
+    uint_t iroot_part(const uint_t& ipart) const {
         return ipart/2;
     }
 
-    defs::wf_comp_t square_norm(const size_t& ipart) const;
+    defs::wf_comp_t square_norm(const uint_t& ipart) const;
 
-    defs::wf_comp_t l1_norm(const size_t& ipart) const;
+    defs::wf_comp_t l1_norm(const uint_t& ipart) const;
 
     /**
      * allow the current ONV in m_store.m_row to change the weight on ONVs to which it generates
@@ -141,7 +141,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param ipart
      *  flat index of the initiator flag to be set in the selected row
      */
-    void grant_initiator_status(const size_t &ipart);
+    void grant_initiator_status(const uint_t &ipart);
 
     /**
      * prohibit the current ONV in m_store.m_row to change the weight on ONVs to which it generates
@@ -149,7 +149,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param ipart
      *  flat index of the initiator flag to be cleared in the selected row
      */
-    void revoke_initiator_status(const size_t &ipart);
+    void revoke_initiator_status(const uint_t &ipart);
 
     /**
      * all changes in the m_weight member of any row associated with m_store should occur through
@@ -159,14 +159,14 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param new_weight
      *  value to which this part weight is to be set
      */
-    void set_weight(const size_t &ipart, const defs::wf_t &new_weight);
+    void set_weight(const uint_t &ipart, const defs::wf_t &new_weight);
 
     void set_weight(const defs::wf_t &new_weight) {
-        for (size_t ipart=0ul; ipart<m_format.m_nelement; ++ipart) set_weight(ipart, new_weight);
+        for (uint_t ipart=0ul; ipart<m_format.m_nelement; ++ipart) set_weight(ipart, new_weight);
     }
 
     void set_weight(const field::Numbers<defs::wf_t, defs::ndim_wf> &new_weight){
-        for (size_t i=0ul; i < m_format.m_nelement; ++i) set_weight(i, new_weight[i]);
+        for (uint_t i=0ul; i < m_format.m_nelement; ++i) set_weight(i, new_weight[i]);
     }
 
     /**
@@ -177,7 +177,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param delta
      *  change in the weight
      */
-    void change_weight(const size_t &ipart, const defs::wf_t &delta);
+    void change_weight(const uint_t &ipart, const defs::wf_t &delta);
 
     /**
      * convenience method to set_weight based on a scalar factor relative to current weight
@@ -186,7 +186,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param factor
      *  fractional change in the weight
      */
-    void scale_weight(const size_t &ipart, const double &factor);
+    void scale_weight(const uint_t &ipart, const double &factor);
 
     /**
      * convenience method to set the weight of a part of the WF to zero on the currently
@@ -194,7 +194,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param ipart
      *  part index
      */
-    void zero_weight(const size_t &ipart);
+    void zero_weight(const uint_t &ipart);
 
     void remove_row();
 
@@ -213,11 +213,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      *  i.e. the connection to the reference has a non-zero H matrix element
      * @return
      */
-    size_t create_row_(const size_t &icycle, const field::Mbf &mbf,
+    uint_t create_row_(const uint_t &icycle, const field::Mbf &mbf,
                        const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns);
 
 
-    size_t create_row_(const size_t &icycle, const field::Mbf &mbf,
+    uint_t create_row_(const uint_t &icycle, const field::Mbf &mbf,
                        const defs::ham_comp_t &hdiag, bool refconn) {
         return create_row_(icycle, mbf, hdiag, std::vector<bool>(npart(), refconn));
     }
@@ -225,30 +225,30 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * Called on all ranks, dispatching create_row_ on the assigned rank only
      */
-    TableBase::Loc create_row(const size_t& icycle, const field::Mbf &mbf,
+    TableBase::Loc create_row(const uint_t& icycle, const field::Mbf &mbf,
                               const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns);
 
 
-    TableBase::Loc create_row(const size_t& icycle, const field::Mbf &mbf,
+    TableBase::Loc create_row(const uint_t& icycle, const field::Mbf &mbf,
                               const defs::ham_comp_t &hdiag, bool refconn) {
         return create_row(icycle, mbf, hdiag, std::vector<bool>(npart(), refconn));
     }
 
-    size_t add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delta,
-                     bool initiator, bool deterministic, size_t dst_ipart);
+    uint_t add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delta,
+                     bool initiator, bool deterministic, uint_t dst_ipart);
 
-    size_t add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delta,
-                     bool initiator, bool deterministic, size_t dst_ipart,
+    uint_t add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delta,
+                     bool initiator, bool deterministic, uint_t dst_ipart,
                      const field::Mbf &src_mbf, const defs::wf_t &src_weight);
 
-    const size_t& npart() const {
+    const uint_t& npart() const {
         return m_format.m_nelement;
     }
 
 private:
 
     void orthogonalize(NdReduction<defs::wf_t, 3>& overlaps,
-                       const size_t& iroot, const size_t& jroot, const size_t& ireplica) {
+                       const uint_t& iroot, const uint_t& jroot, const uint_t& ireplica) {
         ASSERT(iroot<=jroot);
         auto& row = m_store.m_row;
         const auto ipart_src = m_format.flatten({iroot, ireplica});
@@ -296,9 +296,9 @@ public:
         // bra root, ket root, replica
         NdReduction<defs::wf_t, 3> overlaps({nroot(), nroot(), nreplica()});
         auto& row = m_store.m_row;
-        for (size_t iroot = 0ul; iroot < nroot(); ++iroot) {
-            for (size_t jroot = iroot; jroot < nroot(); ++jroot) {
-                for (size_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
+        for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
+            for (uint_t jroot = iroot; jroot < nroot(); ++jroot) {
+                for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
                     for (row.restart(); row.in_range(); row.step()) {
                         if (!row.m_mbf.is_zero()) orthogonalize(overlaps, iroot, jroot, ireplica);
                     }

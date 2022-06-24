@@ -18,7 +18,7 @@ HubbardFrmHam::HubbardFrmHam(opt_pair_t opts) :
 
 defs::ham_t HubbardFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t h = 0.0;
-    for (size_t isite = 0ul; isite < m_basis.m_nsite; ++isite)
+    for (uint_t isite = 0ul; isite < m_basis.m_nsite; ++isite)
         if (onv.get({0, isite}) && onv.get({1, isite})) h += m_u;
     return h;
 }
@@ -37,7 +37,7 @@ void HubbardFrmHam::log_data() const {
     FrmHam::log_data();
 }
 
-defs::ham_t HubbardFrmHam::get_coeff_1100(size_t a, size_t i) const {
+defs::ham_t HubbardFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
     // hopping coeff is always -t
     return -m_basis.m_lattice->phase(a, i);
 }

@@ -5,34 +5,34 @@
 #include "ExcitGen.h"
 #include "M7_lib/hamiltonian/HamiltonianData.h"
 
-bool ExcitGen::draw_frm(size_t, const field::FrmOnv&, defs::prob_t& prob, conn::FrmOnv& ) {
+bool ExcitGen::draw_frm(uint_t, const field::FrmOnv&, defs::prob_t& prob, conn::FrmOnv& ) {
     prob = 0.0;
     return false;
 }
 
-bool ExcitGen::draw_frmbos(size_t, const field::FrmBosOnv&, defs::prob_t& prob, conn::FrmBosOnv& ) {
+bool ExcitGen::draw_frmbos(uint_t, const field::FrmBosOnv&, defs::prob_t& prob, conn::FrmBosOnv& ) {
     prob = 0.0;
     return false;
 }
 
-bool ExcitGen::draw_bos(size_t, const field::BosOnv&, defs::prob_t& prob, conn::BosOnv& ) {
+bool ExcitGen::draw_bos(uint_t, const field::BosOnv&, defs::prob_t& prob, conn::BosOnv& ) {
     prob = 0.0;
     return false;
 }
 
-bool ExcitGen::draw(size_t exsig, const field::FrmOnv& src, defs::prob_t& prob, defs::ham_t& helem,
+bool ExcitGen::draw(uint_t exsig, const field::FrmOnv& src, defs::prob_t& prob, defs::ham_t& helem,
                     conn::FrmOnv& conn) {
     auto success = draw_h_frm(exsig, src, prob, helem, conn);
     return success && ham::is_significant(helem);
 }
 
-bool ExcitGen::draw(size_t exsig, const field::FrmBosOnv& src, defs::prob_t& prob, defs::ham_t& helem,
+bool ExcitGen::draw(uint_t exsig, const field::FrmBosOnv& src, defs::prob_t& prob, defs::ham_t& helem,
                     conn::FrmBosOnv& conn) {
     auto success = draw_h_frmbos(exsig, src, prob, helem, conn);
     return success && ham::is_significant(helem);
 }
 
-bool ExcitGen::draw(size_t exsig, const field::BosOnv& src, defs::prob_t& prob, defs::ham_t& helem,
+bool ExcitGen::draw(uint_t exsig, const field::BosOnv& src, defs::prob_t& prob, defs::ham_t& helem,
                     conn::BosOnv& conn) {
     auto success = draw_h_bos(exsig, src, prob, helem, conn);
     return success && ham::is_significant(helem);

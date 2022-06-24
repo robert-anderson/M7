@@ -4,10 +4,10 @@
 
 #include "UniformTwf.h"
 
-UniformTwf::UniformTwf(const Hamiltonian& ham, size_t npart) : SpfTwfBase(ham, npart){}
+UniformTwf::UniformTwf(const Hamiltonian& ham, uint_t npart) : SpfTwfBase(ham, npart){}
 
 void UniformTwf::add(const Numbers<defs::wf_t, defs::ndim_wf> &weight, defs::ham_t helem_sum) {
-    for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
+    for (uint_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
         m_numerator[ipart] += std::abs(weight[ipart]) * helem_sum;
     }
 }

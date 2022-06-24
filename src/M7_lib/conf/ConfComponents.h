@@ -115,7 +115,7 @@ namespace conf_components {
     std::string type_str<long>() { return "long integer"; }
 
     template<>
-    std::string type_str<size_t>() { return "unsigned integer"; }
+    std::string type_str<uint_t>() { return "unsigned integer"; }
 
     template<>
     std::string type_str<double>() { return "float"; }

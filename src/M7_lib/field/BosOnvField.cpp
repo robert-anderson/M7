@@ -27,7 +27,7 @@ BosOnvField::BosOnvField(const BosOnvField &other) :
 
 BosOnvField &BosOnvField::operator=(const defs::uintv_t &inds) {
     DEBUG_ASSERT_EQ(inds.size(), nelement(), "Vector is not the correct size");
-    for (size_t i = 0ul; i < inds.size(); ++i) (*this)[i] = inds[i];
+    for (uint_t i = 0ul; i < inds.size(); ++i) (*this)[i] = inds[i];
     return *this;
 }
 
@@ -36,16 +36,16 @@ void BosOnvField::set_ops(const defs::uintv_t &iops) {
     for (auto& iop: iops) (*this)[iop]++;
 }
 
-size_t BosOnvField::nboson() const {
+uint_t BosOnvField::nboson() const {
     return this->sum();
 }
-size_t BosOnvField::occ_fac_square(const BosOnvConnection &conn) const {
-    size_t fac = 1ul;
+uint_t BosOnvField::occ_fac_square(const BosOnvConnection &conn) const {
+    uint_t fac = 1ul;
     for (auto& pair : conn.m_ann.pairs()) {
-        for (size_t i=0ul; i<pair.m_nop; ++i) fac*= (*this)[pair.m_imode] - i;
+        for (uint_t i=0ul; i<pair.m_nop; ++i) fac*= (*this)[pair.m_imode] - i;
     }
     for (auto& pair : conn.m_cre.pairs()) {
-        for (size_t i=1ul; i<=pair.m_nop; ++i) fac*= (*this)[pair.m_imode] + i;
+        for (uint_t i=1ul; i<=pair.m_nop; ++i) fac*= (*this)[pair.m_imode] + i;
     }
     return fac;
 }
@@ -54,40 +54,40 @@ double BosOnvField::occ_fac(const BosOnvConnection &conn) const {
     return std::sqrt(double(occ_fac_square(conn)));
 }
 
-size_t BosOnvField::occ_fac_square_ann(size_t occ, size_t nop) {
-    size_t fac = 1ul;
-    for (size_t i=0ul; i<nop; ++i){
+uint_t BosOnvField::occ_fac_square_ann(uint_t occ, uint_t nop) {
+    uint_t fac = 1ul;
+    for (uint_t i=0ul; i<nop; ++i){
         fac*=occ-i;
     }
     return fac;
 }
 
-size_t BosOnvField::occ_fac_square_cre(size_t occ, size_t nop) {
-    size_t fac = 1ul;
-    for (size_t i=1ul; i<=nop; ++i){
+uint_t BosOnvField::occ_fac_square_cre(uint_t occ, uint_t nop) {
+    uint_t fac = 1ul;
+    for (uint_t i=1ul; i<=nop; ++i){
         fac*=occ+i;
     }
     return fac;
 }
 
-size_t BosOnvField::occ_fac_square_com(size_t occ, size_t nop) {
-    size_t fac = 1ul;
-    for (size_t i=0ul; i<nop; ++i){
+uint_t BosOnvField::occ_fac_square_com(uint_t occ, uint_t nop) {
+    uint_t fac = 1ul;
+    for (uint_t i=0ul; i<nop; ++i){
         auto com_fac = occ-i;
         fac*=com_fac*com_fac;
     }
     return fac;
 }
 
-size_t BosOnvField::occ_fac_square(const BosOnvConnection &conn, const BosOps &com) const {
-    size_t fac = 1;
-    size_t icom = 0;
+uint_t BosOnvField::occ_fac_square(const BosOnvConnection &conn, const BosOps &com) const {
+    uint_t fac = 1;
+    uint_t icom = 0;
     auto ncom = com.pairs().size();
     /*
      * loop over bosonic annihilations
      */
     for (auto& pair : conn.m_ann.pairs()) {
-        const size_t occ = (*this)[pair.m_imode];
+        const uint_t occ = (*this)[pair.m_imode];
         // if there are more annihilations than particles, the state is destroyed by the operator acting on it:
         if (pair.m_nop > occ) return 0;
         fac*= occ_fac_square_ann(occ, pair.m_nop);
@@ -118,8 +118,8 @@ double BosOnvField::occ_fac(const BosOnvConnection &conn, const BosOps &com) con
     return std::sqrt(double(occ_fac_square(conn, com)));
 }
 
-size_t BosOnvField::occ_fac_square(const BosOps &com) const {
-    size_t fac = 1ul;
+uint_t BosOnvField::occ_fac_square(const BosOps &com) const {
+    uint_t fac = 1ul;
     for (const auto& pair : com.pairs()) fac*= occ_fac_square_com((*this)[pair.m_imode], pair.m_nop);
     return fac;
 }

@@ -20,7 +20,7 @@ class FrmBosCoupledCoeffs {
      * @return
      *  flat index of the element in the array
      */
-    size_t index(size_t n, size_t p, size_t q) const;
+    uint_t index(uint_t n, uint_t p, uint_t q) const;
 
 public:
     /**
@@ -30,11 +30,11 @@ public:
     /**
      * the extent of the fermion indices in the array and its square to give the stride between consecutive mode indices
      */
-    const size_t m_ncoeff_ind_frm, m_ncoeff_ind_frm2;
+    const uint_t m_ncoeff_ind_frm, m_ncoeff_ind_frm2;
     /**
      * the extent of the boson indices (always the number of modes since boson indices are never spin resolved)
      */
-    const size_t m_ncoeff_ind_bos;
+    const uint_t m_ncoeff_ind_bos;
     /**
      * array of "integrals" only stored on the root-rank of each node
      */
@@ -53,7 +53,7 @@ public:
      * @param value
      *  coefficient value
      */
-    void set(size_t n, size_t p, size_t q, defs::ham_t value);
+    void set(uint_t n, uint_t p, uint_t q, defs::ham_t value);
 
     /**
      * access the coefficient value (called on any rank)
@@ -66,7 +66,7 @@ public:
      * @return
      *  coefficient value
      */
-    defs::ham_t get(size_t n, size_t p, size_t q) const;
+    defs::ham_t get(uint_t n, uint_t p, uint_t q) const;
 
 };
 

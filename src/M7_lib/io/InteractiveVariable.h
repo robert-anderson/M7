@@ -40,9 +40,9 @@ private:
     read_line(const std::string &line, T &v) {
         if (line[0] == '-') return false;
         auto ptr = line.c_str();
-        size_t tmp = string::read_unsigned(ptr);
+        uint_t tmp = string::read_unsigned(ptr);
         v = static_cast<T>(tmp);
-        return static_cast<const size_t &>(v) == tmp;
+        return static_cast<const uint_t &>(v) == tmp;
     }
 
 
@@ -70,7 +70,7 @@ private:
 
     template<typename T>
     bool read_vector(std::vector<T> &v, std::vector<std::string>& lines) {
-        size_t nelement = lines.size();
+        uint_t nelement = lines.size();
         mpi::bcast(nelement);
         std::vector<T> tmp;
         tmp.reserve(nelement);

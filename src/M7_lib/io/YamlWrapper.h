@@ -32,7 +32,7 @@ namespace yaml {
 
         Path up() const;
 
-        size_t depth() const;
+        uint_t depth() const;
     };
 
     struct File {

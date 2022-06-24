@@ -17,7 +17,7 @@ TEST(Lattice, OrthoObc1d) {
     };
     ASSERT_EQ(lattice->m_nsite, chk_rows.size());
     lattice::adj_row_t adj_row;
-    for (size_t i=0ul; i<lattice->m_nsite; ++i){
+    for (uint_t i=0ul; i<lattice->m_nsite; ++i){
         lattice->get_adj_row(i, adj_row);
         ASSERT_EQ(adj_row, chk_rows[i]);
     }
@@ -35,7 +35,7 @@ TEST(Lattice, OrthoApbc1d) {
     };
     ASSERT_EQ(lattice->m_nsite, chk_rows.size());
     lattice::adj_row_t adj_row;
-    for (size_t i=0ul; i<lattice->m_nsite; ++i){
+    for (uint_t i=0ul; i<lattice->m_nsite; ++i){
         lattice->get_adj_row(i, adj_row);
         ASSERT_EQ(adj_row, chk_rows[i]);
     }
@@ -65,7 +65,7 @@ TEST(Lattice, OrthoObc2d) {
     };
     ASSERT_EQ(lattice->m_nsite, chk_rows.size());
     lattice::adj_row_t adj_row;
-    for (size_t i=0ul; i<lattice->m_nsite; ++i){
+    for (uint_t i=0ul; i<lattice->m_nsite; ++i){
         lattice->get_adj_row(i, adj_row);
         ASSERT_EQ(adj_row, chk_rows[i]);
     }
@@ -95,7 +95,7 @@ TEST(Lattice, OrthoPbc2d) {
     };
     ASSERT_EQ(lattice->m_nsite, chk_rows.size());
     lattice::adj_row_t adj_row;
-    for (size_t i=0ul; i<lattice->m_nsite; ++i){
+    for (uint_t i=0ul; i<lattice->m_nsite; ++i){
         lattice->get_adj_row(i, adj_row);
         ASSERT_EQ(adj_row, chk_rows[i]);
     }

@@ -18,7 +18,7 @@ TEST(Pchb2200, FromHFDeterminant) {
     mbf::set_aufbau_mbf(src_mbf, h.default_particles().m_frm);
 
     tester.fill_results_table(src_mbf);
-    const size_t ndraw = 10000000;
+    const uint_t ndraw = 10000000;
     ASSERT_EQ(tester.run(src_mbf, ndraw).m_error_message, "");
     ASSERT_TRUE(tester.all_drawn_at_least_once());
     auto av_err1 = tester.mean_abs_error(ndraw);

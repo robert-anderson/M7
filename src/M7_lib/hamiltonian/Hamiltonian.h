@@ -114,7 +114,7 @@ struct HamiltonianTerms {
     std::unique_ptr<BosHam> make_bos(BosHam::opt_pair_t opts){
         using namespace smart_ptr;
         if (opts.m_ham.m_num_op_weight) {
-            const size_t nsite = m_frm->m_basis.m_nsite;
+            const uint_t nsite = m_frm->m_basis.m_nsite;
             const sys::bos::Basis basis(nsite);
             const auto omega = opts.m_ham.m_num_op_weight.get();
             return make_poly_unique<BosHam, NumOpBosHam>(basis, omega);
@@ -312,7 +312,7 @@ public:
 //    }
 
     // TODO: rename
-    sys::Particles default_particles(size_t nelec=0ul, int ms2=sys::frm::c_undefined_ms2, size_t nboson=0ul) const {
+    sys::Particles default_particles(uint_t nelec=0ul, int ms2=sys::frm::c_undefined_ms2, uint_t nboson=0ul) const {
         // if nelec is not already set, give precedence to nelec value given by FrmHam
         if (!nelec && m_frm) nelec = m_frm.default_nelec();
         if (!nelec && m_frmbos) nelec = m_frmbos.default_nelec();

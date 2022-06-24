@@ -8,7 +8,7 @@
 BosonSumConservingDoubles::BosonSumConservingDoubles(const BosHam &h, PRNG &prng) :
         BosExcitGen(h, prng, {exsig::ex_0022}, "boson mode index sum conserving") {}
 
-void BosonSumConservingDoubles::set_a_range(size_t i, size_t j, size_t &min, size_t &max, size_t &nexclude) const {
+void BosonSumConservingDoubles::set_a_range(uint_t i, uint_t j, uint_t &min, uint_t &max, uint_t &nexclude) const {
     const auto nmode = m_h.m_basis.m_nmode;
     min = 0ul;
     // e.g. nmode = 5, i = 3, j = 3. a can't be 0 or 1, since b would need to be 6 or 5 respectively to conserve sum
@@ -18,18 +18,18 @@ void BosonSumConservingDoubles::set_a_range(size_t i, size_t j, size_t &min, siz
     nexclude = 1 + (i != j);
 }
 
-size_t BosonSumConservingDoubles::na(size_t i, size_t j) const {
-    size_t min, max, nexclude;
+uint_t BosonSumConservingDoubles::na(uint_t i, uint_t j) const {
+    uint_t min, max, nexclude;
     set_a_range(i, j, min, max, nexclude);
     return (max - min) - nexclude;
 }
 
-bool BosonSumConservingDoubles::draw_bos(size_t, const field::BosOnv &src, prob_t &prob, conn::BosOnv &conn) {
+bool BosonSumConservingDoubles::draw_bos(uint_t, const field::BosOnv &src, prob_t &prob, conn::BosOnv &conn) {
     const auto &op_inds = src.m_decoded.m_expanded.get();
     const auto nmode = src.m_nelement;
     const auto nboson_pair = integer::nspair(op_inds.size());
-    size_t ij = m_prng.draw_uint(nboson_pair);
-    size_t i, j;
+    uint_t ij = m_prng.draw_uint(nboson_pair);
+    uint_t i, j;
     integer::inv_strigmap(j, i, ij);
     // i and j are positions in the occ list, convert to orb uintv_t:
     DEBUG_ASSERT_LT(i, j, "picked i, j should be in ascending order");
@@ -40,11 +40,11 @@ bool BosonSumConservingDoubles::draw_bos(size_t, const field::BosOnv &src, prob_
     DEBUG_ASSERT_LT(i, src.m_nelement, "i index OOB");
     DEBUG_ASSERT_LT(j, src.m_nelement, "j index OOB");
 
-    size_t min, max, nexclude;
+    uint_t min, max, nexclude;
     set_a_range(i, j, min, max, nexclude);
 
     if (min + nexclude == max) return false;
-    size_t a = m_prng.draw_uint(min, max - nexclude);
+    uint_t a = m_prng.draw_uint(min, max - nexclude);
     // skip mode indices to prevent selection of i or j as creation operators
     if (a >= i)++a;
     if (i != j && a >= j)++a;

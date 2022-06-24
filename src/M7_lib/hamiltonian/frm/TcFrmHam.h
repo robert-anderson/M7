@@ -15,7 +15,7 @@ struct TcFrmHam : TcHam, GeneralFrmHam {
 
     explicit TcFrmHam(opt_pair_t opts): TcHam(), GeneralFrmHam(opts) {}
 
-    defs::ham_t get_coeff_3300(size_t a, size_t b, size_t c, size_t i, size_t j, size_t k) const override;
+    defs::ham_t get_coeff_3300(uint_t a, uint_t b, uint_t c, uint_t i, uint_t j, uint_t k) const override;
 
     defs::ham_t get_element_3300(const field::FrmOnv &onv,
                                  const conn::FrmOnv &conn) const override;

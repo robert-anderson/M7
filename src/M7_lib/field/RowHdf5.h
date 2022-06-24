@@ -20,15 +20,15 @@ struct RowHdf5Base {
     /**
      * number of rows stored on this rank
      */
-    const size_t m_nitem;
+    const uint_t m_nitem;
     /**
      * largest number of items stored on a single rank
      */
-    const size_t m_nitem_max;
+    const uint_t m_nitem_max;
     /**
      * total number of items across all ranks
      */
-    const size_t m_nitem_total;
+    const uint_t m_nitem_total;
     /**
      * names of the HDF5 datasets / row fields to be read or written
      */
@@ -41,9 +41,9 @@ struct RowHdf5Base {
     /**
      * index of next item to be read or written
      */
-    size_t m_iitem = 0ul;
+    uint_t m_iitem = 0ul;
 
-    RowHdf5Base(const Row &row, size_t nitem, std::vector<std::string> field_names);
+    RowHdf5Base(const Row &row, uint_t nitem, std::vector<std::string> field_names);
 
 protected:
 
@@ -60,7 +60,7 @@ struct RowHdf5WriterBase : RowHdf5Base {
     hdf5::GroupWriter m_group;
     std::vector<hdf5::NdDistListWriter> m_column_writers;
 
-    RowHdf5WriterBase(Row &row, hdf5::GroupWriter &parent, std::string name, size_t nitem,
+    RowHdf5WriterBase(Row &row, hdf5::GroupWriter &parent, std::string name, uint_t nitem,
                       std::vector<std::string> field_names);
 
 protected:
@@ -93,7 +93,7 @@ public:
      * @return
      *  true if there remain unwritten rows on any process
      */
-    bool write(const size_t &n);
+    bool write(const uint_t &n);
 
     void write();
 
@@ -125,7 +125,7 @@ protected:
 
 private:
 
-    static size_t get_nitem(const Row &row, hdf5::GroupReader &parent,
+    static uint_t get_nitem(const Row &row, hdf5::GroupReader &parent,
                             std::string name, std::vector<std::string> field_names);
 
     /**
@@ -147,7 +147,7 @@ public:
      * @return
      *  true if there remain unread rows on any process
      */
-    bool read(const size_t &n);
+    bool read(const uint_t &n);
 
     /**
      * read all rows from HDF5 group
@@ -166,11 +166,11 @@ template<typename row_t>
 struct RowHdf5Writer : row_t, RowHdf5WriterBase {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
 
-    RowHdf5Writer(const row_t &row, hdf5::GroupWriter &parent, std::string name, size_t nitem,
+    RowHdf5Writer(const row_t &row, hdf5::GroupWriter &parent, std::string name, uint_t nitem,
                   std::vector<std::string> field_names) :
             row_t(row), RowHdf5WriterBase(*this, parent, name, nitem, field_names) {}
 
-    RowHdf5Writer(const row_t &row, hdf5::GroupWriter &parent, std::string name, size_t nitem) :
+    RowHdf5Writer(const row_t &row, hdf5::GroupWriter &parent, std::string name, uint_t nitem) :
             RowHdf5Writer(row, parent, name, nitem, get_all_field_names(row)) {}
 };
 

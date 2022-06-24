@@ -29,7 +29,7 @@ TEST(FcidumpFileReader, Real_6orb) {
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_NEARLY_EQ(v, 0.5406487462037872);
     // scan to arbitrary element
-    for (size_t i = 0; i < 17; ++i) file_reader.next(inds, v);
+    for (uint_t i = 0; i < 17; ++i) file_reader.next(inds, v);
     test_inds = {2, 1, 4, 3};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_NEARLY_EQ(v, 0.01759459248922075);
@@ -54,7 +54,7 @@ TEST(FcidumpFileReader, Integer_8orb) {
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_NEARLY_EQ(v, 0.0);
     // scan to arbitrary element
-    for (size_t i = 0; i < 8; ++i) file_reader.next(inds, v);
+    for (uint_t i = 0; i < 8; ++i) file_reader.next(inds, v);
     test_inds = {7, 7, 7, 7};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_NEARLY_EQ(v, 4.0);
@@ -95,20 +95,20 @@ TEST(FcidumpFileReader, Complex_10orb){
     // first entry
     test_inds = {0,0,0,0};
     ASSERT_TRUE(std::equal(uintv_t.begin(), uintv_t.end(), test_inds.begin()));
-    ASSERT_TRUE(datatype::floats_equal(datatype::real(v), 2.2752637995109302));
-    ASSERT_TRUE(datatype::floats_equal(datatype::imag(v), 0.0));
+    ASSERT_TRUE(dtype::floats_equal(dtype::real(v), 2.2752637995109302));
+    ASSERT_TRUE(dtype::floats_equal(dtype::imag(v), 0.0));
     // scan to arbitrary element
-    for (size_t i=0; i<20; ++i) file_reader.next(uintv_t, v);
+    for (uint_t i=0; i<20; ++i) file_reader.next(uintv_t, v);
     // (-0.00851916802083687,-0.005287130898791)   5   3   7   1
     test_inds = {5,3,7,1};
     file_reader.inds_to_orbs(test_inds);
     ASSERT_TRUE(std::equal(uintv_t.begin(), uintv_t.end(), test_inds.begin()));
-    ASSERT_TRUE(datatype::floats_equal(datatype::real(v), -0.00851916802083687));
-    ASSERT_TRUE(datatype::floats_equal(datatype::imag(v), -0.005287130898791));
+    ASSERT_TRUE(dtype::floats_equal(dtype::real(v), -0.00851916802083687));
+    ASSERT_TRUE(dtype::floats_equal(dtype::imag(v), -0.005287130898791));
     // scan to final element
     while(file_reader.next(uintv_t, v)){}
     test_inds = {~0ul, ~0ul, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(uintv_t.begin(), uintv_t.end(), test_inds.begin()));
-    ASSERT_TRUE(datatype::float_is_zero(v));
+    ASSERT_TRUE(dtype::float_is_zero(v));
 }
 #endif

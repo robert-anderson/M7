@@ -69,7 +69,7 @@ public:
 
     void execute();
 
-    void write_iter_stats(size_t icycle);
+    void write_iter_stats(uint_t icycle);
 
     FermionOnv initial_reference(const std::unique_ptr<FermionHamiltonian>& ham, const Options& input){
         if(m_input.initial_reference_det.empty()) {

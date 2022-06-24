@@ -19,18 +19,18 @@ struct GeneralLadderHam : FrmBosHam {
      */
     FrmBosCoupledCoeffs m_v;
 
-    GeneralLadderHam(const EbdumpInfo& info, bool spin_major, size_t bos_occ_cutoff=sys::bos::c_max_occ);
+    GeneralLadderHam(const EbdumpInfo& info, bool spin_major, uint_t bos_occ_cutoff=sys::bos::c_max_occ);
 
     GeneralLadderHam(opt_pair_t opts):
         GeneralLadderHam(EbdumpInfo(opts.m_ham.m_ebdump.m_path),
                 opts.m_ham.m_ebdump.m_spin_major, opts.m_basis.m_bos_occ_cutoff){}
 
-    defs::ham_t get_coeff_1110(size_t imode, size_t i, size_t j) const override;
+    defs::ham_t get_coeff_1110(uint_t imode, uint_t i, uint_t j) const override;
 
-    defs::ham_t get_coeff_1101(size_t imode, size_t i, size_t j) const override;
+    defs::ham_t get_coeff_1101(uint_t imode, uint_t i, uint_t j) const override;
 
 
-    defs::ham_t get_element_pure(const field::FrmBosOnv &onv, size_t imode, bool cre) const;
+    defs::ham_t get_element_pure(const field::FrmBosOnv &onv, uint_t imode, bool cre) const;
 
     defs::ham_t get_element_0010(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const override;
 
@@ -38,7 +38,7 @@ struct GeneralLadderHam : FrmBosHam {
 
 
     defs::ham_t get_element_coupled(const field::FrmBosOnv &onv,
-                                    const conn::FrmOnv& frm_conn, size_t imode, bool cre) const;
+                                    const conn::FrmOnv& frm_conn, uint_t imode, bool cre) const;
 
     defs::ham_t get_element_1110(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const override;
 

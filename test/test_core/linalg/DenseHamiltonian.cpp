@@ -14,8 +14,8 @@ TEST(DenseHamiltonian, FciEnergyCheck4c) {
     DenseHamiltonian ham(Hamiltonian(PROJECT_ROOT"/assets/DHF_Be_STO-3G/FCIDUMP", false));
     auto solver = ham.diagonalize();
     // compare the ground and first excited states to BAGEL's values
-    ASSERT_TRUE(datatype::floats_nearly_equal(solver.m_evals[0], -14.40597603432, 1e-10));
-    ASSERT_TRUE(datatype::floats_nearly_equal(solver.m_evals[1], -14.28883698406, 1e-10));
+    ASSERT_TRUE(dtype::floats_nearly_equal(solver.m_evals[0], -14.40597603432, 1e-10));
+    ASSERT_TRUE(dtype::floats_nearly_equal(solver.m_evals[1], -14.28883698406, 1e-10));
 }
 #endif
 TEST(DenseHamiltonian, N2Rhf) {
@@ -33,7 +33,7 @@ TEST(DenseHamiltonian, HeisenbergFrmHam) {
      */
     defs::uintv_t nsites = {4, 6, 8, 10, 12};
     std::vector<defs::ham_comp_t> energies = {-2.0, -2.8027756375, -3.6510934085, -4.515446354, -5.387390917};
-    for (size_t i=0ul; i<nsites.size(); ++i){
+    for (uint_t i=0ul; i<nsites.size(); ++i){
         auto nsite = nsites[i];
         auto energy = energies[i];
         HeisenbergFrmHam frm_ham(1.0, lattice::make("ortho", {nsite}, {1}));
@@ -50,7 +50,7 @@ TEST(DenseHamiltonian, HF) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/HF_RDMs/FCIDUMP"}, true);
     Hamiltonian ham(&frm_ham);
     auto particles = ham.default_particles();
-    ASSERT_EQ(size_t(particles.m_frm), 6ul);
+    ASSERT_EQ(uint_t(particles.m_frm), 6ul);
     DenseHamiltonian hmat(ham, particles);
     std::vector<double> evals;
     dense::diag(hmat, evals);
@@ -115,10 +115,10 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff2) {
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
     const auto nmode = ham_src.m_basis.m_bos.m_nmode;
     const auto& frm_basis = ham_src.m_basis.m_frm;
-    for (size_t n = 0ul; n < nmode; ++n) {
-        for (size_t p = 0ul; p < frm_basis.m_nspinorb; ++p) {
+    for (uint_t n = 0ul; n < nmode; ++n) {
+        for (uint_t p = 0ul; p < frm_basis.m_nspinorb; ++p) {
             const auto psite = frm_basis.isite(p);
-            for (size_t q = 0ul; q < frm_basis.m_nspinorb; ++q) {
+            for (uint_t q = 0ul; q < frm_basis.m_nspinorb; ++q) {
                 const auto qsite = frm_basis.isite(q);
                 if (n == psite && psite == qsite) {
                     ASSERT_NEARLY_EQ(arith::real(ham_src.m_frmbos.get_coeff_1101(n, p, q)), 1.4);

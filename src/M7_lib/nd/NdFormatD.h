@@ -25,8 +25,8 @@ struct NdFormatD {
     const defs::uintv_t m_shape;
     const defs::uintv_t m_strides;
     const std::vector<std::string> m_dim_names;
-    const size_t m_nelement;
-    const size_t m_nind;
+    const uint_t m_nelement;
+    const uint_t m_nind;
 
     static defs::uintv_t make_strides(const defs::uintv_t& shape){
         const auto nind = shape.size();
@@ -45,11 +45,11 @@ struct NdFormatD {
 
     NdFormatD(const defs::uintv_t& shape): NdFormatD(shape, std::vector<std::string>(shape.size(), "")){}
 
-    NdFormatD(size_t nind, size_t extent): NdFormatD(defs::uintv_t(nind, extent)){}
+    NdFormatD(uint_t nind, uint_t extent): NdFormatD(defs::uintv_t(nind, extent)){}
 
-    size_t flatten(const defs::uintv_t& inds) const {
-        size_t iflat = 0ul;
-        for (size_t i=0ul; i<std::min(inds.size(), m_nind); ++i) {
+    uint_t flatten(const defs::uintv_t& inds) const {
+        uint_t iflat = 0ul;
+        for (uint_t i=0ul; i<std::min(inds.size(), m_nind); ++i) {
             ASSERT(inds[i] < m_shape[i]);
             iflat += inds[i] * m_strides[i];
         }
@@ -57,11 +57,11 @@ struct NdFormatD {
     }
 
     template<typename T>
-    void decode_flat(const size_t& iflat, std::vector<T>& inds) const {
+    void decode_flat(const uint_t& iflat, std::vector<T>& inds) const {
         static_assert(std::is_integral<T>::value, "index type must be integral");
         inds.clear();
-        size_t remainder = iflat;
-        for (size_t i = 0ul; i != m_nind; ++i) {
+        uint_t remainder = iflat;
+        for (uint_t i = 0ul; i != m_nind; ++i) {
             inds.push_back(remainder / m_strides[i]);
             remainder -= inds.back() * m_strides[i];
         }
@@ -76,7 +76,7 @@ private:
     static std::vector<defs::uintv_t> make_inds(const NdFormatD& format) {
         using namespace basic_foreach::rtnd;
         std::vector<defs::uintv_t> out(format.m_nelement);
-        size_t i=0ul;
+        uint_t i=0ul;
         auto fn = [&out, &i](const defs::uintv_t& inds){
             out[i] = inds;
             ++i;
@@ -89,7 +89,7 @@ private:
 public:
     NdEnumerationD(const NdFormatD& format): NdFormatD(format), m_inds(make_inds(format)){}
 
-    const defs::uintv_t& operator[](size_t i) const {
+    const defs::uintv_t& operator[](uint_t i) const {
         DEBUG_ASSERT_LT(i, m_inds.size(), "index OOB");
         return m_inds[i];
     }

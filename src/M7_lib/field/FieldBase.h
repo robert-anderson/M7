@@ -49,7 +49,7 @@ struct FieldBase {
      * not necessarily an integral multiple of c_nbyte_word, although a field added to a row after another of a
      * different type will always begin on a word boundary
      */
-    const size_t m_size;
+    const uint_t m_size;
     /**
      * string identifier for logging purposes
      */
@@ -63,11 +63,11 @@ private:
     /**
      * number of bytes by which Field is offset from the beginning of the Row (first Field to be added has offset 0)
      */
-    size_t m_row_offset = ~0ul;
+    uint_t m_row_offset = ~0ul;
     /**
      * index within m_fields vector of m_row
      */
-    size_t m_row_index = ~0ul;
+    uint_t m_row_index = ~0ul;
     friend Row;
 
 public:
@@ -82,7 +82,7 @@ public:
      * @param name
      *  name of the field i.e. "column heading"
      */
-    FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name);
+    FieldBase(Row *row, uint_t size, const std::type_info &type_info, std::string name);
 
     FieldBase(const FieldBase &other);
 
@@ -132,15 +132,15 @@ public:
     virtual void h5_write_attrs(hid_t /*parent_handle*/) {
     }
 
-    virtual void save(hdf5::NdDistListWriter &h5list, const size_t &iitem) const {
+    virtual void save(hdf5::NdDistListWriter &h5list, const uint_t &iitem) const {
         h5list.write_h5item_bytes(iitem, begin());
     }
 
-    virtual void save(hdf5::GroupWriter &gw, size_t irank= 0ul) const {
+    virtual void save(hdf5::GroupWriter &gw, uint_t irank= 0ul) const {
         gw.save(m_name, begin(), {m_size}, {"raw_data"}, irank);
     }
 
-    virtual void load(hdf5::NdDistListReader &h5list, const size_t &iitem) {
+    virtual void load(hdf5::NdDistListReader &h5list, const uint_t &iitem) {
         h5list.read_h5item_bytes(iitem, begin());
     }
 

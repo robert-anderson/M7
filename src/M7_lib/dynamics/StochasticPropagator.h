@@ -31,26 +31,26 @@ protected:
 public:
     StochasticPropagator(const Hamiltonian &ham, const conf::Document &opts, const Wavefunction& wf);
 
-    void diagonal(Wavefunction &wf, const size_t& ipart) override;
+    void diagonal(Wavefunction &wf, const uint_t& ipart) override;
 
     template<typename T>
-    size_t get_nattempt(const T &weight) {
+    uint_t get_nattempt(const T &weight) {
         static_assert(std::is_floating_point<T>::value, "template arg must be floating point");
         return m_prng.stochastic_round(std::abs(weight), 1.0);
     }
 
     template<typename T>
-    size_t get_nattempt(const std::complex<T> &weight) {
+    uint_t get_nattempt(const std::complex<T> &weight) {
         return get_nattempt(std::abs(weight));
     }
 
-    void off_diagonal(Wavefunction &wf, const size_t& ipart) override;
+    void off_diagonal(Wavefunction &wf, const uint_t& ipart) override;
 
-    size_t ncase_excit_gen() const override;
+    uint_t ncase_excit_gen() const override;
 
     std::vector<defs::prob_t> excit_gen_case_probs() const override;
 
-    void update(const size_t &icycle, const Wavefunction &wf) override;
+    void update(const uint_t &icycle, const Wavefunction &wf) override;
 
 };
 

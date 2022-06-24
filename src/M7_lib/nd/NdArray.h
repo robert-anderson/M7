@@ -7,7 +7,7 @@
 
 #include "NdAccessor.h"
 
-template<typename T, size_t nind>
+template<typename T, uint_t nind>
 struct NdArrayBase {
     NdFormat<nind> m_format;
     std::vector<T> m_data;
@@ -15,7 +15,7 @@ struct NdArrayBase {
     NdArrayBase(uinta_t<nind> shape): m_format(shape), m_data(m_format.nelement()) {}
 };
 
-template<typename T, size_t nind>
+template<typename T, uint_t nind>
 class NdArray : public NdArrayBase<T, nind>, public NdAccessor<T, nind> {
 public:
     template<typename ...Args>

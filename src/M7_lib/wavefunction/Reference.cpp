@@ -5,7 +5,7 @@
 #include "Reference.h"
 
 Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
-                     const Wavefunction &wf, size_t ipart, TableBase::Loc loc) :
+                     const Wavefunction &wf, uint_t ipart, TableBase::Loc loc) :
         Wavefunction::SharedRow(wf, loc, "reference"),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
@@ -30,7 +30,7 @@ void Reference::accept_candidate(double redefinition_thresh) {
     std::vector<defs::wf_comp_t> gather(mpi::nrank());
     mpi::all_gather(m_candidate_abs_weight, gather);
     DEBUG_ASSERT_EQ(m_candidate_abs_weight, gather[mpi::irank()], "Gather error");
-    size_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
+    uint_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
     mpi::bcast(m_irow_candidate, irank);
     auto current_weight = weight();
     if (std::abs(gather[irank]) > std::abs(current_weight*redefinition_thresh)){
@@ -72,7 +72,7 @@ bool Reference::is_connected(const field::Mbf &mbf) const {
     return ham::is_significant(m_ham.get_element(get_mbf(), m_conn[mbf]));
 }
 
-size_t Reference::exsig(const field::Mbf &mbf) const {
+uint_t Reference::exsig(const field::Mbf &mbf) const {
     m_conn[mbf].connect(get_mbf(), mbf);
     return m_conn[mbf].exsig();
 }
@@ -96,7 +96,7 @@ const defs::wf_t &Reference::weight() const {
     return m_global.m_row.m_weight[m_ipart];
 }
 
-defs::wf_t Reference::norm_average_weight(const size_t& icycle, const size_t& ipart) const {
+defs::wf_t Reference::norm_average_weight(const uint_t& icycle, const uint_t& ipart) const {
     auto unnorm = m_global.m_row.m_average_weight[ipart]+m_global.m_row.m_weight[ipart];
     return unnorm/static_cast<defs::wf_comp_t>(m_global.m_row.occupied_ncycle(icycle));
 }
@@ -107,10 +107,10 @@ References::References(const conf::Reference &opts, const Hamiltonian &ham, cons
     DEBUG_ASSERT_EQ(locs.size(), wf.m_format.m_nelement,
                     "there should be a parallel table location specifying each reference row");
     m_refs.reserve(wf.m_format.m_nelement);
-    for (size_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(opts, ham, wf, ipart, locs[ipart]);
+    for (uint_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(opts, ham, wf, ipart, locs[ipart]);
 }
 
-const Reference &References::operator[](const size_t &ipart) const {
+const Reference &References::operator[](const uint_t &ipart) const {
     DEBUG_ASSERT_LT(ipart, m_refs.size(), "reference part index OOB");
     return m_refs[ipart];
 }
@@ -130,19 +130,19 @@ void References::contrib_row() {
 std::vector<bool> References::is_connected(const field::Mbf &mbf) const {
     std::vector<bool> out;
     out.reserve(m_refs.size());
-    for (size_t ipart=0ul; ipart<m_refs.size(); ++ipart)
+    for (uint_t ipart=0ul; ipart<m_refs.size(); ++ipart)
         out.push_back(m_refs[ipart].is_connected(mbf));
     return out;
 }
 
 const field::Numbers<defs::ham_t, defs::ndim_wf> &References::proj_energy_nums() {
-    size_t ipart = 0ul;
+    uint_t ipart = 0ul;
     for (auto& ref: m_refs) m_proj_energy_nums[ipart++] = ref.proj_energy_num();
     return m_proj_energy_nums;
 }
 
 const field::Numbers<defs::wf_t, defs::ndim_wf> &References::weights() {
-    size_t ipart = 0ul;
+    uint_t ipart = 0ul;
     for (auto& ref: m_refs) m_weights[ipart++] = ref.weight();
     return m_weights;
 }

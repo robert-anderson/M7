@@ -39,9 +39,9 @@ public:
 
     explicit GeneralFrmHam(opt_pair_t opts);
 
-    defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
+    defs::ham_t get_coeff_1100(uint_t a, uint_t i) const override;
 
-    defs::ham_t get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const override;
+    defs::ham_t get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const override;
 
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override;
@@ -66,7 +66,7 @@ public:
 
     conn_foreach_list_t make_foreach_iters() const override;
 
-    size_t default_nelec() const override;
+    uint_t default_nelec() const override;
 
     int default_ms2_value() const override;
 };

@@ -5,27 +5,27 @@
 #include "Sparse.h"
 #include "M7_lib/util/String.h"
 
-void sparse::Network::resize(const size_t& nrow) {
+void sparse::Network::resize(const uint_t& nrow) {
     if (nrow > m_rows_icols.size()) m_rows_icols.resize(nrow);
 }
 
-size_t sparse::Network::nrow() const {
+uint_t sparse::Network::nrow() const {
     return m_rows_icols.size();
 }
 
-size_t sparse::Network::nentry() const {
+uint_t sparse::Network::nentry() const {
     return m_nentry;
 }
 
-size_t sparse::Network::nentry(const size_t& irow) const {
+uint_t sparse::Network::nentry(const uint_t& irow) const {
     return (*this)[irow].size();
 }
 
-size_t sparse::Network::max_column_index() const {
+uint_t sparse::Network::max_column_index() const {
     return m_max_icol;
 }
 
-size_t sparse::Network::add(const size_t &irow, const size_t &icol) {
+uint_t sparse::Network::add(const uint_t &irow, const uint_t &icol) {
     if (irow >= m_rows_icols.size()) {
         if (!m_resized_by_add) {
             log::warn("Resizing sparse matrix by adding a row (this entails reallocation which is inefficient)");
@@ -40,7 +40,7 @@ size_t sparse::Network::add(const size_t &irow, const size_t &icol) {
     return m_rows_icols[irow].size()-1;
 }
 
-size_t sparse::Network::insert(const size_t &irow, const size_t &icol) {
+uint_t sparse::Network::insert(const uint_t &irow, const uint_t &icol) {
     auto& row = m_rows_icols[irow];
     auto element = std::find(row.begin(), row.end(), icol);
     if (element==row.end()) return add(irow, icol);
@@ -48,11 +48,11 @@ size_t sparse::Network::insert(const size_t &irow, const size_t &icol) {
     return std::distance(row.begin(), element);
 }
 
-void sparse::Network::add(const size_t &irow, const defs::uintv_t &icols) {
+void sparse::Network::add(const uint_t &irow, const defs::uintv_t &icols) {
     for (auto &icol: icols) add(irow, icol);
 }
 
-void sparse::Network::insert(const size_t &irow, const defs::uintv_t &icols) {
+void sparse::Network::insert(const uint_t &irow, const defs::uintv_t &icols) {
     for (auto &icol: icols) insert(irow, icol);
 }
 
@@ -60,22 +60,22 @@ bool sparse::Network::empty() const {
     return m_rows_icols.empty();
 }
 
-bool sparse::Network::empty(const size_t &irow) const {
+bool sparse::Network::empty(const uint_t &irow) const {
     return (*this)[irow].empty();
 }
 
-const defs::uintv_t &sparse::Network::operator[](const size_t &irow) const{
+const defs::uintv_t &sparse::Network::operator[](const uint_t &irow) const{
     ASSERT(irow<nrow());
     return m_rows_icols[irow];
 }
 
-std::string sparse::Network::row_to_string(size_t irow) const {
+std::string sparse::Network::row_to_string(uint_t irow) const {
     return convert::to_string(m_rows_icols[irow]);
 }
 
 std::string sparse::Network::to_string() const {
     std::string out;
-    for (size_t irow=0ul; irow<nrow(); ++irow) {
+    for (uint_t irow=0ul; irow<nrow(); ++irow) {
         if (m_rows_icols[irow].empty()) continue;
         out+= std::to_string(irow) + ": " + row_to_string(irow)+"\n";
     }
@@ -86,9 +86,9 @@ sparse::Network sparse::Network::get_symmetrized() const {
     Network sym_net;
     sym_net.resize(nrow());
     REQUIRE_LT(max_column_index(), nrow(), "too many columns for this to be a symmetric matrix");
-    for (size_t irow=0ul; irow<nrow(); ++irow) {
+    for (uint_t irow=0ul; irow<nrow(); ++irow) {
         const auto& icols = m_rows_icols[irow];
-        for (size_t iicol=0ul; iicol < icols.size(); ++iicol) {
+        for (uint_t iicol=0ul; iicol < icols.size(); ++iicol) {
             const auto& icol = icols[iicol];
             sym_net.add(irow, icol);
             if (icol != irow) sym_net.insert(icol, irow);
@@ -97,7 +97,7 @@ sparse::Network sparse::Network::get_symmetrized() const {
     return sym_net;
 }
 
-void sparse::Network::get_row_subset(Network &subnet, size_t count, size_t displ) const {
+void sparse::Network::get_row_subset(Network &subnet, uint_t count, uint_t displ) const {
     REQUIRE_LE(displ, nrow(), "row offset OOB");
     REQUIRE_LE(displ+count, nrow(), "row offset+count OOB");
     subnet.resize(count);
@@ -113,7 +113,7 @@ void sparse::Network::get_row_subset(Network &subnet, size_t count, size_t displ
     }
 }
 
-sparse::Network sparse::Network::get_row_subset(size_t count, size_t displ) const {
+sparse::Network sparse::Network::get_row_subset(uint_t count, uint_t displ) const {
     Network subnet;
     get_row_subset(subnet, count, displ);
     return subnet;

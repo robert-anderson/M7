@@ -54,7 +54,7 @@
  */
 class Solver {
 
-    size_t m_icycle = 0ul;
+    uint_t m_icycle = 0ul;
     Propagator &m_prop;
     const conf::Document &m_opts;
     Wavefunction &m_wf;
@@ -84,7 +84,7 @@ class Solver {
      * Sanity checking variables
      */
     defs::wf_t m_chk_nwalker_local = 0.0;
-    size_t m_chk_ninitiator_local = 0ul;
+    uint_t m_chk_ninitiator_local = 0ul;
 
     InteractiveVariable<bool> m_exit;
 public:
@@ -130,7 +130,7 @@ public:
      *  // all local stats are reduced to global stats
      * @param ncycle
      */
-    void execute(size_t ncycle = 1);
+    void execute(uint_t ncycle = 1);
 
     /**
      * reset variables and those of member objects for a new solver iteration
@@ -143,7 +143,7 @@ public:
      * @param ipart
      *  flat index of m_wf.m_format being propagated
      */
-    void propagate_row(const size_t &ipart);
+    void propagate_row(const uint_t &ipart);
 
     /**
      * Loop over all rows in m_wf.m_store which have a non-zero MBF field
@@ -154,7 +154,7 @@ public:
      * Loop over all rows in m_wf.m_store which have a non-zero MBF field but perform no propagation, just add any
      * required weight-averaged contributions to the MEVs
      */
-    void finalizing_loop_over_occupied_mbfs(size_t icycle);
+    void finalizing_loop_over_occupied_mbfs(uint_t icycle);
 
     void loop_over_spawned();
 

@@ -14,11 +14,11 @@
 class PRNG {
     typedef std::vector<uint32_t> U;
     U m_data;
-    size_t m_i;
-    const size_t m_seed;
-    size_t m_nrefresh = 0;
+    uint_t m_i;
+    const uint_t m_seed;
+    uint_t m_nrefresh = 0;
 public:
-    PRNG(const size_t &seed, const size_t &block_size);
+    PRNG(const uint_t &seed, const uint_t &block_size);
 
     void refresh();
 

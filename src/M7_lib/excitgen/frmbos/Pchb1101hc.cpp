@@ -11,14 +11,14 @@ Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
     const auto nmode = m_h.m_basis.m_bos.m_nmode;
     const auto nspinorb = m_h.m_basis.m_frm.m_nspinorb;
     std::vector<defs::prob_t> weights(nmode, 0.0);
-    size_t pq = 0ul;
+    uint_t pq = 0ul;
     log::info("Initializing pre-computed samplers for fermion-boson kinetic term...");
     if (mpi::on_node_i_am_root()) {
-        for (size_t p = 0ul; p < nspinorb; ++p) {
-            for (size_t q = 0ul; q < nspinorb; ++q) {
+        for (uint_t p = 0ul; p < nspinorb; ++p) {
+            for (uint_t q = 0ul; q < nspinorb; ++q) {
                 weights.assign(nmode, 0.0);
                 if (p!=q) {
-                    for (size_t n = 0ul; n < nmode; ++n) {
+                    for (uint_t n = 0ul; n < nmode; ++n) {
                         auto element = m_h.get_coeff_1110(n, p, q);
                         weights[n] = std::abs(element);
                     }
@@ -32,7 +32,7 @@ Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
     mpi::barrier();
 }
 
-bool Pchb1101hc::draw_frmbos(size_t exsig, const field::FrmBosOnv& src,
+bool Pchb1101hc::draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
                              defs::prob_t& prob, conn::FrmBosOnv& conn) {
     /*
      * draw random occupied and vacant fermion indices
@@ -75,6 +75,6 @@ defs::prob_t Pchb1101hc::prob_frmbos(const field::FrmBosOnv& src, const conn::Fr
     return prob_h_frmbos(src, conn, m_h.get_element(src, conn));
 }
 
-size_t Pchb1101hc::approx_nconn(size_t, sys::Particles) const {
+uint_t Pchb1101hc::approx_nconn(uint_t, sys::Particles) const {
     return m_h.m_basis.m_frm.m_nsite*m_h.m_basis.m_bos.m_nmode;
 }

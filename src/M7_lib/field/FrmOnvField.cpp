@@ -7,7 +7,7 @@
 FrmOnvField::FrmOnvField(Row *row, const sys::frm::Basis& basis, std::string name) :
         base_t(row, {{2, basis.m_nsite},{"spin channel", "site"}}, name),
         m_basis(basis), m_decoded(*this),
-        m_dsize_spin_channel(integer::divceil(size_t(m_basis.m_nsite), Buffer::c_nbit_word)){}
+        m_dsize_spin_channel(integer::divceil(uint_t(m_basis.m_nsite), Buffer::c_nbit_word)){}
 
 FrmOnvField::FrmOnvField(Row *row, const sys::Basis &basis, std::string name) :
     FrmOnvField(row, basis.m_frm, std::move(name)){
@@ -40,11 +40,11 @@ bool FrmOnvField::operator==(const defs::uintv_t &inds) const {
 
 int FrmOnvField::ms2() const {
     int ms2 = 0;
-    size_t work;
-    for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
+    uint_t work;
+    for (uint_t idataword = 0; idataword < m_dsize; ++idataword) {
         work = get_dataword(idataword);
         while (work) {
-            size_t ibit = idataword * base_t::nbit_dword() + bit::next_setbit(work);
+            uint_t ibit = idataword * base_t::nbit_dword() + bit::next_setbit(work);
             if (ibit >= nbit()) return ms2;
             ms2 += m_basis.ms2(ibit);
         }
@@ -52,7 +52,7 @@ int FrmOnvField::ms2() const {
     return ms2;
 }
 
-size_t FrmOnvField::site_nocc(const size_t &isite) const {
+uint_t FrmOnvField::site_nocc(const uint_t &isite) const {
     return get({0, isite}) + get({1, isite});
 }
 
@@ -64,7 +64,7 @@ std::string FrmOnvField::to_string() const {
     std::string res;
     res += "(";
     res.reserve(nbit() + 3);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     for (; i < m_basis.m_nsite; ++i)
         res += get(i) ? "1" : "0";
     res += ","; // spin channel delimiter
@@ -74,11 +74,11 @@ std::string FrmOnvField::to_string() const {
     return res;
 }
 
-void FrmOnvField::set(const size_t &bit_offset, const defs::uintv_t &setbits) {
+void FrmOnvField::set(const uint_t &bit_offset, const defs::uintv_t &setbits) {
     for(auto& i: setbits) set(bit_offset+i);
 }
 
-void FrmOnvField::set(const size_t &site_offset, const defs::uintv_t &setbits_alpha, const defs::uintv_t &setbits_beta) {
+void FrmOnvField::set(const uint_t &site_offset, const defs::uintv_t &setbits_alpha, const defs::uintv_t &setbits_beta) {
     for(auto& i: setbits_alpha) set({0, site_offset+i});
     for(auto& i: setbits_beta) set({1, site_offset+i});
 }
@@ -93,7 +93,7 @@ void FrmOnvField::set_spins(const defs::uintv_t &alpha_sites) {
     DEBUG_ASSERT_LE(alpha_sites.size(), m_basis.m_nsite, "can't have more spins than sites");
     zero();
     auto it = alpha_sites.cbegin();
-    for (size_t isite=0ul; isite<m_basis.m_nsite; ++isite){
+    for (uint_t isite=0ul; isite<m_basis.m_nsite; ++isite){
         if (it==alpha_sites.cend() || *it>isite) set({1, isite});
         else {
             set({0, isite});
@@ -102,24 +102,24 @@ void FrmOnvField::set_spins(const defs::uintv_t &alpha_sites) {
     }
 }
 
-void FrmOnvField::put_spin_channel(const size_t &ispin, bool set) {
+void FrmOnvField::put_spin_channel(const uint_t &ispin, bool set) {
     auto ibegin = m_basis.ispinorb(ispin, 0);
     put_range(ibegin, ibegin+m_basis.m_nsite, set);
 }
 
-void FrmOnvField::clr(const size_t &bit_offset, const defs::uintv_t &clrbits) {
+void FrmOnvField::clr(const uint_t &bit_offset, const defs::uintv_t &clrbits) {
     for(auto& i: clrbits) clr(bit_offset+i);
 }
 
-void FrmOnvField::clr(const size_t &site_offset, const defs::uintv_t &clrbits_alpha, const defs::uintv_t &clrbits_beta) {
+void FrmOnvField::clr(const uint_t &site_offset, const defs::uintv_t &clrbits_alpha, const defs::uintv_t &clrbits_beta) {
     for(auto& i: clrbits_alpha) clr({0, site_offset+i});
     for(auto& i: clrbits_beta) clr({1, site_offset+i});
 }
 
-size_t FrmOnvField::get_alpha_dataword(size_t idataword) const {
+uint_t FrmOnvField::get_alpha_dataword(uint_t idataword) const {
     DEBUG_ASSERT_LT(idataword, m_dsize_spin_channel, "dataword index OOB");
     const auto nsite = m_format.m_shape[1];
-    auto dptr = reinterpret_cast<size_t *>(begin());
+    auto dptr = reinterpret_cast<uint_t *>(begin());
     auto tmp = dptr[idataword];
     if (idataword + 1 == m_dsize_spin_channel) {
         auto n = nsite-(idataword)*Buffer::c_nbit_word;
@@ -128,7 +128,7 @@ size_t FrmOnvField::get_alpha_dataword(size_t idataword) const {
     return tmp;
 }
 
-size_t FrmOnvField::get_beta_dataword(size_t idataword) const {
+uint_t FrmOnvField::get_beta_dataword(uint_t idataword) const {
     constexpr auto c_nbit_word = Buffer::c_nbit_word;
     DEBUG_ASSERT_LT(idataword, m_dsize_spin_channel, "dataword index OOB");
     const auto nsite = m_format.m_shape[1];
@@ -138,70 +138,70 @@ size_t FrmOnvField::get_beta_dataword(size_t idataword) const {
     const auto ibit_in_word_begin = ibit_begin-iword_begin*c_nbit_word;
     const auto iword_end = ibit_end/c_nbit_word;
     const auto ibit_in_word_end = ibit_end-iword_end*c_nbit_word;
-    auto dptr = reinterpret_cast<size_t *>(begin());
+    auto dptr = reinterpret_cast<uint_t *>(begin());
     if (iword_begin==iword_end){
-        auto mask = bit::make_range_mask<size_t>(ibit_in_word_begin, ibit_in_word_end);
+        auto mask = bit::make_range_mask<uint_t>(ibit_in_word_begin, ibit_in_word_end);
         return (dptr[iword_begin] & mask) >> ibit_in_word_begin;
     }
     else {
-        auto mask1 = bit::make_range_mask<size_t>(ibit_in_word_begin, c_nbit_word);
-        auto mask2 = bit::make_range_mask<size_t>(0, ibit_in_word_end);
+        auto mask1 = bit::make_range_mask<uint_t>(ibit_in_word_begin, c_nbit_word);
+        auto mask2 = bit::make_range_mask<uint_t>(0, ibit_in_word_end);
         auto shift1 = ibit_in_word_begin;
         auto shift2 = c_nbit_word-ibit_in_word_begin;
         return ((dptr[iword_begin] & mask1) >> shift1) | ((dptr[iword_end] & mask2) << shift2);
     }
 }
 
-size_t FrmOnvField::nalpha() const {
-    size_t count = 0ul;
-    auto fn = [&count](size_t){++count;};
+uint_t FrmOnvField::nalpha() const {
+    uint_t count = 0ul;
+    auto fn = [&count](uint_t){++count;};
     foreach_alpha(fn);
     return count;
 }
 
-size_t FrmOnvField::nbeta() const {
-    size_t count = 0ul;
-    auto fn = [&count](size_t){++count;};
+uint_t FrmOnvField::nbeta() const {
+    uint_t count = 0ul;
+    auto fn = [&count](uint_t){++count;};
     foreach_beta(fn);
     return count;
 }
 
-size_t FrmOnvField::nopen_shell() const {
-    size_t count = 0ul;
-    auto fn = [&count](size_t){++count;};
+uint_t FrmOnvField::nopen_shell() const {
+    uint_t count = 0ul;
+    auto fn = [&count](uint_t){++count;};
     foreach_open_shell(fn);
     return count;
 }
 
-size_t FrmOnvField::nopen_shell_alpha() const {
-    size_t count = 0ul;
-    auto fn = [&count](size_t){++count;};
+uint_t FrmOnvField::nopen_shell_alpha() const {
+    uint_t count = 0ul;
+    auto fn = [&count](uint_t){++count;};
     foreach_open_shell_alpha(fn);
     return count;
 }
 
-size_t FrmOnvField::nopen_shell_beta() const {
-    size_t count = 0ul;
-    auto fn = [&count](size_t){++count;};
+uint_t FrmOnvField::nopen_shell_beta() const {
+    uint_t count = 0ul;
+    auto fn = [&count](uint_t){++count;};
     foreach_open_shell_beta(fn);
     return count;
 }
 
-size_t FrmOnvField::nclosed_shell() const {
-    size_t count = 0ul;
-    auto fn = [&count](size_t){++count;};
+uint_t FrmOnvField::nclosed_shell() const {
+    uint_t count = 0ul;
+    auto fn = [&count](uint_t){++count;};
     foreach_closed_shell(fn);
     return count;
 }
 
-size_t FrmOnvField::noccupied_site() const {
-    size_t count = 0ul;
-    auto fn = [&count](size_t){++count;};
+uint_t FrmOnvField::noccupied_site() const {
+    uint_t count = 0ul;
+    auto fn = [&count](uint_t){++count;};
     foreach_occupied_site(fn);
     return count;
 }
 
-size_t FrmOnvField::nunoccupied_site() const {
+uint_t FrmOnvField::nunoccupied_site() const {
     return m_basis.m_nsite-noccupied_site();
 }
 

@@ -46,7 +46,7 @@ public:
      * retained for stats reasons
      */
     defs::uintv_t m_last_send_counts;
-    size_t m_last_recv_count = 0ul;
+    uint_t m_last_recv_count = 0ul;
 
     /**
      * @param name
@@ -59,7 +59,7 @@ public:
      *  send table instance, this is passed rather than a row, since this class allows for the definition of the send
      *  table as a MappedTable, whose ctor takes additional args
      */
-    CommunicatingPair(std::string name, size_t comm_nrow_est, double exp_fac, const send_table_t &send) :
+    CommunicatingPair(std::string name, uint_t comm_nrow_est, double exp_fac, const send_table_t &send) :
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
         log::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
@@ -70,7 +70,7 @@ public:
         m_recv.set_expansion_factor(exp_fac);
     }
 
-    size_t row_size() const {
+    uint_t row_size() const {
         return static_cast<const TableBase &>(m_recv).row_size();
     }
 
@@ -82,11 +82,11 @@ public:
         return m_send;
     }
 
-    typename send_t::table_t &send(const size_t &i) {
+    typename send_t::table_t &send(const uint_t &i) {
         return m_send[i];
     }
 
-    const typename send_t::table_t &send(const size_t &i) const {
+    const typename send_t::table_t &send(const uint_t &i) const {
         return m_send[i];
     }
 
@@ -98,12 +98,12 @@ public:
         return m_recv;
     }
 
-    void resize(size_t nrow, double factor = -1.0) {
+    void resize(uint_t nrow, double factor = -1.0) {
         m_send.resize(nrow, factor);
         m_recv.resize(nrow * mpi::nrank(), factor);
     }
 
-    void expand(size_t nrow, double factor = -1.0) {
+    void expand(uint_t nrow, double factor = -1.0) {
         m_send.expand(nrow);
         m_recv.expand(nrow * mpi::nrank());
     }
@@ -128,7 +128,7 @@ public:
 
         auto senddispls = m_send.displs();
         defs::uintv_t recvdispls(mpi::nrank(), 0ul);
-        for (size_t i = 1ul; i < mpi::nrank(); ++i)
+        for (uint_t i = 1ul; i < mpi::nrank(); ++i)
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
         auto recv_size = recvdispls.back() + recvcounts.back();
         m_last_recv_count = recv_size / row_size();
@@ -204,7 +204,7 @@ struct Communicator {
         /**
          * set of dynamic row indices stored on this rank
          */
-        std::set<size_t> m_irows;
+        std::set<uint_t> m_irows;
         /**
          * the counts and displs determine a global index for a local dynamic row. The ith element of m_irows on MPI
          * rank j has global index m_displs[j]+i
@@ -222,8 +222,8 @@ struct Communicator {
         const int m_ntrow_to_track_p2p_tag;
         const int m_itrows_to_track_p2p_tag;
         defs::uintv_t m_idrows;
-        size_t m_itrow;
-        size_t m_ndrow_found;
+        uint_t m_itrow;
+        uint_t m_ndrow_found;
 
     public:
         DynamicRowSet(const Communicator &comm, std::string name) :
@@ -244,11 +244,11 @@ struct Communicator {
 
         virtual ~DynamicRowSet() {}
 
-        size_t nrow_() const {
+        uint_t nrow_() const {
             return m_irows.size();
         }
 
-        size_t nrow() const {
+        uint_t nrow() const {
             return mpi::all_sum(nrow_());
         }
 
@@ -257,7 +257,7 @@ struct Communicator {
             m_irows.clear();
         }
 
-        void add_(size_t irow) {
+        void add_(uint_t irow) {
             RowProtector::protect(irow);
             m_irows.insert(irow);
         }
@@ -271,21 +271,21 @@ struct Communicator {
             mpi::all_gather(nrow_(), m_counts);
             mpi::counts_to_displs_consec(m_counts, m_displs);
             m_ranks_with_any_rows.clear();
-            for (size_t irank = 0; irank < mpi::nrank(); ++irank) {
+            for (uint_t irank = 0; irank < mpi::nrank(); ++irank) {
                 if (m_counts[irank]) m_ranks_with_any_rows.push_back(irank);
             }
         }
 
-        bool has_row(size_t irow) override {
+        bool has_row(uint_t irow) override {
             return m_irows.find(irow) != m_irows.end();
         }
 
-        void before_block_transfer(const defs::uintv_t &irows_send, size_t irank_send, size_t irank_recv) override {
-            size_t nrow_transfer;
+        void before_block_transfer(const defs::uintv_t &irows_send, uint_t irank_send, uint_t irank_recv) override {
+            uint_t nrow_transfer;
             if (mpi::i_am(irank_send)) {
                 m_idrows.clear();
                 // look for Dynamic rows among those being transferred
-                size_t itrow = 0ul;
+                uint_t itrow = 0ul;
                 for (const auto &irow: irows_send) {
                     if (m_irows.find(irow) != m_irows.end()) {
                         /*
@@ -330,7 +330,7 @@ struct Communicator {
             }
         }
 
-        void on_row_recv_(size_t irow) override {
+        void on_row_recv_(uint_t irow) override {
             // check if there's any more rows we may need to track
             if (m_ndrow_found < m_idrows.size()) {
                 ASSERT(m_ndrow_found < m_idrows.size());
@@ -462,7 +462,7 @@ struct Communicator {
         using DynamicRowSet::m_ranks_with_any_rows;
         using SharedRowSet::m_global;
 
-        size_t m_iblock_ra;
+        uint_t m_iblock_ra;
 
         SharedRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
                 SharedRowSet(comm, name) {
@@ -485,7 +485,7 @@ struct Communicator {
             log::debug("Shared row \"{}\" is now in block {} on rank {}", m_name, m_iblock_ra, newloc.m_irank);
         }
 
-        size_t irank() const {
+        uint_t irank() const {
             return m_ranks_with_any_rows.size() ? m_ranks_with_any_rows[0] : ~0ul;
         }
 
@@ -538,9 +538,9 @@ struct Communicator {
      * @param nnull_updates_deactivate
      *  number of consecutive acceptably-imbalanced periods required for dynamic load balancing to be deactivated
      */
-    Communicator(std::string name, size_t store_nrow_est, double store_exp_fac, size_t comm_nrow_est,
-                 double comm_exp_fac, const store_table_t &store, const send_table_t &send, size_t nblock_ra,
-                 size_t period_ra, double acceptable_imbalance, size_t nnull_updates_deactivate) :
+    Communicator(std::string name, uint_t store_nrow_est, double store_exp_fac, uint_t comm_nrow_est,
+                 double comm_exp_fac, const store_table_t &store, const send_table_t &send, uint_t nblock_ra,
+                 uint_t period_ra, double acceptable_imbalance, uint_t nnull_updates_deactivate) :
             m_store(name + " store", store),
             m_comm(name, comm_nrow_est, comm_exp_fac, send),
             m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
@@ -569,7 +569,7 @@ struct Communicator {
      * @param send
      *  send table instance
      */
-    Communicator(std::string name, size_t store_nrow_crude_est, size_t comm_nrow_crude_est,
+    Communicator(std::string name, uint_t store_nrow_crude_est, uint_t comm_nrow_crude_est,
                  const conf::Buffers &buf_opts, const conf::LoadBalancing &ra_opts,
                  const store_table_t &store, const send_table_t &send) :
             Communicator(name, std::max(1ul, store_nrow_crude_est) * buf_opts.m_store_fac_init, buf_opts.m_store_exp_fac,
@@ -586,7 +586,7 @@ struct Communicator {
      * @return
      *  rank index assigned to the key specified
      */
-    size_t get_rank(const key_field_t &key) const {
+    uint_t get_rank(const key_field_t &key) const {
         return m_ra.get_rank(key);
     }
 
@@ -598,11 +598,11 @@ struct Communicator {
         return m_comm.send();
     }
 
-    send_table_t &send(const size_t &i) {
+    send_table_t &send(const uint_t &i) {
         return m_comm.send(i);
     }
 
-    const send_table_t &send(const size_t &i) const {
+    const send_table_t &send(const uint_t &i) const {
         return m_comm.send(i);
     }
 

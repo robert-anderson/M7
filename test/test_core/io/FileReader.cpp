@@ -8,7 +8,7 @@
 
 TEST(FileReader, Skip){
     FileReader file_reader(PROJECT_ROOT"/assets/RHF_N2_CCPVTZ/FCIDUMP");
-    size_t n = 0ul;
+    uint_t n = 0ul;
     while (file_reader.next()) ++n;
     ASSERT_EQ(n, 180704);
 }

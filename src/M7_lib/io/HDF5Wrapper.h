@@ -38,40 +38,40 @@ namespace hdf5 {
              H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE};
 
     template<typename T=void>
-    static constexpr size_t type_ind() { return 0; }
+    static constexpr uint_t type_ind() { return 0; }
 
     template<>
-    constexpr size_t type_ind<char>() { return 1; }
+    constexpr uint_t type_ind<char>() { return 1; }
 
     template<>
-    constexpr size_t type_ind<short int>() { return 2; }
+    constexpr uint_t type_ind<short int>() { return 2; }
 
     template<>
-    constexpr size_t type_ind<int>() { return 3; }
+    constexpr uint_t type_ind<int>() { return 3; }
 
     template<>
-    constexpr size_t type_ind<long int>() { return 4; }
+    constexpr uint_t type_ind<long int>() { return 4; }
 
     template<>
-    constexpr size_t type_ind<unsigned char>() { return 5; }
+    constexpr uint_t type_ind<unsigned char>() { return 5; }
 
     template<>
-    constexpr size_t type_ind<unsigned short int>() { return 6; }
+    constexpr uint_t type_ind<unsigned short int>() { return 6; }
 
     template<>
-    constexpr size_t type_ind<unsigned int>() { return 7; }
+    constexpr uint_t type_ind<unsigned int>() { return 7; }
 
     template<>
-    constexpr size_t type_ind<unsigned long int>() { return 8; }
+    constexpr uint_t type_ind<unsigned long int>() { return 8; }
 
     template<>
-    constexpr size_t type_ind<unsigned long long int>() { return 9; }
+    constexpr uint_t type_ind<unsigned long long int>() { return 9; }
 
     template<>
-    constexpr size_t type_ind<float>() { return 10; }
+    constexpr uint_t type_ind<float>() { return 10; }
 
     template<>
-    constexpr size_t type_ind<double>() { return 11; }
+    constexpr uint_t type_ind<double>() { return 11; }
 
     template<typename T>
     const hid_t &type() {
@@ -136,7 +136,7 @@ namespace hdf5 {
     struct AttributeWriterBase {
         const hid_t m_parent_handle, m_h5type;
         const defs::uintv_t m_shape;
-        const size_t m_nelement;
+        const uint_t m_nelement;
         hid_t m_memspace_handle;
         hid_t m_handle;
 
@@ -163,7 +163,7 @@ namespace hdf5 {
     struct AttributeReaderBase {
         const hid_t m_parent_handle, m_h5type;
         const defs::uintv_t m_shape;
-        const size_t m_nelement;
+        const uint_t m_nelement;
         hid_t m_handle;
 
         AttributeReaderBase(hid_t parent_handle, std::string name, const defs::uintv_t &shape, hid_t h5type) :
@@ -285,7 +285,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const T &v, size_t irank=0ul) {
+        save(std::string name, const T &v, uint_t irank=0ul) {
             auto dspace_handle = H5Screate(H5S_SCALAR);
             /**
              * make a null selection if this is not the rank we want to output the value of
@@ -313,7 +313,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::complex<T> &v, size_t irank=0ul) {
+        save(std::string name, const std::complex<T> &v, uint_t irank=0ul) {
             defs::uintv_t shape = {2};
             save(name, reinterpret_cast<const T*>(&v), shape, {"real_imag"}, irank);
         }
@@ -333,7 +333,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const T* v, const defs::uintv_t& shape, std::vector<std::string> dim_labels={}, size_t irank=0ul) {
+        save(std::string name, const T* v, const defs::uintv_t& shape, std::vector<std::string> dim_labels={}, uint_t irank=0ul) {
             auto dims = convert_dims(shape);
             auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
             /**
@@ -348,7 +348,7 @@ namespace hdf5 {
             if (!dim_labels.empty()) {
                 DEBUG_ASSERT_EQ(dim_labels.size(), dims.size(),
                                 "Number of dim labels does not match number of dims");
-                for (size_t idim = 0ul; idim < dims.size(); ++idim) {
+                for (uint_t idim = 0ul; idim < dims.size(); ++idim) {
                     H5DSset_label(dset_handle, idim, dim_labels[idim].c_str());
                     REQUIRE_FALSE(status, "HDF5 Error on dimension label assignment");
                 }
@@ -375,7 +375,7 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         save(std::string name, const std::complex<T>* v, const defs::uintv_t& shape,
-             std::vector<std::string> dim_labels={}, size_t irank=0ul) {
+             std::vector<std::string> dim_labels={}, uint_t irank=0ul) {
             dim_labels.push_back("real_imag");
             auto dims = shape;
             dims.push_back(2ul);
@@ -388,7 +388,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::vector<T>& v, const defs::uintv_t& shape, std::vector<std::string> dim_labels={}, size_t irank=0ul){
+        save(std::string name, const std::vector<T>& v, const defs::uintv_t& shape, std::vector<std::string> dim_labels={}, uint_t irank=0ul){
             REQUIRE_EQ_ALL(v.size(), nd  ::nelement(shape), "vector and shape are incompatible");
             save(name, v.data(), shape, {}, irank);
         }
@@ -398,13 +398,13 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::vector<T>& v, size_t irank=0ul){
+        save(std::string name, const std::vector<T>& v, uint_t irank=0ul){
             save(name, v, {v.size()}, {}, irank);
         }
 
 
         /**
-         * save a vector of strings by creating a char array datatype for the longest element of the given vector v
+         * save a vector of strings by creating a char array dtype for the longest element of the given vector v
          * @param name
          *  key in the HDF5 Group in which the value is to be stored
          * @param v
@@ -412,12 +412,12 @@ namespace hdf5 {
          * @param irank
          *  index of MPI rank which stores the definitive value of v
          */
-        void save(std::string name, const std::vector<std::string>& v, size_t irank=0ul);
+        void save(std::string name, const std::vector<std::string>& v, uint_t irank=0ul);
 
         /**
          * wrapper for save in the case that only a single string is to be stored
          */
-        void save(std::string name, const std::string& v, size_t irank=0ul);
+        void save(std::string name, const std::string& v, uint_t irank=0ul);
     };
 
     struct GroupReader : GroupBase {
@@ -427,19 +427,19 @@ namespace hdf5 {
 
         bool child_exists(const std::string& name) const;
 
-        size_t first_existing_child(const std::vector<std::string>& names) const;
+        uint_t first_existing_child(const std::vector<std::string>& names) const;
 
-        size_t nchild() const;
+        uint_t nchild() const;
 
-        std::string child_name(size_t ichild) const;
+        std::string child_name(uint_t ichild) const;
 
-        int child_type(size_t i) const;
+        int child_type(uint_t i) const;
 
         std::vector<std::string> child_names(int type=-1) const;
 
     private:
 
-        size_t get_dataset_ndim(std::string name);
+        uint_t get_dataset_ndim(std::string name);
 
         defs::uintv_t get_dataset_shape(std::string name);
 
@@ -479,7 +479,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::complex<T> &v, size_t irank=0ul) {
+        load(std::string name, std::complex<T> &v, uint_t irank=0ul) {
             DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             load(name, reinterpret_cast<std::array<T, 2>&>(v)[0], irank);
             load(name, reinterpret_cast<std::array<T, 2>&>(v)[1], irank);
@@ -648,7 +648,7 @@ namespace hdf5 {
          */
         hid_t m_none_memspace_handle;
         /**
-         * datatype as an integer
+         * dtype as an integer
          */
         hid_t m_h5type;
         /**
@@ -676,7 +676,7 @@ namespace hdf5 {
          */
         hsize_t get_item_offset();
 
-        NdDistListBase(hid_t parent_handle, std::string name, const defs::uintv_t &item_dims, const size_t &nitem,
+        NdDistListBase(hid_t parent_handle, std::string name, const defs::uintv_t &item_dims, const uint_t &nitem,
                        bool writemode, hid_t h5type);
 
         /**
@@ -684,7 +684,7 @@ namespace hdf5 {
          * @param iitem
          *  item index for selection
          */
-        void select_hyperslab(const size_t &iitem);
+        void select_hyperslab(const uint_t &iitem);
 
         ~NdDistListBase();
     };
@@ -695,15 +695,15 @@ namespace hdf5 {
     struct NdDistListWriter : public NdDistListBase {
     private:
         NdDistListWriter(hid_t parent_handle, std::string name, const defs::uintv_t &item_dims,
-                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {});
+                         const uint_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {});
 
     public:
         NdDistListWriter(FileWriter &parent, std::string name, const defs::uintv_t &item_dims,
-                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
+                         const uint_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
                 NdDistListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
         NdDistListWriter(GroupWriter &parent, std::string name, const defs::uintv_t &item_dims,
-                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
+                         const uint_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
                 NdDistListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
         /**
@@ -714,7 +714,7 @@ namespace hdf5 {
          *  pointer to data of any type. the counts in the hyperslab selection determine the number of elements n of the
          *  native type T corresponding to m_h5type are to be written. Thus the sizeof(T)*n bytes after data are copied
          */
-        void write_h5item_bytes(const size_t &iitem, const void *data);
+        void write_h5item_bytes(const uint_t &iitem, const void *data);
 
         template<typename T>
         void write_attr(std::string name, const T &obj) {
@@ -736,7 +736,7 @@ namespace hdf5 {
          * @return
          *  length of the overall list shape
          */
-        static size_t extract_list_ndim(hid_t parent_handle, std::string name) {
+        static uint_t extract_list_ndim(hid_t parent_handle, std::string name) {
             auto status = H5Gget_objinfo(parent_handle, name.c_str(), 0, nullptr);
             REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
             auto dataset = H5Dopen1(parent_handle, name.c_str());
@@ -793,7 +793,7 @@ namespace hdf5 {
          * @return
          *  just the global number of items
          */
-        static size_t extract_nitem(hid_t parent_handle, std::string name) {
+        static uint_t extract_nitem(hid_t parent_handle, std::string name) {
             return extract_list_dims(parent_handle, name)[0];
         }
 
@@ -806,7 +806,7 @@ namespace hdf5 {
          * @return
          *  number of items this rank is responsible for reading int
          */
-        static size_t local_nitem(hid_t parent_handle, std::string name) {
+        static uint_t local_nitem(hid_t parent_handle, std::string name) {
             auto nitem_tot = extract_nitem(parent_handle, name);
             auto nitem_share = nitem_tot / mpi::nrank();
             // give the remainder to the root rank
@@ -834,7 +834,7 @@ namespace hdf5 {
          *  pointer to data of any type. the counts in the hyperslab selection determine the number of elements n of the
          *  native type T corresponding to m_h5type are to be read.
          */
-        void read_h5item_bytes(const size_t &iitem, void *data) {
+        void read_h5item_bytes(const uint_t &iitem, void *data) {
             select_hyperslab(iitem);
             log::debug_("reading data...");
             if (data) {
@@ -854,12 +854,12 @@ namespace hdf5 {
     };
 
 
-    template<typename T, size_t ndim>
+    template<typename T, uint_t ndim>
     struct Array {
         NdFormat<ndim> m_format;
-        size_t m_chunk_size;
+        uint_t m_chunk_size;
 
-        Array(NdFormat<ndim> format, size_t chunk_size) :
+        Array(NdFormat<ndim> format, uint_t chunk_size) :
                 m_format(format), m_chunk_size(chunk_size) {}
 
     };
@@ -914,7 +914,7 @@ namespace hdf5 {
             REQUIRE_FALSE_ALL(status, "HDF5 Error on complex type save");
         }
 
-//        template<typename T, size_t ndim>
+//        template<typename T, uint_t ndim>
 //        typename std::enable_if<type_ind<T>()!=~0ul, void>::type
 //        save(const Array<T, ndim>& item, std::string name) {
 //            if (!m_writemode) mpi::abort("File is open for reading - save not permitted.");

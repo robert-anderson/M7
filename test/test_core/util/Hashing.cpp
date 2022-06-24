@@ -6,12 +6,12 @@
 #include "gtest/gtest.h"
 
 TEST(Hashing, Determinism){
-    const size_t nattempt = 10;
+    const uint_t nattempt = 10;
 
     hash::digest_t benchmark;
-    size_t key = 99ul;
+    uint_t key = 99ul;
     benchmark = hash::fnv((char*)&key, sizeof(key));
-    for (size_t i=0ul; i<nattempt; ++i){
+    for (uint_t i=0ul; i<nattempt; ++i){
         ASSERT_EQ(hash::fnv((char*)&key, sizeof(key)), benchmark);
     }
 }

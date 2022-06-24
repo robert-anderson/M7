@@ -58,7 +58,7 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
      */
     void set_ops(const defs::uintv_t &iops);
 
-    size_t nboson() const;
+    uint_t nboson() const;
 
     /**
      * compute the "occupation factor" required to keep the boson ONV basis orthonormal.
@@ -70,7 +70,7 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
      * @param src
      * @return
      */
-    size_t occ_fac_square(const BosOnvConnection &conn) const;
+    uint_t occ_fac_square(const BosOnvConnection &conn) const;
 
     double occ_fac(const BosOnvConnection &conn) const;
 
@@ -83,7 +83,7 @@ private:
      * @return
      *  square of the occupation factor associated with the annihilation
      */
-    static size_t occ_fac_square_ann(size_t occ, size_t nop);
+    static uint_t occ_fac_square_ann(uint_t occ, uint_t nop);
 
     /**
      * @param occ
@@ -93,7 +93,7 @@ private:
      * @return
      *  square of the occupation factor associated with the creation
      */
-    static size_t occ_fac_square_cre(size_t occ, size_t nop);
+    static uint_t occ_fac_square_cre(uint_t occ, uint_t nop);
 
     /**
      * @param occ
@@ -103,7 +103,7 @@ private:
      * @return
      *  square of the occupation factor associated with the number operator
      */
-    static size_t occ_fac_square_com(size_t occ, size_t nop);
+    static uint_t occ_fac_square_com(uint_t occ, uint_t nop);
 
 public:
 
@@ -119,7 +119,7 @@ public:
      * @param com
      * @return
      */
-    size_t occ_fac_square(const BosOnvConnection &conn, const BosOps &com) const;
+    uint_t occ_fac_square(const BosOnvConnection &conn, const BosOps &com) const;
 
     double occ_fac(const BosOnvConnection &conn, const BosOps &com) const;
 
@@ -130,7 +130,7 @@ public:
      * @return
      *  diagonal occupation factor
      */
-    size_t occ_fac_square(const BosOps &com) const;
+    uint_t occ_fac_square(const BosOps &com) const;
 
     double occ_fac(const BosOps &com) const;
 };

@@ -5,7 +5,7 @@
 #include "GeneralLadderHam.h"
 
 
-GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, size_t bos_occ_cutoff) :
+GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, uint_t bos_occ_cutoff) :
         FrmBosHam({{info.m_nsite, {PointGroup(), info.m_orbsym}, info.m_spin_resolved}, {info.m_nmode, bos_occ_cutoff}}),
         m_v(m_basis.size(), info.m_uhf) {
     if (!m_basis) return;
@@ -33,19 +33,19 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, size
     log_data();
 }
 
-defs::ham_t GeneralLadderHam::get_coeff_1110(size_t imode, size_t i, size_t j) const {
+defs::ham_t GeneralLadderHam::get_coeff_1110(uint_t imode, uint_t i, uint_t j) const {
     return m_v.get(imode, i, j);
 }
 
-defs::ham_t GeneralLadderHam::get_coeff_1101(size_t imode, size_t i, size_t j) const {
+defs::ham_t GeneralLadderHam::get_coeff_1101(uint_t imode, uint_t i, uint_t j) const {
     return m_v.get(imode, j, i);
 }
 
-defs::ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, size_t imode, bool cre) const {
-    const auto occ_fac = std::sqrt(size_t(onv.m_bos[imode]) + cre);
+defs::ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, uint_t imode, bool cre) const {
+    const auto occ_fac = std::sqrt(uint_t(onv.m_bos[imode]) + cre);
     defs::ham_t helem = 0.0;
     // fermion ONVs do not differ, so sum over occupied spin orbitals
-    auto fn = [&](size_t i) {
+    auto fn = [&](uint_t i) {
         helem += m_v.get(imode, i, i);
     };
     onv.m_frm.foreach_setbit(fn);
@@ -61,10 +61,10 @@ defs::ham_t GeneralLadderHam::get_element_0001(const field::FrmBosOnv &onv, cons
 }
 
 defs::ham_t GeneralLadderHam::get_element_coupled(const field::FrmBosOnv &onv,
-                                                  const conn::FrmOnv &frm_conn, size_t imode, bool cre) const {
+                                                  const conn::FrmOnv &frm_conn, uint_t imode, bool cre) const {
     DEBUG_ASSERT_TRUE(onv.m_frm.get(frm_conn.m_ann[0]), "annihilated op not occupied in ONV")
     DEBUG_ASSERT_FALSE(onv.m_frm.get(frm_conn.m_cre[0]), "created op occupied in ONV")
-    const auto occ_fac = std::sqrt(size_t(onv.m_bos[imode]) + cre);
+    const auto occ_fac = std::sqrt(uint_t(onv.m_bos[imode]) + cre);
     auto i = frm_conn.m_cre[0];
     auto j = frm_conn.m_ann[0];
     /*

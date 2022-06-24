@@ -20,7 +20,7 @@ defs::ham_t SpinSquareFrmHam::get_element_2200(const field::FrmOnv& onv, const c
     return conn.phase(onv) ? -element : element;
 }
 
-defs::ham_t SpinSquareFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
+defs::ham_t SpinSquareFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const {
     // We have to determine if it is an exchange.
     return m_basis.ispin(a) != m_basis.ispin(b)
         && m_basis.ispin(i) != m_basis.ispin(j)

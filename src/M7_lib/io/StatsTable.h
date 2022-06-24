@@ -25,17 +25,17 @@ namespace statistic {
         virtual std::string stats_string() const = 0;
 
         template<typename T>
-        static std::string stats_string_element(const T &v, size_t denom) {
+        static std::string stats_string_element(const T &v, uint_t denom) {
             return convert::to_string(v / denom);
         }
 
         template<typename T>
-        static std::string stats_string_element(const std::complex<T> &v, size_t denom) {
+        static std::string stats_string_element(const std::complex<T> &v, uint_t denom) {
             return convert::to_string(v.real() / denom) + " " + convert::to_string(v.imag() / denom);
         }
     };
 
-    template<typename T, size_t nind>
+    template<typename T, uint_t nind>
     struct Numbers : NdNumberField<T, nind>, Base {
         typedef NdNumberField<T, nind> base_t;
         using base_t::nelement;
@@ -43,12 +43,12 @@ namespace statistic {
         using base_t::operator+=;
 
         const bool m_mean;
-        const size_t m_precision;
-        size_t m_ncommit_this_period = 0ul;
+        const uint_t m_precision;
+        uint_t m_ncommit_this_period = 0ul;
 
         std::vector<T> m_reduced;
 
-        Numbers(StatsRow *row, NdFormat<nind> format, std::string name = "", bool mean = true, size_t precision=6) :
+        Numbers(StatsRow *row, NdFormat<nind> format, std::string name = "", bool mean = true, uint_t precision=6) :
                 NdNumberField<T, nind>(row, format, name), m_mean(mean),
                 m_precision(precision), m_reduced(this->m_nelement) {}
 
@@ -70,7 +70,7 @@ namespace statistic {
 
         std::string stats_string() const override {
             std::string tmp;
-            for (size_t ielement = 0ul; ielement < nelement(); ++ielement)
+            for (uint_t ielement = 0ul; ielement < nelement(); ++ielement)
                 tmp += stats_string_element(m_reduced[ielement], m_mean ? m_ncommit_this_period : 1ul) + " ";
             return tmp;
         }
@@ -98,14 +98,14 @@ struct StatsTable : BufferedTable<row_t> {
     static_assert(std::is_base_of<StatsRow, row_t>::value, "Template arg must be derived from StatsRow");
     const std::string m_fname, m_description;
     std::unique_ptr<std::ofstream> m_file;
-    const size_t m_period;
-    size_t m_ncommit = 0;
+    const uint_t m_period;
+    uint_t m_ncommit = 0;
 
     void write_header() const {
         const auto &row = static_cast<const Row &>(Table<row_t>::m_row);
-        size_t ncolumn = 0ul;
-        std::map<std::string, size_t> m_format_strings;
-        size_t nformat = 0ul;
+        uint_t ncolumn = 0ul;
+        std::map<std::string, uint_t> m_format_strings;
+        uint_t nformat = 0ul;
         for (const FieldBase *field : row.m_fields) {
             auto num_field = dynamic_cast<const NumberFieldBase *>(field);
             ncolumn += (num_field->m_is_complex + 1) * num_field->m_nelement;
@@ -119,7 +119,7 @@ struct StatsTable : BufferedTable<row_t> {
                 "\n# Distinct multidimensional formats: " << m_format_strings.size() << "\n#" <<
                 "\n# Format list (major index first):" << "\n";
 
-        for (size_t i = 0ul; i < nformat; ++i) {
+        for (uint_t i = 0ul; i < nformat; ++i) {
             for (const auto &it : m_format_strings) {
                 if (it.second == i) {
                     *m_file << "# " << static_cast<char>('A' + i) << ": " << it.first << "\n";
@@ -143,7 +143,7 @@ struct StatsTable : BufferedTable<row_t> {
         *m_file << std::flush;
     }
 
-    StatsTable(std::string fname, std::string description, const row_t &row, size_t period) :
+    StatsTable(std::string fname, std::string description, const row_t &row, uint_t period) :
             BufferedTable<row_t>(fname, {row}), m_fname(fname), m_description(description),
             m_file(new std::ofstream(fname)), m_period(period) {
         write_header();

@@ -15,9 +15,9 @@ TEST(FermionHamiltonian, DhfEnergy) {
     buffered::FrmOnv onv(ham.m_nsite);
     onv = {0, 1, ham.m_nsite, ham.m_nsite + 1};
     auto elem = ham.get_element(onv);
-    ASSERT_TRUE(datatype::floats_equal(datatype::real(elem), benchmark));
-    ASSERT_TRUE(datatype::float_nearly_zero(datatype::imag(elem), 1e-14));
-    ASSERT_TRUE(datatype::floats_equal(ham.get_energy(onv), benchmark));
+    ASSERT_TRUE(dtype::floats_equal(dtype::real(elem), benchmark));
+    ASSERT_TRUE(dtype::float_nearly_zero(dtype::imag(elem), 1e-14));
+    ASSERT_TRUE(dtype::floats_equal(ham.get_energy(onv), benchmark));
 }
 
 TEST(FermionHamiltonian, DhfBrillouinTheorem) {
@@ -33,12 +33,12 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 
     conn::FrmOnv conn(hf_det.m_nsite);
 
-    for (size_t iocc = 0ul; iocc < occs.size(); ++iocc) {
+    for (uint_t iocc = 0ul; iocc < occs.size(); ++iocc) {
         const auto &occ = occs[iocc];
-        for (size_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
+        for (uint_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
             const auto &vac = vacs[iocc];
             conn.set(occ, vac);
-            ASSERT_TRUE(datatype::float_is_zero(ham.get_element(hf_det, conn)));
+            ASSERT_TRUE(dtype::float_is_zero(ham.get_element(hf_det, conn)));
         }
     }
 }
@@ -94,8 +94,8 @@ TEST(GeneralFrmHam, RhfBrillouinTheorem) {
     buffered::FrmOnv excited(ham.m_basis);
     conn::FrmOnv conn(onv);
 
-    for (size_t occ : occs.get()){
-        for (size_t vac : vacs.get()){
+    for (uint_t occ : occs.get()){
+        for (uint_t vac : vacs.get()){
             conn.m_ann.set(occ);
             conn.m_cre.set(vac);
             ASSERT_NEARLY_EQ(ham.get_element_1100(onv, conn), 0.0);

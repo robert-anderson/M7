@@ -11,7 +11,7 @@
 #include "SpecMomIndsField.h"
 
 namespace field {
-    template<typename T, size_t nind>
+    template<typename T, uint_t nind>
     using Numbers = NdNumberField<T, nind>;
 
     using String = StringField;
@@ -19,12 +19,12 @@ namespace field {
     template<typename T>
     using Number = NumberField<T>;
 
-    template<typename T, size_t nind>
+    template<typename T, uint_t nind>
     using NdBitset = BitsetField<T, nind>;
     template<typename T>
     using Bitset = NdBitset<T, 1ul>;
 
-    template<size_t nind>
+    template<uint_t nind>
     using Flags = BitsetField<uint8_t, nind>;
     using Flag = BitField<uint8_t>;
 
@@ -40,7 +40,7 @@ namespace field {
 
     typedef std::tuple<FrmOnv, FrmBosOnv, BosOnv> mbf_tup_t;
 
-    template<size_t mbf_type_ind>
+    template<uint_t mbf_type_ind>
     using mbf_t = typename std::tuple_element<mbf_type_ind, mbf_tup_t>::type;
     typedef mbf_t<defs::mbf_type_ind> Mbf;
 

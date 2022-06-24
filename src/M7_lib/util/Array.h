@@ -8,14 +8,14 @@
 #include "Convert.h"
 
 namespace array {
-    template<typename T, size_t nind>
+    template<typename T, uint_t nind>
     static std::array<T, nind> filled(const T &v) {
         std::array<T, nind> tmp;
         tmp.fill(v);
         return tmp;
     }
 
-    template<typename T, size_t nind>
+    template<typename T, uint_t nind>
     static std::vector<T> to_vector(const std::array<T, nind> &array) {
         std::vector<T> tmp;
         tmp.assign(array.cbegin(), array.cend());
@@ -23,7 +23,7 @@ namespace array {
     }
 }
 
-template<typename T, size_t nind>
+template<typename T, uint_t nind>
 static std::ostream &operator<<(std::ostream &os, const std::array<T, nind> &a) {
     os << convert::to_string(array::to_vector(a));
     return os;

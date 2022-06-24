@@ -10,8 +10,8 @@
 #include <M7_lib/parallel/SharedArray.h>
 
 struct IntegralIndexer {
-    const size_t m_norb, m_size;
-    IntegralIndexer(size_t norb, size_t size): m_norb(norb), m_size(size){}
+    const uint_t m_norb, m_size;
+    IntegralIndexer(uint_t norb, uint_t size): m_norb(norb), m_size(size){}
 };
 
 template<typename T, typename storage_t>
@@ -20,10 +20,10 @@ struct IntegralStorage {
             std::is_same<storage_t, std::vector<T>>::value ||
             std::is_same<storage_t, SharedArray<T>>::value, "storage class must be either private or shared");
     storage_t m_data;
-    const size_t m_size;
+    const uint_t m_size;
     static constexpr arith::comp_t<T> c_coeff_atol = 1e-9;
 
-    IntegralStorage(size_t size): m_data(size), m_size(size){}
+    IntegralStorage(uint_t size): m_data(size), m_size(size){}
 
 private:
     /**
@@ -36,7 +36,7 @@ private:
         return std::abs(elem) >= c_coeff_atol;
     }
 
-    bool set_data(std::vector<T>& data, size_t iflat, T elem){
+    bool set_data(std::vector<T>& data, uint_t iflat, T elem){
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
         if (!is_significant(elem)) return true;
         auto& ref = data[iflat];
@@ -45,7 +45,7 @@ private:
         return true;
     }
 
-    bool set_data(SharedArray<T>& data, size_t iflat, T elem){
+    bool set_data(SharedArray<T>& data, uint_t iflat, T elem){
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
         if (!is_significant(elem)) return true;
         if (data[iflat]!=T(0) && !fptol::numeric_equal(elem, data[iflat])) return false;
@@ -54,11 +54,11 @@ private:
     }
 
 public:
-    bool set_data(size_t iflat, T elem){
+    bool set_data(uint_t iflat, T elem){
         return set_data(m_data, iflat, elem);
     }
 
-    T get_data(size_t iflat) const {
+    T get_data(uint_t iflat) const {
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
         return m_data[iflat];
     }

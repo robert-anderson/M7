@@ -9,10 +9,10 @@
 
 
 struct NumberFieldBase : FieldBase {
-    const size_t m_element_size, m_nelement;
+    const uint_t m_element_size, m_nelement;
     const bool m_is_complex;
 
-    NumberFieldBase(Row *row, size_t element_size, size_t nelement, bool is_complex,
+    NumberFieldBase(Row *row, uint_t element_size, uint_t nelement, bool is_complex,
                     const std::type_info &type_info, std::string name = "");
 
     NumberFieldBase(const NumberFieldBase& other);
@@ -26,12 +26,12 @@ struct NumberFieldBase : FieldBase {
 };
 
 
-template<typename T, size_t nind>
+template<typename T, uint_t nind>
 struct NdNumberField : NumberFieldBase {
     typedef const uinta_t<nind> &inds_t;
     const NdFormat<nind> m_format;
 
-    const size_t &nelement() const {
+    const uint_t &nelement() const {
         return m_format.m_nelement;
     }
 
@@ -53,7 +53,7 @@ struct NdNumberField : NumberFieldBase {
 
     NdNumberField(Row *row, NdFormat<nind> format, std::string name = "") :
             NumberFieldBase(row, sizeof(T), format.m_nelement,
-                            datatype::is_complex<T>(), typeid(T), name), m_format(format) {}
+                            dtype::is_complex<T>(), typeid(T), name), m_format(format) {}
 
     NdNumberField(const NdNumberField &other) : NumberFieldBase(other), m_format(other.m_format){}
 
@@ -77,7 +77,7 @@ struct NdNumberField : NumberFieldBase {
     template<typename U>
     bool operator==(const std::vector<U> &v) const {
         DEBUG_ASSERT_EQ(v.size(), nelement(), "Vector size does not match that of numeric field");
-        for (size_t i=0ul; i<m_nelement; ++i) if (v[i]!=(*this)[i]) return false;
+        for (uint_t i=0ul; i<m_nelement; ++i) if (v[i]!=(*this)[i]) return false;
         return true;
     }
 
@@ -91,14 +91,14 @@ struct NdNumberField : NumberFieldBase {
         return tot;
     }
 
-    bool is_ordered(size_t ibegin, size_t iend, bool strict, bool ascending) const {
+    bool is_ordered(uint_t ibegin, uint_t iend, bool strict, bool ascending) const {
         if (!nelement()) return true;
         DEBUG_ASSERT_TRUE(ibegin<m_nelement || ibegin==iend, "first element OOB");
         DEBUG_ASSERT_LE(iend, m_nelement, "last element OOB");
         DEBUG_ASSERT_LE(ibegin, iend, "first element must be before last element");
         if (ibegin==iend) return true;
         T last_value = (*this)[ibegin];
-        for (size_t i = ibegin+1; i < iend; ++i) {
+        for (uint_t i = ibegin+1; i < iend; ++i) {
             auto this_value = (*this)[i];
             if (strict) {
                 if (ascending) {
@@ -126,7 +126,7 @@ private:
     void copy_to(std::vector<U>& v) const {
         DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
         // can't copy since the target type doesn't match: must dereference element-wise and attempt to convert
-        for (size_t i=0ul; i<m_nelement; ++i) v[i] = U((*this)[i]);
+        for (uint_t i=0ul; i<m_nelement; ++i) v[i] = U((*this)[i]);
     }
 
 public:
@@ -148,102 +148,102 @@ public:
 
     void add_to(std::vector<T>& v) const {
         DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
-        for (size_t i = 0ul; i < m_nelement; ++i) v[i] += (*this)[i];
+        for (uint_t i = 0ul; i < m_nelement; ++i) v[i] += (*this)[i];
     }
 
     template<typename U>
     NdNumberField &add_scaled(const U &factor, const NdNumberField &other) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] += other[i] * factor;
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] += other[i] * factor;
         return *this;
     }
 
     NdNumberField &add_abs(const NdNumberField &other) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] += std::abs(other[i]);
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] += std::abs(other[i]);
         return *this;
     }
 
     NdNumberField &operator+=(const NdNumberField &other) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] += other[i];
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] += other[i];
         return *this;
     }
 
     NdNumberField &operator+=(const T &v) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] += v;
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] += v;
         return *this;
     }
 
     NdNumberField &sub_abs(const NdNumberField &other) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] -= std::abs(other[i]);
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] -= std::abs(other[i]);
         return *this;
     }
 
     template<typename U>
     NdNumberField &sub_scaled(const U &factor, const NdNumberField &other) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] -= other[i] * factor;
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] -= other[i] * factor;
         return *this;
     }
 
     NdNumberField &operator-=(const NdNumberField &other) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] -= other[i];
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] -= other[i];
         return *this;
     }
 
     NdNumberField &operator-=(const T &v) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] -= v;
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] -= v;
         return *this;
     }
 
     NdNumberField &operator*=(const NdNumberField &other) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] *= other[i];
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] *= other[i];
         return *this;
     }
 
     NdNumberField &operator*=(const T &v) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] *= v;
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] *= v;
         return *this;
     }
 
     NdNumberField &operator/=(const NdNumberField &other) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] /= other[i];
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] /= other[i];
         return *this;
     }
 
     NdNumberField &operator/=(const T &v) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] /= v;
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] /= v;
         return *this;
     }
 
     NdNumberField &operator%=(const NdNumberField &other) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] %= other[i];
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] %= other[i];
         return *this;
     }
 
     NdNumberField &operator%=(const T &v) {
-        for (size_t i = 0ul; i < m_nelement; ++i) (*this)[i] %= v;
+        for (uint_t i = 0ul; i < m_nelement; ++i) (*this)[i] %= v;
         return *this;
     }
 
     NdNumberField &to_sqrt() {
-        for (size_t ielement = 0ul; ielement < m_nelement; ++ielement)
+        for (uint_t ielement = 0ul; ielement < m_nelement; ++ielement)
             (*this)[ielement] = std::sqrt((*this)[ielement]);
         return *this;
     }
 
     T sum() const {
         T tmp = 0;
-        for (size_t ielement = 0ul; ielement < m_nelement; ++ielement) tmp += (*this)[ielement];
+        for (uint_t ielement = 0ul; ielement < m_nelement; ++ielement) tmp += (*this)[ielement];
         return tmp;
     }
 
     /*
      * access methods
      */
-    T &operator[](const size_t &ielement) {
+    T &operator[](const uint_t &ielement) {
         DEBUG_ASSERT_LT(ielement, m_nelement, "Numeric field access OOB");
         return dbegin()[ielement];
     }
 
-    const T &operator[](const size_t &ielement) const {
+    const T &operator[](const uint_t &ielement) const {
         DEBUG_ASSERT_LT(ielement, m_nelement, "Numeric field access OOB");
         return dbegin()[ielement];
     }
@@ -269,7 +269,7 @@ public:
     std::string to_string() const override {
         std::string tmp;
         if (nind > 0) tmp += "[";
-        for (size_t ielement = 0ul; ielement < nelement(); ++ielement)
+        for (uint_t ielement = 0ul; ielement < nelement(); ++ielement)
             tmp += convert::to_string((*this)[ielement]) + " ";
         if (nind > 0) tmp += "]";
         return tmp;
@@ -303,7 +303,7 @@ public:
  */
 struct StringField : NdNumberField<char, 1ul> {
     typedef NdNumberField<char, 1ul> base_t;
-    StringField(Row *row, size_t length, std::string name = "");
+    StringField(Row *row, uint_t length, std::string name = "");
 
     StringField(const StringField& other);
 

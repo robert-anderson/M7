@@ -8,7 +8,7 @@ field::Mbf &WalkerTableRow::key_field() {
     return m_mbf;
 }
 
-WalkerTableRow::WalkerTableRow(const sys::Basis& basis, size_t nroot, size_t nreplica, bool average_weights) :
+WalkerTableRow::WalkerTableRow(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool average_weights) :
         m_wf_format({nroot, nreplica}, {"nroot", "nreplica"}),
         m_root_format({nroot}, {"nroot"}),
         m_mbf(this, basis, "many-body basis function"),
@@ -25,18 +25,18 @@ bool WalkerTableRow::is_h5_write_exempt() const {
     return m_mbf.is_zero();
 }
 
-size_t WalkerTableRow::occupied_ncycle(const size_t &icycle_current) const {
+uint_t WalkerTableRow::occupied_ncycle(const uint_t &icycle_current) const {
     return (1+icycle_current)-m_icycle_occ;
 }
 
-const size_t &WalkerTableRow::nroot() const {
+const uint_t &WalkerTableRow::nroot() const {
     return m_wf_format.m_shape[0];
 }
 
-const size_t &WalkerTableRow::nreplica() const {
+const uint_t &WalkerTableRow::nreplica() const {
     return m_wf_format.m_shape[1];
 }
 
-size_t WalkerTableRow::ipart_replica(const size_t &ipart) const {
+uint_t WalkerTableRow::ipart_replica(const uint_t &ipart) const {
     return nreplica()==1 ? ipart : (ipart/2)*2+!(ipart&1ul);
 }

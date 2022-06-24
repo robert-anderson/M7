@@ -16,11 +16,11 @@ struct NumOpBosHam : BosHam {
 
     NumOpBosHam(const sys::bos::Basis& basis, defs::ham_comp_t weight): BosHam(basis), m_weight(weight){}
 
-    defs::ham_t get_coeff_0011(size_t i, size_t j) const override {
+    defs::ham_t get_coeff_0011(uint_t i, uint_t j) const override {
         return i==j ? m_weight : 0;
     }
 
-    defs::ham_t get_coeff_0022(size_t /*i*/, size_t /*j*/, size_t /*k*/, size_t /*l*/) const override {
+    defs::ham_t get_coeff_0022(uint_t /*i*/, uint_t /*j*/, uint_t /*k*/, uint_t /*l*/) const override {
         return 0;
     }
 

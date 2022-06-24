@@ -7,11 +7,11 @@
 #include "FileReader.h"
 #include "M7_lib/util/SmartPtr.h"
 
-FileReader::FileReader(std::string fname, size_t iline) : m_fname(std::move(fname)) {
+FileReader::FileReader(std::string fname, uint_t iline) : m_fname(std::move(fname)) {
     reset(iline);
 }
 
-void FileReader::reset(size_t iline) {
+void FileReader::reset(uint_t iline) {
     if (m_file) m_file->close();
     m_file = smart_ptr::make_unique<std::ifstream>(m_fname);
     REQUIRE_TRUE(m_file->is_open(), "File not found: " + m_fname);
@@ -23,11 +23,11 @@ FileReader::~FileReader() {
     m_file->close();
 }
 
-const size_t &FileReader::iline() {
+const uint_t &FileReader::iline() {
     return m_iline;
 }
 
-size_t FileReader::nline() {
+uint_t FileReader::nline() {
     while (next()){}
     auto nline = iline();
     reset();
@@ -48,8 +48,8 @@ bool FileReader::next() {
     return next(tmp);
 }
 
-void FileReader::skip(size_t nline) {
-    for (size_t i = 0ul; i < nline; ++i) next();
+void FileReader::skip(uint_t nline) {
+    for (uint_t i = 0ul; i < nline; ++i) next();
 }
 
 std::string FileReader::to_string(const std::string &fname) {

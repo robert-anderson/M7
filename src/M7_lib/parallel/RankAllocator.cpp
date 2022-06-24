@@ -14,7 +14,7 @@ RankDynamic::~RankDynamic() {
 void RankAllocatorBase::refresh_callback_list() {
     m_recv_callbacks.clear();
     for (auto ptr : m_rank_dynamic_objects) {
-        m_recv_callbacks.emplace_back([ptr](size_t irow) { ptr->on_row_recv_(irow); });
+        m_recv_callbacks.emplace_back([ptr](uint_t irow) { ptr->on_row_recv_(irow); });
     }
 }
 
@@ -30,8 +30,8 @@ void RankAllocatorBase::erase_dependent(RankDynamic *dependent) {
     refresh_callback_list();
 }
 
-RankAllocatorBase::RankAllocatorBase(std::string name, size_t nblock, size_t period,
-                                     double acceptable_imbalance, size_t nnull_updates_deactivate) :
+RankAllocatorBase::RankAllocatorBase(std::string name, uint_t nblock, uint_t period,
+                                     double acceptable_imbalance, uint_t nnull_updates_deactivate) :
         m_name(name), m_nblock(nblock), m_period(period),
         m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank()),
         m_mean_work_times(nblock, 0.0), m_gathered_total_times(mpi::nrank(), 0.0),
@@ -39,7 +39,7 @@ RankAllocatorBase::RankAllocatorBase(std::string name, size_t nblock, size_t per
 {
     REQUIRE_GE_ALL(m_acceptable_imbalance, 0.0, "Acceptable imbalance fraction must be non-negative");
     REQUIRE_LE_ALL(m_acceptable_imbalance, 1.0, "Acceptable imbalance fraction must not exceed 100%");
-    size_t iblock = 0ul;
+    uint_t iblock = 0ul;
     for (auto &rank:m_block_to_rank) {
         rank = iblock%mpi::nrank();
         m_rank_to_blocks[rank].push_front(iblock);
@@ -47,18 +47,18 @@ RankAllocatorBase::RankAllocatorBase(std::string name, size_t nblock, size_t per
     }
 }
 
-size_t RankAllocatorBase::nblock_local() const {
+uint_t RankAllocatorBase::nblock_local() const {
     return m_rank_to_blocks[mpi::irank()].size();
 }
 
-size_t RankAllocatorBase::get_nskip_() const {
+uint_t RankAllocatorBase::get_nskip_() const {
     const auto& times = m_mean_work_times;
     const auto& list = m_rank_to_blocks[mpi::irank()];
 
     double mean = 0.0;
     for (auto it=list.cbegin(); it!=list.cend(); ++it) mean+=times[*it];
     mean/=list.size();
-    size_t nskip=0ul;
+    uint_t nskip=0ul;
     for (auto it=list.cbegin(); it!=list.cend(); ++it){
         // look for first block with less than the mean associated work time
         if (times[*it] < mean) return nskip;
@@ -75,7 +75,7 @@ void RankAllocatorBase::deactivate() {
     m_icycle_active = ~0ul;
 }
 
-void RankAllocatorBase::activate(size_t icycle) {
+void RankAllocatorBase::activate(uint_t icycle) {
     if (mpi::nrank()==1) return;
     if (!m_period) {
         log::info("Dynamic load balancing disabled for \"{}\"", m_name);
@@ -93,7 +93,7 @@ bool RankAllocatorBase::is_active() const {
 }
 
 bool RankAllocatorBase::is_consistent() {
-    for (size_t irank=0ul; irank<mpi::nrank(); ++irank){
+    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank){
         for (auto& iblock: m_rank_to_blocks[irank]){
             if (m_block_to_rank[iblock]!=irank) return false;
         }
@@ -101,9 +101,9 @@ bool RankAllocatorBase::is_consistent() {
     return true;
 }
 
-void RankAllocatorBase::update(size_t icycle) {
+void RankAllocatorBase::update(uint_t icycle) {
     if (!is_active()) return;
-    size_t ncycle_active = icycle-m_icycle_active;
+    uint_t ncycle_active = icycle-m_icycle_active;
     if (!ncycle_active || ncycle_active%m_period) return;
     // else, this is a preparatory iteration
     auto local_time = std::accumulate(m_mean_work_times.begin(), m_mean_work_times.end(), 0.0);
@@ -119,9 +119,9 @@ void RankAllocatorBase::update(size_t icycle) {
                                   "record_work_time must be called by application");
 
     // this rank has done the least work, so it should receive a block
-    size_t irank_recv = std::distance(m_gathered_total_times.begin(), it_lazy);
+    uint_t irank_recv = std::distance(m_gathered_total_times.begin(), it_lazy);
     // this rank has done the most work, so it should send a block
-    size_t irank_send = std::distance(m_gathered_total_times.begin(), it_busy);
+    uint_t irank_send = std::distance(m_gathered_total_times.begin(), it_busy);
     if (m_rank_to_blocks[irank_send].size()==1){
         log::warn("Busiest rank has only one (very expensive) block remaining ({})",
                   m_rank_to_blocks[irank_send].front());
@@ -158,19 +158,19 @@ void RankAllocatorBase::update(size_t icycle) {
      * sender will send all rows in the selected block, which will become the front
      * block of the recver.
      */
-    size_t nskip;
+    uint_t nskip;
     if (mpi::i_am(irank_send)) nskip = get_nskip_();
     mpi::bcast(nskip, irank_send);
     DEBUG_ASSERT_LT(nskip, m_rank_to_blocks[irank_send].size(), "Too many skips");
     auto it_block_transfer = m_rank_to_blocks[irank_send].begin();
-    for (size_t iskip=0ul; iskip<nskip; ++iskip) ++it_block_transfer;
+    for (uint_t iskip=0ul; iskip<nskip; ++iskip) ++it_block_transfer;
 
     log::info("Sending block {} of rank allocator \"{}\" from rank {} to {} on cycle {}",
               *it_block_transfer, m_name, irank_send, irank_recv, icycle);
     // prepare vector of row indices to send
     defs::uintv_t irows_send;
     if (mpi::i_am(irank_send)){
-        for (size_t irow = 0; irow<table().m_hwm; ++irow){
+        for (uint_t irow = 0; irow<table().m_hwm; ++irow){
             if (table().is_cleared(irow)) continue;
             if (get_block_by_irow(irow) == *it_block_transfer) irows_send.push_back(irow);
         }

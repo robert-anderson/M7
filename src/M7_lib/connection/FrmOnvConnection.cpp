@@ -24,8 +24,8 @@ void FrmOnvConnection::connect(const FrmOnvField& src, const FrmOnvField &dst) {
     DEBUG_ASSERT_FALSE(dst.is_zero(), "should not be computing connection to zero ONV");
     clear();
 
-    size_t src_work, dst_work, work;
-    for (size_t idataword = 0ul; idataword < src.m_dsize; ++idataword) {
+    uint_t src_work, dst_work, work;
+    for (uint_t idataword = 0ul; idataword < src.m_dsize; ++idataword) {
         const auto bit_offset = idataword * Buffer::c_nbit_word;
         src_work = src.get_dataword(idataword);
         dst_work = dst.get_dataword(idataword);
@@ -42,15 +42,15 @@ bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, F
     DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
     connect(src, dst);
     com.clear();
-    size_t nperm = 0ul;
+    uint_t nperm = 0ul;
 
     auto ann_iter = m_ann.cbegin();
     auto cre_iter = m_cre.cbegin();
     const auto ann_end = m_ann.cend();
     const auto cre_end = m_cre.cend();
 
-    size_t src_work, dst_work, work;
-    for (size_t idataword = 0ul; idataword < src.m_dsize; ++idataword) {
+    uint_t src_work, dst_work, work;
+    for (uint_t idataword = 0ul; idataword < src.m_dsize; ++idataword) {
         src_work = src.get_dataword(idataword);
         dst_work = dst.get_dataword(idataword);
         work = src_work & dst_work;
@@ -93,8 +93,8 @@ void FrmOnvConnection::apply(const FrmOnvField &src, FrmOnvField &dst) const {
     DEBUG_ASSERT_TRUE(m_ann.all_occ(src), "not all annihilation indices are occupied in src ONV");
     DEBUG_ASSERT_TRUE(m_cre.all_vac(src), "not all creation indices are vacant in src ONV");
     dst = src;
-    for (size_t i = 0ul; i < nann; ++i) dst.clr(m_ann[i]);
-    for (size_t i = 0ul; i < ncre; ++i) dst.set(m_cre[i]);
+    for (uint_t i = 0ul; i < nann; ++i) dst.clr(m_ann[i]);
+    for (uint_t i = 0ul; i < ncre; ++i) dst.set(m_cre[i]);
     DEBUG_ASSERT_EQ(src.nsetbit(), dst.nsetbit(),
                     "currently, all excitations are particle number conserving, so something has gone wrong here");
     DEBUG_ASSERT_TRUE(m_ann.all_vac(dst), "not all annihilation indices are vacant in dst ONV");
@@ -105,14 +105,14 @@ bool FrmOnvConnection::apply(const FrmOnvField &src, FrmOps &com) const {
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     com.clear();
-    size_t nperm = 0ul;
+    uint_t nperm = 0ul;
 
     auto ann_iter = m_ann.cbegin();
     auto cre_iter = m_cre.cbegin();
     const auto ann_end = m_ann.cend();
     const auto cre_end = m_cre.cend();
 
-    for (size_t idataword = 0ul; idataword < src.m_dsize; ++idataword) {
+    for (uint_t idataword = 0ul; idataword < src.m_dsize; ++idataword) {
         auto work = src.get_dataword(idataword);
         while (work) {
             auto setbit = bit::next_setbit(work) + idataword * Buffer::c_nbit_word;
@@ -158,14 +158,14 @@ const defs::uintv_t &FrmOnvConnection::cre() const {
 }
 
 void FrmOnvConnection::update_dataword_phases(const FrmOnvField &src) const {
-    for (size_t idataword = 1ul; idataword < m_ndataword; ++idataword) {
+    for (uint_t idataword = 1ul; idataword < m_ndataword; ++idataword) {
         auto prev_dataword = src.get_dataword(idataword - 1);
         bool phase = bit::nsetbit(prev_dataword) & 1ul;
         m_dataword_phases[idataword] = (m_dataword_phases[idataword - 1] != phase);
     }
 }
 
-bool FrmOnvConnection::independent_phase(const FrmOnvField &src, const size_t &ibit) const {
+bool FrmOnvConnection::independent_phase(const FrmOnvField &src, const uint_t &ibit) const {
     DEBUG_ASSERT_LT(ibit, src.m_basis.m_nspinorb, "spin orbital index OOB");
     auto idataword = ibit / Buffer::c_nbit_word;
     DEBUG_ASSERT_LT(idataword, m_ndataword, "dataword index OOB");
@@ -203,10 +203,10 @@ bool FrmOnvConnection::phase(const FrmOnvField &src) const {
     return out;
 }
 
-size_t FrmOnvConnection::exsig() const {
+uint_t FrmOnvConnection::exsig() const {
     return exsig::encode(m_cre.size(), m_ann.size(), 0ul, 0ul);
 }
 
-size_t FrmOnvConnection::exsig(const size_t& nop_insert) const {
+uint_t FrmOnvConnection::exsig(const uint_t& nop_insert) const {
     return exsig::encode(m_cre.size() + nop_insert, m_ann.size() + nop_insert, 0ul, 0ul);
 }

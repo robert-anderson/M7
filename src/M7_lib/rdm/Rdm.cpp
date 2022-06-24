@@ -5,11 +5,11 @@
 #include "Rdm.h"
 
 #if 0
-const size_t &FermionRdm::nop() const {
+const uint_t &FermionRdm::nop() const {
     return m_ncre;
 }
 
-size_t FermionRdm::nrow_estimate(size_t nann, size_t ncre, size_t nsite) {
+uint_t FermionRdm::nrow_estimate(uint_t nann, uint_t ncre, uint_t nsite) {
     double nrow = 1.0;
     nrow *= utils::integer::combinatorial(2 * nsite, nann);
     nrow *= utils::integer::combinatorial(2 * nsite, ncre);
@@ -17,7 +17,7 @@ size_t FermionRdm::nrow_estimate(size_t nann, size_t ncre, size_t nsite) {
     return nrow;
 }
 
-FermionRdm::FermionRdm(const conf::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec) :
+FermionRdm::FermionRdm(const conf::FermionRdm &opts, uint_t nrow_crude_est, uint_t nsite, uint_t nelec) :
 base_t(
         log::format("{}-body RDM", opts.m_rank),
         nrow_crude_est / mpi::nrank(),
@@ -41,7 +41,7 @@ base_t(
                     m_nann(opts.m_rank), m_ncre(opts.m_rank), m_nelec(nelec), m_lookup_inds(opts.m_rank),
                     m_conn(nsite), m_mixed_estimator(opts.m_mixed_estimator), m_com(nsite) {
     m_promoters.reserve(opts.m_rank + 1);
-    for (size_t nins = 0ul; nins <= opts.m_rank; ++nins) m_promoters.emplace_back(nelec + nins - opts.m_rank, nins);
+    for (uint_t nins = 0ul; nins <= opts.m_rank; ++nins) m_promoters.emplace_back(nelec + nins - opts.m_rank, nins);
 }
 
 void FermionRdm::make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv &conn, const FrmOps &com,
@@ -52,7 +52,7 @@ void FermionRdm::make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv
     ASSERT(nins <= nop());
 
     const auto &promoter = m_promoters[nins];
-    for (size_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
+    for (uint_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
         auto phase = promoter.apply(icomb, conn, com, m_lookup_inds);
         if (!exlvl || !nins) {ASSERT(!phase); }
         else {
@@ -64,7 +64,7 @@ void FermionRdm::make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv
         auto irank_send = m_ra.get_rank(m_lookup_inds);
         ASSERT(m_lookup_inds.is_ordered());
         auto &send_table = send(irank_send);
-        size_t irow = *send_table[m_lookup_inds];
+        uint_t irow = *send_table[m_lookup_inds];
         if (irow == ~0ul) irow = send_table.insert(m_lookup_inds);
 
         send_table.m_row.jump(irow);

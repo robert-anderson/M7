@@ -5,7 +5,7 @@
 #include "KramersSectorOccupation.h"
 
 #if 0
-KramersSectorOccupation::KramersSectorOccupation(size_t nelec) :
+KramersSectorOccupation::KramersSectorOccupation(uint_t nelec) :
         m_nelec(nelec), m_sum(nelec+1){}
 
 KramersSectorOccupation::~KramersSectorOccupation() {

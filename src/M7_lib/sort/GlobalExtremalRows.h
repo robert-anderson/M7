@@ -18,7 +18,7 @@
  */
 template<typename T>
 struct GlobalSortingRow : Row {
-    field::Number<size_t> m_irank;
+    field::Number<uint_t> m_irank;
     field::Number<T> m_value;
 
     GlobalSortingRow() : m_irank(this), m_value(this) {}
@@ -30,7 +30,7 @@ struct GlobalSortingRow : Row {
  * @tparam T
  * @tparam nind
  */
-template<typename row_t, typename T, size_t nind = 0>
+template<typename row_t, typename T, uint_t nind = 0>
 struct GlobalExtremalRows {
     typedef LocalExtremalRows<row_t, T, nind> lxr_t;
     typedef GlobalSortingRow<T> global_sort_row_t;
@@ -49,7 +49,7 @@ struct GlobalExtremalRows {
      *
      * After the global sort, the local number is revised lower or kept the same.
      */
-    Reduction<size_t> m_ninclude;
+    Reduction<uint_t> m_ninclude;
     /**
      * once the number of included rows over all ranks is at least the number requested, the rank index and sorting
      * value will be loaded into a local table, and then gathered into this table on the root rank only, it is then
@@ -63,15 +63,15 @@ struct GlobalExtremalRows {
         reset();
     }
 
-    GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, size_t ind_to_cmp) :
+    GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, uint_t ind_to_cmp) :
             GlobalExtremalRows(row, field, largest, absval, defs::uintv_t{ind_to_cmp}){}
 
     /**
      * @return
      *  the number of MPI ranks with any nonzero rows left to find in partial sorting operations
      */
-    size_t get_nrank_with_remainder() const {
-        size_t count = m_lxr.nremain() > 0;
+    uint_t get_nrank_with_remainder() const {
+        uint_t count = m_lxr.nremain() > 0;
         return mpi::all_sum(count);
     }
     /**
@@ -95,13 +95,13 @@ private:
         T local_worst_value = 0;
         if (m_lxr.nfound()) local_worst_value = m_lxr.get_value(m_lxr.nfound()-1);
         std::vector<T> local_worst_values(mpi::nrank());
-        std::vector<size_t> local_nfounds(mpi::nrank());
-        std::vector<size_t> local_nrow_nonzero(mpi::nrank());
+        std::vector<uint_t> local_nfounds(mpi::nrank());
+        std::vector<uint_t> local_nrow_nonzero(mpi::nrank());
         mpi::all_gather(local_worst_value, local_worst_values);
         mpi::all_gather(m_lxr.nfound(), local_nfounds);
         mpi::all_gather(m_lxr.nrow_nonzero(), local_nrow_nonzero);
         defs::uintv_t ignored_ranks;
-        for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
+        for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
             if (local_nfounds[irank]==local_nrow_nonzero[irank]) ignored_ranks.push_back(irank);
         }
         /*
@@ -113,7 +113,7 @@ private:
             /*
              * setup a function to order the worst sorted values from each rank
              */
-            auto index_cmp_fn = [&](const size_t &irank, const size_t &jrank) {
+            auto index_cmp_fn = [&](const uint_t &irank, const uint_t &jrank) {
                 return m_lxr.m_value_cmp_fn(local_worst_values[irank], local_worst_values[jrank]);
             };
             ExtremalIndices xi(index_cmp_fn);
@@ -141,7 +141,7 @@ private:
      * @param nrow
      *  target number of row to find globally
      */
-    void find_required_local_rows(size_t nrow) {
+    void find_required_local_rows(uint_t nrow) {
         REQUIRE_NE_ALL(m_ninclude.m_reduced, ~0ul, "required local row reduction hasn't been performed");
         auto nrank_with_remainder = get_nrank_with_remainder();
         if (nrank_with_remainder == 0 || m_ninclude.m_reduced >= nrow) {
@@ -199,7 +199,7 @@ private:
         auto &source_row = m_lxr.m_work_row;
         auto &source_field = m_lxr.m_work_row_field;
         auto &loader_row = local_loader.m_row;
-        for (size_t i = 0ul; i < m_ninclude.m_local; ++i) {
+        for (uint_t i = 0ul; i < m_ninclude.m_local; ++i) {
             static_cast<Row &>(source_row).jump(m_lxr[i]);
             static_cast<Row &>(loader_row).push_back_jump();
             loader_row.m_irank = mpi::irank();
@@ -215,7 +215,7 @@ private:
      * @param nrow
      *  desired number of rows to find
      */
-    void sort(size_t nrow) {
+    void sort(uint_t nrow) {
         nrow = std::min(nrow, m_ninclude.m_reduced);
         defs::uintv_t ninclude_each_rank(mpi::nrank(), 0ul);
         if (mpi::i_am_root()) {
@@ -230,7 +230,7 @@ private:
                     row1, row1.m_value, row2, row2.m_value, m_lxr.m_value_cmp_fn, {0ul});
             LambdaQuickSorter qs(cmp_fn);
             qs.reorder_sort(m_global_sorter);
-            for (size_t irow = 0ul; irow < nrow; ++irow) {
+            for (uint_t irow = 0ul; irow < nrow; ++irow) {
                 row1.jump(irow);
                 ++ninclude_each_rank[row1.m_irank];
             }
@@ -246,7 +246,7 @@ public:
      * @param nrow
      *  number of rows to find across all ranks, this will
      */
-    void find(size_t nrow) {
+    void find(uint_t nrow) {
         update_ninclude();
         if (!mpi::all_sum(m_lxr.m_table.nrow_nonzero())) return;
         find_required_local_rows(nrow);
@@ -261,15 +261,15 @@ public:
      * @return
      *  the row index associated with the ordinal index
      */
-    const size_t& operator[](const size_t& i) const {
+    const uint_t& operator[](const uint_t& i) const {
         DEBUG_ASSERT_LT(i, m_ninclude.m_local, "the specified index was not included in the globally extremal set");
         return m_lxr[i];
     }
 
-    void gatherv(Table<row_t>& dst, size_t iroot=0ul) const {
+    void gatherv(Table<row_t>& dst, uint_t iroot=0ul) const {
         BufferedTable<row_t> m_local("locally included globally extreme rows", m_lxr.m_work_row);
         m_local.push_back(m_ninclude.m_local);
-        for (size_t iinclude=0ul; iinclude<m_ninclude.m_local; ++iinclude){
+        for (uint_t iinclude=0ul; iinclude<m_ninclude.m_local; ++iinclude){
             m_local.copy_row_in(m_lxr.m_table, (*this)[iinclude], iinclude);
         }
         dst.gatherv(m_local, iroot);

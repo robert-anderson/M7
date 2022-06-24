@@ -15,7 +15,7 @@ using namespace exsig;
  * packages the polymorphic excitation generator base class pointer with one of the exsigs it is able to produce
  */
 struct ExcitCase {
-    const size_t m_exsig;
+    const uint_t m_exsig;
     ExcitGen* m_excit_gen;
 };
 
@@ -57,11 +57,11 @@ public:
         set_probs(particles);
     }
 
-    size_t ncase() const;
+    uint_t ncase() const;
 
-    size_t draw_icase();
+    uint_t draw_icase();
     
-    ExcitCase& operator[](size_t icase);
+    ExcitCase& operator[](uint_t icase);
 
     /**
      * set the m_probs and m_cumprobs arrays
@@ -77,7 +77,7 @@ public:
      */
     void set_probs(const sys::Particles& particles);
 
-    defs::prob_t get_prob(size_t icase) const;
+    defs::prob_t get_prob(uint_t icase) const;
 
     const std::vector<defs::prob_t>& get_probs() const;
 
@@ -90,7 +90,7 @@ public:
      * Naturally if there is only one case for the given exsig, the probability is scaled by the probability of the case.
      */
     template<typename mbf_t>
-    void update_prob(size_t icase, const mbf_t &src, prob_t &prob, const conn::from_field_t<mbf_t> &conn) {
+    void update_prob(uint_t icase, const mbf_t &src, prob_t &prob, const conn::from_field_t<mbf_t> &conn) {
         const auto exsig = m_excit_cases[icase].m_exsig;
         DEBUG_ASSERT_EQ(exsig, conn.exsig(), "exsig of case does not match with that of connection");
         const auto& jcases = m_exsig_icases[exsig];
@@ -104,7 +104,7 @@ public:
     }
 
     template<typename mbf_t>
-    bool draw(size_t icase, const mbf_t &src, prob_t &prob, ham_t &helem, conn::from_field_t<mbf_t> &conn) {
+    bool draw(uint_t icase, const mbf_t &src, prob_t &prob, ham_t &helem, conn::from_field_t<mbf_t> &conn) {
         auto& excase = m_excit_cases[icase];
         return excase.m_excit_gen->draw(excase.m_exsig, src, prob, helem, conn);
     }

@@ -28,7 +28,7 @@ namespace comparators {
     /**
      * all row index comparators take a pair of indices and return their relative order as boolean
      */
-    typedef std::function<bool(const size_t &, const size_t &)> index_cmp_fn_t;
+    typedef std::function<bool(const uint_t &, const uint_t &)> index_cmp_fn_t;
     /**
      * templated function definition for scalar value comparisons.
      * returns true if the first argument is "better" than the second
@@ -106,7 +106,7 @@ namespace comparators {
     template<typename T>
     static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool absval, bool largest) {
         // decide category of the given type:
-        constexpr size_t category = datatype::is_complex<T>() ? Only : (std::is_unsigned<T>::value ? Invalid : Any);
+        constexpr uint_t category = dtype::is_complex<T>() ? Only : (std::is_unsigned<T>::value ? Invalid : Any);
         // use this category for tagged dispatch
         return make_value_cmp_fn<T>(absval, largest, Int<category>());
     }
@@ -134,7 +134,7 @@ namespace comparators {
      * @return
      *  a comparator which determines the relative ordering of two row indices in a Table
      */
-    template<typename row_t, typename T, size_t nind = 0ul>
+    template<typename row_t, typename T, uint_t nind = 0ul>
     static index_cmp_fn_t make_num_field_row_cmp_fn(
             row_t &row1, field::Numbers<T, nind> &field1,
             row_t &row2, field::Numbers<T, nind> &field2,
@@ -143,9 +143,9 @@ namespace comparators {
         REQUIRE_TRUE(static_cast<FieldBase &>(field2).belongs_to_row(row2), "specified row-field pair must correspond");
         DEBUG_ASSERT_FALSE(inds_to_cmp.empty(), "need at least one numeric field index for comparison");
         DEBUG_ASSERT_TRUE(std::all_of(inds_to_cmp.cbegin(), inds_to_cmp.cend(),
-                                      [&field1](size_t i) { return i < field1.nelement(); }), "compared field index OOB");
+                                      [&field1](uint_t i) { return i < field1.nelement(); }), "compared field index OOB");
         return [&row1, &field1, &row2, &field2, value_cmp_fn, inds_to_cmp]
-                (const size_t &irow, const size_t &irow_cmp) {
+                (const uint_t &irow, const uint_t &irow_cmp) {
             static_cast<const Row &>(row1).jump(irow);
             static_cast<const Row &>(row2).jump(irow_cmp);
             return value_cmp_fn(field1.sum_over(inds_to_cmp), field2.sum_over(inds_to_cmp));

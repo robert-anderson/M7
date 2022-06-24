@@ -7,7 +7,7 @@
 
 TEST(AbelianGroup, D2h){
     std::vector<std::string> labels = {"A1g", "B1g", "B2g", "B3g", "A1u", "B1u", "B2u", "B3u"};
-    AbelianGroup d2h(labels, [](const size_t& iirrep, const size_t& jirrep){return iirrep^jirrep;});
+    AbelianGroup d2h(labels, [](const uint_t& iirrep, const uint_t& jirrep){return iirrep^jirrep;});
     /*
      * D2h A1g B1g B2g B3g A1u B1u B2u B3u
      * A1g A1g
@@ -20,11 +20,11 @@ TEST(AbelianGroup, D2h){
      * B3u B3u B2u B1u A1u B3g B2g B1g A1g
      */
     enum d2h_inds {A1g, B1g, B2g, B3g, A1u, B1u, B2u, B3u};
-    for (size_t iirrep = A1g; iirrep<=B3u; iirrep++){
+    for (uint_t iirrep = A1g; iirrep<=B3u; iirrep++){
         ASSERT_EQ(d2h.product(iirrep, iirrep), A1g);
         ASSERT_EQ(d2h.product(iirrep, A1g), iirrep);
     }
-    size_t iirrep = B1g;
+    uint_t iirrep = B1g;
     ASSERT_EQ(d2h.product(iirrep, B2g), B3g);
     ASSERT_EQ(d2h.product(iirrep, B3g), B2g);
     ASSERT_EQ(d2h.product(iirrep, A1u), B1u);

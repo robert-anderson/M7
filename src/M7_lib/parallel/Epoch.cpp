@@ -10,7 +10,7 @@ Epoch::Epoch(std::string name): m_name(std::move(name)) {
     m_icycle_start.m_reduced = ~0ul;
 }
 
-bool Epoch::update(size_t icycle, bool condition) {
+bool Epoch::update(uint_t icycle, bool condition) {
     if (*this) return false;
     ASSERT(icycle_start() == ~0ul)
     m_icycle_start.m_local = condition?icycle:~0ul;
@@ -22,7 +22,7 @@ bool Epoch::update(size_t icycle, bool condition) {
     return false;
 }
 
-void Epoch::terminate(size_t icycle) {
+void Epoch::terminate(uint_t icycle) {
     if (!*this) return;
     ASSERT(icycle_start() != ~0ul)
     log::info("Terminating \"{}\" epoch on cycle {} ", m_name, icycle);
@@ -34,20 +34,20 @@ Epoch::operator bool() const {
     return icycle_start() != ~0ul;
 }
 
-const size_t &Epoch::icycle_start() const {
+const uint_t &Epoch::icycle_start() const {
     return m_icycle_start.m_reduced;
 }
 
-bool Epoch::started_last_cycle(size_t icycle) const {
+bool Epoch::started_last_cycle(uint_t icycle) const {
     return (m_icycle_start.m_reduced!=~0ul && m_icycle_start.m_reduced+1==icycle);
 }
 
-bool Epoch::started_this_cycle(size_t icycle) const {
+bool Epoch::started_this_cycle(uint_t icycle) const {
     return (m_icycle_start.m_reduced!=~0ul && m_icycle_start.m_reduced==icycle);
 }
 
-size_t Epochs::icycle_start_last() const {
-    size_t highest = 0ul;
+uint_t Epochs::icycle_start_last() const {
+    uint_t highest = 0ul;
     for (const auto& epoch : m_epochs) {
         if (epoch.icycle_start()>highest) highest=epoch.icycle_start();
     }

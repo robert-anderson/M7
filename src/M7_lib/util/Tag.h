@@ -10,9 +10,9 @@ namespace tag {
     struct Type {
     };
 
-    template<size_t n>
+    template<uint_t n>
     struct Int {
-        static constexpr size_t value() { return n; }
+        static constexpr uint_t value() { return n; }
     };
 }
 

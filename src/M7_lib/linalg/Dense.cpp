@@ -5,8 +5,8 @@
 #include "Dense.h"
 
 
-dense::GemmWrapper::GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq,
-                                char transp, char transq, size_t nrowr, size_t ncolr) :
+dense::GemmWrapper::GemmWrapper(uint_t nrowp, uint_t ncolp, uint_t nrowq, uint_t ncolq,
+                                char transp, char transq, uint_t nrowr, uint_t ncolr) :
         m_transa(valid_trans(transq)), m_transb(valid_trans(transp)),
         m_m(convert::safe_narrow<int>((m_transa=='N') ? ncolq : nrowq)),
         m_n(convert::safe_narrow<int>((m_transb=='N') ? nrowp : ncolp)),

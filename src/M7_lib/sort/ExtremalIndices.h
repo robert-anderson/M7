@@ -24,7 +24,7 @@ struct ExtremalIndices {
      * total number of elements from which to find the indices corresponding to the ordered extremal values, for tables
      * this is (the high water mark) - (the number of row on the free stack)
      */
-    size_t m_nind = ~0ul;
+    uint_t m_nind = ~0ul;
     /**
      * after a reset, this is ordered and consecutive. After a find, the first m_nfound are the extremal indices in the
      * requested order
@@ -39,7 +39,7 @@ struct ExtremalIndices {
     /**
      * total number of extremal valued elements found so far. never greater than m_hwm.
      */
-    size_t m_nfound;
+    uint_t m_nfound;
 
     explicit ExtremalIndices(comparators::index_cmp_fn_t cmp_fn);
 
@@ -47,24 +47,24 @@ struct ExtremalIndices {
      * @return
      *  the total number of elements found so far over all calls to find
      */
-    const size_t &nfound() const;
+    const uint_t &nfound() const;
     /**
      * @return
      *  the number of elements as yet unfound
      */
-    size_t nremain() const;
+    uint_t nremain() const;
     /**
      * @return
      *  pointer to the last found element index
      */
-    const size_t* begin() const;
+    const uint_t* begin() const;
     /**
      * @param ifound
      *  index of the found element indices in order determined by the comparator
      * @return
      *  the ifound-th found element index
      */
-    const size_t &operator[](const size_t &ifound) const;
+    const uint_t &operator[](const uint_t &ifound) const;
     /**
      * start from scratch with an ordered uintv_t array
      * @param hwm
@@ -72,7 +72,7 @@ struct ExtremalIndices {
      * @param inds_ignore
      *  unsorted vector of indices which should be ignored in the partial sort
      */
-    void reset(size_t hwm, defs::uintv_t inds_ignore={});
+    void reset(uint_t hwm, defs::uintv_t inds_ignore={});
     /**
      * @param table
      *  table object from which the m_hwm and free row indices are accessed
@@ -83,7 +83,7 @@ struct ExtremalIndices {
      * @param nfind
      *  number of additional elements to find
      */
-    void find(size_t nfind);
+    void find(uint_t nfind);
 };
 
 #endif //M7_EXTREMALINDICES_H

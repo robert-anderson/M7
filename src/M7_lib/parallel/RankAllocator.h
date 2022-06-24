@@ -60,7 +60,7 @@ struct RankDynamic {
      * @return
      *  returns true if the irow-th row in source mapped table is mapped by this RankDynamic
      */
-    virtual bool has_row(size_t irow) = 0;
+    virtual bool has_row(uint_t irow) = 0;
 
     /**
      * called before physical transfer of rows is performed by MPI
@@ -71,14 +71,14 @@ struct RankDynamic {
      * @param irank_recv
      *  MPI rank to which the rows will be transferred
      */
-    virtual void before_block_transfer(const defs::uintv_t &irows_send, size_t irank_send, size_t irank_recv) = 0;
+    virtual void before_block_transfer(const defs::uintv_t &irows_send, uint_t irank_send, uint_t irank_recv) = 0;
 
     /**
      * called after each row is inserted into the MappedTable on the recving rank
      * @param irow
      *  row index of last transferred row to be inserted into the MappedTable
      */
-    virtual void on_row_recv_(size_t irow) = 0;
+    virtual void on_row_recv_(uint_t irow) = 0;
 
     /**
      * called after physical transfer of rows is performed by MPI
@@ -99,15 +99,15 @@ struct RankAllocatorBase {
      * The "cycle" on which the rank allocator was last made active. This is corresponds to the
      * loop variable of Solver::execute in this program usually, but is not required to.
      */
-    size_t m_icycle_active = ~0ul;
+    uint_t m_icycle_active = ~0ul;
     /**
      * total number of blocks across all ranks
      */
-    const size_t m_nblock;
+    const uint_t m_nblock;
     /**
      * number of cycles between reallocation attempts
      */
-    const size_t m_period;
+    const uint_t m_period;
     /**
      * A map from block index to MPI rank index
      */
@@ -117,7 +117,7 @@ struct RankAllocatorBase {
      * push inward-transferred blocks indices to front
      * pop outward-transferred block indices to back
      */
-    std::vector<std::list<size_t>> m_rank_to_blocks;
+    std::vector<std::list<uint_t>> m_rank_to_blocks;
     /**
      * "work time" stands for the figure of merit representing the cost associated with a
      * block. The vector is of length m_nblock but of course only elements at block indices
@@ -139,8 +139,8 @@ struct RankAllocatorBase {
      * the update method finds no reason to reallocate blocks. If this happens for a
      * certain m_nnull_updates_deactivate periods, m_active is automatically set to false.
      */
-    const size_t m_nnull_updates_deactivate;
-    size_t m_nnull_updates = 0ul;
+    const uint_t m_nnull_updates_deactivate;
+    uint_t m_nnull_updates = 0ul;
 
 private:
     /**
@@ -177,7 +177,7 @@ public:
      */
     void erase_dependent(RankDynamic *dependent);
 
-    RankAllocatorBase(std::string name, size_t nblock, size_t period, double acceptable_imbalance, size_t nnull_updates_deactivate);
+    RankAllocatorBase(std::string name, uint_t nblock, uint_t period, double acceptable_imbalance, uint_t nnull_updates_deactivate);
 
     /**
      * @return
@@ -191,7 +191,7 @@ public:
      * @return
      *  number of blocks in the local allocation
      */
-    size_t nblock_local() const;
+    uint_t nblock_local() const;
 
     /**
      * Selective function: only called on the sending rank since the block-wise work
@@ -206,7 +206,7 @@ public:
      *  number of skips in the list of blocks required to reach the first one which
      *  has a cost less than the average cost over all blocks on this rank.
      */
-    size_t get_nskip_() const;
+    uint_t get_nskip_() const;
 
     /**
      * turn off dynamic rank allocation
@@ -218,7 +218,7 @@ public:
      * @param icycle
      *  cycle index on which the RankAllocator is activated
      */
-    void activate(size_t icycle);
+    void activate(uint_t icycle);
 
     /**
      * @return
@@ -247,11 +247,11 @@ public:
      * @param icycle
      *  the cycle index, to determine whether or not a block reallocation should be attempted
      */
-    void update(size_t icycle);
+    void update(uint_t icycle);
 
-    virtual size_t get_rank_by_irow(const size_t &irow) const = 0;
+    virtual uint_t get_rank_by_irow(const uint_t &irow) const = 0;
 
-    virtual size_t get_block_by_irow(const size_t &irow) const = 0;
+    virtual uint_t get_block_by_irow(const uint_t &irow) const = 0;
 
 };
 
@@ -280,8 +280,8 @@ class RankAllocator : public RankAllocatorBase {
     typedef typename KeyField<row_t>::type key_field_t;
 
 public:
-    RankAllocator(std::string name, MappedTable<row_t> &table, size_t nblock, size_t period,
-                  double acceptable_imbalance, size_t nnull_updates_deactivate) :
+    RankAllocator(std::string name, MappedTable<row_t> &table, uint_t nblock, uint_t period,
+                  double acceptable_imbalance, uint_t nnull_updates_deactivate) :
             RankAllocatorBase(name, nblock, period, acceptable_imbalance, nnull_updates_deactivate),
             m_table(table), m_row(table.m_row) {}
 
@@ -315,7 +315,7 @@ public:
      * @return
      *  block index corresponding to mapped field
      */
-    inline size_t get_block(const key_field_t &key) const {
+    inline uint_t get_block(const key_field_t &key) const {
         return key.hash() % m_nblock;
     }
 
@@ -325,12 +325,12 @@ public:
      * @return
      *  block index corresponding to mapped field of row instance
      */
-    inline size_t get_block(const row_t &row) const {
+    inline uint_t get_block(const row_t &row) const {
         return get_block(KeyField<row_t>::get(row));
     }
 
     template<typename T>
-    inline typename std::enable_if<std::is_same<key_field_t, field::Number<T>>::value, size_t>::type
+    inline typename std::enable_if<std::is_same<key_field_t, field::Number<T>>::value, uint_t>::type
     get_block(const T& key) {
         return hash::fnv(key) % m_nblock;
     }
@@ -341,7 +341,7 @@ public:
      * @return
      *  MPI rank index to which the block corresponding to mapped field is allocated
      */
-    inline size_t get_rank(const key_field_t &key) const {
+    inline uint_t get_rank(const key_field_t &key) const {
         return m_block_to_rank[get_block(key)];
     }
     /**
@@ -351,12 +351,12 @@ public:
      *  MPI rank index to which the block corresponding to mapped field of row object
      *  is allocated
      */
-    inline size_t get_rank(const row_t &row) const {
+    inline uint_t get_rank(const row_t &row) const {
         return get_rank(KeyField<row_t>::get(row));
     }
 
     template<typename T>
-    inline typename std::enable_if<std::is_same<key_field_t, field::Number<T>>::value, size_t>::type
+    inline typename std::enable_if<std::is_same<key_field_t, field::Number<T>>::value, uint_t>::type
     get_rank(const T& key) {
         return m_block_to_rank[get_block(key)];
     }
@@ -367,7 +367,7 @@ public:
      * @return
      *  corresponding MPI rank
      */
-    size_t get_rank_by_irow(const size_t &irow) const override {
+    uint_t get_rank_by_irow(const uint_t &irow) const override {
         m_row.jump(irow);
         return get_rank(m_row);
     }
@@ -378,7 +378,7 @@ public:
      * @return
      *  block index to which row belongs
      */
-    size_t get_block_by_irow(const size_t &irow) const override {
+    uint_t get_block_by_irow(const uint_t &irow) const override {
         m_row.jump(irow);
         return get_block(m_row);
     }

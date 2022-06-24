@@ -12,11 +12,11 @@
 #include <M7_lib/basis/DeterminantField.h>
 
 class KramersSectorOccupation {
-    const size_t m_nelec;
+    const uint_t m_nelec;
     std::vector<Reducible<defs::wf_comp_t>> m_sum;
 
 public:
-    explicit KramersSectorOccupation(size_t nelec);
+    explicit KramersSectorOccupation(uint_t nelec);
 
     explicit KramersSectorOccupation(const DeterminantElement& det);
 

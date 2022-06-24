@@ -15,17 +15,17 @@ namespace ham {
 
     class TermContribs {
 
-        const size_t m_ranksig;
-        const size_t m_basesig;
-        const size_t m_nexsig_contrib_frm, m_nexsig_contrib_bos;
+        const uint_t m_ranksig;
+        const uint_t m_basesig;
+        const uint_t m_nexsig_contrib_frm, m_nexsig_contrib_bos;
 
         std::vector<bool> m_exsig_nonzero;
 
-        size_t ind(size_t exsig) const;
+        uint_t ind(uint_t exsig) const;
 
 
     public:
-        TermContribs(size_t ranksig);
+        TermContribs(uint_t ranksig);
 
         TermContribs(const TermContribs& other);
 
@@ -40,9 +40,9 @@ namespace ham {
          */
         TermContribs(const TermContribs& contribs_1, const TermContribs& contribs_2);
 
-        void set_nonzero(size_t exsig);
+        void set_nonzero(uint_t exsig);
 
-        bool is_nonzero(size_t exsig) const;
+        bool is_nonzero(uint_t exsig) const;
 
         bool any_nonzero() const;
 

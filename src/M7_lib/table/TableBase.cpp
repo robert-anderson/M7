@@ -10,7 +10,7 @@
 #include "TableBase.h"
 #include "RowProtector.h"
 
-TableBase::TableBase(size_t row_size) :
+TableBase::TableBase(uint_t row_size) :
         m_bw(row_size), m_null_row_string(row_size, 0){}
 
 TableBase::TableBase(const TableBase &other) :
@@ -24,11 +24,11 @@ const defs::buf_t *TableBase::begin() const {
     return m_bw.m_begin;
 }
 
-defs::buf_t *TableBase::begin(const size_t &irow) {
+defs::buf_t *TableBase::begin(const uint_t &irow) {
     return m_bw.m_begin + irow * row_size();
 }
 
-const defs::buf_t *TableBase::begin(const size_t &irow) const {
+const defs::buf_t *TableBase::begin(const uint_t &irow) const {
     return m_bw.m_begin + irow * row_size();
 }
 
@@ -42,7 +42,7 @@ bool TableBase::is_full() const {
     return m_hwm == nrow();
 }
 
-size_t TableBase::push_back(size_t nrow) {
+uint_t TableBase::push_back(uint_t nrow) {
     DEBUG_ASSERT_TRUE(row_size(), "cannot resize a table with zero row size");
     if (m_hwm + nrow > this->nrow()) expand(nrow);
     auto tmp = m_hwm;
@@ -50,7 +50,7 @@ size_t TableBase::push_back(size_t nrow) {
     return tmp;
 }
 
-size_t TableBase::get_free_row() {
+uint_t TableBase::get_free_row() {
     if (m_free_rows.empty()) return push_back();
     auto irow = m_free_rows.top();
     m_free_rows.pop();
@@ -65,7 +65,7 @@ void TableBase::clear() {
     while (!m_free_rows.empty()) m_free_rows.pop();
 }
 
-void TableBase::clear(const size_t &irow) {
+void TableBase::clear(const uint_t &irow) {
     ASSERT(!is_protected(irow));
     std::memset(begin(irow), 0, row_size());
     m_free_rows.push(irow);
@@ -75,15 +75,15 @@ bool TableBase::is_cleared() const {
     return std::memcmp(begin(), m_null_row_string.data(), row_size()) == 0;
 }
 
-bool TableBase::is_cleared(const size_t &irow) const {
+bool TableBase::is_cleared(const uint_t &irow) const {
     return std::memcmp(begin(irow), m_null_row_string.data(), row_size()) == 0;
 }
 
-size_t TableBase::bw_size() const {
+uint_t TableBase::bw_size() const {
     return m_bw.m_size;
 }
 
-void TableBase::resize(size_t nrow, double factor) {
+void TableBase::resize(uint_t nrow, double factor) {
     DEBUG_ASSERT_TRUE(row_size(), "cannot resize, row size is zero");
     DEBUG_ASSERT_GE(nrow, m_hwm, "resize would discard uncleared data");
     m_bw.resize(nrow * row_size(), factor);
@@ -91,7 +91,7 @@ void TableBase::resize(size_t nrow, double factor) {
     for(const auto &rp : m_row_protectors) rp->on_resize(this->nrow());
 }
 
-void TableBase::expand(size_t nrow, double factor) {
+void TableBase::expand(uint_t nrow, double factor) {
     resize(this->nrow()+nrow, factor);
 }
 
@@ -101,18 +101,18 @@ void TableBase::clear_rows(const defs::uintv_t &irows) {
     }
 }
 
-void TableBase::insert_rows(const Buffer::Window &recv, size_t nrow, const std::list<recv_cb_t> &callbacks) {
-    for (size_t irow_recv = 0; irow_recv < nrow; ++irow_recv) {
+void TableBase::insert_rows(const Buffer::Window &recv, uint_t nrow, const std::list<recv_cb_t> &callbacks) {
+    for (uint_t irow_recv = 0; irow_recv < nrow; ++irow_recv) {
         auto irow = get_free_row();
         std::memcpy(begin(irow), recv.m_begin + irow_recv * row_size(), row_size());
         post_insert(irow);
         for (auto f: callbacks) f(irow);
     }
 }
-void TableBase::transfer_rows(const defs::uintv_t &irows, size_t irank_send, size_t irank_recv, const std::list<recv_cb_t>& callbacks){
+void TableBase::transfer_rows(const defs::uintv_t &irows, uint_t irank_send, uint_t irank_recv, const std::list<recv_cb_t>& callbacks){
     DEBUG_ASSERT_NE_ALL(irank_recv, irank_send, "sending and recving ranks should never be the same");
     if (!m_transfer) m_transfer = smart_ptr::make_unique<RowTransfer>(m_bw.name());
-    size_t nrow = 0;
+    uint_t nrow = 0;
     if (mpi::i_am(irank_send)){
         auto& send_bw = m_transfer->m_send_bw;
         nrow = irows.size();
@@ -153,12 +153,12 @@ void TableBase::transfer_rows(const defs::uintv_t &irows, size_t irank_send, siz
     }
 }
 
-void TableBase::copy_row_in(const TableBase &src, size_t irow_src, size_t irow_dst) {
+void TableBase::copy_row_in(const TableBase &src, uint_t irow_src, uint_t irow_dst) {
     ASSERT(irow_dst < m_hwm);
     std::memcpy(begin(irow_dst), src.begin(irow_src), row_size());
 }
 
-void TableBase::swap_rows(const size_t &irow, const size_t &jrow) {
+void TableBase::swap_rows(const uint_t &irow, const uint_t &jrow) {
     if (irow == jrow) return;
     auto iptr = begin(irow);
     auto jptr = begin(jrow);
@@ -168,10 +168,10 @@ void TableBase::swap_rows(const size_t &irow, const size_t &jrow) {
 std::string TableBase::to_string(const defs::uintv_t *ordering) const {
     std::string out;
     auto begin_ptr = begin();
-    for (size_t i=0ul; i<m_hwm; ++i){
+    for (uint_t i=0ul; i<m_hwm; ++i){
         auto irow = ordering ? ordering->at(i) : i;
         auto row_ptr = begin_ptr+irow*row_size();
-        for (size_t ibyte=0ul; ibyte < row_size(); ++ibyte){
+        for (uint_t ibyte=0ul; ibyte < row_size(); ++ibyte){
             out+= std::to_string(static_cast<int>(row_ptr[ibyte])) + " ";
         }
         out+="\n";
@@ -196,7 +196,7 @@ void TableBase::all_gatherv(const TableBase &src) {
     post_insert_range(0, nrow_total);
 }
 
-void TableBase::gatherv(const TableBase &src, size_t irank) {
+void TableBase::gatherv(const TableBase &src, uint_t irank) {
     if (mpi::i_am(irank)) clear();
     defs::uintv_t nrows(mpi::nrank());
     defs::uintv_t counts(mpi::nrank());
@@ -224,16 +224,16 @@ bool TableBase::is_protected() const {
                        [](const RowProtector* rp){return rp->is_protected();});
 }
 
-bool TableBase::is_protected(size_t irow) const {
+bool TableBase::is_protected(uint_t irow) const {
     return std::any_of(m_row_protectors.cbegin(), m_row_protectors.cend(),
                        [&](const RowProtector* rp){return rp->is_protected(irow);});
 }
 
-size_t TableBase::nrow_nonzero() const {
+uint_t TableBase::nrow_nonzero() const {
     return m_hwm-m_free_rows.size();
 }
 
-TableBase::Loc::Loc(size_t irank, size_t irow) : m_irank(irank), m_irow(irow){
+TableBase::Loc::Loc(uint_t irank, uint_t irow) : m_irank(irank), m_irow(irow){
 #ifndef NDEBUG
     mpi::bcast(irank);
     mpi::bcast(irow);

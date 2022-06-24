@@ -19,19 +19,19 @@ class HamiltonianFileReader : public NumericCsvFileReader {
 public:
     const bool m_complex_valued;
 
-    static size_t iline_fn(const std::string& fname);
+    static uint_t iline_fn(const std::string& fname);
 
-    HamiltonianFileReader(const std::string &fname, size_t nind);
+    HamiltonianFileReader(const std::string &fname, uint_t nind);
 
     bool next(defs::uintv_t &inds, defs::ham_t &v);
 
-    static size_t nset_ind(const defs::uintv_t &inds);
+    static uint_t nset_ind(const defs::uintv_t &inds);
 
-    virtual size_t ranksig(const defs::uintv_t &inds) const = 0;
+    virtual uint_t ranksig(const defs::uintv_t &inds) const = 0;
 
-    virtual size_t exsig(const defs::uintv_t &inds, size_t ranksig) const = 0;
+    virtual uint_t exsig(const defs::uintv_t &inds, uint_t ranksig) const = 0;
 
-    size_t exsig(const defs::uintv_t &inds) const;
+    uint_t exsig(const defs::uintv_t &inds) const;
 
     virtual bool inds_in_range(const defs::uintv_t& inds) const = 0;
 

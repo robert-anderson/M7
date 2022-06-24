@@ -86,7 +86,7 @@ void Archive::save() {
     save(fw);
 }
 
-void Archive::chkpt(size_t icycle) {
+void Archive::chkpt(uint_t icycle) {
     if (m_do_chkpts) return;
     bool output = false;
     output = m_opts.m_archive.m_period_mins && m_timer / 60 >= m_opts.m_archive.m_period_mins;

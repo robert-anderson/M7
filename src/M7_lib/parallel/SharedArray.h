@@ -11,13 +11,13 @@
 
 template<typename T>
 class SharedArray {
-    const size_t m_size;
+    const uint_t m_size;
 #ifdef ENABLE_MPI
     MPI_Win m_win;
 #endif
     T *m_data = nullptr;
 public:
-    SharedArray(size_t size) : m_size(size) {
+    SharedArray(uint_t size) : m_size(size) {
 #ifdef ENABLE_MPI
         auto baseptr = reinterpret_cast<void *>(&m_data);
         if (mpi::on_node_i_am_root()) {
@@ -40,7 +40,7 @@ public:
         auto ierr = MPI_Win_shared_query(m_win, 0, &alloc_size, &disp_unit, baseptr);
         if (ierr != MPI_SUCCESS) throw std::runtime_error("MPI Memory Window query failed");
         ASSERT(disp_unit == sizeof(T))
-        ASSERT((size_t) alloc_size == size * sizeof(T))
+        ASSERT((uint_t) alloc_size == size * sizeof(T))
         MPI_Win_unlock_all(m_win);
         if (mpi::on_node_i_am_root()) std::memset(reinterpret_cast<char*>(m_data), 0, size * sizeof(T));
         mpi::barrier_on_node();
@@ -75,11 +75,11 @@ public:
 #endif
     }
 
-    const size_t &size() {
+    const uint_t &size() {
         return m_size;
     }
 
-    void set(const size_t &i, const T &v) {
+    void set(const uint_t &i, const T &v) {
         // element-modifying access should only take place on the root rank
         if (mpi::on_node_i_am_root()) {
             DEBUG_ASSERT_LT(i, m_size, "SharedArray element OOB");
@@ -87,7 +87,7 @@ public:
         }
     }
 
-    const T &operator[](const size_t &i) const {
+    const T &operator[](const uint_t &i) const {
         DEBUG_ASSERT_LT(i, m_size, "SharedArray element OOB");
         return m_data[i];
     }

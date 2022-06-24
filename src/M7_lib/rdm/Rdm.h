@@ -16,7 +16,7 @@ struct Rdm {};
 
 struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, Archivable {
     typedef Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true> base_t;
-    const size_t m_nann, m_ncre, m_nelec;
+    const uint_t m_nann, m_ncre, m_nelec;
     /**
      * working indices for building promotions and looking up the MEV tables
      */
@@ -31,12 +31,12 @@ struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, 
     const bool m_mixed_estimator;
     mutable FrmOps m_com;
 
-    const size_t &nop() const;
+    const uint_t &nop() const;
 
-    static size_t nrow_estimate(size_t nann, size_t ncre, size_t nsite);
+    static uint_t nrow_estimate(uint_t nann, uint_t ncre, uint_t nsite);
 
-    FermionRdm(const conf::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec);
-    FermionRdm(const conf::FermionRdm &opts, size_t nsite, size_t nelec):
+    FermionRdm(const conf::FermionRdm &opts, uint_t nrow_crude_est, uint_t nsite, uint_t nelec);
+    FermionRdm(const conf::FermionRdm &opts, uint_t nsite, uint_t nelec):
     FermionRdm(opts, nrow_estimate(opts.m_rank, opts.m_rank, nsite), nsite, nelec){}
 
     void make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv &conn, const FrmOps &com,
@@ -54,7 +54,7 @@ struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, 
     }
 
     void make_contribs(const fields::FrmOnv &src_onv, const defs::wf_t &src_weight,
-                       const fields::FrmOnv &dst_onv, const defs::wf_t &dst_weight, const size_t &nop_conn) {
+                       const fields::FrmOnv &dst_onv, const defs::wf_t &dst_weight, const uint_t &nop_conn) {
         m_conn.connect(src_onv, dst_onv, m_com);
         if (m_conn.size() != nop_conn) return;
         make_contribs(src_onv, m_conn, m_com, src_weight, dst_weight);
@@ -81,7 +81,7 @@ struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, 
         RowHdf5Reader<MevRow<defs::wf_t>> row_reader(m_buffer.m_row, parent, std::to_string(nop()), h5_field_names());
 
         row_reader.restart();
-        for (size_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
+        for (uint_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
             row_reader.read(iitem);
             auto &send_table = send(m_ra.get_rank(row_reader.m_inds));
             // should never read in the same uintv_t twice
@@ -116,7 +116,7 @@ struct RdmGroup {
     // particle number-conserving, fermion RDMs
     std::array<std::unique_ptr<FermionRdm>, defs::c_nop_mask_frm> m_frm_rdms;
 
-    RdmGroup(const conf::FermionRdm &opts, size_t nsite, size_t nelec){
+    RdmGroup(const conf::FermionRdm &opts, uint_t nsite, uint_t nelec){
         for (auto rank: opts.m_ranks.get())
             m_frm_rdms[rank] = smart_ptr::make_unique<FermionRdm>(opts, nsite, nelec);
     }
@@ -138,11 +138,11 @@ struct RdmGroup {
         auto row = m_frm_rdms[2]->m_store.m_row;
 
         for (row.restart(); row.in_range(); row.step()){
-            const size_t i=row.m_inds.m_cre[0];
-            const size_t j=row.m_inds.m_cre[1];
+            const uint_t i=row.m_inds.m_cre[0];
+            const uint_t j=row.m_inds.m_cre[1];
             ASSERT(i<j);
-            const size_t k=row.m_inds.m_ann[0];
-            const size_t l=row.m_inds.m_ann[1];
+            const uint_t k=row.m_inds.m_ann[0];
+            const uint_t l=row.m_inds.m_ann[1];
             ASSERT(k<l);
             const auto rdm_element = row.m_values[0];
             e2 += rdm_element*ham.get_element_2(i, j, k, l);
@@ -162,9 +162,9 @@ struct RdmGroup {
         e1 = mpi::all_sum(e1);
         e2 = mpi::all_sum(e2);
         trace = mpi::all_sum(trace);
-        ASSERT(!datatype::nearly_zero(std::abs(trace), 1e-14));
-        const auto norm = datatype::real(trace) / utils::integer::combinatorial(ham.nelec(), 2);
-        return datatype::real(ham.m_e_core) + (datatype::real(e1) + datatype::real(e2))/norm;
+        ASSERT(!dtype::nearly_zero(std::abs(trace), 1e-14));
+        const auto norm = dtype::real(trace) / utils::integer::combinatorial(ham.nelec(), 2);
+        return dtype::real(ham.m_e_core) + (dtype::real(e1) + dtype::real(e2))/norm;
     }
 
 };

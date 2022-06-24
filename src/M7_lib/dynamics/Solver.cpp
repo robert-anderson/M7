@@ -56,9 +56,9 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
     m_wf.m_ra.activate(m_icycle);
 }
 
-void Solver::execute(size_t ncycle) {
+void Solver::execute(uint_t ncycle) {
     log::info("Beginning solver loop...");
-    for (size_t i = 0ul; i < ncycle; ++i) {
+    for (uint_t i = 0ul; i < ncycle; ++i) {
         m_cycle_timer.reset();
         m_cycle_timer.unpause();
         begin_cycle();
@@ -128,7 +128,7 @@ void Solver::begin_cycle() {
     }
     m_refs.begin_cycle();
 
-    auto update_epoch = [&](const size_t &ncycle_wait) {
+    auto update_epoch = [&](const uint_t &ncycle_wait) {
         const auto &epochs = m_prop.m_shift.m_variable_mode;
         if (!epochs) return false;
         return m_icycle > epochs.icycle_start_last() + ncycle_wait;
@@ -198,7 +198,7 @@ void Solver::loop_over_occupied_mbfs() {
 
         m_refs.contrib_row();
 
-        for (size_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
+        for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
 
             DEBUG_ASSERT_TRUE(!m_wf.m_store.m_row.m_mbf.is_zero(),
                               "Stored MBF should not be zeroed");
@@ -231,7 +231,7 @@ void Solver::loop_over_occupied_mbfs() {
     m_synchronization_timer.pause();
 }
 
-void Solver::finalizing_loop_over_occupied_mbfs(size_t icycle) {
+void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
     if (!m_maes.m_accum_epoch || m_maes.is_period_cycle(icycle)) return;
     auto &row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
@@ -259,7 +259,7 @@ void Solver::loop_over_spawned() {
     m_wf.recv().clear();
 }
 
-void Solver::propagate_row(const size_t &ipart) {
+void Solver::propagate_row(const uint_t &ipart) {
     auto &row = m_wf.m_store.m_row;
 
     if (row.is_cleared()) return;
@@ -277,7 +277,7 @@ void Solver::end_cycle() {
 //    double chk_ratio;
     if (!fptol::numeric_zero(m_wf.m_nwalker.m_local[{0, 0}])) {
 //        chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
-//        bool chk = m_chk_nwalker_local == 0.0 || datatype::nearly_equal(chk_ratio, 1.0);
+//        bool chk = m_chk_nwalker_local == 0.0 || dtype::nearly_equal(chk_ratio, 1.0);
 //        if (!chk) std::cout << "discrepancy: " << m_chk_nwalker_local-m_wf.m_nwalker(0, 0) << std::endl;
 //        MPI_REQUIRE(chk,"Unlogged walker population changes have occurred");
     }

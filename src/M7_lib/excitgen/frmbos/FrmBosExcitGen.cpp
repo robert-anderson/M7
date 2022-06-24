@@ -8,7 +8,7 @@ FrmBosExcitGen::FrmBosExcitGen(const FrmBosHam& h, PRNG& prng, defs::uintv_t exs
         ExcitGen(prng, std::move(exsigs), std::move(description)), m_h(h) {}
 
 
-bool FrmBosExcitGen::draw_h_frmbos(size_t exsig, const field::FrmBosOnv& src, defs::prob_t& prob,
+bool FrmBosExcitGen::draw_h_frmbos(uint_t exsig, const field::FrmBosOnv& src, defs::prob_t& prob,
                                    defs::ham_t& helem, conn::FrmBosOnv& conn) {
     auto result = draw(exsig, src, prob, conn);
     if (!result) return false;

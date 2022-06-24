@@ -25,15 +25,15 @@ namespace setbit_foreach {
      *  get_work_fn_t instance
      */
     template<typename T, typename body_fn_t, typename get_work_fn_t>
-    static void single(size_t dsize, const body_fn_t& fn, const get_work_fn_t& get_work_fn) {
+    static void single(uint_t dsize, const body_fn_t& fn, const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor::assert_prototype<void(size_t), body_fn_t>();
-        functor::assert_prototype<T(size_t), get_work_fn_t>();
+        functor::assert_prototype<void(uint_t), body_fn_t>();
+        functor::assert_prototype<T(uint_t), get_work_fn_t>();
         T work;
-        for (size_t idataword = 0; idataword < dsize; ++idataword) {
+        for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 fn(ibit);
             }
         }
@@ -58,15 +58,15 @@ namespace setbit_foreach {
      *  get_work_fn_t instance
      */
     template<typename T, typename body_fn_t, typename get_work_fn_t>
-    static void pair_inner(size_t dsize, size_t ibit, const body_fn_t &fn, const get_work_fn_t& get_work_fn) {
+    static void pair_inner(uint_t dsize, uint_t ibit, const body_fn_t &fn, const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor::assert_prototype<void(size_t, size_t), body_fn_t>();
-        functor::assert_prototype<T(size_t), get_work_fn_t>();
+        functor::assert_prototype<void(uint_t, uint_t), body_fn_t>();
+        functor::assert_prototype<T(uint_t), get_work_fn_t>();
         T work;
-        for (size_t idataword = 0; idataword < dsize; ++idataword) {
+        for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t jbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t jbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 if (jbit==ibit) return;
                 fn(jbit, ibit);
             }
@@ -93,17 +93,17 @@ namespace setbit_foreach {
      *  get_work_fn_t instance
      */
     template<typename T, typename body_fn_outer_t, typename body_fn_inner_t, typename get_work_fn_t>
-    static void pair(size_t dsize, const body_fn_outer_t& fn_outer, const body_fn_inner_t& fn_inner,
+    static void pair(uint_t dsize, const body_fn_outer_t& fn_outer, const body_fn_inner_t& fn_inner,
                      const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor::assert_prototype<void(size_t), body_fn_outer_t>();
-        functor::assert_prototype<void(size_t, size_t), body_fn_inner_t>();
-        functor::assert_prototype<T(size_t), get_work_fn_t>();
+        functor::assert_prototype<void(uint_t), body_fn_outer_t>();
+        functor::assert_prototype<void(uint_t, uint_t), body_fn_inner_t>();
+        functor::assert_prototype<T(uint_t), get_work_fn_t>();
         T work;
-        for (size_t idataword = 0; idataword < dsize; ++idataword) {
+        for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 fn_outer(ibit);
                 pair_inner<T>(dsize, ibit, fn_inner, get_work_fn);
             }
@@ -115,25 +115,25 @@ namespace setbit_foreach {
      * on the single set bits, only the pairs. here the outer functor is set to a null lambda.
      */
     template<typename T, typename body_fn_inner_t, typename get_work_fn_t>
-    static void pair(size_t dsize, const body_fn_inner_t& fn_inner, const get_work_fn_t& get_work_fn) {
-        auto fn_outer = [](size_t){};
+    static void pair(uint_t dsize, const body_fn_inner_t& fn_inner, const get_work_fn_t& get_work_fn) {
+        auto fn_outer = [](uint_t){};
         pair<T>(dsize, fn_outer, fn_inner, get_work_fn);
     }
 
 
     template<typename T, typename body_fn_3_t, typename get_work_fn_t>
-    static void triple_2(size_t dsize, size_t ibit, size_t jbit, const body_fn_3_t& fn_3,
+    static void triple_2(uint_t dsize, uint_t ibit, uint_t jbit, const body_fn_3_t& fn_3,
                          const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor::assert_prototype<void(size_t, size_t, size_t), body_fn_3_t>();
-        functor::assert_prototype<T(size_t), get_work_fn_t>();
+        functor::assert_prototype<void(uint_t, uint_t, uint_t), body_fn_3_t>();
+        functor::assert_prototype<T(uint_t), get_work_fn_t>();
         DEBUG_ASSERT_LT(jbit, ibit, "triplet should be strictly ordered");
 
         T work;
-        for (size_t idataword = 0; idataword < dsize; ++idataword) {
+        for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t kbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t kbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 if (kbit==ibit) return;
                 if (kbit==jbit) return;
                 fn_3(kbit, jbit, ibit);
@@ -142,18 +142,18 @@ namespace setbit_foreach {
     }
 
     template<typename T, typename body_fn_2_t, typename body_fn_3_t, typename get_work_fn_t>
-    static void triple_1(size_t dsize, size_t ibit, const body_fn_2_t& fn_2, const body_fn_3_t& fn_3,
+    static void triple_1(uint_t dsize, uint_t ibit, const body_fn_2_t& fn_2, const body_fn_3_t& fn_3,
                        const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor::assert_prototype<void(size_t, size_t), body_fn_2_t>();
-        functor::assert_prototype<void(size_t, size_t, size_t), body_fn_3_t>();
-        functor::assert_prototype<T(size_t), get_work_fn_t>();
+        functor::assert_prototype<void(uint_t, uint_t), body_fn_2_t>();
+        functor::assert_prototype<void(uint_t, uint_t, uint_t), body_fn_3_t>();
+        functor::assert_prototype<T(uint_t), get_work_fn_t>();
 
         T work;
-        for (size_t idataword = 0; idataword < dsize; ++idataword) {
+        for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t jbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t jbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 if (jbit==ibit) return;
                 fn_2(jbit, ibit);
                 triple_2<T>(dsize, ibit, jbit, fn_3, get_work_fn);
@@ -163,18 +163,18 @@ namespace setbit_foreach {
 
 
     template<typename T, typename body_fn_1_t, typename body_fn_2_t, typename body_fn_3_t, typename get_work_fn_t>
-    static void triple(size_t dsize, const body_fn_1_t& fn_1, const body_fn_2_t& fn_2, const body_fn_3_t& fn_3,
+    static void triple(uint_t dsize, const body_fn_1_t& fn_1, const body_fn_2_t& fn_2, const body_fn_3_t& fn_3,
                      const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor::assert_prototype<void(size_t), body_fn_1_t>();
-        functor::assert_prototype<void(size_t, size_t), body_fn_2_t>();
-        functor::assert_prototype<void(size_t, size_t, size_t), body_fn_3_t>();
-        functor::assert_prototype<T(size_t), get_work_fn_t>();
+        functor::assert_prototype<void(uint_t), body_fn_1_t>();
+        functor::assert_prototype<void(uint_t, uint_t), body_fn_2_t>();
+        functor::assert_prototype<void(uint_t, uint_t, uint_t), body_fn_3_t>();
+        functor::assert_prototype<T(uint_t), get_work_fn_t>();
         T work;
-        for (size_t idataword = 0; idataword < dsize; ++idataword) {
+        for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 fn_1(ibit);
                 triple_1<T>(dsize, ibit, fn_2, fn_3, get_work_fn);
             }
@@ -187,9 +187,9 @@ namespace setbit_foreach {
      * lambda.
      */
     template<typename T, typename body_fn_t, typename get_work_fn_t>
-    static void triple(size_t dsize, const body_fn_t& fn, const get_work_fn_t& get_work_fn) {
-        auto fn_1 = [](size_t){};
-        auto fn_2 = [](size_t, size_t){};
+    static void triple(uint_t dsize, const body_fn_t& fn, const get_work_fn_t& get_work_fn) {
+        auto fn_1 = [](uint_t){};
+        auto fn_2 = [](uint_t, uint_t){};
         triple<T>(dsize, fn_1, fn_2, fn, get_work_fn);
     }
 

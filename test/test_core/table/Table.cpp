@@ -12,7 +12,7 @@ struct CommonFieldTypeTable : public Table {
     fields::Numbers<short, 1> m_shorts;
     fields::Numbers<short, 1> m_more_shorts;
 
-    CommonFieldTypeTable(size_t n1, size_t n2) :
+    CommonFieldTypeTable(uint_t n1, uint_t n2) :
             m_shorts(this, "some shorts", n1),
             m_more_shorts(this, "some more shorts", n2) {}
 };
@@ -41,7 +41,7 @@ struct DifferentFieldTypeTable : public Table {
     fields::Numbers<short, 1> m_shorts;
     fields::Numbers<float, 1> m_floats;
 
-    DifferentFieldTypeTable(size_t n1, size_t n2) :
+    DifferentFieldTypeTable(uint_t n1, uint_t n2) :
             m_shorts(this, "some shorts", n1),
             m_floats(this, "some floats", n2) {}
 };
@@ -97,14 +97,14 @@ struct SortingTestTable : public Table {
 
 TEST(Table, Sorting) {
     BufferedTable<SortingTestTable> bt("Sorting test");
-    const size_t size = 100;
+    const uint_t size = 100;
     PRNG prng(14, size);
     bt.expand(size);
     bt.push_back(size);
-    for (size_t i = 0ul; i < size; ++i) {
+    for (uint_t i = 0ul; i < size; ++i) {
         bt.m_values(i) = prng.draw_float();
     }
-    auto comp_fn = [&bt](const size_t& i1, const size_t i2){return bt.m_values(i1)>=bt.m_values(i2);};
+    auto comp_fn = [&bt](const uint_t& i1, const uint_t i2){return bt.m_values(i1)>=bt.m_values(i2);};
     QuickSorter sorter(comp_fn);
     sorter.sort(bt);
     ASSERT_TRUE(sorter.is_sorted(bt));
@@ -113,14 +113,14 @@ TEST(Table, Sorting) {
 
 TEST(Table, FieldBasedSorting) {
     BufferedTable<SortingTestTable> bt("Sorting test");
-    const size_t size = 100;
+    const uint_t size = 100;
     PRNG prng(14, size);
     bt.expand(size);
     bt.push_back(size);
-    for (size_t i = 0ul; i < size; ++i) {
+    for (uint_t i = 0ul; i < size; ++i) {
         bt.m_values(i) = prng.draw_float();
     }
-    auto getter_fn = [&bt](const size_t& i) -> const double& {return bt.m_values(i);};
+    auto getter_fn = [&bt](const uint_t& i) -> const double& {return bt.m_values(i);};
     TableFieldSorter<fields::Number<double>> sorter(getter_fn);
     sorter.sort(bt);
     ASSERT_TRUE(sorter.is_sorted(bt));
@@ -128,20 +128,20 @@ TEST(Table, FieldBasedSorting) {
 
 TEST(Table, ExtremalIndices) {
     BufferedTable<SortingTestTable> bt("Extremal values test");
-    const size_t size = 100;
+    const uint_t size = 100;
     PRNG prng(14, size);
     bt.expand(size);
     bt.push_back(size);
-    for (size_t i = 0ul; i < size; ++i) {
+    for (uint_t i = 0ul; i < size; ++i) {
         bt.m_values(i) = prng.draw_float();
     }
-    auto comp_fn = [&bt](const size_t& i1, const size_t i2){return bt.m_values(i1)<=bt.m_values(i2);};
+    auto comp_fn = [&bt](const uint_t& i1, const uint_t i2){return bt.m_values(i1)<=bt.m_values(i2);};
     ExtremalIndices xv(comp_fn);
     xv.find(45);
     QuickSorter sorter(comp_fn);
     sorter.sort(bt);
 
-    for (size_t ifound=0ul; ifound<xv.nfound(); ++ifound){
+    for (uint_t ifound=0ul; ifound<xv.nfound(); ++ifound){
         ASSERT_EQ(xv[ifound], sorter[ifound]);
     }
 }
@@ -149,11 +149,11 @@ TEST(Table, ExtremalIndices) {
 
 TEST(Table, FieldBasedExtremalValues) {
     BufferedTable<SortingTestTable> bt("Extremal values test");
-    const size_t size = 100;
+    const uint_t size = 100;
     PRNG prng(14, size);
     bt.expand(size);
     bt.push_back(size);
-    for (size_t i = 0ul; i < size; ++i) {
+    for (uint_t i = 0ul; i < size; ++i) {
         bt.m_values(i) = prng.draw_float();
     }
 
@@ -165,7 +165,7 @@ TEST(Table, FieldBasedExtremalValues) {
 
     bt.print_contents(xv);
 
-    for (size_t ifound=0ul; ifound<xv.nfound(); ++ifound){
+    for (uint_t ifound=0ul; ifound<xv.nfound(); ++ifound){
         ASSERT_EQ(xv[ifound], sorter[ifound]);
     }
 }
@@ -174,9 +174,9 @@ TEST(Table, FieldBasedExtremalValues) {
 TEST(Table, PointToPointTransfer) {
     if (mpi::nrank()==1) GTEST_SKIP();
     BufferedTable<DifferentFieldTypeTable> bt("Test", 3, 4);
-    const size_t ngen = 5;
+    const uint_t ngen = 5;
     bt.push_back(ngen);
-    for (size_t i=0ul; i<ngen; ++i) bt.m_shorts(i, 0) = 55*(i+1)+mpi::irank();
+    for (uint_t i=0ul; i<ngen; ++i) bt.m_shorts(i, 0) = 55*(i+1)+mpi::irank();
     bt.print_contents();
     defs::uintv_t send;
     if (mpi::i_am(0)) send = {1, 2, 4};
@@ -189,7 +189,7 @@ TEST(Table, PointToPointTransfer) {
 }
 
 TEST(Table, Copy){
-    const size_t nshorts=4, nfloats=3;
+    const uint_t nshorts=4, nfloats=3;
     DifferentFieldTypeTable t(nshorts, nfloats);
     ASSERT_EQ(t.m_shorts.m_format.nelement(), nshorts);
     ASSERT_EQ(t.m_floats.m_format.nelement(), nfloats);
@@ -208,7 +208,7 @@ TEST(Table, Copy){
 }
 
 TEST(Table, CopyBuffered){
-    const size_t nshorts=4, nfloats=3;
+    const uint_t nshorts=4, nfloats=3;
     BufferedTable<DifferentFieldTypeTable> t("Copy test table", nshorts, nfloats);
     ASSERT_EQ(t.m_shorts.m_format.nelement(), nshorts);
     ASSERT_EQ(t.m_floats.m_format.nelement(), nfloats);
@@ -237,7 +237,7 @@ TEST(Table, CopyBuffered){
     ASSERT_EQ(tcopy.m_columns.size(), 2);
 
     ASSERT_EQ(t.m_hwm, 4);
-    ASSERT_EQ(t.m_nrow, (size_t)(4*(1+t.m_bw.expansion_factor())));
+    ASSERT_EQ(t.m_nrow, (uint_t)(4*(1+t.m_bw.expansion_factor())));
 
     // copied buffer should be empty
     ASSERT_EQ(tcopy.m_hwm, 0);

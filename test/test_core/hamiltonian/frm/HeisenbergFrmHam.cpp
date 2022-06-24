@@ -22,14 +22,14 @@ namespace heisenberg_test {
 
     static void set_onv_from_spinvec(field::FrmOnv& onv, const defs::uintv_t& spinvec){
         onv.zero();
-        size_t isite = 0ul;
+        uint_t isite = 0ul;
         for (auto &spin: spinvec) onv.set({spin, isite++});
     }
 }
 
 TEST(HeisenbergFrmHam, LocalExchangeOnly){
     auto lattice = lattice::make("ortho", {6}, {1});
-    for (size_t isite=0ul; isite < lattice->m_nsite; ++isite) {
+    for (uint_t isite=0ul; isite < lattice->m_nsite; ++isite) {
         ASSERT_EQ(lattice->m_nadjs[isite], 2);
     }
     HeisenbergFrmHam ham(1, lattice);
@@ -57,7 +57,7 @@ TEST(HeisenbergFrmHam, LocalExchangeOnly){
 
 TEST(HeisenbergFrmHam, Elements){
     auto lattice = lattice::make("ortho", {6}, {1});
-    for (size_t isite=0ul; isite < lattice->m_nsite; ++isite) {
+    for (uint_t isite=0ul; isite < lattice->m_nsite; ++isite) {
         ASSERT_EQ(lattice->m_nadjs[isite], 2);
     }
     HeisenbergFrmHam ham(1, lattice);
@@ -68,8 +68,8 @@ TEST(HeisenbergFrmHam, Elements){
     auto spinvecs = heisenberg_test::spinvecs();
     auto energies = heisenberg_test::energies();
 
-    size_t noffdiag_nonzero = 0ul;
-    for (size_t isrc=0ul; isrc<spinvecs.size(); ++isrc) {
+    uint_t noffdiag_nonzero = 0ul;
+    for (uint_t isrc=0ul; isrc<spinvecs.size(); ++isrc) {
         heisenberg_test::set_onv_from_spinvec(src, spinvecs[isrc]);
         ASSERT_FLOAT_EQ(ham.get_energy(src), energies[isrc]);
         for (auto & dst_spinvec : spinvecs) {

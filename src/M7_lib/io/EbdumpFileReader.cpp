@@ -11,7 +11,7 @@ EbdumpFileReader::EbdumpFileReader(const std::string& fname, bool spin_major) :
         m_info(FortranNamelistReader(fname)),
         m_norb_distinct((m_info.m_uhf ? 2 : 1)*m_info.m_nsite), m_spin_major(spin_major){}
 
-size_t EbdumpFileReader::ranksig(const defs::uintv_t& inds) const {
+uint_t EbdumpFileReader::ranksig(const defs::uintv_t& inds) const {
     DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
     switch (nset_ind(inds)) {
         case 1ul:
@@ -24,7 +24,7 @@ size_t EbdumpFileReader::ranksig(const defs::uintv_t& inds) const {
     }
 }
 
-size_t EbdumpFileReader::exsig(const defs::uintv_t& inds, size_t) const {
+uint_t EbdumpFileReader::exsig(const defs::uintv_t& inds, uint_t) const {
     DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
     if (inds[1] == inds[2]) return exsig::ex_0010;
     else return exsig::ex_1110;
@@ -36,7 +36,7 @@ bool EbdumpFileReader::inds_in_range(const defs::uintv_t& inds) const {
 
 void EbdumpFileReader::convert_inds(defs::uintv_t& inds) {
     if (!m_info.m_spin_resolved || m_spin_major) return;
-    auto fn = [&inds, this](size_t i){
+    auto fn = [&inds, this](uint_t i){
         auto& ind = inds[i];
         ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_info.m_nsite : 0));
     };

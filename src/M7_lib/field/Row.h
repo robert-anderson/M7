@@ -57,17 +57,17 @@ private:
      * TODO: investigate whether dbegin needs to be cached with regard to performance
      */
     mutable defs::buf_t *m_begin = nullptr;
-    mutable size_t m_i = 0ul;
+    mutable uint_t m_i = 0ul;
 
 public:
     /**
      * total size of a single row in bytes
      */
-    size_t m_size = 0ul;
+    uint_t m_size = 0ul;
     /**
      * number of bytes already allocated to added fields
      */
-    size_t m_current_offset = 0ul;
+    uint_t m_current_offset = 0ul;
     /**
      * required only when copying
      */
@@ -79,7 +79,7 @@ public:
      * @return
      *  true if stored row index is within the range [0, irow_end)
      */
-    bool in_range(const size_t &irow_end) const {
+    bool in_range(const uint_t &irow_end) const {
         return m_i < irow_end;
     }
 
@@ -117,7 +117,7 @@ public:
      * @return
      *  row position within Table
      */
-    const size_t& index() const {
+    const uint_t& index() const {
         DEBUG_ASSERT_LE(m_i, m_table->m_hwm, "the row index is not in the permitted range");
         return m_i;
     }
@@ -125,7 +125,7 @@ public:
     /*
      * the 3 "cursor" methods
      */
-    void restart(const size_t &irow_begin) const {
+    void restart(const uint_t &irow_begin) const {
         DEBUG_ASSERT_LE(irow_begin, m_table->m_hwm, "Cannot restart to an out-of-range row index");
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         if (!m_table->m_hwm && !irow_begin){
@@ -149,7 +149,7 @@ public:
         m_i++;
     }
 
-    void jump(const size_t &i) const {
+    void jump(const uint_t &i) const {
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
         m_begin = m_table->begin() + m_size * i;
@@ -202,9 +202,9 @@ public:
 
     std::string to_string() const;
 
-    size_t add_field(FieldBase *field);
+    uint_t add_field(FieldBase *field);
 
-    size_t nfield() const;
+    uint_t nfield() const;
 
     void clear();
 

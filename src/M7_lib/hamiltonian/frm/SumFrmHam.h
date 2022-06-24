@@ -41,11 +41,11 @@ public:
         m_kramers_attrs = ham::KramersAttributes(h1_base.m_kramers_attrs, h2_base.m_kramers_attrs);
     }
 
-    defs::ham_t get_coeff_1100(size_t a, size_t i) const override {
+    defs::ham_t get_coeff_1100(uint_t a, uint_t i) const override {
         return m_h1.get_coeff_1100(a, i) + m_weight * m_h2.get_coeff_1100(a, i);
     }
 
-    defs::ham_t get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const override {
+    defs::ham_t get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const override {
         return m_h1.get_coeff_2200(a, b, i, j) + m_weight * m_h2.get_coeff_2200(a, b, i, j);
     }
 

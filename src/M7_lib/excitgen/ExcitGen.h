@@ -23,23 +23,23 @@ struct ExcitGen {
     /*
      * when the H matrix element is not necessary:
      */
-    virtual bool draw_frm(size_t /*exsig*/, const field::FrmOnv& /*src*/, defs::prob_t& prob, conn::FrmOnv& /*conn*/);
+    virtual bool draw_frm(uint_t /*exsig*/, const field::FrmOnv& /*src*/, defs::prob_t& prob, conn::FrmOnv& /*conn*/);
 
-    virtual bool draw_frmbos(size_t /*exsig*/, const field::FrmBosOnv& /*src*/, defs::prob_t& prob, conn::FrmBosOnv& /*conn*/);
+    virtual bool draw_frmbos(uint_t /*exsig*/, const field::FrmBosOnv& /*src*/, defs::prob_t& prob, conn::FrmBosOnv& /*conn*/);
 
-    virtual bool draw_bos(size_t /*exsig*/, const field::BosOnv& /*src*/, defs::prob_t& prob, conn::BosOnv& /*conn*/);
+    virtual bool draw_bos(uint_t /*exsig*/, const field::BosOnv& /*src*/, defs::prob_t& prob, conn::BosOnv& /*conn*/);
 
     /*
      * when the H matrix element is necessary. these can delegate the above methods in this base class, but in derived
      * classes it may make more sense to call specific methods to compute the matrix element in a more efficient way
      */
-    virtual bool draw_h_frm(size_t exsig, const field::FrmOnv& src,
+    virtual bool draw_h_frm(uint_t exsig, const field::FrmOnv& src,
                             defs::prob_t& prob, defs::ham_t& helem, conn::FrmOnv& conn) = 0;
 
-    virtual bool draw_h_frmbos(size_t exsig, const field::FrmBosOnv& src,
+    virtual bool draw_h_frmbos(uint_t exsig, const field::FrmBosOnv& src,
                                defs::prob_t& prob, defs::ham_t& helem, conn::FrmBosOnv& conn) = 0;
 
-    virtual bool draw_h_bos(size_t exsig, const field::BosOnv& src,
+    virtual bool draw_h_bos(uint_t exsig, const field::BosOnv& src,
                             defs::prob_t& prob, defs::ham_t& helem, conn::BosOnv& conn) = 0;
 
 
@@ -63,23 +63,23 @@ struct ExcitGen {
      * not for the standard requirement that methods cannot be partially overridden. This dispatcher approach helps
      * cut down on clutter in the derived classes
      */
-    bool draw(size_t exsig, const field::FrmOnv& src, defs::prob_t& prob, conn::FrmOnv& conn) {
+    bool draw(uint_t exsig, const field::FrmOnv& src, defs::prob_t& prob, conn::FrmOnv& conn) {
         return draw_frm(exsig, src, prob, conn);
     }
-    bool draw(size_t exsig, const field::FrmBosOnv& src, defs::prob_t& prob, conn::FrmBosOnv& conn) {
+    bool draw(uint_t exsig, const field::FrmBosOnv& src, defs::prob_t& prob, conn::FrmBosOnv& conn) {
         return draw_frmbos(exsig, src, prob, conn);
     }
-    bool draw(size_t exsig, const field::BosOnv& src, defs::prob_t& prob, conn::BosOnv& conn) {
+    bool draw(uint_t exsig, const field::BosOnv& src, defs::prob_t& prob, conn::BosOnv& conn) {
         return draw_bos(exsig, src, prob, conn);
     }
 
-    bool draw(size_t exsig, const field::FrmOnv& src,
+    bool draw(uint_t exsig, const field::FrmOnv& src,
               defs::prob_t& prob, defs::ham_t& helem, conn::FrmOnv& conn);
 
-    bool draw(size_t exsig, const field::FrmBosOnv& src,
+    bool draw(uint_t exsig, const field::FrmBosOnv& src,
               defs::prob_t& prob, defs::ham_t& helem, conn::FrmBosOnv& conn);
 
-    bool draw(size_t exsig, const field::BosOnv& src,
+    bool draw(uint_t exsig, const field::BosOnv& src,
               defs::prob_t& prob, defs::ham_t& helem, conn::BosOnv& conn);
 
 
@@ -91,7 +91,7 @@ struct ExcitGen {
     defs::prob_t prob(const field::BosOnv& src, const conn::BosOnv& conn, defs::ham_t helem) const;
     defs::prob_t prob(const field::FrmBosOnv& src, const conn::FrmBosOnv& conn, defs::ham_t helem) const;
 
-    virtual size_t approx_nconn(size_t /*exsig*/, sys::Particles /*particles*/) const {
+    virtual uint_t approx_nconn(uint_t /*exsig*/, sys::Particles /*particles*/) const {
         return 1ul;
     }
 

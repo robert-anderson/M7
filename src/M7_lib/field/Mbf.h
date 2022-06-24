@@ -34,17 +34,17 @@ namespace mbf {
      */
     void set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs);
 
-    void set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::uintv_t> &def, size_t idef);
+    void set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::uintv_t> &def, uint_t idef);
 
-    void set_from_def_array(field::BosOnv &mbf, const std::vector<defs::uintv_t> &def, size_t idef);
+    void set_from_def_array(field::BosOnv &mbf, const std::vector<defs::uintv_t> &def, uint_t idef);
 
-    void set(field::FrmOnv &mbf, sys::Particles particles, const conf::MbfDef &def, size_t idef);
+    void set(field::FrmOnv &mbf, sys::Particles particles, const conf::MbfDef &def, uint_t idef);
 
-    void set(field::BosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, size_t idef);
+    void set(field::BosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, uint_t idef);
 
-    void set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, size_t idef);
+    void set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, uint_t idef);
 
-    template<size_t mbf_ind>
+    template<uint_t mbf_ind>
     std::string name(){
         switch (mbf_ind) {
             case 0: return "fermion (determinant basis)";

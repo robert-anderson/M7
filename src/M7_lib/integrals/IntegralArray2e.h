@@ -58,7 +58,7 @@
 namespace integrals_2e {
     using namespace integer;
 
-    typedef std::function<void(size_t, size_t, size_t, size_t)> foreach_fn_t;
+    typedef std::function<void(uint_t, uint_t, uint_t, uint_t)> foreach_fn_t;
 
     namespace syms {
         enum Sym {
@@ -72,7 +72,7 @@ namespace integrals_2e {
 
     struct Indexer : IntegralIndexer {
         const syms::Sym m_sym;
-        Indexer(size_t norb, size_t size, syms::Sym sym): IntegralIndexer(norb, size), m_sym(sym){}
+        Indexer(uint_t norb, uint_t size, syms::Sym sym): IntegralIndexer(norb, size), m_sym(sym){}
 
         /**
          * currently this is just a general (assuming no symmetry) iterator, and could be overridden in derived classes,
@@ -89,13 +89,13 @@ namespace integrals_2e {
      * this is actually an unphysical assumption, since any two-electron integrals will have D symmetry to exploit
      */
     struct IndexerSymNone : Indexer {
-        const size_t m_norb2, m_norb3;
+        const uint_t m_norb2, m_norb3;
 
-        IndexerSymNone(size_t norb);
+        IndexerSymNone(uint_t norb);
 
-        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
+        uint_t index_only(uint_t a, uint_t b, uint_t i, uint_t j) const;
 
-        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+        std::pair<uint_t, bool> index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const;
 
     };
 
@@ -103,11 +103,11 @@ namespace integrals_2e {
      * indexing scheme which only assumes hermiticity. this is another unphysical scheme for the same reason as above
      */
     struct IndexerSymH : Indexer {
-        IndexerSymH(size_t norb);
+        IndexerSymH(uint_t norb);
 
-        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
+        uint_t index_only(uint_t a, uint_t b, uint_t i, uint_t j) const;
 
-        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+        std::pair<uint_t, bool> index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const;
 
     };
 
@@ -116,11 +116,11 @@ namespace integrals_2e {
      */
     struct IndexerSymD : Indexer {
         IndexerSymH m_sym_h;
-        IndexerSymD(size_t norb);
+        IndexerSymD(uint_t norb);
 
-        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
+        uint_t index_only(uint_t a, uint_t b, uint_t i, uint_t j) const;
 
-        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+        std::pair<uint_t, bool> index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const;
     };
 
     /**
@@ -141,12 +141,12 @@ namespace integrals_2e {
      *  i.e. b>=j, a>=i, bj>=ai
      */
     struct IndexerSymDH : Indexer {
-        const size_t m_hir_size;
-        IndexerSymDH(size_t norb);
+        const uint_t m_hir_size;
+        IndexerSymDH(uint_t norb);
 
-        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+        std::pair<uint_t, bool> index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const;
 
-        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
+        uint_t index_only(uint_t a, uint_t b, uint_t i, uint_t j) const;
 
     };
 
@@ -168,12 +168,12 @@ namespace integrals_2e {
      *  i.e. b>=j, a>=i, bj>=ai
      */
     struct IndexerSymDR : Indexer {
-        const size_t m_hir_size;
-        IndexerSymDR(size_t norb);
+        const uint_t m_hir_size;
+        IndexerSymDR(uint_t norb);
 
-        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
+        uint_t index_only(uint_t a, uint_t b, uint_t i, uint_t j) const;
 
-        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+        std::pair<uint_t, bool> index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const;
     };
 
     /**
@@ -182,23 +182,23 @@ namespace integrals_2e {
      *  - Hermitian H
      */
     struct IndexerSymDHR : Indexer {
-        IndexerSymDHR(size_t norb);
+        IndexerSymDHR(uint_t norb);
 
-        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
+        uint_t index_only(uint_t a, uint_t b, uint_t i, uint_t j) const;
 
-        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+        std::pair<uint_t, bool> index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const;
     };
 
 
     template<typename T>
     struct Array {
-        const size_t m_norb;
-        Array(size_t norb): m_norb(norb){}
+        const uint_t m_norb;
+        Array(uint_t norb): m_norb(norb){}
         virtual ~Array() = default;
 
-        virtual bool set(size_t a, size_t b, size_t i, size_t j, T elem) = 0;
+        virtual bool set(uint_t a, uint_t b, uint_t i, uint_t j, T elem) = 0;
 
-        virtual T get(size_t a, size_t b, size_t i, size_t j) const = 0;
+        virtual T get(uint_t a, uint_t b, uint_t i, uint_t j) const = 0;
 
         virtual syms::Sym sym() const = 0;
     };
@@ -211,12 +211,12 @@ namespace integrals_2e {
         indexer_t m_indexer;
         SharedIntegralStorage<T> m_data;
 
-        IndexedArray(size_t norb) :
+        IndexedArray(uint_t norb) :
             Array<T>(norb), m_indexer(norb), m_data(static_cast<const IntegralIndexer &>(m_indexer).m_size) {}
 
-        bool set(size_t a, size_t b, size_t i, size_t j, T elem) override {
+        bool set(uint_t a, uint_t b, uint_t i, uint_t j, T elem) override {
             // any compiler should statically execute this conditional
-            if (!datatype::is_complex<T>())
+            if (!dtype::is_complex<T>())
                 return m_data.set_data(m_indexer.index_only(a, b, i, j), elem);
             else {
                 const auto pair = m_indexer.index_and_conj(a, b, i, j);
@@ -224,9 +224,9 @@ namespace integrals_2e {
             }
         }
 
-        T get(size_t a, size_t b, size_t i, size_t j) const override {
+        T get(uint_t a, uint_t b, uint_t i, uint_t j) const override {
             // any compiler should statically execute this conditional
-            if (!datatype::is_complex<T>())
+            if (!dtype::is_complex<T>())
                 return m_data.get_data(m_indexer.index_only(a, b, i, j));
             else {
                 const auto pair = m_indexer.index_and_conj(a, b, i, j);
@@ -258,7 +258,7 @@ namespace integrals_2e {
      *  new instance of the type corresponding to the requested symmetry
      */
     template<typename T>
-    std::unique_ptr<Array<T>> make(size_t norb, syms::Sym sym){
+    std::unique_ptr<Array<T>> make(uint_t norb, syms::Sym sym){
         typedef std::unique_ptr<Array<T>> ptr_t;
         using namespace syms;
         switch (sym) {

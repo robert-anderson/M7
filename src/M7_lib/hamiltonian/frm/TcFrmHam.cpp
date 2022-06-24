@@ -4,7 +4,7 @@
 
 #include "TcFrmHam.h"
 
-defs::ham_t TcFrmHam::get_coeff_3300(size_t a, size_t b, size_t c, size_t i, size_t j, size_t k) const {
+defs::ham_t TcFrmHam::get_coeff_3300(uint_t a, uint_t b, uint_t c, uint_t i, uint_t j, uint_t k) const {
     auto ia = m_basis.isite(a);
     auto ib = m_basis.isite(b);
     auto ic = m_basis.isite(c);
@@ -19,8 +19,8 @@ defs::ham_t TcFrmHam::get_coeff_3300(size_t a, size_t b, size_t c, size_t i, siz
     auto mj = m_basis.ispin(j);
     auto mk = m_basis.ispin(k);
     defs::ham_t coeff = 0.0;
-    auto add_contrib = [&](size_t mp, size_t mq, size_t mr, size_t ip,
-                           size_t iq, size_t ir, int sgn) {
+    auto add_contrib = [&](uint_t mp, uint_t mq, uint_t mr, uint_t ip,
+                           uint_t iq, uint_t ir, int sgn) {
         if (mp == ma && mq == mb && mr == mc) {
             coeff += sgn * get_lmat_coeff(ia, ib, ic, ip, iq, ir);
         }
@@ -46,7 +46,7 @@ defs::ham_t TcFrmHam::get_element_3300(const field::FrmOnv &onv,
 
 defs::ham_t TcFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     auto element = GeneralFrmHam::get_element_0000(onv);
-    auto triples_fn = [&](size_t i, size_t j, size_t k) {
+    auto triples_fn = [&](uint_t i, uint_t j, uint_t k) {
         element += get_coeff_3300(i, j, k, i, j, k);
     };
     onv.foreach_setbit_triple(triples_fn);
@@ -57,7 +57,7 @@ defs::ham_t TcFrmHam::get_element_1100(const field::FrmOnv &onv,
                                        const conn::FrmOnv &conn) const {
     auto general_element = GeneralFrmHam::get_element_1100(onv, conn);
     defs::ham_t tc_element = 0.0;
-    auto doubles_fn = [&](size_t i, size_t j) {
+    auto doubles_fn = [&](uint_t i, uint_t j) {
         if (i == conn.m_ann[0] || j == conn.m_ann[0]) return;
         tc_element += get_coeff_3300(conn.m_cre[0], i, j, conn.m_ann[0], i, j);
     };
@@ -71,7 +71,7 @@ defs::ham_t TcFrmHam::get_element_2200(const field::FrmOnv &onv,
                                        const conn::FrmOnv &conn) const {
     auto general_element = GeneralFrmHam::get_element_2200(onv, conn);
     defs::ham_t tc_element = 0.0;
-    auto fn = [&](size_t i) {
+    auto fn = [&](uint_t i) {
         if (i == conn.m_ann[0] || i == conn.m_ann[1]) return;
         tc_element += get_coeff_3300(conn.m_cre[0], conn.m_cre[1], i,
                                   conn.m_ann[0], conn.m_ann[1], i);

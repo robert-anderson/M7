@@ -54,8 +54,8 @@ public:
 };
 
 struct Metadata : Archivable {
-    size_t m_nsite;
-    size_t m_nelec;
+    uint_t m_nsite;
+    uint_t m_nelec;
 
     Metadata() : Archivable("metadata", true, true, true) {
 
@@ -68,8 +68,8 @@ struct Metadata : Archivable {
 struct Archive {
     const conf::Document m_opts;
     const bool m_do_load, m_do_save, m_do_chkpts;
-    size_t m_nchkpt = 0ul;
-    size_t m_icycle_last_chkpt = 0ul;
+    uint_t m_nchkpt = 0ul;
+    uint_t m_icycle_last_chkpt = 0ul;
     Timer m_timer;
     /**
      * store members and call their load and save methods polymorphically when required
@@ -98,7 +98,7 @@ public:
 
     void save();
 
-    void chkpt(size_t icycle);
+    void chkpt(uint_t icycle);
 
     void add_member(Archivable &item);
 

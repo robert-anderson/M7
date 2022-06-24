@@ -14,16 +14,16 @@ struct FrmExcitGen : ExcitGen {
 
     FrmExcitGen(const FrmHam& h, PRNG& prng, defs::uintv_t exsigs, std::string description);
 
-    bool draw_frmbos(size_t exsig, const field::FrmBosOnv& src,
+    bool draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
                      defs::prob_t& prob, conn::FrmBosOnv& conn) override;
 
-    bool draw_h_frm(size_t exsig, const field::FrmOnv& src, defs::prob_t& prob,
+    bool draw_h_frm(uint_t exsig, const field::FrmOnv& src, defs::prob_t& prob,
                     defs::ham_t& helem, conn::FrmOnv& conn) override;
 
-    bool draw_h_frmbos(size_t exsig, const field::FrmBosOnv& src, defs::prob_t& prob,
+    bool draw_h_frmbos(uint_t exsig, const field::FrmBosOnv& src, defs::prob_t& prob,
                        defs::ham_t& helem, conn::FrmBosOnv& conn) override;
 
-    bool draw_h_bos(size_t /*exsig*/, const field::BosOnv& /*src*/, defs::prob_t& prob,
+    bool draw_h_bos(uint_t /*exsig*/, const field::BosOnv& /*src*/, defs::prob_t& prob,
                     defs::ham_t& helem, conn::BosOnv& /*conn*/) override {
         prob = 0.0;
         helem = 0.0;

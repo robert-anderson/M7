@@ -33,14 +33,14 @@ std::vector<std::string> integrals_2e::syms::equivalences(integrals_2e::syms::Sy
     return {};
 }
 
-integrals_2e::IndexerSymNone::IndexerSymNone(size_t norb) :
+integrals_2e::IndexerSymNone::IndexerSymNone(uint_t norb) :
         Indexer(norb, pow(norb, 4ul), syms::None), m_norb2(norb * norb), m_norb3(norb * m_norb2) {}
 
-size_t integrals_2e::IndexerSymNone::index_only(size_t a, size_t b, size_t i, size_t j) const {
+uint_t integrals_2e::IndexerSymNone::index_only(uint_t a, uint_t b, uint_t i, uint_t j) const {
     return a * m_norb3 + b * m_norb2 + i * m_norb + j;
 }
 
-std::pair<size_t, bool> integrals_2e::IndexerSymNone::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+std::pair<uint_t, bool> integrals_2e::IndexerSymNone::index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const {
     return {index_only(a, b, i, j), false};
 }
 
@@ -51,35 +51,35 @@ void integrals_2e::Indexer::foreach(const integrals_2e::foreach_fn_t &fn) const 
 }
 
 
-integrals_2e::IndexerSymH::IndexerSymH(size_t norb) : Indexer(norb, npair(norb*norb), syms::H) {}
+integrals_2e::IndexerSymH::IndexerSymH(uint_t norb) : Indexer(norb, npair(norb*norb), syms::H) {}
 
-size_t integrals_2e::IndexerSymH::index_only(size_t a, size_t b, size_t i, size_t j) const {
+uint_t integrals_2e::IndexerSymH::index_only(uint_t a, uint_t b, uint_t i, uint_t j) const {
     const auto ab = a*m_norb+b;
     const auto ij = i*m_norb+j;
     return (ab>=ij) ? trigmap(ab, ij) : trigmap(ij, ab);
 }
 
-std::pair<size_t, bool> integrals_2e::IndexerSymH::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+std::pair<uint_t, bool> integrals_2e::IndexerSymH::index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const {
     const auto ab = a*m_norb+b;
     const auto ij = i*m_norb+j;
     if (ab>=ij) return {trigmap(ab, ij), true};
     else return {trigmap(ij, ab), false};
 }
 
-size_t integrals_2e::IndexerSymD::index_only(size_t a, size_t b, size_t i, size_t j) const {
+uint_t integrals_2e::IndexerSymD::index_only(uint_t a, uint_t b, uint_t i, uint_t j) const {
     return m_sym_h.index_only(a, i, b, j);
 }
 
-integrals_2e::IndexerSymDH::IndexerSymDH(size_t norb) :
+integrals_2e::IndexerSymDH::IndexerSymDH(uint_t norb) :
         Indexer(norb, 2*npair(npair(norb)), syms::DH), m_hir_size(m_size/2){}
 
-std::pair<size_t, bool> integrals_2e::IndexerSymD::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+std::pair<uint_t, bool> integrals_2e::IndexerSymD::index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const {
     return {index_only(a, b, i, j), false};
 }
 
-integrals_2e::IndexerSymD::IndexerSymD(size_t norb) : Indexer(norb, npair(norb*norb), syms::D), m_sym_h(norb){}
+integrals_2e::IndexerSymD::IndexerSymD(uint_t norb) : Indexer(norb, npair(norb*norb), syms::D), m_sym_h(norb){}
 
-std::pair<size_t, bool> integrals_2e::IndexerSymDH::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+std::pair<uint_t, bool> integrals_2e::IndexerSymDH::index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const {
     // let y = <ab|ij>, correct order is x
     if (b >= j){
         const auto bj = trigmap(b, j);
@@ -134,14 +134,14 @@ std::pair<size_t, bool> integrals_2e::IndexerSymDH::index_and_conj(size_t a, siz
     return {};
 }
 
-size_t integrals_2e::IndexerSymDH::index_only(size_t a, size_t b, size_t i, size_t j) const {
+uint_t integrals_2e::IndexerSymDH::index_only(uint_t a, uint_t b, uint_t i, uint_t j) const {
     return index_and_conj(a, b, i, j).first;
 }
 
-integrals_2e::IndexerSymDR::IndexerSymDR(size_t norb) :
+integrals_2e::IndexerSymDR::IndexerSymDR(uint_t norb) :
         Indexer(norb, 2*npair(npair(norb)), syms::DR), m_hir_size(m_size/2){}
 
-size_t integrals_2e::IndexerSymDR::index_only(size_t a, size_t b, size_t i, size_t j) const {
+uint_t integrals_2e::IndexerSymDR::index_only(uint_t a, uint_t b, uint_t i, uint_t j) const {
     // let y = <ab|ij>, correct order is x
     if (b >= j){
         const auto bj = trigmap(b, j);
@@ -196,19 +196,19 @@ size_t integrals_2e::IndexerSymDR::index_only(size_t a, size_t b, size_t i, size
     return {};
 }
 
-std::pair<size_t, bool> integrals_2e::IndexerSymDR::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+std::pair<uint_t, bool> integrals_2e::IndexerSymDR::index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const {
     return {index_only(a, b, i, j), false};
 }
 
-integrals_2e::IndexerSymDHR::IndexerSymDHR(size_t norb) : Indexer(norb, npair(npair(norb)), syms::DHR){}
+integrals_2e::IndexerSymDHR::IndexerSymDHR(uint_t norb) : Indexer(norb, npair(npair(norb)), syms::DHR){}
 
-size_t integrals_2e::IndexerSymDHR::index_only(size_t a, size_t b, size_t i, size_t j) const {
+uint_t integrals_2e::IndexerSymDHR::index_only(uint_t a, uint_t b, uint_t i, uint_t j) const {
     const auto bj = (b>=j) ? trigmap(b, j) : trigmap(j, b);
     const auto ai = (a>=i) ? trigmap(a, i) : trigmap(i, a);
     return (bj>=ai) ? trigmap(bj, ai) : trigmap(ai, bj);
 }
 
-std::pair<size_t, bool> integrals_2e::IndexerSymDHR::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+std::pair<uint_t, bool> integrals_2e::IndexerSymDHR::index_and_conj(uint_t a, uint_t b, uint_t i, uint_t j) const {
     // always have real orbitals so never any conjugation
     return {index_only(a, b, i, j), false};
 }

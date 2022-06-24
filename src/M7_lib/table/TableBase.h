@@ -42,7 +42,7 @@ struct TableBase {
      * The data layout of a Table is defined by a class derived from Row, but this templated dependence is not included
      * in this base class. While the fine detail of field offsets etc is not needed here, we need to know the basics,
      * i.e. what amount of memory does a single row require. This is always padded to a whole number of system words.
-     * A system word is sizeof(size_t) bytes in length
+     * A system word is sizeof(uint_t) bytes in length
      */
     /**
      * The contents of the Table are ultimately stored in a Buffer, which is just a wrapper for a dynamically
@@ -59,11 +59,11 @@ struct TableBase {
      * "high water mark" is result of the next call to push_back. Think of this as the Table's size by analogy to
      * std::vector
      */
-    size_t m_hwm = 0ul;
+    uint_t m_hwm = 0ul;
     /**
      * indices of vacated rows below the high water mark should be pushed into this stack to allow reuse
      */
-    std::stack<size_t> m_free_rows;
+    std::stack<uint_t> m_free_rows;
     /**
      * buffered space for communication in the event of rank reallocation, instantiate on first transfer if required
      */
@@ -77,20 +77,20 @@ struct TableBase {
      */
     const std::vector<char> m_null_row_string;
 
-    TableBase(size_t row_size);
+    TableBase(uint_t row_size);
 
     TableBase(const TableBase& other);
 
     /**
      * the number of rows in the BufferWindow. Think of this as the Table's capacity by analogy to std::vector
      */
-    size_t nrow() const {
+    uint_t nrow() const {
         return m_bw.m_nrow;
     }
     /**
      * the size of a single row in bytes (always an integer number of system words)
      */
-    const size_t& row_size() const {
+    const uint_t& row_size() const {
         return m_bw.m_row_size;
     }
 
@@ -112,7 +112,7 @@ struct TableBase {
      * @return
      *  pointer to the first data word of the indexed row in the BufferWindow
      */
-    defs::buf_t *begin(const size_t& irow);
+    defs::buf_t *begin(const uint_t& irow);
 
     /**
      * @param irow
@@ -120,7 +120,7 @@ struct TableBase {
      * @return
      *  const pointer to the first data word of the indexed row in the BufferWindow
      */
-    const defs::buf_t *begin(const size_t& irow) const;
+    const defs::buf_t *begin(const uint_t& irow) const;
 
     /**
      * Associate the table with a buffer by assigning the table an available BufferWindow
@@ -142,14 +142,14 @@ struct TableBase {
      * @return
      *  row index of the first newly-accessible row
      */
-    size_t push_back(size_t nrow = 1);
+    uint_t push_back(uint_t nrow = 1);
 
     /**
      * If there are free rows on the stack: pop one and use it, else: push_back
      * @return
      *  index of unused row
      */
-    size_t get_free_row();
+    uint_t get_free_row();
 
     /**
      * clear the entire table only if it contains no protected rows, else fatal error
@@ -161,13 +161,13 @@ struct TableBase {
      * @param irow
      *  row index to clear
      */
-    virtual void clear(const size_t& irow);
+    virtual void clear(const uint_t& irow);
 
     /**
      * @return
      *  size of the buffer window in bytes
      */
-    size_t bw_size() const;
+    uint_t bw_size() const;
 
     /**
      * @return
@@ -181,21 +181,21 @@ struct TableBase {
      * @return
      *  true if entire row is zero
      */
-    bool is_cleared(const size_t& irow) const;
+    bool is_cleared(const uint_t& irow) const;
 
     /**
      * call the resize method on the buffer window and reflect the reallocation in m_nrow
      * @param nrow
      *  minimum number of rows in the new buffer. the buffer's resize_factor determines the actual size of the reallocation
      */
-    void resize(size_t nrow, double factor=-1.0);
+    void resize(uint_t nrow, double factor=-1.0);
 
     /**
      * resize based on the number of additional rows required beyond those currently allocated
      * @param nrow
      *  minimum number of new rows. the buffer's resize_factor determines the actual size of the reallocation
      */
-    void expand(size_t nrow, double factor=-1.0);
+    void expand(uint_t nrow, double factor=-1.0);
 
     /**
      * simply call clear on each indexed row
@@ -211,7 +211,7 @@ struct TableBase {
      * @param iinsert
      *  row index of the already-inserted data
      */
-    virtual void post_insert(const size_t& /*iinsert*/){}
+    virtual void post_insert(const uint_t& /*iinsert*/){}
 
     /**
      * If we have copied a block of rows contiguously into a table with non-trivial post-insert obligations, we need to
@@ -221,21 +221,21 @@ struct TableBase {
      * @param iend
      *  row index of end of the already-inserted data
      */
-    void post_insert_range(size_t ibegin = 0ul, size_t iend = ~0ul) {
+    void post_insert_range(uint_t ibegin = 0ul, uint_t iend = ~0ul) {
         if (iend == ~0ul) iend = m_hwm;
-        for (size_t i = ibegin; i < iend; ++i) post_insert(i);
+        for (uint_t i = ibegin; i < iend; ++i) post_insert(i);
     }
 
     /**
      * function pointer type for the callback associated with row transfers.
      * see RankAllocator.h
      */
-    typedef std::function<void(const defs::uintv_t& , size_t, size_t)> transfer_cb_t;
+    typedef std::function<void(const defs::uintv_t& , uint_t, uint_t)> transfer_cb_t;
     /**
      * function pointer type for the callback associated with receipt of a single row in a transfer operation
      * see RankAllocator.h
      */
-    typedef std::function<void(size_t)> recv_cb_t;
+    typedef std::function<void(uint_t)> recv_cb_t;
 
     /**
      * insert all rows held in the buffer window into this Table, then call all callbacks if any.
@@ -246,7 +246,7 @@ struct TableBase {
      * @param callbacks
      *  functions to call each time a received row is processed
      */
-    virtual void insert_rows(const Buffer::Window& recv, size_t nrow, const std::list<recv_cb_t>& callbacks);
+    virtual void insert_rows(const Buffer::Window& recv, uint_t nrow, const std::list<recv_cb_t>& callbacks);
 
     /**
      * By P2P MPI communication, send the rows identified in the first arg from irank_send to irank_recv.
@@ -260,7 +260,7 @@ struct TableBase {
      * @param callbacks
      *  functions to call on irank_recv each time a received row is processed
      */
-    void transfer_rows(const defs::uintv_t& irows, size_t irank_send, size_t irank_recv,
+    void transfer_rows(const defs::uintv_t& irows, uint_t irank_send, uint_t irank_recv,
                        const std::list<recv_cb_t>& callbacks = {});
 
     /**
@@ -273,7 +273,7 @@ struct TableBase {
      * @param irow_dst
      *  row in this table to which the source row is copied bytewise
      */
-    void copy_row_in(const TableBase& src, size_t irow_src, size_t irow_dst);
+    void copy_row_in(const TableBase& src, uint_t irow_src, uint_t irow_dst);
 
     /**
      * swap row contents dword-for-dword via std::swap
@@ -282,7 +282,7 @@ struct TableBase {
      * @param jrow
      *  row index to be swapped
      */
-    void swap_rows(const size_t& irow, const size_t& jrow);
+    void swap_rows(const uint_t& irow, const uint_t& jrow);
 
     /**
      * "Location" class which describes the location of a row in a distributed table i.e. by a row index and a rank index
@@ -291,9 +291,9 @@ struct TableBase {
         /**
          * rank and row indices
          */
-        const size_t m_irank, m_irow;
+        const uint_t m_irank, m_irow;
 
-        Loc(size_t irank, size_t irow);
+        Loc(uint_t irank, uint_t irow);
 
         /**
          * @return
@@ -336,7 +336,7 @@ struct TableBase {
      * @param irank
      *  index of the only rank in the communicator to receive the data from src
      */
-    virtual void gatherv(const TableBase& src, size_t irank = 0ul);
+    virtual void gatherv(const TableBase& src, uint_t irank = 0ul);
 
     /**
      * adds a rank-dynamic object to the RankAllocator
@@ -370,13 +370,13 @@ struct TableBase {
      * @return
      *  true if any of the associated RowProtectors are protecting irow
      */
-    bool is_protected(size_t irow) const;
+    bool is_protected(uint_t irow) const;
 
     /**
      * @return
      *  number rows below the high water mark that aren't free
      */
-    size_t nrow_nonzero() const;
+    uint_t nrow_nonzero() const;
 
     std::string name() const {
         return m_bw.name();

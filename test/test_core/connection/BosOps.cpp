@@ -7,7 +7,7 @@
 
 
 TEST(BosOps, FromImodes1) {
-    const size_t nmode = 6;
+    const uint_t nmode = 6;
     BosOps ops(nmode);
     ops.set(4);
     ASSERT_EQ(ops.get()[0], 4);
@@ -16,7 +16,7 @@ TEST(BosOps, FromImodes1) {
 }
 
 TEST(BosOps, FromImodes2) {
-    const size_t nmode = 6;
+    const uint_t nmode = 6;
     BosOps ops(nmode);
     ops.set(4, 5);
     ASSERT_EQ(ops.get()[0], 4);
@@ -32,7 +32,7 @@ TEST(BosOps, FromImodes2) {
     ASSERT_EQ(ops[0].m_nop, 2);
 }
 TEST(BosOps, FromImodes3) {
-    const size_t nmode = 6;
+    const uint_t nmode = 6;
     BosOps ops(nmode);
     ops.set(1, 3, 5);
     ASSERT_EQ(ops.get()[0], 1);

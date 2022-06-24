@@ -7,7 +7,7 @@
 
 #include <complex>
 
-namespace datatype {
+namespace dtype {
     /**
      * generic case: non-complex
      */

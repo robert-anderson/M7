@@ -6,7 +6,7 @@
 
 
 
-excititers::LadderHopping::LadderHopping(const Hamiltonian &ham, size_t exsig) :
+excititers::LadderHopping::LadderHopping(const Hamiltonian &ham, uint_t exsig) :
         Ladder(ham, exsig) {}
 
 void excititers::LadderHopping::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {
@@ -14,7 +14,7 @@ void excititers::LadderHopping::foreach(const FrmBosOnv &src, conn::FrmBosOnv &c
     const auto &occs = m_work_orbs.occ(src.m_frm).m_flat.inds();
     const auto &vacs = m_work_orbs.vac(src.m_frm).m_flat.inds();
 
-    for (size_t imode = 0ul; imode < m_bd.m_nmode; ++imode) {
+    for (uint_t imode = 0ul; imode < m_bd.m_nmode; ++imode) {
         if (m_cre) {
             if (src.m_bos[imode] == m_ham.m_nboson_max) continue;
             conn.m_bos.m_cre.set(imode);

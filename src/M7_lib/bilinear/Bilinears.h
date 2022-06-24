@@ -51,20 +51,20 @@ private:
      * @return
      *  integer excitation signature
      */
-    static size_t parse_exsig(const std::string &string) {
+    static uint_t parse_exsig(const std::string &string) {
         REQUIRE_TRUE_ALL(string.size() == 1 || string.size() == 4, "invalid exsig string specification");
         if (string.size() == 1) {
-            size_t rank = string::parse_decimal_digit(string.c_str());
+            uint_t rank = string::parse_decimal_digit(string.c_str());
             REQUIRE_LE_ALL(rank, exsig::c_nop_mask_frm, "number of fermion operators exceeds limit");
             return exsig::encode(rank, rank, 0, 0);
         }
-        size_t nfrm_cre = string::parse_decimal_digit(string.c_str());
+        uint_t nfrm_cre = string::parse_decimal_digit(string.c_str());
         REQUIRE_LE_ALL(nfrm_cre, exsig::c_nop_mask_frm, "number of fermion creation operators exceeds limit");
-        size_t nfrm_ann = string::parse_decimal_digit(string.c_str()+1);
+        uint_t nfrm_ann = string::parse_decimal_digit(string.c_str()+1);
         REQUIRE_LE_ALL(nfrm_ann, exsig::c_nop_mask_frm, "number of fermion annihilation operators exceeds limit");
-        size_t nbos_cre = string::parse_decimal_digit(string.c_str()+2);
+        uint_t nbos_cre = string::parse_decimal_digit(string.c_str()+2);
         REQUIRE_LE_ALL(nbos_cre, exsig::c_nop_mask_bos, "number of boson creation operators exceeds limit");
-        size_t nbos_ann = string::parse_decimal_digit(string.c_str()+3);
+        uint_t nbos_ann = string::parse_decimal_digit(string.c_str()+3);
         REQUIRE_LE_ALL(nbos_ann, exsig::c_nop_mask_bos, "number of boson annihilation operators exceeds limit");
         return exsig::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
     }
@@ -108,11 +108,11 @@ public:
     }
 
     Bilinears(const conf::AvEsts &opts, defs::uintv_t rdm_ranksigs, defs::uintv_t /*specmom_exsigs*/,
-              sys::Size extents, size_t nelec, const Epoch &epoch) :
+              sys::Size extents, uint_t nelec, const Epoch &epoch) :
             m_rdms(opts.m_rdm, rdm_ranksigs, extents, nelec, epoch),
             m_spec_moms(opts.m_spec_mom), m_total_norm({1}) {}
 
-    Bilinears(const conf::AvEsts &opts, sys::Size extents, size_t nelec, const Epoch &epoch) :
+    Bilinears(const conf::AvEsts &opts, sys::Size extents, uint_t nelec, const Epoch &epoch) :
             Bilinears(opts, parse_exsigs(opts.m_rdm.m_ranks),
                       parse_exsigs(opts.m_spec_mom.m_ranks), extents, nelec, epoch) {}
 

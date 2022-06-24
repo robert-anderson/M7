@@ -6,7 +6,7 @@
 #include "String.h"
 
 std::string string::join(const std::vector<std::string> &words, const std::string &divider) {
-    auto fn = [&words](size_t i, std::string& word) {
+    auto fn = [&words](uint_t i, std::string& word) {
         if (i >= words.size()) return false;
         word = words[i];
         return true;
@@ -18,11 +18,11 @@ std::string string::join(const std::vector<std::string> &words) {
     return join(words, " ");
 }
 
-std::string string::join(const std::string &word, const size_t &nrepeat, const std::string &divider) {
+std::string string::join(const std::string &word, const uint_t &nrepeat, const std::string &divider) {
     return join(std::vector<std::string>(nrepeat, word), divider);
 }
 
-std::string string::join(const std::string &word, const size_t &nrepeat) {
+std::string string::join(const std::string &word, const uint_t &nrepeat) {
     return join(word, nrepeat, " ");
 }
 
@@ -66,7 +66,7 @@ std::string string::YN(bool t) {
     return t ? "YES" : "NO";
 }
 
-std::string string::memsize(size_t nbyte) {
+std::string string::memsize(uint_t nbyte) {
     if (nbyte < 1e3) {
         return std::to_string(nbyte) + "B";
     } else if (nbyte < 1e6) {
@@ -78,7 +78,7 @@ std::string string::memsize(size_t nbyte) {
     }
 }
 
-std::string string::boxed(std::string s, size_t padding, char c) {
+std::string string::boxed(std::string s, uint_t padding, char c) {
     std::string res;
     res += std::string(s.size() + 2 * (padding + 1), c) + '\n';
     res += c + std::string(padding, ' ') + s + std::string(padding, ' ') + c + "\n";
@@ -123,7 +123,7 @@ double string::read_double(const char *&ptr) {
     }
 }
 
-size_t string::read_unsigned(const char *&ptr) {
+uint_t string::read_unsigned(const char *&ptr) {
     const char *begin = nullptr;
     ASSERT(ptr != nullptr)
     for (; *ptr != 0; ptr++) {
@@ -140,7 +140,7 @@ size_t string::read_unsigned(const char *&ptr) {
     if (begin && is_numeric(ptr[-1])) {
         return std::strtoul(begin, const_cast<char **>(&ptr), 10); // this will decrement the pointer!
     } else {
-        return std::numeric_limits<size_t>::max();
+        return std::numeric_limits<uint_t>::max();
     }
 }
 
@@ -151,20 +151,20 @@ int64_t string::read_signed(const char *&ptr) {
         ptr++;
     }
     auto tmp = read_unsigned(ptr);
-    if (tmp == std::numeric_limits<size_t>::max()) return std::numeric_limits<int64_t>::max();
+    if (tmp == std::numeric_limits<uint_t>::max()) return std::numeric_limits<int64_t>::max();
     return pos ? tmp : -tmp;
 }
 
-size_t string::parse_decimal_digit(const char *c) {
+uint_t string::parse_decimal_digit(const char *c) {
     if (*c < '0' || *c > '9') return ~0ul;
     return *c - '0';
 }
 
-std::string string::plural(size_t i, std::string plu_ending, std::string sing_ending) {
+std::string string::plural(uint_t i, std::string plu_ending, std::string sing_ending) {
     return (i == 1) ? sing_ending : plu_ending;
 }
 
-std::string string::plural(std::string base, size_t i, std::string plu_ending, std::string sing_ending) {
+std::string string::plural(std::string base, uint_t i, std::string plu_ending, std::string sing_ending) {
     return std::to_string(i) + " " + base + plural(i, plu_ending, sing_ending);
 }
 

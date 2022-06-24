@@ -86,8 +86,8 @@ namespace conf {
     };
 
     struct InteractingBoseGas : Section {
-        Param<size_t> m_ndim;
-        Param<size_t> m_nwave;
+        Param<uint_t> m_ndim;
+        Param<uint_t> m_nwave;
         Param<defs::ham_t> m_ek_scale;
 
         explicit InteractingBoseGas(Group *parent);

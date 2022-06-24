@@ -19,17 +19,17 @@ private:
      * @param nexclude
      *  index a should not be assigned the same value as i or j, step over these
      */
-    void set_a_range(size_t i, size_t j, size_t& min, size_t &max, size_t& nexclude) const;
+    void set_a_range(uint_t i, uint_t j, uint_t& min, uint_t &max, uint_t& nexclude) const;
 
     /**
      * @return
      *  number of possible values for index a
      */
-    size_t na(size_t i, size_t j) const;
+    uint_t na(uint_t i, uint_t j) const;
 
 public:
 
-    bool draw_bos(size_t /*exsig*/, const field::BosOnv &src, defs::prob_t &prob, conn::BosOnv &conn) override;
+    bool draw_bos(uint_t /*exsig*/, const field::BosOnv &src, defs::prob_t &prob, conn::BosOnv &conn) override;
 
     defs::prob_t prob_bos(const field::BosOnv &src, const conn::BosOnv &conn) const override;
 

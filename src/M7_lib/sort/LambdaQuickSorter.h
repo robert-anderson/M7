@@ -17,13 +17,13 @@ struct LambdaQuickSorter {
 
     LambdaQuickSorter(comparators::index_cmp_fn_t cmp_fn);
 
-    const size_t& operator[](const size_t& i) const;
+    const uint_t& operator[](const uint_t& i) const;
 
-    void preserve_sort(const size_t &hwm);
+    void preserve_sort(const uint_t &hwm);
 
     void preserve_sort(const TableBase &table);
 
-    bool is_preserve_sorted(const size_t &hwm);
+    bool is_preserve_sorted(const uint_t &hwm);
 
     bool is_preserve_sorted(const TableBase &table);
 
@@ -50,17 +50,17 @@ struct LambdaQuickSorter {
     bool is_reorder_sorted(const TableBase &table);
 
 private:
-    void swap(size_t ii1, size_t ii2);
+    void swap(uint_t ii1, uint_t ii2);
 
-    size_t partition(size_t iilo, size_t iihi);
+    uint_t partition(uint_t iilo, uint_t iihi);
 
-    void qs(size_t iilo, size_t iihi);
+    void qs(uint_t iilo, uint_t iihi);
 
-    void swap(size_t ii1, size_t ii2, TableBase &table);
+    void swap(uint_t ii1, uint_t ii2, TableBase &table);
 
-    size_t partition(size_t iilo, size_t iihi, TableBase &table);
+    uint_t partition(uint_t iilo, uint_t iihi, TableBase &table);
 
-    void qs(size_t iilo, size_t iihi, TableBase &table);
+    void qs(uint_t iilo, uint_t iihi, TableBase &table);
 
 };
 

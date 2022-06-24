@@ -20,7 +20,7 @@ class Reference : public Wavefunction::SharedRow {
     /**
      * index to the "part" of the wavefunction for which this object tracks the reference row
      */
-    const size_t m_ipart;
+    const uint_t m_ipart;
 
     /**
      * work space for computing connections to other ONVs via the Hamiltonian
@@ -30,7 +30,7 @@ class Reference : public Wavefunction::SharedRow {
     /**
      * If a candidate for redefinition of the reference is found, then its weight and row within m_list must be stored
      */
-    size_t m_irow_candidate;
+    uint_t m_irow_candidate;
     /**
      * candidate weights are averaged over replicas so that replicas on the same root will redefine to the same row
      */
@@ -47,11 +47,11 @@ class Reference : public Wavefunction::SharedRow {
 
 public:
     Reference(const conf::Reference &opts, const Hamiltonian &ham,
-              const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
+              const Wavefunction &wf, uint_t ipart, TableBase::Loc loc);
 
     const field::Mbf& get_mbf() const;
 
-    size_t occupied_ncycle(const size_t& icycle) const {
+    uint_t occupied_ncycle(const uint_t& icycle) const {
         return m_global.m_row.occupied_ncycle(icycle);
     }
 
@@ -94,7 +94,7 @@ public:
      * @return
      *  excitation signature from ref to arg
      */
-    size_t exsig(const field::Mbf &mbf) const;
+    uint_t exsig(const field::Mbf &mbf) const;
 
     /**
      * occupied ONVs connected to the reference must contribute to the numerator inner product <ref | H | onv>
@@ -118,7 +118,7 @@ public:
      * @return
      *  normalized average weight
      */
-    defs::wf_t norm_average_weight(const size_t& icycle, const size_t& ipart) const;
+    defs::wf_t norm_average_weight(const uint_t& icycle, const uint_t& ipart) const;
 
     const WalkerTableRow& row() const {
         return m_global.m_row;
@@ -136,7 +136,7 @@ struct References {
 
     References(const conf::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs);
 
-    const Reference& operator[](const size_t& ipart) const;
+    const Reference& operator[](const uint_t& ipart) const;
 
     void begin_cycle();
 

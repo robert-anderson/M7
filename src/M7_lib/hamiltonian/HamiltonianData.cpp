@@ -4,16 +4,16 @@
 
 #include "HamiltonianData.h"
 
-size_t ham::TermContribs::ind(size_t exsig) const {
+uint_t ham::TermContribs::ind(uint_t exsig) const {
     if (!contribs_to(exsig, m_ranksig)) return ~0ul;
-    size_t ifrm = decode_nfrm_cre(exsig);
+    uint_t ifrm = decode_nfrm_cre(exsig);
     DEBUG_ASSERT_LE(ifrm, m_nexsig_contrib_frm, "invalid number of like-indexed fermion operators");
-    size_t ibos = decode_nbos_cre(exsig);
+    uint_t ibos = decode_nbos_cre(exsig);
     DEBUG_ASSERT_LE(ibos, m_nexsig_contrib_bos, "invalid number of like-indexed boson operators");
     return ifrm * m_nexsig_contrib_bos + ibos;
 }
 
-ham::TermContribs::TermContribs(size_t ranksig) :
+ham::TermContribs::TermContribs(uint_t ranksig) :
         m_ranksig(ranksig), m_basesig(base_exsig(ranksig)),
         m_nexsig_contrib_frm(ncontrib_frm(ranksig)), m_nexsig_contrib_bos(ncontrib_bos(ranksig)),
         m_exsig_nonzero(m_nexsig_contrib_frm * m_nexsig_contrib_bos, false) {}
@@ -37,8 +37,8 @@ ham::TermContribs::TermContribs(const ham::TermContribs &contribs_1, const ham::
     /*
      * loop over all exsigs which may or may not contribute to the terms
      */
-    for (size_t nfrm=0ul; nfrm < m_nexsig_contrib_frm; ++nfrm) {
-        for (size_t nbos=0ul; nbos < m_nexsig_contrib_frm; ++nbos) {
+    for (uint_t nfrm=0ul; nfrm < m_nexsig_contrib_frm; ++nfrm) {
+        for (uint_t nbos=0ul; nbos < m_nexsig_contrib_frm; ++nbos) {
             auto exsig = encode(base_nfrm_cre + nfrm, base_nfrm_ann + nfrm,
                                 base_nbos_cre + nbos, base_nbos_ann + nbos);
             /*
@@ -50,13 +50,13 @@ ham::TermContribs::TermContribs(const ham::TermContribs &contribs_1, const ham::
     }
 }
 
-void ham::TermContribs::set_nonzero(size_t exsig) {
+void ham::TermContribs::set_nonzero(uint_t exsig) {
     auto i = ind(exsig);
     REQUIRE_NE(i, ~0ul, "exsig doesn't contribute to this ranksig");
     m_exsig_nonzero[i] = true;
 }
 
-bool ham::TermContribs::is_nonzero(size_t exsig) const {
+bool ham::TermContribs::is_nonzero(uint_t exsig) const {
     auto i = ind(exsig);
     REQUIRE_NE(i, ~0ul, "exsig doesn't contribute to this ranksig");
     return m_exsig_nonzero[i];

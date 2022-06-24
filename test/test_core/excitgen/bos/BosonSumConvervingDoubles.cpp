@@ -17,7 +17,7 @@ TEST(BosonSumConservingDoubles, LandauLevels) {
     buffered::BosOnv src_mbf(ham.m_bd);
     src_mbf = {2, 0, 1, 2, 0, 0, 1, 0};
     tester.fill_results_table(src_mbf);
-    const size_t ndraw = 10000000;
+    const uint_t ndraw = 10000000;
     tester.run(src_mbf, ndraw);
     ASSERT_TRUE(tester.all_drawn_at_least_once());
     std::cout << tester.m_results.to_string() << std::endl;

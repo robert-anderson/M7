@@ -105,7 +105,7 @@ public:
      * @return
      *  one-electron coefficient of H given by the 2D array T
      */
-    virtual defs::ham_t get_coeff_1100(size_t /*a*/, size_t /*i*/) const {return 0;}
+    virtual defs::ham_t get_coeff_1100(uint_t /*a*/, uint_t /*i*/) const {return 0;}
     /**
      * coefficient of the "2-body" term
      * @param a
@@ -119,7 +119,7 @@ public:
      * @return
      *  two-electron coefficient of H given by the 4D array U
      */
-    virtual defs::ham_t get_coeff_2200(size_t /*a*/, size_t /*b*/, size_t /*i*/, size_t /*j*/) const {return 0;}
+    virtual defs::ham_t get_coeff_2200(uint_t /*a*/, uint_t /*b*/, uint_t /*i*/, uint_t /*j*/) const {return 0;}
     /**
      * coefficient of the "3-body" term
      * @param a
@@ -137,8 +137,8 @@ public:
      * @return
      *  three-electron coefficient of H given by the 6D array L
      */
-    virtual defs::ham_t get_coeff_3300(size_t /*a*/, size_t /*b*/, size_t /*c*/,
-                                       size_t /*i*/, size_t /*j*/, size_t /*k*/) const {return 0;}
+    virtual defs::ham_t get_coeff_3300(uint_t /*a*/, uint_t /*b*/, uint_t /*c*/,
+                                       uint_t /*i*/, uint_t /*j*/, uint_t /*k*/) const {return 0;}
     /**
      * @param onv
      *  fermionic occupation number vector (Slater determinant)
@@ -185,7 +185,7 @@ public:
      */
     virtual void log_data() const;
 
-    virtual size_t default_nelec() const {
+    virtual uint_t default_nelec() const {
         return m_basis.m_nsite;
     }
 

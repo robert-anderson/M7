@@ -21,11 +21,11 @@ struct MagnitudeLogger {
     /**
      * number of draws required to be made from each case before it is allowed to affect dynamic probabilities and tau
      */
-    const size_t m_ndraw_min;
+    const uint_t m_ndraw_min;
     const bool m_static_tau;
     const bool m_static_probs;
     const double m_tau_min, m_tau_max, m_prob_min;
-    const size_t m_period;
+    const uint_t m_period;
     /**
      * number of draws made in each excitation case
      */
@@ -38,8 +38,8 @@ struct MagnitudeLogger {
      * working array for assigning new probability values to excitation generator group object
      */
     mutable std::vector<defs::prob_t> m_new_probs;
-    MagnitudeLogger(defs::ham_comp_t max_bloom, size_t ndraw_min, size_t nexcase, bool static_tau, bool static_probs,
-                    double tau_min, double tau_max, double prob_min, size_t period);
+    MagnitudeLogger(defs::ham_comp_t max_bloom, uint_t ndraw_min, uint_t nexcase, bool static_tau, bool static_probs,
+                    double tau_min, double tau_max, double prob_min, uint_t period);
 
     /**
      * add a generated spawn to the logger, i.e. increment the draw counter, and update the highest magnitude if the
@@ -52,7 +52,7 @@ struct MagnitudeLogger {
      *  probability that this excitation was drawn *given* icase (i.e. prob of attempting an icase excitation is not
      *  factored in)
      */
-    void log(size_t icase, const defs::ham_t& helem, const defs::prob_t& prob);
+    void log(uint_t icase, const defs::ham_t& helem, const defs::prob_t& prob);
 
 private:
     /**
@@ -78,7 +78,7 @@ private:
 
 public:
 
-    void update(size_t icycle, double& tau);
+    void update(uint_t icycle, double& tau);
 
     /**
      * @param tau
@@ -86,7 +86,7 @@ public:
      * @param excit_gens
      *  reference to group of excitation generators to update probabilities for
      */
-    void update(size_t icycle, double& tau, ExcitGenGroup& excit_gens);
+    void update(uint_t icycle, double& tau, ExcitGenGroup& excit_gens);
 };
 
 #endif //M7_MAGNITUDELOGGER_H

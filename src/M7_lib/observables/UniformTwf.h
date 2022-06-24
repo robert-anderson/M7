@@ -13,7 +13,7 @@
 
 class UniformTwf : public SpfTwfBase {
 public:
-    UniformTwf(const Hamiltonian &ham, size_t npart);
+    UniformTwf(const Hamiltonian &ham, uint_t npart);
 
     virtual ~UniformTwf() {}
 

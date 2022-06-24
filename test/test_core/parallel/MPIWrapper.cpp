@@ -8,25 +8,25 @@
 #include "M7_lib/parallel/MPIWrapper.h"
 
 TEST(MPIWrapper, AllSum){
-    size_t i = mpi::irank()+1;
-    size_t res = mpi::all_sum(i);
+    uint_t i = mpi::irank()+1;
+    uint_t res = mpi::all_sum(i);
     ASSERT_EQ(res, (mpi::nrank()*(mpi::nrank()+1))/2);
 }
 
 TEST(MPIWrapper, AllMax){
-    size_t i = hash::in_range(mpi::irank(), 5, 19);
-    size_t res = mpi::all_max(i);
+    uint_t i = hash::in_range(mpi::irank(), 5, 19);
+    uint_t res = mpi::all_max(i);
     defs::uintv_t chk(mpi::nrank());
-    for (size_t irank=0ul; irank<mpi::nrank(); ++irank) chk[irank] = hash::in_range(irank, 5, 19);
+    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) chk[irank] = hash::in_range(irank, 5, 19);
     std::sort(chk.begin(), chk.end());
     ASSERT_EQ(res, chk.back());
 }
 
 TEST(MPIWrapper, AllMin){
-    size_t i = hash::in_range(mpi::irank(), 5, 19);
-    size_t res = mpi::all_min(i);
+    uint_t i = hash::in_range(mpi::irank(), 5, 19);
+    uint_t res = mpi::all_min(i);
     defs::uintv_t chk(mpi::nrank());
-    for (size_t irank=0ul; irank<mpi::nrank(); ++irank) chk[irank] = hash::in_range(irank, 5, 19);
+    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) chk[irank] = hash::in_range(irank, 5, 19);
     std::sort(chk.begin(), chk.end());
     ASSERT_EQ(res, chk.front());
 }
@@ -34,30 +34,30 @@ TEST(MPIWrapper, AllMin){
 TEST(MPIWrapper, Alltoall){
     defs::uintv_t send(mpi::nrank(), 0ul);
     defs::uintv_t recv(mpi::nrank(), 0ul);
-    for (size_t irecv=0ul; irecv<mpi::nrank(); ++irecv){
+    for (uint_t irecv=0ul; irecv<mpi::nrank(); ++irecv){
         send[irecv] = hash::in_range({irecv, mpi::irank()}, 3, 123);
     }
     mpi::all_to_all(send, recv);
-    for (size_t isent=0ul; isent<mpi::nrank(); ++isent){
+    for (uint_t isent=0ul; isent<mpi::nrank(); ++isent){
         ASSERT_EQ(recv[isent], hash::in_range({mpi::irank(), isent}, 3, 123));
     }
 }
 
 TEST(MPIWrapper, Allgatherv){
-    const size_t n=4;
+    const uint_t n=4;
     defs::uintv_t send(n, 0ul);
     defs::uintv_t recv(n * mpi::nrank(), 0ul);
-    for (size_t i=0ul; i<n; ++i){
+    for (uint_t i=0ul; i<n; ++i){
         send[i] = hash::in_range({mpi::irank(), i}, 3, 123);
     }
     defs::uintv_t recvcounts(mpi::nrank(), n);
     defs::uintv_t displs(mpi::nrank(), 0);
-    for (size_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+n;
+    for (uint_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+n;
 
     mpi::all_gatherv(send.data(), n, recv.data(), recvcounts, displs);
-    size_t iflat = 0ul;
-    for (size_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
-        for (size_t i=0ul; i<n; ++i){
+    uint_t iflat = 0ul;
+    for (uint_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
+        for (uint_t i=0ul; i<n; ++i){
             ASSERT_EQ(recv[iflat], hash::in_range({isrc, i}, 3, 123));
             ++iflat;
         }
@@ -65,29 +65,29 @@ TEST(MPIWrapper, Allgatherv){
 }
 
 TEST(MPIWrapper, AllgathervRagged){
-    const size_t nsend=hash::in_range(mpi::irank(), 5, 17);
+    const uint_t nsend=hash::in_range(mpi::irank(), 5, 17);
     defs::uintv_t send(nsend, 0ul);
-    for (size_t i=0ul; i<nsend; ++i){
+    for (uint_t i=0ul; i<nsend; ++i){
         send[i] = hash::in_range({mpi::irank(), i}, 3, 123);
     }
 
     defs::uintv_t recvcounts(mpi::nrank(), 0);
     mpi::all_gather(nsend, recvcounts);
-    for (size_t i=0ul; i<mpi::nrank(); ++i){
+    for (uint_t i=0ul; i<mpi::nrank(); ++i){
         ASSERT_EQ(recvcounts[i], hash::in_range(i, 5, 17));
     }
 
     defs::uintv_t displs(mpi::nrank(), 0);
-    for (size_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+recvcounts[i-1];
+    for (uint_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+recvcounts[i-1];
 
-    const size_t nrecv = displs.back()+recvcounts.back();
+    const uint_t nrecv = displs.back()+recvcounts.back();
     defs::uintv_t recv(nrecv, 0ul);
 
     mpi::all_gatherv(send.data(), nsend, recv.data(), recvcounts, displs);
 
-    size_t iflat = 0ul;
-    for (size_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
-        for (size_t i=0ul; i<recvcounts[isrc]; ++i){
+    uint_t iflat = 0ul;
+    for (uint_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
+        for (uint_t i=0ul; i<recvcounts[isrc]; ++i){
             ASSERT_EQ(recv[iflat], hash::in_range({isrc, i}, 3, 123));
             ++iflat;
         }
@@ -97,20 +97,20 @@ TEST(MPIWrapper, AllgathervRagged){
 
 TEST(MPIWrapper, MaxLocMinLoc){
     typedef double T;
-    auto to_T = [](size_t irank){
+    auto to_T = [](uint_t irank){
         return std::pow(1.13, (irank+7*3)%5+1);
     };
     T local = to_T(mpi::irank());
-    std::pair<T, size_t> max{std::numeric_limits<T>::min(), 0};
-    std::pair<T, size_t> min{std::numeric_limits<T>::max(), 0};
-    for (size_t i=0ul; i<mpi::nrank(); ++i) {
+    std::pair<T, uint_t> max{std::numeric_limits<T>::min(), 0};
+    std::pair<T, uint_t> min{std::numeric_limits<T>::max(), 0};
+    for (uint_t i=0ul; i<mpi::nrank(); ++i) {
         auto d = to_T(i);
         if (d>max.first) max = {d, i};
         if (d<min.first) min = {d, i};
     }
 
-    std::pair<T, size_t> mpi_max{std::numeric_limits<T>::min(), 0};
-    std::pair<T, size_t> mpi_min{std::numeric_limits<T>::max(), 0};
+    std::pair<T, uint_t> mpi_max{std::numeric_limits<T>::min(), 0};
+    std::pair<T, uint_t> mpi_min{std::numeric_limits<T>::max(), 0};
 
     ASSERT_EQ(MPI_DOUBLE_INT, mpi_pair_type<T>());
 

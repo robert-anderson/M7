@@ -95,60 +95,60 @@ namespace sys {
          * extent of the fermionic single particle basis
          */
         struct Size {
-            const size_t m_nsite;
-            const size_t m_nspinorb;
+            const uint_t m_nsite;
+            const uint_t m_nspinorb;
             /**
              * number of pairs of distinct spin orbitals
              */
-            const size_t m_nspinorb_pair;
+            const uint_t m_nspinorb_pair;
 
-            Size(size_t nsite);
+            Size(uint_t nsite);
 
-            operator size_t () const {
+            operator uint_t () const {
                 return m_nsite;
             }
 
-            size_t isite(size_t ispinorb) const {
+            uint_t isite(uint_t ispinorb) const {
                 DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
                 return ispinorb < m_nsite ? ispinorb : ispinorb - m_nsite;
             }
-            static size_t isite(size_t ispinorb, size_t nsite) {
+            static uint_t isite(uint_t ispinorb, uint_t nsite) {
                 DEBUG_ASSERT_LT(ispinorb, 2*nsite, "spin orbital index OOB");
                 return ispinorb < nsite ? ispinorb : ispinorb - nsite;
             }
 
-            size_t ispin(size_t ispinorb) const {
+            uint_t ispin(uint_t ispinorb) const {
                 DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
                 return ispinorb >= m_nsite;
             }
-            static size_t ispin(size_t ispinorb, size_t nsite) {
+            static uint_t ispin(uint_t ispinorb, uint_t nsite) {
                 DEBUG_ASSERT_LT(ispinorb, 2*nsite, "spin orbital index OOB");
                 return ispinorb >= nsite;
             }
 
-            size_t ispinorb(size_t ispin, size_t isite) const {
+            uint_t ispinorb(uint_t ispin, uint_t isite) const {
                 DEBUG_ASSERT_LT(ispin, 2ul, "spin channel index OOB");
                 DEBUG_ASSERT_LT(isite, m_nsite, "site index OOB");
                 return ispin ? isite + m_nsite : isite;
             }
-            static size_t ispinorb(size_t ispin, size_t isite, size_t nsite) {
+            static uint_t ispinorb(uint_t ispin, uint_t isite, uint_t nsite) {
                 DEBUG_ASSERT_LT(ispin, 2ul, "spin channel index OOB");
                 DEBUG_ASSERT_LT(isite, nsite, "site index OOB");
                 return ispin ? isite + nsite : isite;
             }
 
-            size_t ispinorb(std::pair<size_t, size_t> pair) const {
+            uint_t ispinorb(std::pair<uint_t, uint_t> pair) const {
                 return ispinorb(pair.first, pair.second);
             }
-            static size_t ispinorb(std::pair<size_t, size_t> pair, size_t nsite) {
+            static uint_t ispinorb(std::pair<uint_t, uint_t> pair, uint_t nsite) {
                 return ispinorb(pair.first, pair.second, nsite);
             }
 
-            int ms2(size_t ispinorb) const {
+            int ms2(uint_t ispinorb) const {
                 DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
                 return ispinorb < m_nsite ? 1 : -1;
             }
-            static int ms2(size_t ispinorb, size_t nsite) {
+            static int ms2(uint_t ispinorb, uint_t nsite) {
                 DEBUG_ASSERT_LT(ispinorb, 2*nsite, "spin orbital index OOB");
                 return ispinorb < nsite ? 1 : -1;
             }
@@ -159,8 +159,8 @@ namespace sys {
              * @return
              *  number of indices needed in the access of coefficients
              */
-            size_t ncoeff_ind(bool spin_resolved) const;
-            static size_t ncoeff_ind(bool spin_resolved, size_t nsite);
+            uint_t ncoeff_ind(bool spin_resolved) const;
+            static uint_t ncoeff_ind(bool spin_resolved, uint_t nsite);
         };
 
         /**
@@ -189,19 +189,19 @@ namespace sys {
                 return m_nsite;
             }
 
-            Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, std::shared_ptr<lattice::Base> lattice);
+            Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, std::shared_ptr<lattice::Base> lattice);
 
             Basis(std::shared_ptr<lattice::Base> lattice);
 
-            Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved);
+            Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved);
             /*
              * non-resolved spin, C1 point group (no spatial symmetry)
              */
-            Basis(size_t nsite): Basis(nsite, {nsite}, false) {}
+            Basis(uint_t nsite): Basis(nsite, {nsite}, false) {}
 
             bool operator==(const Basis& other) const;
 
-            size_t ncoeff_ind() const;
+            uint_t ncoeff_ind() const;
 
             defs::info_map_t info() const;
 
@@ -216,7 +216,7 @@ namespace sys {
             /**
              * either 0 or 1 based on the evenness of the electron number
              */
-            static int lowest_value(size_t nelec);
+            static int lowest_value(uint_t nelec);
             Ms2(int v, bool conserve=true);
             Ms2();
         };
@@ -226,26 +226,26 @@ namespace sys {
             /**
              * number of electrons in the system (0ul if not conserved)
              */
-            const size_t m_n;
+            const uint_t m_n;
 
         public:
             /**
              * number of pairs of distinct electrons in the system (0ul if not conserved)
              */
-            const size_t m_npair;
+            const uint_t m_npair;
             const Ms2 m_ms2;
             /**
              * numbers of occupied alpha and beta electrons (0 if spin unconserved)
              */
-            const size_t m_nalpha, m_nbeta;
+            const uint_t m_nalpha, m_nbeta;
 
-            Electrons(size_t n, Ms2 ms2);
+            Electrons(uint_t n, Ms2 ms2);
 
-            Electrons(size_t n): Electrons(n, Ms2(Ms2::lowest_value(n))){}
+            Electrons(uint_t n): Electrons(n, Ms2(Ms2::lowest_value(n))){}
 
             Electrons(const Electrons& e1, const Electrons& e2);
 
-            operator size_t () const {
+            operator uint_t () const {
                 return m_n;
             }
 
@@ -264,11 +264,11 @@ namespace sys {
             /**
              * number of vacant spin orbitals
              */
-            const size_t m_nvac;
+            const uint_t m_nvac;
             /**
              * numbers of occupied alpha and beta vacant orbitals (0 if spin unconserved)
              */
-            const size_t m_nvac_alpha, m_nvac_beta;
+            const uint_t m_nvac_alpha, m_nvac_beta;
 
             explicit Sector(Basis basis, Electrons elecs);
 
@@ -281,7 +281,7 @@ namespace sys {
                 return m_basis.m_nsite;
             }
 
-            size_t size() const;
+            uint_t size() const;
         };
     }
 
@@ -289,29 +289,29 @@ namespace sys {
         /**
          * maximum occupation supported by the mode occupation type
          */
-        static constexpr size_t c_max_occ = std::numeric_limits<bos_occ_t>::max();
+        static constexpr uint_t c_max_occ = std::numeric_limits<bos_occ_t>::max();
         /**
          * extent of the bosonic single particle basis
          */
         struct Size {
-            const size_t m_nmode;
+            const uint_t m_nmode;
 
-            Size(size_t nmode);
+            Size(uint_t nmode);
 
-            operator size_t() const {
+            operator uint_t() const {
                 return m_nmode;
             }
         };
 
         struct Basis : Size {
-            const size_t m_occ_cutoff;
+            const uint_t m_occ_cutoff;
         private:
             using Size::operator unsigned long;
         public:
             explicit operator bool() const {
                 return m_nmode;
             }
-            Basis(size_t nmode, size_t occ_cutoff=c_max_occ);
+            Basis(uint_t nmode, uint_t occ_cutoff=c_max_occ);
 
             bool operator==(const Basis& other) const;
             
@@ -320,8 +320,8 @@ namespace sys {
             std::string to_string() const;
         };
 
-        struct Bosons : public conservation::Optional<size_t> {
-            Bosons(size_t v, bool conserve);
+        struct Bosons : public conservation::Optional<uint_t> {
+            Bosons(uint_t v, bool conserve);
             Bosons();
             Bosons(const Bosons& b1, const Bosons& b2);
         };
@@ -343,7 +343,7 @@ namespace sys {
     struct Size {
         const frm::Size m_frm;
         const bos::Size m_bos;
-        Size(size_t nsite, size_t nmode);
+        Size(uint_t nsite, uint_t nmode);
         void require_pure_frm() const;
         void require_pure_bos() const;
     };

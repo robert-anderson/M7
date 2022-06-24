@@ -135,12 +135,12 @@ struct CompositeField : CompositeFieldBase {
         return fn.m_hash;
     }
 
-    template<size_t ifield>
+    template<uint_t ifield>
     const typename std::tuple_element<ifield, std::tuple<Args...>>::type &get() const {
         return std::get<ifield>(m_refs);
     }
 
-    template<size_t ifield>
+    template<uint_t ifield>
     typename std::tuple_element<ifield, std::tuple<Args...>>::type &get() {
         return std::get<ifield>(m_refs);
     }

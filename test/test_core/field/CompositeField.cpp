@@ -14,7 +14,7 @@ namespace composite_field_test {
         field::Bitset<uint16_t> m_bitset;
         field::Numbers<int, 2> m_ints;
 
-        BitsAndInts(Row *row, size_t nbit, std::array<size_t, 2> ints_shape, std::string prefix) :
+        BitsAndInts(Row *row, uint_t nbit, uinta_t<2> ints_shape, std::string prefix) :
                 base_t(m_bitset, m_ints),
                 m_bitset(row, nbit, prefix + " bitset"),
                 m_ints(row, ints_shape, prefix + " ints") {}
@@ -36,7 +36,7 @@ namespace composite_field_test {
         typedef CompositeField<BitsAndInts, BitsAndInts> base_t;
         BitsAndInts m_first;
         BitsAndInts m_second;
-        BitsAndIntsPair(Row* row, size_t nbit, std::array<size_t, 2> ints_shape, std::string prefix):
+        BitsAndIntsPair(Row* row, uint_t nbit, uinta_t<2> ints_shape, std::string prefix):
             base_t(m_first, m_second),
             m_first(row, nbit, ints_shape, prefix + " first"),
             m_second(row, nbit, ints_shape, prefix + " second"){}
@@ -54,15 +54,15 @@ namespace composite_field_test {
     struct TestRow : Row {
         BitsAndInts m_single;
         BitsAndIntsPair m_pair;
-        TestRow(size_t nbit, std::array<size_t, 2> ints_shape):
+        TestRow(uint_t nbit, uinta_t<2> ints_shape):
             m_single(this, nbit, ints_shape, "single"), m_pair(this, nbit, ints_shape, "pair"){}
     };
 }
 
 TEST(CompositeField, DataIntegrity) {
     using namespace composite_field_test;
-    const size_t nbit = 9;
-    const std::array<size_t, 2> ints_shape = {4, 3};
+    const uint_t nbit = 9;
+    const uinta_t<2> ints_shape = {4, 3};
 
     TestRow row(nbit, ints_shape);
     ASSERT_EQ(&row.m_single.m_bitset, &row.m_single.get<0>());
@@ -77,11 +77,11 @@ TEST(CompositeField, DataIntegrity) {
     ASSERT_EQ(row.m_pair.m_second.m_ints.m_format.m_shape, ints_shape);
 
     ASSERT_EQ(row.nfield(), 6ul);
-    for (size_t i=0ul; i<row.nfield(); ++i) ASSERT_EQ(row.m_fields[i]->m_row, &row);
+    for (uint_t i=0ul; i<row.nfield(); ++i) ASSERT_EQ(row.m_fields[i]->m_row, &row);
     ASSERT_EQ(row.m_child, nullptr);
 
     auto row_copy = row;
-    for (size_t i=0ul; i<row_copy.nfield(); ++i) ASSERT_EQ(row_copy.m_fields[i]->m_row, &row_copy);
+    for (uint_t i=0ul; i<row_copy.nfield(); ++i) ASSERT_EQ(row_copy.m_fields[i]->m_row, &row_copy);
 
     BufferedTable<TestRow> bt("test table", {{nbit, ints_shape}});
     bt.resize(10);

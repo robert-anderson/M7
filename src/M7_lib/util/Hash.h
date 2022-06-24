@@ -7,6 +7,8 @@
 
 #include <M7_lib/defs.h>
 
+using namespace defs;
+
 namespace hash {
 
     typedef uint64_t digest_t;
@@ -35,10 +37,10 @@ namespace hash {
         }
     }
 
-    static digest_t fnv(const char *begin, const size_t &size) {
+    static digest_t fnv(const char *begin, const uint_t &size) {
         const auto prime = fnv_prime<digest_t>();
         auto result = fnv_offset_basis<digest_t>();
-        for (size_t ibyte = 0ul; ibyte < size; ++ibyte) {
+        for (uint_t ibyte = 0ul; ibyte < size; ++ibyte) {
             result ^= *(begin + ibyte);
             result *= prime;
         }
@@ -80,9 +82,9 @@ namespace hash {
      *  arbitrary integers with repetition allowed in the [lo, hi) range
      */
     std::vector<digest_t>
-    in_range(const std::vector<digest_t> &v, size_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    in_range(const std::vector<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
 
-    std::vector<digest_t> in_range(digest_t v, size_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    std::vector<digest_t> in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
 
     /**
      * deterministically generate arbitrary testing data: NOT a random number generator
@@ -100,9 +102,9 @@ namespace hash {
      *  unrepeated arbitrary integers in the [lo, hi) range
      */
     std::vector<digest_t>
-    unique_in_range(const std::vector<digest_t> &v, size_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    unique_in_range(const std::vector<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
 
-    std::vector<digest_t> unique_in_range(digest_t v, size_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    std::vector<digest_t> unique_in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
 }
 
 

@@ -12,31 +12,31 @@
 #include <M7_lib/linalg/Dense.h>
 
 struct AbelianGroup {
-    typedef std::function<size_t(const size_t &, const size_t &)> direct_prod_fn_t;
+    typedef std::function<uint_t(const uint_t &, const uint_t &)> direct_prod_fn_t;
     typedef const direct_prod_fn_t &cr_direct_prod_fn_t;
     const std::vector<std::string> m_labels;
-    dense::Matrix<size_t> m_products;
+    dense::Matrix<uint_t> m_products;
 
-    size_t nirrep() const;
+    uint_t nirrep() const;
 
-    const size_t &product(const size_t &iirrep, const size_t &jirrep) const;
+    const uint_t &product(const uint_t &iirrep, const uint_t &jirrep) const;
 
-    const std::string &product_label(const size_t &iirrep, const size_t &jirrep) const;
+    const std::string &product_label(const uint_t &iirrep, const uint_t &jirrep) const;
 
-    template<size_t nirrep>
+    template<uint_t nirrep>
     bool is_conservative(const uinta_t<nirrep> &iirreps) const {
         static_assert(nirrep > 1, "function applies to direct products of irreps");
-        size_t tmp = iirreps[0];
-        for (size_t i = 1ul; i < nirrep - 1; ++i) tmp = product(tmp, iirreps[i]);
+        uint_t tmp = iirreps[0];
+        for (uint_t i = 1ul; i < nirrep - 1; ++i) tmp = product(tmp, iirreps[i]);
         return tmp == iirreps.back();
     }
 
-    template<size_t nirrep>
+    template<uint_t nirrep>
     bool is_conservative(const uinta_t<nirrep> &iirreps1, const uinta_t<nirrep> &iirreps2) const {
         static_assert(nirrep > 0, "function applies to direct products of irreps");
-        size_t tmp1 = iirreps1[0];
-        size_t tmp2 = iirreps2[0];
-        for (size_t i = 1ul; i < nirrep; ++i) {
+        uint_t tmp1 = iirreps1[0];
+        uint_t tmp2 = iirreps2[0];
+        for (uint_t i = 1ul; i < nirrep; ++i) {
             tmp1 = product(tmp1, iirreps1[i]);
             tmp2 = product(tmp2, iirreps2[i]);
         }
@@ -74,11 +74,11 @@ struct PointGroup : AbelianGroup {
 struct AbelianGroupMap {
     const AbelianGroup m_grp;
     const defs::uintv_t m_site_irreps;
-    const size_t m_nsite;
+    const uint_t m_nsite;
 
     AbelianGroupMap(AbelianGroup grp, defs::uintv_t site_irreps);
 
-    AbelianGroupMap(size_t nsite);
+    AbelianGroupMap(uint_t nsite);
 
     bool operator==(const AbelianGroupMap& other) const;
 

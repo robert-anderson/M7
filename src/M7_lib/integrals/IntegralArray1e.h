@@ -13,7 +13,7 @@
 namespace integrals_1e {
     using namespace integer;
 
-    typedef std::function<void(size_t, size_t)> foreach_fn_t;
+    typedef std::function<void(uint_t, uint_t)> foreach_fn_t;
 
     namespace syms {
         enum Sym {
@@ -26,16 +26,16 @@ namespace integrals_1e {
 
     struct Indexer : IntegralIndexer {
         const syms::Sym m_sym;
-        Indexer(size_t norb, size_t size, syms::Sym sym): IntegralIndexer(norb, size), m_sym(sym){}
+        Indexer(uint_t norb, uint_t size, syms::Sym sym): IntegralIndexer(norb, size), m_sym(sym){}
         virtual void foreach(const foreach_fn_t& fn) const = 0;
     };
 
     struct IndexerSymNone : Indexer {
-        IndexerSymNone(size_t norb);
+        IndexerSymNone(uint_t norb);
 
-        size_t index_only(size_t a, size_t i) const;
+        uint_t index_only(uint_t a, uint_t i) const;
 
-        std::pair<size_t, bool> index_and_conj(size_t a, size_t i) const;
+        std::pair<uint_t, bool> index_and_conj(uint_t a, uint_t i) const;
 
         void foreach(const foreach_fn_t &fn) const override;
     };
@@ -43,24 +43,24 @@ namespace integrals_1e {
     using namespace integer;
 
     struct IndexerSymH : Indexer {
-        IndexerSymH(size_t norb);
+        IndexerSymH(uint_t norb);
 
-        size_t index_only(size_t a, size_t i) const;
+        uint_t index_only(uint_t a, uint_t i) const;
 
-        std::pair<size_t, bool> index_and_conj(size_t a, size_t i) const;
+        std::pair<uint_t, bool> index_and_conj(uint_t a, uint_t i) const;
 
         void foreach(const foreach_fn_t &fn) const override;
     };
 
     template<typename T>
     struct Array {
-        const size_t m_norb;
-        Array(size_t norb): m_norb(norb){}
+        const uint_t m_norb;
+        Array(uint_t norb): m_norb(norb){}
         virtual ~Array() = default;
 
-        virtual bool set(size_t a, size_t i, T elem) = 0;
+        virtual bool set(uint_t a, uint_t i, T elem) = 0;
 
-        virtual T get(size_t a, size_t i) const = 0;
+        virtual T get(uint_t a, uint_t i) const = 0;
 
         virtual syms::Sym sym() const = 0;
     };
@@ -73,12 +73,12 @@ namespace integrals_1e {
         indexer_t m_indexer;
         PrivateIntegralStorage<T> m_data;
 
-        IndexedArray(size_t norb) : Array<T>(norb), m_indexer(norb),
+        IndexedArray(uint_t norb) : Array<T>(norb), m_indexer(norb),
             m_data(static_cast<const Indexer&>(m_indexer).m_size) {}
 
-        bool set(size_t a, size_t i, T elem) override {
+        bool set(uint_t a, uint_t i, T elem) override {
             // any compiler should statically execute this conditional
-            if (!datatype::is_complex<T>())
+            if (!dtype::is_complex<T>())
                 return m_data.set_data(m_indexer.index_only(a, i), elem);
             else {
                 const auto pair = m_indexer.index_and_conj(a, i);
@@ -86,9 +86,9 @@ namespace integrals_1e {
             }
         }
 
-        T get(size_t a, size_t i) const override {
+        T get(uint_t a, uint_t i) const override {
             // any compiler should statically execute this conditional
-            if (!datatype::is_complex<T>())
+            if (!dtype::is_complex<T>())
                 return m_data.get_data(m_indexer.index_only(a, i));
             else {
                 const auto pair = m_indexer.index_and_conj(a, i);
@@ -117,7 +117,7 @@ namespace integrals_1e {
      *  new instance of the type corresponding to the requested symmetry
      */
     template<typename T>
-    std::unique_ptr<Array<T>> make(size_t norb, syms::Sym sym){
+    std::unique_ptr<Array<T>> make(uint_t norb, syms::Sym sym){
         typedef std::unique_ptr<Array<T>> ptr_t;
         using namespace syms;
         switch (sym) {

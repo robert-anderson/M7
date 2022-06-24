@@ -6,7 +6,7 @@
 #include "M7_lib/util/Exsig.h"
 #include "M7_lib/basis/BasisData.h"
 
-FcidumpInfo::FcidumpInfo(std::string fname, bool uhf, bool relativistic, size_t nelec, size_t nsite, int ms2, defs::uintv_t orbsym):
+FcidumpInfo::FcidumpInfo(std::string fname, bool uhf, bool relativistic, uint_t nelec, uint_t nsite, int ms2, defs::uintv_t orbsym):
         m_fname(fname), m_uhf(uhf), m_relativistic(relativistic), m_spin_resolved(m_uhf || m_relativistic),
         m_nelec(nelec), m_nsite(nsite), m_nspinorb(m_spin_resolved ? m_nsite*2 : m_nsite),
         m_norb_distinct(m_spin_resolved ? m_nspinorb : m_nsite),
@@ -60,12 +60,12 @@ bool FcidumpFileReader::next(defs::uintv_t &inds, defs::ham_t &v) {
     return true;
 }
 
-size_t FcidumpFileReader::ranksig(const defs::uintv_t &inds) const {
+uint_t FcidumpFileReader::ranksig(const defs::uintv_t &inds) const {
     auto nset_inds = HamiltonianFileReader::nset_ind(inds);
     return exsig::encode(nset_inds/2, nset_inds/2, 0, 0);
 }
 
-size_t FcidumpFileReader::exsig(const defs::uintv_t &inds, size_t ranksig) const {
+uint_t FcidumpFileReader::exsig(const defs::uintv_t &inds, uint_t ranksig) const {
     switch (ranksig) {
         case 0ul: return 0ul;
         case exsig::ex_single:
@@ -80,5 +80,5 @@ size_t FcidumpFileReader::exsig(const defs::uintv_t &inds, size_t ranksig) const
 }
 
 bool FcidumpFileReader::inds_in_range(const defs::uintv_t &inds) const {
-    return std::all_of(inds.cbegin(), inds.cend(), [this](size_t i){return i<=m_info.m_norb_distinct;});
+    return std::all_of(inds.cbegin(), inds.cend(), [this](uint_t i){return i<=m_info.m_norb_distinct;});
 }

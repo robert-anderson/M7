@@ -4,7 +4,7 @@
 
 #include "Maes.h"
 
-Maes::Maes(const conf::AvEsts &opts, sys::Size extents, size_t nelec, size_t nroot) :
+Maes::Maes(const conf::AvEsts &opts, sys::Size extents, uint_t nelec, uint_t nroot) :
         m_accum_epoch("MAE accumulation"), m_bilinears(opts, extents, nelec, m_accum_epoch),
         m_ref_excits(opts.m_ref_excits, extents, nroot), m_period(opts.m_stats_period) {
     if (*this) {
@@ -22,7 +22,7 @@ bool Maes::all_stores_empty() const {
     return m_bilinears.all_stores_empty() && m_ref_excits.all_stores_empty();
 }
 
-bool Maes::is_period_cycle(size_t icycle) {
+bool Maes::is_period_cycle(uint_t icycle) {
     if (!m_accum_epoch) return false;
     if (!m_period) return false;
     if (m_icycle_period_start == ~0ul || m_icycle_period_start == icycle) {
@@ -36,7 +36,7 @@ void Maes::end_cycle() {
     m_bilinears.end_cycle();
 }
 
-void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, const size_t &icycle) {
+void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, const uint_t &icycle) {
     if (!m_accum_epoch) return;
     // the current cycle should be included in the denominator
     if (!row.occupied_ncycle(icycle)) {
@@ -45,7 +45,7 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
     }
     defs::wf_comp_t ncycle_occ = row.occupied_ncycle(icycle);
 
-    for (size_t ipart = 0ul; ipart < row.m_wf_format.m_nelement; ++ipart) {
+    for (uint_t ipart = 0ul; ipart < row.m_wf_format.m_nelement; ++ipart) {
         auto &ref = refs[ipart];
         auto &ref_mbf = ref.get_mbf();
         auto ipart_replica = row.ipart_replica(ipart);
@@ -85,7 +85,7 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
     row.m_icycle_occ = icycle + 1;
 }
 
-void Maes::output(size_t icycle, const Hamiltonian &ham, bool final) {
+void Maes::output(uint_t icycle, const Hamiltonian &ham, bool final) {
     if (!*this) return;
     if (!is_period_cycle(icycle) && !final) return;
     auto &stats_row = m_stats->m_row;

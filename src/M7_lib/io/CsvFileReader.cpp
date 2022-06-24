@@ -5,7 +5,7 @@
 #include "CsvFileReader.h"
 #include "M7_lib/util/String.h"
 
-CsvFileReader::CsvFileReader(const std::string& fname, std::string delimiters, size_t iline) :
+CsvFileReader::CsvFileReader(const std::string& fname, std::string delimiters, uint_t iline) :
         FileReader(fname, iline), m_delimiters(std::move(delimiters)) {}
 
 bool CsvFileReader::next(std::vector<std::string>& tokens) {
@@ -31,7 +31,7 @@ bool NumericCsvFileReader::valid_numeric(const std::vector<std::string>& tokens)
 }
 
 NumericCsvFileReader::NumericCsvFileReader(const std::string& fname,
-              size_t ncolumn, std::string delimiters, size_t iline) :
+              uint_t ncolumn, std::string delimiters, uint_t iline) :
         CsvFileReader(fname, delimiters, iline), m_ncolumn(ncolumn) {}
 
 bool NumericCsvFileReader::next(std::vector<std::string>& tokens) {
@@ -41,7 +41,7 @@ bool NumericCsvFileReader::next(std::vector<std::string>& tokens) {
     return true;
 }
 
-bool NumericCsvFileReader::parsable_as(const std::string& str, size_t&) {
+bool NumericCsvFileReader::parsable_as(const std::string& str, uint_t&) {
     for (auto c : str) if (strchr(c_allowed_chars.c_str(), c) != nullptr) return false;
     return true;
 }
@@ -62,7 +62,7 @@ bool NumericCsvFileReader::parsable_as(const std::string&, float&) {
     return true;
 }
 
-void NumericCsvFileReader::parse(const std::string& str, size_t& v) {
+void NumericCsvFileReader::parse(const std::string& str, uint_t& v) {
     v = std::stoul(str);
 }
 
@@ -82,7 +82,7 @@ void NumericCsvFileReader::parse(const std::string& str, float& v) {
     v = std::stof(str);
 }
 
-size_t NumericCsvFileReader::ncolumn(const std::string& fname, std::function<size_t(const std::string&)> iline_fn) {
+uint_t NumericCsvFileReader::ncolumn(const std::string& fname, std::function<uint_t(const std::string&)> iline_fn) {
     if (!FileReader::exists(fname)) return 0ul;
     CsvFileReader file_reader(fname);
     auto iline = iline_fn(fname);

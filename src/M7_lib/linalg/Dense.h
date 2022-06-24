@@ -80,8 +80,8 @@ namespace dense {
 
     using namespace fptol;
     template<typename T>
-    static bool nearly_equal(const T* v1, const T* v2, size_t size, arith::comp_t<T> atol = default_atol_near<T>()) {
-        for (size_t i = 0ul; i < size; ++i) {
+    static bool nearly_equal(const T* v1, const T* v2, uint_t size, arith::comp_t<T> atol = default_atol_near<T>()) {
+        for (uint_t i = 0ul; i < size; ++i) {
             if (!fptol::nearly_equal(v1[i], v2[i], arith::comp_t<T>(0), atol)) return false;
         }
         return true;
@@ -98,16 +98,16 @@ namespace dense {
     class Matrix {
         std::vector<T> m_buffer;
 
-        size_t index(const size_t &irow, const size_t &icol) const {
+        uint_t index(const uint_t &irow, const uint_t &icol) const {
             DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
             DEBUG_ASSERT_LT(icol, m_ncol, "column index OOB");
             return irow * m_ncol + icol;
         }
 
-        size_t m_nrow, m_ncol;
+        uint_t m_nrow, m_ncol;
     public:
 
-        Matrix(size_t nrow, size_t ncol) : m_buffer(nrow * ncol, T(0)), m_nrow(nrow), m_ncol(ncol) {}
+        Matrix(uint_t nrow, uint_t ncol) : m_buffer(nrow * ncol, T(0)), m_nrow(nrow), m_ncol(ncol) {}
         Matrix(const sparse::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_column_index()+1){
             *this = sparse;
         }
@@ -127,10 +127,10 @@ namespace dense {
         Matrix& operator=(const sparse::Matrix<T>& sparse){
             REQUIRE_GE(m_nrow, sparse.nrow(), "not enough rows in dense matrix ");
             REQUIRE_GT(m_ncol, sparse.max_column_index(), "not enough columns in dense matrix ");
-            for (size_t irow = 0ul; irow < sparse.nrow(); ++irow) {
+            for (uint_t irow = 0ul; irow < sparse.nrow(); ++irow) {
                 auto pair = sparse[irow];
                 auto nentry = pair.first.size();
-                for (size_t ientry = 0ul; ientry < nentry; ++ientry)
+                for (uint_t ientry = 0ul; ientry < nentry; ++ientry)
                     (*this)(irow, pair.first[ientry]) = pair.second[ientry];
             }
             return *this;
@@ -147,33 +147,33 @@ namespace dense {
             return !std::memcmp(ptr(), other.ptr(), sizeof(T)*m_ncol*m_nrow);
         }
 
-        const size_t& nrow() const {return m_nrow;}
-        const size_t& ncol() const {return m_ncol;}
-        std::pair<size_t, size_t> dims() const {return {nrow(), ncol()};}
+        const uint_t& nrow() const {return m_nrow;}
+        const uint_t& ncol() const {return m_ncol;}
+        std::pair<uint_t, uint_t> dims() const {return {nrow(), ncol()};}
 
-        T* ptr(const size_t &irow=0) {
+        T* ptr(const uint_t &irow=0) {
             return m_buffer.data()+index(irow, 0);
         }
 
-        const T* ptr(const size_t &irow=0) const {
+        const T* ptr(const uint_t &irow=0) const {
             return m_buffer.data()+index(irow, 0);
         }
 
-        T &operator[](const size_t &iflat) {
+        T &operator[](const uint_t &iflat) {
             DEBUG_ASSERT_LT(iflat, m_buffer.size(), "index OOB");
             return m_buffer[iflat];
         }
 
-        const T &operator[](const size_t &iflat) const {
+        const T &operator[](const uint_t &iflat) const {
             DEBUG_ASSERT_LT(iflat, m_buffer.size(), "index OOB");
             return m_buffer[iflat];
         }
 
-        T &operator()(const size_t &irow, const size_t &icol) {
+        T &operator()(const uint_t &irow, const uint_t &icol) {
             return m_buffer[index(irow, icol)];
         }
 
-        const T &operator()(const size_t &irow, const size_t &icol) const {
+        const T &operator()(const uint_t &irow, const uint_t &icol) const {
             return m_buffer[index(irow, icol)];
         }
 
@@ -191,12 +191,12 @@ namespace dense {
         /*
          * for bounds safety, we keep these set-from-pointer methods protected
          */
-        void set_row(const size_t &irow, const T* v) {
+        void set_row(const uint_t &irow, const T* v) {
             memcpy(m_buffer.data() + index(irow, 0ul), v, m_ncol * sizeof(T));
         }
 
-        void set_col(const size_t &icol, const T* v) {
-            for (size_t irow = 0ul; irow<m_nrow; ++irow) (*this)(irow, icol) = v[irow];
+        void set_col(const uint_t &icol, const T* v) {
+            for (uint_t irow = 0ul; irow<m_nrow; ++irow) (*this)(irow, icol) = v[irow];
         }
 
     public:
@@ -208,7 +208,7 @@ namespace dense {
             auto tmp = m_buffer;
             std::swap(m_nrow, m_ncol);
             auto ptr = tmp.data();
-            for (size_t icol = 0ul; icol<m_ncol; ++icol) {
+            for (uint_t icol = 0ul; icol<m_ncol; ++icol) {
                 set_col(icol, ptr);
                 ptr+=m_nrow;
             }
@@ -229,20 +229,20 @@ namespace dense {
             conj();
         }
 
-        void set_row(const size_t &irow, const std::vector<T> &v) {
+        void set_row(const uint_t &irow, const std::vector<T> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
             set_row(irow, v.data());
         }
 
-        void set_col(const size_t &icol, const std::vector<T> &v) {
+        void set_col(const uint_t &icol, const std::vector<T> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
             set_col(icol, v.data());
         }
 
         std::string to_string() const {
             std::string out;
-            for (size_t irow = 0ul; irow < m_nrow; ++irow) {
-                for (size_t icol = 0ul; icol < m_ncol; ++icol) {
+            for (uint_t irow = 0ul; irow < m_nrow; ++irow) {
+                for (uint_t icol = 0ul; icol < m_ncol; ++icol) {
                     out+=convert::to_string((*this)(irow, icol))+"  ";
                 }
                 out+="\n";
@@ -250,7 +250,7 @@ namespace dense {
             return out;
         }
 
-        void save(std::string name, hdf5::GroupWriter& gw, size_t irank=0) const {
+        void save(std::string name, hdf5::GroupWriter& gw, uint_t irank=0) const {
             defs::uintv_t shape;
             shape.push_back(m_nrow);
             shape.push_back(m_ncol);
@@ -262,7 +262,7 @@ namespace dense {
     class SquareMatrix : public Matrix<T> {
     public:
         using Matrix<T>::operator=;
-        SquareMatrix(size_t n): Matrix<T>(n, n){}
+        SquareMatrix(uint_t n): Matrix<T>(n, n){}
         SquareMatrix(const sparse::Matrix<T>& sparse) :
                 SquareMatrix(std::max(sparse.nrow(), sparse.max_column_index()+1)){
             *this = sparse;
@@ -315,7 +315,7 @@ namespace dense {
         /**
          * overloaded ctor to conveniently check dimensional compatibility of result
          */
-        GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq, char transp, char transq, size_t nrowr, size_t ncolr);
+        GemmWrapper(uint_t nrowp, uint_t ncolp, uint_t nrowq, uint_t ncolq, char transp, char transq, uint_t nrowr, uint_t ncolr);
 
         void multiply(const float* p, const float* q, float* r, float alpha, float beta);
 

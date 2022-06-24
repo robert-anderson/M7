@@ -14,33 +14,33 @@
 #include "PRNG.h"
 
 struct Aliaser {
-    const size_t m_nrow, m_nprob;
+    const uint_t m_nrow, m_nprob;
 private:
     SharedMatrix<defs::prob_t> m_prob_table;
-    SharedMatrix<size_t> m_alias_table;
+    SharedMatrix<uint_t> m_alias_table;
     SharedArray<defs::prob_t> m_norm;
 
 public:
-    Aliaser(size_t nrow, size_t nprob);
+    Aliaser(uint_t nrow, uint_t nprob);
 
-    void update(size_t irow, const defs::prob_t *probs, size_t nprob);
+    void update(uint_t irow, const defs::prob_t *probs, uint_t nprob);
 
-    void update(size_t irow, const std::vector<defs::prob_t> &probs);
+    void update(uint_t irow, const std::vector<defs::prob_t> &probs);
 
-    size_t draw(size_t irow, PRNG &prng) const;
+    uint_t draw(uint_t irow, PRNG &prng) const;
 
-    defs::prob_t norm(size_t irow) const;
+    defs::prob_t norm(uint_t irow) const;
 };
 
 class SingleAliaser : public Aliaser {
 public:
-    SingleAliaser(size_t nprob);
+    SingleAliaser(uint_t nprob);
 
     SingleAliaser(const std::vector<defs::prob_t> &probs);
 
     void update(const std::vector<defs::prob_t> &probs);
 
-    size_t draw(PRNG &prng) const;
+    uint_t draw(PRNG &prng) const;
 
     defs::prob_t norm() const;
 };

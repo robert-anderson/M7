@@ -35,7 +35,7 @@ namespace quick_sorter_test {
         return {"alpaca", "alpha", "beetle", "catamaran", "catapult"};
     }
 
-    static std::vector<size_t> correct_counts() {
+    static std::vector<uint_t> correct_counts() {
         return {5, 4, 3, 2, 4};
     }
 
@@ -43,7 +43,7 @@ namespace quick_sorter_test {
         row_t m_row1;
         row_t m_row2;
         AscOrderFn(const row_t& row): m_row1(row), m_row2(row){}
-        bool operator()(const size_t &irow1, const size_t &irow2){
+        bool operator()(const uint_t &irow1, const uint_t &irow2){
             m_row1.jump(irow1);
             m_row2.jump(irow2);
             return m_row1.m_field < m_row2.m_field;
@@ -57,7 +57,7 @@ namespace quick_sorter_test {
  */
 TEST(QuickSorter, FunctorSort){
     using namespace quick_sorter_test;
-    const size_t nchar = 9;
+    const uint_t nchar = 9;
 
     bt_t table("test", {{nchar}});
     setup_table(table);
@@ -75,7 +75,7 @@ TEST(QuickSorter, FunctorSort){
      */
     auto correct_order = quick_sorter_test::correct_order();
     auto correct = correct_order.cbegin();
-    for (size_t i=0ul; i<table.m_hwm; ++i){
+    for (uint_t i=0ul; i<table.m_hwm; ++i){
         row1.jump(qs.m_inds[i]);
         while (correct!=correct_order.cend() && row1.m_field != *correct) correct++;
     }
@@ -94,7 +94,7 @@ TEST(QuickSorter, FunctorSort){
     qs.reorder_sort(table);
     correct = correct_order.cbegin();
     row1.restart();
-    for (size_t i=0ul; i<table.m_hwm; ++i){
+    for (uint_t i=0ul; i<table.m_hwm; ++i){
         while (correct!=correct_order.cend() && row1.m_field != *correct) correct++;
         row1.step();
     }
@@ -114,14 +114,14 @@ TEST(QuickSorter, FunctorSort){
  */
 TEST(QuickSorter, LambdaSort){
     using namespace quick_sorter_test;
-    const size_t nchar = 9;
+    const uint_t nchar = 9;
 
     bt_t table("test", {{nchar}});
     setup_table(table);
 
     auto row1 = table.m_row;
     auto row2 = table.m_row;
-    auto comp_fn = [&](const size_t &irow1, const size_t &irow2){
+    auto comp_fn = [&](const uint_t &irow1, const uint_t &irow2){
         row1.jump(irow1);
         row2.jump(irow2);
         return row1.m_field < row2.m_field;
@@ -138,7 +138,7 @@ TEST(QuickSorter, LambdaSort){
      */
     auto correct_order = quick_sorter_test::correct_order();
     auto correct = correct_order.cbegin();
-    for (size_t i=0ul; i<table.m_hwm; ++i){
+    for (uint_t i=0ul; i<table.m_hwm; ++i){
         row1.jump(qs.m_inds[i]);
         while (correct!=correct_order.cend() && row1.m_field != *correct) correct++;
     }
@@ -157,7 +157,7 @@ TEST(QuickSorter, LambdaSort){
     qs.reorder_sort(table);
     correct = correct_order.cbegin();
     row1.restart();
-    for (size_t i=0ul; i<table.m_hwm; ++i){
+    for (uint_t i=0ul; i<table.m_hwm; ++i){
         while (correct!=correct_order.cend() && row1.m_field != *correct) correct++;
         row1.step();
     }

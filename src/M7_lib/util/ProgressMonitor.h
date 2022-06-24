@@ -10,13 +10,13 @@
 struct ProgressMonitor {
     const bool m_local;
     const std::string m_name, m_item_name;
-    const size_t m_nexpect, m_pc_resolution, m_period;
-    size_t m_i = 0ul;
+    const uint_t m_nexpect, m_pc_resolution, m_period;
+    uint_t m_i = 0ul;
 
-    ProgressMonitor(bool local, std::string name, std::string item_name, size_t nexpect, size_t pc_resolution = 5);
+    ProgressMonitor(bool local, std::string name, std::string item_name, uint_t nexpect, uint_t pc_resolution = 5);
 
 private:
-    void log(const size_t &pc) const;
+    void log(const uint_t &pc) const;
 
 public:
     void next();

@@ -6,16 +6,16 @@
 #include "FermionPromoter.h"
 
 
-FermionPromoter::FermionPromoter(size_t ncom, size_t nop_insert) :
+FermionPromoter::FermionPromoter(uint_t ncom, uint_t nop_insert) :
     m_nop_insert(nop_insert),
     m_ncomb(integer::combinatorial(ncom, nop_insert)),
     m_all_combs(nop_insert * m_ncomb){
     if (!nop_insert) return;
 
     basic_foreach::rtnd::Ordered<> foreach_comb(ncom, nop_insert);
-    size_t icomb = 0ul;
+    uint_t icomb = 0ul;
     auto fn = [&](const defs::uintv_t& inds) {
-        for (size_t i = 0ul; i < nop_insert; ++i) {
+        for (uint_t i = 0ul; i < nop_insert; ++i) {
             auto j = icomb * nop_insert + i;
             ASSERT(j < m_all_combs.size());
             m_all_combs[j] = inds[i];
@@ -25,18 +25,18 @@ FermionPromoter::FermionPromoter(size_t ncom, size_t nop_insert) :
     foreach_comb.loop(fn);
 }
 
-const defs::mev_ind_t *FermionPromoter::begin(const size_t &icomb) const {
+const defs::mev_ind_t *FermionPromoter::begin(const uint_t &icomb) const {
     ASSERT(icomb < m_ncomb);
     return m_all_combs.data() + icomb * m_nop_insert;
 }
 
-bool FermionPromoter::apply(const size_t &icomb, const conn::FrmOnv &conn,
+bool FermionPromoter::apply(const uint_t &icomb, const conn::FrmOnv &conn,
                             const FrmOps &com, MaeIndsPair &frm_inds) const {
     auto comb_begin = begin(icomb);
     frm_inds.zero();
-    size_t ann_passed = 0ul;
-    size_t cre_passed = 0ul;
-    for (size_t iins = 0ul; iins < m_nop_insert; ++iins) {
+    uint_t ann_passed = 0ul;
+    uint_t cre_passed = 0ul;
+    for (uint_t iins = 0ul; iins < m_nop_insert; ++iins) {
         auto ins = com[comb_begin[iins]];
         while (ann_passed < conn.m_ann.size() && conn.m_ann[ann_passed] < ins) {
             frm_inds.m_ann[ann_passed + iins] = conn.m_ann[ann_passed];

@@ -20,7 +20,7 @@ FciqmcCalculation::FciqmcCalculation(const conf::Document &opts) :
     TableBase::Loc ref_loc = {m_wf.get_rank(ref_mbf), 0ul};
     m_wf.create_row(0, ref_mbf, ref_energy, std::vector<bool>(m_wf.npart(), true));
     if (ref_loc.is_mine()){
-        for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
+        for (uint_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
             m_wf.set_weight(ipart, opts.m_wavefunction.m_nw_init.get());
     }
     m_prop->m_shift.m_values = ref_energy+opts.m_shift.m_init;

@@ -9,7 +9,7 @@ HeisenbergExchange::HeisenbergExchange(const FrmHam& h, PRNG& prng) :
     REQUIRE_TRUE(h.is<HeisenbergFrmHam>(), "given hamiltonian is not of HeisenbergFrmHam type");
 }
 
-bool HeisenbergExchange::draw_frm(size_t exsig, const field::FrmOnv& src,
+bool HeisenbergExchange::draw_frm(uint_t exsig, const field::FrmOnv& src,
                                   defs::prob_t& prob, conn::FrmOnv& conn) {
     DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
     const auto& lattice = m_h.m_basis.m_lattice;
@@ -52,6 +52,6 @@ defs::prob_t HeisenbergExchange::prob_frm(const field::FrmOnv& src, const conn::
     return prob / basis.m_nsite;
 }
 
-size_t HeisenbergExchange::approx_nconn(size_t, sys::Particles) const {
+uint_t HeisenbergExchange::approx_nconn(uint_t, sys::Particles) const {
     return 1ul<<m_h.m_basis.m_lattice->m_nadj_max;
 }

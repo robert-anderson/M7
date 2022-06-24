@@ -9,7 +9,7 @@
 
 #if 0
 TEST(BosonCouplings, Element_b0) {
-    size_t nboson_cutoff = 4, nsite = 4;
+    uint_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
     conn::FrmBosOnv conn(nsite);
 
@@ -53,7 +53,7 @@ TEST(BosonCouplings, Element_b0) {
 }
 
 TEST(BosonCouplings, Element_f0_b1){
-    size_t nboson_cutoff = 4, nsite = 4;
+    uint_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
     conn::FrmBosOnv conn(nsite);
 
@@ -116,7 +116,7 @@ TEST(BosonCouplings, Element_f0_b1){
 }
 
 TEST(BosonCouplings, Element_f1_b1){
-    size_t nboson_cutoff = 4, nsite = 4;
+    uint_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
     conn::FrmBosOnv conn(nsite);
 

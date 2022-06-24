@@ -23,11 +23,11 @@ public:
     ExactPropagator(const Hamiltonian& ham, const conf::Document& opts, const Wavefunction& wf,
                     bool only_nonzero_h_spawns=true);
 
-    void diagonal(Wavefunction &wf, const size_t& ipart) override;
+    void diagonal(Wavefunction &wf, const uint_t& ipart) override;
 
-    void off_diagonal(Wavefunction &wf, const size_t& dst_mbf) override;
+    void off_diagonal(Wavefunction &wf, const uint_t& dst_mbf) override;
 
-    void update(const size_t &icycle, const Wavefunction &wf) override;
+    void update(const uint_t &icycle, const Wavefunction &wf) override;
 };
 
 #endif //M7_EXACTPROPAGATOR_H

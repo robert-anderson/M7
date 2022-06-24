@@ -85,10 +85,10 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
             1.0825317547305484, 0.0, 0.0, 0.6123724356957947,
             1.0825317547305484, 0.37500000000000006, 0.6629126073623882,
             0.6123724356957946, 0.43301270189221935};
-    size_t n = 0ul;
-    for (size_t i=0ul; i<basis.size(); ++i){
+    uint_t n = 0ul;
+    for (uint_t i=0ul; i<basis.size(); ++i){
         src = basis[i];
-        for (size_t j=i+1; j<basis.size(); ++j) {
+        for (uint_t j=i+1; j<basis.size(); ++j) {
             dst = basis[j];
             conn.connect(src, dst);
             ASSERT_FLOAT_EQ(ham.get_element(src, conn), h_upper_triangle[n]);

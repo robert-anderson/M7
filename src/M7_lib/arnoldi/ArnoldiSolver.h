@@ -18,8 +18,8 @@
  * put all type-independent operations in this un-templated base class
  */
 struct ArnoldiProblemBase {
-    const size_t m_nroot;
-    ArnoldiProblemBase(size_t nroot): m_nroot(nroot){}
+    const uint_t m_nroot;
+    ArnoldiProblemBase(uint_t nroot): m_nroot(nroot){}
     /**
      * @return
      *  true if the obtained Krylov basis is sufficiently complete
@@ -49,17 +49,17 @@ protected:
 template<typename T>
 struct ArnoldiProblemWithProduct : ArnoldiProblemBase {
 
-    ArnoldiProblemWithProduct(size_t nroot): ArnoldiProblemBase(nroot){}
+    ArnoldiProblemWithProduct(uint_t nroot): ArnoldiProblemBase(nroot){}
 
-    virtual void setup(size_t nrow, bool parallel) = 0;
+    virtual void setup(uint_t nrow, bool parallel) = 0;
 
     virtual bool solve(dist_mv_prod::Base<T> &mv_prod) = 0;
 
     virtual bool solve(sparse::Matrix<T> &sparse_mat) = 0;
 
-    virtual T real_eigenvalue(size_t i) = 0;
+    virtual T real_eigenvalue(uint_t i) = 0;
 
-    virtual std::complex<T> complex_eigenvalue(size_t i) = 0;
+    virtual std::complex<T> complex_eigenvalue(uint_t i) = 0;
 
 protected:
     /**
@@ -90,8 +90,8 @@ struct ArnoldiProblemSym : ArnoldiProblemWithProduct<T> {
 
     std::unique_ptr<ARrcSymStdEig<T>> m_solver;
 
-    ArnoldiProblemSym(size_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){
-        datatype::unused(sigma);
+    ArnoldiProblemSym(uint_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){
+        dtype::unused(sigma);
     }
 
 private:
@@ -105,7 +105,7 @@ private:
 
     void find_eigenvalues() override { m_solver->FindEigenvalues(); }
 
-    void setup(size_t nrow, bool dist) override {
+    void setup(uint_t nrow, bool dist) override {
         if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcSymStdEig<T>>(nrow, m_nroot);
     }
 
@@ -140,11 +140,11 @@ public:
         return solve_base(prod_fn, false);
     }
 
-    T real_eigenvalue(size_t i) override {
+    T real_eigenvalue(uint_t i) override {
         return m_solver->Eigenvalue(i);
     }
 
-    std::complex<T> complex_eigenvalue(size_t i) override {
+    std::complex<T> complex_eigenvalue(uint_t i) override {
         return {real_eigenvalue(i), 0.0};
     }
 };
@@ -161,8 +161,8 @@ struct ArnoldiProblemNonSym : ArnoldiProblemWithProduct<T> {
 
     std::unique_ptr<ARrcNonSymStdEig<T>> m_solver;
 
-    ArnoldiProblemNonSym(size_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){
-        datatype::unused(sigma);}
+    ArnoldiProblemNonSym(uint_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){
+        dtype::unused(sigma);}
 
 private:
     bool basis_found() override { return m_solver->ArnoldiBasisFound(); }
@@ -175,7 +175,7 @@ private:
 
     void find_eigenvalues() override { m_solver->FindEigenvalues(); }
 
-    void setup(size_t nrow, bool dist) override {
+    void setup(uint_t nrow, bool dist) override {
         if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcNonSymStdEig<T>>(nrow, m_nroot);
     }
 
@@ -210,14 +210,14 @@ public:
         return solve_base(prod_fn, false);
     }
 
-    T real_eigenvalue(size_t i) override {
+    T real_eigenvalue(uint_t i) override {
         auto z = complex_eigenvalue(i);
         if (!fptol::numeric_zero(z.imag()))
             log::warn("taking real part of eigenvalue with non-zero imaginary part");
         return arith::real(complex_eigenvalue(i));
     }
 
-    std::complex<T> complex_eigenvalue(size_t i) override {
+    std::complex<T> complex_eigenvalue(uint_t i) override {
         return m_solver->Eigenvalue(i);
     }
 };

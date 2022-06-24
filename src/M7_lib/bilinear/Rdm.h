@@ -18,19 +18,19 @@
 using namespace exsig;
 
 class Rdm : public Communicator<MaeRow, MaeRow, true> {
-    const size_t m_ranksig;
-    const size_t m_rank, m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
+    const uint_t m_ranksig;
+    const uint_t m_rank, m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
     std::vector<FermionPromoter> m_frm_promoters;
     buffered::MaeInds m_lookup_inds;
-    static size_t nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, sys::Size basis_size);
+    static uint_t nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size);
 
-    static size_t nrow_estimate(size_t exsig, sys::Size extents);
+    static uint_t nrow_estimate(uint_t exsig, sys::Size extents);
 
 public:
     const sys::Size m_basis_size;
-    const size_t m_nelec;
+    const uint_t m_nelec;
 
-    Rdm(const conf::Rdms& opts, size_t ranksig, sys::Size basis_size, size_t nelec, size_t nvalue);
+    Rdm(const conf::Rdms& opts, uint_t ranksig, sys::Size basis_size, uint_t nelec, uint_t nvalue);
 
     void make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
                        const com_ops::Frm& com, const defs::wf_t& contrib);
@@ -62,14 +62,14 @@ public:
     const bool m_explicit_ref_conns;
     const Epoch& m_accum_epoch;
     Reduction<defs::wf_t> m_total_norm;
-    const size_t m_nelec;
+    const uint_t m_nelec;
 
     Rdms(const conf::Rdms& opts, defs::uintv_t ranksigs,
-         sys::Size extents, size_t nelec, const Epoch& accum_epoch);
+         sys::Size extents, uint_t nelec, const Epoch& accum_epoch);
 
     operator bool() const;
 
-    bool takes_contribs_from(size_t exsig) const;
+    bool takes_contribs_from(uint_t exsig) const;
 
     void make_contribs(const field::Mbf& src_onv, const conn::Mbf& conn,
                        const com_ops::Mbf& com, const defs::wf_t& contrib);
@@ -100,7 +100,7 @@ public:
      * @param ipart_dst
      */
 //    void make_contribs(const field::Mbf& src_mbf, const defs::wf_t& src_weight, const WalkerTableRow& dst_row,
-//                       const Propagator& prop, const References& refs, const size_t& ipart_dst) {
+//                       const Propagator& prop, const References& refs, const uint_t& ipart_dst) {
 //        if (!*this) return;
 //        if (!m_accum_epoch) return;
 //
@@ -144,9 +144,9 @@ public:
      *  boson ladder-operator (pure and coupled) hamiltonian
      * @return
      */
-    defs::ham_comp_t get_energy(const FrmBosHam& ham, size_t nelec, size_t exsig) const;
+    defs::ham_comp_t get_energy(const FrmBosHam& ham, uint_t nelec, uint_t exsig) const;
 
-    defs::ham_comp_t get_energy(const FrmBosHam& ham, size_t nelec) const {
+    defs::ham_comp_t get_energy(const FrmBosHam& ham, uint_t nelec) const {
         return get_energy(ham, nelec, exsig::ex_1101) + get_energy(ham, nelec, exsig::ex_1110);
     }
 

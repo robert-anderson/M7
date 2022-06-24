@@ -24,7 +24,7 @@ bool DstFinder::find() {
 
 comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
     if (m_rdms) {
-        return [&](const size_t &irow1, const size_t &irow2) {
+        return [&](const uint_t &irow1, const uint_t &irow2) {
             m_work_row1.jump(irow1);
             m_work_row2.jump(irow2);
             // sort criteria from major to minor: dst MBF, dst_ipart, src MBF,
@@ -37,7 +37,7 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
             return m_work_row1.m_dst_mbf < m_work_row2.m_dst_mbf;
         };
     } else {
-        return [&](const size_t &irow1, const size_t &irow2) {
+        return [&](const uint_t &irow1, const uint_t &irow2) {
             m_work_row1.jump(irow1);
             m_work_row2.jump(irow2);
             // sort criteria from major to minor: dst MBF, dst_ipart
@@ -50,7 +50,7 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
 }
 
 Annihilator::Annihilator(Wavefunction &wf, const Propagator &prop, const References &refs,
-                         Rdms &rdms, const size_t &icycle, defs::wf_comp_t nadd) :
+                         Rdms &rdms, const uint_t &icycle, defs::wf_comp_t nadd) :
         m_wf(wf), m_prop(prop), m_refs(refs), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
         m_work_row1(wf.m_comm.recv().m_row), m_work_row2(wf.m_comm.recv().m_row),
         m_sort_cmp_fn(make_sort_cmp_fn()) {
@@ -63,7 +63,7 @@ void Annihilator::sort_recv() {
     qs.reorder_sort(m_wf.recv());
 }
 
-void Annihilator::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
+void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
                                  bool allow_initiation, WalkerTableRow &dst_row) {
     if (m_nadd == 0.0) {
         DEBUG_ASSERT_TRUE(allow_initiation,
@@ -116,8 +116,8 @@ void Annihilator::handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &ne
         /*
          * store the original positions of the row objects in the recv table
          */
-        size_t irow_begin = block_begin.index();
-        size_t irow_next_begin = next_block_begin.index();
+        uint_t irow_begin = block_begin.index();
+        uint_t irow_next_begin = next_block_begin.index();
 
         auto &current = next_block_begin;
         defs::wf_t src_weight = block_begin.m_src_weight;
@@ -165,7 +165,7 @@ void Annihilator::handle_src_block(SpawnTableRow &block_begin, WalkerTableRow &d
     DEBUG_ASSERT_TRUE(m_rdms.m_accum_epoch, "shouldn't be sampling RDMs yet");
     DEBUG_ASSERT_EQ(block_begin.m_dst_mbf, dst_row.m_mbf, "wrong dst_row found");
 
-    size_t ipart_dst = block_begin.m_ipart_dst;
+    uint_t ipart_dst = block_begin.m_ipart_dst;
 
     /*
      * don't make contributions to RDM elements if they already take the equivalent contribution from deterministic

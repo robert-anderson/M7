@@ -54,7 +54,7 @@ public:
  */
 namespace buffered {
 
-    template<typename T, size_t nind>
+    template<typename T, uint_t nind>
     struct Numbers : BufferedField<field::Numbers<T, nind>> {
         typedef BufferedField<field::Numbers<T, nind>> base_t;
         typedef typename field::Numbers<T, nind>::inds_t inds_t;
@@ -93,7 +93,7 @@ namespace buffered {
         }
     };
 
-    template<typename T, size_t nind>
+    template<typename T, uint_t nind>
     struct NdBitset : BufferedField<field::NdBitset<T, nind>> {
         typedef BufferedField<field::NdBitset<T, nind>> base_t;
         typedef typename field::NdBitset<T, nind>::inds_t inds_t;
@@ -114,7 +114,7 @@ namespace buffered {
     template<typename T>
     struct Bitset : NdBitset<T, 1ul> {
         using field::Bitset<T>::operator=;
-        explicit Bitset(size_t nbit): NdBitset<T, 1ul>({nbit}){}
+        explicit Bitset(uint_t nbit): NdBitset<T, 1ul>({nbit}){}
         Bitset(const Bitset& other) : Bitset(other.m_format.m_nelement){
             *this = other;
         }
@@ -130,7 +130,7 @@ namespace buffered {
     struct FrmOnv : BufferedField<field::FrmOnv> {
         using field::FrmOnv::operator=;
         explicit FrmOnv(const sys::frm::Basis& basis) : BufferedField<field::FrmOnv>(basis){}
-        FrmOnv(size_t nsite) : FrmOnv(sys::frm::Basis(nsite)){}
+        FrmOnv(uint_t nsite) : FrmOnv(sys::frm::Basis(nsite)){}
         explicit FrmOnv(const sys::Basis& basis) : FrmOnv(basis.m_frm){}
         explicit FrmOnv(const sys::frm::Sector& sector) : FrmOnv(sector.m_basis){}
         explicit FrmOnv(const sys::Sector& sector) : FrmOnv(sector.m_frm){}
@@ -151,7 +151,7 @@ namespace buffered {
         using field::BosOnv::operator=;
         using field::BosOnv::operator==;
         explicit BosOnv(const sys::bos::Basis& basis) : BufferedField<field::BosOnv>(basis){}
-        BosOnv(size_t nmode, size_t occ_cutoff=sys::bos::c_max_occ) : BosOnv(sys::bos::Basis(nmode, occ_cutoff)){}
+        BosOnv(uint_t nmode, uint_t occ_cutoff=sys::bos::c_max_occ) : BosOnv(sys::bos::Basis(nmode, occ_cutoff)){}
         explicit BosOnv(const sys::Basis& basis) : BosOnv(basis.m_bos){}
         explicit BosOnv(const sys::bos::Sector& sector) : BosOnv(sector.m_basis){}
         explicit BosOnv(const sys::Sector& sector) : BosOnv(sector.m_bos){}
@@ -172,7 +172,7 @@ namespace buffered {
         using field::FrmBosOnv::operator=;
         explicit FrmBosOnv(const sys::frm::Basis& frm_basis, const sys::bos::Basis& bos_basis):
             BufferedField<field::FrmBosOnv>(frm_basis, bos_basis){}
-        FrmBosOnv(size_t nsite, size_t nmode, size_t bos_occ_cutoff=sys::bos::c_max_occ):
+        FrmBosOnv(uint_t nsite, uint_t nmode, uint_t bos_occ_cutoff=sys::bos::c_max_occ):
             FrmBosOnv(sys::frm::Basis(nsite), sys::bos::Basis(nmode, bos_occ_cutoff)){}
         explicit FrmBosOnv(const sys::Basis& basis): FrmBosOnv(basis.m_frm, basis.m_bos){}
         explicit FrmBosOnv(const sys::Sector& sector): FrmBosOnv(sector.basis()){}
@@ -239,7 +239,7 @@ namespace buffered {
 
     typedef std::tuple<FrmOnv, FrmBosOnv, BosOnv> mbf_tup_t;
 
-    template<size_t mbf_ind>
+    template<uint_t mbf_ind>
     using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
     typedef mbf_t<defs::mbf_type_ind> Mbf;
 
@@ -268,12 +268,12 @@ namespace buffered {
         using field::MaeInds::operator=;
         using field::MaeInds::m_frm;
         using field::MaeInds::m_bos;
-        MaeInds(size_t exsig): BufferedField<field::MaeInds>(exsig){}
+        MaeInds(uint_t exsig): BufferedField<field::MaeInds>(exsig){}
     };
 
     struct SpecMomInds : BufferedField<field::SpecMomInds> {
         using field::SpecMomInds::operator=;
-        SpecMomInds(size_t exsig): BufferedField<field::SpecMomInds>(exsig){}
+        SpecMomInds(uint_t exsig): BufferedField<field::SpecMomInds>(exsig){}
     };
 }
 

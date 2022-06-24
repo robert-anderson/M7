@@ -72,7 +72,7 @@ namespace decoded_mbf {
              */
             defs::uintv_t m_simple_inds;
 
-            LabelledBase(size_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
+            LabelledBase(uint_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
 
             const std::vector<defs::uintv_t> &validated() const;
 
@@ -84,13 +84,13 @@ namespace decoded_mbf {
              * @return
              *  spin orbital irrep map with 2*nirrep labels
              */
-            static defs::uintv_t make_spinorb_map(const defs::uintv_t &site_irreps, size_t nirrep);
+            static defs::uintv_t make_spinorb_map(const defs::uintv_t &site_irreps, uint_t nirrep);
 
             void clear();
 
             bool empty();
 
-            size_t label(size_t ispinorb) const;
+            uint_t label(uint_t ispinorb) const;
         };
 
         /**
@@ -98,7 +98,7 @@ namespace decoded_mbf {
          */
         struct LabelledOccs : LabelledBase {
         protected:
-            LabelledOccs(size_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
+            LabelledOccs(uint_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
 
         public:
             const std::vector<defs::uintv_t> &get();
@@ -111,7 +111,7 @@ namespace decoded_mbf {
          */
         struct LabelledVacs : LabelledBase {
         protected:
-            LabelledVacs(size_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
+            LabelledVacs(uint_t nelement, const defs::uintv_t &map, const FrmOnvField &mbf);
 
         public:
             const std::vector<defs::uintv_t> &get();
@@ -127,7 +127,7 @@ namespace decoded_mbf {
          * @tparam nind
          *  number of elements in shape of label array
          */
-        template<size_t nind>
+        template<uint_t nind>
         struct NdBase {
             const NdFormat<nind> m_format;
         protected:
@@ -140,15 +140,15 @@ namespace decoded_mbf {
             NdBase(uinta_t<nind> shape, const std::vector<defs::uintv_t> &inds) :
                     m_format(shape), m_inds_ref(inds) {}
 
-            size_t size(const size_t &i) const {
+            uint_t size(const uint_t &i) const {
                 return m_inds_ref[i].size();
             }
 
-            size_t size(const uinta_t<nind> &inds) const {
+            uint_t size(const uinta_t<nind> &inds) const {
                 return m_inds_ref[m_format.flatten(inds)].size();
             }
 
-            const defs::uintv_t &operator[](const size_t &i) const {
+            const defs::uintv_t &operator[](const uint_t &i) const {
                 return m_inds_ref[i];
             }
 
@@ -163,7 +163,7 @@ namespace decoded_mbf {
          * @tparam nind
          *  number of elements in shape of label array
          */
-        template<size_t nind>
+        template<uint_t nind>
         struct NdLabelledOccs : LabelledOccs {
         protected:
             NdBase<nind> m_nd_inds;
@@ -190,7 +190,7 @@ namespace decoded_mbf {
          * @tparam nind
          *  number of elements in shape of label array
          */
-        template<size_t nind>
+        template<uint_t nind>
         struct NdLabelledVacs : LabelledVacs {
         protected:
             NdBase<nind> m_nd_inds;

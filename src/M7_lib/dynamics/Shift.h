@@ -46,7 +46,7 @@ struct Reweighter {
      * @param av_shift
      *  average shift value over some number of historical instantaneous values
      */
-    void update(size_t icycle, size_t ipart, bool begin_cond, defs::ham_comp_t av_shift);
+    void update(uint_t icycle, uint_t ipart, bool begin_cond, defs::ham_comp_t av_shift);
     /**
      * if the reweighting adapation is in use, and the epoch is active, then add to histories
      * @param ipart
@@ -56,7 +56,7 @@ struct Reweighter {
      * @param tau
      *  current timestep
      */
-    void add(size_t ipart, defs::ham_comp_t shift, double tau);
+    void add(uint_t ipart, defs::ham_comp_t shift, double tau);
 
 private:
     /**
@@ -66,7 +66,7 @@ private:
      * @param v
      *  instantaneous shift
      */
-    void add_to_history(size_t ipart, const defs::ham_comp_t& v);
+    void add_to_history(uint_t ipart, const defs::ham_comp_t& v);
 
     /**
      * @return
@@ -112,7 +112,7 @@ struct Shift {
 
     Shift(const conf::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt);
 
-    const defs::ham_comp_t & operator[](const size_t& ipart);
+    const defs::ham_comp_t & operator[](const uint_t& ipart);
 
     /**
      * compute the change in all parts of the shift value based on the current values of wf.m_nwalkers
@@ -128,7 +128,7 @@ struct Shift {
      * @param tau
      *  current timestep
      */
-    void update(const Wavefunction& wf, const size_t& icycle, const double& tau);
+    void update(const Wavefunction& wf, const uint_t& icycle, const double& tau);
 
 private:
 
@@ -143,7 +143,7 @@ private:
      * @return
      *  normalized average for ipart
      */
-    defs::ham_comp_t get_average(const size_t& ipart) const;
+    defs::ham_comp_t get_average(const uint_t& ipart) const;
 
 };
 

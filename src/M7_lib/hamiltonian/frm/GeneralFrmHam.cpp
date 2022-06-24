@@ -44,11 +44,11 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo& info, bool 
     log_ints_sym(ints_2e->sym(), true);
     REQUIRE_TRUE(ints_2e.get(), "2e integral array object unallocated");
 
-    size_t iline_first_2e = ~0ul;
-    size_t iline_first_1e = ~0ul;
+    uint_t iline_first_2e = ~0ul;
+    uint_t iline_first_1e = ~0ul;
 
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
-    size_t iline = ~0ul;
+    uint_t iline = ~0ul;
     while (file_reader.next(inds, value)) {
         ++iline;
         auto ranksig = file_reader.ranksig(inds);
@@ -107,13 +107,13 @@ GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
         GeneralFrmHam({FortranNamelistReader(opts.m_ham.m_fcidump.m_path)},
                       opts.m_ham.m_fcidump.m_spin_major) {}
 
-defs::ham_t GeneralFrmHam::get_coeff_1100(size_t a, size_t i) const {
+defs::ham_t GeneralFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
     if (m_basis.m_spin_resolved) return m_ints.m_1e->get(a, i);
     if (m_basis.ispin(i)!=m_basis.ispin(a)) return 0.0;
     return m_ints.m_1e->get(m_basis.isite(a), m_basis.isite(i));
 }
 
-defs::ham_t GeneralFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
+defs::ham_t GeneralFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const {
     if (m_basis.m_spin_resolved) return m_ints.m_2e->get(a, b, i, j)-m_ints.m_2e->get(a, b, j, i);
     const auto aspin = m_basis.ispin(a);
     const auto bspin = m_basis.ispin(b);
@@ -131,8 +131,8 @@ defs::ham_t GeneralFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j
 
 defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv& onv) const {
     defs::ham_t element = m_e_core;
-    auto singles_fn = [&](size_t i) { element += GeneralFrmHam::get_coeff_1100(i, i); };
-    auto doubles_fn = [&](size_t i, size_t j) {
+    auto singles_fn = [&](uint_t i) { element += GeneralFrmHam::get_coeff_1100(i, i); };
+    auto doubles_fn = [&](uint_t i, uint_t j) {
         element += GeneralFrmHam::get_coeff_2200(i, j, i, j);
     };
     onv.foreach_setbit_pair(singles_fn, doubles_fn);
@@ -145,7 +145,7 @@ defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv& onv, const conn
     const auto& cre = conn.m_cre[0];
 
     defs::ham_t element = GeneralFrmHam::get_coeff_1100(cre, ann);
-    auto fn = [&](size_t ibit) {
+    auto fn = [&](uint_t ibit) {
         if (ibit != ann) element += GeneralFrmHam::get_coeff_2200(cre, ibit, ann, ibit);
     };
     onv.foreach_setbit(fn);
@@ -187,7 +187,7 @@ conn_foreach::base_list_t GeneralFrmHam::make_foreach_iters() const {
     return list;
 }
 
-size_t GeneralFrmHam::default_nelec() const {
+uint_t GeneralFrmHam::default_nelec() const {
     return m_info.m_nelec;
 }
 

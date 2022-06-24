@@ -22,9 +22,9 @@
  */
 
 TEST(BufferedFields, Numbers){
-    const std::array<size_t, 3> shape {4, 3, 2};
-    const size_t nelement = 4*3*2;
-    const size_t hi = nelement*4;
+    const uinta_t<3> shape {4, 3, 2};
+    const uint_t nelement = 4*3*2;
+    const uint_t hi = nelement*4;
     const auto elements = hash::unique_in_range(0, nelement, 0, hi, true);
 
     //  1. constructable via argument forwarding to T::T
@@ -32,7 +32,7 @@ TEST(BufferedFields, Numbers){
     ASSERT_EQ(direct.m_format.m_nelement, nelement);
 
     //  2. compatible with a call to any public method of T without cast to T&
-    for (size_t ielement = 0ul; ielement<nelement; ++ielement) direct[ielement] = elements[ielement];
+    for (uint_t ielement = 0ul; ielement<nelement; ++ielement) direct[ielement] = elements[ielement];
 
     //  3. copy-constructable from const B<T>&
     auto direct_cpy = direct;
@@ -111,13 +111,13 @@ TEST(BufferedFields, Number){
 }
 
 TEST(BufferedFields, NdBitset){
-    const std::array<size_t, 3> shape {4, 3, 2};
-    const size_t nbit = 4*3*2;
-    const size_t nsetbit = 8;
+    const uinta_t<3> shape {4, 3, 2};
+    const uint_t nbit = 4*3*2;
+    const uint_t nsetbit = 8;
     const auto setbits = hash::unique_in_range(0, nsetbit, 0, nbit, true);
 
     //  1. constructable via argument forwarding to T::T
-    buffered::NdBitset<size_t, 3> direct(shape);
+    buffered::NdBitset<uint_t, 3> direct(shape);
     ASSERT_EQ(direct.m_format.m_nelement, nbit);
 
     //  2. compatible with a call to any public method of T without cast to T&
@@ -130,8 +130,8 @@ TEST(BufferedFields, NdBitset){
     ASSERT_EQ(direct, direct_cpy);
 
     //  4. copy-constructable from const T&
-    const field::NdBitset<size_t, 3>& base_cref = direct;
-    buffered::NdBitset<size_t, 3> base_cref_cpy(base_cref);
+    const field::NdBitset<uint_t, 3>& base_cref = direct;
+    buffered::NdBitset<uint_t, 3> base_cref_cpy(base_cref);
     ASSERT_EQ(base_cref_cpy.m_format.m_shape, shape);
     for (auto& ibit: setbits) ASSERT_TRUE(base_cref_cpy.get(ibit));
     ASSERT_EQ(direct, base_cref_cpy);
@@ -157,12 +157,12 @@ TEST(BufferedFields, NdBitset){
 }
 
 TEST(BufferedFields, Bitset){
-    const size_t nbit = 20;
-    const size_t nsetbit = 8;
+    const uint_t nbit = 20;
+    const uint_t nsetbit = 8;
     auto setbits = hash::unique_in_range(0, nsetbit, 0, nbit, true);
 
     //  1. constructable via argument forwarding to T::T
-    buffered::Bitset<size_t> direct(nbit);
+    buffered::Bitset<uint_t> direct(nbit);
     ASSERT_EQ(direct.m_format.m_nelement, nbit);
 
     //  2. compatible with a call to any public method of T without cast to T&
@@ -175,8 +175,8 @@ TEST(BufferedFields, Bitset){
     ASSERT_EQ(direct, direct_cpy);
 
     //  4. copy-constructable from const T&
-    const field::Bitset<size_t>& base_cref = direct;
-    buffered::Bitset<size_t> base_cref_cpy(base_cref);
+    const field::Bitset<uint_t>& base_cref = direct;
+    buffered::Bitset<uint_t> base_cref_cpy(base_cref);
     ASSERT_EQ(base_cref_cpy.m_format.m_nelement, nbit);
     for (auto& ibit: setbits) ASSERT_TRUE(direct.get(ibit));
     ASSERT_EQ(direct, base_cref_cpy);
@@ -203,7 +203,7 @@ TEST(BufferedFields, Bitset){
 
 
 TEST(BufferedFields, FrmOnv){
-    const size_t nsite = 6;
+    const uint_t nsite = 6;
     defs::uintv_t frm_inds = {0, 2, 4, 5, 7, 9};
     const sys::frm::Basis basis(nsite);
 
@@ -248,8 +248,8 @@ TEST(BufferedFields, FrmOnv){
 }
 
 TEST(BufferedFields, BosOnv){
-    const size_t nmode = 5;
-    const size_t bos_occ_cutoff = 10;
+    const uint_t nmode = 5;
+    const uint_t bos_occ_cutoff = 10;
     defs::uintv_t zero_inds(nmode, 0);
     defs::uintv_t bos_inds = {3, 1, 2, 4, 9};
     const sys::bos::Basis basis(nmode, bos_occ_cutoff);
@@ -257,7 +257,7 @@ TEST(BufferedFields, BosOnv){
     //  1. constructable via argument forwarding to T::T
     buffered::BosOnv direct(nmode);
     ASSERT_EQ(direct.m_basis.m_nmode, nmode);
-    ASSERT_EQ(direct.to_vector<size_t>(), zero_inds);
+    ASSERT_EQ(direct.to_vector<uint_t>(), zero_inds);
 
     //  2. compatible with a call to any public method of T without cast to T&
     ASSERT_EQ(direct.m_nelement, nmode);
@@ -266,7 +266,7 @@ TEST(BufferedFields, BosOnv){
     direct = bos_inds;
     auto direct_cpy = direct;
     ASSERT_EQ(direct_cpy.m_basis, direct.m_basis);
-    ASSERT_EQ(direct_cpy.to_vector<size_t>(), bos_inds);
+    ASSERT_EQ(direct_cpy.to_vector<uint_t>(), bos_inds);
     ASSERT_EQ(direct, direct_cpy);
 
     //  4. copy-constructable from const T&
@@ -342,7 +342,7 @@ TEST(BufferedFields, FrmBosOnv){
 }
 
 TEST(BufferedFields, FrmXonv){
-    const size_t nsite = 5;
+    const uint_t nsite = 5;
     defs::uintv_t ket_inds = {0, 2, 4, 5, 9};
     defs::uintv_t bra_inds = {1, 2, 3, 7};
     const sys::frm::Basis basis(nsite);
@@ -390,7 +390,7 @@ TEST(BufferedFields, FrmXonv){
 }
 
 TEST(BufferedFields, BosXonv){
-    const size_t nmode = 5;
+    const uint_t nmode = 5;
     defs::uintv_t ket_inds = {3, 1, 2, 4, 9};
     defs::uintv_t bra_inds = {2, 4, 9, 3, 1};
     const sys::bos::Basis basis(nmode);

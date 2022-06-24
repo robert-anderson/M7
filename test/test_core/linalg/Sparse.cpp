@@ -15,12 +15,12 @@ TEST(Sparse, RectMatrixVectorProduct){
      *
      *  a.v = [-17, 4, -4, -27, -16,  46, -40]
      */
-    const size_t nrow = 7;
+    const uint_t nrow = 7;
     defs::uintv_t irows = {0, 0, 1, 2, 3, 4, 4, 5, 5, 6};
     defs::uintv_t icols = {0, 1, 2, 2, 0, 1, 2, 0, 2, 1};
     std::vector<T> vs = {1, -1, 2, -2, 3, -3, 4, -4, 5, -5};
     mat.resize(nrow);
-    for (size_t i=0ul; i<irows.size(); ++i) mat.add(irows[i], icols[i], vs[i]);
+    for (uint_t i=0ul; i<irows.size(); ++i) mat.add(irows[i], icols[i], vs[i]);
 
     std::vector<T> in = {-9, 8, 2};
     ASSERT_EQ(in.size(), mat.max_column_index()+1);

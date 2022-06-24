@@ -30,7 +30,7 @@ defs::ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explic
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
     if (ref_loc.is_mine()) {
-        for (size_t ipart = 0ul; ipart < wf.npart(); ++ipart)
+        for (uint_t ipart = 0ul; ipart < wf.npart(); ++ipart)
             wf.set_weight(ipart, defs::wf_t(opts.m_wavefunction.m_nw_init));
     }
 

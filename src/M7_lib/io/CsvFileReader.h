@@ -17,7 +17,7 @@ protected:
     std::string m_work_line;
 public:
 
-    CsvFileReader(const std::string& fname, std::string delimiters=", ", size_t iline=0ul);
+    CsvFileReader(const std::string& fname, std::string delimiters=", ", uint_t iline=0ul);
 
     bool next(std::vector<std::string>& tokens);
 };
@@ -28,20 +28,20 @@ class NumericCsvFileReader : public CsvFileReader {
     bool valid_numeric(const std::vector<std::string>& tokens);
 
 public:
-    const size_t m_ncolumn;
-    NumericCsvFileReader(const std::string& fname, size_t ncolumn,
-                         std::string delimiters=", ", size_t iline=0ul);
+    const uint_t m_ncolumn;
+    NumericCsvFileReader(const std::string& fname, uint_t ncolumn,
+                         std::string delimiters=", ", uint_t iline=0ul);
 
     bool next(std::vector<std::string>& tokens);
 
     typedef std::vector<std::string>::const_iterator c_iter_token_t;
 
-    static bool parsable_as(const std::string& str, size_t&);
+    static bool parsable_as(const std::string& str, uint_t&);
     static bool parsable_as(const std::string& str, int&);
     static bool parsable_as(const std::string& /*str*/, double&);
     static bool parsable_as(const std::string& /*str*/, float&);
 
-    static void parse(const std::string& str, size_t& v);
+    static void parse(const std::string& str, uint_t& v);
     static void parse(const std::string& str, long& v);
     static void parse(const std::string& str, int& v);
     static void parse(const std::string& str, double & v);
@@ -83,7 +83,7 @@ public:
         }
     }
 
-    static size_t ncolumn(const std::string& fname, std::function<size_t(const std::string&)> iline_fn);
+    static uint_t ncolumn(const std::string& fname, std::function<uint_t(const std::string&)> iline_fn);
 };
 
 #endif //M7_CSVFILEREADER_H

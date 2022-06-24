@@ -8,13 +8,13 @@
 
 
 #if 0
-//sys::frm::Size::Size(size_t nsite)
+//sys::frm::Size::Size(uint_t nsite)
 
-size_t sys::frm::Size::ncoeff_ind(bool restricted_orbs) const {
+uint_t sys::frm::Size::ncoeff_ind(bool restricted_orbs) const {
     return restricted_orbs ? m_nspinorb : m_nsite;
 }
 
-sys::Size::Size(size_t nsite, size_t nmode) : m_sites(nsite), m_nmode(nmode){}
+sys::Size::Size(uint_t nsite, uint_t nmode) : m_sites(nsite), m_nmode(nmode){}
 
 void sys::Size::require_pure_frm() const {
     REQUIRE_FALSE(m_nmode, "Single particle basis specification is not purely fermionic");
@@ -24,7 +24,7 @@ void sys::Size::require_pure_bos() const {
     REQUIRE_FALSE(m_sites, "Single particle basis specification is not purely bosonic");
 }
 
-sys::frm::Basis::Basis(size_t nelec, size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, int ms2) :
+sys::frm::Basis::Basis(uint_t nelec, uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, int ms2) :
         m_nelec(nelec), m_sites(nsite), m_nvac(m_sites.m_nspinorb - nelec), m_spin_resolved(spin_resolved),
         m_abgrp_map(std::move(abgrp_map)), m_ms2(ms2),
         m_nelec_alpha(ms2_conserved() ? (m_nelec+m_ms2)/2 : 0ul),
@@ -32,16 +32,16 @@ sys::frm::Basis::Basis(size_t nelec, size_t nsite, AbelianGroupMap abgrp_map, bo
         m_nvac_alpha(ms2_conserved() ? m_sites - m_nelec_alpha : 0ul),
         m_nvac_beta(ms2_conserved() ? m_sites - m_nelec_beta : 0ul){
     if (ms2_conserved())
-        REQUIRE_EQ(size_t(std::abs(m_ms2) % 2), m_nelec % 2, "2*Ms quantum number given incompatible with nelec");
+        REQUIRE_EQ(uint_t(std::abs(m_ms2) % 2), m_nelec % 2, "2*Ms quantum number given incompatible with nelec");
 }
 
-sys::frm::Basis::Basis(size_t nelec, size_t nsite, int ms2) :
+sys::frm::Basis::Basis(uint_t nelec, uint_t nsite, int ms2) :
         sys::frm::Basis(nelec, nsite, {nsite}, false, ms2){}
 
-sys::frm::Basis::Basis(size_t nelec, size_t nsite) :
+sys::frm::Basis::Basis(uint_t nelec, uint_t nsite) :
         sys::frm::Basis(nelec, nsite, ~0){}
 
-sys::frm::Basis::Basis(size_t nsite) :
+sys::frm::Basis::Basis(uint_t nsite) :
         sys::frm::Basis(0ul, nsite){}
 
 sys::frm::Basis::Basis() : sys::frm::Basis(0ul){}
@@ -73,12 +73,12 @@ bool sys::frm::Basis::operator==(const sys::frm::Basis &other) const {
     return m_sites==other.m_sites && m_abgrp_map==other.m_abgrp_map;
 }
 
-BosHilbertSpace::BosHilbertSpace(size_t nboson, size_t nmode, bool nboson_conserve, size_t occ_cutoff) :
+BosHilbertSpace::BosHilbertSpace(uint_t nboson, uint_t nmode, bool nboson_conserve, uint_t occ_cutoff) :
         m_nboson(nboson), m_nmode(nmode), m_nboson_conserve(nboson_conserve), m_occ_cutoff(occ_cutoff){}
 
-BosHilbertSpace::BosHilbertSpace(size_t nboson, size_t nmode) : BosHilbertSpace(nboson, nmode, true, defs::max_bos_occ){}
+BosHilbertSpace::BosHilbertSpace(uint_t nboson, uint_t nmode) : BosHilbertSpace(nboson, nmode, true, defs::max_bos_occ){}
 
-BosHilbertSpace::BosHilbertSpace(size_t nmode) : BosHilbertSpace(0ul, nmode, false, defs::max_bos_occ){}
+BosHilbertSpace::BosHilbertSpace(uint_t nmode) : BosHilbertSpace(0ul, nmode, false, defs::max_bos_occ){}
 
 BosHilbertSpace::BosHilbertSpace() : BosHilbertSpace(0ul){}
 
@@ -136,18 +136,18 @@ HilbertSpace::operator bool() const {
 
 #endif
 
-sys::frm::Size::Size(size_t nsite) :
+sys::frm::Size::Size(uint_t nsite) :
         m_nsite(nsite), m_nspinorb(2 * nsite), m_nspinorb_pair(integer::nspair(m_nspinorb)){}
 
-size_t sys::frm::Size::ncoeff_ind(bool spin_resolved) const {
+uint_t sys::frm::Size::ncoeff_ind(bool spin_resolved) const {
     return spin_resolved ? m_nspinorb : m_nsite;
 }
 
-size_t sys::frm::Size::ncoeff_ind(bool spin_resolved, size_t nsite) {
+uint_t sys::frm::Size::ncoeff_ind(bool spin_resolved, uint_t nsite) {
     return spin_resolved ? 2*nsite : nsite;
 }
 
-sys::frm::Basis::Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved,
+sys::frm::Basis::Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved,
                        std::shared_ptr<lattice::Base> lattice) :
         Size(nsite), m_abgrp_map(std::move(abgrp_map)), m_spin_resolved(spin_resolved), m_lattice(lattice){
     if (*m_lattice) {
@@ -160,14 +160,14 @@ sys::frm::Basis::Basis(std::shared_ptr<lattice::Base> lattice) :
     REQUIRE_TRUE(*m_lattice, "cannot build a basis from a null lattice");
 }
 
-sys::frm::Basis::Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved) :
+sys::frm::Basis::Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved) :
         Basis(nsite, abgrp_map, spin_resolved, lattice::make()){}
 
 bool sys::frm::Basis::operator==(const sys::frm::Basis &other) const {
     return (m_nsite == other.m_nsite) && (m_abgrp_map == other.m_abgrp_map) && (m_spin_resolved == other.m_spin_resolved);
 }
 
-size_t sys::frm::Basis::ncoeff_ind() const {
+uint_t sys::frm::Basis::ncoeff_ind() const {
     return Size::ncoeff_ind(m_spin_resolved);
 }
 
@@ -184,7 +184,7 @@ std::string sys::frm::Basis::to_string() const {
     return convert::to_string(info());
 }
 
-int sys::frm::Ms2::lowest_value(size_t nelec) {
+int sys::frm::Ms2::lowest_value(uint_t nelec) {
     return nelec&1ul;
 }
 
@@ -192,11 +192,11 @@ sys::frm::Ms2::Ms2(int v, bool conserve) : conservation::Optional<int>(v, conser
 
 sys::frm::Ms2::Ms2() : conservation::Optional<int>("2*Ms"){}
 
-sys::frm::Electrons::Electrons(size_t n, sys::frm::Ms2 ms2) : m_n(n), m_npair(integer::nspair(m_n)), m_ms2(ms2),
+sys::frm::Electrons::Electrons(uint_t n, sys::frm::Ms2 ms2) : m_n(n), m_npair(integer::nspair(m_n)), m_ms2(ms2),
                                                               m_nalpha(m_ms2.conserve() ? (m_n+m_ms2)/2 : 0ul),
                                                               m_nbeta(m_ms2.conserve() ? m_n-m_nalpha : 0ul) {
     if (m_ms2.conserve() && m_n)
-        REQUIRE_EQ(size_t(std::abs(m_ms2) % 2), m_n % 2,
+        REQUIRE_EQ(uint_t(std::abs(m_ms2) % 2), m_n % 2,
                    "2*Ms quantum number given incompatible with number of electrons");
 }
 
@@ -232,7 +232,7 @@ bool sys::frm::Sector::operator==(const sys::frm::Sector &other) const {
     return m_basis==other.m_basis && m_elecs==other.m_elecs;
 }
 
-size_t sys::frm::Sector::size() const {
+uint_t sys::frm::Sector::size() const {
     if (m_elecs.m_ms2.conserve()) {
         const auto na = integer::combinatorial(m_basis.m_nsite, m_elecs.m_nalpha);
         const auto nb = integer::combinatorial(m_basis.m_nsite, m_elecs.m_nbeta);
@@ -241,9 +241,9 @@ size_t sys::frm::Sector::size() const {
     return integer::combinatorial(m_basis.m_nspinorb, m_elecs);
 }
 
-sys::bos::Size::Size(size_t nmode) : m_nmode(nmode){}
+sys::bos::Size::Size(uint_t nmode) : m_nmode(nmode){}
 
-sys::bos::Basis::Basis(size_t nmode, size_t occ_cutoff) : Size(nmode), m_occ_cutoff(occ_cutoff){}
+sys::bos::Basis::Basis(uint_t nmode, uint_t occ_cutoff) : Size(nmode), m_occ_cutoff(occ_cutoff){}
 
 bool sys::bos::Basis::operator==(const sys::bos::Basis &other) const {
     return (m_occ_cutoff == other.m_occ_cutoff) && (m_nmode == other.m_nmode);
@@ -260,7 +260,7 @@ std::string sys::bos::Basis::to_string() const {
     return convert::to_string(info());
 }
 
-sys::bos::Bosons::Bosons(size_t v, bool conserve) : conservation::Optional<size_t>(v, conserve, "nboson"){}
+sys::bos::Bosons::Bosons(uint_t v, bool conserve) : conservation::Optional<uint_t>(v, conserve, "nboson"){}
 
 sys::bos::Bosons::Bosons() : Bosons(~0ul, true){}
 
@@ -272,7 +272,7 @@ bool sys::bos::Sector::operator==(const sys::bos::Sector &other) const {
     return m_basis==other.m_basis && m_bosons==other.m_bosons;
 }
 
-sys::Size::Size(size_t nsite, size_t nmode) : m_frm(nsite), m_bos(nmode){}
+sys::Size::Size(uint_t nsite, uint_t nmode) : m_frm(nsite), m_bos(nmode){}
 
 void sys::Size::require_pure_frm() const {
     REQUIRE_FALSE(m_bos, "Single particle basis specification is not purely fermionic");

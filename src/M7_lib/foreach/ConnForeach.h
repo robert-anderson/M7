@@ -28,9 +28,9 @@ namespace conn_foreach {
     using namespace basic_foreach;
 
     struct Base {
-        const size_t m_exsig;
+        const uint_t m_exsig;
 
-        Base(size_t exsig);
+        Base(uint_t exsig);
 
         virtual ~Base() {}
 
@@ -58,7 +58,7 @@ namespace conn_foreach {
 
     namespace frm {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig) : conn_foreach::Base(exsig) {
+            Base(uint_t exsig) : conn_foreach::Base(exsig) {
                 REQUIRE_TRUE(exsig::is_pure_frm(exsig), "excitation signature has boson operators");
             }
 
@@ -66,7 +66,7 @@ namespace conn_foreach {
             void frmbos_loop(conn::FrmBosOnv& conn, const field::FrmBosOnv& src, const function_t& fn) override;
         };
 
-        template<size_t nop>
+        template<uint_t nop>
         struct General : Base {
             General() : Base(exsig::encode(nop, nop, 0, 0)) {}
 
@@ -76,10 +76,10 @@ namespace conn_foreach {
                 const auto& vacs = src.m_decoded.m_simple_vacs.get();
                 auto ann_fn = [&conn, &occs, &vacs, &fn](const ctnd::inds_t<nop> &ann_ops) {
                     conn.m_ann.clear();
-                    for (size_t iop = 0ul; iop < nop; ++iop) conn.m_ann.add(occs[ann_ops[iop]]);
+                    for (uint_t iop = 0ul; iop < nop; ++iop) conn.m_ann.add(occs[ann_ops[iop]]);
                     auto cre_fn = [&conn, &vacs, &fn](const ctnd::inds_t<nop> &cre_ops) {
                         conn.m_cre.clear();
-                        for (size_t iop = 0ul; iop < nop; ++iop) conn.m_cre.add(vacs[cre_ops[iop]]);
+                        for (uint_t iop = 0ul; iop < nop; ++iop) conn.m_cre.add(vacs[cre_ops[iop]]);
                         fn();
                     };
                     ctnd::Ordered<nop, true, true> cre_foreach(vacs.size());
@@ -95,13 +95,13 @@ namespace conn_foreach {
             }
         };
 
-        template<size_t nop>
+        template<uint_t nop>
         struct Ms2Conserve : Base {
             Ms2Conserve(): Base(exsig::encode(nop, nop, 0, 0)) {}
 
         private:
 
-            template<typename fn_t, size_t nbeta, size_t nalpha>
+            template<typename fn_t, uint_t nbeta, uint_t nalpha>
             void loop_one_beta_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn,
                                   tag::Int<nbeta>, tag::Int<nalpha>) {
                 const auto &occs = src.m_decoded.m_spin_occs.get();
@@ -110,13 +110,13 @@ namespace conn_foreach {
                 auto ann_alpha_fn = [&](const ctnd::inds_t<nalpha> &ann_alpha_ops) {
                     auto ann_beta_fn = [&](const ctnd::inds_t<nbeta> &ann_beta_ops) {
                         conn.m_ann.clear();
-                        for (size_t iop = 0ul; iop < nalpha; ++iop) conn.m_ann.add(occs[0][ann_alpha_ops[iop]]);
-                        for (size_t iop = 0ul; iop < nbeta; ++iop) conn.m_ann.add(occs[1][ann_beta_ops[iop]]);
+                        for (uint_t iop = 0ul; iop < nalpha; ++iop) conn.m_ann.add(occs[0][ann_alpha_ops[iop]]);
+                        for (uint_t iop = 0ul; iop < nbeta; ++iop) conn.m_ann.add(occs[1][ann_beta_ops[iop]]);
                         auto cre_alpha_fn = [&](const ctnd::inds_t<nalpha> &cre_alpha_ops) {
                             auto cre_beta_fn = [&](const ctnd::inds_t<nbeta> &cre_beta_ops) {
                                 conn.m_cre.clear();
-                                for (size_t iop = 0ul; iop < nalpha; ++iop) conn.m_cre.add(vacs[0][cre_alpha_ops[iop]]);
-                                for (size_t iop = 0ul; iop < nbeta; ++iop) conn.m_cre.add(vacs[1][cre_beta_ops[iop]]);
+                                for (uint_t iop = 0ul; iop < nalpha; ++iop) conn.m_cre.add(vacs[0][cre_alpha_ops[iop]]);
+                                for (uint_t iop = 0ul; iop < nbeta; ++iop) conn.m_cre.add(vacs[1][cre_beta_ops[iop]]);
                                 fn();
                             };
                             ctnd::Ordered<nbeta, true, true> cre_beta_foreach(vacs.size(1));
@@ -133,7 +133,7 @@ namespace conn_foreach {
                 nalpha ? ann_alpha_foreach.loop(ann_alpha_fn) : ann_alpha_fn({});
             }
 
-            template<typename fn_t, size_t nbeta>
+            template<typename fn_t, uint_t nbeta>
             void loop_all_nbeta_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn, tag::Int<nbeta> tag) {
                 static_assert(nop >= nbeta, "number of beta-spin operators cannot exceed excit level");
                 loop_one_beta_fn<fn_t>(conn, src, fn, tag, tag::Int<nop - nbeta>());
@@ -238,7 +238,7 @@ namespace conn_foreach {
 
     namespace bos {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig): conn_foreach::Base(exsig){
+            Base(uint_t exsig): conn_foreach::Base(exsig){
                 REQUIRE_TRUE(exsig::is_pure_bos(exsig), "excitation signature has fermion operators");
             }
 
@@ -276,8 +276,8 @@ namespace conn_foreach {
             void loop_fn(conn::BosOnv& conn, const field::BosOnv& src, const fn_t& fn) {
                 functor::assert_prototype<void()>(fn);
                 conn.clear();
-                for (size_t imode = 0ul; imode < src.m_size; ++imode) {
-                    if (size_t(src[imode] + 1) > src.m_basis.m_occ_cutoff) continue;
+                for (uint_t imode = 0ul; imode < src.m_size; ++imode) {
+                    if (uint_t(src[imode] + 1) > src.m_basis.m_occ_cutoff) continue;
                     conn.m_cre.set(imode);
                     fn();
                 }
@@ -292,7 +292,7 @@ namespace conn_foreach {
 
     namespace frmbos {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig) : conn_foreach::Base(exsig) {
+            Base(uint_t exsig) : conn_foreach::Base(exsig) {
                 REQUIRE_TRUE(exsig::decode_nfrm(exsig) && exsig::decode_nbos(exsig),
                              "excitation signature is not that of a fermion-boson product");
             }
@@ -308,7 +308,7 @@ namespace conn_foreach {
             frm_t m_frm_foreach;
             bos_t m_bos_foreach;
 
-            static size_t combined_exsig() {
+            static uint_t combined_exsig() {
                 const frm::Base frm = frm_t();
                 auto nfrm_cre = exsig::decode_nfrm_cre(frm.m_exsig);
                 auto nfrm_ann = exsig::decode_nfrm_ann(frm.m_exsig);

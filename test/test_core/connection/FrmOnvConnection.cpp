@@ -24,22 +24,22 @@ namespace frm_onv_connection_test {
         FrmOps com(src.m_basis.m_nsite);
         return connection.apply(src, com);
     }
-    static size_t ncre(const field::FrmOnv& src, const field::FrmOnv& dst){
+    static uint_t ncre(const field::FrmOnv& src, const field::FrmOnv& dst){
         FrmOnvConnection connection(src);
         connection.connect(src, dst);
         return connection.m_cre.size();
     }
-    static size_t nann(const field::FrmOnv& src, const field::FrmOnv& dst){
+    static uint_t nann(const field::FrmOnv& src, const field::FrmOnv& dst){
         FrmOnvConnection connection(src);
         connection.connect(src, dst);
         return connection.m_ann.size();
     }
-    static size_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::uintv_t ann, defs::uintv_t cre){
+    static uint_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::uintv_t ann, defs::uintv_t cre){
         FrmOnvConnection connection(src);
         connection.connect(src, dst);
         return (connection.m_ann == ann) && (connection.m_cre == cre);
     }
-    static size_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::uintv_t ann, defs::uintv_t cre, defs::uintv_t com){
+    static uint_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::uintv_t ann, defs::uintv_t cre, defs::uintv_t com){
         FrmOnvConnection connection(src);
         FrmOps com_chk(src.m_basis.m_nsite);
         connection.connect(src, dst, com_chk);
@@ -55,7 +55,7 @@ namespace frm_onv_connection_test {
 
 TEST(FrmOnvConnection, Ex01){
     using namespace frm_onv_connection_test;
-    const size_t nsite = 5;
+    const uint_t nsite = 5;
     buffered::FrmOnv src_onv(nsite);
     src_onv = {1, 2, 3, 5, 7, 8};
     buffered::FrmOnv dst_onv(nsite);
@@ -76,7 +76,7 @@ TEST(FrmOnvConnection, Ex01){
 
 TEST(FrmOnvConnection, Ex10){
     using namespace frm_onv_connection_test;
-    const size_t nsite = 5;
+    const uint_t nsite = 5;
     buffered::FrmOnv src_onv(nsite);
     src_onv = {1, 2, 3, 5, 7, 8};
     buffered::FrmOnv dst_onv(nsite);
@@ -97,7 +97,7 @@ TEST(FrmOnvConnection, Ex10){
 
 TEST(FrmOnvConnection, Ex11SingleWord){
     using namespace frm_onv_connection_test;
-    const size_t nsite = 32;
+    const uint_t nsite = 32;
     buffered::FrmOnv src_onv(nsite);
     src_onv = {{3, 8, 12, 30}, {12, 14, 15, 22}};
     buffered::FrmOnv dst_onv(nsite);
@@ -119,7 +119,7 @@ TEST(FrmOnvConnection, Ex11SingleWord){
 
 TEST(FrmOnvConnection, Ex11MultiWord){
     using namespace frm_onv_connection_test;
-    const size_t nsite = 125;
+    const uint_t nsite = 125;
     buffered::FrmOnv src_onv(nsite);
     src_onv = {{3, 8, 12, 30}, {112, 114, 115, 122}};
     buffered::FrmOnv dst_onv(nsite);
@@ -141,7 +141,7 @@ TEST(FrmOnvConnection, Ex11MultiWord){
 
 TEST(FrmOnvConnection, Ex22){
     using namespace frm_onv_connection_test;
-    const size_t nsite = 123;
+    const uint_t nsite = 123;
     buffered::FrmOnv src_onv(nsite);
     src_onv = {3, 8, 12, 30, 123, 144, 188, 234};
     buffered::FrmOnv dst_onv(nsite);
@@ -164,7 +164,7 @@ TEST(FrmOnvConnection, Ex22){
 
 TEST(FrmOnvConnection, Ex33){
     using namespace frm_onv_connection_test;
-    const size_t nsite = 123;
+    const uint_t nsite = 123;
     buffered::FrmOnv src_onv(nsite);
     src_onv = {3, 8, 12, 30, 123, 144, 188, 234};
     buffered::FrmOnv dst_onv(nsite);
@@ -204,10 +204,10 @@ TEST(Connection, EntireCiPhases) {
         NumericCsvFileReader::parse(tokens.cbegin()+1, tokens.cend(), inds);
         bra.zero();
         ket.zero();
-        for (size_t i = 0ul; i < 8ul; ++i) {
+        for (uint_t i = 0ul; i < 8ul; ++i) {
             if (inds[i]) bra.set(i);
         }
-        for (size_t i = 8ul; i < 16ul; ++i) {
+        for (uint_t i = 8ul; i < 16ul; ++i) {
             if (inds[i]) ket.set(i - 8);
         }
         if (bra.is_zero() || ket.is_zero()) continue;

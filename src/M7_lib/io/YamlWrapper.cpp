@@ -34,7 +34,7 @@ yaml::Path yaml::Path::up() const {
     return tmp;
 }
 
-size_t yaml::Path::depth() const {
+uint_t yaml::Path::depth() const {
     return m_name_list.size();
 }
 

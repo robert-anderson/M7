@@ -15,7 +15,7 @@ struct InteractingBoseGasBosHam : BosHam {
     const Planewaves m_planewaves;
     const defs::ham_t m_ek_scale;
 
-    InteractingBoseGasBosHam(size_t ndim, size_t nwave, defs::ham_t ek_scale):
+    InteractingBoseGasBosHam(uint_t ndim, uint_t nwave, defs::ham_t ek_scale):
         BosHam(Planewaves::size(ndim, nwave)), m_planewaves(ndim, nwave), m_ek_scale(ek_scale){}
 
     InteractingBoseGasBosHam(opt_pair_t opts):
@@ -24,18 +24,18 @@ struct InteractingBoseGasBosHam : BosHam {
                     opts.m_ham.m_interacting_bose_gas.m_nwave,
                     opts.m_ham.m_interacting_bose_gas.m_ek_scale){}
 
-    defs::ham_t get_coeff_0011(size_t /*i*/, size_t /*j*/) const override {
+    defs::ham_t get_coeff_0011(uint_t /*i*/, uint_t /*j*/) const override {
         return 0.0;
     }
 
-    defs::ham_t get_coeff_0022(size_t i, size_t j, size_t k, size_t l) const override {
+    defs::ham_t get_coeff_0022(uint_t i, uint_t j, uint_t k, uint_t l) const override {
         return m_planewaves.conserving(i, j, k, l) ? 1.0 : 0.0;
     }
 
     defs::ham_t get_element_0000(const field::BosOnv& onv) const override {
         // total linear momentum
         defs::ham_t tot = 0.0;
-        for (size_t imode=0ul; imode<m_basis.m_nmode; ++imode){
+        for (uint_t imode=0ul; imode<m_basis.m_nmode; ++imode){
             if (!onv[imode]) continue;
             tot+=m_planewaves.kinetic_energy(imode)*onv[imode];
             //tot+=0.5*onv[imode]*(onv[imode]-1);

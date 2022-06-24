@@ -7,7 +7,7 @@
 
 bool ArnoldiProblemBase::solve_base(const std::function<void()> &product_fn, bool dist) {
     bool i_am_solver_rank = mpi::i_am_root() || !dist;
-    size_t nmv_call = 0ul;
+    uint_t nmv_call = 0ul;
     bool stop = false;
     while (!stop){
         if (i_am_solver_rank) take_step();

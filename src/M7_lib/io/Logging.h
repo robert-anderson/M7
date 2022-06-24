@@ -58,7 +58,7 @@ struct log {
 
     static std::string get_demangled_prototype(const char* line);
 
-    static std::vector<std::string> get_backtrace(size_t depth);
+    static std::vector<std::string> get_backtrace(uint_t depth);
 
     template<typename ...Args>
     static void info(const std::string& fmt_string, Args&&... args){
@@ -73,7 +73,7 @@ struct log {
         if (mpi::nrank()==1) info(fmt_string, args...);
         g_local_file_logger->info(fmt_string, args...);
 #endif
-        datatype::unused(fmt_string, args...);
+        dtype::unused(fmt_string, args...);
     }
 
     static void info_lines(const std::vector<std::string>& lines);
@@ -92,20 +92,20 @@ struct log {
      *  a vector of strings which when printed will display a table in which the rows are vertically aligned
      */
     static std::vector<std::string> make_table(const std::vector<std::vector<std::string>>& rows,
-                                               bool header=false, size_t padding=2);
+                                               bool header=false, uint_t padding=2);
 
     static std::vector<std::string> make_table(const std::string& title, const std::vector<std::vector<std::string>>& rows,
-                                               bool header=false, size_t padding=2);
+                                               bool header=false, uint_t padding=2);
 
-    static void info_table(const std::vector<std::vector<std::string>>& rows, bool header=false, size_t padding=2);
+    static void info_table(const std::vector<std::vector<std::string>>& rows, bool header=false, uint_t padding=2);
 
     static void info_table(const std::string& title, const std::vector<std::vector<std::string>>& rows,
-                           bool header=false, size_t padding=2);
+                           bool header=false, uint_t padding=2);
 
-    static void info_table_(const std::vector<std::vector<std::string>>& rows, bool header=false, size_t padding=2);
+    static void info_table_(const std::vector<std::vector<std::string>>& rows, bool header=false, uint_t padding=2);
 
     static void info_table_(const std::string& title, const std::vector<std::vector<std::string>>& rows,
-                            bool header=false, size_t padding=2);
+                            bool header=false, uint_t padding=2);
 
     template<typename ...Args>
     static void warn(const std::string& fmt_string, Args&&... args){
@@ -120,7 +120,7 @@ struct log {
         if (mpi::nrank()==1) warn(fmt_string, args...);
         g_local_file_logger->warn(fmt_string, args...);
 #endif
-        datatype::unused(fmt_string, args...);
+        dtype::unused(fmt_string, args...);
     }
 
     template<typename ...Args>
@@ -136,10 +136,10 @@ struct log {
         if (mpi::nrank()==1) error(fmt_string, args...);
         g_local_file_logger->error(fmt_string, args...);
 #endif
-        datatype::unused(fmt_string, args...);
+        dtype::unused(fmt_string, args...);
     }
 
-    static void error_backtrace_(size_t depth=20);
+    static void error_backtrace_(uint_t depth=20);
 
     template<typename ...Args>
     static void critical(const std::string& fmt_string, Args&&... args){
@@ -154,7 +154,7 @@ struct log {
         if (mpi::nrank()==1) critical(fmt_string, args...);
         g_local_file_logger->critical(fmt_string, args...);
 #endif
-        datatype::unused(fmt_string, args...);
+        dtype::unused(fmt_string, args...);
     }
 
     template<typename ...Args>
@@ -164,7 +164,7 @@ struct log {
         g_reduced_stdout_logger->debug(fmt_string, args...);
         g_reduced_file_logger->debug(fmt_string, args...);
 #endif
-        datatype::unused(fmt_string, args...);
+        dtype::unused(fmt_string, args...);
     }
 
     template<typename ...Args>
@@ -175,7 +175,7 @@ struct log {
         g_local_file_logger->debug(fmt_string, args...);
 #endif
 #endif
-        datatype::unused(fmt_string, args...);
+        dtype::unused(fmt_string, args...);
     }
 };
 

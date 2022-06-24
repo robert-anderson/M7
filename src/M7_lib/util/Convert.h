@@ -14,12 +14,12 @@
 
 namespace convert {
 
-    constexpr size_t default_fp(tag::Int<0>) { return 0ul; }
+    constexpr uint_t default_fp(tag::Int<0>) { return 0ul; }
 
-    constexpr size_t default_fp(tag::Int<1>) { return 6ul; }
+    constexpr uint_t default_fp(tag::Int<1>) { return 6ul; }
 
     template<typename T>
-    constexpr size_t default_fp() {
+    constexpr uint_t default_fp() {
         return default_fp(tag::Int<std::is_floating_point<T>::value>());
     }
 
@@ -29,14 +29,14 @@ namespace convert {
      *  integer-convertible type which is not explicitly handled by an overload in this namespace. typically an enum
      * @param v
      *  reference to the object being represented as a string
-     * @param is_convertible_to_size_t
+     * @param is_convertible_to_uint_t
      *  static dispatch tag
      * @return
      *  string representation of the integer conversion
      */
     template<typename T>
-    static std::string to_string(const T &v, tag::Int<true> /*is_convertible_to_size_t*/) {
-        return std::to_string(static_cast<size_t>(v));
+    static std::string to_string(const T &v, tag::Int<true> /*is_convertible_to_uint_t*/) {
+        return std::to_string(static_cast<uint_t>(v));
     }
 
     /**
@@ -45,13 +45,13 @@ namespace convert {
      *  non integer-convertible type which is not explicitly handled by an overload in this namespace
      * @param v
      *  reference to the object being represented as a string
-     * @param is_convertible_to_size_t
+     * @param is_convertible_to_uint_t
      *  static dispatch tag
      * @return
      *  result of object's own to_string definition
      */
     template<typename T>
-    static std::string to_string(const T &v, tag::Int<false> /*is_convertible_to_size_t*/) {
+    static std::string to_string(const T &v, tag::Int<false> /*is_convertible_to_uint_t*/) {
         return v.to_string();
     }
 
@@ -66,11 +66,11 @@ namespace convert {
      */
     template<typename T>
     static string_if_not_arith_t<T> to_string(const T &v) {
-        return to_string(v, tag::Int<std::is_convertible<T, size_t>::value>());
+        return to_string(v, tag::Int<std::is_convertible<T, uint_t>::value>());
     }
 
     template<typename T>
-    static string_if_not_arith_t<T> to_string(const T &v, size_t /*fp*/) {
+    static string_if_not_arith_t<T> to_string(const T &v, uint_t /*fp*/) {
         return to_string(v);
     }
 
@@ -78,7 +78,7 @@ namespace convert {
      * catch-all for arithmetic types
      */
     template<typename T>
-    static string_if_arith_t<T> to_string(const T &v, size_t fp = default_fp<T>()) {
+    static string_if_arith_t<T> to_string(const T &v, uint_t fp = default_fp<T>()) {
         if (v == std::numeric_limits<T>::max()) return "inf";
         std::stringstream tmp;
         tmp << std::scientific << std::setprecision(fp) << v;
@@ -94,7 +94,7 @@ namespace convert {
     }
 
     template<typename T>
-    static std::string to_string(const T *v, size_t /*fp*/) {
+    static std::string to_string(const T *v, uint_t /*fp*/) {
         return to_string(v);
     }
 
@@ -107,12 +107,12 @@ namespace convert {
     }
 
     template<typename T>
-    static std::string to_string(T *const v, size_t /*fp*/) {
+    static std::string to_string(T *const v, uint_t /*fp*/) {
         return to_string(v);
     }
 
     template<typename T>
-    static std::string to_string(const std::complex<T> &v, size_t fp = default_fp<T>()) {
+    static std::string to_string(const std::complex<T> &v, uint_t fp = default_fp<T>()) {
         return "(" + to_string(v.real(), fp) + ", " + to_string(v.imag(), fp) + ")";
     }
 
@@ -126,13 +126,13 @@ namespace convert {
      * @param str
      * @return
      */
-    static std::string to_string(const std::string &str, size_t /*fp*/) {
+    static std::string to_string(const std::string &str, uint_t /*fp*/) {
         return to_string(str);
     }
 
     template<typename T>
-    static std::string to_string(const std::vector<T> &v, size_t fp = default_fp<T>()) {
-        auto fn = [&v, &fp](size_t i, std::string &word) {
+    static std::string to_string(const std::vector<T> &v, uint_t fp = default_fp<T>()) {
+        auto fn = [&v, &fp](uint_t i, std::string &word) {
             if (i >= v.size()) return false;
             word = to_string(v[i], fp);
             return true;
@@ -141,8 +141,8 @@ namespace convert {
     }
 
     template<typename key_t, typename value_t>
-    static std::string to_string(const std::map<key_t, value_t> &v, size_t fp = default_fp<value_t>()) {
-        auto fn = [&v, &fp](size_t i, std::string &word) {
+    static std::string to_string(const std::map<key_t, value_t> &v, uint_t fp = default_fp<value_t>()) {
+        auto fn = [&v, &fp](uint_t i, std::string &word) {
             if (i >= v.size()) return false;
             auto it = v.cend();
             std::advance(it, i);
@@ -153,9 +153,9 @@ namespace convert {
     }
 
     template<typename T>
-    static std::string to_string(const std::stack<T> &v, size_t fp = default_fp<T>()) {
+    static std::string to_string(const std::stack<T> &v, uint_t fp = default_fp<T>()) {
         auto cpy = v;
-        auto fn = [&cpy, &fp](size_t i, std::string &word) {
+        auto fn = [&cpy, &fp](uint_t i, std::string &word) {
             if (cpy.empty()) return false;
             word = to_string(cpy.top(), fp);
             cpy.pop();
@@ -165,7 +165,7 @@ namespace convert {
     }
 
     template<typename T>
-    static std::string to_string(const std::list<T> &v, size_t fp = default_fp<T>()) {
+    static std::string to_string(const std::list<T> &v, uint_t fp = default_fp<T>()) {
         auto cpy = v;
         std::vector<T> tmp;
         for (const auto &it: v) tmp.push_back(it);
@@ -176,7 +176,7 @@ namespace convert {
         return v ? "true" : "false";
     }
 
-    static std::string to_string(bool v, size_t) {
+    static std::string to_string(bool v, uint_t) {
         return to_string(v);
     }
 

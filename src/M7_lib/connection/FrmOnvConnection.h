@@ -16,7 +16,7 @@ class FrmOps {
     const sys::frm::Size m_sites;
     defs::uintv_t m_inds;
 public:
-    FrmOps(size_t nsite): m_sites(nsite) {
+    FrmOps(uint_t nsite): m_sites(nsite) {
         m_inds.reserve(2*m_sites);
     }
 
@@ -40,7 +40,7 @@ public:
         return m_inds==v;
     }
 
-    const size_t &operator[](size_t i) const {
+    const uint_t &operator[](uint_t i) const {
         DEBUG_ASSERT_LT(i, m_inds.size(), "operator index is OOB");
         return m_inds[i];
     }
@@ -49,18 +49,18 @@ public:
         m_inds.clear();
     }
 
-    size_t size() const {
+    uint_t size() const {
         return m_inds.size();
     }
 
-    void add(size_t ispinorb) {
+    void add(uint_t ispinorb) {
         DEBUG_ASSERT_TRUE(m_inds.empty() || ispinorb > m_inds.back(),
                           "spin orbital indices should be added in ascending order");
         DEBUG_ASSERT_LT(ispinorb, m_sites.m_nspinorb, "spin orbital index OOB");
         m_inds.push_back(ispinorb);
     }
 
-    void add(std::pair<size_t, size_t> pair) {
+    void add(std::pair<uint_t, uint_t> pair) {
         add(m_sites.ispinorb(pair));
     }
 
@@ -80,18 +80,18 @@ public:
         DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected uintv_t were added");
     }
 
-    void set(size_t ispinorb){
+    void set(uint_t ispinorb){
         clear();
         add(ispinorb);
     }
 
-    void set(size_t ispinorb1, size_t ispinorb2){
+    void set(uint_t ispinorb1, uint_t ispinorb2){
         clear();
         add(ispinorb1);
         add(ispinorb2);
     }
 
-    void set_in_order(size_t ispinorb1, size_t ispinorb2){
+    void set_in_order(uint_t ispinorb1, uint_t ispinorb2){
         clear();
         DEBUG_ASSERT_NE(ispinorb1, ispinorb2, "fermion indices in connection product may not coincide");
         if (ispinorb1 < ispinorb2) {
@@ -104,18 +104,18 @@ public:
         }
     }
 
-    void set(std::pair<size_t, size_t> pair){
+    void set(std::pair<uint_t, uint_t> pair){
         clear();
         add(pair);
     }
 
-    void set(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
+    void set(std::pair<uint_t, uint_t> pair1, std::pair<uint_t, uint_t> pair2){
         clear();
         add(pair1);
         add(pair2);
     }
 
-    void set_in_order(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
+    void set_in_order(std::pair<uint_t, uint_t> pair1, std::pair<uint_t, uint_t> pair2){
         set_in_order(m_sites.ispinorb(pair1), m_sites.ispinorb(pair2));
     }
 
@@ -133,7 +133,7 @@ public:
      *  true if all elements of the index array are set bits in the ONV
      */
     bool all_occ(const FrmOnvField &src) const {
-        return std::all_of(cbegin(), cend(), [&src](size_t i) { return src.get(i); });
+        return std::all_of(cbegin(), cend(), [&src](uint_t i) { return src.get(i); });
     }
     /**
      * @param src
@@ -142,7 +142,7 @@ public:
      *  true if all elements of the index array are clear bits in the ONV
      */
     bool all_vac(const FrmOnvField &src) const {
-        return std::all_of(cbegin(), cend(), [&src](size_t i) { return !src.get(i); });
+        return std::all_of(cbegin(), cend(), [&src](uint_t i) { return !src.get(i); });
     }
     /**
      * @return
@@ -155,8 +155,8 @@ public:
         return true;
     }
 
-    size_t nalpha() const {
-        size_t n=0ul;
+    uint_t nalpha() const {
+        uint_t n=0ul;
         for (auto i: m_inds) n+=!m_sites.ispin(i);
         return n;
     }
@@ -176,7 +176,7 @@ private:
      * efficient computation of phases without enumeration of common occupation requires the number of set bits between
      * the beginning of the bit string and the beginning of each each dataword to be cached
      */
-    const size_t m_ndataword;
+    const uint_t m_ndataword;
     mutable std::vector<bool> m_dataword_phases;
 public:
 
@@ -260,7 +260,7 @@ public:
      * @return
      *  total number of operators in connection product
      */
-    size_t size() const {
+    uint_t size() const {
         return m_cre.size()+m_ann.size();
     }
 
@@ -287,7 +287,7 @@ private:
      * @return
      *  antisymmetric phase of the projection of a single creation or annihilation operator with index ibit
      */
-    bool independent_phase(const FrmOnvField &src, const size_t &ibit) const;
+    bool independent_phase(const FrmOnvField &src, const uint_t &ibit) const;
 
 public:
     /**
@@ -333,7 +333,7 @@ public:
      */
     bool phase(const FrmOnvField &src) const;
 
-    size_t exsig() const;
+    uint_t exsig() const;
 
     /**
      * @param nop_insert
@@ -341,7 +341,7 @@ public:
      * @return
      *  excitation signature of the resulting term
      */
-    size_t exsig(const size_t& nop_insert) const;
+    uint_t exsig(const uint_t& nop_insert) const;
 };
 
 static std::ostream &operator<<(std::ostream &os, const FrmOnvConnection &conn) {

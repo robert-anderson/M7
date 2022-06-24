@@ -9,19 +9,19 @@
 
 class BosonCoeffs_1 {
 
-    size_t index(size_t n, size_t m) const {
+    uint_t index(uint_t n, uint_t m) const {
         return n * m_nmode + m;
     }
 
 public:
-    const size_t m_nmode;
+    const uint_t m_nmode;
     SharedArray<defs::ham_t> m_v;
 
-    BosonCoeffs_1(size_t nmode);
+    BosonCoeffs_1(uint_t nmode);
 
-    void set(size_t n, size_t m, defs::ham_t value);
+    void set(uint_t n, uint_t m, defs::ham_t value);
 
-    defs::ham_t get(size_t n, size_t m) const;
+    defs::ham_t get(uint_t n, uint_t m) const;
 };
 
 

@@ -6,20 +6,20 @@
 #include "Propagator.h"
 
 
-void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
+void Propagator::update(const uint_t& icycle, const Wavefunction& wf) {
     m_shift.update(wf, icycle, tau());
 }
 
 void Propagator::load_fn(hdf5::GroupReader& parent) {
-    REQUIRE_EQ_ALL(parent.load<size_t>("nsite"), m_ham.m_frm.m_basis.m_nsite,
+    REQUIRE_EQ_ALL(parent.load<uint_t>("nsite"), m_ham.m_frm.m_basis.m_nsite,
                    "number of fermion sites is not consistent with HDF5 archive");
-    REQUIRE_EQ_ALL(parent.load<size_t>("nmode"), m_ham.m_bos.m_basis.m_nmode,
+    REQUIRE_EQ_ALL(parent.load<uint_t>("nmode"), m_ham.m_bos.m_basis.m_nmode,
                    "number of boson modes is not consistent with HDF5 archive");
 }
 
 void Propagator::save_fn(hdf5::GroupWriter& parent) {
     hdf5::GroupWriter gw("propagator", parent);
-    gw.save("nsite", size_t(m_ham.m_frm.m_basis.m_nsite));
+    gw.save("nsite", uint_t(m_ham.m_frm.m_basis.m_nsite));
     gw.save("nmode", m_ham.m_bos.m_basis.m_nmode);
     //gw.save("shift", m_shift.m_values);
     gw.save("tau", m_tau);

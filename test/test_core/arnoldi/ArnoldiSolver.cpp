@@ -9,8 +9,8 @@
 #include "M7_lib/util/Sort.h"
 
 TEST(ArnoldiSolver, SymNonDist) {
-    const size_t nrow = 20;
-    const size_t nroot = 3;
+    const uint_t nrow = 20;
+    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
     auto sym = mat.get_symmetrized(false);
 
@@ -25,14 +25,14 @@ TEST(ArnoldiSolver, SymNonDist) {
     dense::diag(dense, evals);
     // Arnoldi finds the extremal eigenvalue. in this case, the most positive
     auto dense_eval_it = evals.cbegin()+(nrow-nroot);
-    for (size_t iroot=0ul; iroot<nroot; ++iroot){
+    for (uint_t iroot=0ul; iroot<nroot; ++iroot){
         ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
     }
 }
 
 TEST(ArnoldiSolver, SymDist) {
-    const size_t nrow = 20;
-    const size_t nroot = 3;
+    const uint_t nrow = 20;
+    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
     auto sym = mat.get_symmetrized(false);
     dist_mv_prod::Sparse<double> prod(sym);
@@ -48,15 +48,15 @@ TEST(ArnoldiSolver, SymDist) {
         std::vector<double> evals;
         dense::diag(dense, evals);
         auto dense_eval_it = evals.cbegin() + (nrow - nroot);
-        for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
+        for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
             ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
         }
     }
 }
 
 TEST(ArnoldiSolver, NonSymNonDist) {
-    const size_t nrow = 20;
-    const size_t nroot = 3;
+    const uint_t nrow = 20;
+    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
 
     ArnoldiProblemNonSym<double> arnoldi_problem(nroot);
@@ -72,14 +72,14 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
     sort::inplace(evals, false, true);
     auto dense_eval_it = evals.cbegin() + (nrow - nroot);
-    for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
+    for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
         ASSERT_NEARLY_EQ(arnoldi_problem.complex_eigenvalue(iroot), dense_eval_it[iroot]);
     }
 }
 
 TEST(ArnoldiSolver, NonSymDist) {
-    const size_t nrow = 20;
-    const size_t nroot = 3;
+    const uint_t nrow = 20;
+    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
     dist_mv_prod::Sparse<double> prod(mat);
 
@@ -96,7 +96,7 @@ TEST(ArnoldiSolver, NonSymDist) {
         // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
         sort::inplace(evals, false, true);
         auto dense_eval_it = evals.cbegin() + (nrow - nroot);
-        for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
+        for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
             ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), arith::real(dense_eval_it[iroot]));
         }
     }

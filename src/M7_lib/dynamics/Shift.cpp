@@ -12,7 +12,7 @@ Reweighter::Reweighter(const conf::Shift &opts, const NdFormat<defs::ndim_wf> &w
         m_total(wf_fmt.m_shape, 1.0) {
 }
 
-void Reweighter::update(size_t icycle, size_t ipart, bool begin_cond, defs::ham_comp_t av_shift) {
+void Reweighter::update(uint_t icycle, uint_t ipart, bool begin_cond, defs::ham_comp_t av_shift) {
     if (m_opts.m_reweight.m_ncycle == 0) return;
     if (m_active[ipart].update(icycle, begin_cond)) {
         m_const_shift[ipart] = av_shift;
@@ -21,7 +21,7 @@ void Reweighter::update(size_t icycle, size_t ipart, bool begin_cond, defs::ham_
     }
 }
 
-void Reweighter::add(size_t ipart, defs::ham_comp_t shift, double tau) {
+void Reweighter::add(uint_t ipart, defs::ham_comp_t shift, double tau) {
     if (m_opts.m_reweight.m_ncycle == 0) return;
     if (!m_active[ipart]) return;
     add_to_history(ipart, std::exp(tau * (m_const_shift[ipart] - shift)));
@@ -29,7 +29,7 @@ void Reweighter::add(size_t ipart, defs::ham_comp_t shift, double tau) {
     ASSERT(m_histories[ipart].size() <= m_opts.m_reweight.m_ncycle);
 }
 
-void Reweighter::add_to_history(size_t ipart, const defs::ham_comp_t &v) {
+void Reweighter::add_to_history(uint_t ipart, const defs::ham_comp_t &v) {
     auto &history = m_histories[ipart];
     history.push(v);
     m_total[ipart] *= v;
@@ -42,7 +42,7 @@ void Reweighter::add_to_history(size_t ipart, const defs::ham_comp_t &v) {
 }
 
 bool Reweighter::product_chk() const {
-    for (size_t ipart=0ul; ipart<m_const_shift.nelement(); ++ipart) {
+    for (uint_t ipart=0ul; ipart<m_const_shift.nelement(); ++ipart) {
         defs::ham_comp_t total = 1.0;
         auto histories_copy = m_histories[ipart];
         while (!histories_copy.empty()) {
@@ -67,15 +67,15 @@ Shift::Shift(const conf::Document &opts, const NdFormat<defs::ndim_wf> &wf_fmt) 
     DEBUG_ASSERT_FALSE(m_variable_mode, "Shift should not initially be in variable mode");
 }
 
-const defs::ham_comp_t &Shift::operator[](const size_t &ipart) {
+const defs::ham_comp_t &Shift::operator[](const uint_t &ipart) {
     return m_values[ipart];
 }
 
-void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &tau) {
+void Shift::update(const Wavefunction &wf, const uint_t &icycle, const double &tau) {
     if (m_nwalker_target.read()) m_variable_mode.terminate(icycle);
     const bool is_period_cycle = !(icycle % m_opts.m_shift.m_period);
 
-    for (size_t ipart=0ul; ipart < m_variable_mode.nelement(); ++ipart){
+    for (uint_t ipart=0ul; ipart < m_variable_mode.nelement(); ++ipart){
         /*
          * at the beginning of cycle i - where this update is performed, Nw_i is not available directly since the loop
          * over the current occupied list has yet to be performed. Nw_i is required so compute S_i, so we must get it by
@@ -86,7 +86,7 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
         /*
          * number of cycles since last update
          */
-        size_t a = 0ul;
+        uint_t a = 0ul;
         if (variable_mode.update(icycle, nw >= m_nwalker_target)) {
             log::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
                       ipart, icycle-1, wf.m_nwalker.m_reduced[ipart], icycle, nw);
@@ -114,7 +114,7 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
 }
 
 void Shift::add_to_average() {
-    for (size_t ipart=0ul; ipart<m_values.nelement(); ++ipart) {
+    for (uint_t ipart=0ul; ipart<m_values.nelement(); ++ipart) {
         m_avg_value_histories[ipart].push(m_values[ipart]);
         if (m_avg_value_histories[ipart].size() > m_opts.m_shift.m_ncycle_av) {
             m_avg_values[ipart] -= m_avg_value_histories[ipart].front();
@@ -125,6 +125,6 @@ void Shift::add_to_average() {
     }
 }
 
-defs::ham_comp_t Shift::get_average(const size_t &ipart) const {
+defs::ham_comp_t Shift::get_average(const uint_t &ipart) const {
     return m_avg_values[ipart]/m_avg_value_histories[ipart].size();
 }

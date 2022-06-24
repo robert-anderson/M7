@@ -7,19 +7,21 @@
 
 #include "M7_lib/defs.h"
 
+using namespace defs;
+
 namespace integer {
 
     /**
      * std::min is not constexpr in C++11 so implement it here
      */
-    static constexpr size_t min(size_t i, size_t j) {
+    static constexpr uint_t min(uint_t i, uint_t j) {
         return i < j ? i : j;
     }
 
     /**
      * std::max is not constexpr in C++11 so implement it here
      */
-    static constexpr size_t max(size_t i, size_t j) {
+    static constexpr uint_t max(uint_t i, uint_t j) {
         return i > j ? i : j;
     }
 
@@ -39,40 +41,40 @@ namespace integer {
         return divceil(num, modulo) * modulo;
     }
 
-    size_t rectmap(size_t irow, size_t icol, size_t ncol);
+    uint_t rectmap(uint_t irow, uint_t icol, uint_t ncol);
 
-    void inv_rectmap(size_t &irow, size_t &icol, size_t ncol, size_t flat);
+    void inv_rectmap(uint_t &irow, uint_t &icol, uint_t ncol, uint_t flat);
 
-    size_t trigmap(size_t i, size_t j);
+    uint_t trigmap(uint_t i, uint_t j);
 
-    size_t npair(size_t ndim);
+    uint_t npair(uint_t ndim);
 
-    void inv_trigmap(size_t &i, size_t &j, size_t n);
+    void inv_trigmap(uint_t &i, uint_t &j, uint_t n);
 
-    size_t strigmap(size_t i, size_t j);
+    uint_t strigmap(uint_t i, uint_t j);
 
-    void inv_strigmap(size_t &i, size_t &j, size_t n);
+    void inv_strigmap(uint_t &i, uint_t &j, uint_t n);
 
-    size_t nspair(size_t ndim);
+    uint_t nspair(uint_t ndim);
 
-    size_t factorial(size_t n);
+    uint_t factorial(uint_t n);
 
-    size_t combinatorial(size_t n, size_t r);
+    uint_t combinatorial(uint_t n, uint_t r);
 
-    size_t combinatorial_with_repetition(size_t n, size_t r);
+    uint_t combinatorial_with_repetition(uint_t n, uint_t r);
 
-    template<size_t n>
-    static typename std::enable_if<n == 0ul, size_t>::type ntup_num(size_t /*extent*/) {
+    template<uint_t n>
+    static typename std::enable_if<n == 0ul, uint_t>::type ntup_num(uint_t /*extent*/) {
         return 1ul;
     }
 
-    template<size_t n>
-    static typename std::enable_if<n != 0ul, size_t>::type ntup_num(size_t extent) {
+    template<uint_t n>
+    static typename std::enable_if<n != 0ul, uint_t>::type ntup_num(uint_t extent) {
         return extent * ntup_num<n - 1>(extent - 1);
     }
 
-    template<size_t n>
-    static size_t ntup(size_t extent) {
+    template<uint_t n>
+    static uint_t ntup(uint_t extent) {
         return ntup_num<n>(extent) / ntup_num<n>(n);
     }
 

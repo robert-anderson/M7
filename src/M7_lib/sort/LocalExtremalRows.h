@@ -18,7 +18,7 @@
  * @tparam nind
  *  number of elements in the shape of the numerical field (0 for scalar)
  */
-template<typename row_t, typename T, size_t nind=0>
+template<typename row_t, typename T, uint_t nind=0>
 struct LocalExtremalRows {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
     /**
@@ -74,7 +74,7 @@ struct LocalExtremalRows {
         reset();
     }
 
-    LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, size_t ind_to_cmp):
+    LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, uint_t ind_to_cmp):
             LocalExtremalRows(row, field, largest, absval, defs::uintv_t{ind_to_cmp}){}
 
     void reset() {
@@ -85,28 +85,28 @@ struct LocalExtremalRows {
      * @param nfind
      *  number of local extremal rows to find
      */
-    void find(size_t nfind) {
+    void find(uint_t nfind) {
         m_xinds.find(nfind);
     }
 
-    const size_t& operator[](const size_t& i) const {
+    const uint_t& operator[](const uint_t& i) const {
         return m_xinds[i];
     }
 
-    const size_t &nfound() const {
+    const uint_t &nfound() const {
         return m_xinds.nfound();
     }
 
-    size_t nremain() const {
+    uint_t nremain() const {
         return m_xinds.nremain();
     }
 
-    size_t nrow_nonzero() const {
+    uint_t nrow_nonzero() const {
         DEBUG_ASSERT_EQ(m_xinds.m_nind, m_table.nrow_nonzero(), "inconsistent number of indices");
         return m_xinds.m_nind;
     }
 
-    T get_value(const size_t& i) const {
+    T get_value(const uint_t& i) const {
         DEBUG_ASSERT_LT(i, nrow_nonzero(), "row index is OOB wrt number of non-zero rows");
         DEBUG_ASSERT_LT(i, nfound(), "row index is OOB wrt number of found extremal rows");
         m_work_row.jump(m_xinds[i]);

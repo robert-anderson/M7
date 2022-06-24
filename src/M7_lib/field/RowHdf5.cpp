@@ -4,7 +4,7 @@
 
 #include "RowHdf5.h"
 
-RowHdf5Base::RowHdf5Base(const Row &row, size_t nitem, std::vector<std::string> field_names) :
+RowHdf5Base::RowHdf5Base(const Row &row, uint_t nitem, std::vector<std::string> field_names) :
         m_nitem(nitem), m_nitem_max(mpi::all_max(m_nitem)),
         m_nitem_total(mpi::all_sum(m_nitem)), m_field_names(std::move(field_names)),
         m_selected_field_inds(make_selected_field_inds(row.m_fields)) {}
@@ -16,7 +16,7 @@ defs::uintv_t RowHdf5Base::make_selected_field_inds(const std::vector<FieldBase 
     for (const auto &field_name: m_field_names) {
         REQUIRE_TRUE(!field_name.empty(), "Selected field name must be non-zero in length");
         bool match_found = false;
-        size_t i = 0ul;
+        uint_t i = 0ul;
         for (FieldBase *field_ptr: fields) {
             if (field_ptr->m_name == field_name) {
                 match_found = true;
@@ -30,7 +30,7 @@ defs::uintv_t RowHdf5Base::make_selected_field_inds(const std::vector<FieldBase 
 }
 
 void RowHdf5WriterBase::write_all_fields() {
-    for (size_t ifield = 0ul; ifield < m_selected_field_inds.size(); ++ifield) {
+    for (uint_t ifield = 0ul; ifield < m_selected_field_inds.size(); ++ifield) {
         auto &writer = m_column_writers[ifield];
         auto field = m_row.m_fields[ifield];
         field->save(writer, m_iitem);
@@ -41,7 +41,7 @@ void RowHdf5WriterBase::null_write_all_fields() {
     for (auto &writer: m_column_writers) writer.write_h5item_bytes(m_iitem, nullptr);
 }
 
-bool RowHdf5WriterBase::write(const size_t &n) {
+bool RowHdf5WriterBase::write(const uint_t &n) {
     log::debug_("beginning HDF5 write loop over rows");
     if (!m_iitem) m_row.restart();
     auto limit = std::min(m_iitem + n, m_nitem_max);
@@ -60,7 +60,7 @@ void RowHdf5WriterBase::write() {
     write(m_nitem_max);
 }
 
-RowHdf5WriterBase::RowHdf5WriterBase(Row &row, hdf5::GroupWriter &parent, std::string name, size_t nitem,
+RowHdf5WriterBase::RowHdf5WriterBase(Row &row, hdf5::GroupWriter &parent, std::string name, uint_t nitem,
                                      std::vector<std::string> field_names) :
         RowHdf5Base(row, nitem, std::move(field_names)), m_row(row),
         m_group(name, parent){
@@ -115,7 +115,7 @@ std::vector<std::string> RowHdf5ReaderBase::stored_field_names(
 }
 
 
-size_t RowHdf5ReaderBase::get_nitem(const Row &row, hdf5::GroupReader &parent, std::string name,
+uint_t RowHdf5ReaderBase::get_nitem(const Row &row, hdf5::GroupReader &parent, std::string name,
                                     std::vector<std::string> field_names) {
     if (row.m_fields.empty()) return 0ul;
     hdf5::GroupReader group(name, parent);
@@ -126,7 +126,7 @@ size_t RowHdf5ReaderBase::get_nitem(const Row &row, hdf5::GroupReader &parent, s
 }
 
 void RowHdf5ReaderBase::read_all_fields() {
-    for (size_t ifield = 0ul; ifield < m_column_readers.size(); ++ifield) {
+    for (uint_t ifield = 0ul; ifield < m_column_readers.size(); ++ifield) {
         auto &reader = m_column_readers[ifield];
         auto &field = m_row.m_fields[ifield];
         field->load(reader, m_iitem);
@@ -137,7 +137,7 @@ void RowHdf5ReaderBase::null_read_all_fields() {
     for (auto & reader : m_column_readers) reader.read_h5item_bytes(m_iitem, nullptr);
 }
 
-bool RowHdf5ReaderBase::read(const size_t &n) {
+bool RowHdf5ReaderBase::read(const uint_t &n) {
     log::debug_("beginning HDF5 read loop over multidimensional list dataset");
     if (!m_iitem) {
         // first call, so reset table and row

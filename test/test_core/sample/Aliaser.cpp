@@ -14,12 +14,12 @@ TEST(Aliaser, DistributionCheck) {
     SingleAliaser aliaser(probs);
     defs::uintv_t results(probs.size(), 0ul);
 
-    const size_t n_attempts = 20000000;
-    for (size_t i = 0ul; i < n_attempts; ++i) {
+    const uint_t n_attempts = 20000000;
+    for (uint_t i = 0ul; i < n_attempts; ++i) {
         results[aliaser.draw(prng)]++;
     }
     auto norm = std::accumulate(probs.begin(), probs.end(), 0.0);
-    for (size_t i = 0ul; i < probs.size(); ++i) {
+    for (uint_t i = 0ul; i < probs.size(); ++i) {
         if (fptol::numeric_zero(probs[i])) ASSERT_EQ(results[i], 0);
         else ASSERT_LT(std::abs(1.0 - (float(results[i]) / float(n_attempts)) / (probs[i] / norm)), 0.01);
     }

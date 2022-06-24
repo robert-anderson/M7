@@ -18,23 +18,23 @@ namespace exsig {
     /**
      * number of bits in the signature representing each number of fermion SQ operators
      */
-    static constexpr size_t c_nbit_nop_frm = 3;
+    static constexpr uint_t c_nbit_nop_frm = 3;
     /**
      * number of bits in the signature representing each number of boson SQ operators
      */
-    static constexpr size_t c_nbit_nop_bos = 2;
+    static constexpr uint_t c_nbit_nop_bos = 2;
     /**
      * mask and max value for extraction of a number of fermion SQ operators
      */
-    static constexpr size_t c_nop_mask_frm = (1 << c_nbit_nop_frm) - 1;
+    static constexpr uint_t c_nop_mask_frm = (1 << c_nbit_nop_frm) - 1;
     /**
      * mask and max value for extraction of a number of boson SQ operators
      */
-    static constexpr size_t c_nop_mask_bos = (1 << c_nbit_nop_bos) - 1;
+    static constexpr uint_t c_nop_mask_bos = (1 << c_nbit_nop_bos) - 1;
     /**
      * total number of distinct excitation signatures that can be stored
      */
-    static constexpr size_t c_ndistinct = (1 << (2 * c_nbit_nop_frm + 2 * c_nbit_nop_bos));
+    static constexpr uint_t c_ndistinct = (1 << (2 * c_nbit_nop_frm + 2 * c_nbit_nop_bos));
 
 
     /**
@@ -54,7 +54,7 @@ namespace exsig {
      * @return
      *  the excitation signature
      */
-    static constexpr size_t encode(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann) {
+    static constexpr uint_t encode(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann) {
         return (nfrm_cre > c_nop_mask_frm || nfrm_ann > c_nop_mask_frm ||
                 nbos_cre > c_nop_mask_bos || nbos_ann > c_nop_mask_bos) ?
                ~0ul : nfrm_cre | (nfrm_ann << c_nbit_nop_frm) |
@@ -68,7 +68,7 @@ namespace exsig {
      * @return
      *  the number of fermion creation indices in the SQ operator product encoded within exsig
      */
-    static constexpr size_t decode_nfrm_cre(size_t exsig) {
+    static constexpr uint_t decode_nfrm_cre(uint_t exsig) {
         return c_nop_mask_frm & exsig;
     }
 
@@ -78,7 +78,7 @@ namespace exsig {
      * @return
      *  the number of fermion annihilation indices in the SQ operator product encoded within exsig
      */
-    static constexpr size_t decode_nfrm_ann(size_t exsig) {
+    static constexpr uint_t decode_nfrm_ann(uint_t exsig) {
         return c_nop_mask_frm & (exsig >> c_nbit_nop_frm);
     }
 
@@ -88,7 +88,7 @@ namespace exsig {
      * @return
      *  the number of boson creation indices in the SQ operator product encoded within exsig
      */
-    static constexpr size_t decode_nbos_cre(size_t exsig) {
+    static constexpr uint_t decode_nbos_cre(uint_t exsig) {
         return c_nop_mask_bos & (exsig >> (2 * c_nbit_nop_frm));
     }
 
@@ -98,7 +98,7 @@ namespace exsig {
      * @return
      *  the number of boson annihilation indices in the SQ operator product encoded within exsig
      */
-    static constexpr size_t decode_nbos_ann(size_t exsig) {
+    static constexpr uint_t decode_nbos_ann(uint_t exsig) {
         return c_nop_mask_bos & (exsig >> (2 * c_nbit_nop_frm + c_nbit_nop_bos));
     }
 
@@ -108,7 +108,7 @@ namespace exsig {
      * @return
      *  the total number of fermion indices in the SQ operator product encoded within exsig
      */
-    static constexpr size_t decode_nfrm(size_t exsig) {
+    static constexpr uint_t decode_nfrm(uint_t exsig) {
         return decode_nfrm_cre(exsig) + decode_nfrm_ann(exsig);
     }
 
@@ -118,7 +118,7 @@ namespace exsig {
      * @return
      *  the total number of boson indices in the SQ operator product encoded within exsig
      */
-    static constexpr size_t decode_nbos(size_t exsig) {
+    static constexpr uint_t decode_nbos(uint_t exsig) {
         return decode_nbos_cre(exsig) + decode_nbos_ann(exsig);
     }
 
@@ -128,7 +128,7 @@ namespace exsig {
      * @return
      *  the total number of operators of any particle type in the SQ operator product encoded within exsig
      */
-    static constexpr size_t decode_nop(size_t exsig) {
+    static constexpr uint_t decode_nop(uint_t exsig) {
         return decode_nfrm(exsig) + decode_nbos(exsig);
     }
 
@@ -138,7 +138,7 @@ namespace exsig {
      * @return
      *  true if the exsig has no boson operators
      */
-    static constexpr bool is_pure_frm(size_t exsig) {
+    static constexpr bool is_pure_frm(uint_t exsig) {
         return !(decode_nbos_cre(exsig) || decode_nbos_ann(exsig));
     }
 
@@ -148,7 +148,7 @@ namespace exsig {
      * @return
      *  true if the exsig has no fermion operators
      */
-    static constexpr bool is_pure_bos(size_t exsig) {
+    static constexpr bool is_pure_bos(uint_t exsig) {
         return !(decode_nfrm_cre(exsig) || decode_nfrm_ann(exsig));
     }
 
@@ -158,7 +158,7 @@ namespace exsig {
      * @return
      *  true if the exsig represents a fermion number-conserving operator product
      */
-    static constexpr bool conserves_nfrm(size_t exsig) {
+    static constexpr bool conserves_nfrm(uint_t exsig) {
         return decode_nfrm_cre(exsig) == decode_nfrm_ann(exsig);
     }
 
@@ -168,19 +168,19 @@ namespace exsig {
      * @return
      *  true if the exsig represents a boson number-conserving operator product
      */
-    static constexpr bool conserves_nbos(size_t exsig) {
+    static constexpr bool conserves_nbos(uint_t exsig) {
         return decode_nbos_cre(exsig) == decode_nbos_ann(exsig);
     }
 
-    static constexpr size_t ncontrib_frm(size_t exsig) {
+    static constexpr uint_t ncontrib_frm(uint_t exsig) {
         return integer::min(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig)) + 1;
     }
 
-    static constexpr size_t ncontrib_bos(size_t exsig) {
+    static constexpr uint_t ncontrib_bos(uint_t exsig) {
         return integer::min(decode_nbos_cre(exsig), decode_nbos_ann(exsig)) + 1;
     }
 
-    static constexpr size_t base_exsig(size_t exsig) {
+    static constexpr uint_t base_exsig(uint_t exsig) {
         return encode(
                 decode_nfrm_cre(exsig) - (ncontrib_frm(exsig) - 1),
                 decode_nfrm_ann(exsig) - (ncontrib_frm(exsig) - 1),
@@ -189,22 +189,22 @@ namespace exsig {
         );
     }
 
-    static constexpr size_t add_ops(size_t exsig, size_t nfrm, size_t nbos) {
+    static constexpr uint_t add_ops(uint_t exsig, uint_t nfrm, uint_t nbos) {
         return encode(decode_nfrm_cre(exsig) + nfrm, decode_nfrm_ann(exsig) + nfrm,
                       decode_nbos_cre(exsig) + nbos, decode_nbos_ann(exsig) + nbos);
     }
 
-    static constexpr bool contribs_to_frm(size_t exsig, size_t ranksig) {
+    static constexpr bool contribs_to_frm(uint_t exsig, uint_t ranksig) {
         return (decode_nfrm_cre(exsig) <= decode_nfrm_cre(ranksig)) && (
                 decode_nfrm_cre(ranksig) - decode_nfrm_cre(exsig) == decode_nfrm_ann(ranksig) - decode_nfrm_ann(exsig));
     }
 
-    static constexpr bool contribs_to_bos(size_t exsig, size_t ranksig) {
+    static constexpr bool contribs_to_bos(uint_t exsig, uint_t ranksig) {
         return (decode_nbos_cre(exsig) <= decode_nbos_cre(ranksig)) && (
                 decode_nbos_cre(ranksig) - decode_nbos_cre(exsig) == decode_nbos_ann(ranksig) - decode_nbos_ann(exsig));
     }
 
-    static constexpr bool contribs_to(size_t exsig, size_t ranksig) {
+    static constexpr bool contribs_to(uint_t exsig, uint_t ranksig) {
         return contribs_to_frm(exsig, ranksig) && contribs_to_bos(exsig, ranksig);
     }
 
@@ -214,29 +214,29 @@ namespace exsig {
      * @return
      *  the exsig representing the hermitian conjugate of the operator represented by the argument
      */
-    static constexpr size_t conj(size_t exsig) {
+    static constexpr uint_t conj(uint_t exsig) {
         return exsig::encode(decode_nfrm_ann(exsig), decode_nfrm_cre(exsig), decode_nbos_ann(exsig),
                                     decode_nbos_cre(exsig));
     }
 
-    static std::string to_string(size_t exsig) {
+    static std::string to_string(uint_t exsig) {
         if (exsig > c_ndistinct) return "invalid";
         return std::to_string(decode_nfrm_cre(exsig)) + std::to_string(decode_nfrm_ann(exsig)) +
                std::to_string(decode_nbos_cre(exsig)) + std::to_string(decode_nbos_ann(exsig));
     }
 
-    static constexpr size_t ex_single = encode(1, 1, 0, 0);
-    static constexpr size_t ex_double = encode(2, 2, 0, 0);
-    static constexpr size_t ex_triple = encode(3, 3, 0, 0);
-    static constexpr size_t ex_1100 = ex_single;
-    static constexpr size_t ex_2200 = ex_double;
-    static constexpr size_t ex_3300 = ex_triple;
-    static constexpr size_t ex_1101 = encode(1, 1, 0, 1);
-    static constexpr size_t ex_1110 = encode(1, 1, 1, 0);
-    static constexpr size_t ex_0001 = encode(0, 0, 0, 1);
-    static constexpr size_t ex_0010 = encode(0, 0, 1, 0);
-    static constexpr size_t ex_0011 = encode(0, 0, 1, 1);
-    static constexpr size_t ex_0022 = encode(0, 0, 2, 2);
+    static constexpr uint_t ex_single = encode(1, 1, 0, 0);
+    static constexpr uint_t ex_double = encode(2, 2, 0, 0);
+    static constexpr uint_t ex_triple = encode(3, 3, 0, 0);
+    static constexpr uint_t ex_1100 = ex_single;
+    static constexpr uint_t ex_2200 = ex_double;
+    static constexpr uint_t ex_3300 = ex_triple;
+    static constexpr uint_t ex_1101 = encode(1, 1, 0, 1);
+    static constexpr uint_t ex_1110 = encode(1, 1, 1, 0);
+    static constexpr uint_t ex_0001 = encode(0, 0, 0, 1);
+    static constexpr uint_t ex_0010 = encode(0, 0, 1, 0);
+    static constexpr uint_t ex_0011 = encode(0, 0, 1, 1);
+    static constexpr uint_t ex_0022 = encode(0, 0, 2, 2);
 }
 
 #endif //M7_UTIL_EXSIG_H

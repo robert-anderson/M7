@@ -15,7 +15,7 @@ TEST(BasicForeach, CtndUnrestricted0) {
     using namespace basic_foreach;
     ctnd::Unrestricted<0> foreach({});
     ASSERT_EQ(foreach.m_niter, 0);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&](const ctnd::inds_t<0>&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
@@ -23,7 +23,7 @@ TEST(BasicForeach, CtndUnrestricted0) {
 
 TEST(BasicForeach, CtndUnrestricted3) {
     using namespace basic_foreach;
-    constexpr size_t nind = 3;
+    constexpr uint_t nind = 3;
     const ctnd::inds_t<nind> shape = {3, 4, 2};
     const std::vector<ctnd::inds_t<nind>> chk_inds = {
             {0, 0, 0},
@@ -64,7 +64,7 @@ TEST(BasicForeach, CtndUnrestricted3) {
 
 TEST(BasicForeach, CtndUnrestrictedExit) {
     using namespace basic_foreach;
-    constexpr size_t nind = 3;
+    constexpr uint_t nind = 3;
     const ctnd::inds_t<nind> shape = {2, 2, 2};
     const std::vector<ctnd::inds_t<nind>> chk_inds = {
             {0, 0, 0},
@@ -77,10 +77,10 @@ TEST(BasicForeach, CtndUnrestrictedExit) {
             {1, 1, 1}
     };
 
-    for (size_t i = 0ul; i < chk_inds.size(); ++i) {
+    for (uint_t i = 0ul; i < chk_inds.size(); ++i) {
         const auto& terminal_inds = chk_inds[i];
 
-        size_t iiter = 0ul;
+        uint_t iiter = 0ul;
         auto fn = [&](const ctnd::inds_t<nind>& inds){
             if (inds==terminal_inds) throw ExitLoop();
             ++iiter;
@@ -97,7 +97,7 @@ TEST(BasicForeach, CtndOrderedStrictAsc0) {
     using namespace basic_foreach;
     ctnd::Ordered<0, true, true> foreach(0);
     ASSERT_EQ(foreach.m_niter, 0);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&](const ctnd::inds_t<0>&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
@@ -105,8 +105,8 @@ TEST(BasicForeach, CtndOrderedStrictAsc0) {
 
 TEST(BasicForeach, CtndOrderedStrictAsc3) {
     using namespace basic_foreach;
-    constexpr size_t nind = 3;
-    const size_t n = 5;
+    constexpr uint_t nind = 3;
+    const uint_t n = 5;
     const std::vector<ctnd::inds_t<nind>> chk_inds = {
             {0, 1, 2},
             {0, 1, 3},
@@ -132,8 +132,8 @@ TEST(BasicForeach, CtndOrderedStrictAsc3) {
 
 TEST(BasicForeach, CtndOrderedExit) {
     using namespace basic_foreach;
-    const size_t n = 5;
-    constexpr size_t nind = 3;
+    const uint_t n = 5;
+    constexpr uint_t nind = 3;
     const std::vector<ctnd::inds_t<nind>> chk_inds = {
             {0, 1, 2},
             {0, 1, 3},
@@ -147,10 +147,10 @@ TEST(BasicForeach, CtndOrderedExit) {
             {2, 3, 4}
     };
 
-    for (size_t i = 0ul; i < chk_inds.size(); ++i) {
+    for (uint_t i = 0ul; i < chk_inds.size(); ++i) {
         const auto& terminal_inds = chk_inds[i];
 
-        size_t iiter = 0ul;
+        uint_t iiter = 0ul;
         auto fn = [&](const ctnd::inds_t<nind>& inds){
             if (inds==terminal_inds) throw ExitLoop();
             ++iiter;
@@ -167,7 +167,7 @@ TEST(BasicForeach, CtndOrderedStrictDesc0) {
     using namespace basic_foreach;
     ctnd::Ordered<0, true, false> foreach(0);
     ASSERT_EQ(foreach.m_niter, 0);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&](const ctnd::inds_t<0>&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
@@ -175,8 +175,8 @@ TEST(BasicForeach, CtndOrderedStrictDesc0) {
 
 TEST(BasicForeach, CtndOrderedStrictDesc3) {
     using namespace basic_foreach;
-    constexpr size_t nind = 3;
-    const size_t n = 5;
+    constexpr uint_t nind = 3;
+    const uint_t n = 5;
     const std::vector<ctnd::inds_t<nind>> chk_inds = {
             {2, 1, 0},
             {3, 1, 0},
@@ -204,7 +204,7 @@ TEST(BasicForeach, CtndOrderedAsc0) {
     using namespace basic_foreach;
     ctnd::Ordered<0, false, true> foreach(0);
     ASSERT_EQ(foreach.m_niter, 0);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&](const ctnd::inds_t<0>&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
@@ -212,8 +212,8 @@ TEST(BasicForeach, CtndOrderedAsc0) {
 
 TEST(BasicForeach, CtndOrderedAsc3) {
     using namespace basic_foreach;
-    constexpr size_t nind = 3;
-    const size_t n = 3;
+    constexpr uint_t nind = 3;
+    const uint_t n = 3;
     const std::vector<ctnd::inds_t<nind>> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
@@ -241,7 +241,7 @@ TEST(BasicForeach, CtndOrderedDesc0) {
     using namespace basic_foreach;
     ctnd::Ordered<0, false, false> foreach(0);
     ASSERT_EQ(foreach.m_niter, 0);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&](const ctnd::inds_t<0>&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
@@ -249,8 +249,8 @@ TEST(BasicForeach, CtndOrderedDesc0) {
 
 TEST(BasicForeach, CtndOrderedDesc3) {
     using namespace basic_foreach;
-    constexpr size_t nind = 3;
-    const size_t n = 3;
+    constexpr uint_t nind = 3;
+    const uint_t n = 3;
     const std::vector<ctnd::inds_t<nind>> chk_inds = {
             {0, 0, 0},
             {1, 0, 0},
@@ -281,7 +281,7 @@ TEST(BasicForeach, RtndUnrestricted0) {
     using namespace basic_foreach;
     rtnd::Unrestricted foreach({});
     ASSERT_EQ(foreach.m_niter, 0);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&](const rtnd::inds_t&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
@@ -342,10 +342,10 @@ TEST(BasicForeach, RtndUnrestrictedExit) {
             {1, 1, 1}
     };
 
-    for (size_t i = 0ul; i < chk_inds.size(); ++i) {
+    for (uint_t i = 0ul; i < chk_inds.size(); ++i) {
         const auto& terminal_inds = chk_inds[i];
 
-        size_t iiter = 0ul;
+        uint_t iiter = 0ul;
         auto fn = [&](const rtnd::inds_t& inds){
             if (inds==terminal_inds) throw ExitLoop();
             ++iiter;
@@ -363,7 +363,7 @@ TEST(BasicForeach, RtndOrderedStrictAsc0) {
     using namespace basic_foreach;
     rtnd::Ordered<true, true> foreach(0, 0);
     ASSERT_EQ(foreach.m_niter, 0);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&](const rtnd::inds_t&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
@@ -371,8 +371,8 @@ TEST(BasicForeach, RtndOrderedStrictAsc0) {
 
 TEST(BasicForeach, RtndOrderedStrictAsc3) {
     using namespace basic_foreach;
-    const size_t nind = 3;
-    const size_t n = 5;
+    const uint_t nind = 3;
+    const uint_t n = 5;
     const std::vector<rtnd::inds_t> chk_inds = {
             {0, 1, 2},
             {0, 1, 3},
@@ -398,8 +398,8 @@ TEST(BasicForeach, RtndOrderedStrictAsc3) {
 
 TEST(BasicForeach, RtndOrderedExit) {
     using namespace basic_foreach;
-    const size_t n = 5;
-    const size_t nind = 3;
+    const uint_t n = 5;
+    const uint_t nind = 3;
     const std::vector<rtnd::inds_t> chk_inds = {
             {0, 1, 2},
             {0, 1, 3},
@@ -413,10 +413,10 @@ TEST(BasicForeach, RtndOrderedExit) {
             {2, 3, 4}
     };
 
-    for (size_t i = 0ul; i < chk_inds.size(); ++i) {
+    for (uint_t i = 0ul; i < chk_inds.size(); ++i) {
         const auto& terminal_inds = chk_inds[i];
 
-        size_t iiter = 0ul;
+        uint_t iiter = 0ul;
         auto fn = [&](const rtnd::inds_t& inds){
             if (inds==terminal_inds) throw ExitLoop();
             ++iiter;
@@ -433,7 +433,7 @@ TEST(BasicForeach, RtndOrderedStrictDesc0) {
     using namespace basic_foreach;
     rtnd::Ordered<true, false> foreach(0, 0);
     ASSERT_EQ(foreach.m_niter, 0);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&](const rtnd::inds_t&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
@@ -441,8 +441,8 @@ TEST(BasicForeach, RtndOrderedStrictDesc0) {
 
 TEST(BasicForeach, RtndOrderedStrictDesc3) {
     using namespace basic_foreach;
-    const size_t nind = 3;
-    const size_t n = 5;
+    const uint_t nind = 3;
+    const uint_t n = 5;
     const std::vector<rtnd::inds_t> chk_inds = {
             {2, 1, 0},
             {3, 1, 0},
@@ -470,7 +470,7 @@ TEST(BasicForeach, RtndOrderedAsc0) {
     using namespace basic_foreach;
     rtnd::Ordered<false, true> foreach(0, 0);
     ASSERT_EQ(foreach.m_niter, 0);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&](const rtnd::inds_t&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
@@ -478,8 +478,8 @@ TEST(BasicForeach, RtndOrderedAsc0) {
 
 TEST(BasicForeach, RtndOrderedAsc3) {
     using namespace basic_foreach;
-    const size_t nind = 3;
-    const size_t n = 3;
+    const uint_t nind = 3;
+    const uint_t n = 3;
     const std::vector<rtnd::inds_t> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
@@ -507,7 +507,7 @@ TEST(BasicForeach, RtndOrderedDesc0) {
     using namespace basic_foreach;
     rtnd::Ordered<false, false> foreach(0, 0);
     ASSERT_EQ(foreach.m_niter, 0);
-    size_t iiter = 0ul;
+    uint_t iiter = 0ul;
     auto fn = [&](const rtnd::inds_t&) { ++iiter; };
     foreach.loop(fn);
     ASSERT_FALSE(iiter);
@@ -515,8 +515,8 @@ TEST(BasicForeach, RtndOrderedDesc0) {
 
 TEST(BasicForeach, RtndOrderedDesc3) {
     using namespace basic_foreach;
-    const size_t nind = 3;
-    const size_t n = 3;
+    const uint_t nind = 3;
+    const uint_t n = 3;
     const std::vector<rtnd::inds_t> chk_inds = {
             {0, 0, 0},
             {1, 0, 0},

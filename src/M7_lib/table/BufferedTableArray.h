@@ -15,17 +15,17 @@ private:
     Buffer m_buffer;
     std::vector<table_t> m_tables;
 
-    const size_t &row_size() const {
+    const uint_t &row_size() const {
         return static_cast<const TableBase &>(m_tables[0]).row_size();
     }
 
-    size_t window_size() const {
+    uint_t window_size() const {
         return static_cast<const TableBase &>(m_tables[0]).m_bw.m_size;
     }
 
 public:
 
-    size_t nrow_per_table() const {
+    uint_t nrow_per_table() const {
         return static_cast<const TableBase &>(m_tables[0]).nrow();
     }
 
@@ -37,18 +37,18 @@ public:
         return m_tables[0].begin();
     }
 
-    size_t buffer_size() const {
+    uint_t buffer_size() const {
         return m_buffer.size();
     }
 
-    size_t bw_size() const {
+    uint_t bw_size() const {
         return (*this)[0].bw_size();
     }
 
-    BufferedTableArray(std::string name, size_t ntable, const table_t& table):
+    BufferedTableArray(std::string name, uint_t ntable, const table_t& table):
             m_buffer(name, ntable) {
         m_tables.reserve(ntable);
-        for (size_t itable = 0ul; itable < ntable; ++itable) {
+        for (uint_t itable = 0ul; itable < ntable; ++itable) {
             m_tables.emplace_back(table);
             static_cast<TableBase &>(m_tables.back()).set_buffer(&m_buffer);
         }
@@ -57,7 +57,7 @@ public:
     BufferedTableArray(const BufferedTableArray<table_t> &other) :
             m_buffer(other.m_buffer.m_name, other.ntable(), 0) {
         m_tables.reserve(other.ntable());
-        for (size_t itable = 0ul; itable < other.ntable(); ++itable) {
+        for (uint_t itable = 0ul; itable < other.ntable(); ++itable) {
             m_tables.emplace_back(other.m_tables[itable]);
             static_cast<TableBase &>(m_tables.back()).set_buffer(&m_buffer);
         }
@@ -66,7 +66,7 @@ public:
 
     BufferedTableArray& operator=(const BufferedTableArray<row_t, mapped> &other) {
         m_buffer.resize(other.m_buffer.size());
-        for (size_t itable = 0ul; itable < other.ntable(); ++itable) {
+        for (uint_t itable = 0ul; itable < other.ntable(); ++itable) {
             auto& this_table = m_tables[itable];
             auto& other_table = other.m_tables[itable];
             this_table.clear();
@@ -76,35 +76,35 @@ public:
         return *this;
     }
 
-    size_t ntable() const { return m_tables.size(); }
+    uint_t ntable() const { return m_tables.size(); }
 
-    void resize(size_t nrow_per_table, double factor=-1.0) {
+    void resize(uint_t nrow_per_table, double factor=-1.0) {
         m_buffer.resize(ntable() * nrow_per_table * row_size(), factor);
     }
 
-    void expand(size_t nrow_per_table) {
+    void expand(uint_t nrow_per_table) {
         resize(this->nrow_per_table()+nrow_per_table);
     }
 
-    table_t &operator[](const size_t &itable) {
+    table_t &operator[](const uint_t &itable) {
         DEBUG_ASSERT_LT(itable, ntable(), "Table array access OOB");
         return m_tables[itable];
     }
 
-    const table_t &operator[](const size_t &itable) const {
+    const table_t &operator[](const uint_t &itable) const {
         DEBUG_ASSERT_LT(itable, ntable(), "Table array access OOB");
         return m_tables[itable];
     }
 
     defs::uintv_t hwms() const {
         defs::uintv_t res(ntable());
-        for (size_t i = 0ul; i < ntable(); ++i) res[i] = (*this)[i].m_hwm;
+        for (uint_t i = 0ul; i < ntable(); ++i) res[i] = (*this)[i].m_hwm;
         return res;
     }
 
     defs::uintv_t displs() const {
         defs::uintv_t res(ntable());
-        for (size_t i = 0ul; i < ntable(); ++i) res[i] = bw_size() * i;
+        for (uint_t i = 0ul; i < ntable(); ++i) res[i] = bw_size() * i;
         return res;
     }
 
@@ -121,7 +121,7 @@ public:
 
     std::string to_string() {
         std::string tmp;
-        for (size_t itable = 0ul; itable < ntable(); ++itable) {
+        for (uint_t itable = 0ul; itable < ntable(); ++itable) {
             tmp+="Table array element " + std::to_string(itable) + ":\n";
             tmp+= static_cast<const Table<row_t> &>(m_tables[itable]).to_string() + "\n";
         }

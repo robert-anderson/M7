@@ -40,8 +40,8 @@ struct FrmBosHam : HamOpTerm {
 
     virtual ~FrmBosHam(){}
 
-    virtual defs::ham_t get_coeff_1110(size_t /*imode*/, size_t /*i*/, size_t /*j*/) const {return 0;}
-    virtual defs::ham_t get_coeff_1101(size_t /*imode*/, size_t /*i*/, size_t /*j*/) const {return 0;}
+    virtual defs::ham_t get_coeff_1110(uint_t /*imode*/, uint_t /*i*/, uint_t /*j*/) const {return 0;}
+    virtual defs::ham_t get_coeff_1101(uint_t /*imode*/, uint_t /*i*/, uint_t /*j*/) const {return 0;}
 
     virtual defs::ham_t get_element_0010(const field::FrmBosOnv& /*onv*/,
                                          const conn::FrmBosOnv& /*conn*/) const {return 0;}
@@ -72,7 +72,7 @@ struct FrmBosHam : HamOpTerm {
      */
     void log_data() const;
 
-    virtual size_t default_nelec() const {
+    virtual uint_t default_nelec() const {
         // assume 1/2-filling
         return m_basis.m_frm.m_nsite;
     }
@@ -81,7 +81,7 @@ struct FrmBosHam : HamOpTerm {
         return sys::frm::c_undefined_ms2;
     }
 
-    virtual size_t default_nboson() const {
+    virtual uint_t default_nboson() const {
         return 0ul;
     }
 };

@@ -10,8 +10,8 @@
 
 #include "BitsetField.h"
 
-struct FrmOnvField : BitsetField<size_t, 2> {
-    typedef BitsetField<size_t, 2> base_t;
+struct FrmOnvField : BitsetField<uint_t, 2> {
+    typedef BitsetField<uint_t, 2> base_t;
     using base_t::get;
     using base_t::set;
     using base_t::clr;
@@ -29,7 +29,7 @@ private:
     /**
      * number of data words required for the storage of a single spin channel (alpha, beta)
      */
-    const size_t m_dsize_spin_channel;
+    const uint_t m_dsize_spin_channel;
 
 public:
 
@@ -59,40 +59,40 @@ public:
 
     bool operator==(const defs::uintv_t& inds) const;
 
-    void set(const size_t& bit_offset, const defs::uintv_t& setbits);
+    void set(const uint_t& bit_offset, const defs::uintv_t& setbits);
 
-    void set(const size_t& site_offset, const defs::uintv_t& setbits_alpha, const defs::uintv_t& setbits_beta);
+    void set(const uint_t& site_offset, const defs::uintv_t& setbits_alpha, const defs::uintv_t& setbits_beta);
 
     void set(const defs::uintv_t& setbits_alpha, const defs::uintv_t& setbits_beta);
 
     void set_spins(const defs::uintv_t& alpha_sites);
 
-    void put_spin_channel(const size_t& ispin, bool set);
+    void put_spin_channel(const uint_t& ispin, bool set);
 
-    void clr(const size_t& bit_offset, const defs::uintv_t& clrbits);
+    void clr(const uint_t& bit_offset, const defs::uintv_t& clrbits);
 
-    void clr(const size_t& site_offset, const defs::uintv_t& clrbits_alpha, const defs::uintv_t& clrbits_beta);
+    void clr(const uint_t& site_offset, const defs::uintv_t& clrbits_alpha, const defs::uintv_t& clrbits_beta);
 
-    void excite(const size_t &i, const size_t &j) {
-        auto* dptr = reinterpret_cast<size_t *>(begin());
+    void excite(const uint_t &i, const uint_t &j) {
+        auto* dptr = reinterpret_cast<uint_t *>(begin());
         clr(dptr, i);
         set(dptr, j);
     }
     void excite(inds_t ann, inds_t cre){
-        auto* dptr = reinterpret_cast<size_t *>(begin());
+        auto* dptr = reinterpret_cast<uint_t *>(begin());
         clr(dptr, ann);
         set(dptr, cre);
     }
 
-    void excite(const size_t &i, const size_t &j, const size_t &k, const size_t &l) {
-        auto* dptr = reinterpret_cast<size_t *>(begin());
+    void excite(const uint_t &i, const uint_t &j, const uint_t &k, const uint_t &l) {
+        auto* dptr = reinterpret_cast<uint_t *>(begin());
         clr(dptr, i);
         clr(dptr, j);
         set(dptr, k);
         set(dptr, l);
     }
     void excite(inds_t ann1, inds_t ann2, inds_t cre1, inds_t cre2) {
-        auto* dptr = reinterpret_cast<size_t *>(begin());
+        auto* dptr = reinterpret_cast<uint_t *>(begin());
         clr(dptr, ann1);
         clr(dptr, ann2);
         set(dptr, cre1);
@@ -106,7 +106,7 @@ public:
      */
     int ms2() const;
 
-    size_t site_nocc(const size_t& isite) const;
+    uint_t site_nocc(const uint_t& isite) const;
 
     bool all_sites_single_occ() const;
 
@@ -118,7 +118,7 @@ public:
      * @return
      *  raw dataword representing a portion of the alpha spin channel of the FrmOnv
      */
-    size_t get_alpha_dataword(size_t idataword) const;
+    uint_t get_alpha_dataword(uint_t idataword) const;
 
     /**
      * slightly more involved than the alpha channel counterpart. since the spin channels are not separated by a word
@@ -129,25 +129,25 @@ public:
      * @return
      *  raw dataword representing a portion of the beta spin channel of the FrmOnv
      */
-    size_t get_beta_dataword(size_t idataword) const;
+    uint_t get_beta_dataword(uint_t idataword) const;
 
     template<typename body_fn_t>
     void foreach_alpha(const body_fn_t& fn) const {
-        auto get_work_fn = [&](size_t idataword){
+        auto get_work_fn = [&](uint_t idataword){
             return get_alpha_dataword(idataword);
         };
-        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+        setbit_foreach::single<uint_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
-    size_t nalpha() const;
+    uint_t nalpha() const;
 
     template<typename body_fn_t>
     void foreach_beta(const body_fn_t& fn) const {
-        auto get_work_fn = [&](size_t idataword){
+        auto get_work_fn = [&](uint_t idataword){
             return get_beta_dataword(idataword);
         };
-        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+        setbit_foreach::single<uint_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
-    size_t nbeta() const;
+    uint_t nbeta() const;
 
 
     /**
@@ -159,13 +159,13 @@ public:
      */
     template<typename body_fn_t>
     void foreach_open_shell(const body_fn_t& fn) const {
-        auto get_work_fn = [&](size_t idataword){
+        auto get_work_fn = [&](uint_t idataword){
             return get_alpha_dataword(idataword) ^ get_beta_dataword(idataword);
         };
-        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+        setbit_foreach::single<uint_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
 
-    size_t nopen_shell() const;
+    uint_t nopen_shell() const;
 
     /**
      * efficiently iterate over the indices of those sites where the alpha spin orbital is occupied but the beta spin
@@ -177,13 +177,13 @@ public:
      */
     template<typename body_fn_t>
     void foreach_open_shell_alpha(const body_fn_t& fn) const {
-        auto get_work_fn = [&](size_t idataword){
+        auto get_work_fn = [&](uint_t idataword){
             return get_alpha_dataword(idataword) &~ get_beta_dataword(idataword);
         };
-        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+        setbit_foreach::single<uint_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
 
-    size_t nopen_shell_alpha() const;
+    uint_t nopen_shell_alpha() const;
 
     /**
      * efficiently iterate over the indices of those sites where the alpha spin vacant is occupied but the beta spin
@@ -195,13 +195,13 @@ public:
      */
     template<typename body_fn_t>
     void foreach_open_shell_beta(const body_fn_t& fn) const {
-        auto get_work_fn = [&](size_t idataword){
+        auto get_work_fn = [&](uint_t idataword){
             return ~get_alpha_dataword(idataword) & get_beta_dataword(idataword);
         };
-        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+        setbit_foreach::single<uint_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
 
-    size_t nopen_shell_beta() const;
+    uint_t nopen_shell_beta() const;
 
     /**
      * efficiently iterate over the doubly-occupied site indices
@@ -212,13 +212,13 @@ public:
      */
     template<typename body_fn_t>
     void foreach_closed_shell(const body_fn_t& fn) const {
-        auto get_work_fn = [&](size_t idataword){
+        auto get_work_fn = [&](uint_t idataword){
             return get_alpha_dataword(idataword) & get_beta_dataword(idataword);
         };
-        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+        setbit_foreach::single<uint_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
 
-    size_t nclosed_shell() const;
+    uint_t nclosed_shell() const;
 
     /**
      * efficiently iterate over the site indices with any non-zero occupation
@@ -229,13 +229,13 @@ public:
      */
     template<typename body_fn_t>
     void foreach_occupied_site(const body_fn_t& fn) const {
-        auto get_work_fn = [&](size_t idataword){
+        auto get_work_fn = [&](uint_t idataword){
             return get_alpha_dataword(idataword) | get_beta_dataword(idataword);
         };
-        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+        setbit_foreach::single<uint_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
 
-    size_t noccupied_site() const;
+    uint_t noccupied_site() const;
 
     /**
      * efficiently iterate over the unoccupied site indices
@@ -246,8 +246,8 @@ public:
      */
     template<typename body_fn_t>
     void foreach_unoccupied_site(const body_fn_t& fn) const {
-        size_t isite = 0ul;
-        auto tmp = [&isite, &fn](size_t iocc_site){
+        uint_t isite = 0ul;
+        auto tmp = [&isite, &fn](uint_t iocc_site){
             for (; isite<iocc_site; ++isite){
                 fn(isite);
             }
@@ -261,7 +261,7 @@ public:
         }
     }
 
-    size_t nunoccupied_site() const;
+    uint_t nunoccupied_site() const;
 
 };
 

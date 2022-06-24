@@ -46,11 +46,11 @@ public:
         return *this;
     }
 
-    size_t size() const {
+    uint_t size() const {
         return m_inds.size();
     }
 
-    const size_t& operator[](const size_t& i) const{
+    const uint_t& operator[](const uint_t& i) const{
         ASSERT(i<size());
         return m_inds[i];
     }
@@ -92,14 +92,14 @@ typedef FlatOrbs<OccupiedUpdater> OccOrbs;
 typedef FlatOrbs<VacantUpdater> VacOrbs;
 
 
-template<typename updater_fn, size_t nind>
+template<typename updater_fn, uint_t nind>
 struct NdOrbs__ {
     const NdFormat<nind> m_format;
     std::vector<defs::uintv_t> m_inds;
     const defs::uintv_t m_map;
 
     FlatOrbs<updater_fn> m_flat;
-    NdOrbs__(uinta_t<nind> shape, size_t nsite, const defs::uintv_t& map):
+    NdOrbs__(uinta_t<nind> shape, uint_t nsite, const defs::uintv_t& map):
         m_format(shape), m_inds(m_format.m_nelement), m_map(map), m_flat(nsite){
         if (!nsite) return;
         for (auto& v: m_inds) v.reserve(2*nsite);
@@ -129,15 +129,15 @@ struct NdOrbs__ {
         return *this;
     }
 
-    size_t size(const size_t& ielement) const {
+    uint_t size(const uint_t& ielement) const {
         return m_inds[ielement].size();
     }
 
-    size_t size(const uinta_t<nind>& uintv_t) const {
+    uint_t size(const uinta_t<nind>& uintv_t) const {
         return m_inds[m_format.flatten(uintv_t)].size();
     }
 
-    const defs::uintv_t& operator[](const size_t& i) const{
+    const defs::uintv_t& operator[](const uint_t& i) const{
         ASSERT(i<m_inds.size());
         return m_inds[i];
     }
@@ -199,21 +199,21 @@ struct NdVacantUpdater {
             defs::uintv_t& flat_inds, std::vector<defs::uintv_t> &nd_inds);
 };
 
-template<size_t nind>
+template<uint_t nind>
 using NdOccOrbs__ = NdOrbs__<NdOccupiedUpdater, nind>;
-template<size_t nind>
+template<uint_t nind>
 using NdVacOrbs__ = NdOrbs__<NdVacantUpdater, nind>;
 
 template<typename updater_fn>
 class SpinNdOrbs__ : public NdOrbs__<updater_fn, 1> {
-    defs::uintv_t make_spin_map(size_t nsite) {
+    defs::uintv_t make_spin_map(uint_t nsite) {
         defs::uintv_t out(2*nsite, 0);
         for (auto it = out.begin()+nsite; it!=out.end(); ++it) *it = 1ul;
         return out;
     }
 
 public:
-    explicit SpinNdOrbs__(size_t nsite) :
+    explicit SpinNdOrbs__(uint_t nsite) :
             NdOrbs__<updater_fn, 1>({2}, nsite, make_spin_map(nsite)){}
 };
 
@@ -227,7 +227,7 @@ class SpinSymNdOrbs__ : public NdOrbs__<updater_fn, 2> {
         defs::uintv_t out(2*grp_map.m_nsite, 0);
         std::copy(grp_map.m_site_irreps.cbegin(), grp_map.m_site_irreps.cend(), out.begin());
         std::copy(grp_map.m_site_irreps.cbegin(), grp_map.m_site_irreps.cend(), out.begin()+grp_map.m_nsite);
-        for (size_t i=grp_map.m_nsite; i<grp_map.m_nsite*2; ++i) out[i]+=grp_map.m_grp.nirrep();
+        for (uint_t i=grp_map.m_nsite; i<grp_map.m_nsite*2; ++i) out[i]+=grp_map.m_grp.nirrep();
         return out;
     }
 

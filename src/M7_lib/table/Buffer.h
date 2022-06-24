@@ -17,11 +17,11 @@ public:
     /**
      * number of bytes in the system word
      */
-    static constexpr size_t c_nbyte_word = sizeof(size_t);
+    static constexpr uint_t c_nbyte_word = sizeof(uint_t);
     /**
      * number of bits in the system word
      */
-    static constexpr size_t c_nbit_word = CHAR_BIT * c_nbyte_word;
+    static constexpr uint_t c_nbit_word = CHAR_BIT * c_nbyte_word;
     class Window {
         friend class Buffer;
         /**
@@ -33,21 +33,21 @@ public:
         /**
          * Size of the row in bytes
          */
-        const size_t m_row_size;
+        const uint_t m_row_size;
         /**
          * Current number of whole rows that can be stored in the window
          */
-        size_t m_nrow = 0ul;
+        uint_t m_nrow = 0ul;
         defs::buf_t *m_begin = nullptr;
-        size_t m_size = 0ul;
+        uint_t m_size = 0ul;
 
-        Window(size_t row_size=1): m_row_size(row_size) {}
+        Window(uint_t row_size=1): m_row_size(row_size) {}
 
         Window(const Window& other): Window(other.m_row_size) {}
 
         Window& operator=(const Window& other);
 
-        explicit Window(Buffer *buffer, size_t row_size=1);
+        explicit Window(Buffer *buffer, uint_t row_size=1);
         /**
          * @return
          *  true if this window has an associated Buffer and it has an allocated data vector
@@ -60,7 +60,7 @@ public:
          * @param new_size
          *  new size in bytes for the redefined window
          */
-        void move(defs::buf_t *begin, size_t new_size);
+        void move(defs::buf_t *begin, uint_t new_size);
         /**
          * delegate to the buffer's resize method so that all associated windows, not just this one, are moved
          * @param size
@@ -68,7 +68,7 @@ public:
          * @param factor
          *  optional expansion factor
          */
-        void resize(size_t size, double factor=-1.0);
+        void resize(uint_t size, double factor=-1.0);
         /**
          * @return
          *  name of buffer
@@ -82,16 +82,16 @@ public:
     double m_expansion_factor = 0.0;
     const std::string m_name;
 private:
-    const size_t m_nwindow_max;
+    const uint_t m_nwindow_max;
     std::vector<defs::buf_t> m_data;
     std::vector<Window *> m_windows;
 
 public:
-    Buffer(std::string name, size_t nwindow_max);
+    Buffer(std::string name, uint_t nwindow_max);
 
-    size_t size() const;
+    uint_t size() const;
 
-    size_t window_size() const;
+    uint_t window_size() const;
 
     void append_window(Window *window);
 
@@ -102,14 +102,14 @@ public:
      * @param factor
      *  optional expansion factor
      */
-    void resize(size_t size, double factor=-1.0);
+    void resize(uint_t size, double factor=-1.0);
     /**
      * @param size
      *  size in bytes
      * @return
      *  space in memory taken up by the buffer in sensible units given the magnitude of the allocation
      */
-    std::string capacity_string(size_t size) const;
+    std::string capacity_string(uint_t size) const;
 
     std::string capacity_string() const;
 

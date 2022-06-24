@@ -9,16 +9,16 @@ Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
         m_nspinorb_pair(m_h.m_basis.m_nspinorb_pair),
         m_pick_ab_given_ij(m_nspinorb_pair, m_nspinorb_pair) {
     std::vector<defs::prob_t> weights(m_nspinorb_pair, 0.0);
-    size_t ij = 0ul;
+    uint_t ij = 0ul;
     log::info("Initializing pre-computed heat bath sampling weights for doubles...");
     const auto nspinorb = m_h.m_basis.m_nspinorb;
     if (mpi::on_node_i_am_root()) {
-        for (size_t i = 0ul; i < nspinorb; ++i) {
-            for (size_t j = 0ul; j < i; ++j) {
+        for (uint_t i = 0ul; i < nspinorb; ++i) {
+            for (uint_t j = 0ul; j < i; ++j) {
                 weights.assign(m_nspinorb_pair, 0.0);
-                size_t ab = 0ul;
-                for (size_t a = 0ul; a < nspinorb; ++a) {
-                    for (size_t b = 0ul; b < a; ++b) {
+                uint_t ab = 0ul;
+                for (uint_t a = 0ul; a < nspinorb; ++a) {
+                    for (uint_t b = 0ul; b < a; ++b) {
                         //if (a!=i && a!=j && b!=i && b!=j) { !TODO why does this restriction fail?
                         auto element = m_h.get_coeff_2200(i, j, a, b);
                         weights[ab] = std::abs(element);
@@ -36,13 +36,13 @@ Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
     mpi::barrier();
 }
 
-bool Pchb2200::draw_h_frm(size_t exsig, const field::FrmOnv& src, defs::prob_t& prob,
+bool Pchb2200::draw_h_frm(uint_t exsig, const field::FrmOnv& src, defs::prob_t& prob,
                           defs::ham_t& helem, conn::FrmOnv& conn) {
     DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
-    size_t i, j, a, b;
+    uint_t i, j, a, b;
     const auto& occs = src.m_decoded.m_simple_occs.get();
     const auto npair_elec = integer::nspair(occs.size());
-    size_t ij = m_prng.draw_uint(npair_elec);
+    uint_t ij = m_prng.draw_uint(npair_elec);
     integer::inv_strigmap(j, i, ij);
     // i and j are positions in the occ list, convert to orb uintv_t:
     i = occs[i];
@@ -57,7 +57,7 @@ bool Pchb2200::draw_h_frm(size_t exsig, const field::FrmOnv& src, defs::prob_t& 
         return false;
     }
 
-    size_t ab = m_pick_ab_given_ij.draw(ij, m_prng);
+    uint_t ab = m_pick_ab_given_ij.draw(ij, m_prng);
     integer::inv_strigmap(b, a, ab); // a and b are spin orbital indices
     //ASSERT(i!=a && i!=b && j!=a && j!=b)
 
@@ -73,7 +73,7 @@ bool Pchb2200::draw_h_frm(size_t exsig, const field::FrmOnv& src, defs::prob_t& 
     return !fptol::numeric_zero(prob);
 }
 
-bool Pchb2200::draw_frm(size_t exsig, const field::FrmOnv& src, defs::prob_t& prob, conn::FrmOnv& conn) {
+bool Pchb2200::draw_frm(uint_t exsig, const field::FrmOnv& src, defs::prob_t& prob, conn::FrmOnv& conn) {
     /*
      * need the helement to compute the probability so if it isn't actually needed, just dispose of it
      * in contrast to the generic case where it is not assumed that the helement must be computed to get the prob,
@@ -94,6 +94,6 @@ defs::prob_t Pchb2200::prob_frm(const field::FrmOnv& src, const conn::FrmOnv& co
     return prob_h_frm(src, conn, m_h.get_element_2200(src, conn));
 }
 
-size_t Pchb2200::approx_nconn(size_t, sys::Particles particles) const {
+uint_t Pchb2200::approx_nconn(uint_t, sys::Particles particles) const {
     return particles.m_frm.m_npair * m_nspinorb_pair;
 }

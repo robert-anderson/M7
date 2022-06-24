@@ -108,7 +108,7 @@ namespace defs {
     #define ENABLE_FERMIONS
 #endif
 
-    constexpr size_t mbf_type_ind = MBF_TYPE;
+    constexpr uint_t mbf_type_ind = MBF_TYPE;
 
 #ifdef ENABLE_BOSONS
     constexpr bool enable_bosons = true;
@@ -123,9 +123,9 @@ namespace defs {
 #endif
 
     //  nroot, nreplica
-    constexpr size_t ndim_wf = 2;
+    constexpr uint_t ndim_wf = 2;
     //  nroot
-    constexpr size_t ndim_root = 1;
+    constexpr uint_t ndim_root = 1;
     typedef uinta_t<ndim_wf> wf_inds_t;
 }
 #endif //M7_DEFS_H

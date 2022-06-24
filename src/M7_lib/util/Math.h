@@ -6,6 +6,9 @@
 #define M7_UTIL_MATH_H
 
 #include <complex>
+#include "M7_lib/defs.h"
+
+using namespace defs;
 
 namespace math {
 
@@ -26,7 +29,7 @@ namespace math {
      *  x to the power y
      */
     template<typename T>
-    T pow(T x, size_t exp) {
+    T pow(T x, uint_t exp) {
         if (!exp) return 1;
         if (exp == 1) return x;
 
@@ -47,12 +50,12 @@ namespace math {
      *  x to the power exp
      *
      */
-    template<size_t exp, typename T=void>
+    template<uint_t exp, typename T=void>
     static typename std::enable_if<exp == 0ul, T>::type pow(T /*x*/) {
         return 1ul;
     }
 
-    template<size_t exp, typename T=void>
+    template<uint_t exp, typename T=void>
     static typename std::enable_if<exp != 0ul, T>::type pow(T x) {
         return x * pow<exp - 1, T>(x);
     }

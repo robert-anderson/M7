@@ -22,7 +22,7 @@ struct RowProtector {
     /**
      * number of true values in m_flags
      */
-    size_t m_nprotected = 0ul;
+    uint_t m_nprotected = 0ul;
     /**
      * iterator in m_table::m_row_protectors associated with this object
      */
@@ -36,25 +36,25 @@ struct RowProtector {
      * @param irow
      *  row index to protect
      */
-    void protect(const size_t &irow);
+    void protect(const uint_t &irow);
     /**
      * cease treating row as protected
      * @param irow
      *  row index to release
      */
-    void release(const size_t &irow);
+    void release(const uint_t &irow);
     /**
      * called when the associated m_table is resized
      * @param nrow
      */
-    void on_resize(size_t nrow);
+    void on_resize(uint_t nrow);
     /**
      * @param irow
      *  row index
      * @return
      *  true if indexed row is protected
      */
-    bool is_protected(const size_t &irow) const;
+    bool is_protected(const uint_t &irow) const;
     /**
      * @return
      *  true if this object protects any rows

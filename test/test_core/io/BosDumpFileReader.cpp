@@ -20,7 +20,7 @@ TEST(BosdumpFileReader, ReadFile){
 
     // scan to arbitrary element
     // 0.3535533906 3 2 1 2
-    for (size_t i=3; i<37; ++i) file_reader.next(inds, value);
+    for (uint_t i=3; i<37; ++i) file_reader.next(inds, value);
     test_inds = {2, 1, 0, 1};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_FLOAT_EQ(arith::real(value), 0.3535533906);

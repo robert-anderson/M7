@@ -20,8 +20,8 @@ TEST(UtilInteger, Factorial) {
 }
 
 TEST(UtilInteger, Combinatorial) {
-    for (size_t n = 0ul; n < 20; ++n) {
-        for (size_t r = 0ul; r <= n; ++r) {
+    for (uint_t n = 0ul; n < 20; ++n) {
+        for (uint_t r = 0ul; r <= n; ++r) {
             ASSERT_EQ(combinatorial(n, r),
                       factorial(n) / (factorial(n - r) * factorial(r)));
         }
@@ -31,13 +31,13 @@ TEST(UtilInteger, Combinatorial) {
 }
 
 TEST(UtilInteger, PairMaps) {
-    const size_t N = 20;
-    size_t n;
-    size_t tmp_i, tmp_j;
+    const uint_t N = 20;
+    uint_t n;
+    uint_t tmp_i, tmp_j;
 
-    size_t ij = 0ul;
-    for (size_t i = 0ul; i < N; ++i) {
-        for (size_t j = 0ul; j <= i; ++j) {
+    uint_t ij = 0ul;
+    for (uint_t i = 0ul; i < N; ++i) {
+        for (uint_t j = 0ul; j <= i; ++j) {
             n = trigmap(i, j);
             inv_trigmap(tmp_i, tmp_j, n);
             ASSERT_EQ(n, ij);
@@ -48,8 +48,8 @@ TEST(UtilInteger, PairMaps) {
     }
 
     ij = 0ul;
-    for (size_t i = 0ul; i < N; ++i) {
-        for (size_t j = 0ul; j < i; ++j) {
+    for (uint_t i = 0ul; i < N; ++i) {
+        for (uint_t j = 0ul; j < i; ++j) {
             n = strigmap(i, j);
             inv_strigmap(tmp_i, tmp_j, n);
             ASSERT_EQ(n, ij);
@@ -60,8 +60,8 @@ TEST(UtilInteger, PairMaps) {
     }
 
     ij = 0ul;
-    for (size_t i = 0ul; i < N; ++i) {
-        for (size_t j = 0ul; j < N; ++j) {
+    for (uint_t i = 0ul; i < N; ++i) {
+        for (uint_t j = 0ul; j < N; ++j) {
             n = rectmap(i, j, N);
             inv_rectmap(tmp_i, tmp_j, N, n);
             ASSERT_EQ(n, ij);

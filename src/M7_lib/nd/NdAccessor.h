@@ -12,7 +12,7 @@
 
 #include "NdFormat.h"
 
-template <typename T, size_t nind>
+template <typename T, uint_t nind>
 struct NdAccessor {
     T* m_data;
     const NdFormat<nind>& m_format;
@@ -35,7 +35,7 @@ struct NdAccessor {
     template<typename U>
     NdAccessor& operator=(const std::vector<U> &v){
         ASSERT(v.size()==nelement());
-        for (size_t i = 0ul; i < nelement(); ++i) (*this)(i) = v[i];
+        for (uint_t i = 0ul; i < nelement(); ++i) (*this)(i) = v[i];
         return *this;
     }
 
@@ -48,7 +48,7 @@ struct NdAccessor {
         return *this;
     }
 
-    T& operator[](const size_t& ielement){
+    T& operator[](const uint_t& ielement){
         ASSERT(ielement<m_format.nelement());
         return m_data[ielement];
     }
@@ -71,11 +71,11 @@ struct NdAccessor {
         return m_data[m_format.flatten(inds...)];
     }
 
-    void bcast(size_t iroot=0ul) {
+    void bcast(uint_t iroot=0ul) {
         mpi::bcast(m_data, nelement(), iroot);
     }
 
-    size_t nelement() const {
+    uint_t nelement() const {
         return m_format.nelement();
     }
 
@@ -87,7 +87,7 @@ struct NdAccessor {
 /*
  * An NdAccessor that owns its own NdFormat, rather than referencing it from outside
  */
-template <typename T, size_t nind>
+template <typename T, uint_t nind>
 struct FormattedNdAccessor : private NdFormat<nind>, public NdAccessor<T, nind>{
     template<typename ...Args>
     FormattedNdAccessor(T* data, NdFormat<nind> format):

@@ -11,7 +11,7 @@ TEST(DecodedMbf, Simple){
     mbf = setbits;
     defs::uintv_t clrbits;
     auto iter = setbits.begin();
-    for (size_t i=0ul; i < mbf.nbit(); ++i){
+    for (uint_t i=0ul; i < mbf.nbit(); ++i){
         if (iter!=setbits.end() && i==*iter) iter++;
         else clrbits.push_back(i);
     }
@@ -26,7 +26,7 @@ TEST(DecodedMbf, Simple){
     /*
      * for a small number of occupied orbs, run through all possible arrangements
      */
-    const size_t noccorb = 3;
+    const uint_t noccorb = 3;
     auto occ_fn = [&mbf](const inds_t& inds) {
         mbf.zero();
         mbf = inds;
@@ -40,7 +40,7 @@ TEST(DecodedMbf, Simple){
     /*
      * for a small number of vacant orbs, run through all possible arrangements
      */
-    const size_t nvacorb = 3;
+    const uint_t nvacorb = 3;
     auto vac_fn = [&mbf](const defs::uintv_t &inds) {
         mbf.set();
         for (auto i: inds) mbf.clr(i);
@@ -53,7 +53,7 @@ TEST(DecodedMbf, Simple){
 }
 
 TEST(DecodedMbf, SingleMultipleOccupation) {
-    const size_t nsite = 8;
+    const uint_t nsite = 8;
     defs::uintv_t alpha_inds = {0, 4, 5, 7};
     defs::uintv_t beta_inds = {0, 1, 2, 5};
     buffered::FrmOnv mbf(nsite);
@@ -72,7 +72,7 @@ TEST(DecodedMbf, SingleMultipleOccupation) {
 
 TEST(DecodedMbf, Labelled){
     // arbitrary, fictitious group
-    AbelianGroup grp({"W", "X", "Y", "Z"}, [](const size_t& iirrep, const size_t& jirrep){
+    AbelianGroup grp({"W", "X", "Y", "Z"}, [](const uint_t& iirrep, const uint_t& jirrep){
         return (iirrep+jirrep)%4;
     });
 
@@ -194,7 +194,7 @@ TEST(DecodedMbf, Labelled){
 }
 
 TEST(DecodedMbf, Bosons) {
-    const size_t nmode = 8;
+    const uint_t nmode = 8;
     buffered::BosOnv mbf(nmode);
     mbf = {0, 1, 0, 3, 1, 0, 1, 2};
     defs::uintv_t chk_inds;
@@ -207,7 +207,7 @@ TEST(DecodedMbf, Bosons) {
 }
 
 TEST(DecodedMbf, Holstein) {
-    const size_t nsite = 8;
+    const uint_t nsite = 8;
     buffered::FrmBosOnv mbf(nsite, nsite);
     mbf.m_frm = {{0, 1, 5, 7}, {0, 3, 6, 7}};
     mbf.m_bos = {0, 1, 2, 3, 1, 0, 1, 2};

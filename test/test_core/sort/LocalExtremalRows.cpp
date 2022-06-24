@@ -11,7 +11,7 @@ namespace local_extremal_rows_test {
     typedef BufferedTable<int_scalar_row_t> int_scalar_table_t;
     typedef SingleFieldRow<field::Number<std::complex<float>>> complex_scalar_row_t;
     typedef BufferedTable<complex_scalar_row_t> complex_scalar_table_t;
-    static constexpr size_t c_nfind = 4;
+    static constexpr uint_t c_nfind = 4;
 
     static std::vector<std::complex<float>> get_complex_data() {
         return {
@@ -138,7 +138,7 @@ TEST(LocalExtremalRows, AscendingComplex) {
     auto cmp_fn = [](std::complex<float> z1, std::complex<float> z2){return std::abs(z1) < std::abs(z2);};
     std::sort(complex_data.begin(), complex_data.end(), cmp_fn);
     // note that this is not a valid means of verification if any elements in the test data have the same magnitude
-    for (size_t irow = 0ul; irow < c_nfind; ++irow){
+    for (uint_t irow = 0ul; irow < c_nfind; ++irow){
         row.jump(lxv[irow]);
         const std::complex<float> &field = row.m_field;
         ASSERT_EQ(field, complex_data[irow]);
@@ -157,7 +157,7 @@ TEST(LocalExtremalRows, DescendingComplex) {
     auto cmp_fn = [](std::complex<float> z1, std::complex<float> z2){return std::abs(z1) > std::abs(z2);};
     std::sort(complex_data.begin(), complex_data.end(), cmp_fn);
     // note that this is not a valid means of verification if any elements in the test data have the same magnitude
-    for (size_t irow = 0ul; irow < c_nfind; ++irow){
+    for (uint_t irow = 0ul; irow < c_nfind; ++irow){
         row.jump(lxv[irow]);
         const std::complex<float> &field = row.m_field;
         ASSERT_EQ(field, complex_data[irow]);

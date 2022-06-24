@@ -8,7 +8,7 @@
 #include <M7_lib/foreach/SetbitForeach.h>
 #include "FieldBase.h"
 
-template<typename T, size_t nind>
+template<typename T, uint_t nind>
 struct BitsetField : FieldBase {
     static_assert(std::is_integral<T>::value, "Basis for bitset field must be an integral type");
 
@@ -16,9 +16,9 @@ struct BitsetField : FieldBase {
 
     struct BitView {
         BitsetField &m_field;
-        const size_t m_ibit = 0;
+        const uint_t m_ibit = 0;
 
-        BitView(BitsetField &field, size_t ibit): m_field(field), m_ibit(ibit){}
+        BitView(BitsetField &field, uint_t ibit): m_field(field), m_ibit(ibit){}
 
         operator bool() const {
             return m_field.get(m_ibit);
@@ -30,13 +30,13 @@ struct BitsetField : FieldBase {
     };
 
 
-    static constexpr size_t nbit_dword() { return sizeof(T) * CHAR_BIT; }
+    static constexpr uint_t nbit_dword() { return sizeof(T) * CHAR_BIT; }
 
     const NdFormat<nind> m_format;
     // total number of data words of type T required
-    const size_t m_dsize;
+    const uint_t m_dsize;
     // number of bits unused in last dataword
-    const size_t m_nbit_in_last_dword;
+    const uint_t m_nbit_in_last_dword;
 
     using FieldBase::zero;
     using FieldBase::begin;
@@ -62,7 +62,7 @@ struct BitsetField : FieldBase {
         return *this;
     }
 
-    const size_t &nbit() const {
+    const uint_t &nbit() const {
         return m_format.m_nelement;
     }
 
@@ -70,11 +70,11 @@ struct BitsetField : FieldBase {
         return reinterpret_cast<T *>(begin());
     }
 
-    BitView operator[](const size_t &ibit) {
+    BitView operator[](const uint_t &ibit) {
         return {*this, ibit};
     }
 
-    const BitView operator[](const size_t &ibit) const {
+    const BitView operator[](const uint_t &ibit) const {
         return {*this, ibit};
     }
 
@@ -86,12 +86,12 @@ struct BitsetField : FieldBase {
         return {*this, m_format.flatten(inds)};
     }
 
-    bool get(const T *dptr, const size_t &ibit) const {
+    bool get(const T *dptr, const uint_t &ibit) const {
         ASSERT(ibit < nbit());
         return bit::get(dptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
-    bool get(const size_t &ibit) const {
+    bool get(const uint_t &ibit) const {
         return get(dbegin(), ibit);
     }
 
@@ -103,12 +103,12 @@ struct BitsetField : FieldBase {
         return get(m_format.flatten(inds));
     }
 
-    void set(T *dptr, const size_t &ibit) {
+    void set(T *dptr, const uint_t &ibit) {
         ASSERT(ibit < nbit());
         bit::set(dptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
-    void set(const size_t &ibit) {
+    void set(const uint_t &ibit) {
         set(reinterpret_cast<T *>(begin()), ibit);
     }
 
@@ -120,7 +120,7 @@ struct BitsetField : FieldBase {
         set(m_format.flatten(inds));
     }
 
-    void put_range(const size_t &ibegin, const size_t &iend, bool set) {
+    void put_range(const uint_t &ibegin, const uint_t &iend, bool set) {
         T mask;
         auto iword_begin = ibegin/nbit_dword();
         auto iword_end = iend/nbit_dword();
@@ -137,13 +137,13 @@ struct BitsetField : FieldBase {
         bit::apply_mask(dbegin()[iword_end], 0, ibitword_end, set);
         // make the all-bits mask
         bit::make_range_mask(mask, 0, nbit_dword());
-        for (size_t iword=iword_begin+1; iword<iword_end; ++iword){
+        for (uint_t iword=iword_begin+1; iword<iword_end; ++iword){
             // apply it to all words between begin and end
             bit::apply_mask(dbegin()[iword], mask, set);
         }
     }
 
-    void set_range(const size_t &ibegin, const size_t &iend) {
+    void set_range(const uint_t &ibegin, const uint_t &iend) {
         put_range(ibegin, iend, true);
     }
 
@@ -151,16 +151,16 @@ struct BitsetField : FieldBase {
         set_range(0, m_format.m_nelement);
     }
 
-    void clr_range(const size_t &ibegin, const size_t &iend) {
+    void clr_range(const uint_t &ibegin, const uint_t &iend) {
         put_range(ibegin, iend, false);
     }
 
-    void clr(T *dptr, const size_t &ibit) {
+    void clr(T *dptr, const uint_t &ibit) {
         ASSERT(ibit < nbit());
         bit::clr(dptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
-    void clr(const size_t &ibit) {
+    void clr(const uint_t &ibit) {
         clr(reinterpret_cast<T *>(begin()), ibit);
     }
 
@@ -172,11 +172,11 @@ struct BitsetField : FieldBase {
         clr(m_format.flatten(inds));
     }
 
-    void put(T *dptr, const size_t &ibit, bool v) {
+    void put(T *dptr, const uint_t &ibit, bool v) {
         v ? set(dptr, ibit) : clr(dptr, ibit);
     }
 
-    void put(const size_t &ibit, bool v) {
+    void put(const uint_t &ibit, bool v) {
         v ? set(ibit) : clr(ibit);
     }
 
@@ -188,7 +188,7 @@ struct BitsetField : FieldBase {
         put(m_format.flatten(inds), v);
     }
 
-    T get_dataword(const size_t &idataword) const {
+    T get_dataword(const uint_t &idataword) const {
         DEBUG_ASSERT_LT(idataword, m_dsize, "dataword index OOB");
         auto *dptr = reinterpret_cast<T *>(begin());
         auto tmp = dptr[idataword];
@@ -200,7 +200,7 @@ struct BitsetField : FieldBase {
         return tmp;
     }
 
-    T get_antidataword(const size_t &idataword) const {
+    T get_antidataword(const uint_t &idataword) const {
         DEBUG_ASSERT_LT(idataword, m_dsize, "dataword index OOB");
         auto *dptr = reinterpret_cast<T *>(begin());
         auto tmp = ~dptr[idataword];
@@ -212,37 +212,37 @@ struct BitsetField : FieldBase {
 
     template<typename fn_t>
     void foreach_setbit(const fn_t& fn) const {
-        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        auto get_work_fn = [this](uint_t idataword){return get_dataword(idataword);};
         setbit_foreach::single<T>(m_dsize, fn, get_work_fn);
     }
 
     template<typename fn_outer_t, typename fn_inner_t>
     void foreach_setbit_pair(const fn_outer_t& fn_outer, const fn_inner_t& fn_inner) const {
-        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        auto get_work_fn = [this](uint_t idataword){return get_dataword(idataword);};
         setbit_foreach::pair<T>(m_dsize, fn_outer, fn_inner, get_work_fn);
     }
 
     template<typename fn_inner_t>
     void foreach_setbit_pair(const fn_inner_t& fn_inner) const {
-        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        auto get_work_fn = [this](uint_t idataword){return get_dataword(idataword);};
         setbit_foreach::pair<T>(m_dsize, fn_inner, get_work_fn);
     }
 
     template<typename fn_1_t, typename fn_2_t, typename fn_3_t>
     void foreach_setbit_triple(const fn_1_t& fn_1, const fn_2_t& fn_2, const fn_3_t& fn_3) const {
-        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        auto get_work_fn = [this](uint_t idataword){return get_dataword(idataword);};
         setbit_foreach::triple<T>(m_dsize, fn_1, fn_2, fn_3, get_work_fn);
     }
 
     template<typename fn_inner_t>
     void foreach_setbit_triple(const fn_inner_t& fn_inner) const {
-        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        auto get_work_fn = [this](uint_t idataword){return get_dataword(idataword);};
         setbit_foreach::triple<T>(m_dsize, fn_inner, get_work_fn);
     }
 
-    size_t nsetbit() const {
-        size_t result = 0;
-        for (size_t idataword = 0ul; idataword < m_dsize; ++idataword) {
+    uint_t nsetbit() const {
+        uint_t result = 0;
+        for (uint_t idataword = 0ul; idataword < m_dsize; ++idataword) {
             result += bit::nsetbit(get_dataword(idataword));
         }
         return result;
@@ -251,7 +251,7 @@ struct BitsetField : FieldBase {
     std::string to_string() const override {
         std::string res;
         res.reserve(nbit());
-        for (size_t i = 0ul; i < nbit(); ++i)
+        for (uint_t i = 0ul; i < nbit(); ++i)
             res += get(i) ? "1" : "0";
         return res;
     }

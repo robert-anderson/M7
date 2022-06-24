@@ -25,9 +25,9 @@ namespace mbf_foreach {
         using prototype_t = void();
         using function_t = std::function<prototype_t>;
 
-        const size_t m_niter;
+        const uint_t m_niter;
 
-        Base(size_t niter);
+        Base(uint_t niter);
 
         virtual ~Base() {}
 
@@ -60,11 +60,11 @@ namespace mbf_foreach {
     };
 
     struct PairBase {
-        using prototype_t = void(size_t, size_t);
+        using prototype_t = void(uint_t, uint_t);
         using function_t = std::function<prototype_t>;
 
-        const size_t m_nrow;
-        const size_t m_niter;
+        const uint_t m_nrow;
+        const uint_t m_niter;
 
     protected:
         virtual void frm_loop(field::FrmOnv& /*bra*/, field::FrmOnv& /*ket*/, const function_t& /*fn*/) {};
@@ -72,7 +72,7 @@ namespace mbf_foreach {
         virtual void frmbos_loop(field::FrmBosOnv& /*bra*/, field::FrmBosOnv& /*ket*/, const function_t& /*fn*/) {};
 
     public:
-        PairBase(size_t nrow);
+        PairBase(uint_t nrow);
 
         virtual ~PairBase() {}
 
@@ -112,9 +112,9 @@ namespace mbf_foreach {
         template<typename fn_t>
         void loop_fn(mbf_t& outer, mbf_t& inner, const fn_t &fn) {
             functor::assert_prototype<prototype_t>(fn);
-            size_t iouter = 0ul;
+            uint_t iouter = 0ul;
             auto outer_fn = [this, &inner, &fn, &iouter]() {
-                size_t iinner = 0ul;
+                uint_t iinner = 0ul;
                 auto inner_fn = [&fn, &iouter, &iinner]() {
                     fn(iouter, iinner);
                     ++iinner;
@@ -130,7 +130,7 @@ namespace mbf_foreach {
 
         struct Base : mbf_foreach::Base {
             const sys::frm::Sector m_sector;
-            Base(const sys::frm::Sector& sector, size_t niter);
+            Base(const sys::frm::Sector& sector, uint_t niter);
         protected:
             void verify_mbf(const field::FrmOnv& mbf) {
                 REQUIRE_TRUE(mbf.m_basis==m_sector.m_basis, "given MBF has incorrect basis");
@@ -188,7 +188,7 @@ namespace mbf_foreach {
             typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
             foreach_t m_alpha_foreach, m_beta_foreach;
 
-            static size_t niter(const sys::frm::Sector& sector);
+            static uint_t niter(const sys::frm::Sector& sector);
 
             Ms2Conserve(const sys::frm::Sector& sector);
 
@@ -233,7 +233,7 @@ namespace mbf_foreach {
     namespace bos {
         struct Base : mbf_foreach::Base {
             const sys::bos::Sector m_sector;
-            Base(const sys::bos::Sector& sector, size_t niter);     
+            Base(const sys::bos::Sector& sector, uint_t niter);     
         protected:
             void verify_mbf(const field::BosOnv& mbf) {
                 REQUIRE_TRUE(mbf.m_basis==m_sector.m_basis, "given MBF has incorrect basis");
@@ -302,7 +302,7 @@ namespace mbf_foreach {
 
     namespace frm_bos {
         struct Base : mbf_foreach::Base {
-            explicit Base(size_t niter);
+            explicit Base(uint_t niter);
         };
 
         template<typename frm_foreach_t, typename bos_foreach_t>
@@ -321,7 +321,7 @@ namespace mbf_foreach {
                 Bases (const frm_foreach_t &frm, const bos_foreach_t &bos): m_frm(frm), m_bos(bos){}
             };
 
-            static size_t make_niter(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
+            static uint_t make_niter(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
                 Bases bases(frm_foreach, bos_foreach);
                 return bases.m_frm.m_niter * bases.m_bos.m_niter;
             }

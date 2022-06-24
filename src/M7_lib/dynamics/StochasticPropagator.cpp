@@ -22,7 +22,7 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian& ham, const conf::D
 }
 
 
-void StochasticPropagator::off_diagonal(Wavefunction& wf, const size_t& ipart) {
+void StochasticPropagator::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     const auto& row = wf.m_store.m_row;
     const defs::wf_t& weight = row.m_weight[ipart];
     /*
@@ -41,7 +41,7 @@ void StochasticPropagator::off_diagonal(Wavefunction& wf, const size_t& ipart) {
     defs::prob_t prob_nattempt_floor, prob_gen, prob_thresh_accept;
     defs::ham_t helem;
 
-    auto nattempt = size_t(m_prng.stochastic_round(abs_weight, 1.0, prob_nattempt_floor));
+    auto nattempt = uint_t(m_prng.stochastic_round(abs_weight, 1.0, prob_nattempt_floor));
     if (!nattempt) return;
     /*
      * clear the cached-orbital representations of the current MBF
@@ -50,7 +50,7 @@ void StochasticPropagator::off_diagonal(Wavefunction& wf, const size_t& ipart) {
 
     auto& conn = m_conn[src_mbf];
     auto& dst_mbf = m_dst[src_mbf];
-    for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
+    for (uint_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
 
         conn.clear();
         auto icase = m_excit_gen_group.draw_icase();
@@ -117,7 +117,7 @@ void StochasticPropagator::off_diagonal(Wavefunction& wf, const size_t& ipart) {
     }
 }
 
-void StochasticPropagator::diagonal(Wavefunction& wf, const size_t& ipart) {
+void StochasticPropagator::diagonal(Wavefunction& wf, const uint_t& ipart) {
     auto& row = wf.m_store.m_row;
     bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
     const defs::ham_comp_t& hdiag = row.m_hdiag;
@@ -137,7 +137,7 @@ void StochasticPropagator::diagonal(Wavefunction& wf, const size_t& ipart) {
     }
 }
 
-size_t StochasticPropagator::ncase_excit_gen() const {
+uint_t StochasticPropagator::ncase_excit_gen() const {
     return m_excit_gen_group.ncase();
 }
 
@@ -145,7 +145,7 @@ std::vector<defs::prob_t> StochasticPropagator::excit_gen_case_probs() const {
     return m_excit_gen_group.get_probs();
 }
 
-void StochasticPropagator::update(const size_t& icycle, const Wavefunction& wf) {
+void StochasticPropagator::update(const uint_t& icycle, const Wavefunction& wf) {
     Propagator::update(icycle, wf);
     m_mag_log.update(icycle, m_tau, m_excit_gen_group);
 }

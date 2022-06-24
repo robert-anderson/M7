@@ -24,13 +24,13 @@ namespace basic_foreach {
      * "compile time number of dimensions"
      */
     namespace ctnd {
-        template<size_t nind>
+        template<uint_t nind>
         using inds_t = defs::uinta_t<nind>;
 
-        template<size_t nind>
+        template<uint_t nind>
         struct Base {
         protected:
-            static constexpr size_t c_nind = nind;
+            static constexpr uint_t c_nind = nind;
             /**
              * work space into which each set of indices is inserted: should not be directly accessed in derived classes
              */
@@ -39,12 +39,12 @@ namespace basic_foreach {
             /**
              * length of the index iterator
              */
-            const size_t m_niter;
+            const uint_t m_niter;
 
-            Base(size_t niter) : m_niter(niter) {}
+            Base(uint_t niter) : m_niter(niter) {}
         };
 
-        template<size_t nind>
+        template<uint_t nind>
         struct Unrestricted : Base<nind> {
             using Base<nind>::m_value;
             using Base<nind>::m_niter;
@@ -55,9 +55,9 @@ namespace basic_foreach {
              * @tparam ilevel
              *  current level (position in the m_value array)
              */
-            template<size_t ilevel, typename fn_t>
+            template<uint_t ilevel, typename fn_t>
             void level_loop(const fn_t &fn, tag::Int<ilevel>) {
-                constexpr size_t iind = ilevel - 1;
+                constexpr uint_t iind = ilevel - 1;
                 auto &ind = Base<nind>::m_value[iind];
                 const auto &extent = m_shape[iind];
                 for (ind = 0ul; ind < extent; ++ind) level_loop(fn, tag::Int<ilevel + 1>());
@@ -68,7 +68,7 @@ namespace basic_foreach {
              */
             template<typename fn_t>
             void level_loop(const fn_t &fn, tag::Int<nind>) {
-                constexpr size_t iind = nind - 1;
+                constexpr uint_t iind = nind - 1;
                 auto &ind = m_value[iind];
                 const auto &extent = m_shape[iind];
                 for (ind = 0ul; ind < extent; ++ind) fn(m_value);
@@ -90,13 +90,13 @@ namespace basic_foreach {
 
         public:
 
-            static size_t niter(const inds_t<nind> &shape){
+            static uint_t niter(const inds_t<nind> &shape){
                 return nind ? nd::nelement(array::to_vector(shape)) : 0ul;
             }
 
             Unrestricted(const inds_t<nind> &shape) : Base<nind>(niter(shape)), m_shape(shape) {}
 
-            Unrestricted(size_t extent = 0ul) : Unrestricted(array::filled<size_t, nind>(extent)) {}
+            Unrestricted(uint_t extent = 0ul) : Unrestricted(array::filled<uint_t, nind>(extent)) {}
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
@@ -105,24 +105,24 @@ namespace basic_foreach {
             }
         };
 
-        template<size_t nind, bool strict = true, bool ascending = true>
+        template<uint_t nind, bool strict = true, bool ascending = true>
         struct Ordered : Base<nind> {
             using Base<nind>::m_value;
             using Base<nind>::m_niter;
 
-            static size_t niter(size_t n) {
+            static uint_t niter(uint_t n) {
                 if (!nind || !n) return 0ul;
                 return integer::combinatorial(strict ? n : (n + nind) - 1, nind);
             }
         protected:
-            size_t m_n;
+            uint_t m_n;
 
         private:
 
-            template<size_t ilevel, typename fn_t>
+            template<uint_t ilevel, typename fn_t>
             void level_loop(const fn_t &fn, tag::Int<ilevel>) {
-                constexpr size_t iind = ascending ? (nind - ilevel) : (ilevel - 1);
-                constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
+                constexpr uint_t iind = ascending ? (nind - ilevel) : (ilevel - 1);
+                constexpr uint_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_value[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_value[ascending ? iind + 1 : iind - 1] + !strict;
                 for (ind = 0ul; ind < extent; ++ind) level_loop(fn, tag::Int<ilevel + 1>());
@@ -130,8 +130,8 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void level_loop(const fn_t &fn, tag::Int<nind>) {
-                constexpr size_t iind = ascending ? 0 : nind - 1;
-                constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
+                constexpr uint_t iind = ascending ? 0 : nind - 1;
+                constexpr uint_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_value[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_value[ascending ? iind + 1 : iind - 1] + !strict;
                 for (ind = 0ul; ind < extent; ++ind) fn(m_value);
@@ -147,7 +147,7 @@ namespace basic_foreach {
 
         public:
 
-            Ordered(size_t n) : Base<nind>(niter(n)), m_n(n) {}
+            Ordered(uint_t n) : Base<nind>(niter(n)), m_n(n) {}
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
@@ -167,7 +167,7 @@ namespace basic_foreach {
             /**
              * length of the index iterator
              */
-            const size_t m_niter;
+            const uint_t m_niter;
         protected:
             /**
              * work space into which each set of indices is inserted: should not be directly accessed in derived classes
@@ -177,9 +177,9 @@ namespace basic_foreach {
             /**
              * number of dimensions: length of the index array
              */
-            const size_t m_nind;
+            const uint_t m_nind;
 
-            Base(size_t nind, size_t niter) : m_niter(niter), m_value(nind, 0ul), m_nind(nind) {}
+            Base(uint_t nind, uint_t niter) : m_niter(niter), m_value(nind, 0ul), m_nind(nind) {}
         };
 
         struct Unrestricted : Base {
@@ -187,7 +187,7 @@ namespace basic_foreach {
         private:
 
             template<typename fn_t>
-            void level_loop(const fn_t &fn, size_t ilevel) {
+            void level_loop(const fn_t &fn, uint_t ilevel) {
                 const auto &iind = ilevel - 1;
                 auto &ind = m_value[iind];
                 const auto &extent = m_shape[iind];
@@ -200,18 +200,18 @@ namespace basic_foreach {
 
         public:
 
-            static size_t niter(const inds_t& shape) {
+            static uint_t niter(const inds_t& shape) {
                 return shape.empty() ? 0ul : nd::nelement(shape);
             }
 
-            static size_t niter(size_t nind, size_t extent){
+            static uint_t niter(uint_t nind, uint_t extent){
                 return std::pow(extent, nind);
             }
 
             explicit Unrestricted(inds_t shape):
                 Base(shape.size(), niter(shape)), m_shape(std::move(shape)) {}
 
-            Unrestricted(size_t nind, size_t extent): Unrestricted(inds_t(nind, extent)) {}
+            Unrestricted(uint_t nind, uint_t extent): Unrestricted(inds_t(nind, extent)) {}
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
@@ -224,18 +224,18 @@ namespace basic_foreach {
         template<bool strict = true, bool ascending = true>
         struct Ordered : Base {
 
-            static size_t niter(size_t n, size_t r) {
+            static uint_t niter(uint_t n, uint_t r) {
                 if (!r) return 0ul;
                 return integer::combinatorial(strict ? n : (n + r) - 1, r);
             }
 
         private:
-            const size_t m_n;
+            const uint_t m_n;
 
             template<typename fn_t>
-            void level_loop(const fn_t &fn, size_t ilevel) {
-                const size_t iind = ascending ? (m_nind - ilevel) : (ilevel - 1);
-                const size_t iind_unrestrict = ascending ? m_nind - 1 : 0;
+            void level_loop(const fn_t &fn, uint_t ilevel) {
+                const uint_t iind = ascending ? (m_nind - ilevel) : (ilevel - 1);
+                const uint_t iind_unrestrict = ascending ? m_nind - 1 : 0;
                 auto &ind = m_value[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_value[ascending ? iind + 1 : iind - 1] + !strict;
                 if (ilevel < m_nind)
@@ -246,7 +246,7 @@ namespace basic_foreach {
             }
 
         public:
-            Ordered(size_t n, size_t r) : Base(r, niter(n, r)), m_n(n) {}
+            Ordered(uint_t n, uint_t r) : Base(r, niter(n, r)), m_n(n) {}
 
             template<typename fn_t>
             void loop(const fn_t& fn) {

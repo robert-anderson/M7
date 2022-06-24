@@ -81,7 +81,7 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
     return nullptr;
 }
 
-size_t DenseHamiltonian::nrow(const Hamiltonian &h, sys::Particles particles, bool force_general) {
+uint_t DenseHamiltonian::nrow(const Hamiltonian &h, sys::Particles particles, bool force_general) {
     auto ptr = make_pair_iterator(h, particles, force_general);
     return ptr->m_nrow;
 }

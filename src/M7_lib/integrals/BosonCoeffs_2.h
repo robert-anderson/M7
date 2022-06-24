@@ -10,24 +10,24 @@
 
 class BosonCoeffs_2 {
 
-    size_t index(size_t i, size_t j, size_t k, size_t l) const {
+    uint_t index(uint_t i, uint_t j, uint_t k, uint_t l) const {
         using namespace integer;
         auto ij = i*m_nmode+j;
         auto kl = k*m_nmode+l;
         return ij>=kl ? trigmap(ij, kl) : trigmap(kl, ij);
     }
 
-    const size_t m_nmode;
+    const uint_t m_nmode;
 public:
     SharedArray<defs::ham_t> m_v;
 
-    BosonCoeffs_2(size_t nmode);
+    BosonCoeffs_2(uint_t nmode);
 
-    void set(size_t i, size_t j, size_t k, size_t l, defs::ham_t value);
+    void set(uint_t i, uint_t j, uint_t k, uint_t l, defs::ham_t value);
 
-    defs::ham_t get(size_t i, size_t j, size_t k, size_t l) const;
+    defs::ham_t get(uint_t i, uint_t j, uint_t k, uint_t l) const;
 
-    defs::ham_t phys_element(size_t i, size_t j, size_t k, size_t l) const;
+    defs::ham_t phys_element(uint_t i, uint_t j, uint_t k, uint_t l) const;
 };
 
 

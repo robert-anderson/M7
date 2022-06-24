@@ -13,10 +13,10 @@
  * edge case where there are no dimensions to iterate over
  */
 TEST(Foreach, CtndUnrestricted0) {
-    const std::array<size_t, 0> shape = {};
+    const uinta_t<0> shape = {};
     using namespace basic_foreach::ctnd;
     Unrestricted<0> foreach(shape);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t<0>&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0);
@@ -24,8 +24,8 @@ TEST(Foreach, CtndUnrestricted0) {
 }
 
 TEST(Foreach, CtndUnrestricted3) {
-    const std::array<size_t, 3> shape = {3, 4, 2};
-    const std::vector<std::array<size_t, 3>> chk_inds = {
+    const uinta_t<3> shape = {3, 4, 2};
+    const std::vector<uinta_t<3>> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
             {0, 1, 0},
@@ -53,17 +53,17 @@ TEST(Foreach, CtndUnrestricted3) {
     };
     using namespace basic_foreach::ctnd;
     Unrestricted<3> foreach(shape);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t<3>& inds) {ASSERT_EQ(inds, chk_inds[i++]);};
     foreach.loop(fn);
     ASSERT_EQ(i, foreach.m_niter);
 }
 
 TEST(Foreach, CtndOrderedStrictAsc0) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::ctnd;
     Ordered<0, true, true> foreach(n);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t<0>&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
@@ -71,10 +71,10 @@ TEST(Foreach, CtndOrderedStrictAsc0) {
 }
 
 TEST(Foreach, CtndOrderedStrictAsc3) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::ctnd;
     Ordered<3, true, true> foreach(n);
-    const std::vector<std::array<size_t, 3>> chk_inds = {
+    const std::vector<uinta_t<3>> chk_inds = {
             {0, 1, 2},
             {0, 1, 3},
             {0, 2, 3},
@@ -86,17 +86,17 @@ TEST(Foreach, CtndOrderedStrictAsc3) {
             {1, 3, 4},
             {2, 3, 4}
     };
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t<3>& inds) {ASSERT_EQ(inds, chk_inds[i++]);};
     foreach.loop(fn);
     ASSERT_EQ(i, foreach.m_niter);
 }
 
 TEST(Foreach, CtndOrderedStrictDesc0) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::ctnd;
     Ordered<0, true, false> foreach(n);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t<0>&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
@@ -104,10 +104,10 @@ TEST(Foreach, CtndOrderedStrictDesc0) {
 }
 
 TEST(Foreach, CtndOrderedStrictDesc3) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::ctnd;
     Ordered<3, true, false> foreach(n);
-    const std::vector<std::array<size_t, 3>> chk_inds = {
+    const std::vector<uinta_t<3>> chk_inds = {
             {2, 1, 0},
             {3, 1, 0},
             {3, 2, 0},
@@ -119,17 +119,17 @@ TEST(Foreach, CtndOrderedStrictDesc3) {
             {4, 3, 1},
             {4, 3, 2}
     };
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t<3>& inds) {ASSERT_EQ(inds, chk_inds[i++]);};
     foreach.loop(fn);
     ASSERT_EQ(i, foreach.m_niter);
 }
 
 TEST(Foreach, CtndOrderedAsc0) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::ctnd;
     Ordered<0, false, true> foreach(n);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t<0>&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
@@ -137,10 +137,10 @@ TEST(Foreach, CtndOrderedAsc0) {
 }
 
 TEST(Foreach, CtndOrderedAsc3) {
-    const size_t n = 3;
+    const uint_t n = 3;
     using namespace basic_foreach::ctnd;
     Ordered<3, false, true> foreach(n);
-    const std::vector<std::array<size_t, 3>> chk_inds = {
+    const std::vector<uinta_t<3>> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
             {0, 1, 1},
@@ -152,17 +152,17 @@ TEST(Foreach, CtndOrderedAsc3) {
             {1, 2, 2},
             {2, 2, 2}
     };
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t<3>& inds) {ASSERT_EQ(inds, chk_inds[i++]);};
     foreach.loop(fn);
     ASSERT_EQ(i, foreach.m_niter);
 }
 
 TEST(Foreach, CtndOrderedDesc0) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::ctnd;
     Ordered<0, false, false> foreach(n);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t<0>&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
@@ -170,10 +170,10 @@ TEST(Foreach, CtndOrderedDesc0) {
 }
 
 TEST(Foreach, CtndOrderedDesc3) {
-    const size_t n = 3;
+    const uint_t n = 3;
     using namespace basic_foreach::ctnd;
     Ordered<3, false, false> foreach(n);
-    const std::vector<std::array<size_t, 3>> chk_inds = {
+    const std::vector<uinta_t<3>> chk_inds = {
              {0, 0, 0},
              {1, 0, 0},
              {1, 1, 0},
@@ -185,7 +185,7 @@ TEST(Foreach, CtndOrderedDesc3) {
              {2, 2, 1},
              {2, 2, 2}
     };
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t<3>& inds) {ASSERT_EQ(inds, chk_inds[i++]);};
     foreach.loop(fn);
     ASSERT_EQ(i, foreach.m_niter);
@@ -201,10 +201,10 @@ TEST(Foreach, CtndOrderedDesc3) {
  * edge case where there are no dimensions to iterate over
  */
 TEST(Foreach, RtndUnrestricted0) {
-    const std::vector<size_t> shape = {};
+    const std::vector<uint_t> shape = {};
     using namespace basic_foreach::rtnd;
     Unrestricted foreach(shape);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0);
@@ -212,8 +212,8 @@ TEST(Foreach, RtndUnrestricted0) {
 }
 
 TEST(Foreach, RtndUnrestricted3) {
-    const std::vector<size_t> shape = {3, 4, 2};
-    const std::vector<std::vector<size_t>> chk_inds = {
+    const std::vector<uint_t> shape = {3, 4, 2};
+    const std::vector<std::vector<uint_t>> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
             {0, 1, 0},
@@ -241,17 +241,17 @@ TEST(Foreach, RtndUnrestricted3) {
     };
     using namespace basic_foreach::rtnd;
     Unrestricted foreach(shape);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t& inds) {ASSERT_EQ(inds, chk_inds[i++]);};
     foreach.loop(fn);
     ASSERT_EQ(i, foreach.m_niter);
 }
 
 TEST(Foreach, RtndOrderedStrictAsc0) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::rtnd;
     Ordered<true, true> foreach(n, 0);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
@@ -259,10 +259,10 @@ TEST(Foreach, RtndOrderedStrictAsc0) {
 }
 
 TEST(Foreach, RtndOrderedStrictAsc3) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::rtnd;
     Ordered<true, true> foreach(n, 3);
-    const std::vector<std::vector<size_t>> chk_inds = {
+    const std::vector<std::vector<uint_t>> chk_inds = {
             {0, 1, 2},
             {0, 1, 3},
             {0, 2, 3},
@@ -274,17 +274,17 @@ TEST(Foreach, RtndOrderedStrictAsc3) {
             {1, 3, 4},
             {2, 3, 4}
     };
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t& inds) {ASSERT_EQ(inds, chk_inds[i++]);};
     foreach.loop(fn);
     ASSERT_EQ(i, foreach.m_niter);
 }
 
 TEST(Foreach, RtndOrderedStrictDesc0) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::rtnd;
     Ordered<true, false> foreach(n, 0);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
@@ -292,10 +292,10 @@ TEST(Foreach, RtndOrderedStrictDesc0) {
 }
 
 TEST(Foreach, RtndOrderedStrictDesc3) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::rtnd;
     Ordered<true, false> foreach(n, 3);
-    const std::vector<std::vector<size_t>> chk_inds = {
+    const std::vector<std::vector<uint_t>> chk_inds = {
             {2, 1, 0},
             {3, 1, 0},
             {3, 2, 0},
@@ -307,17 +307,17 @@ TEST(Foreach, RtndOrderedStrictDesc3) {
             {4, 3, 1},
             {4, 3, 2}
     };
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t& inds) {ASSERT_EQ(inds, chk_inds[i++]);};
     foreach.loop(fn);
     ASSERT_EQ(i, foreach.m_niter);
 }
 
 TEST(Foreach, RtndOrderedAsc0) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::rtnd;
     Ordered<false, true> foreach(n, 0);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
@@ -325,10 +325,10 @@ TEST(Foreach, RtndOrderedAsc0) {
 }
 
 TEST(Foreach, RtndOrderedAsc3) {
-    const size_t n = 3;
+    const uint_t n = 3;
     using namespace basic_foreach::rtnd;
     Ordered<false, true> foreach(n, 3);
-    const std::vector<std::vector<size_t>> chk_inds = {
+    const std::vector<std::vector<uint_t>> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
             {0, 1, 1},
@@ -340,17 +340,17 @@ TEST(Foreach, RtndOrderedAsc3) {
             {1, 2, 2},
             {2, 2, 2}
     };
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t& inds) {ASSERT_EQ(inds, chk_inds[i++]);};
     foreach.loop(fn);
     ASSERT_EQ(i, foreach.m_niter);
 }
 
 TEST(Foreach, RtndOrderedDesc0) {
-    const size_t n = 5;
+    const uint_t n = 5;
     using namespace basic_foreach::rtnd;
     Ordered<false, false> foreach(n, 0);
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t&) {++i;};
     foreach.loop(fn);
     ASSERT_EQ(i, 0ul);
@@ -358,10 +358,10 @@ TEST(Foreach, RtndOrderedDesc0) {
 }
 
 TEST(Foreach, RtndOrderedDesc3) {
-    const size_t n = 3;
+    const uint_t n = 3;
     using namespace basic_foreach::rtnd;
     Ordered<false, false> foreach(n, 3);
-    const std::vector<std::vector<size_t>> chk_inds = {
+    const std::vector<std::vector<uint_t>> chk_inds = {
             {0, 0, 0},
             {1, 0, 0},
             {1, 1, 0},
@@ -373,7 +373,7 @@ TEST(Foreach, RtndOrderedDesc3) {
             {2, 2, 1},
             {2, 2, 2}
     };
-    size_t i = 0ul;
+    uint_t i = 0ul;
     auto fn = [&](const inds_t& inds) {ASSERT_EQ(inds, chk_inds[i++]);};
     foreach.loop(fn);
     ASSERT_EQ(i, foreach.m_niter);

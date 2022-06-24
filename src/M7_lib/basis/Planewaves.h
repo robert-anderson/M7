@@ -19,11 +19,11 @@ class Planewaves {
     /**
      * number of degrees of freedom (sites or modes)
      */
-    const size_t m_size;
+    const uint_t m_size;
     /**
      * number of physical dimensions
      */
-    const size_t m_ndim;
+    const uint_t m_ndim;
     const std::vector<std::vector<int>> m_momvecs;
     mutable std::vector<int> m_momvec_work;
     mutable defs::uintv_t m_inds_work;
@@ -33,30 +33,30 @@ class Planewaves {
     static std::vector<std::vector<int>> make_momvecs(const defs::uintv_t& wave_shape);
 
 public:
-    static size_t size(const defs::uintv_t& wave_shape);
-    static size_t size(size_t ndim, size_t nwave);
+    static uint_t size(const defs::uintv_t& wave_shape);
+    static uint_t size(uint_t ndim, uint_t nwave);
 
     explicit Planewaves(const defs::uintv_t& wave_shape);
 
-    Planewaves(size_t ndim, size_t nwave);
+    Planewaves(uint_t ndim, uint_t nwave);
 
-    const std::vector<int>& operator[](const size_t& i) const;
+    const std::vector<int>& operator[](const uint_t& i) const;
 
-    bool conserving(const size_t& icre, const size_t& iann) const;
+    bool conserving(const uint_t& icre, const uint_t& iann) const;
 
-    bool conserving(const size_t& icre1, const size_t& icre2, const size_t& iann1, const size_t& iann2) const;
+    bool conserving(const uint_t& icre1, const uint_t& icre2, const uint_t& iann1, const uint_t& iann2) const;
 
-    int diff(const size_t& idim, const size_t& i, const size_t& j) const;
+    int diff(const uint_t& idim, const uint_t& i, const uint_t& j) const;
 
-    void diff(std::vector<int>& diff, const size_t& i, const size_t& j) const;
+    void diff(std::vector<int>& diff, const uint_t& i, const uint_t& j) const;
 
-    size_t diff(const size_t& i, const size_t& j) const;
+    uint_t diff(const uint_t& i, const uint_t& j) const;
 
-    size_t encode(const std::vector<int>& momvec) const;
+    uint_t encode(const std::vector<int>& momvec) const;
 
-    const size_t& size() const;
+    const uint_t& size() const;
 
-    int kinetic_energy(const size_t& i) const;
+    int kinetic_energy(const uint_t& i) const;
 };
 
 

@@ -16,7 +16,7 @@ HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, const std::shared_ptr<lattice:
 HeisenbergFrmHam::HeisenbergFrmHam(FrmHam::opt_pair_t opts) :
         HeisenbergFrmHam(opts.m_ham.m_heisenberg.m_coupling, lattice::make(opts.m_ham.m_heisenberg)){}
 
-defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
+defs::ham_t HeisenbergFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const {
     /*
      * normal-ordered SQ operators are:
      *      pa+  qb+  qa   pb
@@ -49,7 +49,7 @@ defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv& onv) const {
      * finally, return the accumulation scaled by J
      */
     int si_sj_tot = 0;
-    for (size_t isite=0ul; isite<m_basis.m_nsite; ++isite){
+    for (uint_t isite=0ul; isite<m_basis.m_nsite; ++isite){
         DEBUG_ASSERT_EQ(onv.site_nocc(isite), 1ul,
                         "spin system is assumed, must not have unoccupied or doubly occupied sites");
         m_basis.m_lattice->get_adj_row(isite, m_work_adj_row);

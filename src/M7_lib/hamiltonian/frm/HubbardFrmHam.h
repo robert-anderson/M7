@@ -17,7 +17,7 @@ struct HubbardFrmHam : FrmHam {
 
     HubbardFrmHam(opt_pair_t opts);
 
-    defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
+    defs::ham_t get_coeff_1100(uint_t a, uint_t i) const override;
 
     defs::ham_t get_element_0000(const field::FrmOnv& onv) const override;
 

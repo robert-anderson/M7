@@ -8,14 +8,14 @@
 namespace parameters_test {
 
     struct Section1 : conf_components::Section {
-        conf_components::Param<std::vector<size_t>> m_some_numbers;
-        conf_components::Param<std::vector<size_t>> m_some_unspecified_numbers;
+        conf_components::Param<std::vector<uint_t>> m_some_numbers;
+        conf_components::Param<std::vector<uint_t>> m_some_unspecified_numbers;
         conf_components::Param<std::string> m_a_string;
 
         struct SubSection1 : conf_components::Section {
-            conf_components::Param<size_t> m_a_number;
+            conf_components::Param<uint_t> m_a_number;
             conf_components::Param<double> m_a_float;
-            conf_components::Param<size_t> m_another_number;
+            conf_components::Param<uint_t> m_another_number;
 
             SubSection1(conf_components::Group *parent) :
                     conf_components::Section(parent, "subsection1", "minor options"),
@@ -25,7 +25,7 @@ namespace parameters_test {
         };
 
         struct SubSection2 : conf_components::Section {
-            conf_components::Param<size_t> m_a_number;
+            conf_components::Param<uint_t> m_a_number;
 
             SubSection2(conf_components::Group *parent) :
                     conf_components::Section(parent, "subsection2", "different minor options"),
@@ -77,7 +77,7 @@ TEST(Parameters, ParsingYaml) {
     ASSERT_EQ(yf.get_as<std::string>("section1.a_string"), "this is just a string");
     ASSERT_TRUE(yf.exists("section1.subsection1"));
     ASSERT_TRUE(yf.exists("section1.subsection1.a_number"));
-    ASSERT_EQ(yf.get_as<size_t>("section1.subsection1.a_number"), 78);
+    ASSERT_EQ(yf.get_as<uint_t>("section1.subsection1.a_number"), 78);
     ASSERT_TRUE(yf.exists("section1.subsection1.a_float"));
     ASSERT_EQ(yf.get_as<double>("section1.subsection1.a_float"), 4.5);
     ASSERT_TRUE(yf.exists("section2"));

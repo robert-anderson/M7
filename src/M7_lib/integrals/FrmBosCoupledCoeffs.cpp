@@ -5,7 +5,7 @@
 #include <M7_lib/field/FrmOnvField.h>
 #include "FrmBosCoupledCoeffs.h"
 
-size_t FrmBosCoupledCoeffs::index(size_t n, size_t p, size_t q) const {
+uint_t FrmBosCoupledCoeffs::index(uint_t n, uint_t p, uint_t q) const {
     if (m_sizes.m_frm.m_nsite == m_ncoeff_ind_frm){
         // not storing spin-resolved, so convert spin orbital indices to site indices
         p = m_sizes.m_frm.isite(p);
@@ -19,10 +19,10 @@ FrmBosCoupledCoeffs::FrmBosCoupledCoeffs(sys::Size sizes, bool spin_resolved):
         m_ncoeff_ind_frm2(m_ncoeff_ind_frm * m_ncoeff_ind_frm), m_ncoeff_ind_bos(m_sizes.m_bos.m_nmode),
         m_v(m_ncoeff_ind_bos * m_ncoeff_ind_frm2){}
 
-void FrmBosCoupledCoeffs::set(size_t n, size_t p, size_t q, defs::ham_t value) {
+void FrmBosCoupledCoeffs::set(uint_t n, uint_t p, uint_t q, defs::ham_t value) {
     m_v.set(index(n, p, q), value);
 }
 
-defs::ham_t FrmBosCoupledCoeffs::get(size_t n, size_t p, size_t q) const {
+defs::ham_t FrmBosCoupledCoeffs::get(uint_t n, uint_t p, uint_t q) const {
     return m_v[index(n, p, q)];
 }

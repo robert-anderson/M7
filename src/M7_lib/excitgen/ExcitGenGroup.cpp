@@ -6,7 +6,7 @@
 
 void ExcitGenGroup::update_cumprobs() {
     m_cumprobs = m_probs;
-    for (size_t icase = 1ul; icase < m_probs.size(); ++icase)
+    for (uint_t icase = 1ul; icase < m_probs.size(); ++icase)
         m_cumprobs[icase] = m_cumprobs[icase - 1] + m_probs[icase];
     DEBUG_ASSERT_NUM_EQ(m_cumprobs.back(), 1.0, "cumulative probability should be 1.0");
 }
@@ -35,24 +35,24 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian& ham, const conf::Propagator& opt
     }
     m_exsig_icases.resize(exsig::c_ndistinct, defs::uintv_t());
     // fill the map from exsigs to exgens
-    for (size_t icase=0ul; icase<m_excit_cases.size(); ++icase) m_exsig_icases[m_excit_cases[icase].m_exsig].push_back(icase);
+    for (uint_t icase=0ul; icase<m_excit_cases.size(); ++icase) m_exsig_icases[m_excit_cases[icase].m_exsig].push_back(icase);
     set_probs(m_probs);
     log();
 }
 
-size_t ExcitGenGroup::ncase() const {
+uint_t ExcitGenGroup::ncase() const {
     return m_excit_cases.size();
 }
 
-size_t ExcitGenGroup::draw_icase() {
+uint_t ExcitGenGroup::draw_icase() {
     auto r = m_prng.draw_float();
-    for (size_t i = 0ul; i < ncase(); ++i) {
+    for (uint_t i = 0ul; i < ncase(); ++i) {
         if (r < m_cumprobs[i]) return i;
     }
     return ncase() - 1;
 }
 
-ExcitCase& ExcitGenGroup::operator[](size_t icase) {
+ExcitCase& ExcitGenGroup::operator[](uint_t icase) {
     return m_excit_cases[icase];
 }
 
@@ -68,7 +68,7 @@ void ExcitGenGroup::set_probs(const std::vector<defs::prob_t>& probs) {
     update_cumprobs();
 }
 
-defs::prob_t ExcitGenGroup::get_prob(size_t icase) const {
+defs::prob_t ExcitGenGroup::get_prob(uint_t icase) const {
     DEBUG_ASSERT_LT(icase, ncase(), "excit gen case index OOB");
     return m_probs[icase];
 }
@@ -79,7 +79,7 @@ const std::vector<defs::prob_t>& ExcitGenGroup::get_probs() const {
 
 void ExcitGenGroup::log() const {
     std::vector<std::vector<std::string>> rows = {{"Excitation Signature", "Description", "Probability"}};
-    for (size_t icase=0ul; icase<ncase(); ++icase){
+    for (uint_t icase=0ul; icase<ncase(); ++icase){
         auto exsig_str = exsig::to_string(m_excit_cases[icase].m_exsig);
         auto prob_str = convert::to_string(get_prob(icase));
         rows.push_back({exsig_str, m_excit_cases[icase].m_excit_gen->m_description, prob_str});

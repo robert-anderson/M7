@@ -10,14 +10,14 @@
 
 template<typename T>
 struct ReductionBase {
-    const size_t m_nelement;
+    const uint_t m_nelement;
     T *m_local_ptr = nullptr;
     T *m_reduced_ptr = nullptr;
 
-    ReductionBase(size_t nelement) : m_nelement(nelement) {}
+    ReductionBase(uint_t nelement) : m_nelement(nelement) {}
 };
 
-template<typename T, size_t nind>
+template<typename T, uint_t nind>
 struct NdReduction : ReductionBase<T> {
     typedef typename std::conditional<nind==0, T, buffered::Numbers<T, nind>>::type store_t;
     store_t m_local;
@@ -114,7 +114,7 @@ private:
     void collect() {
         auto dst = m_local_buffer.data();
         for (ReductionBase<T> *member: m_members) {
-            const size_t nelement = member->m_nelement;
+            const uint_t nelement = member->m_nelement;
             std::memcpy(dst, member->m_local_ptr, nelement * sizeof(T));
             dst += nelement;
         }
@@ -123,7 +123,7 @@ private:
     void disperse() {
         auto src = m_reduced_buffer.data();
         for (ReductionBase<T> *member: m_members) {
-            const size_t nelement = member->m_nelement;
+            const uint_t nelement = member->m_nelement;
             std::memcpy(member->m_reduced_ptr, src, nelement * sizeof(T));
             src += nelement;
         }

@@ -4,13 +4,13 @@
 
 #include "HolsteinLadderHam.h"
 
-defs::ham_t HolsteinLadderHam::get_coeff_1110(size_t imode, size_t i, size_t j) const {
+defs::ham_t HolsteinLadderHam::get_coeff_1110(uint_t imode, uint_t i, uint_t j) const {
     if (imode != m_basis.m_frm.isite(i)) return 0;
     if (imode != m_basis.m_frm.isite(j)) return 0;
     return m_g;
 }
 
-defs::ham_t HolsteinLadderHam::get_coeff_1101(size_t imode, size_t i, size_t j) const {
+defs::ham_t HolsteinLadderHam::get_coeff_1101(uint_t imode, uint_t i, uint_t j) const {
     return get_coeff_1110(imode, j, i);
 }
 

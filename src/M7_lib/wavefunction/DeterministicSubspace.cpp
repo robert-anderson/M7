@@ -44,7 +44,7 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const Mbf &ref, const 
 }
 
 DeterministicSubspace::DeterministicSubspace(
-        const conf::Semistochastic &opts, Wavefunction &wf, size_t iroot) :
+        const conf::Semistochastic &opts, Wavefunction &wf, uint_t iroot) :
         Wavefunction::PartSharedRowSet<DeterministicDataRow>(
                 wf, "semistochastic", {wf}, DeterministicDataRow::load_fn),
         m_opts(opts), m_wf(wf), m_iroot(iroot), m_iparts(make_iparts()) {}
@@ -58,7 +58,7 @@ void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, con
     auto row = m_wf.m_store.m_row;
     Wavefunction::weights_gxr_t gxr(row, row.m_weight, true, true, m_iparts);
     gxr.find(m_opts.m_size);
-    for (size_t i = 0ul; i < gxr.m_ninclude.m_local; ++i) {
+    for (uint_t i = 0ul; i < gxr.m_ninclude.m_local; ++i) {
         row.jump(gxr[i]);
         add_(row);
     }
@@ -71,8 +71,8 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
     suite::Conns conns_work(m_wf.m_sector.size());
     auto &row_local = m_local.m_row;
     auto &conn_work = conns_work[row_local.m_mbf];
-    size_t n_hconn = 0ul;
-    size_t n_rdm_conn = 0ul;
+    uint_t n_hconn = 0ul;
+    uint_t n_rdm_conn = 0ul;
     m_ham_matrix.resize(m_local.m_hwm);
     m_rdm_network.resize(m_local.m_hwm);
     for (row_local.restart(); row_local.in_range(); row_local.step()) {
@@ -139,10 +139,10 @@ DeterministicSubspaces::operator bool() const {
 }
 
 void DeterministicSubspaces::build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears,
-                                                 Wavefunction &wf, size_t icycle) {
+                                                 Wavefunction &wf, uint_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
-    for (size_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {
+    for (uint_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {
         REQUIRE_TRUE_ALL(m_detsubs[iroot] == nullptr, "detsubs should not already be allocated");
         m_detsubs[iroot] = smart_ptr::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
         m_detsubs[iroot]->build_from_most_occupied(ham, bilinears);

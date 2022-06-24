@@ -10,7 +10,7 @@
 
 #if 0
 class InteractingBoseGasDoubles : BosExcitGen {
-    const size_t m_nbos_pair;
+    const uint_t m_nbos_pair;
     /**
      * working arrays into which the mode indices are decoded
      */
@@ -23,7 +23,7 @@ class InteractingBoseGasDoubles : BosExcitGen {
         return dynamic_cast<const InteractingBoseGasBosHam*>(m_h.m_bos.get());
     }
 
-    bool draw_h_bos(size_t exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem,
+    bool draw_h_bos(uint_t exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem,
                     conn::BosOnv &conn) override {
         auto h = h_cast();
         DEBUG_ONLY(h);
@@ -32,14 +32,14 @@ class InteractingBoseGasDoubles : BosExcitGen {
         DEBUG_ASSERT_EQ(bos_op_inds.size(), m_h.nboson(),
                         "boson ONV does not hold expected number of particles");
         auto ipair_occ = m_prng.draw_uint(m_nbos_pair);
-        size_t imode, jmode;
+        uint_t imode, jmode;
         utils::integer::inv_strigmap(imode, jmode, ipair_occ);
         imode = bos_op_inds[imode];
         jmode = bos_op_inds[jmode];
 //        h->get_ikpoints(imode, m_ikpoints_i_work);
 //        h->get_ikpoints(jmode, m_ikpoints_j_work);
         // sum the momenta in each dim
-        for (size_t i=0ul; i<m_ikpoints_i_work.size(); ++i) m_ikpoints_i_work[i]+=m_ikpoints_j_work[i];
+        for (uint_t i=0ul; i<m_ikpoints_i_work.size(); ++i) m_ikpoints_i_work[i]+=m_ikpoints_j_work[i];
         /*
          * ultimately, i+j = k+l must hold, so the picking of k from here, defines l
          * must pick
@@ -50,7 +50,7 @@ class InteractingBoseGasDoubles : BosExcitGen {
         return true;
     }
 
-    bool draw_bos(size_t exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
+    bool draw_bos(uint_t exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
                   conn::BosOnv &conn) override {
         defs::ham_t helem;
         return draw_h_bos(exsig, src, orbs, prob, helem, conn);

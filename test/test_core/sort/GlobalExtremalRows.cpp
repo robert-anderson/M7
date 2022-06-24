@@ -10,41 +10,41 @@ namespace global_extremal_rows_test {
     typedef SingleFieldRow<field::Number<int>> scalar_row_t;
     typedef BufferedTable<scalar_row_t> scalar_table_t;
 
-    static size_t nfind() {
+    static uint_t nfind() {
         return 6 * mpi::nrank();
     }
 
-    static size_t get_nrow(size_t irank) {
+    static uint_t get_nrow(uint_t irank) {
         return hash::in_range(irank, 0, 26);
     }
 
-    static bool skip(size_t irank, size_t i){
+    static bool skip(uint_t irank, uint_t i){
         // clear one row in every 10
         return !hash::in_range({irank, i}, 0, 10);
     }
 
-    static size_t get_nrow_nonzero(size_t irank) {
-        size_t nrow = 0ul;
-        for (size_t irow=0ul; irow<get_nrow(irank); ++irow)
+    static uint_t get_nrow_nonzero(uint_t irank) {
+        uint_t nrow = 0ul;
+        for (uint_t irow=0ul; irow<get_nrow(irank); ++irow)
             if (!skip(irank, irow)) ++nrow;
         return nrow;
     }
 
-    static std::vector<int> get_data(size_t irank) {
+    static std::vector<int> get_data(uint_t irank) {
         const auto nrow = get_nrow(irank);
         std::vector<int> out;
         out.reserve(nrow);
         const int vmax = 20;
-        for (size_t i = 0ul; i < nrow; ++i)
+        for (uint_t i = 0ul; i < nrow; ++i)
             out.push_back(-vmax + int(hash::in_range({i, irank}, 0, 2 * vmax)));
         return out;
     }
 
-    static std::vector<int> get_data_with_skips(size_t irank) {
+    static std::vector<int> get_data_with_skips(uint_t irank) {
         auto data = get_data(irank);
         auto out = data;
         out.clear();
-        for (size_t i =0ul; i<data.size(); ++i) if (!skip(irank, i)) out.push_back(data[i]);
+        for (uint_t i =0ul; i<data.size(); ++i) if (!skip(irank, i)) out.push_back(data[i]);
         return out;
     }
 
@@ -60,31 +60,31 @@ namespace global_extremal_rows_test {
         }
     }
 
-    static size_t get_global_nrow() {
-        size_t nrow = 0ul;
-        for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) nrow += get_nrow(irank);
+    static uint_t get_global_nrow() {
+        uint_t nrow = 0ul;
+        for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) nrow += get_nrow(irank);
         return nrow;
     }
 
-    static size_t get_global_nrow_nonzero() {
-        size_t nrow = 0ul;
-        for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) nrow += get_nrow_nonzero(irank);
+    static uint_t get_global_nrow_nonzero() {
+        uint_t nrow = 0ul;
+        for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) nrow += get_nrow_nonzero(irank);
         return nrow;
     }
 
     struct Item {
-        size_t m_irank, m_irow;
+        uint_t m_irank, m_irow;
         int m_value;
 
-        Item(size_t irank, size_t irow, int value) : m_irank(irank), m_irow(irow), m_value(value) {}
+        Item(uint_t irank, uint_t irow, int value) : m_irank(irank), m_irow(irow), m_value(value) {}
     };
 
     static std::vector<Item> get_all_sorted(bool largest, bool absval) {
         std::vector<Item> all_items;
         all_items.reserve(get_global_nrow());
-        for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
+        for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
             auto rank_data = get_data(irank);
-            for (size_t irow = 0ul; irow < rank_data.size(); ++irow){
+            for (uint_t irow = 0ul; irow < rank_data.size(); ++irow){
                 if (!skip(irank, irow)) all_items.emplace_back(irank, irow, rank_data[irow]);
             }
         }
@@ -145,7 +145,7 @@ TEST(GlobalExtremalRows, FindAsc) {
         ASSERT_EQ(right_order.size(), get_global_nrow_nonzero());
 
         sorted_row.restart();
-        for (size_t iitem = 0ul; iitem < gxr.m_ninclude.m_reduced; ++iitem) {
+        for (uint_t iitem = 0ul; iitem < gxr.m_ninclude.m_reduced; ++iitem) {
             const auto &item = right_order[iitem];
             int value = sorted_row.m_value;
             ASSERT_EQ(value, item.m_value);
@@ -184,7 +184,7 @@ TEST(GlobalExtremalRows, FindDesc) {
         ASSERT_EQ(right_order.size(), get_global_nrow_nonzero());
 
         sorted_row.restart();
-        for (size_t iitem = 0ul; iitem < gxr.m_ninclude.m_reduced; ++iitem) {
+        for (uint_t iitem = 0ul; iitem < gxr.m_ninclude.m_reduced; ++iitem) {
             const auto &item = right_order[iitem];
             int value = sorted_row.m_value;
             ASSERT_EQ(value, item.m_value);

@@ -22,7 +22,7 @@ TEST(EbDumpFileReader, ReadFile){
     ASSERT_NEARLY_EQ(value, -0.01832284815866287);
 
     // scan to arbitrary element
-    for (size_t i=0; i<18; ++i) file_reader.next(inds, value);
+    for (uint_t i=0; i<18; ++i) file_reader.next(inds, value);
     test_inds = {1, 0, 2};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_NEARLY_EQ(value, -0.009244953059296356);
@@ -52,7 +52,7 @@ TEST(EbDumpFileReader, SpinResolved){
     ASSERT_NEARLY_EQ(value, 0.07953916361235415);
 
     // scan to arbitrary element
-    for (size_t i=0; i<18; ++i) file_reader.next(inds, value);
+    for (uint_t i=0; i<18; ++i) file_reader.next(inds, value);
     // 3 1 7 -> 2 0 6 -> 2 0 3
     test_inds = {2, 0, 3};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));

@@ -27,10 +27,10 @@ static constexpr std::array<uinta_t<4>, 8> orderings{
 struct FcidumpInfo {
     const std::string m_fname;
     const bool m_uhf, m_relativistic, m_spin_resolved;
-    const size_t m_nelec, m_nsite, m_nspinorb, m_norb_distinct;
+    const uint_t m_nelec, m_nsite, m_nspinorb, m_norb_distinct;
     const int m_ms2;
     const defs::uintv_t m_orbsym;
-    FcidumpInfo(std::string fname, bool uhf, bool relativistic, size_t nelec, size_t nsite, int ms2, defs::uintv_t orbsym);
+    FcidumpInfo(std::string fname, bool uhf, bool relativistic, uint_t nelec, uint_t nsite, int ms2, defs::uintv_t orbsym);
     FcidumpInfo(const FortranNamelistReader& reader);
 
     FcidumpInfo(std::string fname);
@@ -62,9 +62,9 @@ struct FcidumpFileReader : public HamiltonianFileReader {
 
     bool next(defs::uintv_t &inds, defs::ham_t &v);
 
-    size_t ranksig(const defs::uintv_t &inds) const override;
+    uint_t ranksig(const defs::uintv_t &inds) const override;
 
-    size_t exsig(const defs::uintv_t &inds, size_t ranksig) const override;
+    uint_t exsig(const defs::uintv_t &inds, uint_t ranksig) const override;
 
     bool inds_in_range(const defs::uintv_t &inds) const override;
 

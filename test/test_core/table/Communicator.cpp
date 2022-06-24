@@ -8,10 +8,10 @@
 
 namespace communicator_test {
     struct TestRow : Row {
-        field::Number<size_t> m_key;
+        field::Number<uint_t> m_key;
         field::Number<double> m_value;
         TestRow(): m_key(this, "key"), m_value(this, "value"){}
-        field::Number<size_t> &key_field() {
+        field::Number<uint_t> &key_field() {
             return m_key;
         };
     };
@@ -19,15 +19,15 @@ namespace communicator_test {
 TEST(Communicator, SharedRow) {
     using namespace communicator_test;
     typedef Communicator<TestRow, TestRow> comm_t;
-    const size_t nrow_store_est = 20;
+    const uint_t nrow_store_est = 20;
     const double store_exp_fac = 0.0;
-    const size_t nrow_comm_est = 20;
+    const uint_t nrow_comm_est = 20;
     const double comm_exp_fac = 0.0;
     comm_t comm("test communicator", nrow_store_est, store_exp_fac, nrow_comm_est, comm_exp_fac,
                 {{}, 10}, {{}}, 5, 1, 0.02, 5);
-    const size_t nrow_per_rank_expect = 6;
+    const uint_t nrow_per_rank_expect = 6;
     auto &row = comm.m_store.m_row;
-    for (size_t i = 0; i<nrow_per_rank_expect*mpi::nrank(); ++i){
+    for (uint_t i = 0; i<nrow_per_rank_expect*mpi::nrank(); ++i){
         auto key = 123+i*5;
         if (!mpi::i_am(comm.m_ra.get_rank(key))) continue;
         row.push_back_jump();

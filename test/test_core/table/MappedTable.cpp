@@ -8,18 +8,18 @@
 
 namespace mapped_table_test {
     struct MyRow : Row {
-        field::Number<size_t> m_key;
+        field::Number<uint_t> m_key;
 
         MyRow() : m_key(this) {}
 
-        field::Number<size_t> &key_field() {
+        field::Number<uint_t> &key_field() {
             return m_key;
         }
     };
 
     typedef BufferedTable<MyRow, true> table_t;
 
-    size_t nitem_in_bucket(const MappedTableBase &table, size_t ibucket) {
+    uint_t nitem_in_bucket(const MappedTableBase &table, uint_t ibucket) {
         const auto &bucket = table.m_buckets[ibucket];
         return std::distance(bucket.begin(), bucket.end());
     }
@@ -28,7 +28,7 @@ namespace mapped_table_test {
 TEST(MappedTable, Empty) {
     using namespace mapped_table_test;
     table_t table("test", {{}});
-    buffered::Number<size_t> key;
+    buffered::Number<uint_t> key;
     key = 100;
     auto lookup = table[key];
     ASSERT_FALSE(lookup);
@@ -36,13 +36,13 @@ TEST(MappedTable, Empty) {
 
 TEST(MappedTable, Remap) {
     using namespace mapped_table_test;
-    const size_t nbucket_init = 3ul;
-    const size_t nlookup_remap = 10ul;
+    const uint_t nbucket_init = 3ul;
+    const uint_t nlookup_remap = 10ul;
     const double remap_ratio = 0.5;
     table_t table("test", {{}, nbucket_init, nlookup_remap, remap_ratio});
     table.set_expansion_factor(1);
     ASSERT_EQ(remap_ratio, table.m_remap_ratio);
-    buffered::Number<size_t> key;
+    buffered::Number<uint_t> key;
     key = 100;
     while ((key++) < 120) table.insert(key);
 
@@ -105,13 +105,13 @@ TEST(MappedTable, Remap) {
 
     // make the required number of (non-skipping) lookups for remapping to be due
     key = 120;
-    for (size_t i=0ul; i<nlookup_remap; ++i) table[key];
+    for (uint_t i=0ul; i<nlookup_remap; ++i) table[key];
     // remap still shouldn't be due since there were no skips
     ASSERT_FALSE(table.remap_due());
 
     const auto nitem = table.nrow_nonzero();
     ASSERT_EQ(nitem, 20);
-    const size_t nbucket = nbucket_init * (ratio / remap_ratio) * (1.0 + table.get_expansion_factor());
+    const uint_t nbucket = nbucket_init * (ratio / remap_ratio) * (1.0 + table.get_expansion_factor());
     ASSERT_EQ(nbucket, table.nbucket());
 
     // check that all elements are still mapped and present after remap operation

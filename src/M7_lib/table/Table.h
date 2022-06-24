@@ -36,7 +36,7 @@ struct Table : TableBase {
         if (!m_hwm) return tmp;
         const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
         auto row = m_row;
-        for (size_t iirow = 0ul; iirow < n; ++iirow) {
+        for (uint_t iirow = 0ul; iirow < n; ++iirow) {
             auto irow = ordering ? (*ordering)[iirow] : iirow;
             row.jump(irow);
             tmp += std::to_string(irow) + ". " + row.to_string() + "\n";
@@ -46,9 +46,9 @@ struct Table : TableBase {
     }
 
 private:
-    size_t nrow_to_write() const {
+    uint_t nrow_to_write() const {
         auto row = m_row;
-        size_t n = 0ul;
+        uint_t n = 0ul;
         for (row.restart(); row.in_range(); row.step()) {
             n += !static_cast<const Row&>(row).is_h5_write_exempt();
         }

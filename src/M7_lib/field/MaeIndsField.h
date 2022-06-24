@@ -14,31 +14,31 @@
  */
 class MaeIndsPartition {
     NdNumberField<defs::mev_ind_t, 1> &m_field;
-    const size_t m_offset, m_size;
+    const uint_t m_offset, m_size;
 public:
-    MaeIndsPartition(NdNumberField<defs::mev_ind_t, 1> &field, size_t offset, size_t size) :
+    MaeIndsPartition(NdNumberField<defs::mev_ind_t, 1> &field, uint_t offset, uint_t size) :
         m_field(field), m_offset(offset), m_size(size) {}
 
-    const defs::mev_ind_t &operator[](const size_t &iind) const {
+    const defs::mev_ind_t &operator[](const uint_t &iind) const {
         DEBUG_ASSERT_LT(iind, m_size, "operator index OOB in partition");
         return m_field[m_offset + iind];
     };
 
-    defs::mev_ind_t &operator[](const size_t &iind) {
+    defs::mev_ind_t &operator[](const uint_t &iind) {
         DEBUG_ASSERT_LT(iind, m_size, "operator index OOB in partition");
         return m_field[m_offset + iind];
     };
 
-    const size_t &size() const {
+    const uint_t &size() const {
         return m_size;
     }
 
     void zero() {
-        for (size_t i=0ul; i<m_size; ++i) (*this)[i]=0ul;
+        for (uint_t i=0ul; i<m_size; ++i) (*this)[i]=0ul;
     }
 
     /**
-     * can't simply copy uintv_t since the mev_ind_t is not the same as size_t in general, so must do a narrowing loop
+     * can't simply copy uintv_t since the mev_ind_t is not the same as uint_t in general, so must do a narrowing loop
      * @param inds
      *  indices in unsigned system words
      * @return
@@ -46,7 +46,7 @@ public:
      */
     MaeIndsPartition &operator=(const defs::uintv_t &inds) {
         DEBUG_ASSERT_EQ(inds.size(), m_size, "uintv_t vector size incompatible");
-        size_t iind = 0ul;
+        uint_t iind = 0ul;
         for (auto &ind: inds) (*this)[iind++] = ind;
         return *this;
     }
@@ -59,8 +59,8 @@ struct MaeIndsPair {
     MaeIndsPartition m_cre;
     MaeIndsPartition m_ann;
 
-    MaeIndsPair(NdNumberField<defs::mev_ind_t, 1> &field, size_t cre_offset,
-                size_t cre_size, size_t ann_offset, size_t ann_size) :
+    MaeIndsPair(NdNumberField<defs::mev_ind_t, 1> &field, uint_t cre_offset,
+                uint_t cre_size, uint_t ann_offset, uint_t ann_size) :
             m_cre(field, cre_offset, cre_size),
             m_ann(field, ann_offset, ann_size) {}
 
@@ -87,7 +87,7 @@ struct MaeIndsPair {
 struct MaeIndsField : NdNumberField<defs::mev_ind_t, 1> {
     typedef NdNumberField<defs::mev_ind_t, 1> base_t;
     using base_t::operator=;
-    const size_t m_exsig;
+    const uint_t m_exsig;
     const uinta_t<4> m_nops;
     const uinta_t<4> m_nop_offsets;
     MaeIndsPair m_frm;
@@ -99,7 +99,7 @@ private:
     uinta_t<4> make_nop_offsets() const;
 
 public:
-    MaeIndsField(Row *row, size_t exsig, std::string name = "indices");
+    MaeIndsField(Row *row, uint_t exsig, std::string name = "indices");
 
     MaeIndsField(const MaeIndsField& other);
 
@@ -109,7 +109,7 @@ public:
     MaeIndsField &operator=(const FrmBosOnvConnection& conn);
 
 private:
-    bool is_ordered(const size_t &iop, bool strict) const;
+    bool is_ordered(const uint_t &iop, bool strict) const;
 
 public:
     bool is_ordered() const;

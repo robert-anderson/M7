@@ -5,7 +5,7 @@
 #include "GeneralBosHam.h"
 
 
-GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, size_t occ_cutoff) :
+GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, uint_t occ_cutoff) :
         BosHam({header.m_nmode, occ_cutoff}),
         m_coeffs_1(m_basis.m_nmode), m_coeffs_2(m_basis.m_nmode) {
 
@@ -34,21 +34,21 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, size_t occ_cutoff) :
 GeneralBosHam::GeneralBosHam(opt_pair_t opts) :
         GeneralBosHam(BosdumpHeader(opts.m_ham.m_bosdump.m_path), opts.m_basis.m_bos_occ_cutoff){}
 
-defs::ham_t GeneralBosHam::get_coeff_0011(size_t i, size_t j) const {
+defs::ham_t GeneralBosHam::get_coeff_0011(uint_t i, uint_t j) const {
     return m_coeffs_1.get(i, j);
 }
 
-defs::ham_t GeneralBosHam::get_coeff_0022(size_t i, size_t j, size_t k, size_t l) const {
+defs::ham_t GeneralBosHam::get_coeff_0022(uint_t i, uint_t j, uint_t k, uint_t l) const {
     return m_coeffs_2.get(i, j, k, l) + m_coeffs_2.get(i, j, l, k);
 }
 
 defs::ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
     defs::ham_t h = 0;
-    for (size_t imode = 0ul; imode < m_basis.m_nmode; ++imode) {
+    for (uint_t imode = 0ul; imode < m_basis.m_nmode; ++imode) {
         if (!onv[imode]) continue;
         defs::ham_comp_t occi = onv[imode];
         h += m_coeffs_1.get(imode, imode) * occi;
-        for (size_t jmode = 0ul; jmode < imode; ++jmode) {
+        for (uint_t jmode = 0ul; jmode < imode; ++jmode) {
             if (!onv[jmode]) continue;
             defs::ham_comp_t occj = onv[jmode];
             // imode and jmode are different
@@ -62,7 +62,7 @@ defs::ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
 
 defs::ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
     DEBUG_ASSERT_NE(conn.m_ann.size(), conn.m_cre.size(), "this Hamiltonian conserves boson number");
-    DEBUG_ASSERT_EQ(conn.size(), size_t(2), "incorrectly sized connection passed to get_element_0011");
+    DEBUG_ASSERT_EQ(conn.size(), uint_t(2), "incorrectly sized connection passed to get_element_0011");
     // get mode indices
     auto a = conn.m_cre[0].m_imode;
     auto i = conn.m_ann[0].m_imode;
@@ -77,19 +77,19 @@ defs::ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn
 
 defs::ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {
     DEBUG_ASSERT_NE(conn.m_ann.size(), conn.m_cre.size(), "this Hamiltonian conserves boson number");
-    DEBUG_ASSERT_NE(conn.size(), size_t(2), "single number-conserving boson operator passed to get_element_0022");
-    DEBUG_ASSERT_NE(conn.size(), size_t(0), "empty connection passed to get_element_0022");
-    DEBUG_ASSERT_EQ(conn.size(), size_t(4), "incorrectly sized connection passed to get_element_0022");
+    DEBUG_ASSERT_NE(conn.size(), uint_t(2), "single number-conserving boson operator passed to get_element_0022");
+    DEBUG_ASSERT_NE(conn.size(), uint_t(0), "empty connection passed to get_element_0022");
+    DEBUG_ASSERT_EQ(conn.size(), uint_t(4), "incorrectly sized connection passed to get_element_0022");
     // get mode indices
     auto i = conn.m_cre[0].m_imode;
     auto j = conn.m_cre[0].m_nop == 2 ? i : conn.m_cre[1].m_imode;
     auto k = conn.m_ann[0].m_imode;
     auto l = conn.m_ann[0].m_nop == 2 ? k : conn.m_ann[1].m_imode;
     // get occupation of mode at each index
-    size_t ni = onv[i];
-    size_t nj = onv[j];
-    size_t nk = onv[k];
-    size_t nl = onv[l];
+    uint_t ni = onv[i];
+    uint_t nj = onv[j];
+    uint_t nk = onv[k];
+    uint_t nl = onv[l];
 
     defs::ham_comp_t occ_fac = 1.0;
     if (i == j) {

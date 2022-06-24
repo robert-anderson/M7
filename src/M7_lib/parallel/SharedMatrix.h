@@ -9,20 +9,20 @@
 
 template<typename T>
 class SharedMatrix : public SharedArray<T> {
-    const size_t m_nrow, m_ncol;
+    const uint_t m_nrow, m_ncol;
 
 public:
-    SharedMatrix(size_t nrow, size_t ncol):
+    SharedMatrix(uint_t nrow, uint_t ncol):
         SharedArray<T>(nrow*ncol), m_nrow(nrow), m_ncol(ncol){}
 
-    void set(const size_t &irow, const size_t& icol, const T& v) {
+    void set(const uint_t &irow, const uint_t& icol, const T& v) {
         // element-modifying access should only take place on the root rank
         ASSERT(irow<m_nrow)
         ASSERT(icol<m_ncol)
         SharedArray<T>::set(irow*m_ncol+icol, v);
     }
 
-    const T& get(const size_t &irow, const size_t& icol) const {
+    const T& get(const uint_t &irow, const uint_t& icol) const {
         ASSERT(irow<m_nrow)
         ASSERT(icol<m_ncol)
         return SharedArray<T>::operator[](irow*m_ncol+icol);

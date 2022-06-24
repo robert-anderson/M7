@@ -8,8 +8,8 @@
 
 #if 0
 TEST(DynamicRowSet, Test) {
-    const size_t nsite = 12;
-    const size_t nrow_per_rank = 4;
+    const uint_t nsite = 12;
+    const uint_t nrow_per_rank = 4;
     BufferedTable<table_test::DetMappedTable> bt("Test table", nsite);
     RankAllocator<fields::Det> ra(bt, bt.m_key_field, 100, 10, 0.05);
 
@@ -24,7 +24,7 @@ TEST(DynamicRowSet, Test) {
     det.set(2 * nsite - 2);
     det.set(2 * nsite - 1);
 
-    for (size_t ibit = 2; ibit < 2 * nsite - 2; ++ibit) {
+    for (uint_t ibit = 2; ibit < 2 * nsite - 2; ++ibit) {
         det.set(ibit);
         if (bt.m_hwm < nrow_per_rank and mpi::i_am(ra.get_rank(det))) {
             auto irow = bt.push_back();

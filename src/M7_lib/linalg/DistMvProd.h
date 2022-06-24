@@ -20,11 +20,11 @@ namespace dist_mv_prod {
          * number of elements of the product vector (Mv) stored on this rank
          * this is the same as the number of rows of the matrix multiplied by the input vector v on this rank
          */
-        const size_t m_nrow_local;
+        const uint_t m_nrow_local;
         /**
          * total number of elements in the product vector (Mv) over all ranks
          */
-        const size_t m_nrow;
+        const uint_t m_nrow;
         /**
          * m_nrow_local values for all ranks
          */
@@ -51,12 +51,12 @@ namespace dist_mv_prod {
         }
 
     public:
-        Base(size_t nelement_mv_local) :
+        Base(uint_t nelement_mv_local) :
                 m_nrow_local(nelement_mv_local), m_nrow(mpi::all_sum(nelement_mv_local)),
                 m_counts(make_counts()), m_displs(mpi::counts_to_displs_consec(m_counts)),
                 m_v(mpi::i_am_root() ? 0 : m_nrow, 0), m_partial_mv(nelement_mv_local, 0) {}
 
-        void parallel_multiply(const T *v, size_t v_size, T *mv, bool all_gather_mv) {
+        void parallel_multiply(const T *v, uint_t v_size, T *mv, bool all_gather_mv) {
             if (!m_nrow) return;
             bcast(v, v_size);
             multiply(v, v_size);
@@ -69,7 +69,7 @@ namespace dist_mv_prod {
         }
 
     protected:
-        T* get_v_ptr(const T *v, size_t v_size) {
+        T* get_v_ptr(const T *v, uint_t v_size) {
             auto ptr = v;
             if (!ptr) {
                 m_v.resize(v_size);
@@ -78,7 +78,7 @@ namespace dist_mv_prod {
             return const_cast<T*>(ptr);
         }
 
-        void bcast(const T *v, size_t v_size) {
+        void bcast(const T *v, uint_t v_size) {
             mpi::bcast(get_v_ptr(v, v_size), m_nrow);
         }
 
@@ -92,7 +92,7 @@ namespace dist_mv_prod {
             mpi::all_gatherv(m_partial_mv.data(), m_nrow_local, mv, m_counts.data(), m_displs.data());
         }
 
-        virtual void multiply(const T *v, size_t v_size) = 0;
+        virtual void multiply(const T *v, uint_t v_size) = 0;
     };
 
     template<typename T>
@@ -101,7 +101,7 @@ namespace dist_mv_prod {
         Sparse(const sparse::Matrix<T>& mat): Base<T>(mat.nrow()), m_mat(mat){}
 
     protected:
-        void multiply(const T *v, size_t v_size) override {
+        void multiply(const T *v, uint_t v_size) override {
             m_mat.multiply(Base<T>::get_v_ptr(v, v_size), Base<T>::m_partial_mv.data(), Base<T>::m_partial_mv.size());
         }
     };

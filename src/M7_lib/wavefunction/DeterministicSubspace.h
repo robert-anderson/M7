@@ -58,7 +58,7 @@ struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataR
     /**
      * associated WF root index
      */
-    const size_t m_iroot;
+    const uint_t m_iroot;
 private:
     /**
      * the part indices associated with this subspace, will contain two entries if WF uses replication, else one
@@ -72,7 +72,7 @@ private:
 
 public:
 
-    DeterministicSubspace(const conf::Semistochastic &opts, Wavefunction &wf, size_t iroot);
+    DeterministicSubspace(const conf::Semistochastic &opts, Wavefunction &wf, uint_t iroot);
 
     virtual ~DeterministicSubspace() {}
 
@@ -115,7 +115,7 @@ struct DeterministicSubspaces {
 
     operator bool() const;
 
-    void build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears, Wavefunction &wf, size_t icycle);
+    void build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears, Wavefunction &wf, uint_t icycle);
 
     void update();
 

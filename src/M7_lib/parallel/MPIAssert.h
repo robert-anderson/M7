@@ -221,7 +221,7 @@ namespace asserts {
 #ifndef NDEBUG
 #define DEBUG_ONLY(var)
 #else
-#define DEBUG_ONLY(var) datatype::unused(var);
+#define DEBUG_ONLY(var) dtype::unused(var);
 #endif
 
 #define MPI_EQ_BASE(kind, lhs, rhs, collective, reason) asserts::eq(kind, lhs, rhs, #lhs, #rhs, __FILE__, __LINE__, collective, reason);

@@ -14,7 +14,7 @@ struct FciqmcStatsRow : StatsRow {
 
     NdFormat<defs::ndim_wf> m_wf_format;
 
-    statistic::Number<size_t> m_icycle;
+    statistic::Number<uint_t> m_icycle;
     statistic::Number<double> m_tau;
     statistic::Numbers<defs::ham_comp_t, defs::ndim_wf> m_shift;
     statistic::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
@@ -25,8 +25,8 @@ struct FciqmcStatsRow : StatsRow {
     statistic::Numbers<defs::wf_t, defs::ndim_wf> m_ref_weight;
     statistic::Numbers<defs::ham_t, defs::ndim_wf> m_ref_proj_energy;
     statistic::Numbers<defs::ham_comp_t, defs::ndim_wf> m_l2_norm;
-    statistic::Numbers<size_t, defs::ndim_wf> m_ninitiator;
-    statistic::Numbers<size_t, defs::ndim_wf> m_nocc_mbf;
+    statistic::Numbers<uint_t, defs::ndim_wf> m_ninitiator;
+    statistic::Numbers<uint_t, defs::ndim_wf> m_nocc_mbf;
     statistic::Numbers<int, defs::ndim_wf> m_delta_nocc_mbf;
     statistic::Numbers<defs::prob_t, 1ul> m_exlvl_probs;
     statistic::Numbers<defs::ham_comp_t, defs::ndim_wf> m_reweighting_factor;

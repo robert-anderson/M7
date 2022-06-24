@@ -42,17 +42,17 @@ struct FermionPromoter {
     /**
      * number of common creation-annihilation operator pairs to insert into connection
      */
-    const size_t m_nop_insert;
+    const uint_t m_nop_insert;
     /**
      * total number of possible combinations
      */
-    const size_t m_ncomb;
+    const uint_t m_ncomb;
     /**
      * enumeration of all possible combinations
      */
     std::vector<defs::mev_ind_t> m_all_combs;
 
-    FermionPromoter(size_t ncom, size_t nop_insert);
+    FermionPromoter(uint_t ncom, uint_t nop_insert);
 
 private:
     /**
@@ -61,7 +61,7 @@ private:
      * @return
      *  const pointer to beginning of combination in m_all_combs
      */
-    const defs::mev_ind_t *begin(const size_t &icomb) const;
+    const defs::mev_ind_t *begin(const uint_t &icomb) const;
 
 public:
     /**
@@ -77,7 +77,7 @@ public:
      * @return
      *  antisymmetric phase associated with sorting both ann and cre to ascending order
      */
-    bool apply(const size_t &icomb, const conn::FrmOnv &conn,
+    bool apply(const uint_t &icomb, const conn::FrmOnv &conn,
                const FrmOps& com, MaeIndsPair &frm_inds) const;
 
 };

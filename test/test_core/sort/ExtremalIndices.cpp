@@ -7,7 +7,7 @@
 
 TEST(ExtremalIndices, Ascending) {
     std::vector<int> data = {6, 13, -12, 2, 9, 0, 1, -99, 1999};
-    auto cmp = [&data](const size_t& i1, const size_t& i2){
+    auto cmp = [&data](const uint_t& i1, const uint_t& i2){
         return data[i1]<data[i2];
     };
     ExtremalIndices xi(cmp);
@@ -22,7 +22,7 @@ TEST(ExtremalIndices, Ascending) {
 
 TEST(ExtremalIndices, AscendingAbs) {
     std::vector<int> data = {6, 13, -12, 2, 9, 0, 1, -99, 1999};
-    auto cmp = [&data](const size_t& i1, const size_t& i2){
+    auto cmp = [&data](const uint_t& i1, const uint_t& i2){
         return std::abs(data[i1])<std::abs(data[i2]);
     };
     ExtremalIndices xi(cmp);
@@ -37,7 +37,7 @@ TEST(ExtremalIndices, AscendingAbs) {
 
 TEST(ExtremalIndices, Descending) {
     std::vector<int> data = {6, 13, -12, 2, 9, 0, 1, -99, 1999};
-    auto cmp = [&data](const size_t& i1, const size_t& i2){
+    auto cmp = [&data](const uint_t& i1, const uint_t& i2){
         return data[i1]>data[i2];
     };
     ExtremalIndices xi(cmp);
@@ -52,7 +52,7 @@ TEST(ExtremalIndices, Descending) {
 
 TEST(ExtremalIndices, DescendingAbs) {
     std::vector<int> data = {6, 13, -12, 2, 9, 0, 1, -99, 1999};
-    auto cmp = [&data](const size_t& i1, const size_t& i2){
+    auto cmp = [&data](const uint_t& i1, const uint_t& i2){
         return std::abs(data[i1])>std::abs(data[i2]);
     };
     ExtremalIndices xi(cmp);
@@ -68,7 +68,7 @@ TEST(ExtremalIndices, DescendingAbs) {
 TEST(ExtremalIndices, AscendingMultiple) {
     // find elements in three separate calls, growing the sorted set each time
     std::vector<int> data = {6, 13, -12, 2, 9, 0, 1, -99, 1999};
-    auto cmp = [&data](const size_t& i1, const size_t& i2){
+    auto cmp = [&data](const uint_t& i1, const uint_t& i2){
         return data[i1]<data[i2];
     };
     ExtremalIndices xi(cmp);

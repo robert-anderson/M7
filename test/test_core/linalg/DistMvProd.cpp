@@ -9,12 +9,12 @@
 
 TEST(DistMvProd, SparseRealSym) {
     typedef double T;
-    const size_t nrow = 123;
-    const size_t ncol = 19;
-    const size_t nnonzero_per_row = 5;
+    const uint_t nrow = 123;
+    const uint_t ncol = 19;
+    const uint_t nnonzero_per_row = 5;
     auto global_mat = sparse_matrix_examples::rect_double(nrow, ncol, nnonzero_per_row);
-    const size_t count_local = mpi::evenly_shared_count(nrow);
-    const size_t displ_local = mpi::evenly_shared_displ(nrow);
+    const uint_t count_local = mpi::evenly_shared_count(nrow);
+    const uint_t displ_local = mpi::evenly_shared_displ(nrow);
     auto local_mat = global_mat.get_row_subset(count_local, displ_local);
     ASSERT_EQ(global_mat.nrow(), nrow);
     ASSERT_EQ(mpi::all_sum(local_mat.nrow()), nrow);

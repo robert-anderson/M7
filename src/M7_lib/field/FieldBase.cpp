@@ -6,7 +6,7 @@
 #include "FieldBase.h"
 
 
-FieldBase::FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name) :
+FieldBase::FieldBase(Row *row, uint_t size, const std::type_info &type_info, std::string name) :
         m_type_info(type_info), m_size(size),
         m_name(name), m_null_string(std::max(1ul, m_size), 0) {
     if (!row) return;

@@ -78,7 +78,7 @@ public:
 
     }
 
-    void add_determinant(const size_t& irow){
+    void add_determinant(const uint_t& irow){
 
     }
 

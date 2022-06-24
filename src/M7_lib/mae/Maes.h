@@ -28,23 +28,23 @@ struct Maes {
     /**
      * number of cycles between consecutive averaging operations and stats output
      */
-    const size_t m_period;
+    const uint_t m_period;
     /**
      * cycle on which the current period started
      */
-    size_t m_icycle_period_start = ~0ul;
+    uint_t m_icycle_period_start = ~0ul;
     /**
      * stats output object
      */
     std::unique_ptr<MaeStats> m_stats = nullptr;
 
-    Maes(const conf::AvEsts &opts, sys::Size extents, size_t nelec, size_t nroot);
+    Maes(const conf::AvEsts &opts, sys::Size extents, uint_t nelec, uint_t nroot);
 
     operator bool() const;
 
     bool all_stores_empty() const;
 
-    bool is_period_cycle(size_t icycle);
+    bool is_period_cycle(uint_t icycle);
 
     void end_cycle();
 
@@ -106,9 +106,9 @@ struct Maes {
      *     be added in a special "finalizing" loop over occupied MBFs. crucially, this is done *before* the
      *     instantaneous weight is summed into the average, since this was already done in the previous iteration.
      */
-    void make_average_contribs(WalkerTableRow &row, const References &refs, const size_t &icycle);
+    void make_average_contribs(WalkerTableRow &row, const References &refs, const uint_t &icycle);
 
-    void output(size_t icycle, const Hamiltonian& ham, bool final=false);
+    void output(uint_t icycle, const Hamiltonian& ham, bool final=false);
 };
 
 

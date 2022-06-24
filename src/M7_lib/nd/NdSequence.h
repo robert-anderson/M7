@@ -10,7 +10,7 @@
 #include <M7_lib/io/Logging.h"
 #include <M7_lib/parallel/MPIAssert.h"
 
-template<size_t nind>
+template<uint_t nind>
 struct NdSequence {
     NdFormat<nind> m_format;
     typedef uinta_t<nind> inds_t;
@@ -26,7 +26,7 @@ struct NdSequence {
             to_front();
         }
 
-        size_t ielement() const {
+        uint_t ielement() const {
             return std::distance(m_sequence.m_inds_vector.cbegin(), m_inds);
         }
 
@@ -38,7 +38,7 @@ struct NdSequence {
             return m_inds!=m_sequence.m_inds_vector.end();
         }
 
-        size_t nelement() const {
+        uint_t nelement() const {
             return m_sequence.m_inds_vector.size();
         }
 
@@ -68,7 +68,7 @@ struct NdSequence {
     }
 
     static std::vector<uinta_t<nind>> make_inds_vector(const NdFormat<nind>& format) {
-        const size_t limit = 2<<10;
+        const uint_t limit = 2<<10;
         if (format.m_nelement > limit){
             log::warn("Attempting to cache {} (> {}) Nd index arrays, this class is intended for small products of Nd extents",
                       format.m_nelement, limit);
@@ -80,7 +80,7 @@ struct NdSequence {
         ProductEnumerator enumerator(std::move(shape));
         tmp.resize(format.m_nelement);
         defs::uintv_t inds(nind);
-        size_t iflat = ~0ul;
+        uint_t iflat = ~0ul;
         while (enumerator.next(inds, iflat)) std::copy_n(inds.begin(), nind, tmp[iflat].begin());
         ASSERT(iflat == tmp.size());
         return tmp;

@@ -4,7 +4,7 @@
 
 #include "UniformSingles.h"
 
-bool UniformSingles::draw_frm(size_t exsig, const field::FrmOnv& src, defs::prob_t& prob, conn::FrmOnv& conn) {
+bool UniformSingles::draw_frm(uint_t exsig, const field::FrmOnv& src, defs::prob_t& prob, conn::FrmOnv& conn) {
     DEBUG_ASSERT_EQ(exsig, exsig::ex_single, "this excitation generator is only suitable for exsig 1100");
     auto spin_conserving = m_h.m_kramers_attrs.m_conserving_singles;
     if (spin_conserving) return draw_spin_conserve_fn(m_prng, src, prob, conn);
@@ -24,8 +24,8 @@ bool UniformSingles::draw_spin_conserve_fn(PRNG& prng, const field::FrmOnv& src,
     DEBUG_ASSERT_TRUE(nocc, "should have emitted null excitation if number of occupied orbitals is zero");
     DEBUG_ASSERT_TRUE(nvac, "should have emitted null excitation if number of vacant orbitals is zero");
 
-    size_t ia = prng.draw_uint(nocc * nvac);
-    size_t i, a;
+    uint_t ia = prng.draw_uint(nocc * nvac);
+    uint_t i, a;
     integer::inv_rectmap(i, a, nvac, ia);
     DEBUG_ASSERT_LT(i, nocc, "drawn occupied OOB");
     DEBUG_ASSERT_LT(a, nvac, "drawn vacant OOB");
@@ -45,7 +45,7 @@ bool UniformSingles::draw_spin_nonconserve_fn(PRNG& prng, const field::FrmOnv& s
     const auto nvac = src.m_basis.m_nspinorb - nelec;
     const auto ncases = nelec * nvac;
     auto ia = prng.draw_uint(ncases);
-    size_t i, a;
+    uint_t i, a;
     integer::inv_rectmap(i, a, nvac, ia);
     conn.m_ann.set(occs[i]);
     conn.m_cre.set(vacs[a]);
@@ -78,7 +78,7 @@ defs::prob_t UniformSingles::prob_frm(const field::FrmOnv& src, const conn::FrmO
     return prob_spin_nonconserve_fn(src, conn);
 }
 
-size_t UniformSingles::approx_nconn(size_t, sys::Particles particles) const {
+uint_t UniformSingles::approx_nconn(uint_t, sys::Particles particles) const {
     const auto& elecs = particles.m_frm;
     sys::frm::Sector sector(m_h.m_basis, particles.m_frm);
     if (elecs.m_ms2.conserve()){

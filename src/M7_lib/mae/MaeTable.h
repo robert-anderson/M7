@@ -13,7 +13,7 @@ struct MaeRow : public Row {
 
     field::MaeInds &key_field();
 
-    MaeRow(size_t exsig, size_t nvalue);
+    MaeRow(uint_t exsig, uint_t nvalue);
 };
 
 struct SpecMomsRow : public Row {
@@ -22,7 +22,7 @@ struct SpecMomsRow : public Row {
 
     field::SpecMomInds &key_field();
 
-    SpecMomsRow(size_t exsig, size_t nvalue);
+    SpecMomsRow(uint_t exsig, uint_t nvalue);
 };
 
 

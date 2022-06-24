@@ -8,6 +8,8 @@
 #include <x86intrin.h>
 #include "M7_lib/defs.h"
 
+using namespace defs;
+
 /**
  * utilities relating to the manipulation of integral types as bitsets
  */
@@ -47,21 +49,21 @@ namespace bit {
      * clear the bit in x at position i
      */
     template<typename T>
-    static inline void clr(T &x, size_t i) {
+    static inline void clr(T &x, uint_t i) {
         x &= ~(T(1) << T(i));
     }
     /**
      * set the bit in x at position i
      */
     template<typename T>
-    static inline void set(T &x, size_t i) {
+    static inline void set(T &x, uint_t i) {
         x |= (T(1) << T(i));
     }
     /**
      * return true if the bit in x at position i is set, else false
      */
     template<typename T>
-    static inline bool get(const T &x, size_t i) {
+    static inline bool get(const T &x, uint_t i) {
         return x & (T(1) << T(i));
     }
     /**
@@ -69,23 +71,23 @@ namespace bit {
      * TODO: generalize for the absence of x86 instruction set with the BMI, SSE4.2, ABM etc (the exact set to which
      *  these instructions are taken to belong is vendor specific) extension e.g. ARM
      */
-    inline size_t next_setbit(unsigned long long &work) {
+    inline uint_t next_setbit(unsigned long long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
-        size_t result = __tzcnt_u64(work);
+        uint_t result = __tzcnt_u64(work);
         bit::clr(work, result);
         return result;
     }
 
-    inline size_t next_setbit(unsigned long &work) {
+    inline uint_t next_setbit(unsigned long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
-        size_t result = __tzcnt_u64(work);
+        uint_t result = __tzcnt_u64(work);
         bit::clr(work, result);
         return result;
     }
 
-    inline size_t next_setbit(unsigned &work) {
+    inline uint_t next_setbit(unsigned &work) {
         static_assert(sizeof(work) == 4, "Data length not supported");
-        size_t result = __tzcnt_u32(work);
+        uint_t result = __tzcnt_u32(work);
         bit::clr(work, result);
         return result;
     }
@@ -93,17 +95,17 @@ namespace bit {
      * use architecture dependent intrinsic to count the number of set bits in the word
      * TODO: see next_setbit
      */
-    inline size_t nsetbit(const unsigned long long &work) {
+    inline uint_t nsetbit(const unsigned long long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         return _popcnt64(work);
     }
 
-    inline size_t nsetbit(const unsigned long &work) {
+    inline uint_t nsetbit(const unsigned long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         return _popcnt64(work);
     }
 
-    inline size_t nsetbit(const unsigned &work) {
+    inline uint_t nsetbit(const unsigned &work) {
         static_assert(sizeof(work) == 4, "Data length not supported");
         return _popcnt32(work);
     }
@@ -111,59 +113,59 @@ namespace bit {
     /**
      * return v with the first n bits cleared
      */
-    static uint8_t truncate(const uint8_t &v, size_t n) {
+    static uint8_t truncate(const uint8_t &v, uint_t n) {
         return v & c_trunc_mask_8[n];
     }
 
-    static uint16_t truncate(const uint16_t &v, size_t n) {
+    static uint16_t truncate(const uint16_t &v, uint_t n) {
         return v & c_trunc_mask_16[n];
     }
 
-    static uint32_t truncate(const uint32_t &v, size_t n) {
+    static uint32_t truncate(const uint32_t &v, uint_t n) {
         return v & c_trunc_mask_32[n];
     }
 
-    static uint64_t truncate(const uint64_t &v, size_t n) {
+    static uint64_t truncate(const uint64_t &v, uint_t n) {
         return v & c_trunc_mask_64[n];
     }
 
-    static int8_t truncate(const int8_t &v, size_t n) {
+    static int8_t truncate(const int8_t &v, uint_t n) {
         return truncate(uint8_t(v), n);
     }
 
-    static int16_t truncate(const int16_t &v, size_t n) {
+    static int16_t truncate(const int16_t &v, uint_t n) {
         return truncate(uint16_t(v), n);
     }
 
-    static int32_t truncate(const int32_t &v, size_t n) {
+    static int32_t truncate(const int32_t &v, uint_t n) {
         return truncate(uint32_t(v), n);
     }
 
-    static int64_t truncate(const int64_t &v, size_t n) {
+    static int64_t truncate(const int64_t &v, uint_t n) {
         return truncate(uint64_t(v), n);
     }
 
     /**
      * make a mask which is set (1) in the range [ibegin, iend), and clear (0) elsewhere
      */
-    static void make_range_mask(uint8_t &v, size_t ibegin, size_t iend) {
+    static void make_range_mask(uint8_t &v, uint_t ibegin, uint_t iend) {
         v = c_trunc_mask_8[iend] & ~c_trunc_mask_8[ibegin];
     }
 
-    static void make_range_mask(uint16_t &v, size_t ibegin, size_t iend) {
+    static void make_range_mask(uint16_t &v, uint_t ibegin, uint_t iend) {
         v = c_trunc_mask_16[iend] & ~c_trunc_mask_16[ibegin];
     }
 
-    static void make_range_mask(uint32_t &v, size_t ibegin, size_t iend) {
+    static void make_range_mask(uint32_t &v, uint_t ibegin, uint_t iend) {
         v = c_trunc_mask_32[iend] & ~c_trunc_mask_32[ibegin];
     }
 
-    static void make_range_mask(uint64_t &v, size_t ibegin, size_t iend) {
+    static void make_range_mask(uint64_t &v, uint_t ibegin, uint_t iend) {
         v = c_trunc_mask_64[iend] & ~c_trunc_mask_64[ibegin];
     }
 
     template<typename T>
-    static T make_range_mask(size_t ibegin, size_t iend) {
+    static T make_range_mask(uint_t ibegin, uint_t iend) {
         T v;
         make_range_mask(v, ibegin, iend);
         return v;
@@ -196,21 +198,21 @@ namespace bit {
      * make the range mask word then apply it
      */
     template<typename T>
-    void apply_mask(T &v, size_t ibegin, size_t iend, bool set) {
+    void apply_mask(T &v, uint_t ibegin, uint_t iend, bool set) {
         T mask;
         make_range_mask(mask, ibegin, iend);
         apply_mask(v, mask, set);
     }
 
     template<typename T>
-    static inline size_t nsetbit_before(const T &v, size_t n) {
+    static inline uint_t nsetbit_before(const T &v, uint_t n) {
         return nsetbit(truncate(v, n));
     }
 
     template<typename T>
     static std::string to_string(const T &v) {
         std::string tmp;
-        for (size_t i = 0ul; i < sizeof(T) * CHAR_BIT; ++i) tmp += get(v, i) ? '1' : '0';
+        for (uint_t i = 0ul; i < sizeof(T) * CHAR_BIT; ++i) tmp += get(v, i) ? '1' : '0';
         return tmp;
     }
 

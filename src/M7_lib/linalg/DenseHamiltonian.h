@@ -42,11 +42,11 @@ class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
      * @return
      *  number of rows (and columns) in the matrix representation of H
      */
-    size_t nrow(const Hamiltonian& h, sys::Particles particles, bool force_general);
+    uint_t nrow(const Hamiltonian& h, sys::Particles particles, bool force_general);
 
     template<typename mbf_t>
     void loop_over_pair_iterator(PairBase* foreach, const Hamiltonian& h, mbf_t& work_bra, mbf_t& work_ket){
-        auto fn = [this, &h, &work_bra, &work_ket](size_t ibra, size_t iket) {
+        auto fn = [this, &h, &work_bra, &work_ket](uint_t ibra, uint_t iket) {
             (*this)(ibra, iket) = h.get_element(work_bra, work_ket);
         };
         foreach->loop(work_bra, work_ket, fn);
