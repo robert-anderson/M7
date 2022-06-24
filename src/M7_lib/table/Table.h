@@ -25,8 +25,14 @@ struct Table : TableBase {
         static_cast<Row &>(m_row).select_null();
     }
 
+    Table& operator=(const Table& other) {
+        TableBase::operator=(other);
+        return *this;
+    }
+
     Table(const Table<row_t> &other) : Table(other.m_row) {
         ASSERT(static_cast<Row &>(m_row).m_table == this);
+        *this = other;
     }
 
     virtual ~Table(){}

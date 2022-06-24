@@ -5,6 +5,7 @@
 #include <M7_lib/wavefunction/Wavefunction.h>
 #include "gtest/gtest.h"
 
+
 #if 0
 TEST(Wavefunction, DynamicRowSet){
     conf::Document opts;

@@ -21,14 +21,12 @@ public:
     }
 
     BufferedTable& operator=(const BufferedTable<row_t, mapped> &other) {
-        if (other.m_buffer.size()) {
-            m_buffer.resize(other.m_buffer.size());
-            Table<row_t>::clear();
-            Table<row_t>::push_back(other.m_hwm);
-            Table<row_t>::m_bw = other.m_bw;
-            Table<row_t>::m_row.restart();
-        }
+        table_t::operator=(other);
         return *this;
+    }
+
+    bool operator==(const BufferedTable<row_t, mapped> &other) const {
+        return static_cast<const table_t&>(*this) == static_cast<const table_t&>(other);
     }
 
     BufferedTable(const BufferedTable<row_t, mapped> &other) : BufferedTable(other.m_buffer.m_name, other){

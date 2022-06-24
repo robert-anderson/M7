@@ -47,6 +47,14 @@ struct MappedTableBase {
 
     MappedTableBase(uint_t nbucket = 0ul, uint_t remap_nlookup = 0ul, double remap_ratio = 0.0);
 
+    MappedTableBase& operator=(const MappedTableBase& other);
+
+    MappedTableBase(const MappedTableBase& other);
+
+    bool operator==(const MappedTableBase& other) const;
+
+    bool operator!=(const MappedTableBase& other) const;
+
     /**
      * Assuming uniform frequency of access, the average number of skips per lookup in a bucket containing n items is
      *  (0 + 1 + ... + n-1) / n = (n-1)/2
@@ -117,8 +125,19 @@ struct MappedTable : Table<row_t>, MappedTableBase {
             Table<row_t>(row), MappedTableBase(nbucket, remap_nlookup, remap_ratio),
             m_lookup_row(m_row), m_insert_row(m_row) {}
 
-    MappedTable(const MappedTable<row_t> &other) : MappedTable(other.m_row, other.m_buckets.size(),
-                                                               other.m_remap_nlookup, other.m_remap_ratio) {}
+    MappedTable& operator=(const MappedTable& other) {
+        MappedTableBase::operator=(other);
+        Table<row_t>::operator=(other);
+        return *this;
+    }
+
+    MappedTable(const MappedTable<row_t> &other) :
+        MappedTable(other.m_row, other.m_buckets.size(), other.m_remap_nlookup, other.m_remap_ratio) {}
+
+    bool operator==(const MappedTable<row_t> &other) const {
+        if (!MappedTableBase::operator==(other)) return false;
+        return TableBase::operator==(other);
+    }
     /**
      * attempt to find the element identified by key in the hash map.
      * @param key
@@ -164,7 +183,7 @@ public:
         clear_map();
     }
 
-    void clear(const uint_t &irow) override {
+    void clear(uint_t irow) override {
         m_row.jump(irow);
         auto lookup = (*this)[KeyField<row_t>::get(m_row)];
         erase(lookup);
@@ -207,7 +226,7 @@ public:
      * @param buckets
      *  vector of buckets into which the row indices are stored
      */
-    void post_insert_buckets(const uint_t &irow, std::vector<std::forward_list<uint_t>> &buckets) {
+    void post_insert_buckets(uint_t irow, std::vector<std::forward_list<uint_t>> &buckets) {
         DEBUG_ASSERT_FALSE(TableBase::is_cleared(irow), "cannot map to a cleared row");
         m_insert_row.jump(irow);
         // row mustn't have already been added
@@ -221,7 +240,7 @@ public:
      * @param irow
      *  index of the row to be mapped
      */
-    void post_insert(const uint_t &irow) override {
+    void post_insert(uint_t irow) override {
         post_insert_buckets(irow, m_buckets);
     }
     /**

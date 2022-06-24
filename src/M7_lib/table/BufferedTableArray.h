@@ -15,7 +15,7 @@ private:
     Buffer m_buffer;
     std::vector<table_t> m_tables;
 
-    const uint_t &row_size() const {
+    uint_t row_size() const {
         return static_cast<const TableBase &>(m_tables[0]).row_size();
     }
 

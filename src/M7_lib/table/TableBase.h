@@ -79,6 +79,25 @@ struct TableBase {
 
     TableBase(uint_t row_size);
 
+protected:
+    /**
+     * the copy assignment is not exposed as public, since otherwise the TableBase could be set equal to an incompatible
+     * TableBase. Better and safer that the row-templated subclasses implement the public interface
+     * @param other
+     *  value of TableBase to which this one will be set
+     * @return
+     *  ref to this
+     */
+    TableBase& operator=(const TableBase& other) {
+        resize(other.nrow(), 0.0);
+        m_bw = other.m_bw;
+        m_hwm = other.m_hwm;
+        m_free_rows = other.m_free_rows;
+        m_row_protectors = other.m_row_protectors;
+        return *this;
+    }
+
+public:
     TableBase(const TableBase& other);
 
     /**
@@ -87,10 +106,29 @@ struct TableBase {
     uint_t nrow() const {
         return m_bw.m_nrow;
     }
+
+    /**
+     * strict equality: other table may have the same contents but a different buffer size, in this case the tables are
+     * not considered equal. main use for this method is to check for successful copy operations
+     * @param other
+     *  table to compare against
+     * @return
+     *  true if the other table is identical in value to this one
+     */
+    bool operator==(const TableBase& other) const {
+        if (this==&other) return true;
+        if (nrow()!=other.nrow()) return false;
+        if (m_hwm!=other.m_hwm) return false;
+        return std::memcmp(begin(), other.begin(), m_hwm * row_size())==0;
+    }
+
+    bool operator!=(const TableBase& other) const {
+        return !(*this==other);
+    }
     /**
      * the size of a single row in bytes (always an integer number of system words)
      */
-    const uint_t& row_size() const {
+    uint_t row_size() const {
         return m_bw.m_row_size;
     }
 
@@ -112,7 +150,7 @@ struct TableBase {
      * @return
      *  pointer to the first data word of the indexed row in the BufferWindow
      */
-    buf_t *begin(const uint_t& irow);
+    buf_t *begin(uint_t irow);
 
     /**
      * @param irow
@@ -120,7 +158,7 @@ struct TableBase {
      * @return
      *  const pointer to the first data word of the indexed row in the BufferWindow
      */
-    const buf_t *begin(const uint_t& irow) const;
+    const buf_t *begin(uint_t irow) const;
 
     /**
      * Associate the table with a buffer by assigning the table an available BufferWindow
@@ -161,7 +199,7 @@ struct TableBase {
      * @param irow
      *  row index to clear
      */
-    virtual void clear(const uint_t& irow);
+    virtual void clear(uint_t irow);
 
     /**
      * @return
@@ -181,7 +219,7 @@ struct TableBase {
      * @return
      *  true if entire row is zero
      */
-    bool is_cleared(const uint_t& irow) const;
+    bool is_cleared(uint_t irow) const;
 
     /**
      * call the resize method on the buffer window and reflect the reallocation in m_nrow
@@ -211,7 +249,7 @@ struct TableBase {
      * @param iinsert
      *  row index of the already-inserted data
      */
-    virtual void post_insert(const uint_t& /*iinsert*/){}
+    virtual void post_insert(uint_t /*iinsert*/){}
 
     /**
      * If we have copied a block of rows contiguously into a table with non-trivial post-insert obligations, we need to
@@ -282,7 +320,7 @@ struct TableBase {
      * @param jrow
      *  row index to be swapped
      */
-    void swap_rows(const uint_t& irow, const uint_t& jrow);
+    void swap_rows(uint_t irow, uint_t jrow);
 
     /**
      * "Location" class which describes the location of a row in a distributed table i.e. by a row index and a rank index

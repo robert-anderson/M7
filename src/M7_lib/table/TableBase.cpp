@@ -13,8 +13,7 @@
 TableBase::TableBase(uint_t row_size) :
         m_bw(row_size), m_null_row_string(row_size, 0){}
 
-TableBase::TableBase(const TableBase &other) :
-        TableBase(other.m_bw.m_row_size){}
+TableBase::TableBase(const TableBase &other) : TableBase(other.m_bw.m_row_size){}
 
 buf_t *TableBase::begin() {
     return m_bw.m_begin;
@@ -24,11 +23,11 @@ const buf_t *TableBase::begin() const {
     return m_bw.m_begin;
 }
 
-buf_t *TableBase::begin(const uint_t &irow) {
+buf_t *TableBase::begin(uint_t irow) {
     return m_bw.m_begin + irow * row_size();
 }
 
-const buf_t *TableBase::begin(const uint_t &irow) const {
+const buf_t *TableBase::begin(uint_t irow) const {
     return m_bw.m_begin + irow * row_size();
 }
 
@@ -65,7 +64,7 @@ void TableBase::clear() {
     while (!m_free_rows.empty()) m_free_rows.pop();
 }
 
-void TableBase::clear(const uint_t &irow) {
+void TableBase::clear(uint_t irow) {
     ASSERT(!is_protected(irow));
     std::memset(begin(irow), 0, row_size());
     m_free_rows.push(irow);
@@ -75,7 +74,7 @@ bool TableBase::is_cleared() const {
     return std::memcmp(begin(), m_null_row_string.data(), row_size()) == 0;
 }
 
-bool TableBase::is_cleared(const uint_t &irow) const {
+bool TableBase::is_cleared(uint_t irow) const {
     return std::memcmp(begin(irow), m_null_row_string.data(), row_size()) == 0;
 }
 
@@ -158,7 +157,7 @@ void TableBase::copy_row_in(const TableBase &src, uint_t irow_src, uint_t irow_d
     std::memcpy(begin(irow_dst), src.begin(irow_src), row_size());
 }
 
-void TableBase::swap_rows(const uint_t &irow, const uint_t &jrow) {
+void TableBase::swap_rows(uint_t irow, uint_t jrow) {
     if (irow == jrow) return;
     auto iptr = begin(irow);
     auto jptr = begin(jrow);

@@ -7,17 +7,28 @@
 #include "M7_lib/table/BufferedFields.h"
 
 namespace mapped_table_test {
-    struct MyRow : Row {
+    struct KeyOnlyRow : Row {
         field::Number<uint_t> m_key;
 
-        MyRow() : m_key(this) {}
+        KeyOnlyRow() : m_key(this) {}
 
         field::Number<uint_t> &key_field() {
             return m_key;
         }
     };
 
-    typedef BufferedTable<MyRow, true> table_t;
+    typedef BufferedTable<KeyOnlyRow, true> key_only_table_t;
+
+    struct ExtendedRow : KeyOnlyRow {
+        field::String m_text;
+        field::Numbers<float, 1> m_numbers;
+
+        ExtendedRow() :
+            m_text(this, 20, "some text"),
+            m_numbers(this, {6}, "some numbers") {}
+    };
+
+    typedef BufferedTable<ExtendedRow, true> extended_table_t;
 
     uint_t nitem_in_bucket(const MappedTableBase &table, uint_t ibucket) {
         const auto &bucket = table.m_buckets[ibucket];
@@ -27,7 +38,7 @@ namespace mapped_table_test {
 
 TEST(MappedTable, Empty) {
     using namespace mapped_table_test;
-    table_t table("test", {{}});
+    key_only_table_t table("test", {{}});
     buffered::Number<uint_t> key;
     key = 100;
     auto lookup = table[key];
@@ -39,7 +50,7 @@ TEST(MappedTable, Remap) {
     const uint_t nbucket_init = 3ul;
     const uint_t nlookup_remap = 10ul;
     const double remap_ratio = 0.5;
-    table_t table("test", {{}, nbucket_init, nlookup_remap, remap_ratio});
+    key_only_table_t table("test", {{}, nbucket_init, nlookup_remap, remap_ratio});
     table.set_expansion_factor(1);
     ASSERT_EQ(remap_ratio, table.m_remap_ratio);
     buffered::Number<uint_t> key;
@@ -117,4 +128,40 @@ TEST(MappedTable, Remap) {
     // check that all elements are still mapped and present after remap operation
     key = 100;
     while ((key++) < 120) ASSERT_TRUE(table[key]);
+}
+
+TEST(MappedTable, Copy) {
+    using namespace mapped_table_test;
+    extended_table_t table("test", {{}});
+    table.set_expansion_factor(1);
+    const uint_t ibegin = 16;
+    const uint_t nstep = 7;
+    const uint_t nentry = 10;
+    const std::vector<std::string> strings {
+            "Lorem ipsum", "dolor sit amet,", "consectetur", "adipiscing elit,", "sed do",
+            "eiusmod tempor", "incididunt", "ut", "labore et", "dolore", "magna aliqua."
+    };
+    const std::vector<float> floats = {1.3, 1.4, 2.5, 2.6, 3.7, 3.8};
+
+    buffered::Number<uint_t> key;
+    for (uint_t i=0ul; i<nentry; ++i) {
+        key = ibegin+i*nstep;
+        table.insert(key);
+        table.m_row.m_text = strings[i];
+        table.m_row.m_numbers = floats;
+        table.m_row.m_numbers += float(i);
+    }
+
+    /*
+     * copy ctor
+     */
+    auto cpy = table;
+    ASSERT_EQ(cpy, table);
+
+    extended_table_t other("other", {{}});
+    /*
+     * copy assigment
+     */
+    other = table;
+    ASSERT_EQ(other, cpy);
 }

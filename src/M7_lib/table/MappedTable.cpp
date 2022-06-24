@@ -9,6 +9,32 @@ MappedTableBase::MappedTableBase(uint_t nbucket, uint_t remap_nlookup, double re
     m_remap_nlookup(remap_nlookup?remap_nlookup:c_default_remap_nlookup),
     m_remap_ratio(remap_ratio!=0.0?remap_ratio:c_default_remap_ratio){}
 
+MappedTableBase &MappedTableBase::operator=(const MappedTableBase &other) {
+    if (this==&other) return *this;
+    m_buckets = other.m_buckets;
+    m_nskip_total = other.m_nskip_total;
+    m_nlookup_total = other.m_nlookup_total;
+    return *this;
+}
+
+MappedTableBase::MappedTableBase(const MappedTableBase &other) :
+        MappedTableBase(other.nbucket(), other.m_remap_nlookup, other.m_remap_ratio){
+    m_buckets = other.m_buckets;
+}
+
+bool MappedTableBase::operator==(const MappedTableBase &other) const {
+    if (this==&other) return true;
+    if (nbucket()!=other.nbucket()) return false;
+    if (m_remap_nlookup!=other.m_remap_nlookup) return false;
+    if (m_remap_ratio!=other.m_remap_ratio) return false;
+    if (m_buckets!=other.m_buckets) return false;
+    return true;
+}
+
+bool MappedTableBase::operator!=(const MappedTableBase &other) const {
+    return !(*this==other);
+}
+
 uint_t MappedTableBase::nbucket_guess(uint_t nitem, double ratio) {
     return nitem / (2*ratio + 1);
 }
@@ -39,6 +65,7 @@ bool MappedTableBase::all_nonzero_rows_mapped(const TableBase &source) const {
     }
     return true;
 }
+
 
 constexpr uint_t MappedTableBase::c_default_nbucket;
 constexpr double MappedTableBase::c_default_remap_ratio;
