@@ -83,7 +83,7 @@ namespace hdf5 {
 
     struct StringType {
         const hid_t m_handle;
-        const hsize_t m_nchar; // including null terminator
+        const hsize_t m_nchar; // excluding null terminator
 
     private:
         static hsize_t size_max(const std::vector<std::string>& vec) {
@@ -103,7 +103,9 @@ namespace hdf5 {
         }
     public:
 
-        StringType(hid_t handle): m_handle(handle), m_nchar(H5Tget_size(m_handle)){}
+        StringType(hid_t handle): m_handle(handle), m_nchar(H5Tget_size(m_handle)){
+            DEBUG_ASSERT_TRUE(m_nchar, "number of chars in string type should be non-zero");
+        }
 
         StringType(const std::string& str): StringType(str.size(), 0) {}
 
@@ -177,6 +179,10 @@ namespace hdf5 {
             m_space(shape), m_h5type(h5type),
             m_handle(H5Acreate(parent_handle, name.c_str(), m_h5type, m_space.m_handle, H5P_DEFAULT, H5P_DEFAULT)){}
 
+        ~AttrWriter(){
+            H5Aclose(m_handle);
+        }
+
         void write_bytes(const char *src) const {
             auto status = H5Awrite(m_handle, m_h5type, src);
             DEBUG_ONLY(status);
@@ -196,15 +202,21 @@ namespace hdf5 {
         const DataSpace m_space;
     public:
         const hid_t m_h5type;
+        const hsize_t m_nelement;
 
         AttrReader(hid_t parent_handle, const std::string& name):
             m_handle(H5Aopen(parent_handle, name.c_str(), H5P_DEFAULT)),
-            m_space(H5Aget_space(m_handle)), m_h5type(H5Aget_type(m_handle)) {}
+            m_space(H5Aget_space(m_handle)), m_h5type(H5Aget_type(m_handle)),
+            m_nelement(m_space.m_nelement){}
+
+        ~AttrReader(){
+            H5Aclose(m_handle);
+        }
 
         void read_bytes(char *dst) const {
             auto status = H5Aread(m_handle, m_h5type, dst);
             DEBUG_ONLY(status);
-            DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
+            DEBUG_ASSERT_FALSE(status, "HDF5 attribute read failed");
         }
 
         template<typename T>
@@ -214,6 +226,17 @@ namespace hdf5 {
             read_bytes(reinterpret_cast<char*>(dst));
         }
 
+        void read(std::string *dst, size_t n) const {
+            REQUIRE_EQ(n, m_space.m_nelement, "number of elements read must be the number stored");
+            StringType type(H5Aget_type(m_handle));
+            std::vector<char> tmp(type.m_nchar*n);
+            auto status = H5Aread(m_handle, m_h5type, tmp.data());
+            DEBUG_ONLY(status);
+            DEBUG_ASSERT_FALSE(status, "HDF5 attribute read failed");
+            for (uint_t i=0; i<n; ++i) {
+                (dst++)->insert(0, tmp.data()+i*type.m_nchar, type.m_nchar);
+            }
+        }
     };
 
 
@@ -223,6 +246,9 @@ namespace hdf5 {
         Node(hid_t handle): m_handle(handle){}
         operator hid_t() const {
             return m_handle;
+        }
+        bool attr_exists(const std::string& name) const {
+            return H5Aexists(m_handle, name.c_str());
         }
     };
 
@@ -234,22 +260,33 @@ namespace hdf5 {
             H5Oget_info(m_handle, &m_info);
         }
 
+    private:
         template<typename T>
-        void read_attr(const std::string& name, const T& v) {
+        void read_attr_fn(const std::string& name, T& v, T default_) const {
+            if (!attr_exists(name)) {
+                v = default_;
+                return;
+            }
             AttrReader attr(m_handle, name);
             attr.read(&v, 1);
         }
 
         template<typename T>
-        void read_attr(const std::string& name, const std::vector<T>& v) {
+        void read_attr_fn(const std::string& name, std::vector<T>& v, std::vector<T> default_) const {
+            if (!attr_exists(name)) {
+                v = default_;
+                return;
+            }
             AttrReader attr(m_handle, name);
             attr.read(v.data(), v.size());
         }
+    public:
 
-        void read_attr(const std::string& name, const std::string& v) {
-            AttrReader attr(m_handle, name);
-            StringType(attr.m_h5type);
-            attr.read(const_cast<char*>(v.c_str()), 1);
+        template<typename T>
+        T read_attr(const std::string& name, T default_ = {}) const {
+            T v;
+            read_attr_fn(name, v, default_);
+            return v;
         }
 
         bool child_exists(const std::string& name) const;
@@ -617,7 +654,9 @@ namespace hdf5 {
 
 
     struct FileBase {
+        const std::string m_fname;
         static void check_is_hdf5(const std::string &name);
+        FileBase(const std::string& fname): m_fname((check_is_hdf5(fname), fname)){}
     };
 
     struct FileReader : NodeReader, FileBase {
@@ -629,7 +668,7 @@ namespace hdf5 {
             return H5Fopen(fname.c_str(), H5F_ACC_RDONLY, p_list.m_handle);
         }
     public:
-        FileReader(const std::string& fname): NodeReader(get_handle(fname)) {}
+        FileReader(const std::string& fname): NodeReader(get_handle(fname)), FileBase(fname) {}
 
         ~FileReader() {
             auto status = H5Fclose(m_handle);
@@ -637,7 +676,7 @@ namespace hdf5 {
         }
     };
 
-    struct FileWriter : NodeWriter {
+    struct FileWriter : NodeWriter, FileBase {
     private:
         static hid_t get_handle(const std::string& fname) {
             AccessPList p_list;
@@ -647,7 +686,7 @@ namespace hdf5 {
             return handle;
         }
     public:
-        FileWriter(const std::string& fname): NodeWriter(get_handle(fname)) {}
+        FileWriter(const std::string& fname): NodeWriter(get_handle(fname)), FileBase(fname) {}
 
         ~FileWriter() {
             auto status = H5Fclose(m_handle);
@@ -834,7 +873,7 @@ namespace hdf5 {
          *  native type T corresponding to m_h5type are to be written. Thus the sizeof(T)*n bytes after data are copied
          */
         void write_h5item_bytes(const uint_t &iitem, const void *data);
-        
+
     };
 
     /**
