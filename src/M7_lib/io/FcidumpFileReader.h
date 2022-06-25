@@ -7,6 +7,7 @@
 
 #include <M7_lib/defs.h>
 #include <M7_lib/io/Logging.h>
+#include <M7_lib/io/HDF5Wrapper.h>
 
 #include "HamiltonianFileReader.h"
 #include "FortranNamelistReader.h"
@@ -32,6 +33,7 @@ struct FcidumpInfo {
     const uintv_t m_orbsym;
     FcidumpInfo(std::string fname, bool uhf, bool relativistic, uint_t nelec, uint_t nsite, int ms2, uintv_t orbsym);
     FcidumpInfo(const FortranNamelistReader& reader);
+    FcidumpInfo(const hdf5::FileReader& reader);
 
     FcidumpInfo(std::string fname);
 };

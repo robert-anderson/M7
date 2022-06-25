@@ -20,6 +20,15 @@ FcidumpInfo::FcidumpInfo(const FortranNamelistReader &reader) :
                     reader.read_int("MS2", sys::frm::c_undefined_ms2),
                     integer::dec(reader.read_uints("ORBSYM", {}))){}
 
+FcidumpInfo::FcidumpInfo(const hdf5::FileReader &reader) :
+        FcidumpInfo(reader.m_fname,
+                    reader.read_attr<int>("UHF", 0),
+                    reader.read_attr<int>("TREL", 0),
+                    reader.read_attr<uint64_t>("NELEC", 0ul),
+                    reader.read_attr<uint64_t>("NORB", 0ul),
+                    reader.read_attr<int>("MS2", sys::frm::c_undefined_ms2),
+                    integer::dec(reader.read_attr<std::vector<uint64_t>>("ORBSYM", {}))){}
+
 FcidumpInfo::FcidumpInfo(std::string fname) : FcidumpInfo(FortranNamelistReader(fname)){}
 
 FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) :
