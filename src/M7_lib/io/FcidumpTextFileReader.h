@@ -2,8 +2,8 @@
 // Created by Robert J. Anderson on 15/07/2020.
 //
 
-#ifndef M7_FCIDUMPFILEREADER_H
-#define M7_FCIDUMPFILEREADER_H
+#ifndef M7_FCIDUMPTEXTFILEREADER_H
+#define M7_FCIDUMPTEXTFILEREADER_H
 
 #include <M7_lib/defs.h>
 #include <M7_lib/io/Logging.h>
@@ -26,7 +26,7 @@ static constexpr std::array<uinta_t<4>, 8> orderings{
         }
 };
 
-struct FcidumpFileReader : public HamTextFileReader {
+struct FcidumpTextFileReader : public HamTextFileReader {
     /**
      * spin-resolved FCIDUMPs index in spinorbs, which may not or may not be spin-major, depending on the program they
      * were generated for. E.g. NECI assumes spin-minor ordering, so if the FCIDUMP supplied was intended for use with
@@ -38,7 +38,7 @@ struct FcidumpFileReader : public HamTextFileReader {
     bool m_spin_conserving_1e = true;
     bool m_spin_conserving_2e = true;
 
-    FcidumpFileReader(const std::string &fname, bool spin_major);
+    FcidumpTextFileReader(const std::string &fname, bool spin_major);
 
     bool spin_conserving() const;
 
@@ -60,4 +60,4 @@ struct FcidumpFileReader : public HamTextFileReader {
 
 };
 
-#endif //M7_FCIDUMPFILEREADER_H
+#endif //M7_FCIDUMPTEXTFILEREADER_H

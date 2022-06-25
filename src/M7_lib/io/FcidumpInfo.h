@@ -22,4 +22,11 @@ struct FcidumpInfo {
     FcidumpInfo(std::string fname);
 };
 
+struct EbdumpInfo : FcidumpInfo {
+    const uint_t m_nmode;
+    EbdumpInfo(const FortranNamelistReader& reader):
+            FcidumpInfo(reader), m_nmode(reader.read_int("NMODE")){}
+    EbdumpInfo(std::string fname): EbdumpInfo(FortranNamelistReader(fname)){}
+};
+
 #endif //M7_FCIDUMPINFO_H

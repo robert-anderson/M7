@@ -2,11 +2,11 @@
 // Created by Robert J. Anderson on 05/11/2020.
 //
 
-#include "FcidumpFileReader.h"
+#include "FcidumpTextFileReader.h"
 #include "M7_lib/util/Exsig.h"
 #include "M7_lib/basis/BasisData.h"
 
-FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) :
+FcidumpTextFileReader::FcidumpTextFileReader(const std::string &fname, bool spin_major) :
         HamTextFileReader(fname, 4), m_info(FortranNamelistReader(fname)), m_spin_major(spin_major) {
     auto nsite = m_info.m_nsite;
     if (m_info.m_spin_resolved) {
@@ -28,28 +28,28 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
     else log::info("FCIDUMP file does NOT conserve spin in 2 particle integrals");
 }
 
-bool FcidumpFileReader::spin_conserving() const {
+bool FcidumpTextFileReader::spin_conserving() const {
     return m_spin_conserving_1e && m_spin_conserving_2e;
 }
 
-void FcidumpFileReader::convert_inds(uintv_t &inds) {
+void FcidumpTextFileReader::convert_inds(uintv_t &inds) {
     if (!m_info.m_spin_resolved || m_spin_major) return;
     for (auto &ind: inds)
         ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_info.m_nsite : 0));
 }
 
-bool FcidumpFileReader::next(uintv_t &inds, ham_t &v) {
+bool FcidumpTextFileReader::next(uintv_t &inds, ham_t &v) {
     if (!HamTextFileReader::next(inds, v)) return false;
     convert_inds(inds);
     return true;
 }
 
-uint_t FcidumpFileReader::ranksig(const uintv_t &inds) const {
+uint_t FcidumpTextFileReader::ranksig(const uintv_t &inds) const {
     auto nset_inds = HamTextFileReader::nset_ind(inds);
     return exsig::encode(nset_inds/2, nset_inds/2, 0, 0);
 }
 
-uint_t FcidumpFileReader::exsig(const uintv_t &inds, uint_t ranksig) const {
+uint_t FcidumpTextFileReader::exsig(const uintv_t &inds, uint_t ranksig) const {
     switch (ranksig) {
         case 0ul: return 0ul;
         case exsig::ex_single:
@@ -63,6 +63,6 @@ uint_t FcidumpFileReader::exsig(const uintv_t &inds, uint_t ranksig) const {
     }
 }
 
-bool FcidumpFileReader::inds_in_range(const uintv_t &inds) const {
+bool FcidumpTextFileReader::inds_in_range(const uintv_t &inds) const {
     return std::all_of(inds.cbegin(), inds.cend(), [this](uint_t i){return i<=m_info.m_norb_distinct;});
 }

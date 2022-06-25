@@ -26,7 +26,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo& info, bool 
 
     REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),m_basis.ncoeff_ind(),"site map size incorrect");
 
-    FcidumpFileReader file_reader(info.m_fname, spin_major);
+    FcidumpTextFileReader file_reader(info.m_fname, spin_major);
     m_complex_valued = file_reader.m_complex_valued;
 
     using namespace ham;

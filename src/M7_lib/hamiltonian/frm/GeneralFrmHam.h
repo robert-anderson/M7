@@ -8,7 +8,7 @@
 #include "FrmHam.h"
 #include "M7_lib/integrals/IntegralArray1e.h"
 #include "M7_lib/integrals/IntegralArray2e.h"
-#include "M7_lib/io/FcidumpFileReader.h"
+#include "M7_lib/io/FcidumpTextFileReader.h"
 
 struct GeneralFrmHam : FrmHam {
 

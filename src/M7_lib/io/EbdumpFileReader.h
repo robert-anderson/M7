@@ -5,14 +5,7 @@
 #ifndef M7_EBDUMPFILEREADER_H
 #define M7_EBDUMPFILEREADER_H
 
-#include "FcidumpFileReader.h"
-
-struct EbdumpInfo : FcidumpInfo {
-    const uint_t m_nmode;
-    EbdumpInfo(const FortranNamelistReader& reader):
-        FcidumpInfo(reader), m_nmode(reader.read_int("NMODE")){}
-    EbdumpInfo(std::string fname): EbdumpInfo(FortranNamelistReader(fname)){}
-};
+#include "FcidumpTextFileReader.h"
 
 struct EbdumpFileReader : HamTextFileReader {
     const EbdumpInfo m_info;

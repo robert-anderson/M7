@@ -9,7 +9,7 @@ target_sources(M7_lib
         EbdumpFileReader.cpp
         EbdumpFileReader.h
         FcidumpFileReader.cpp
-        FcidumpFileReader.h
+        FcidumpTextFileReader.h
         FcidumpInfo.cpp
         FcidumpInfo.h
         FciqmcStats.cpp

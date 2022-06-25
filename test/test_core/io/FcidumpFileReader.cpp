@@ -3,7 +3,7 @@
 //
 
 #include "test_core/defs.h"
-#include "M7_lib/io/FcidumpFileReader.h"
+#include "M7_lib/io/FcidumpTextFileReader.h"
 
 TEST(FcidumpInfo, EmptyFilename) {
     FcidumpInfo header("");
@@ -16,7 +16,7 @@ TEST(FcidumpInfo, EmptyFilename) {
 }
 
 TEST(FcidumpFileReader, Real_6orb) {
-    FcidumpFileReader file_reader(PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", false);
+    FcidumpTextFileReader file_reader(PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 6);
@@ -41,7 +41,7 @@ TEST(FcidumpFileReader, Real_6orb) {
 }
 
 TEST(FcidumpFileReader, Integer_8orb) {
-    FcidumpFileReader file_reader(PROJECT_ROOT"/assets/Hubbard_U4_8site/FCIDUMP", false);
+    FcidumpTextFileReader file_reader(PROJECT_ROOT"/assets/Hubbard_U4_8site/FCIDUMP", false);
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 8);
@@ -66,7 +66,7 @@ TEST(FcidumpFileReader, Integer_8orb) {
 }
 
 TEST(FcidumpFileReader, Molcas) {
-    FcidumpFileReader file_reader(PROJECT_ROOT"/assets/O2_Molcas/FCIDUMP", false);
+    FcidumpTextFileReader file_reader(PROJECT_ROOT"/assets/O2_Molcas/FCIDUMP", false);
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 6);
@@ -85,8 +85,8 @@ TEST(FcidumpFileReader, Molcas) {
 }
 
 #ifdef ENABLE_COMPLEX
-TEST(FcidumpFileReader, Complex_10orb){
-    FcidumpFileReader file_reader(PROJECT_ROOT"/assets/DHF_Be_STO-3G/FCIDUMP", false);
+TEST(FcidumpTextFileReader, Complex_10orb){
+    FcidumpTextFileReader file_reader(PROJECT_ROOT"/assets/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_EQ(file_reader.m_nspatorb, 5);
     uintv_t uintv_t(4);
     ham_t v;

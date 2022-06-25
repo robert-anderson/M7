@@ -4,7 +4,7 @@
 
 #include "test_core/defs.h"
 #include "M7_lib/io/HDF5Wrapper.h"
-#include "M7_lib/io/FcidumpFileReader.h"
+#include "M7_lib/io/FcidumpTextFileReader.h"
 
 TEST(Hdf5FcidumpReader, Header) {
     hdf5::FileReader fr(PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5");
