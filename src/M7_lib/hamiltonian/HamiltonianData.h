@@ -76,7 +76,7 @@ namespace ham {
         bool conserving() const;
     };
 
-    static constexpr double element_tol() {return 1e-12;}
+    static constexpr double c_element_tol = 1e-12;
     /**
      * @param elem
      *  hamiltonian matrix element
@@ -84,7 +84,7 @@ namespace ham {
      *  true if the magnitude of elem exceeds hard-coded minimum
      */
     static bool is_significant(ham_t elem) {
-        return fptol::nearly_zero(elem, element_tol());
+        return std::abs(elem) >= c_element_tol;
     }
 }
 

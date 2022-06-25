@@ -32,7 +32,7 @@ struct Table : TableBase {
 
     Table(const Table<row_t> &other) : Table(other.m_row) {
         ASSERT(static_cast<Row &>(m_row).m_table == this);
-        *this = other;
+        // only set the layout, not the buffer, since the result is not yet associated with a buffer
     }
 
     virtual ~Table(){}
