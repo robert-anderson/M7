@@ -310,7 +310,6 @@ void Solver::output_stats() {
         stats.m_nocc_mbf = m_wf.m_nocc_mbf.m_reduced;
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
-        stats.m_reweighting_factor = m_prop.m_shift.m_reweighter.m_total;
         m_stats->commit();
 
         auto &timing_stats = m_timing_stats->m_row;

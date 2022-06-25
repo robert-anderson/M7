@@ -4,56 +4,6 @@
 
 #include "Shift.h"
 
-Reweighter::Reweighter(const conf::Shift &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
-        m_opts(opts),
-        m_const_shift(wf_fmt.m_shape, opts.m_init),
-        m_active("accumulating reweighting statistics", wf_fmt.m_nelement, "WF part"),
-        m_histories(wf_fmt.m_nelement, std::queue<ham_comp_t>()),
-        m_total(wf_fmt.m_shape, 1.0) {
-}
-
-void Reweighter::update(uint_t icycle, uint_t ipart, bool begin_cond, ham_comp_t av_shift) {
-    if (m_opts.m_reweight.m_ncycle == 0) return;
-    if (m_active[ipart].update(icycle, begin_cond)) {
-        m_const_shift[ipart] = av_shift;
-        log::info("setting constant shift for reweighting on WF part {} to current average shift {}",
-                  ipart, m_const_shift[ipart]);
-    }
-}
-
-void Reweighter::add(uint_t ipart, ham_comp_t shift, double tau) {
-    if (m_opts.m_reweight.m_ncycle == 0) return;
-    if (!m_active[ipart]) return;
-    add_to_history(ipart, std::exp(tau * (m_const_shift[ipart] - shift)));
-    ASSERT(product_chk());
-    ASSERT(m_histories[ipart].size() <= m_opts.m_reweight.m_ncycle);
-}
-
-void Reweighter::add_to_history(uint_t ipart, const ham_comp_t &v) {
-    auto &history = m_histories[ipart];
-    history.push(v);
-    m_total[ipart] *= v;
-    if (history.size() == m_opts.m_reweight.m_ncycle) {
-        auto oldest_factor = history.front();
-        m_total[ipart] /= oldest_factor;
-        history.pop();
-    }
-    // else we're still filling.
-}
-
-bool Reweighter::product_chk() const {
-    for (uint_t ipart=0ul; ipart<m_const_shift.nelement(); ++ipart) {
-        ham_comp_t total = 1.0;
-        auto histories_copy = m_histories[ipart];
-        while (!histories_copy.empty()) {
-            total *= histories_copy.front();
-            histories_copy.pop();
-        }
-        if (!fptol::numeric_equal(total, m_total[ipart])) return false;
-    }
-    return true;
-}
-
 Shift::Shift(const conf::Document &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         m_opts(opts),
         m_nwalker_last_period(wf_fmt.m_shape, std::numeric_limits<wf_comp_t>::max()),
@@ -61,8 +11,7 @@ Shift::Shift(const conf::Document &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         m_avg_value_histories(wf_fmt.m_nelement, std::queue<ham_comp_t>()),
         m_avg_values(wf_fmt.m_shape, opts.m_shift.m_init),
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
-        m_nwalker_target("nwalker_target", opts.m_propagator.m_nw_target),
-        m_reweighter(opts.m_shift, wf_fmt){
+        m_nwalker_target("nwalker_target", opts.m_propagator.m_nw_target){
     m_nwalker_last_period.zero();
     DEBUG_ASSERT_FALSE(m_variable_mode, "Shift should not initially be in variable mode");
 }
@@ -97,12 +46,6 @@ void Shift::update(const Wavefunction &wf, const uint_t &icycle, const double &t
         if (variable_mode && a) {
             auto rate =  nw / m_nwalker_last_period[ipart];
             m_values[ipart] -= m_opts.m_shift.m_damp * std::log(std::abs(rate)) / (tau * a);
-            if (m_opts.m_shift.m_reweight.enabled()) {
-                bool reweight_begin_cond = icycle >= variable_mode.icycle_start() + m_opts.m_shift.m_reweight.m_delay;
-                m_reweighter.update(icycle, ipart, reweight_begin_cond, get_average(ipart));
-                m_reweighter.add(ipart, m_values[ipart], tau);
-            }
-
         }
         add_to_average();
     }
