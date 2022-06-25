@@ -3,6 +3,7 @@
 #include <M7_lib/parallel/MPIWrapper.h>
 #include <M7_lib/dynamics/FciqmcCalculation.h>
 #include <M7_lib/io/YamlWrapper.h>
+#include <M7_lib/field/Mbf.h>
 #include <M7_lib/conf/Conf.h>
 
 int main(int argc, char **argv) {
@@ -15,7 +16,7 @@ int main(int argc, char **argv) {
      * log compile-time defintions
      */
     log::info("M7 {} build", c_enable_debug ? "DEBUG" : "RELEASE");
-    log::info("Many-body basis definition: {}", dtype::mbf_type_name<c_mbf_type_ind>());
+    log::info("Many-body basis definition: {}", mbf::name<c_mbf_type_ind>());
     log::info("Walker arithmetic type: {}", c_enable_complex_wf ? "complex" : "real");
 
     if (argc == 1) {
