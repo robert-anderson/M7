@@ -7,7 +7,7 @@
 
 
 EbdumpFileReader::EbdumpFileReader(const std::string& fname, bool spin_major) :
-        HamiltonianFileReader(fname, 3),
+        HamTextFileReader(fname, 3),
         m_info(FortranNamelistReader(fname)),
         m_norb_distinct((m_info.m_uhf ? 2 : 1)*m_info.m_nsite), m_spin_major(spin_major){}
 
@@ -46,7 +46,7 @@ void EbdumpFileReader::convert_inds(uintv_t& inds) {
 }
 
 bool EbdumpFileReader::next(uintv_t& inds, ham_t& v) {
-    if (!HamiltonianFileReader::next(inds, v)) return false;
+    if (!HamTextFileReader::next(inds, v)) return false;
     convert_inds(inds);
     return true;
 }

@@ -2,9 +2,9 @@
 // Created by Robert J. Anderson on 19/08/2021.
 //
 
-#include "HamiltonianFileReader.h"
+#include "HamTextFileReader.h"
 
-uint_t HamiltonianFileReader::iline_fn(const std::string &fname) {
+uint_t HamTextFileReader::iline_fn(const std::string &fname) {
     FileReader file_reader(fname);
     std::string line;
     uint_t iline=0ul;
@@ -15,7 +15,7 @@ uint_t HamiltonianFileReader::iline_fn(const std::string &fname) {
     return ~0ul;
 }
 
-HamiltonianFileReader::HamiltonianFileReader(const std::string &fname, uint_t nind) :
+HamTextFileReader::HamTextFileReader(const std::string &fname, uint_t nind) :
         NumericCsvFileReader(fname, ncolumn(fname, iline_fn)),
         m_complex_valued(m_ncolumn==nind+2) {
     REQUIRE_GT(m_ncolumn, nind, "not enough columns in body of file "+fname);
@@ -25,7 +25,7 @@ HamiltonianFileReader::HamiltonianFileReader(const std::string &fname, uint_t ni
     }
 }
 
-bool HamiltonianFileReader::next(uintv_t &inds, ham_t &v) {
+bool HamTextFileReader::next(uintv_t &inds, ham_t &v) {
     auto result = NumericCsvFileReader::next(m_work_tokens);
     if (!result) return false;
     REQUIRE_EQ(m_work_tokens.size(), m_ncolumn, "invalid line found in file "+m_fname);
@@ -39,14 +39,14 @@ bool HamiltonianFileReader::next(uintv_t &inds, ham_t &v) {
     return true;
 }
 
-uint_t HamiltonianFileReader::nset_ind(const uintv_t &inds) {
+uint_t HamTextFileReader::nset_ind(const uintv_t &inds) {
     return std::count_if(inds.begin(), inds.end(), [](const uint_t &a) { return a != ~0ul; });
 }
 
-uint_t HamiltonianFileReader::exsig(const uintv_t &inds) const {
+uint_t HamTextFileReader::exsig(const uintv_t &inds) const {
     return exsig(inds, ranksig(inds));
 }
 
-void HamiltonianFileReader::decrement_inds(uintv_t &inds) {
+void HamTextFileReader::decrement_inds(uintv_t &inds) {
     for (auto &i:inds) i = ((i == 0 || i == ~0ul) ? ~0ul : i - 1);
 }

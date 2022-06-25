@@ -9,8 +9,9 @@
 #include <M7_lib/io/Logging.h>
 #include <M7_lib/io/HDF5Wrapper.h>
 
-#include "HamiltonianFileReader.h"
+#include "HamTextFileReader.h"
 #include "FortranNamelistReader.h"
+#include "FcidumpInfo.h"
 
 static constexpr std::array<uinta_t<4>, 8> orderings{
         {
@@ -25,20 +26,7 @@ static constexpr std::array<uinta_t<4>, 8> orderings{
         }
 };
 
-struct FcidumpInfo {
-    const std::string m_fname;
-    const bool m_uhf, m_relativistic, m_spin_resolved;
-    const uint_t m_nelec, m_nsite, m_nspinorb, m_norb_distinct;
-    const int m_ms2;
-    const uintv_t m_orbsym;
-    FcidumpInfo(std::string fname, bool uhf, bool relativistic, uint_t nelec, uint_t nsite, int ms2, uintv_t orbsym);
-    FcidumpInfo(const FortranNamelistReader& reader);
-    FcidumpInfo(const hdf5::FileReader& reader);
-
-    FcidumpInfo(std::string fname);
-};
-
-struct FcidumpFileReader : public HamiltonianFileReader {
+struct FcidumpFileReader : public HamTextFileReader {
     /**
      * spin-resolved FCIDUMPs index in spinorbs, which may not or may not be spin-major, depending on the program they
      * were generated for. E.g. NECI assumes spin-minor ordering, so if the FCIDUMP supplied was intended for use with

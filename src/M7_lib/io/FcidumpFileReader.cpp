@@ -6,33 +6,8 @@
 #include "M7_lib/util/Exsig.h"
 #include "M7_lib/basis/BasisData.h"
 
-FcidumpInfo::FcidumpInfo(std::string fname, bool uhf, bool relativistic, uint_t nelec, uint_t nsite, int ms2, uintv_t orbsym):
-        m_fname(fname), m_uhf(uhf), m_relativistic(relativistic), m_spin_resolved(m_uhf || m_relativistic),
-        m_nelec(nelec), m_nsite(nsite), m_nspinorb(m_spin_resolved ? m_nsite*2 : m_nsite),
-        m_norb_distinct(m_spin_resolved ? m_nspinorb : m_nsite),
-        m_ms2(ms2), m_orbsym(orbsym.empty() ? uintv_t(m_nsite, 1) : orbsym){
-    REQUIRE_EQ(m_orbsym.size(), m_nsite, "invalid ORBSYM specified in FCIDUMP file");
-}
-
-FcidumpInfo::FcidumpInfo(const FortranNamelistReader &reader) :
-        FcidumpInfo(reader.m_fname, reader.read_bool("UHF"), reader.read_bool("TREL"),
-                    reader.read_uint("NELEC"), reader.read_uint("NORB"),
-                    reader.read_int("MS2", sys::frm::c_undefined_ms2),
-                    integer::dec(reader.read_uints("ORBSYM", {}))){}
-
-FcidumpInfo::FcidumpInfo(const hdf5::FileReader &reader) :
-        FcidumpInfo(reader.m_fname,
-                    reader.read_attr<int>("UHF", 0),
-                    reader.read_attr<int>("TREL", 0),
-                    reader.read_attr<uint64_t>("NELEC", 0ul),
-                    reader.read_attr<uint64_t>("NORB", 0ul),
-                    reader.read_attr<int>("MS2", sys::frm::c_undefined_ms2),
-                    integer::dec(reader.read_attr<std::vector<uint64_t>>("ORBSYM", {}))){}
-
-FcidumpInfo::FcidumpInfo(std::string fname) : FcidumpInfo(FortranNamelistReader(fname)){}
-
 FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) :
-        HamiltonianFileReader(fname, 4), m_info(FortranNamelistReader(fname)), m_spin_major(spin_major) {
+        HamTextFileReader(fname, 4), m_info(FortranNamelistReader(fname)), m_spin_major(spin_major) {
     auto nsite = m_info.m_nsite;
     if (m_info.m_spin_resolved) {
         uintv_t inds(4);
@@ -64,13 +39,13 @@ void FcidumpFileReader::convert_inds(uintv_t &inds) {
 }
 
 bool FcidumpFileReader::next(uintv_t &inds, ham_t &v) {
-    if (!HamiltonianFileReader::next(inds, v)) return false;
+    if (!HamTextFileReader::next(inds, v)) return false;
     convert_inds(inds);
     return true;
 }
 
 uint_t FcidumpFileReader::ranksig(const uintv_t &inds) const {
-    auto nset_inds = HamiltonianFileReader::nset_ind(inds);
+    auto nset_inds = HamTextFileReader::nset_ind(inds);
     return exsig::encode(nset_inds/2, nset_inds/2, 0, 0);
 }
 

@@ -9,7 +9,7 @@ BosdumpHeader::BosdumpHeader(const std::string &fname) :
         FortranNamelistReader(fname), m_nmode(read_int("NMODE")), m_nboson(read_int("NBOSON")) {}
 
 BosdumpFileReader::BosdumpFileReader(const std::string &fname) :
-        HamiltonianFileReader(fname, 4), m_header(BosdumpHeader(fname)) {}
+        HamTextFileReader(fname, 4), m_header(BosdumpHeader(fname)) {}
 
 uint_t BosdumpFileReader::ranksig(const uintv_t &inds) const {
     DEBUG_ASSERT_EQ(inds.size(), 4ul, "incorrect maximum number of SQ operator indices");

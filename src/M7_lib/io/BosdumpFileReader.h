@@ -5,7 +5,7 @@
 #ifndef M7_BOSDUMPFILEREADER_H
 #define M7_BOSDUMPFILEREADER_H
 
-#include "HamiltonianFileReader.h"
+#include "HamTextFileReader.h"
 #include "FortranNamelistReader.h"
 
 struct BosdumpHeader : FortranNamelistReader {
@@ -13,7 +13,7 @@ struct BosdumpHeader : FortranNamelistReader {
     BosdumpHeader(const std::string& fname);
 };
 
-struct BosdumpFileReader : HamiltonianFileReader {
+struct BosdumpFileReader : HamTextFileReader {
     BosdumpHeader m_header;
 
     BosdumpFileReader(const std::string &fname);

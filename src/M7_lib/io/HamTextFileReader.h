@@ -2,8 +2,8 @@
 // Created by Robert J. Anderson on 19/08/2021.
 //
 
-#ifndef M7_HAMILTONIANFILEREADER_H
-#define M7_HAMILTONIANFILEREADER_H
+#ifndef M7_HAMTEXTFILEREADER_H
+#define M7_HAMTEXTFILEREADER_H
 
 #include "CsvFileReader.h"
 #include "FortranNamelistReader.h"
@@ -12,7 +12,7 @@
  * base class for all Hamiltonian-defining files with a Fortran namelist header, and all values defined at the beginning
  * of the line with indices following
  */
-class HamiltonianFileReader : public NumericCsvFileReader {
+class HamTextFileReader : public NumericCsvFileReader {
 
     std::vector<std::string> m_work_tokens;
 
@@ -21,7 +21,7 @@ public:
 
     static uint_t iline_fn(const std::string& fname);
 
-    HamiltonianFileReader(const std::string &fname, uint_t nind);
+    HamTextFileReader(const std::string &fname, uint_t nind);
 
     bool next(uintv_t &inds, ham_t &v);
 
@@ -40,4 +40,4 @@ private:
 };
 
 
-#endif //M7_HAMILTONIANFILEREADER_H
+#endif //M7_HAMTEXTFILEREADER_H

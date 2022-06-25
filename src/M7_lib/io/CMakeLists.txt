@@ -10,6 +10,8 @@ target_sources(M7_lib
         EbdumpFileReader.h
         FcidumpFileReader.cpp
         FcidumpFileReader.h
+        FcidumpInfo.cpp
+        FcidumpInfo.h
         FciqmcStats.cpp
         FciqmcStats.h
         FileReader.cpp
@@ -18,8 +20,8 @@ target_sources(M7_lib
         FortranNamelistReader.h
         HDF5Wrapper.cpp
         HDF5Wrapper.h
-        HamiltonianFileReader.cpp
-        HamiltonianFileReader.h
+        HamTextFileReader.cpp
+        HamTextFileReader.h
         InteractiveVariable.cpp
         InteractiveVariable.h
         Logging.cpp

@@ -14,7 +14,7 @@ struct EbdumpInfo : FcidumpInfo {
     EbdumpInfo(std::string fname): EbdumpInfo(FortranNamelistReader(fname)){}
 };
 
-struct EbdumpFileReader : HamiltonianFileReader {
+struct EbdumpFileReader : HamTextFileReader {
     const EbdumpInfo m_info;
     const uint_t m_norb_distinct;
     const bool m_spin_major;
