@@ -41,16 +41,16 @@ struct Archivable {
     virtual ~Archivable() {}
 
 protected:
-    virtual void load_fn(hdf5::GroupReader &parent) = 0;
+    virtual void load_fn(const hdf5::NodeReader &parent) = 0;
 
-    virtual void save_fn(hdf5::GroupWriter &parent) = 0;
+    virtual void save_fn(const hdf5::NodeWriter &parent) = 0;
 
 public:
-    void load(hdf5::GroupReader &parent);
+    void load(const hdf5::GroupReader &parent);
 
-    void save(hdf5::GroupWriter &parent);
+    void save(const hdf5::GroupWriter &parent);
 
-    void chkpt(hdf5::GroupWriter &parent);
+    void chkpt(const hdf5::GroupWriter &parent);
 };
 
 struct Metadata : Archivable {
@@ -82,14 +82,14 @@ struct Archive {
 
 private:
 
-    void save_metadata(hdf5::FileWriter &fw);
+    void save_metadata(const hdf5::FileWriter &fw);
 
     /**
      * check that metadata in loaded file is compatible with options of the current execution
      */
-    void verify_metadata(hdf5::FileReader &fr);
+    void verify_metadata(const hdf5::FileReader &fr);
 
-    void save(hdf5::FileWriter& fw);
+    void save(const hdf5::FileWriter& fw);
 
 
 public:

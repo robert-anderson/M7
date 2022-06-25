@@ -13,7 +13,7 @@ Archivable::Archivable(std::string name, const conf::Archivable& opts) :
 Archivable::Archivable(std::string name, const conf::Archive& opts) :
         Archivable(std::move(name), opts.do_load(), opts.do_save(), opts.do_chkpts()) {}
 
-void Archivable::load(hdf5::GroupReader& parent) {
+void Archivable::load(const hdf5::GroupReader& parent) {
     if (m_load) {
         REQUIRE_TRUE_ALL(parent.child_exists(m_name),
                          log::format("Load failed: \"{}\" does not exist in archive", m_name));
@@ -22,14 +22,14 @@ void Archivable::load(hdf5::GroupReader& parent) {
     }
 }
 
-void Archivable::save(hdf5::GroupWriter& parent) {
+void Archivable::save(const hdf5::GroupWriter& parent) {
     if (m_save) {
         log::info("saving \"{}\" to archive", m_name);
         save_fn(parent);
     }
 }
 
-void Archivable::chkpt(hdf5::GroupWriter& parent) {
+void Archivable::chkpt(const hdf5::GroupWriter& parent) {
     if (m_chkpt) {
         log::info("saving \"{}\" checkpoint to archive", m_name);
         save_fn(parent);
@@ -57,18 +57,18 @@ Archive::~Archive() {
     save();
 }
 
-void Archive::save_metadata(hdf5::FileWriter& fw) {
-    hdf5::GroupWriter gw("metadata", fw);
+void Archive::save_metadata(const hdf5::FileWriter& fw) {
+    hdf5::GroupWriter gw(fw, "metadata");
     gw.save("timestamp", std::round(std::chrono::steady_clock::now().time_since_epoch().count()));
 }
 
-void Archive::verify_metadata(hdf5::FileReader& /*fr*/) {
+void Archive::verify_metadata(const hdf5::FileReader& /*fr*/) {
 
 }
 
-void Archive::save(hdf5::FileWriter& fw) {
+void Archive::save(const hdf5::FileWriter& fw) {
     save_metadata(fw);
-    hdf5::GroupWriter gw("archive", fw);
+    hdf5::GroupWriter gw(fw, "archive");
     for (auto ptr: m_members) ptr->save(gw);
 }
 
@@ -76,7 +76,7 @@ void Archive::load() {
     if (!m_do_load) return;
     hdf5::FileReader fr(m_opts.m_archive.m_load_path);
     verify_metadata(fr);
-    hdf5::GroupReader gr("archive", fr);
+    hdf5::GroupReader gr(fr, "archive");
     for (auto ptr: m_members) ptr->load(gr);
 }
 

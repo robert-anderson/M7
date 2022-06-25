@@ -39,11 +39,11 @@ public:
     }
 
 protected:
-    void load_fn(hdf5::GroupReader& /*parent*/) override {
+    void load_fn(const hdf5::NodeReader& /*parent*/) override {
 
     }
 
-    void save_fn(hdf5::GroupWriter& /*parent*/) override {
+    void save_fn(const hdf5::NodeWriter& /*parent*/) override {
 
     }
 

@@ -16,23 +16,16 @@
 #include <M7_lib/nd/NdFormat.h>
 
 namespace hdf5 {
-
-    static std::vector<hsize_t> convert_dims(const uintv_t &item_dims) {
-        std::vector<hsize_t> out;
-        out.reserve(item_dims.size());
-        for (auto &i: item_dims) out.push_back(i);
-        return out;
-    }
-
 #ifdef H5_HAVE_PARALLEL
-    constexpr bool have_parallel = true;
+    constexpr bool c_have_parallel = true;
 #else
     constexpr bool c_have_parallel = false;
 #endif
 
-    static_assert(have_parallel, "HDF5 must be compiled with parallel functionality");
+    static_assert(c_have_parallel, "HDF5 must be compiled with parallel functionality");
 
-    static const std::array<hid_t, 12> types =
+
+    static const std::array<hid_t, 12> c_types =
             {0, H5T_NATIVE_CHAR, H5T_NATIVE_SHORT, H5T_NATIVE_INT32, H5T_NATIVE_LONG,
              H5T_NATIVE_UCHAR, H5T_NATIVE_USHORT, H5T_NATIVE_UINT32, H5T_NATIVE_ULONG,
              H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE};
@@ -77,37 +70,55 @@ namespace hdf5 {
     const hid_t &type() {
         typedef arith::comp_t<T> comp_t;
         static_assert(type_ind<comp_t>(), "type has no HDF5 equivalent");
-        return types[type_ind<comp_t>()];
+        return c_types[type_ind<comp_t>()];
     }
 
-    struct Group;
+    /**
+     * @param h5type
+     *  type index
+     * @return
+     *  size in bytes of the type identified by the given HDF5 type index
+     */
+    hsize_t type_size(hid_t h5type);
 
-    struct File {
-        bool m_writemode;
-        hid_t m_handle;
+    struct StringType {
+        const hid_t m_handle;
+        const hsize_t m_nchar; // including null terminator
 
-        File(std::string name, bool writemode) : m_writemode(writemode) {
-            auto plist_id = H5Pcreate(H5P_FILE_ACCESS);
-            H5Pset_fapl_mpio(plist_id, MPI_COMM_WORLD, MPI_INFO_NULL);
-
-            if (writemode) {
-                m_handle = H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
-                REQUIRE_NE(m_handle, 0,
-                                "HDF5 file could not be opened for writing. It may be locked by another program");
-            } else {
-                REQUIRE_TRUE(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
-                m_handle = H5Fopen(name.c_str(), H5F_ACC_RDONLY, plist_id);
-            }
-            H5Pclose(plist_id);
+    private:
+        static hsize_t size_max(const std::vector<std::string>& vec) {
+            if (vec.empty()) return 0ul;
+            return std::max_element(vec.cbegin(), vec.cend(),
+                 [](const std::string& s1, const std::string& s2){return s1.size()>s2.size();})->size();
         }
 
-        ~File() {
-            auto status = H5Fclose(m_handle);
-            REQUIRE_TRUE(!status, "HDF5 Error on closing file");
+        /*
+         * use dummy arg so as not to have same prototype as public ctor in case hsize_t coincides with hid_t
+         */
+        StringType(hsize_t size, int /*dummy*/): m_handle(H5Tcopy(H5T_C_S1)), m_nchar(size+1) {
+            auto status = H5Tset_size(m_handle, m_nchar);
+            DEBUG_ONLY(status);
+            DEBUG_ASSERT_FALSE(status, "HDF5 string type resizing failed");
+            DEBUG_ASSERT_EQ(H5Tget_size(m_handle), m_nchar, "string length at odds with type length");
         }
+    public:
 
-        Group subgroup(std::string name);
+        StringType(hid_t handle): m_handle(handle), m_nchar(H5Tget_size(m_handle)){}
+
+        StringType(const std::string& str): StringType(str.size(), 0) {}
+
+        StringType(const std::vector<std::string>& str_vec): StringType(size_max(str_vec), 0) {}
+
+        ~StringType() {
+            auto status = H5Tclose(m_handle);
+            DEBUG_ONLY(status);
+            DEBUG_ASSERT_FALSE(status, "HDF5 string type release failed");
+        }
+        operator hid_t() const {
+            return m_handle;
+        }
     };
+
 
     struct PList {
         hid_t m_handle;
@@ -133,143 +144,291 @@ namespace hdf5 {
         }
     };
 
-    struct AttributeWriterBase {
-        const hid_t m_parent_handle, m_h5type;
-        const uintv_t m_shape;
-        const uint_t m_nelement;
-        hid_t m_memspace_handle;
-        hid_t m_handle;
-
-        AttributeWriterBase(hid_t parent_handle, std::string name, const uintv_t &shape, hid_t h5type);
-
-        ~AttributeWriterBase();
-
+    struct DataSpace {
+        const hid_t m_handle;
+        const std::vector<hsize_t> m_shape;
+        const hsize_t m_nelement;
     private:
-        void write_bytes(const char *src);
+        std::vector<hsize_t> make_shape() const {
+            auto ndim = H5Sget_simple_extent_dims(m_handle, nullptr, nullptr);
+            std::vector<hsize_t> shape(ndim, 0);
+            H5Sget_simple_extent_dims(m_handle, shape.data(), nullptr);
+            return shape;
+        }
+    public:
+        DataSpace(hid_t handle): m_handle(handle), m_shape(make_shape()), m_nelement(nd::nelement(m_shape)){}
+        DataSpace(const std::vector<hsize_t>& shape):
+            DataSpace(H5Screate_simple(shape.size(), shape.data(), nullptr)){
+            REQUIRE_EQ(shape, m_shape, "given shape and shape reported by HDF5 do not agree");
+        };
+        ~DataSpace() {
+            H5Sclose(m_handle);
+        }
+    };
+
+
+    class AttrWriter {
+        const DataSpace m_space;
+        const hid_t m_h5type;
+        const hid_t m_handle;
 
     public:
+        AttrWriter(hid_t parent_handle, const std::string& name, const std::vector<hsize_t>& shape, hid_t h5type):
+            m_space(shape), m_h5type(h5type),
+            m_handle(H5Acreate(parent_handle, name.c_str(), m_h5type, m_space.m_handle, H5P_DEFAULT, H5P_DEFAULT)){}
+
+        void write_bytes(const char *src) const {
+            auto status = H5Awrite(m_handle, m_h5type, src);
+            DEBUG_ONLY(status);
+            DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
+        }
+
         template<typename T>
-        static void write(hid_t parent, std::string name, const std::vector<T> &src) {
-            AttributeWriterBase(parent, name, {src.size()}, type<T>()).write_bytes(
-                    reinterpret_cast<const char *>(src.data()));
-        }
-
-        static void write(hid_t parent, std::string name, const std::string &src);
-
-        static void write(hid_t parent, std::string name, const std::vector<std::string> &src);
-    };
-
-
-    struct AttributeReaderBase {
-        const hid_t m_parent_handle, m_h5type;
-        const uintv_t m_shape;
-        const uint_t m_nelement;
-        hid_t m_handle;
-
-        AttributeReaderBase(hid_t parent_handle, std::string name, const uintv_t &shape, hid_t h5type) :
-                m_parent_handle(parent_handle), m_h5type(h5type), m_shape(shape),
-                m_nelement(nd::nelement(shape)) {
-            m_handle = H5Aopen_name(m_parent_handle, name.c_str());
-        }
-
-        ~AttributeReaderBase() {
-            H5Aclose(m_handle);
+        void write(const T *src, hsize_t n) const {
+            REQUIRE_EQ(type<T>(), m_h5type, "element type is at odds with the stored type");
+            REQUIRE_EQ(n, m_space.m_nelement, "number of elements written must match that of the dataspace");
+            write_bytes(reinterpret_cast<const char*>(src));
         }
     };
 
-    template<typename T>
-    struct AttributeReader : AttributeReaderBase {
-        AttributeReader(hid_t parent_handle, std::string name, const uintv_t &shape) :
-                AttributeReaderBase(parent_handle, name, shape, type<T>()) {}
+    class AttrReader {
+        const hid_t m_handle;
+        const DataSpace m_space;
+    public:
+        const hid_t m_h5type;
 
-    private:
-        void read(char *dst) {
+        AttrReader(hid_t parent_handle, const std::string& name):
+            m_handle(H5Aopen(parent_handle, name.c_str(), H5P_DEFAULT)),
+            m_space(H5Aget_space(m_handle)), m_h5type(H5Aget_type(m_handle)) {}
+
+        void read_bytes(char *dst) const {
             auto status = H5Aread(m_handle, m_h5type, dst);
-            DEBUG_ASSERT_TRUE(!status, "HDF5 attribute read failed");
+            DEBUG_ONLY(status);
+            DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
         }
-
-    public:
-        void read(std::vector<T> &dst) {
-            MPI_REQUIRE(dst.size() == m_nelement, "Destination length is incompatible with specified shape");
-            read(reinterpret_cast<char *>(dst.data()));
-        }
-    };
-
-
-    struct FileBase {
-        static void check_is_hdf5(const std::string &name);
-
-        const hid_t m_handle;
-    protected:
-        FileBase(hid_t handle) : m_handle(handle) {}
-
-        ~FileBase() {
-            H5Fclose(m_handle);
-        }
-    };
-
-    struct FileWriter : FileBase {
-        FileWriter(std::string name);
-    };
-
-    struct FileReader : FileBase {
-        FileReader(std::string name);
-    };
-
-    /**
-     * parent class for HDF5 group I/O
-     *
-     * there are three different categories of object whose I/O is handled by this HDF5 wrapper:
-     *  1. Non-distributed primitive types and STL container specializations of primitive types
-     *  2. Non-distributed user-defined classes
-     *  3. Distributed user-defined classes (MappedTable)
-     *
-     * more complicated combinations of these are handled in the Archivable class, but the above are the building blocks.
-     *
-     * Categories 1 and 2 are typically for small metadata and verification information, writing these types requires
-     * the identification of a "definitive rank", defaulting to the root, whose value of the written data is taken to be
-     * the correct value to commit to disk.
-     *
-     * The most expensive category is 3 since this includes wavefunctions and multidimensional quantities. In recognition
-     * of this, the HDF5 files are opened in collective mode, and so even operations in categories 1 and 2 (which could
-     * be done in independent mode) involve null write operations on the non-definitive MPI rank, and all ranks read in
-     * the same value.
-     *
-     * save methods defined in the Writer subclass, and load methods defined in the Reader subclass are for category 1,
-     * i.e. the following types:
-     *  primitive
-     *  pointer to primitive (shaped)
-     *  vector of primitives
-     *  complex of primitives
-     *  pointer to complex of primitive (shaped)
-     *  vector of complex of primitives
-     * these are not user-defined classes and therefore we cannot define save and load methods on these objects, so
-     * these functions are handled in the subclass definitions below
-     *
-     */
-    struct GroupBase {
-        const std::string m_name;
-        const hid_t m_parent_handle;
-        const hid_t m_handle;
-    protected:
-        GroupBase(std::string name, hid_t parent_handle, hid_t handle);
-
-        ~GroupBase();
-    };
-
-    /**
-     * carries out all creation of datasets and Groups
-     */
-    struct GroupWriter : GroupBase {
-        GroupWriter(std::string name, const FileWriter &parent);
-
-        GroupWriter(std::string name, const GroupWriter &parent) :
-                GroupBase(name, parent.m_handle,
-                          H5Gcreate(parent.m_handle, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) {}
 
         template<typename T>
-        void write_attr(std::string name, const T &obj) {
-            AttributeWriterBase::write(m_handle, name, obj);
+        void read(T *dst, size_t n) const {
+            REQUIRE_EQ(type<T>(), m_h5type, "element type is at odds with the stored type");
+            REQUIRE_EQ(n, m_space.m_nelement, "number of elements read must be the number stored");
+            read_bytes(reinterpret_cast<char*>(dst));
+        }
+
+    };
+
+
+
+    struct Node {
+        const hid_t m_handle;
+        Node(hid_t handle): m_handle(handle){}
+        operator hid_t() const {
+            return m_handle;
+        }
+    };
+
+    struct NodeReader : Node {
+    protected:
+        H5O_info_t m_info;
+    public:
+        NodeReader(hid_t handle): Node(handle){
+            H5Oget_info(m_handle, &m_info);
+        }
+
+        template<typename T>
+        void read_attr(const std::string& name, const T& v) {
+            AttrReader attr(m_handle, name);
+            attr.read(&v, 1);
+        }
+
+        template<typename T>
+        void read_attr(const std::string& name, const std::vector<T>& v) {
+            AttrReader attr(m_handle, name);
+            attr.read(v.data(), v.size());
+        }
+
+        void read_attr(const std::string& name, const std::string& v) {
+            AttrReader attr(m_handle, name);
+            StringType(attr.m_h5type);
+            attr.read(const_cast<char*>(v.c_str()), 1);
+        }
+
+        bool child_exists(const std::string& name) const;
+
+        uint_t first_existing_child(const std::vector<std::string>& names) const;
+
+        uint_t nchild() const;
+
+        std::string child_name(uint_t ichild) const;
+
+        int child_type(uint_t i) const;
+
+        std::vector<std::string> child_names(int type=-1) const;
+
+
+        /**
+         * load a single value of a primitive type (HDF5 scalar dataset) from disk
+         * @tparam T
+         *  primitive type (any type for which type_ind<T>() is not ~0ul)
+         * @param name
+         *  key in the HDF5 Group in which the value is stored
+         * @param v
+         *  value to retrieve
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, T& v) const {
+            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
+            auto dspace_handle = H5Screate(H5S_SCALAR);
+            auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
+                                          H5P_DEFAULT, H5P_DEFAULT);
+            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void *>(&v));
+            REQUIRE_FALSE_ALL(status, "HDF5 Error on primitive type load");
+            H5Dclose(dset_handle);
+            H5Sclose(dspace_handle);
+        }
+
+        /**
+         * load a single value of a complex type (HDF5 simple dataset) to disk by reinterpreting the complex number as
+         * a length-2 array and reading a simple dataset from the file
+         * @tparam T
+         *  primitive type of the components of the complex number
+         * @param name
+         *  key in the HDF5 Group in which the value is stored
+         * @param v
+         *  value to store
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, std::complex<T> &v, uint_t irank=0ul) const {
+            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
+            load(name, reinterpret_cast<std::array<T, 2>&>(v)[0], irank);
+            load(name, reinterpret_cast<std::array<T, 2>&>(v)[1], irank);
+        }
+
+        /**
+         * load a multidimensional array (HDF5 simple dataset) of a primitive type from disk
+         * @tparam T
+         *  primitive type of the elements of the array
+         * @param name
+         *  key in the HDF5 Group in which the value is stored
+         * @param v
+         *  pointer to the beginning of the array data
+         * @param shape
+         *  vector of expected dimensional extents - throw error if this is not the same as the stored shape
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, T* v, const uintv_t& shape){
+            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
+            auto file_shape = get_dataset_shape(name);
+            REQUIRE_EQ_ALL(shape, file_shape, "expected a container of a different shape");
+            auto dims = convert::vector<hsize_t>(shape);
+            auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
+            auto dset_handle = H5Dopen1(m_handle, name.c_str());
+            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void*>(v));
+            H5Dclose(dset_handle);
+            H5Sclose(dspace_handle);
+            REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
+        }
+
+        /**
+         * load a multidimensional array (HDF5 simple dataset) of a complex type from disk
+         * @tparam T
+         *  primitive type of the real and imag components of elements of the array
+         * @param name
+         *  key in the HDF5 Group in which the value is stored
+         * @param v
+         *  pointer to the beginning of the array data
+         * @param shape
+         *  vector of expected dimensional extents - throw error if this is not the same as the stored shape
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, std::complex<T>* v, const uintv_t& shape){
+            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
+            auto complex_shape = shape;
+            complex_shape.push_back(2ul);
+            auto file_shape = get_dataset_shape(name);
+            REQUIRE_EQ_ALL(complex_shape, file_shape, "expected a container of a different shape");
+            auto dims = convert::vector<hsize_t>(shape);
+            auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
+            auto dset_handle = H5Dopen1(m_handle, name.c_str());
+            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void*>(v));
+            H5Dclose(dset_handle);
+            H5Sclose(dspace_handle);
+            REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
+        }
+
+        /**
+         * convenient wrapper in the case that the destination is a vector but the source is shaped
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, std::vector<T>& v, const uintv_t& shape){
+            REQUIRE_EQ_ALL(v.size(), nd::nelement(shape), "vector and shape are incompatible");
+            load(name, v.data(), shape);
+        }
+
+        /**
+         * convenient wrapper in the case that the destination is a vector
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, std::vector<T>& v){
+            load(name, v, {v.size()});
+        }
+
+        /**
+         * convenient wrapper for scalar load
+         */
+        template<typename T>
+        T load(std::string name) const {
+            T tmp;
+            load(name, tmp);
+            return tmp;
+        }
+
+        /**
+         * convenient wrapper for vector load
+         */
+        template<typename T>
+        std::vector<T> load_vector(std::string name) const {
+            auto nelement = nd::nelement(get_dataset_shape(name));
+            std::vector<T> tmp(nelement);
+            load(name, tmp);
+            return tmp;
+        }
+
+    private:
+
+        uint_t get_dataset_ndim(std::string name) const;
+
+        uintv_t get_dataset_shape(std::string name) const;
+    };
+
+    struct NodeWriter : Node {
+        NodeWriter(hid_t handle): Node(handle){}
+
+        template<typename T>
+        void write_attr(const std::string& name, const T& v) const {
+            AttrWriter attr(m_handle, name, {1}, type<T>());
+            attr.write(&v, 1);
+        }
+
+        template<typename T>
+        void write_attr(const std::string& name, const std::vector<T>& v) const {
+            AttrWriter attr(m_handle, name, {v.size()}, type<T>());
+            attr.write(v.data(), v.size());
+        }
+
+        void write_attr(const std::string& name, const std::string& v) const {
+            AttrWriter attr(m_handle, name, {1}, StringType(v));
+            attr.write(v.c_str(), 1);
+        }
+
+        void write_attr(const std::string& name, const std::vector<std::string>& v) const {
+            AttrWriter attr(m_handle, name, {v.size()}, StringType(v));
+            attr.write(v.data()->c_str(), 1);
         }
 
         /**
@@ -285,7 +444,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const T &v, uint_t irank=0ul) {
+        save(std::string name, const T &v, uint_t irank=0ul) const {
             auto dspace_handle = H5Screate(H5S_SCALAR);
             /**
              * make a null selection if this is not the rank we want to output the value of
@@ -313,7 +472,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::complex<T> &v, uint_t irank=0ul) {
+        save(std::string name, const std::complex<T> &v, uint_t irank=0ul) const {
             uintv_t shape = {2};
             save(name, reinterpret_cast<const T*>(&v), shape, {"real_imag"}, irank);
         }
@@ -333,8 +492,9 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const T* v, const uintv_t& shape, std::vector<std::string> dim_labels={}, uint_t irank=0ul) {
-            auto dims = convert_dims(shape);
+        save(std::string name, const T* v, const uintv_t& shape,
+             std::vector<std::string> dim_labels={}, uint_t irank=0ul) const {
+            auto dims = convert::vector<hsize_t>(shape);
             auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
             /**
              * make a null selection if this is not the rank we want to output the value of
@@ -375,7 +535,7 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         save(std::string name, const std::complex<T>* v, const uintv_t& shape,
-             std::vector<std::string> dim_labels={}, uint_t irank=0ul) {
+             std::vector<std::string> dim_labels={}, uint_t irank=0ul) const {
             dim_labels.push_back("real_imag");
             auto dims = shape;
             dims.push_back(2ul);
@@ -388,7 +548,8 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::vector<T>& v, const uintv_t& shape, std::vector<std::string> dim_labels={}, uint_t irank=0ul){
+        save(std::string name, const std::vector<T>& v, const uintv_t& shape,
+             std::vector<std::string> dim_labels={}, uint_t irank=0ul) const {
             REQUIRE_EQ_ALL(v.size(), nd  ::nelement(shape), "vector and shape are incompatible");
             save(name, v.data(), shape, {}, irank);
         }
@@ -398,7 +559,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::vector<T>& v, uint_t irank=0ul){
+        save(std::string name, const std::vector<T>& v, uint_t irank=0ul) const {
             save(name, v, {v.size()}, {}, irank);
         }
 
@@ -412,173 +573,131 @@ namespace hdf5 {
          * @param irank
          *  index of MPI rank which stores the definitive value of v
          */
-        void save(std::string name, const std::vector<std::string>& v, uint_t irank=0ul);
+        void save(std::string name, const std::vector<std::string>& v, uint_t irank=0ul) const {
+            auto memtype = H5Tcopy (H5T_C_S1);
+            auto longest = std::max_element(
+                    v.cbegin(), v.cend(),[](const std::string& s1, const std::string& s2){return s1.size()<s2.size();});
+            auto size = longest->size();
+            std::vector<char> buffer(size*v.size());
+            uint_t istr = 0ul;
+            for (auto& str: v) std::strcpy(buffer.data()+(istr++)*size, str.c_str());
+
+            auto status = H5Tset_size(memtype, size);
+            REQUIRE_FALSE_ALL(status, "failed to create string type");
+
+            /*
+             * Create dataset with a null dataspace.
+             */
+            std::vector<hsize_t> shape = {v.size()};
+            auto dspace_handle = H5Screate_simple(1, shape.data(), NULL);
+            /**
+             * make a null selection if this is not the rank we want to output the value of
+             */
+            if (!mpi::i_am(irank)) H5Sselect_none(dspace_handle);
+            auto dset_handle = H5Dcreate (m_handle, name.c_str(), memtype, dspace_handle, H5P_DEFAULT,
+                                          H5P_DEFAULT, H5P_DEFAULT);
+
+            status = H5Dwrite(dset_handle, memtype, dspace_handle, dspace_handle, H5P_DEFAULT, buffer.data());
+            REQUIRE_FALSE_ALL(status, "HDF5 Error on string array save");
+            H5Dclose(dset_handle);
+            H5Sclose(dspace_handle);
+        }
 
         /**
          * wrapper for save in the case that only a single string is to be stored
          */
-        void save(std::string name, const std::string& v, uint_t irank=0ul);
+        void save(std::string name, const std::string& v, uint_t irank=0ul) const {
+            std::vector<std::string> vs = {v};
+            save(name, vs, irank);
+        }
     };
 
-    struct GroupReader : GroupBase {
-        GroupReader(std::string name, const FileReader &parent);
 
-        GroupReader(std::string name, const GroupReader &parent);
 
-        bool child_exists(const std::string& name) const;
 
-        uint_t first_existing_child(const std::vector<std::string>& names) const;
 
-        uint_t nchild() const;
+    struct FileBase {
+        static void check_is_hdf5(const std::string &name);
+    };
 
-        std::string child_name(uint_t ichild) const;
-
-        int child_type(uint_t i) const;
-
-        std::vector<std::string> child_names(int type=-1) const;
-
+    struct FileReader : NodeReader, FileBase {
     private:
-
-        uint_t get_dataset_ndim(std::string name);
-
-        uintv_t get_dataset_shape(std::string name);
-
+        static hid_t get_handle(const std::string& fname) {
+            AccessPList p_list;
+            H5Pset_fapl_mpio(p_list.m_handle, MPI_COMM_WORLD, MPI_INFO_NULL);
+            REQUIRE_TRUE(H5Fis_hdf5(fname.c_str()), "Specified file is not HDF5 format");
+            return H5Fopen(fname.c_str(), H5F_ACC_RDONLY, p_list.m_handle);
+        }
     public:
+        FileReader(const std::string& fname): NodeReader(get_handle(fname)) {}
 
-        /**
-         * load a single value of a primitive type (HDF5 scalar dataset) from disk
-         * @tparam T
-         *  primitive type (any type for which type_ind<T>() is not ~0ul)
-         * @param name
-         *  key in the HDF5 Group in which the value is stored
-         * @param v
-         *  value to retrieve
-         */
-        template<typename T>
-        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, T& v) {
-            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
-            auto dspace_handle = H5Screate(H5S_SCALAR);
-            auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
-                                          H5P_DEFAULT, H5P_DEFAULT);
-            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void *>(&v));
-            REQUIRE_FALSE_ALL(status, "HDF5 Error on primitive type load");
-            H5Dclose(dset_handle);
-            H5Sclose(dspace_handle);
+        ~FileReader() {
+            auto status = H5Fclose(m_handle);
+            REQUIRE_TRUE(!status, "HDF5 Error on closing file");
         }
+    };
 
-        /**
-         * load a single value of a complex type (HDF5 simple dataset) to disk by reinterpreting the complex number as
-         * a length-2 array and reading a simple dataset from the file
-         * @tparam T
-         *  primitive type of the components of the complex number
-         * @param name
-         *  key in the HDF5 Group in which the value is stored
-         * @param v
-         *  value to store
-         */
-        template<typename T>
-        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::complex<T> &v, uint_t irank=0ul) {
-            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
-            load(name, reinterpret_cast<std::array<T, 2>&>(v)[0], irank);
-            load(name, reinterpret_cast<std::array<T, 2>&>(v)[1], irank);
+    struct FileWriter : NodeWriter {
+    private:
+        static hid_t get_handle(const std::string& fname) {
+            AccessPList p_list;
+            H5Pset_fapl_mpio(p_list, MPI_COMM_WORLD, MPI_INFO_NULL);
+            auto handle = H5Fcreate(fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, p_list);
+            REQUIRE_NE(handle, 0, "HDF5 file could not be opened for writing. It may be locked by another program");
+            return handle;
         }
+    public:
+        FileWriter(const std::string& fname): NodeWriter(get_handle(fname)) {}
 
-        /**
-         * load a multidimensional array (HDF5 simple dataset) of a primitive type from disk
-         * @tparam T
-         *  primitive type of the elements of the array
-         * @param name
-         *  key in the HDF5 Group in which the value is stored
-         * @param v
-         *  pointer to the beginning of the array data
-         * @param shape
-         *  vector of expected dimensional extents - throw error if this is not the same as the stored shape
-         */
-        template<typename T>
-        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, T* v, const uintv_t& shape){
-            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
-            auto file_shape = get_dataset_shape(name);
-            REQUIRE_EQ_ALL(shape, file_shape, "expected a container of a different shape");
-            auto dims = convert_dims(shape);
-            auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
-            auto dset_handle = H5Dopen1(m_handle, name.c_str());
-            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void*>(v));
-            H5Dclose(dset_handle);
-            H5Sclose(dspace_handle);
-            REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
+        ~FileWriter() {
+            auto status = H5Fclose(m_handle);
+            REQUIRE_TRUE(!status, "HDF5 Error on closing file");
         }
+    };
 
-        /**
-         * load a multidimensional array (HDF5 simple dataset) of a complex type from disk
-         * @tparam T
-         *  primitive type of the real and imag components of elements of the array
-         * @param name
-         *  key in the HDF5 Group in which the value is stored
-         * @param v
-         *  pointer to the beginning of the array data
-         * @param shape
-         *  vector of expected dimensional extents - throw error if this is not the same as the stored shape
-         */
-        template<typename T>
-        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::complex<T>* v, const uintv_t& shape){
-            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
-            auto complex_shape = shape;
-            complex_shape.push_back(2ul);
-            auto file_shape = get_dataset_shape(name);
-            REQUIRE_EQ_ALL(complex_shape, file_shape, "expected a container of a different shape");
-            auto dims = convert_dims(complex_shape);
-            auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
-            auto dset_handle = H5Dopen1(m_handle, name.c_str());
-            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void*>(v));
-            H5Dclose(dset_handle);
-            H5Sclose(dspace_handle);
-            REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
-        }
+    /**
+     * parent class for HDF5 group I/O
+     *
+     * there are three different categories of object whose I/O is handled by this HDF5 wrapper:
+     *  1. Non-distributed primitive types and STL container specializations of primitive types
+     *  2. Non-distributed user-defined classes
+     *  3. Distributed user-defined classes (MappedTable)
+     *
+     * more complicated combinations of these are handled in the Archivable class, but the above are the building blocks.
+     *
+     * Categories 1 and 2 are typically for small metadata and verification information, writing these types requires
+     * the identification of a "definitive rank", defaulting to the root, whose value of the written data is taken to be
+     * the correct value to commit to disk.
+     *
+     * The most expensive category is 3 since this includes wavefunctions and multidimensional quantities. In recognition
+     * of this, the HDF5 files are opened in collective mode, and so even operations in categories 1 and 2 (which could
+     * be done in independent mode) involve null write operations on the non-definitive MPI rank, and all ranks read in
+     * the same value.
+     *
+     * save methods defined in the Writer subclass, and load methods defined in the Reader subclass are for category 1,
+     * i.e. the following types:
+     *  primitive
+     *  pointer to primitive (shaped)
+     *  vector of primitives
+     *  complex of primitives
+     *  pointer to complex of primitive (shaped)
+     *  vector of complex of primitives
+     * these are not user-defined classes and therefore we cannot define save and load methods on these objects, so
+     * these functions are handled in the subclass definitions below
+     *
+     */
 
-        /**
-         * convenient wrapper in the case that the destination is a vector but the source is shaped
-         */
-        template<typename T>
-        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::vector<T>& v, const uintv_t& shape){
-            REQUIRE_EQ_ALL(v.size(), nd::nelement(shape), "vector and shape are incompatible");
-            load(name, v.data(), shape);
-        }
+    /**
+     * carries out all creation of datasets and Groups
+     */
+    struct GroupWriter : NodeWriter {
+        GroupWriter(const NodeWriter& node, std::string name):
+            NodeWriter(H5Gcreate(node, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) {}
+    };
 
-        /**
-         * convenient wrapper in the case that the destination is a vector
-         */
-        template<typename T>
-        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::vector<T>& v){
-            load(name, v, {v.size()});
-        }
-
-        /**
-         * convenient wrapper for scalar load
-         */
-        template<typename T>
-        T load(std::string name) {
-            T tmp;
-            load(name, tmp);
-            return tmp;
-        }
-
-        /**
-         * convenient wrapper for vector load
-         */
-        template<typename T>
-        std::vector<T> load_vector(std::string name) {
-            auto nelement = nd::nelement(get_dataset_shape(name));
-            std::vector<T> tmp(nelement);
-            load(name, tmp);
-            return tmp;
-        }
-
+    struct GroupReader : NodeReader {
+        GroupReader(const NodeReader& node, std::string name):
+            NodeReader(H5Gopen2(node, name.c_str(), H5P_DEFAULT)) {}
     };
 
     /**
@@ -715,11 +834,7 @@ namespace hdf5 {
          *  native type T corresponding to m_h5type are to be written. Thus the sizeof(T)*n bytes after data are copied
          */
         void write_h5item_bytes(const uint_t &iitem, const void *data);
-
-        template<typename T>
-        void write_attr(std::string name, const T &obj) {
-            AttributeWriterBase::write(m_dataset_handle, name, obj);
-        }
+        
     };
 
     /**

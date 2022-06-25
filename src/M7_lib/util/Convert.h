@@ -196,13 +196,22 @@ namespace convert {
         return narrows;
     }
 
-    template<typename T1, typename T2>
-    static void vector(const std::vector<T1> &v1, std::vector<T2> &v2) {
-        static_assert(std::is_convertible<T1, T2>::value, "incompatible types");
-        v2.clear();
-        v2.reserve(v1.size());
-        for (auto &i: v1) v2.push_back(i);
+    template<typename to_t, typename from_t>
+    static void vector(const std::vector<from_t> &from, std::vector<to_t> &to) {
+        static_assert(std::is_convertible<from_t, to_t>::value, "incompatible types");
+        to.clear();
+        to.reserve(from.size());
+        for (auto &i: from) to.push_back(i);
     }
+
+    template<typename to_t, typename from_t>
+    static std::vector<to_t> vector(const std::vector<from_t> &from) {
+        std::vector<to_t> to;
+        vector(from, to);
+        return to;
+    }
+
+
 }
 
 template<typename T>

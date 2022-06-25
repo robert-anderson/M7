@@ -64,15 +64,15 @@ private:
 
 public:
 
-    virtual void save(hdf5::GroupWriter &parent, std::string name, std::vector<std::string> field_names) const {
+    virtual void save(const hdf5::NodeWriter& parent, std::string name, std::vector<std::string> field_names) const {
         RowHdf5Writer<row_t>(m_row, parent, name, nrow_to_write(), field_names).write();
     }
 
-    virtual void save(hdf5::GroupWriter &parent, std::string name) const {
+    virtual void save(const hdf5::NodeWriter& parent, std::string name) const {
         RowHdf5Writer<row_t>(m_row, parent, name, nrow_to_write()).write();
     }
 
-    virtual void load(hdf5::GroupReader &parent, std::string name) {
+    virtual void load(const hdf5::NodeReader& parent, std::string name) {
         RowHdf5Reader<row_t>(m_row, parent, name).read();
     }
 

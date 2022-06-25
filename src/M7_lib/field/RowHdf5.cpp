@@ -60,10 +60,9 @@ void RowHdf5WriterBase::write() {
     write(m_nitem_max);
 }
 
-RowHdf5WriterBase::RowHdf5WriterBase(Row &row, hdf5::GroupWriter &parent, std::string name, uint_t nitem,
+RowHdf5WriterBase::RowHdf5WriterBase(Row &row, const hdf5::NodeWriter &parent, std::string name, uint_t nitem,
                                      std::vector<std::string> field_names) :
-        RowHdf5Base(row, nitem, std::move(field_names)), m_row(row),
-        m_group(name, parent){
+        RowHdf5Base(row, nitem, std::move(field_names)), m_row(row), m_group(parent, name){
     m_column_writers.reserve(m_selected_field_inds.size());
     for (auto &ifield: m_selected_field_inds) {
         auto field = m_row.m_fields[ifield];
@@ -88,10 +87,10 @@ std::vector<std::string> RowHdf5WriterBase::get_all_field_names(const Row &row) 
 }
 
 
-RowHdf5ReaderBase::RowHdf5ReaderBase(Row &row, hdf5::GroupReader &parent, std::string name,
+RowHdf5ReaderBase::RowHdf5ReaderBase(Row &row, const hdf5::NodeReader &parent, std::string name,
                                      std::vector<std::string> field_names) :
         RowHdf5Base(row, get_nitem(row, parent, name, field_names), field_names),
-        m_row(row), m_group(name, parent) {
+        m_row(row), m_group(parent, name) {
     m_column_readers.reserve(m_selected_field_inds.size());
     for (auto &ifield: m_selected_field_inds) {
         auto &field = m_row.m_fields[ifield];
@@ -103,8 +102,8 @@ RowHdf5ReaderBase::RowHdf5ReaderBase(Row &row, hdf5::GroupReader &parent, std::s
 
 
 std::vector<std::string> RowHdf5ReaderBase::stored_field_names(
-        const Row &row, const hdf5::GroupReader &parent, std::string name) {
-    hdf5::GroupReader group(name, parent);
+        const Row &row, const hdf5::NodeReader &parent, std::string name) {
+    hdf5::GroupReader group(parent, name);
     std::vector<std::string> out;
     out.reserve(row.m_fields.size());
     for (FieldBase *field: row.m_fields) {
@@ -115,10 +114,10 @@ std::vector<std::string> RowHdf5ReaderBase::stored_field_names(
 }
 
 
-uint_t RowHdf5ReaderBase::get_nitem(const Row &row, hdf5::GroupReader &parent, std::string name,
+uint_t RowHdf5ReaderBase::get_nitem(const Row &row, const hdf5::NodeReader& parent, std::string name,
                                     std::vector<std::string> field_names) {
     if (row.m_fields.empty()) return 0ul;
-    hdf5::GroupReader group(name, parent);
+    hdf5::GroupReader group(parent, name);
     // take the number of items in the first selected column
     auto ifield = group.first_existing_child(field_names);
     REQUIRE_LE(ifield, field_names.size(), "no selected field not found in HDF5 group");

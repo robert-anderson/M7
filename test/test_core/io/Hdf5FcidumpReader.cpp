@@ -17,7 +17,7 @@ namespace hdf5_new {
 #ifdef H5_HAVE_PARALLEL
     constexpr bool c_have_parallel = true;
 #else
-    constexpr bool have_parallel = false;
+    constexpr bool c_have_parallel = false;
 #endif
 
     static_assert(c_have_parallel, "HDF5 must be compiled with parallel functionality");
@@ -131,16 +131,6 @@ namespace hdf5_new {
         }
     };
 
-    struct ReadNode : Node {
-        ReadNode(hid_t handle): Node(handle){}
-    };
-
-    struct WriteNode : Node {
-        WriteNode(hid_t handle): Node(handle){}
-    };
-
-
-
     struct AttrReader : Attr {
     private:
         static hid_t get_handle(const Node& node, const std::string& name) {
@@ -174,6 +164,22 @@ namespace hdf5_new {
         }
     };
 
+    struct ReadNode : Node {
+    protected:
+        H5O_info_t m_info;
+    public:
+        ReadNode(hid_t handle): Node(handle){
+            H5Oget_info(m_handle, &m_info);
+        }
+    };
+
+    struct WriteNode : Node {
+        WriteNode(hid_t handle): Node(handle){}
+    };
+
+
+
+
     struct ReadFile : ReadNode {
     private:
         static hid_t get_handle(const std::string& fname) {
@@ -196,8 +202,8 @@ namespace hdf5_new {
     };
 
     /*
-    struct WriteFile : WriteNode {
-        WriteFile(std::string fname) {
+    struct FileWriter : NodeWriter {
+        FileWriter(std::string fname) {
             auto plist_id = H5Pcreate(H5P_FILE_ACCESS);
             H5Pset_fapl_mpio(plist_id, MPI_COMM_WORLD, MPI_INFO_NULL);
             REQUIRE_TRUE(H5Fis_hdf5(fname.c_str()), "Specified file is not HDF5 format");
@@ -205,7 +211,7 @@ namespace hdf5_new {
             H5Pclose(plist_id);
         }
 
-        ~ReadFile() {
+        FileReaderer() {
             auto status = H5Fclose(m_handle);
             REQUIRE_TRUE(!status, "HDF5 Error on closing file");
         }
@@ -213,11 +219,11 @@ namespace hdf5_new {
      */
 
 
-//    struct WriteNode : Node {
-//        WriteNode(hid_t handle): Node(handle){}
+//    struct NodeWriter : Node {
+//        NodeWriter(hid_t handle): Node(handle){}
 //    };
 
-//    struct WriteFile : WriteNode {
+//    struct FileWriter : NodeWriter {
 //
 //    };
 
@@ -232,6 +238,8 @@ TEST(Hdf5FcidumpReader, Header) {
     uintv_t v;
     attr_reader.read(v);
     std::cout << v << std::endl;
+
+
 
 //    auto err = H5Aexists_by_name(file.m_handle, ".", "CORE_ENERGY", hdf5::AccessPList());
 //    std::cout << err << std::endl;

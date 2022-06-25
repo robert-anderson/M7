@@ -63,11 +63,11 @@ std::vector<std::string> Wavefunction::h5_field_names() {
         return {"mbf (fermion)", "mbf (boson)", "weight"};
 }
 
-void Wavefunction::h5_write(hdf5::GroupWriter& parent, std::string name) {
+void Wavefunction::h5_write(const hdf5::NodeWriter& parent, std::string name) {
     m_store.save(parent, name, h5_field_names());
 }
 
-void Wavefunction::h5_read(hdf5::GroupReader& parent, const Hamiltonian& ham, const field::Mbf& ref,
+void Wavefunction::h5_read(const hdf5::NodeReader& parent, const Hamiltonian& ham, const field::Mbf& ref,
                            std::string name) {
     m_store.clear();
     BufferedTable<WalkerTableRow> m_buffer("", {m_store.m_row});
@@ -232,10 +232,10 @@ uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta, boo
     return irow;
 }
 
-void Wavefunction::load_fn(hdf5::GroupReader& /*parent*/) {
+void Wavefunction::load_fn(const hdf5::NodeReader& /*parent*/) {
 
 }
 
-void Wavefunction::save_fn(hdf5::GroupWriter& /*parent*/) {
+void Wavefunction::save_fn(const hdf5::NodeWriter& /*parent*/) {
 
 }

@@ -43,11 +43,11 @@ struct RowHdf5Base {
      */
     uint_t m_iitem = 0ul;
 
-    RowHdf5Base(const Row &row, uint_t nitem, std::vector<std::string> field_names);
+    RowHdf5Base(const Row& row, uint_t nitem, std::vector<std::string> field_names);
 
 protected:
 
-    uintv_t make_selected_field_inds(const std::vector<FieldBase *> &fields) const;
+    uintv_t make_selected_field_inds(const std::vector<FieldBase *>& fields) const;
 
 };
 
@@ -56,11 +56,11 @@ struct RowHdf5WriterBase : RowHdf5Base {
     /**
      * reference to superclass instance cast to a Row
      */
-    Row &m_row;
+    Row& m_row;
     hdf5::GroupWriter m_group;
     std::vector<hdf5::NdDistListWriter> m_column_writers;
 
-    RowHdf5WriterBase(Row &row, hdf5::GroupWriter &parent, std::string name, uint_t nitem,
+    RowHdf5WriterBase(Row& row, const hdf5::NodeWriter& parent, std::string name, uint_t nitem,
                       std::vector<std::string> field_names);
 
 protected:
@@ -71,7 +71,7 @@ protected:
      * @return
      *  all field names
      */
-    static std::vector<std::string> get_all_field_names(const Row &row);
+    static std::vector<std::string> get_all_field_names(const Row& row);
 
 private:
     /**
@@ -93,7 +93,7 @@ public:
      * @return
      *  true if there remain unwritten rows on any process
      */
-    bool write(const uint_t &n);
+    bool write(const uint_t& n);
 
     void write();
 
@@ -103,11 +103,11 @@ struct RowHdf5ReaderBase : RowHdf5Base {
     /**
      * reference to superclass instance cast to a Row
      */
-    Row &m_row;
+    Row& m_row;
     hdf5::GroupReader m_group;
     std::vector<hdf5::NdDistListReader> m_column_readers;
 
-    RowHdf5ReaderBase(Row &row, hdf5::GroupReader &parent, std::string name, std::vector<std::string> field_names);
+    RowHdf5ReaderBase(Row& row, const hdf5::NodeReader& parent, std::string name, std::vector<std::string> field_names);
 
 protected:
 
@@ -121,11 +121,11 @@ protected:
      * @return
      *  all field names
      */
-    static std::vector<std::string> stored_field_names(const Row &row, const hdf5::GroupReader &parent, std::string name);
+    static std::vector<std::string> stored_field_names(const Row& row, const hdf5::NodeReader& parent, std::string name);
 
 private:
 
-    static uint_t get_nitem(const Row &row, hdf5::GroupReader &parent,
+    static uint_t get_nitem(const Row& row, const hdf5::NodeReader& parent,
                             std::string name, std::vector<std::string> field_names);
 
     /**
@@ -147,7 +147,7 @@ public:
      * @return
      *  true if there remain unread rows on any process
      */
-    bool read(const uint_t &n);
+    bool read(const uint_t& n);
 
     /**
      * read all rows from HDF5 group
@@ -166,11 +166,11 @@ template<typename row_t>
 struct RowHdf5Writer : row_t, RowHdf5WriterBase {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
 
-    RowHdf5Writer(const row_t &row, hdf5::GroupWriter &parent, std::string name, uint_t nitem,
+    RowHdf5Writer(const row_t& row, const hdf5::NodeWriter& parent, std::string name, uint_t nitem,
                   std::vector<std::string> field_names) :
             row_t(row), RowHdf5WriterBase(*this, parent, name, nitem, field_names) {}
 
-    RowHdf5Writer(const row_t &row, hdf5::GroupWriter &parent, std::string name, uint_t nitem) :
+    RowHdf5Writer(const row_t& row, const hdf5::NodeWriter& parent, std::string name, uint_t nitem) :
             RowHdf5Writer(row, parent, name, nitem, get_all_field_names(row)) {}
 };
 
@@ -179,10 +179,10 @@ template<typename row_t>
 struct RowHdf5Reader : row_t, RowHdf5ReaderBase {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
 
-    RowHdf5Reader(const row_t &row, hdf5::GroupReader &parent, std::string name, std::vector<std::string> field_names) :
+    RowHdf5Reader(const row_t& row, const hdf5::NodeReader& parent, std::string name, std::vector<std::string> field_names) :
             row_t(row), RowHdf5ReaderBase(*this, parent, name, field_names) {}
 
-    RowHdf5Reader(const row_t &row, hdf5::GroupReader &parent, std::string name) :
+    RowHdf5Reader(const row_t& row, const hdf5::NodeReader& parent, std::string name) :
             RowHdf5Reader(row, parent, name, stored_field_names(row, parent, name)) {}
 };
 

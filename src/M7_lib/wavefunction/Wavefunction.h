@@ -106,9 +106,9 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
     std::vector<std::string> h5_field_names();
 
-    void h5_write(hdf5::GroupWriter &parent, std::string name = "wavefunction");
+    void h5_write(const hdf5::NodeWriter &parent, std::string name = "wavefunction");
 
-    void h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, const field::Mbf &ref,
+    void h5_read(const hdf5::NodeReader &parent, const Hamiltonian &ham, const field::Mbf &ref,
                  std::string name = "wavefunction");
 
     void begin_cycle();
@@ -310,9 +310,9 @@ public:
 
 
 protected:
-    void load_fn(hdf5::GroupReader &parent) override;
+    void load_fn(const hdf5::NodeReader &parent) override;
 
-    void save_fn(hdf5::GroupWriter &parent) override;
+    void save_fn(const hdf5::NodeWriter &parent) override;
 
 };
 

@@ -84,9 +84,9 @@ public:
     void imp_samp_delta(wf_t &delta, const field::Mbf &src_mbf, const field::Mbf &dst_mbf) const;
 
 private:
-    void load_fn(hdf5::GroupReader &parent) override;
+    void load_fn(const hdf5::NodeReader &parent) override;
 
-    void save_fn(hdf5::GroupWriter &parent) override;
+    void save_fn(const hdf5::NodeWriter &parent) override;
 };
 
 #endif //M7_PROPAGATOR_H

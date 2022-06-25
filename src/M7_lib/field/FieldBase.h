@@ -128,8 +128,7 @@ public:
 
     virtual std::string to_string() const = 0;
 
-    virtual void h5_write_attrs(hid_t /*parent_handle*/) {
-    }
+    virtual void h5_write_attrs(const hdf5::NodeWriter& /*node*/) const {}
 
     virtual void save(hdf5::NdDistListWriter &h5list, const uint_t &iitem) const {
         h5list.write_h5item_bytes(iitem, begin());

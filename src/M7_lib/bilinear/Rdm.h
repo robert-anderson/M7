@@ -45,7 +45,7 @@ public:
 
     void end_cycle();
 
-    void save(hdf5::GroupWriter& gw) const;
+    void save(hdf5::NodeWriter& gw) const;
 };
 
 class Rdms : public Archivable {
@@ -170,16 +170,16 @@ public:
     }
 
 private:
-    void load_fn(hdf5::GroupReader& /*parent*/) override {
+    void load_fn(const hdf5::NodeReader& /*parent*/) override {
 
     }
 
-    void save_fn(hdf5::GroupWriter& parent) override {
+    void save_fn(const hdf5::NodeWriter& parent) override {
         if (!m_accum_epoch) {
             log::warn("MAE accumulation epoch was not reached in this calculation: omitting RDM save");
             return;
         }
-        hdf5::GroupWriter gw("rdms", parent);
+        hdf5::GroupWriter gw(parent, "rdms");
         gw.save("norm", m_total_norm.m_reduced);
         for (const auto& i: m_active_ranksigs) {
             DEBUG_ASSERT_TRUE(m_rdms[i].get(), "active ranksig was not allocated!");

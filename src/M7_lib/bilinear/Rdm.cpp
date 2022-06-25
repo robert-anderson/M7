@@ -126,7 +126,7 @@ void Rdm::end_cycle() {
     m_comm.recv().clear();
 }
 
-void Rdm::save(hdf5::GroupWriter& gw) const {
+void Rdm::save(hdf5::NodeWriter& gw) const {
     m_store.save(gw, to_string(m_ranksig));
 }
 

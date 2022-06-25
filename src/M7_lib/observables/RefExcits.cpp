@@ -26,7 +26,7 @@ std::vector<std::string> RefExcitsOneExsig::h5_field_names() const {
     return {m_row.m_inds.m_name, m_row.m_values.m_name};
 }
 
-void RefExcitsOneExsig::save(hdf5::GroupWriter& gw) const {
+void RefExcitsOneExsig::save(const hdf5::NodeWriter& gw) const {
     Table<MaeRow>::save(gw, exsig::to_string(m_working_inds.m_exsig), h5_field_names());
 }
 
@@ -78,10 +78,10 @@ RefExcits::operator bool() const {
     return !m_active_exsigs.empty();
 }
 
-void RefExcits::save_fn(hdf5::GroupWriter& parent) {
+void RefExcits::save_fn(const hdf5::NodeWriter& parent) {
     wf_t av_ref;
     av_ref = mpi::all_sum(m_av_ref[0]);
-    hdf5::GroupWriter gw("ref_excits", parent);
+    hdf5::GroupWriter gw(parent, "ref_excits");
     gw.save("0000", av_ref);
     for (const auto& i: m_active_exsigs) {
         DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active exsig was not allocated!");

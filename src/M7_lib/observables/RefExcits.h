@@ -30,7 +30,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
     std::vector<std::string> h5_field_names() const;
 
     using Table<MaeRow>::save;
-    void save(hdf5::GroupWriter& gw) const;
+    void save(const hdf5::NodeWriter& gw) const;
 
     void make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot);
 };
@@ -64,9 +64,9 @@ struct RefExcits : Archivable {
 
 private:
 
-    void load_fn(hdf5::GroupReader& /*parent*/) override {}
+    void load_fn(const hdf5::NodeReader& /*parent*/) override {}
 
-    void save_fn(hdf5::GroupWriter& parent) override;
+    void save_fn(const hdf5::NodeWriter& parent) override;
 };
 
 #endif //M7_REFEXCITS_H

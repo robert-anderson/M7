@@ -256,9 +256,9 @@ struct BitsetField : FieldBase {
         return res;
     }
 
-    void h5_write_attrs(hid_t parent_handle) override {
-        hdf5::AttributeWriterBase::write(parent_handle, "bitset shape", m_format.shape_vector());
-        hdf5::AttributeWriterBase::write(parent_handle, "bitset dim names", m_format.dim_names_vector());
+    void h5_write_attrs(const hdf5::NodeWriter& node) const override {
+        node.write_attr("bitset shape", m_format.shape_vector());
+        node.write_attr("bitset dim names", m_format.dim_names_vector());
     }
 
     uintv_t h5_shape() const override {

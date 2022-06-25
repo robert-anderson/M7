@@ -10,12 +10,18 @@
 #include <M7_lib/table/BufferedTable.h>
 #include "M7_lib/io/HDF5Wrapper.h"
 
+TEST(HDF5Wrapper, StringType) {
+    std::string s = "Lorem ipsum dolor sit";
+    hdf5::StringType type(s);
+    ASSERT_EQ(type.m_nchar, s.size()+1);
+}
+
 TEST(HDF5Wrapper, StringVector) {
     auto definitive_irank = hash::in_range(99, 0, mpi::nrank());
     std::vector<std::string> strings = {"Lorem", "ipsum dolor sit", "amet, consectetur adipiscing", "elit"};
     {
         hdf5::FileWriter fw("table_test.h5");
-        hdf5::GroupWriter gw("container", fw);
+        hdf5::GroupWriter gw(fw, "container");
         gw.save("a_string_vector", strings, definitive_irank);
     }
 }
@@ -25,7 +31,7 @@ TEST(HDF5Wrapper, String) {
     std::string s = "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
     {
         hdf5::FileWriter fw("table_test.h5");
-        hdf5::GroupWriter gw("container", fw);
+        hdf5::GroupWriter gw(fw, "container");
         gw.save("a_string", s, definitive_irank);
     }
 }
@@ -38,13 +44,13 @@ TEST(HDF5Wrapper, FloatArray) {
     v[2] = hash::in_range(mpi::irank(), 4, 18);
     {
         hdf5::FileWriter fw("table_test.h5");
-        hdf5::GroupWriter gw("container", fw);
+        hdf5::GroupWriter gw(fw, "container");
         gw.save("a_float_array", v.data(), shape, {"dim0", "dim1"}, definitive_irank);
     }
     mpi::barrier();
     {
         hdf5::FileReader fr("table_test.h5");
-        hdf5::GroupReader gr("container", fr);
+        hdf5::GroupReader gr(fr, "container");
         auto nelement = nd::nelement(shape);
         ASSERT_EQ(nelement, v.size());
         std::vector<float> v_read(nelement);
@@ -64,13 +70,13 @@ TEST(HDF5Wrapper, ComplexArray) {
     v[2].imag(hash::in_range(mpi::irank(), 4, 18));
     {
         hdf5::FileWriter fw("table_test.h5");
-        hdf5::GroupWriter gw("container", fw);
+        hdf5::GroupWriter gw(fw, "container");
         gw.save("a_complex_array", v.data(), shape, {"dim0", "dim1"}, definitive_irank);
     }
     mpi::barrier();
     {
         hdf5::FileReader fr("table_test.h5");
-        hdf5::GroupReader gr("container", fr);
+        hdf5::GroupReader gr(fr, "container");
         auto nelement = nd::nelement(shape);
         ASSERT_EQ(nelement, v.size());
         std::vector<std::complex<float>> v_read(nelement);
@@ -119,16 +125,15 @@ TEST(HDF5Wrapper, NumberDistributed) {
     }
     {
         hdf5::FileWriter fw("table_test.h5");
-        hdf5::GroupWriter gw("container", fw);
+        hdf5::GroupWriter gw(fw, "container");
         write_table.save(gw, "table");
     }
     mpi::barrier();
     {
         hdf5::FileReader fr("table_test.h5");
-        hdf5::GroupReader gr("container", fr);
+        hdf5::GroupReader gr(fr, "container");
 
         ASSERT_EQ(gr.child_name(0), "table");
-        ASSERT_EQ(gr.m_parent_handle, fr.m_handle);
         ASSERT_TRUE(gr.child_exists("table"));
         ASSERT_FALSE(gr.child_exists("not_the_table"));
         read_table.load(gr, "table");
