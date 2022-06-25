@@ -10,9 +10,12 @@ hsize_t hdf5::type_size(hid_t h5type) {
     return H5Tget_size(h5type);
 }
 
+bool hdf5::FileBase::is_hdf5(const std::string &fname) {
+    return H5Fis_hdf5(fname.c_str());
+}
 
-void hdf5::FileBase::check_is_hdf5(const std::string &name) {
-    REQUIRE_TRUE(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
+void hdf5::FileBase::require_is_hdf5(const std::string &fname) {
+    REQUIRE_TRUE(is_hdf5(fname), "Specified file is not HDF5 format");
 }
 
 bool hdf5::NodeReader::child_exists(const std::string &name) const {
@@ -26,10 +29,10 @@ uint_t hdf5::NodeReader::first_existing_child(const std::vector<std::string> &na
 }
 
 uint_t hdf5::NodeReader::nchild() const {
-    hsize_t num;
-    auto status = H5Gget_num_objs(m_handle, &num);
+    hsize_t n;
+    auto status = H5Gget_num_objs(m_handle, &n);
     REQUIRE_TRUE(!status, "could not get number of objects within HDF5 group");
-    return status == 0;
+    return n;
 }
 
 std::string hdf5::NodeReader::child_name(uint_t ichild) const {

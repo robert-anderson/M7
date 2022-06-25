@@ -11,15 +11,21 @@
 
 struct FcidumpInfo {
     const std::string m_fname;
+    enum Implementation {CSV, HDF5};
+    const Implementation m_impl;
     const bool m_uhf, m_relativistic, m_spin_resolved;
     const uint_t m_nelec, m_nsite, m_nspinorb, m_norb_distinct;
     const int m_ms2;
     const uintv_t m_orbsym;
-    FcidumpInfo(std::string fname, bool uhf, bool relativistic, uint_t nelec, uint_t nsite, int ms2, uintv_t orbsym);
+    FcidumpInfo(std::string fname, Implementation impl,
+                bool uhf, bool relativistic, uint_t nelec, uint_t nsite, int ms2, uintv_t orbsym);
     FcidumpInfo(const FortranNamelistReader& reader);
     FcidumpInfo(const hdf5::FileReader& reader);
-
-    FcidumpInfo(std::string fname);
+    /**
+     * examine the file at the specified path and decide which ctor to call and return the result
+     */
+    static FcidumpInfo make(const std::string& fname);
+    FcidumpInfo(const std::string& fname): FcidumpInfo(make(fname)){}
 };
 
 struct EbdumpInfo : FcidumpInfo {

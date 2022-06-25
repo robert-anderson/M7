@@ -21,73 +21,62 @@ void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
     log::info("this storage scheme assumes that {} integrals are equivalent", convert::to_string(equivs));
 }
 
-GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo& info, bool spin_major) {
+GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader& reader) {
     if (!m_basis.m_nsite) return {nullptr, nullptr};
 
-    REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),m_basis.ncoeff_ind(),"site map size incorrect");
+    REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(), m_basis.ncoeff_ind(), "site map size incorrect");
 
-    FcidumpTextFileReader file_reader(info.m_fname, spin_major);
-    m_complex_valued = file_reader.m_complex_valued;
+    m_complex_valued = reader.complex_valued();
 
     using namespace ham;
-    uintv_t inds(4);
-    ham_t value;
-
     /*
      * initialize permutational symmetries.
-     * if the source is complex-valued, then it cannot have DHR symmetry (and still represent a physical Hamiltonian)
      */
     auto ints_1e = integrals_1e::make<ham_t>(m_basis.ncoeff_ind(), integrals_1e::syms::H);
     log_ints_sym(ints_1e->sym(), true);
     REQUIRE_TRUE(ints_1e.get(), "1e integral array object unallocated");
-    auto ints_2e = integrals_2e::make<ham_t>(m_basis.ncoeff_ind(), m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR);
+    /*
+     *
+     * if the source is complex-valued, then it cannot have DHR symmetry (and still represent a physical Hamiltonian)
+     */
+    auto ints_2e = integrals_2e::make<ham_t>(m_basis.ncoeff_ind(),
+                                             m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR);
     log_ints_sym(ints_2e->sym(), true);
     REQUIRE_TRUE(ints_2e.get(), "2e integral array object unallocated");
 
-    uint_t iline_first_2e = ~0ul;
-    uint_t iline_first_1e = ~0ul;
+    IntegralReader::IterData d;
+    m_e_core = reader.ecore();
 
-    log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
-    uint_t iline = ~0ul;
-    while (file_reader.next(inds, value)) {
-        ++iline;
-        auto ranksig = file_reader.ranksig(inds);
-        auto exsig = file_reader.exsig(inds, ranksig);
-
-        if (ranksig == 0ul) {
-            m_e_core = value;
+    while (reader.next(d)){
+        if (d.m_ranksig == 0ul) {
+            m_e_core = d.m_value;
             continue;
         }
 
-        auto& rank_contrib = ranksig == ex_single ? m_contribs_1100 : m_contribs_2200;
-        rank_contrib.set_nonzero(exsig);
+        auto& rank_contrib = d.m_ranksig == ex_single ? m_contribs_1100 : m_contribs_2200;
+        rank_contrib.set_nonzero(d.m_exsig);
 
-        if (ranksig == ex_single) {
-            if (iline_first_1e==~0ul) iline_first_1e = iline;
+        if (d.m_ranksig == ex_single) {
             bool success = false;
             while (!success) {
-                success = ints_1e->set(inds[0], inds[1], value);
+                success = ints_1e->set(d.m_inds[0], d.m_inds[1], d.m_value);
                 if (!success) {
                     integrals_1e::next_sym_attempt(ints_1e);
-                    file_reader.reset(iline_first_1e);
-                    iline = iline_first_1e-1;
+                    reader.goto_first_1e();
                     log_ints_sym(ints_1e->sym(), false);
                 }
             }
-        } else if (ranksig == ex_double) {
-            if (iline_first_2e==~0ul) iline_first_2e = iline;
+        } else if (d.m_ranksig == ex_double) {
             bool success = false;
             while (!success) {
                 // FCIDUMP integral indices are in chemists' ordering
-                success = ints_2e->set(inds[0], inds[2], inds[1], inds[3], value);
+                success = ints_2e->set(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3], d.m_value);
                 if (!success) {
                     integrals_2e::next_sym_attempt(ints_2e);
-                    file_reader.reset(iline_first_2e);
-                    iline = iline_first_2e-1;
+                    reader.goto_first_2e();
                     log_ints_sym(ints_2e->sym(), false);
                 }
             }
-
         } else MPI_ABORT("File reader error");
     }
     mpi::barrier();

@@ -26,9 +26,14 @@ namespace hdf5 {
 
 
     static const std::array<hid_t, 12> c_types =
-            {0, H5T_NATIVE_CHAR, H5T_NATIVE_SHORT, H5T_NATIVE_INT32, H5T_NATIVE_LONG,
-             H5T_NATIVE_UCHAR, H5T_NATIVE_USHORT, H5T_NATIVE_UINT32, H5T_NATIVE_ULONG,
-             H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE};
+            {0, H5T_NATIVE_CHAR,
+             H5T_NATIVE_UINT8, H5T_NATIVE_INT8,
+             H5T_NATIVE_UINT16, H5T_NATIVE_INT16,
+             H5T_NATIVE_UINT32, H5T_NATIVE_INT32,
+             H5T_NATIVE_UINT64, H5T_NATIVE_INT64,
+             H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE};
+
+    std::string type_name(hid_t type);
 
     template<typename T=void>
     static constexpr uint_t type_ind() { return 0; }
@@ -37,28 +42,28 @@ namespace hdf5 {
     constexpr uint_t type_ind<char>() { return 1; }
 
     template<>
-    constexpr uint_t type_ind<short int>() { return 2; }
+    constexpr uint_t type_ind<uint8_t>() { return 2; }
 
     template<>
-    constexpr uint_t type_ind<int>() { return 3; }
+    constexpr uint_t type_ind<int8_t>() { return 3; }
 
     template<>
-    constexpr uint_t type_ind<long int>() { return 4; }
+    constexpr uint_t type_ind<uint16_t>() { return 4; }
 
     template<>
-    constexpr uint_t type_ind<unsigned char>() { return 5; }
+    constexpr uint_t type_ind<int16_t>() { return 5; }
 
     template<>
-    constexpr uint_t type_ind<unsigned short int>() { return 6; }
+    constexpr uint_t type_ind<uint32_t>() { return 6; }
 
     template<>
-    constexpr uint_t type_ind<unsigned int>() { return 7; }
+    constexpr uint_t type_ind<int32_t>() { return 7; }
 
     template<>
-    constexpr uint_t type_ind<unsigned long int>() { return 8; }
+    constexpr uint_t type_ind<uint64_t>() { return 8; }
 
     template<>
-    constexpr uint_t type_ind<unsigned long long int>() { return 9; }
+    constexpr uint_t type_ind<int64_t>() { return 9; }
 
     template<>
     constexpr uint_t type_ind<float>() { return 10; }
@@ -191,7 +196,7 @@ namespace hdf5 {
 
         template<typename T>
         void write(const T *src, hsize_t n) const {
-            REQUIRE_EQ(type<T>(), m_h5type, "element type is at odds with the stored type");
+            REQUIRE_TRUE(H5Tequal(type<T>(), m_h5type), "element type is at odds with the stored type");
             REQUIRE_EQ(n, m_space.m_nelement, "number of elements written must match that of the dataspace");
             write_bytes(reinterpret_cast<const char*>(src));
         }
@@ -221,7 +226,7 @@ namespace hdf5 {
 
         template<typename T>
         void read(T *dst, size_t n) const {
-            REQUIRE_EQ(type<T>(), m_h5type, "element type is at odds with the stored type");
+            REQUIRE_TRUE(H5Tequal(type<T>(), m_h5type), "element type is at odds with the stored type");
             REQUIRE_EQ(n, m_space.m_nelement, "number of elements read must be the number stored");
             read_bytes(reinterpret_cast<char*>(dst));
         }
@@ -278,6 +283,7 @@ namespace hdf5 {
                 return;
             }
             AttrReader attr(m_handle, name);
+            v.resize(attr.m_nelement);
             attr.read(v.data(), v.size());
         }
     public:
@@ -655,8 +661,9 @@ namespace hdf5 {
 
     struct FileBase {
         const std::string m_fname;
-        static void check_is_hdf5(const std::string &name);
-        FileBase(const std::string& fname): m_fname((check_is_hdf5(fname), fname)){}
+        static bool is_hdf5(const std::string &fname);
+        static void require_is_hdf5(const std::string &fname);
+        FileBase(const std::string& fname): m_fname((require_is_hdf5(fname), fname)){}
     };
 
     struct FileReader : NodeReader, FileBase {

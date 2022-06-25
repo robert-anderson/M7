@@ -8,7 +8,7 @@ target_sources(M7_lib
         CsvFileReader.h
         EbdumpFileReader.cpp
         EbdumpFileReader.h
-        FcidumpFileReader.cpp
+        FcidumpTextFileReader.cpp
         FcidumpTextFileReader.h
         FcidumpInfo.cpp
         FcidumpInfo.h
