@@ -2,6 +2,7 @@
 // Created by Robert J. Anderson on 05/07/2021.
 //
 
+#include <M7_lib/hdf5/Group.h>
 #include "Archivable.h"
 
 Archivable::Archivable(std::string name, bool load, bool save, bool chkpt) :
@@ -13,7 +14,7 @@ Archivable::Archivable(std::string name, const conf::Archivable& opts) :
 Archivable::Archivable(std::string name, const conf::Archive& opts) :
         Archivable(std::move(name), opts.do_load(), opts.do_save(), opts.do_chkpts()) {}
 
-void Archivable::load(const hdf5::GroupReader& parent) {
+void Archivable::load(const hdf5::NodeReader& parent) {
     if (m_load) {
         REQUIRE_TRUE_ALL(parent.child_exists(m_name),
                          log::format("Load failed: \"{}\" does not exist in archive", m_name));
@@ -22,14 +23,14 @@ void Archivable::load(const hdf5::GroupReader& parent) {
     }
 }
 
-void Archivable::save(const hdf5::GroupWriter& parent) {
+void Archivable::save(const hdf5::NodeWriter& parent) {
     if (m_save) {
         log::info("saving \"{}\" to archive", m_name);
         save_fn(parent);
     }
 }
 
-void Archivable::chkpt(const hdf5::GroupWriter& parent) {
+void Archivable::chkpt(const hdf5::NodeWriter& parent) {
     if (m_chkpt) {
         log::info("saving \"{}\" checkpoint to archive", m_name);
         save_fn(parent);

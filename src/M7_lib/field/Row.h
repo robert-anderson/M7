@@ -5,7 +5,6 @@
 #ifndef M7_ROW_H
 #define M7_ROW_H
 
-#include <M7_lib/io/HDF5Wrapper.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/table/TableBase.h>
 

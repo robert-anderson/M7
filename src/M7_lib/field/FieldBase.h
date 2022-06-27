@@ -9,7 +9,8 @@
 #include <cstring>
 #include <M7_lib/util/Hash.h>
 #include <M7_lib/nd/NdArrayList.h>
-#include <M7_lib/io/HDF5Wrapper.h>
+#include <M7_lib/hdf5/NdDistList.h>
+#include <M7_lib/hdf5/Node.h>
 
 #include "Row.h"
 
@@ -134,16 +135,16 @@ public:
         h5list.write_h5item_bytes(iitem, begin());
     }
 
-    virtual void save(hdf5::GroupWriter &gw, uint_t irank= 0ul) const {
-        gw.save(m_name, begin(), {m_size}, {"raw_data"}, irank);
+    virtual void save(hdf5::NodeWriter &nw, uint_t irank= 0ul) const {
+        nw.save(m_name, begin(), {m_size}, {"raw_data"}, irank);
     }
 
     virtual void load(hdf5::NdDistListReader &h5list, const uint_t &iitem) {
         h5list.read_h5item_bytes(iitem, begin());
     }
 
-    virtual void load(hdf5::GroupReader &gr) {
-        gr.load(m_name, begin(), {m_size});
+    virtual void load(hdf5::NodeReader &nr) const {
+        nr.load(m_name, begin(), {m_size});
     }
 
     virtual uintv_t h5_shape() const {

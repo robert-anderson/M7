@@ -7,7 +7,6 @@
 
 #include <M7_lib/defs.h>
 #include <M7_lib/io/Logging.h>
-#include <M7_lib/io/HDF5Wrapper.h>
 
 #include "HamTextFileReader.h"
 #include "FortranNamelistReader.h"

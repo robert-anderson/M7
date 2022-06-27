@@ -8,7 +8,6 @@
 #include <M7_lib/field/Row.h>
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/table/BufferedTable.h>
-#include "M7_lib/io/HDF5Wrapper.h"
 
 TEST(HDF5Wrapper, StringType) {
     std::string s = "Lorem ipsum dolor sit";

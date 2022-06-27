@@ -7,8 +7,8 @@
 
 #include <M7_lib/conf/Conf.h>
 #include <M7_lib/util/Timer.h>
+#include <M7_lib/hdf5/File.h>
 
-#include "HDF5Wrapper.h"
 
 struct Archivable {
     const std::string m_name;
@@ -46,11 +46,11 @@ protected:
     virtual void save_fn(const hdf5::NodeWriter &parent) = 0;
 
 public:
-    void load(const hdf5::GroupReader &parent);
+    void load(const hdf5::NodeReader &parent);
 
-    void save(const hdf5::GroupWriter &parent);
+    void save(const hdf5::NodeWriter &parent);
 
-    void chkpt(const hdf5::GroupWriter &parent);
+    void chkpt(const hdf5::NodeWriter &parent);
 };
 
 struct Metadata : Archivable {

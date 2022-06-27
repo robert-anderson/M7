@@ -14,7 +14,7 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/util/FpTol.h>
 #include <M7_lib/defs.h>
-#include <M7_lib/io/HDF5Wrapper.h>
+#include <M7_lib/hdf5/Node.h>
 #include "Sparse.h"
 
 
@@ -250,11 +250,11 @@ namespace dense {
             return out;
         }
 
-        void save(std::string name, hdf5::GroupWriter& gw, uint_t irank=0) const {
+        void save(std::string name, hdf5::NodeWriter& nw, uint_t irank=0) const {
             uintv_t shape;
             shape.push_back(m_nrow);
             shape.push_back(m_ncol);
-            gw.save(name, m_buffer, shape, {"nrow", "ncol"}, irank);
+            nw.save(name, m_buffer, shape, {"nrow", "ncol"}, irank);
         }
     };
 

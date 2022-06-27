@@ -8,7 +8,7 @@
 #include <forward_list>
 #include <set>
 
-#include <M7_lib/io/HDF5Wrapper.h>
+#include <M7_lib/hdf5/Node.h>
 #include <M7_lib/field/Fields.h>
 
 #include "Table.h"

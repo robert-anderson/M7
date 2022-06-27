@@ -6,7 +6,7 @@
 #define M7_FCIDUMPINFO_H
 
 #include "FortranNamelistReader.h"
-#include "HDF5Wrapper.h"
+#include "M7_lib/hdf5/File.h"
 
 
 struct FcidumpInfo {

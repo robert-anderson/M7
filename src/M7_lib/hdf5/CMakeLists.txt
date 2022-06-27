@@ -1,0 +1,21 @@
+target_sources(M7_lib
+    PRIVATE
+        Attr.cpp
+        Attr.h
+        Dataset.cpp
+        Dataset.h
+        Dataspace.cpp
+        Dataspace.h
+        File.cpp
+        File.h
+        Group.cpp
+        Group.h
+        NdDistList.cpp
+        NdDistList.h
+        Node.cpp
+        Node.h
+        PropertyList.cpp
+        PropertyList.h
+        Type.cpp
+        Type.h
+)

@@ -196,22 +196,42 @@ namespace convert {
         return narrows;
     }
 
+    namespace {
+        template<typename to_t, typename from_t>
+        static void vector(const std::vector<from_t> &from, std::vector<to_t> &to, tag::Int<false> /*same*/) {
+            static_assert(std::is_convertible<from_t, to_t>::value, "incompatible types");
+            to.clear();
+            to.reserve(from.size());
+            for (auto &i: from) to.push_back(i);
+        }
+        template<typename to_t, typename from_t>
+        static std::vector<to_t> vector(const std::vector<from_t> &from, tag::Int<false> /*same*/) {
+            std::vector<to_t> to;
+            vector(from, to, tag::Int<false>());
+            return to;
+        }
+        /*
+         * no need to iterate when the to and from type are identical
+         */
+        template<typename to_t, typename from_t>
+        static void vector(const std::vector<from_t> &from, std::vector<to_t> &to, tag::Int<true> /*same*/) {
+            to = from;
+        }
+        template<typename to_t, typename from_t>
+        static std::vector<to_t> vector(const std::vector<from_t> &from, tag::Int<true> /*same*/) {
+            return from;
+        }
+    }
+
     template<typename to_t, typename from_t>
     static void vector(const std::vector<from_t> &from, std::vector<to_t> &to) {
-        static_assert(std::is_convertible<from_t, to_t>::value, "incompatible types");
-        to.clear();
-        to.reserve(from.size());
-        for (auto &i: from) to.push_back(i);
+        vector(from, to, tag::Int<std::is_same<to_t, from_t>::value>());
     }
 
     template<typename to_t, typename from_t>
     static std::vector<to_t> vector(const std::vector<from_t> &from) {
-        std::vector<to_t> to;
-        vector(from, to);
-        return to;
+        return vector<to_t>(from, tag::Int<std::is_same<to_t, from_t>::value>());
     }
-
-
 }
 
 template<typename T>

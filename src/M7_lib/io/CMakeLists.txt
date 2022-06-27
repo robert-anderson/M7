@@ -18,8 +18,6 @@ target_sources(M7_lib
         FileReader.h
         FortranNamelistReader.cpp
         FortranNamelistReader.h
-        HDF5Wrapper.cpp
-        HDF5Wrapper.h
         HamTextFileReader.cpp
         HamTextFileReader.h
         InteractiveVariable.cpp

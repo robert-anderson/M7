@@ -12,6 +12,7 @@
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/table/Communicator.h>
 #include <M7_lib/io/Archivable.h>
+#include <M7_lib/hdf5/Group.h>
 
 #include "FermionPromoter.h"
 
