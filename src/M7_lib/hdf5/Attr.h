@@ -12,7 +12,7 @@ namespace hdf5 {
         const hid_t m_handle;
         const DataSpace m_space;
     public:
-        const hid_t m_h5type;
+        const Type m_type;
         const hsize_t m_nelement;
 
         AttrReader(hid_t parent_handle, const std::string &name);
@@ -22,9 +22,8 @@ namespace hdf5 {
         void read_bytes(char *dst) const;
 
         template<typename T>
-        void read(T *dst, size_t n) const {
-            REQUIRE_TRUE(H5Tequal(type<T>(), m_h5type), "element type is at odds with the stored type");
-            REQUIRE_EQ(n, m_space.m_nelement, "number of elements read must be the number stored");
+        void read(T *dst) const {
+            REQUIRE_EQ(Type(dst), m_type, "element type is at odds with the stored type");
             read_bytes(reinterpret_cast<char *>(dst));
         }
 
@@ -45,7 +44,7 @@ namespace hdf5 {
 
         template<typename T>
         void write(const T *src, hsize_t n) const {
-            REQUIRE_TRUE(H5Tequal(type<T>(), m_h5type), "element type is at odds with the stored type");
+            REQUIRE_EQ(Type(src), m_h5type, "element type is at odds with the stored type");
             REQUIRE_EQ(n, m_space.m_nelement, "number of elements written must match that of the dataspace");
             write_bytes(reinterpret_cast<const char *>(src));
         }

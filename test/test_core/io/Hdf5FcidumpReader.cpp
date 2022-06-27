@@ -25,6 +25,6 @@ TEST(Hdf5FcidumpReader, Header) {
     std::cout << inds << std::endl;
 
     hdf5::FileWriter fw("rja.h5");
-    hdf5::DatasetWriter dw(fw, "FOCK_INDEX", shape, type<int64_t>());
+    hdf5::DatasetWriter dw(fw, "FOCK_INDEX", shape, Type(inds.data()));
     dw.write(inds.data());
 }

@@ -12,13 +12,15 @@ namespace hdf5 {
      * carries out all creation of datasets and Groups
      */
     struct GroupWriter : NodeWriter {
-        GroupWriter(const NodeWriter &node, std::string name) :
-                NodeWriter(H5Gcreate(node, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) {}
+        GroupWriter(const NodeWriter &node, std::string name);
+
+        ~GroupWriter();
     };
 
     struct GroupReader : NodeReader {
-        GroupReader(const NodeReader &node, std::string name) :
-                NodeReader(H5Gopen2(node, name.c_str(), H5P_DEFAULT)) {}
+        GroupReader(const NodeReader &node, std::string name);
+
+        ~GroupReader();
     };
 }
 

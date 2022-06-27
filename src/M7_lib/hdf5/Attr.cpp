@@ -7,7 +7,7 @@
 
 hdf5::AttrReader::AttrReader(hid_t parent_handle, const std::string& name) :
         m_handle(H5Aopen(parent_handle, name.c_str(), H5P_DEFAULT)),
-        m_space(H5Aget_space(m_handle)), m_h5type(H5Aget_type(m_handle)),
+        m_space(H5Aget_space(m_handle)), m_type(H5Aget_type(m_handle)),
         m_nelement(m_space.m_nelement){}
 
 hdf5::AttrReader::~AttrReader() {
@@ -15,20 +15,19 @@ hdf5::AttrReader::~AttrReader() {
 }
 
 void hdf5::AttrReader::read_bytes(char* dst) const {
-    auto status = H5Aread(m_handle, m_h5type, dst);
+    auto status = H5Aread(m_handle, m_type, dst);
     DEBUG_ONLY(status);
     DEBUG_ASSERT_FALSE(status, "HDF5 attribute read failed");
 }
 
 void hdf5::AttrReader::read(std::string* dst, size_t n) const {
     REQUIRE_EQ(n, m_space.m_nelement, "number of elements read must be the number stored");
-    StringType type(H5Aget_type(m_handle));
-    std::vector<char> tmp(type.m_nchar*n);
-    auto status = H5Aread(m_handle, m_h5type, tmp.data());
+    std::vector<char> tmp(m_type.m_size*n);
+    auto status = H5Aread(m_handle, m_type, tmp.data());
     DEBUG_ONLY(status);
     DEBUG_ASSERT_FALSE(status, "HDF5 attribute read failed");
     for (uint_t i=0; i<n; ++i) {
-        (dst++)->insert(0, tmp.data()+i*type.m_nchar, type.m_nchar);
+        (dst++)->insert(0, tmp.data()+i*m_type.m_size, m_type.m_size);
     }
 }
 

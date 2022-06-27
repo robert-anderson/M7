@@ -70,22 +70,6 @@ namespace hdf5 {
     template<>
     constexpr uint_t type_ind<double>() { return 11; }
 
-    template<typename T>
-    const hid_t &type() {
-        typedef arith::comp_t<T> comp_t;
-        static_assert(type_ind<comp_t>(), "type has no HDF5 equivalent");
-        return c_types[type_ind<comp_t>()];
-    }
-
-    static bool types_equal(hid_t t1, hid_t t2) {
-        return H5Tequal(t1, t2);
-    }
-
-    template<typename T>
-    bool types_equal(hid_t t2) {
-        return types_equal(type<T>(), t2);
-    }
-
     /**
      * @param h5type
      *  type index
@@ -94,28 +78,53 @@ namespace hdf5 {
      */
     hsize_t type_size(hid_t h5type);
 
-    struct StringType {
+
+
+    struct Type {
         const hid_t m_handle;
-        const hsize_t m_nchar; // excluding null terminator
+        const hsize_t m_size;
 
     private:
-        static hsize_t size_max(const std::vector<std::string>& vec);
-
+        const bool m_immutable;
+        static hsize_t size_max(const std::vector<std::string>* vec);
         /*
          * use dummy arg so as not to have same prototype as public ctor in case hsize_t coincides with hid_t
          */
-        StringType(hsize_t size, int /*dummy*/);
+        Type(hsize_t size, char /*dummy*/);
+
     public:
 
-        StringType(hid_t handle);
 
-        StringType(const std::string& str);
+        template<typename T>
+        static const hid_t &type() {
+            typedef arith::comp_t<T> comp_t;
+            //static_assert(type_ind<comp_t>(), "type has no HDF5 native equivalent");
+            return c_types[type_ind<comp_t>()];
+        }
 
-        StringType(const std::vector<std::string>& str_vec);
+        Type(): m_handle(0), m_size(0ul), m_immutable(true){}
+        explicit Type(hid_t handle): m_handle(handle), m_size(H5Tget_size(m_handle)), m_immutable(true){}
 
-        ~StringType();
+        template<typename T>
+        Type(const T*): Type(type<T>()){}
 
-        operator hid_t() const;
+
+        Type(const std::string* str);
+
+        Type(const std::vector<std::string>* str_vec);
+
+        ~Type();
+
+        static bool types_equal(hid_t t1, hid_t t2) {
+            return H5Tequal(t1, t2);
+        }
+
+        bool operator==(hid_t other) const {
+            return types_equal(m_handle, other);
+        }
+
+        operator hid_t () const;
+
     };
 }
 

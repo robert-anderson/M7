@@ -155,8 +155,8 @@ public:
         return {};
     }
 
-    virtual hid_t h5_type() const {
-        return 0;
+    virtual hdf5::Type h5_type() const {
+        return {};
     }
 
 private:

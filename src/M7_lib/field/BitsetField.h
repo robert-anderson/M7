@@ -273,8 +273,8 @@ struct BitsetField : FieldBase {
         return {};
     }
 
-    hid_t h5_type() const override {
-        return hdf5::type<T>();
+    hdf5::Type h5_type() const override {
+        return {static_cast<T*>(nullptr)};
     }
 };
 

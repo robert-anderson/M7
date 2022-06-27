@@ -8,22 +8,24 @@
 #include <M7_lib/field/Row.h>
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/table/BufferedTable.h>
+#include <M7_lib/hdf5/Dataset.h>
 
 TEST(HDF5Wrapper, StringType) {
     std::string s = "Lorem ipsum dolor sit";
-    hdf5::StringType type(s);
-    ASSERT_EQ(type.m_nchar, s.size()+1);
+    hdf5::Type type(&s);
+    ASSERT_EQ(type.m_size, s.size());
 }
 
-TEST(HDF5Wrapper, StringVector) {
-    auto definitive_irank = hash::in_range(99, 0, mpi::nrank());
-    std::vector<std::string> strings = {"Lorem", "ipsum dolor sit", "amet, consectetur adipiscing", "elit"};
-    {
-        hdf5::FileWriter fw("table_test.h5");
-        hdf5::GroupWriter gw(fw, "container");
-        gw.save("a_string_vector", strings, definitive_irank);
-    }
-}
+//TEST(HDF5Wrapper, StringVector) {
+//    auto definitive_irank = hash::in_range(99, 0, mpi::nrank());
+//    std::vector<std::string> strings = {"Lorem", "ipsum dolor sit", "amet, consectetur adipiscing", "elit"};
+//    {
+//        hdf5::FileWriter fw("table_test.h5");
+//        hdf5::GroupWriter gw(fw, "container");
+//        gw.write_data("a_string_vector", {1}, hdf5::Type(&strings));
+//        dw.write(strings);
+//    }
+//}
 
 TEST(HDF5Wrapper, String) {
     auto definitive_irank = hash::in_range(99, 0, mpi::nrank());
@@ -44,7 +46,7 @@ TEST(HDF5Wrapper, FloatArray) {
     {
         hdf5::FileWriter fw("table_test.h5");
         hdf5::GroupWriter gw(fw, "container");
-        gw.save("a_float_array", v.data(), shape, {"dim0", "dim1"}, definitive_irank);
+        gw.write_data("a_float_array", v);//, shape);//, {"dim0", "dim1"}, definitive_irank);
     }
     mpi::barrier();
     {

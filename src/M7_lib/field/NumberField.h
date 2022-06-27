@@ -293,8 +293,8 @@ public:
         return {m_format.m_dim_names.cbegin(), m_format.m_dim_names.cend()};
     }
 
-    hid_t h5_type() const override {
-        return hdf5::type<T>();
+    hdf5::Type h5_type() const override {
+        return {static_cast<T*>(nullptr)};
     }
 };
 
