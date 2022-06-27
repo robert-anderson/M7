@@ -78,6 +78,15 @@ namespace hdf5 {
         return c_types[type_ind<comp_t>()];
     }
 
+    static bool types_equal(hid_t t1, hid_t t2) {
+        return H5Tequal(t1, t2);
+    }
+
+    template<typename T>
+    bool types_equal(hid_t t2) {
+        return types_equal(type<T>(), t2);
+    }
+
     /**
      * @param h5type
      *  type index
@@ -91,64 +100,42 @@ namespace hdf5 {
         const hsize_t m_nchar; // excluding null terminator
 
     private:
-        static hsize_t size_max(const std::vector<std::string>& vec) {
-            if (vec.empty()) return 0ul;
-            return std::max_element(vec.cbegin(), vec.cend(),
-                 [](const std::string& s1, const std::string& s2){return s1.size()>s2.size();})->size();
-        }
+        static hsize_t size_max(const std::vector<std::string>& vec);
 
         /*
          * use dummy arg so as not to have same prototype as public ctor in case hsize_t coincides with hid_t
          */
-        StringType(hsize_t size, int /*dummy*/): m_handle(H5Tcopy(H5T_C_S1)), m_nchar(size+1) {
-            auto status = H5Tset_size(m_handle, m_nchar);
-            DEBUG_ONLY(status);
-            DEBUG_ASSERT_FALSE(status, "HDF5 string type resizing failed");
-            DEBUG_ASSERT_EQ(H5Tget_size(m_handle), m_nchar, "string length at odds with type length");
-        }
+        StringType(hsize_t size, int /*dummy*/);
     public:
 
-        StringType(hid_t handle): m_handle(handle), m_nchar(H5Tget_size(m_handle)){
-            DEBUG_ASSERT_TRUE(m_nchar, "number of chars in string type should be non-zero");
-        }
+        StringType(hid_t handle);
 
-        StringType(const std::string& str): StringType(str.size(), 0) {}
+        StringType(const std::string& str);
 
-        StringType(const std::vector<std::string>& str_vec): StringType(size_max(str_vec), 0) {}
+        StringType(const std::vector<std::string>& str_vec);
 
-        ~StringType() {
-            auto status = H5Tclose(m_handle);
-            DEBUG_ONLY(status);
-            DEBUG_ASSERT_FALSE(status, "HDF5 string type release failed");
-        }
-        operator hid_t() const {
-            return m_handle;
-        }
+        ~StringType();
+
+        operator hid_t() const;
     };
 
 
     struct PList {
-        hid_t m_handle;
+        const hid_t m_handle;
 
-        ~PList() {
-            H5Pclose(m_handle);
-        }
+        PList(hid_t handle);
 
-        operator hid_t() const {
-            return m_handle;
-        }
+        ~PList();
+
+        operator hid_t() const;
     };
 
     struct AccessPList : PList {
-        AccessPList() : PList{H5Pcreate(H5P_FILE_ACCESS)} {
-            H5Pset_fapl_mpio(m_handle, MPI_COMM_WORLD, MPI_INFO_NULL);
-        }
+        AccessPList();
     };
 
     struct CollectivePList : PList {
-        CollectivePList() : PList{H5Pcreate(H5P_DATASET_XFER)} {
-            H5Pset_dxpl_mpio(m_handle, H5FD_MPIO_COLLECTIVE);
-        }
+        CollectivePList();
     };
 
     struct DataSpace {
@@ -156,21 +143,12 @@ namespace hdf5 {
         const std::vector<hsize_t> m_shape;
         const hsize_t m_nelement;
     private:
-        std::vector<hsize_t> make_shape() const {
-            auto ndim = H5Sget_simple_extent_dims(m_handle, nullptr, nullptr);
-            std::vector<hsize_t> shape(ndim, 0);
-            H5Sget_simple_extent_dims(m_handle, shape.data(), nullptr);
-            return shape;
-        }
+        std::vector<hsize_t> make_shape() const;
     public:
-        DataSpace(hid_t handle): m_handle(handle), m_shape(make_shape()), m_nelement(nd::nelement(m_shape)){}
-        DataSpace(const std::vector<hsize_t>& shape):
-            DataSpace(H5Screate_simple(shape.size(), shape.data(), nullptr)){
-            REQUIRE_EQ(shape, m_shape, "given shape and shape reported by HDF5 do not agree");
-        };
-        ~DataSpace() {
-            H5Sclose(m_handle);
-        }
+        DataSpace(hid_t handle);
+        DataSpace(const std::vector<hsize_t>& shape);
+        ~DataSpace();
+        operator hid_t() const;
     };
 
 
@@ -180,19 +158,11 @@ namespace hdf5 {
         const hid_t m_handle;
 
     public:
-        AttrWriter(hid_t parent_handle, const std::string& name, const std::vector<hsize_t>& shape, hid_t h5type):
-            m_space(shape), m_h5type(h5type),
-            m_handle(H5Acreate(parent_handle, name.c_str(), m_h5type, m_space.m_handle, H5P_DEFAULT, H5P_DEFAULT)){}
+        AttrWriter(hid_t parent_handle, const std::string& name, const std::vector<hsize_t>& shape, hid_t h5type);
 
-        ~AttrWriter(){
-            H5Aclose(m_handle);
-        }
+        ~AttrWriter();
 
-        void write_bytes(const char *src) const {
-            auto status = H5Awrite(m_handle, m_h5type, src);
-            DEBUG_ONLY(status);
-            DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
-        }
+        void write_bytes(const char *src) const;
 
         template<typename T>
         void write(const T *src, hsize_t n) const {
@@ -209,20 +179,11 @@ namespace hdf5 {
         const hid_t m_h5type;
         const hsize_t m_nelement;
 
-        AttrReader(hid_t parent_handle, const std::string& name):
-            m_handle(H5Aopen(parent_handle, name.c_str(), H5P_DEFAULT)),
-            m_space(H5Aget_space(m_handle)), m_h5type(H5Aget_type(m_handle)),
-            m_nelement(m_space.m_nelement){}
+        AttrReader(hid_t parent_handle, const std::string& name);
 
-        ~AttrReader(){
-            H5Aclose(m_handle);
-        }
+        ~AttrReader();
 
-        void read_bytes(char *dst) const {
-            auto status = H5Aread(m_handle, m_h5type, dst);
-            DEBUG_ONLY(status);
-            DEBUG_ASSERT_FALSE(status, "HDF5 attribute read failed");
-        }
+        void read_bytes(char *dst) const;
 
         template<typename T>
         void read(T *dst, size_t n) const {
@@ -231,16 +192,50 @@ namespace hdf5 {
             read_bytes(reinterpret_cast<char*>(dst));
         }
 
-        void read(std::string *dst, size_t n) const {
-            REQUIRE_EQ(n, m_space.m_nelement, "number of elements read must be the number stored");
-            StringType type(H5Aget_type(m_handle));
-            std::vector<char> tmp(type.m_nchar*n);
-            auto status = H5Aread(m_handle, m_h5type, tmp.data());
-            DEBUG_ONLY(status);
-            DEBUG_ASSERT_FALSE(status, "HDF5 attribute read failed");
-            for (uint_t i=0; i<n; ++i) {
-                (dst++)->insert(0, tmp.data()+i*type.m_nchar, type.m_nchar);
-            }
+        void read(std::string *dst, size_t n) const;
+    };
+
+    class DatasetReader {
+        const DataSpace m_space;
+        const hid_t m_handle;
+    private:
+
+        uint_t get_dataset_ndim(hid_t parent_handle, const std::string& name) const {
+            auto status = H5Gget_objinfo(parent_handle, name.c_str(), 0, nullptr);
+            REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
+            auto dataset = H5Dopen1(parent_handle, name.c_str());
+            auto dataspace = H5Dget_space(dataset);
+            auto rank = H5Sget_simple_extent_ndims(dataspace);
+            H5Sclose(dataspace);
+            H5Dclose(dataset);
+            return rank;
+        }
+
+        uintv_t get_dataset_shape(hid_t parent_handle, const std::string& name) const {
+            auto ndim = get_dataset_ndim(parent_handle, name);
+            auto dataset = H5Dopen1(parent_handle, name.c_str());
+            REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));
+            auto dataspace = H5Dget_space(dataset);
+            std::vector<hsize_t> dims(ndim, 0ul);
+            H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
+            H5Sclose(dataspace);
+            H5Dclose(dataset);
+            uintv_t out;
+            out.reserve(dims.size());
+            for (const auto &i: dims) out.push_back(i);
+            return out;
+        }
+
+    public:
+        const hid_t m_h5type;
+        //const hsize_t m_nelement;
+        DatasetReader(hid_t parent_handle, const std::string& name):
+            m_space(convert::vector<hsize_t>(get_dataset_shape(parent_handle, name))),
+            m_handle(H5Dopen1(parent_handle, name.c_str())),
+            m_h5type(H5Dget_type(m_handle)){}
+
+        ~DatasetReader(){
+            H5Dclose(m_handle);
         }
     };
 
@@ -248,22 +243,16 @@ namespace hdf5 {
 
     struct Node {
         const hid_t m_handle;
-        Node(hid_t handle): m_handle(handle){}
-        operator hid_t() const {
-            return m_handle;
-        }
-        bool attr_exists(const std::string& name) const {
-            return H5Aexists(m_handle, name.c_str());
-        }
+        Node(hid_t handle);
+        operator hid_t() const;
+        bool attr_exists(const std::string& name) const;
     };
 
     struct NodeReader : Node {
     protected:
         H5O_info_t m_info;
     public:
-        NodeReader(hid_t handle): Node(handle){
-            H5Oget_info(m_handle, &m_info);
-        }
+        NodeReader(hid_t handle);
 
     private:
         template<typename T>

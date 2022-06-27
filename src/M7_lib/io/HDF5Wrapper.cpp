@@ -10,6 +10,148 @@ hsize_t hdf5::type_size(hid_t h5type) {
     return H5Tget_size(h5type);
 }
 
+
+hsize_t hdf5::StringType::size_max(const std::vector<std::string>& vec) {
+    if (vec.empty()) return 0ul;
+    return std::max_element(vec.cbegin(), vec.cend(),
+                            [](const std::string& s1, const std::string& s2){return s1.size()>s2.size();})->size();
+}
+
+hdf5::StringType::StringType(hsize_t size, int) : m_handle(H5Tcopy(H5T_C_S1)), m_nchar(size+1) {
+    auto status = H5Tset_size(m_handle, m_nchar);
+    DEBUG_ONLY(status);
+    DEBUG_ASSERT_FALSE(status, "HDF5 string type resizing failed");
+    DEBUG_ASSERT_EQ(H5Tget_size(m_handle), m_nchar, "string length at odds with type length");
+}
+
+hdf5::StringType::StringType(hid_t handle) : m_handle(handle), m_nchar(H5Tget_size(m_handle)){
+    DEBUG_ASSERT_TRUE(m_nchar, "number of chars in string type should be non-zero");
+}
+
+hdf5::StringType::StringType(const std::string& str) : StringType(str.size(), 0) {}
+
+hdf5::StringType::StringType(const std::vector<std::string>& str_vec) : StringType(size_max(str_vec), 0) {}
+
+hdf5::StringType::~StringType() {
+    auto status = H5Tclose(m_handle);
+    DEBUG_ONLY(status);
+    DEBUG_ASSERT_FALSE(status, "HDF5 string type release failed");
+}
+
+hdf5::StringType::operator hid_t() const {
+    return m_handle;
+}
+
+
+hdf5::PList::PList(hid_t handle) : m_handle(handle){}
+
+hdf5::PList::~PList() {
+    H5Pclose(m_handle);
+}
+
+hdf5::PList::operator hid_t() const {
+    return m_handle;
+}
+
+hdf5::AccessPList::AccessPList() : PList(H5Pcreate(H5P_FILE_ACCESS)) {
+    H5Pset_fapl_mpio(m_handle, MPI_COMM_WORLD, MPI_INFO_NULL);
+}
+
+hdf5::CollectivePList::CollectivePList() : PList(H5Pcreate(H5P_DATASET_XFER)) {
+    H5Pset_dxpl_mpio(m_handle, H5FD_MPIO_COLLECTIVE);
+}
+
+
+std::vector<hsize_t> hdf5::DataSpace::make_shape() const {
+    auto ndim = H5Sget_simple_extent_dims(m_handle, nullptr, nullptr);
+    std::vector<hsize_t> shape(ndim, 0);
+    H5Sget_simple_extent_dims(m_handle, shape.data(), nullptr);
+    return shape;
+}
+
+hdf5::DataSpace::DataSpace(hid_t handle) : m_handle(handle), m_shape(make_shape()), m_nelement(nd::nelement(m_shape)){}
+
+hdf5::DataSpace::DataSpace(const std::vector<hsize_t>& shape) :
+        DataSpace(H5Screate_simple(shape.size(), shape.data(), nullptr)){
+    REQUIRE_EQ(shape, m_shape, "given shape and shape reported by HDF5 do not agree");
+}
+
+hdf5::DataSpace::~DataSpace() {
+    H5Sclose(m_handle);
+}
+
+hdf5::DataSpace::operator hid_t() const {
+    return m_handle;
+}
+
+
+hdf5::AttrWriter::AttrWriter(hid_t parent_handle, const std::string& name, const std::vector<hsize_t>& shape,
+                             hid_t h5type) :
+        m_space(shape), m_h5type(h5type),
+        m_handle(H5Acreate(parent_handle, name.c_str(), m_h5type, m_space.m_handle, H5P_DEFAULT, H5P_DEFAULT)){}
+
+hdf5::AttrWriter::~AttrWriter() {
+    H5Aclose(m_handle);
+}
+
+void hdf5::AttrWriter::write_bytes(const char* src) const {
+    auto status = H5Awrite(m_handle, m_h5type, src);
+    DEBUG_ONLY(status);
+    DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
+}
+
+hdf5::AttrReader::AttrReader(hid_t parent_handle, const std::string& name) :
+        m_handle(H5Aopen(parent_handle, name.c_str(), H5P_DEFAULT)),
+        m_space(H5Aget_space(m_handle)), m_h5type(H5Aget_type(m_handle)),
+        m_nelement(m_space.m_nelement){}
+
+hdf5::AttrReader::~AttrReader() {
+    H5Aclose(m_handle);
+}
+
+void hdf5::AttrReader::read_bytes(char* dst) const {
+    auto status = H5Aread(m_handle, m_h5type, dst);
+    DEBUG_ONLY(status);
+    DEBUG_ASSERT_FALSE(status, "HDF5 attribute read failed");
+}
+
+void hdf5::AttrReader::read(std::string* dst, size_t n) const {
+    REQUIRE_EQ(n, m_space.m_nelement, "number of elements read must be the number stored");
+    StringType type(H5Aget_type(m_handle));
+    std::vector<char> tmp(type.m_nchar*n);
+    auto status = H5Aread(m_handle, m_h5type, tmp.data());
+    DEBUG_ONLY(status);
+    DEBUG_ASSERT_FALSE(status, "HDF5 attribute read failed");
+    for (uint_t i=0; i<n; ++i) {
+        (dst++)->insert(0, tmp.data()+i*type.m_nchar, type.m_nchar);
+    }
+}
+
+hdf5::Node::Node(hid_t handle) : m_handle(handle){}
+
+hdf5::Node::operator hid_t() const {
+    return m_handle;
+}
+
+bool hdf5::Node::attr_exists(const std::string& name) const {
+    return H5Aexists(m_handle, name.c_str());
+}
+
+
+
+
+
+
+
+hdf5::NodeReader::NodeReader(hid_t handle) : Node(handle){
+    H5Oget_info(m_handle, &m_info);
+}
+
+
+
+
+
+
 bool hdf5::FileBase::is_hdf5(const std::string &fname) {
     return H5Fis_hdf5(fname.c_str());
 }
@@ -85,7 +227,6 @@ uintv_t hdf5::NodeReader::get_dataset_shape(std::string name) const {
     for (const auto &i: dims) out.push_back(i);
     return out;
 }
-
 
 void hdf5::NdDistListWriter::write_h5item_bytes(const uint_t &iitem, const void *data) {
     DEBUG_ASSERT_EQ(bool(data), iitem < m_nitem_local,
