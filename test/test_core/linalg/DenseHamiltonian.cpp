@@ -59,6 +59,10 @@ TEST(DenseHamiltonian, HF) {
 
 
 TEST(DenseHamiltonian, N2Molcas) {
+    /*
+     * HF:      -108.9540866268
+     * CASCI:   -109.02180323
+     */
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5"}, true);
     Hamiltonian ham(&frm_ham);
     auto particles = ham.default_particles();
@@ -66,7 +70,7 @@ TEST(DenseHamiltonian, N2Molcas) {
     DenseHamiltonian hmat(ham, particles);
     std::vector<double> evals;
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], -99.9421389039332);
+    ASSERT_NEARLY_EQ(evals[0], -109.02180323);
 }
 
 TEST(DenseHamiltonian, PyscfX2cCheck) {

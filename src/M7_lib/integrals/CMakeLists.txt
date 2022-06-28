@@ -11,4 +11,6 @@ target_sources(M7_lib
         IntegralArray1e.h
         IntegralArray2e.cpp
         IntegralArray2e.h
+        IntegralReader.cpp
+        IntegralReader.h
 )

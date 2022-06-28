@@ -11,7 +11,7 @@
 
 struct FcidumpInfo {
     const std::string m_fname;
-    enum Implementation {CSV, HDF5};
+    enum Implementation {CSV, MolcasHDF5};
     const Implementation m_impl;
     const bool m_uhf, m_relativistic, m_spin_resolved;
     const uint_t m_nelec, m_nsite, m_nspinorb, m_norb_distinct;

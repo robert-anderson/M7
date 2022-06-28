@@ -49,24 +49,32 @@ namespace hdf5 {
         }
     public:
 
+        uintv_t dataset_shape(std::string name) const {
+            return DatasetReader::get_shape<uint_t>(m_handle, name);
+        }
+
+        uint_t dataset_nelement(std::string name) const {
+            return DatasetReader::get_nelement(m_handle, name);
+        }
+
         template<typename T>
-        void read_data(std::string name, T *v, uint_t size) {
+        void read_data(std::string name, T *v, uint_t size) const {
             DatasetReader dr(*this, name);
             REQUIRE_EQ(size, dr.m_space.m_nelement, "number of elements does not match read size");
             dr.read(reinterpret_cast<char*>(v));
         }
         template<typename T>
-        void read_data(std::string name, T &v) {
+        void read_data(std::string name, T &v) const {
             read_data(name, reinterpret_cast<char*>(&v), 1);
         }
         template<typename T>
-        void read_data(std::string name, std::vector<T> &v) {
+        void read_data(std::string name, std::vector<T> &v) const {
             auto nelement = DatasetReader::get_nelement(m_handle, name);
             v.resize(nelement);
             read_data(name, reinterpret_cast<char*>(v.data()), v.size());
         }
         template<typename T>
-        T read_data(std::string name) {
+        T read_data(std::string name) const {
             T v{};
             read_data(name, v);
             return v;

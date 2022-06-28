@@ -26,6 +26,6 @@ TEST(FortranNamelistReader, FromFile) {
     ASSERT_EQ(header.read_uint("NELEC"), 6);
     ASSERT_EQ(header.read_int("MS2", 2), 0);
     uintv_t orbsym = {0, 2, 1, 5, 6, 4};
-    ASSERT_EQ(integer::dec(header.read_uints("ORBSYM")), orbsym);
-    ASSERT_EQ(header.read_uints("ORBSYM"), integer::inc(orbsym));
+    ASSERT_EQ(integer::shifted(header.read_uints("ORBSYM"), false), orbsym);
+    ASSERT_EQ(header.read_uints("ORBSYM"), integer::shifted(orbsym, true));
 }

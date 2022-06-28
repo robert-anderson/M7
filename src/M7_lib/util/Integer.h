@@ -78,16 +78,15 @@ namespace integer {
     }
 
     template<typename T>
-    static std::vector<T> inc(const std::vector<T>& v) {
-        auto out = v;
-        for (auto& it: out) ++it;
-        return out;
+    static void shift(std::vector<T>& v, bool increment=true) {
+        if (increment) for (auto& it: v) ++it;
+        else for (auto& it: v) --it;
     }
 
     template<typename T>
-    static std::vector<T> dec(const std::vector<T>& v) {
+    static std::vector<T> shifted(const std::vector<T>& v, bool increment=true) {
         auto out = v;
-        for (auto& it: out) --it;
+        shift(out, increment);
         return out;
     }
 }

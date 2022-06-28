@@ -82,6 +82,24 @@ TEST(GeneralFrmHam, RhfEnergy) {
     ASSERT_NEARLY_EQ(ham.get_energy(onv), benchmark);
 }
 
+TEST(GeneralFrmHam, RhfEnergyMolcas) {
+    /*
+     * HF:      -108.9540866268
+     * CASCI:   -109.02180323
+     */
+    const auto benchmark = -108.9540866268;
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5"}, true);
+    Hamiltonian ham(&frm_ham);
+    uintv_t chk_orbsyms = {0, 0, 0, 0, 0, 0};
+    ASSERT_EQ(ham.m_basis.m_frm.m_abgrp_map.m_site_irreps, chk_orbsyms);
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
+    buffered::FrmOnv onv(ham.m_basis);
+    mbf::set_aufbau_mbf(onv, ham.default_particles().m_frm);
+    auto elem = ham.get_element(onv);
+    ASSERT_NEARLY_EQ(elem, benchmark);
+    ASSERT_NEARLY_EQ(ham.get_energy(onv), benchmark);
+}
+
 TEST(GeneralFrmHam, RhfBrillouinTheorem) {
     GeneralFrmHam ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"}, true);
     ASSERT_TRUE(ham.m_kramers_attrs.conserving());

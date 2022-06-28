@@ -103,11 +103,20 @@ namespace dense {
             DEBUG_ASSERT_LT(icol, m_ncol, "column index OOB");
             return irow * m_ncol + icol;
         }
-
+        /**
+         * these can't be const because of the need to swap them in the inplace transpose, so instead they are made
+         * private and read-only access is provided by a getter method for each
+         */
         uint_t m_nrow, m_ncol;
     public:
-
-        Matrix(uint_t nrow, uint_t ncol) : m_buffer(nrow * ncol, T(0)), m_nrow(nrow), m_ncol(ncol) {}
+        Matrix(uint_t nrow, uint_t ncol) : m_buffer(nrow * ncol, T(0)), m_nrow(nrow), m_ncol(ncol) {
+            REQUIRE_TRUE(m_nrow, "matrix must have a non-zero number of rows");
+            REQUIRE_TRUE(m_ncol, "matrix must have a non-zero number of columns");
+        }
+        Matrix(const hdf5::NodeReader& nr, const std::string name) :
+            Matrix(nr.dataset_shape(name)[0], nr.dataset_shape(name)[1]) {
+            nr.read_data(name, m_buffer.data(), m_buffer.size());
+        }
         Matrix(const sparse::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_column_index()+1){
             *this = sparse;
         }
@@ -189,14 +198,80 @@ namespace dense {
 
     protected:
         /*
-         * for bounds safety, we keep these set-from-pointer methods protected
+         * for bounds safety, we keep these set-from and get-to pointer methods protected
          */
-        void set_row(const uint_t &irow, const T* v) {
-            memcpy(m_buffer.data() + index(irow, 0ul), v, m_ncol * sizeof(T));
+        /**
+         * non-converting copy-in
+         * @tparam U
+         *  U (==T)
+         * @param irow
+         *  row index
+         * @param src
+         *  data source
+         */
+        template<typename U>
+        typename std::enable_if<std::is_same<U, T>::value, void>::type
+        set_row(const uint_t &irow, const U* src) {
+            memcpy(m_buffer.data() + index(irow, 0ul), src, m_ncol * sizeof(T));
         }
 
-        void set_col(const uint_t &icol, const T* v) {
-            for (uint_t irow = 0ul; irow<m_nrow; ++irow) (*this)(irow, icol) = v[irow];
+        /**
+         * converting copy-in
+         * @tparam U
+         *  U (!=T)
+         * @param irow
+         *  row index
+         * @param src
+         *  data source
+         */
+        template<typename U>
+        typename std::enable_if<!std::is_same<U, T>::value, void>::type
+        set_row(const uint_t &irow, const U* src) {
+            static_assert(std::is_convertible<U, T>::value, "invalid conversion");
+            for (uint_t icol = 0ul; irow<m_ncol; ++icol) (*this)(irow, icol) = src[icol];
+        }
+
+        /**
+         * non-converting copy-out
+         * @tparam U
+         *  U (==T)
+         * @param irow
+         *  row index
+         * @param dst
+         *  data destination
+         */
+        template<typename U>
+        typename std::enable_if<std::is_same<U, T>::value, void>::type
+        get_row(const uint_t &irow, U* dst) const {
+            memcpy(dst, m_buffer.data() + index(irow, 0ul), m_ncol * sizeof(T));
+        }
+
+        /**
+         * non-converting copy-out
+         * @tparam U
+         *  U (!=T)
+         * @param irow
+         *  row index
+         * @param dst
+         *  data destination
+         */
+        template<typename U>
+        typename std::enable_if<!std::is_same<U, T>::value, void>::type
+        get_row(const uint_t &irow, U* dst) const {
+            static_assert(std::is_convertible<T, U>::value, "invalid conversion");
+            for (uint_t icol = 0ul; icol<m_ncol; ++icol) dst[icol] = (*this)(irow, icol);
+        }
+
+        template<typename U>
+        void set_col(const uint_t &icol, const U* src) {
+            static_assert(std::is_convertible<U, T>::value, "invalid conversion");
+            for (uint_t irow = 0ul; irow<m_nrow; ++irow) (*this)(irow, icol) = src[irow];
+        }
+
+        template<typename U>
+        void get_col(const uint_t &icol, U* dst) const {
+            static_assert(std::is_convertible<T, U>::value, "invalid conversion");
+            for (uint_t irow = 0ul; irow<m_nrow; ++irow) dst[irow] = (*this)(irow, icol);
         }
 
     public:
@@ -229,14 +304,28 @@ namespace dense {
             conj();
         }
 
-        void set_row(const uint_t &irow, const std::vector<T> &v) {
+        template<typename U>
+        void set_row(const uint_t &irow, const std::vector<U> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
             set_row(irow, v.data());
         }
 
-        void set_col(const uint_t &icol, const std::vector<T> &v) {
+        template<typename U>
+        void set_col(const uint_t &icol, const std::vector<U> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
             set_col(icol, v.data());
+        }
+
+        template<typename U>
+        void get_row(const uint_t &irow, std::vector<U> &v) const {
+            v.resize(m_ncol);
+            get_row(irow, v.data());
+        }
+
+        template<typename U>
+        void get_col(const uint_t &icol, std::vector<U> &v) const {
+            v.resize(m_nrow);
+            get_col(icol, v.data());
         }
 
         std::string to_string() const {

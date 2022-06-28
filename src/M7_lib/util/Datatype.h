@@ -108,6 +108,60 @@ namespace dtype {
         (void)first;
         unused(args...);
     }
+
+    template<typename T>
+    constexpr T null() {
+        return std::numeric_limits<T>::max();
+    }
+    template<typename T>
+    constexpr T null(const T&) {
+        return null<T>();
+    }
+
+    template<typename T>
+    bool is_null(const T& v){
+        return v==null(v);
+    }
+
+    template<typename T>
+    static bool all_null(const T& v) {
+        return is_null(v);
+    }
+    template<typename T, typename ...Args>
+    bool all_null(const T& first, const Args&... rest){
+        return is_null(first) && all_null(rest...);
+    }
+
+    template<typename T>
+    static bool any_null(const T& v) {
+        return is_null(v);
+    }
+    template<typename T, typename ...Args>
+    bool any_null(const T& first, const Args&... rest){
+        return is_null(first) || any_null(rest...);
+    }
+
+    template<typename T>
+    void nullify(T& v){
+        v = null(v);
+    }
+
+    template<typename T>
+    void nullify(T* v){
+        v = nullptr;
+    }
+
+    template<typename T, typename ...Args>
+    void nullify(T& first, Args&... rest){
+        nullify(first);
+        nullify(rest...);
+    }
+
+
+    template<typename T, size_t n>
+    static void nullify(std::array<T, n>& a) {
+        for (uint i=0ul; i<n; ++i) nullify(a[i]);
+    }
 }
 
 

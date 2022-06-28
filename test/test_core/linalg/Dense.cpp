@@ -6,10 +6,11 @@
 #include "M7_lib/linalg/Dense.h"
 
 TEST(Dense, Transpose) {
-    dense::Matrix<int> p(3, 5);
-    p.set_row(0, {1, 2, 3, 4, 5});
-    p.set_row(1, {4, 2, 2, 7, 1});
-    p.set_row(2, {8, 3, 4, 2, 7});
+    typedef int T;
+    dense::Matrix<T> p(3, 5);
+    p.set_row<T>(0, {1, 2, 3, 4, 5});
+    p.set_row<T>(1, {4, 2, 2, 7, 1});
+    p.set_row<T>(2, {8, 3, 4, 2, 7});
     auto p_chk = p;
     ASSERT_EQ(p_chk.nrow(), 3);
     ASSERT_EQ(p_chk.ncol(), 5);
@@ -27,11 +28,13 @@ TEST(Dense, Transpose) {
 
 
 TEST(Dense, Dagger) {
-    dense::Matrix<std::complex<float>> p(3, 5);
+    typedef float comp_t;
+    typedef std::complex<comp_t> T;
+    dense::Matrix<T> p(3, 5);
 
-    p.set_row(0, {{6.6, 8.4}, {8.7, 4.6}, {9.8, 7.8}, {4.7, 6.4}, {3.5, 6.0}});
-    p.set_row(1, {{2.8, 3.2}, {5.6, 3.5}, {5.4, 1.5}, {5.8, 5.9}, {4.1, 5.4}});
-    p.set_row(2, {{0.7, 6.4}, {4.8, 7.8}, {4.9, 7.0}, {7.4, 7.7}, {1.0, 7.1}});
+    p.set_row<T>(0, {{6.6, 8.4}, {8.7, 4.6}, {9.8, 7.8}, {4.7, 6.4}, {3.5, 6.0}});
+    p.set_row<T>(1, {{2.8, 3.2}, {5.6, 3.5}, {5.4, 1.5}, {5.8, 5.9}, {4.1, 5.4}});
+    p.set_row<T>(2, {{0.7, 6.4}, {4.8, 7.8}, {4.9, 7.0}, {7.4, 7.7}, {1.0, 7.1}});
     auto p_chk = p;
     ASSERT_EQ(p_chk.nrow(), 3);
     ASSERT_EQ(p_chk.ncol(), 5);
@@ -50,25 +53,26 @@ TEST(Dense, Dagger) {
 }
 
 TEST(Dense, RectSingleMatMatProduct) {
+    typedef float T;
     const float tol = 5e-6;
     dense::Matrix<float> p(3, 5);
 
-    p.set_row(0, {0.7, 3. , 2.8, 2.9, 3.7});
-    p.set_row(1, {0.6, 0.8, 0. , 2.6, 4. });
-    p.set_row(2, {1.6, 2.2, 0.2, 3.3, 2.3});
+    p.set_row<T>(0, {0.7, 3. , 2.8, 2.9, 3.7});
+    p.set_row<T>(1, {0.6, 0.8, 0. , 2.6, 4. });
+    p.set_row<T>(2, {1.6, 2.2, 0.2, 3.3, 2.3});
 
     dense::Matrix<float> q(5, 4);
 
-    q.set_row(0, {3.7, 2.7, 1.4, 1.4});
-    q.set_row(1, {1.4, 3.3, 1.1, 1.2});
-    q.set_row(2, {1.2, 3.4, 1.7, 3.8});
-    q.set_row(3, {1. , 2.9, 2.6, 2.8});
-    q.set_row(4, {3.4, 3.7, 1.1, 4. });
+    q.set_row<T>(0, {3.7, 2.7, 1.4, 1.4});
+    q.set_row<T>(1, {1.4, 3.3, 1.1, 1.2});
+    q.set_row<T>(2, {1.2, 3.4, 1.7, 3.8});
+    q.set_row<T>(3, {1. , 2.9, 2.6, 2.8});
+    q.set_row<T>(4, {3.4, 3.7, 1.1, 4. });
 
     dense::Matrix<float> r_chk(3, 4);
-    r_chk.set_row(0, {25.63, 43.41, 20.65, 38.14});
-    r_chk.set_row(1, {19.54, 26.6 , 12.88, 25.08});
-    r_chk.set_row(2, {20.36, 30.34, 16.11, 24.08});
+    r_chk.set_row<T>(0, {25.63, 43.41, 20.65, 38.14});
+    r_chk.set_row<T>(1, {19.54, 26.6 , 12.88, 25.08});
+    r_chk.set_row<T>(2, {20.36, 30.34, 16.11, 24.08});
 
     dense::Matrix<float> r(3, 4);
     dense::multiply(p, q, r);
@@ -98,25 +102,26 @@ TEST(Dense, RectSingleMatMatProduct) {
 }
 
 TEST(Dense, RectDoubleMatMatProduct) {
+    typedef float T;
     const float tol = 1e-12;
     dense::Matrix<double> p(3, 5);
 
-    p.set_row(0, {0.7, 3. , 2.8, 2.9, 3.7});
-    p.set_row(1, {0.6, 0.8, 0. , 2.6, 4. });
-    p.set_row(2, {1.6, 2.2, 0.2, 3.3, 2.3});
+    p.set_row<T>(0, {0.7, 3. , 2.8, 2.9, 3.7});
+    p.set_row<T>(1, {0.6, 0.8, 0. , 2.6, 4. });
+    p.set_row<T>(2, {1.6, 2.2, 0.2, 3.3, 2.3});
 
     dense::Matrix<double> q(5, 4);
 
-    q.set_row(0, {3.7, 2.7, 1.4, 1.4});
-    q.set_row(1, {1.4, 3.3, 1.1, 1.2});
-    q.set_row(2, {1.2, 3.4, 1.7, 3.8});
-    q.set_row(3, {1. , 2.9, 2.6, 2.8});
-    q.set_row(4, {3.4, 3.7, 1.1, 4. });
+    q.set_row<T>(0, {3.7, 2.7, 1.4, 1.4});
+    q.set_row<T>(1, {1.4, 3.3, 1.1, 1.2});
+    q.set_row<T>(2, {1.2, 3.4, 1.7, 3.8});
+    q.set_row<T>(3, {1. , 2.9, 2.6, 2.8});
+    q.set_row<T>(4, {3.4, 3.7, 1.1, 4. });
 
     dense::Matrix<double> r_chk(3, 4);
-    r_chk.set_row(0, {25.63, 43.41, 20.65, 38.14});
-    r_chk.set_row(1, {19.54, 26.6 , 12.88, 25.08});
-    r_chk.set_row(2, {20.36, 30.34, 16.11, 24.08});
+    r_chk.set_row<T>(0, {25.63, 43.41, 20.65, 38.14});
+    r_chk.set_row<T>(1, {19.54, 26.6 , 12.88, 25.08});
+    r_chk.set_row<T>(2, {20.36, 30.34, 16.11, 24.08});
 
     dense::Matrix<double> r(3, 4);
     dense::multiply(p, q, r);
@@ -146,29 +151,30 @@ TEST(Dense, RectDoubleMatMatProduct) {
 }
 
 TEST(Dense, RectComplexSingleMatMatProduct) {
-    typedef float T;
-    const T tol = 1e-5;
-    dense::Matrix<std::complex<T>> p(3, 5);
+    typedef float comp_t;
+    typedef std::complex<comp_t> T;
+    const comp_t tol = 1e-5;
+    dense::Matrix<T> p(3, 5);
 
-    p.set_row(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
-    p.set_row(1, {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}});
-    p.set_row(2, {{1.6, 2.0}, {2.2, 2.7}, {0.2, 0.2}, {3.3, 2.5}, {2.3, 2.0}});
+    p.set_row<T>(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
+    p.set_row<T>(1, {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}});
+    p.set_row<T>(2, {{1.6, 2.0}, {2.2, 2.7}, {0.2, 0.2}, {3.3, 2.5}, {2.3, 2.0}});
 
-    dense::Matrix<std::complex<T>> q(5, 4);
+    dense::Matrix<T> q(5, 4);
 
-    q.set_row(0, {{0.5, 2.0}, {1.3, 0.7}, {1.5, 3.8}, {1.3, 0.9}});
-    q.set_row(1, {{1.2, 1.5}, {1.5, 2.5}, {1.2, 2.3}, {0.1, 1.4}});
-    q.set_row(2, {{3.8, 3.0}, {1.5, 3.3}, {0.9, 2.9}, {0.1, 2.9}});
-    q.set_row(3, {{2.1, 1.4}, {2.9, 1.2}, {0.8, 1.1}, {1.2, 1.7}});
-    q.set_row(4, {{2.0, 0.5}, {2.0, 2.2}, {1.5, 1.6}, {3.5, 0.4}});
+    q.set_row<T>(0, {{0.5, 2.0}, {1.3, 0.7}, {1.5, 3.8}, {1.3, 0.9}});
+    q.set_row<T>(1, {{1.2, 1.5}, {1.5, 2.5}, {1.2, 2.3}, {0.1, 1.4}});
+    q.set_row<T>(2, {{3.8, 3.0}, {1.5, 3.3}, {0.9, 2.9}, {0.1, 2.9}});
+    q.set_row<T>(3, {{2.1, 1.4}, {2.9, 1.2}, {0.8, 1.1}, {1.2, 1.7}});
+    q.set_row<T>(4, {{2.0, 0.5}, {2.0, 2.2}, {1.5, 1.6}, {3.5, 0.4}});
 
-    dense::Matrix<std::complex<T>> r_chk(3, 4);
+    dense::Matrix<T> r_chk(3, 4);
 
-    r_chk.set_row(0, {{11.27, 43.72}, {3.95, 48.29}, {-7.82, 38.93}, {2.97, 36.63}});
-    r_chk.set_row(1, {{-10.43, 32.52}, {-9.24, 35.64}, {-26.06, 29.51}, {-2.25, 21.02}});
-    r_chk.set_row(2, {{2.58, 27.12}, {3.64, 34.5} , {-9.03, 30.45}, {3.12, 24.52}});
+    r_chk.set_row<T>(0, {{11.27, 43.72}, {3.95, 48.29}, {-7.82, 38.93}, {2.97, 36.63}});
+    r_chk.set_row<T>(1, {{-10.43, 32.52}, {-9.24, 35.64}, {-26.06, 29.51}, {-2.25, 21.02}});
+    r_chk.set_row<T>(2, {{2.58, 27.12}, {3.64, 34.5} , {-9.03, 30.45}, {3.12, 24.52}});
 
-    dense::Matrix<std::complex<T>> r(3, 4);
+    dense::Matrix<T> r(3, 4);
     dense::multiply(p, q, r);
     ASSERT_TRUE(r.nearly_equal(r_chk, tol));
 
@@ -204,29 +210,30 @@ TEST(Dense, RectComplexSingleMatMatProduct) {
 }
 
 TEST(Dense, RectComplexDoubleMatMatProduct) {
-    typedef double T;
-    const T tol = 1e-11;
-    dense::Matrix<std::complex<T>> p(3, 5);
+    typedef double comp_t;
+    typedef std::complex<comp_t> T;
+    const comp_t tol = 1e-11;
+    dense::Matrix<T> p(3, 5);
 
-    p.set_row(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
-    p.set_row(1, {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}});
-    p.set_row(2, {{1.6, 2.0}, {2.2, 2.7}, {0.2, 0.2}, {3.3, 2.5}, {2.3, 2.0}});
+    p.set_row<T>(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
+    p.set_row<T>(1, {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}});
+    p.set_row<T>(2, {{1.6, 2.0}, {2.2, 2.7}, {0.2, 0.2}, {3.3, 2.5}, {2.3, 2.0}});
 
-    dense::Matrix<std::complex<T>> q(5, 4);
+    dense::Matrix<T> q(5, 4);
 
-    q.set_row(0, {{0.5, 2.0}, {1.3, 0.7}, {1.5, 3.8}, {1.3, 0.9}});
-    q.set_row(1, {{1.2, 1.5}, {1.5, 2.5}, {1.2, 2.3}, {0.1, 1.4}});
-    q.set_row(2, {{3.8, 3.0}, {1.5, 3.3}, {0.9, 2.9}, {0.1, 2.9}});
-    q.set_row(3, {{2.1, 1.4}, {2.9, 1.2}, {0.8, 1.1}, {1.2, 1.7}});
-    q.set_row(4, {{2.0, 0.5}, {2.0, 2.2}, {1.5, 1.6}, {3.5, 0.4}});
+    q.set_row<T>(0, {{0.5, 2.0}, {1.3, 0.7}, {1.5, 3.8}, {1.3, 0.9}});
+    q.set_row<T>(1, {{1.2, 1.5}, {1.5, 2.5}, {1.2, 2.3}, {0.1, 1.4}});
+    q.set_row<T>(2, {{3.8, 3.0}, {1.5, 3.3}, {0.9, 2.9}, {0.1, 2.9}});
+    q.set_row<T>(3, {{2.1, 1.4}, {2.9, 1.2}, {0.8, 1.1}, {1.2, 1.7}});
+    q.set_row<T>(4, {{2.0, 0.5}, {2.0, 2.2}, {1.5, 1.6}, {3.5, 0.4}});
 
-    dense::Matrix<std::complex<T>> r_chk(3, 4);
+    dense::Matrix<T> r_chk(3, 4);
 
-    r_chk.set_row(0, {{11.27, 43.72}, {3.95, 48.29}, {-7.82, 38.93}, {2.97, 36.63}});
-    r_chk.set_row(1, {{-10.43, 32.52}, {-9.24, 35.64}, {-26.06, 29.51}, {-2.25, 21.02}});
-    r_chk.set_row(2, {{2.58, 27.12}, {3.64, 34.5} , {-9.03, 30.45}, {3.12, 24.52}});
+    r_chk.set_row<T>(0, {{11.27, 43.72}, {3.95, 48.29}, {-7.82, 38.93}, {2.97, 36.63}});
+    r_chk.set_row<T>(1, {{-10.43, 32.52}, {-9.24, 35.64}, {-26.06, 29.51}, {-2.25, 21.02}});
+    r_chk.set_row<T>(2, {{2.58, 27.12}, {3.64, 34.5} , {-9.03, 30.45}, {3.12, 24.52}});
 
-    dense::Matrix<std::complex<T>> r(3, 4);
+    dense::Matrix<T> r(3, 4);
     dense::multiply(p, q, r);
     ASSERT_TRUE(r.nearly_equal(r_chk, tol));
 
@@ -266,9 +273,9 @@ TEST(Dense, RectSingleMatVecProduct) {
     const T tol = 1e-5;
     dense::Matrix<T> p(3, 5);
 
-    p.set_row(0, {0.7, 3. , 2.8, 2.9, 3.7});
-    p.set_row(1, {0.6, 0.8, 0. , 2.6, 4. });
-    p.set_row(2, {1.6, 2.2, 0.2, 3.3, 2.3});
+    p.set_row<T>(0, {0.7, 3. , 2.8, 2.9, 3.7});
+    p.set_row<T>(1, {0.6, 0.8, 0. , 2.6, 4. });
+    p.set_row<T>(2, {1.6, 2.2, 0.2, 3.3, 2.3});
 
     std::vector<T> q = {1.4, 3.3, 1.1, 1.2, 4.0};
     std::vector<T> r_chk = {32.24, 22.6 , 22.88};
@@ -289,9 +296,9 @@ TEST(Dense, RectDoubleMatVecProduct) {
     const T tol = 1e-11;
     dense::Matrix<T> p(3, 5);
 
-    p.set_row(0, {0.7, 3. , 2.8, 2.9, 3.7});
-    p.set_row(1, {0.6, 0.8, 0. , 2.6, 4. });
-    p.set_row(2, {1.6, 2.2, 0.2, 3.3, 2.3});
+    p.set_row<T>(0, {0.7, 3. , 2.8, 2.9, 3.7});
+    p.set_row<T>(1, {0.6, 0.8, 0. , 2.6, 4. });
+    p.set_row<T>(2, {1.6, 2.2, 0.2, 3.3, 2.3});
 
     std::vector<T> q = {1.4, 3.3, 1.1, 1.2, 4.0};
     std::vector<T> r_chk = {32.24, 22.6 , 22.88};
@@ -309,16 +316,17 @@ TEST(Dense, RectDoubleMatVecProduct) {
 
 
 TEST(Dense, RectComplexSingleMatVecProduct) {
-    typedef float T;
-    const T tol = 1e-5;
-    dense::Matrix<std::complex<T>> p(3, 5);
+    typedef float comp_t;
+    typedef std::complex<comp_t> T;
+    const comp_t tol = 1e-5;
+    dense::Matrix<T> p(3, 5);
 
-    p.set_row(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
-    p.set_row(1, {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}});
-    p.set_row(2, {{1.6, 2.0}, {2.2, 2.7}, {0.2, 0.2}, {3.3, 2.5}, {2.3, 2.0}});
+    p.set_row<T>(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
+    p.set_row<T>(1, {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}});
+    p.set_row<T>(2, {{1.6, 2.0}, {2.2, 2.7}, {0.2, 0.2}, {3.3, 2.5}, {2.3, 2.0}});
 
-    std::vector<std::complex<T>> q = {{2.6, 2.5}, {3.9, 1.3}, {2.5, 4.0}, {2.9, 2.2}, {2.1, 1.4}};
-    std::vector<std::complex<T>> r_chk = {{11.35, 53.53}, {-11.87, 51.0}, {10.03, 45.82}};
+    std::vector<T> q = {{2.6, 2.5}, {3.9, 1.3}, {2.5, 4.0}, {2.9, 2.2}, {2.1, 1.4}};
+    std::vector<T> r_chk = {{11.35, 53.53}, {-11.87, 51.0}, {10.03, 45.82}};
     auto r = dense::multiply(p, q);
     ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
 
@@ -339,16 +347,17 @@ TEST(Dense, RectComplexSingleMatVecProduct) {
 }
 
 TEST(Dense, RectComplexDoubleMatVecProduct) {
-    typedef double T;
-    const T tol = 1e-11;
-    dense::Matrix<std::complex<T>> p(3, 5);
+    typedef float comp_t;
+    typedef std::complex<comp_t> T;
+    const comp_t tol = 1e-5;
+    dense::Matrix<T> p(3, 5);
 
-    p.set_row(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
-    p.set_row(1, {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}});
-    p.set_row(2, {{1.6, 2.0}, {2.2, 2.7}, {0.2, 0.2}, {3.3, 2.5}, {2.3, 2.0}});
+    p.set_row<T>(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
+    p.set_row<T>(1, {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}});
+    p.set_row<T>(2, {{1.6, 2.0}, {2.2, 2.7}, {0.2, 0.2}, {3.3, 2.5}, {2.3, 2.0}});
 
-    std::vector<std::complex<T>> q = {{2.6, 2.5}, {3.9, 1.3}, {2.5, 4.0}, {2.9, 2.2}, {2.1, 1.4}};
-    std::vector<std::complex<T>> r_chk = {{11.35, 53.53}, {-11.87, 51.0}, {10.03, 45.82}};
+    std::vector<T> q = {{2.6, 2.5}, {3.9, 1.3}, {2.5, 4.0}, {2.9, 2.2}, {2.1, 1.4}};
+    std::vector<T> r_chk = {{11.35, 53.53}, {-11.87, 51.0}, {10.03, 45.82}};
     auto r = dense::multiply(p, q);
     ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
 
@@ -385,25 +394,27 @@ TEST(Dense, DoubleInnerProduct) {
 }
 
 TEST(Dense, ComplexSingleInnerProduct) {
-    typedef float T;
-    const T tol = 1e-5;
-    std::vector<std::complex<T>> p = {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}};
-    std::vector<std::complex<T>> q = {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}};
+    typedef float comp_t;
+    typedef std::complex<comp_t> T;
+    const comp_t tol = 1e-5;
+    std::vector<T> p = {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}};
+    std::vector<T> q = {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}};
     auto r = dense::inner_product(p, q);
-    ASSERT_NEARLY_EQ_TOL(r, std::complex<T>(-0.41, 51.24), T(0.0), tol);
+    ASSERT_NEARLY_EQ_TOL(r, T(-0.41, 51.24), comp_t(0), tol);
     r = dense::inner_product(p, q, true);
-    ASSERT_NEARLY_EQ_TOL(r, std::complex<T>(50.73, 10.48), T(0.0), tol);
+    ASSERT_NEARLY_EQ_TOL(r, T(50.73, 10.48), comp_t(0), tol);
 }
 
 TEST(Dense, ComplexDoubleInnerProduct) {
-    typedef double T;
-    const T tol = 1e-11;
-    std::vector<std::complex<T>> p = {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}};
-    std::vector<std::complex<T>> q = {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}};
+    typedef float comp_t;
+    typedef std::complex<comp_t> T;
+    const comp_t tol = 1e-11;
+    std::vector<T> p = {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}};
+    std::vector<T> q = {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}};
     auto r = dense::inner_product(p, q);
-    ASSERT_NEARLY_EQ_TOL(r, std::complex<T>(-0.41, 51.24), T(0.0), tol);
+    ASSERT_NEARLY_EQ_TOL(r, T(-0.41, 51.24), comp_t(0), tol);
     r = dense::inner_product(p, q, true);
-    ASSERT_NEARLY_EQ_TOL(r, std::complex<T>(50.73, 10.48), T(0.0), tol);
+    ASSERT_NEARLY_EQ_TOL(r, T(50.73, 10.48), comp_t(0), tol);
 }
 
 
@@ -417,10 +428,10 @@ TEST(Dense, RealSymEig) {
         [-1, -1,  2, -5],
         [ 2, -1, -5,  4]]
      */
-    mat.set_row(0, {0, 2, -1, 2});
-    mat.set_row(1, {2, 4, -1, -1});
-    mat.set_row(2, {-1, -1, 2, -5});
-    mat.set_row(3, {2, -1, -5, 4});
+    mat.set_row<T>(0, {0, 2, -1, 2});
+    mat.set_row<T>(1, {2, 4, -1, -1});
+    mat.set_row<T>(2, {-1, -1, 2, -5});
+    mat.set_row<T>(3, {2, -1, -5, 4});
 
     dense::SquareMatrix<T> evecs(n);
     std::vector<T> evals;
@@ -436,10 +447,10 @@ TEST(Dense, RealSymEig) {
        [ 0.26077289,  0.08247022, -0.60888775,  0.74461525]]
      */
     dense::SquareMatrix<T> evecs_chk(n);
-    evecs_chk.set_row(0, {0.42674891, -0.30080954, -0.59964891, -0.6064818});
-    evecs_chk.set_row(1, {0.81540297, -0.2009709, 0.51855174, 0.16072585});
-    evecs_chk.set_row(2, {-0.29154909, -0.92861347, 0.02794618, 0.22780509});
-    evecs_chk.set_row(3, {0.26077289, 0.08247022, -0.60888775, 0.74461525});
+    evecs_chk.set_row<T>(0, {0.42674891, -0.30080954, -0.59964891, -0.6064818});
+    evecs_chk.set_row<T>(1, {0.81540297, -0.2009709, 0.51855174, 0.16072585});
+    evecs_chk.set_row<T>(2, {-0.29154909, -0.92861347, 0.02794618, 0.22780509});
+    evecs_chk.set_row<T>(3, {0.26077289, 0.08247022, -0.60888775, 0.74461525});
 
     ASSERT_TRUE(evecs.nearly_equal(evecs_chk, 1e-7));
 }
@@ -456,19 +467,19 @@ TEST(Dense, ComplexHermEig) {
        [-5.-2.j, -3.+1.j, -4.+0.j, -1.+2.j],
        [-2.+5.j, -3.-2.j, -1.-2.j,  2.+0.j]]
      */
-    mat.set_row(0, {{4,  0},
+    mat.set_row<T>(0, {{4,  0},
                     {-1, 0},
                     {-5, 2},
                     {-2, -5}});
-    mat.set_row(1, {{-1, 0},
+    mat.set_row<T>(1, {{-1, 0},
                     {0,  0},
                     {-3, -1},
                     {-3, 2}});
-    mat.set_row(2, {{-5, -2},
+    mat.set_row<T>(2, {{-5, -2},
                     {-3, 1},
                     {-4, 0},
                     {-1, 2}});
-    mat.set_row(3, {{-2, 5},
+    mat.set_row<T>(3, {{-2, 5},
                     {-3, -2},
                     {-1, -2},
                     {2,  0}});
@@ -520,10 +531,10 @@ TEST(Dense, RealNonSymEig) {
        [-3,  0, -5, -2],
        [ 4, -2, -1, -5]]
      */
-    mat.set_row(0, {-5,  0, -4,  0});
-    mat.set_row(1, {-3, -1,  1,  0});
-    mat.set_row(2, {-3,  0, -5, -2});
-    mat.set_row(3, {4, -2, -1, -5});
+    mat.set_row<T>(0, {-5,  0, -4,  0});
+    mat.set_row<T>(1, {-3, -1,  1,  0});
+    mat.set_row<T>(2, {-3,  0, -5, -2});
+    mat.set_row<T>(3, {4, -2, -1, -5});
 
     auto evals = mat.diag_inplace<double>();
 
@@ -547,10 +558,10 @@ TEST(Dense, RealNonSymEigRight) {
        [-3,  0, -5, -2],
        [ 4, -2, -1, -5]]
      */
-    mat.set_row(0, {-5,  0, -4,  0});
-    mat.set_row(1, {-3, -1,  1,  0});
-    mat.set_row(2, {-3,  0, -5, -2});
-    mat.set_row(3, {4, -2, -1, -5});
+    mat.set_row<T>(0, {-5,  0, -4,  0});
+    mat.set_row<T>(1, {-3, -1,  1,  0});
+    mat.set_row<T>(2, {-3,  0, -5, -2});
+    mat.set_row<T>(3, {4, -2, -1, -5});
 
     auto evals = mat.diag_inplace<std::complex<double>>();
 

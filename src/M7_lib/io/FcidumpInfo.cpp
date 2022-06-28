@@ -20,16 +20,17 @@ FcidumpInfo::FcidumpInfo(const FortranNamelistReader &reader) :
                     reader.read_bool("UHF"), reader.read_bool("TREL"),
                     reader.read_uint("NELEC"), reader.read_uint("NORB"),
                     reader.read_int("MS2", sys::frm::c_undefined_ms2),
-                    integer::dec(reader.read_uints("ORBSYM", {}))){}
+                    integer::shifted(reader.read_uints("ORBSYM", {}), false)){}
 
 FcidumpInfo::FcidumpInfo(const hdf5::FileReader &reader) :
-        FcidumpInfo(reader.m_fname, Implementation::HDF5,
+        FcidumpInfo(reader.m_fname, Implementation::MolcasHDF5,
                     reader.read_attr<int>("UHF", 0),
                     reader.read_attr<int>("TREL", 0),
                     reader.read_attr<int64_t>("NELEC", 0ul),
                     reader.read_attr<int64_t>("NORB", 0ul),
                     reader.read_attr<int>("MS2", sys::frm::c_undefined_ms2),
-                    integer::dec(convert::vector<uint_t>(reader.read_attr<std::vector<int64_t>>("ORBSYM", {})))){}
+                    integer::shifted(convert::vector<uint_t>(
+                            reader.read_attr<std::vector<int64_t>>("ORBSYM", {})),false)){}
 
 FcidumpInfo FcidumpInfo::make(const std::string& fname) {
     if (hdf5::FileBase::is_hdf5(fname)) return {hdf5::FileReader(fname)};
