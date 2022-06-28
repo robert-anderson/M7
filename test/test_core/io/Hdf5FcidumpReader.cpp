@@ -15,16 +15,10 @@ TEST(Hdf5FcidumpReader, Header) {
     auto shape = hdf5::DatasetReader::get_shape<hsize_t>(fr, "FOCK_INDEX");
     ASSERT_EQ(shape[0], 6ul);
     ASSERT_EQ(shape[1], 2ul);
-    auto nelement = hdf5::DatasetReader::get_nelement(fr, "FOCK_INDEX");
-    std::vector<int64_t> inds(nelement, 0);
-    {
-        hdf5::DatasetReader dr(fr, "FOCK_INDEX");
-        dr.read(inds.data());
-    }
+    auto inds = fr.read_data<std::vector<int64_t>>("FOCK_INDEX");
 
     std::cout << inds << std::endl;
 
     hdf5::FileWriter fw("rja.h5");
-    hdf5::DatasetWriter dw(fw, "FOCK_INDEX", shape, Type(inds.data()));
-    dw.write(inds.data());
+    fw.write_data("FOCK_INDEX", inds);
 }

@@ -50,6 +50,29 @@ namespace hdf5 {
     public:
 
         template<typename T>
+        void read_data(std::string name, T *v, uint_t size) {
+            DatasetReader dr(*this, name);
+            REQUIRE_EQ(size, dr.m_space.m_nelement, "number of elements does not match read size");
+            dr.read(reinterpret_cast<char*>(v));
+        }
+        template<typename T>
+        void read_data(std::string name, T &v) {
+            read_data(name, reinterpret_cast<char*>(&v), 1);
+        }
+        template<typename T>
+        void read_data(std::string name, std::vector<T> &v) {
+            auto nelement = DatasetReader::get_nelement(m_handle, name);
+            v.resize(nelement);
+            read_data(name, reinterpret_cast<char*>(v.data()), v.size());
+        }
+        template<typename T>
+        T read_data(std::string name) {
+            T v{};
+            read_data(name, v);
+            return v;
+        }
+
+        template<typename T>
         T read_attr(const std::string& name, T default_ = {}) const {
             T v;
             read_attr_fn(name, v, default_);
@@ -85,7 +108,7 @@ namespace hdf5 {
             auto dspace_handle = H5Screate(H5S_SCALAR);
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), Type(v), dspace_handle, H5P_DEFAULT,
                                           H5P_DEFAULT, H5P_DEFAULT);
-            auto status = H5Dread(dset_handle, Type(v), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void *>(&v));
+            auto status = H5Dread(dset_handle, Type(v), dspace_handle, dspace_handle, H5P_DEFAULT, reinterpret_cast<void *>(&v));
             REQUIRE_FALSE_ALL(status, "HDF5 Error on primitive type load");
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
@@ -103,10 +126,10 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::complex<T> &v, uint_t irank=0ul) const {
+        load(std::string name, std::complex<T> &v) const {
             DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
-            load(name, reinterpret_cast<std::array<T, 2>&>(v)[0], irank);
-            load(name, reinterpret_cast<std::array<T, 2>&>(v)[1], irank);
+            load(name, reinterpret_cast<std::array<T, 2>&>(v)[0]);
+            load(name, reinterpret_cast<std::array<T, 2>&>(v)[1]);
         }
 
         /**
@@ -129,7 +152,7 @@ namespace hdf5 {
             auto dims = convert::vector<hsize_t>(shape);
             auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
             auto dset_handle = H5Dopen1(m_handle, name.c_str());
-            auto status = H5Dread(dset_handle, Type(v), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void*>(v));
+            auto status = H5Dread(dset_handle, Type(v), dspace_handle, dspace_handle, H5P_DEFAULT, reinterpret_cast<void*>(v));
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
             REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
@@ -157,7 +180,7 @@ namespace hdf5 {
             auto dims = convert::vector<hsize_t>(shape);
             auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
             auto dset_handle = H5Dopen1(m_handle, name.c_str());
-            auto status = H5Dread(dset_handle, Type(v), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void*>(v));
+            auto status = H5Dread(dset_handle, Type(v), dspace_handle, dspace_handle, H5P_DEFAULT, reinterpret_cast<void*>(v));
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
             REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
@@ -236,16 +259,16 @@ namespace hdf5 {
         }
 
         template<typename T>
-        void write_data(std::string name, const T *v, uint_t size, uint_t irank=0ul) {
-            DatasetWriter(*this, name, {size}, Type(v)).write(static_cast<const char*>(v));
+        void write_data(std::string name, const T *v, uint_t size) {
+            DatasetWriter(*this, name, {size}, Type(v)).write(reinterpret_cast<const char*>(v));
         }
         template<typename T>
-        void write_data(std::string name, const T &v, uint_t irank=0ul) {
-            write_data(name, &v, 1, irank);
+        void write_data(std::string name, const T &v) {
+            write_data(name, &v, 1);
         }
         template<typename T>
-        void write_data(std::string name, const std::vector<T> &v, uint_t irank=0ul) {
-            write_data(name, v.data(), v.size(), irank);
+        void write_data(std::string name, const std::vector<T> &v) {
+            write_data(name, v.data(), v.size());
         }
 
         /**
@@ -270,7 +293,7 @@ namespace hdf5 {
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), Type(v), dspace_handle, H5P_DEFAULT,
                                           H5P_DEFAULT, H5P_DEFAULT);
 
-            auto status = H5Dwrite(dset_handle, Type(v), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<const void *>(&v));
+            auto status = H5Dwrite(dset_handle, Type(v), dspace_handle, dspace_handle, H5P_DEFAULT, reinterpret_cast<const void *>(&v));
             REQUIRE_FALSE_ALL(status, "HDF5 Error on primitive type save");
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
@@ -320,7 +343,7 @@ namespace hdf5 {
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), Type(v), dspace_handle, H5P_DEFAULT,
                                           H5P_DEFAULT, H5P_DEFAULT);
 
-            auto status = H5Dwrite(dset_handle, Type(v), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<const void*>(v));
+            auto status = H5Dwrite(dset_handle, Type(v), dspace_handle, dspace_handle, H5P_DEFAULT, reinterpret_cast<const void*>(v));
             REQUIRE_FALSE(status, "HDF5 Error on multidimensional save");
             if (!dim_labels.empty()) {
                 DEBUG_ASSERT_EQ(dim_labels.size(), dims.size(),
