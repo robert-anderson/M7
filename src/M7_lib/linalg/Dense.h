@@ -307,24 +307,28 @@ namespace dense {
         template<typename U>
         void set_row(const uint_t &irow, const std::vector<U> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
+            // copies byte wise if U==T, else converts element wise
             set_row(irow, v.data());
         }
 
         template<typename U>
         void set_col(const uint_t &icol, const std::vector<U> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
+            // copies element wise if U==T, else converts element wise
             set_col(icol, v.data());
         }
 
         template<typename U>
         void get_row(const uint_t &irow, std::vector<U> &v) const {
             v.resize(m_ncol);
+            // copies byte wise if U==T, else converts element wise
             get_row(irow, v.data());
         }
 
         template<typename U>
         void get_col(const uint_t &icol, std::vector<U> &v) const {
             v.resize(m_nrow);
+            // copies element wise if U==T, else converts element wise
             get_col(icol, v.data());
         }
 
