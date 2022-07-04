@@ -14,7 +14,7 @@ struct BosExcitGen : ExcitGen {
 
     const BosHam& m_h;
 
-    BosExcitGen(const BosHam& h, PRNG& prng, uintv_t exsigs, std::string description);
+    BosExcitGen(const BosHam& h, PRNG& prng, uintv_t exsigs, str_t description);
 
     bool draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
                      prob_t& prob, conn::FrmBosOnv& conn) override;

@@ -14,7 +14,7 @@ public:
     typedef typename std::conditional<mapped, MappedTable<row_t>, Table<row_t>>::type table_t;
     using TableBase::m_bw;
 
-    BufferedTable(std::string name, const table_t& table):
+    BufferedTable(str_t name, const table_t& table):
             table_t(table), m_buffer(name, 1) {
         TableBase::set_buffer(&m_buffer);
         ASSERT(static_cast<const Row&>(Table<row_t>::m_row).m_table);

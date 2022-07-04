@@ -5,7 +5,7 @@
 #include "FcidumpInfo.h"
 #include "M7_lib/basis/BasisData.h"
 
-FcidumpInfo::FcidumpInfo(std::string fname, Implementation impl,
+FcidumpInfo::FcidumpInfo(str_t fname, Implementation impl,
                          bool uhf, bool relativistic, uint_t nelec, uint_t nsite, int ms2, uintv_t orbsym):
         m_fname(fname), m_impl(impl),
         m_uhf(uhf), m_relativistic(relativistic), m_spin_resolved(m_uhf || m_relativistic),
@@ -32,7 +32,7 @@ FcidumpInfo::FcidumpInfo(const hdf5::FileReader &reader) :
                     integer::shifted(convert::vector<uint_t>(
                             reader.read_attr<std::vector<int64_t>>("ORBSYM", {})),false)){}
 
-FcidumpInfo FcidumpInfo::make(const std::string& fname) {
+FcidumpInfo FcidumpInfo::make(const str_t& fname) {
     if (hdf5::FileBase::is_hdf5(fname)) return {hdf5::FileReader(fname)};
     else return {FortranNamelistReader(fname)};
 }

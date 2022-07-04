@@ -13,7 +13,7 @@ namespace quick_sorter_test {
     typedef SingleFieldRow<field::String> row_t;
     typedef BufferedTable<row_t> bt_t;
     static void setup_table(Table<row_t>& table){
-        const std::vector<std::string> words = {
+        const strv_t words = {
                 "alpha", "beetle", "catapult", "alpaca", "alpha", "catapult",
                 "beetle", "beetle", "alpaca", "alpha", "catamaran", "catapult",
                 "alpaca", "catamaran", "alpaca", "alpaca", "catapult", "beetle"
@@ -31,7 +31,7 @@ namespace quick_sorter_test {
         }
     }
 
-    static std::vector<std::string> correct_order() {
+    static strv_t correct_order() {
         return {"alpaca", "alpha", "beetle", "catamaran", "catapult"};
     }
 

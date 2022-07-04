@@ -105,7 +105,7 @@ namespace hdf5 {
          */
         hsize_t get_item_offset();
 
-        NdDistListBase(hid_t parent_handle, std::string name, const uintv_t &item_dims, const uint_t &nitem,
+        NdDistListBase(hid_t parent_handle, str_t name, const uintv_t &item_dims, const uint_t &nitem,
                        bool writemode, hid_t h5type);
 
         /**
@@ -123,12 +123,12 @@ namespace hdf5 {
  */
     struct NdDistListWriter : public NdDistListBase {
     private:
-        NdDistListWriter(hid_t parent_handle, std::string name, const uintv_t &item_dims,
-                         const uint_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {});
+        NdDistListWriter(hid_t parent_handle, str_t name, const uintv_t &item_dims,
+                         const uint_t &nitem, hid_t h5type, const strv_t &dim_labels = {});
 
     public:
-        NdDistListWriter(NodeWriter &parent, std::string name, const uintv_t &item_dims,
-                         const uint_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
+        NdDistListWriter(NodeWriter &parent, str_t name, const uintv_t &item_dims,
+                         const uint_t &nitem, hid_t h5type, const strv_t &dim_labels = {}) :
                 NdDistListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
         /**
@@ -157,7 +157,7 @@ namespace hdf5 {
          * @return
          *  length of the overall list shape
          */
-        static uint_t extract_list_ndim(hid_t parent_handle, std::string name) {
+        static uint_t extract_list_ndim(hid_t parent_handle, str_t name) {
             auto status = H5Gget_objinfo(parent_handle, name.c_str(), 0, nullptr);
             REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
             auto dataset = H5Dopen1(parent_handle, name.c_str());
@@ -177,7 +177,7 @@ namespace hdf5 {
          * @return
          *  global list shape
          */
-        static uintv_t extract_list_dims(hid_t parent_handle, std::string name) {
+        static uintv_t extract_list_dims(hid_t parent_handle, str_t name) {
             auto rank = extract_list_ndim(parent_handle, name);
             auto dataset = H5Dopen1(parent_handle, name.c_str());
             auto dataspace = H5Dget_space(dataset);
@@ -199,7 +199,7 @@ namespace hdf5 {
          * @return
          *  shape of the list items themselves
          */
-        static uintv_t extract_item_dims(hid_t parent_handle, std::string name) {
+        static uintv_t extract_item_dims(hid_t parent_handle, str_t name) {
             auto list_dims = extract_list_dims(parent_handle, name);
             uintv_t out;
             out.reserve(list_dims.size() - 1);
@@ -215,7 +215,7 @@ namespace hdf5 {
          * @return
          *  just the global number of items
          */
-        static uint_t extract_nitem(hid_t parent_handle, std::string name) {
+        static uint_t extract_nitem(hid_t parent_handle, str_t name) {
             return extract_list_dims(parent_handle, name)[0];
         }
 
@@ -228,7 +228,7 @@ namespace hdf5 {
          * @return
          *  number of items this rank is responsible for reading int
          */
-        static uint_t local_nitem(hid_t parent_handle, std::string name) {
+        static uint_t local_nitem(hid_t parent_handle, str_t name) {
             auto nitem_tot = extract_nitem(parent_handle, name);
             auto nitem_share = nitem_tot / mpi::nrank();
             // give the remainder to the root rank
@@ -237,12 +237,12 @@ namespace hdf5 {
         }
 
     private:
-        NdDistListReader(hid_t parent_handle, std::string name, hid_t h5_type) :
+        NdDistListReader(hid_t parent_handle, str_t name, hid_t h5_type) :
                 NdDistListBase(parent_handle, name, extract_item_dims(parent_handle, name),
                                local_nitem(parent_handle, name), false, h5_type) {}
 
     public:
-        NdDistListReader(NodeReader &parent, std::string name, hid_t h5_type) :
+        NdDistListReader(NodeReader &parent, str_t name, hid_t h5_type) :
                 NdDistListReader(parent.m_handle, name, h5_type) {}
 
         /**

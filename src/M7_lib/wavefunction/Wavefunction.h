@@ -104,12 +104,12 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
         return m_store.m_row.m_average_weight.belongs_to_row();
     }
 
-    std::vector<std::string> h5_field_names();
+    strv_t h5_field_names();
 
-    void h5_write(const hdf5::NodeWriter &parent, std::string name = "wavefunction");
+    void h5_write(const hdf5::NodeWriter &parent, str_t name = "wavefunction");
 
     void h5_read(const hdf5::NodeReader &parent, const Hamiltonian &ham, const field::Mbf &ref,
-                 std::string name = "wavefunction");
+                 str_t name = "wavefunction");
 
     void begin_cycle();
 

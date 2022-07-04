@@ -38,7 +38,7 @@ void dense::GemmWrapper::multiply(const std::complex<double> *p, const std::comp
 }
 
 char dense::GemmWrapper::valid_trans(char t) {
-    const std::string valid_chars = "NnCcTt";
+    const str_t valid_chars = "NnCcTt";
     auto i = valid_chars.find(t);
     REQUIRE_LT(i, valid_chars.size(), "invalid character given");
     return valid_chars[2*(i/2)];

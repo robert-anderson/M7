@@ -7,9 +7,9 @@
 
 TEST(CsvFileReader, Fcidump){
     CsvFileReader file_reader(PROJECT_ROOT"/assets/RHF_Cr2_12o12e/FCIDUMP");
-    std::vector<std::string> split_line;
+    strv_t split_line;
     file_reader.next(split_line);
-    std::vector<std::string> chk_line;
+    strv_t chk_line;
     chk_line = {"&FCI", "NORB=", "12", "NELEC=12", "MS2=0"};
     ASSERT_EQ(split_line,  chk_line);
     for (uint_t iline=1ul; iline<123; ++iline) {
@@ -21,9 +21,9 @@ TEST(CsvFileReader, Fcidump){
 
 TEST(NumericCsvFileReader, Fcidump){
     NumericCsvFileReader file_reader(PROJECT_ROOT"/assets/RHF_Cr2_12o12e/FCIDUMP", 5);
-    std::vector<std::string> split_line;
+    strv_t split_line;
     file_reader.next(split_line);
-    std::vector<std::string> chk_line;
+    strv_t chk_line;
     chk_line = {"0.5192717990625102", "1", "1", "1", "1"};
     ASSERT_EQ(split_line,  chk_line);
     for (uint_t iline=5ul; iline<123; ++iline) {
@@ -47,7 +47,7 @@ TEST(NumericCsvFileReader, ParseScientific){
 
 TEST(NumericCsvFileReader, ParseSingleReal){
     const uint_t nreal = 1;
-    std::vector<std::string> line = {"-0.001368384767972724", "4", "3", "9", "9"};
+    strv_t line = {"-0.001368384767972724", "4", "3", "9", "9"};
     uintv_t inds;
     uintv_t chk_inds = {4, 3, 9, 9};
     NumericCsvFileReader::parse(line.cbegin()+nreal, line.cend(), inds);
@@ -64,7 +64,7 @@ TEST(NumericCsvFileReader, ParseSingleReal){
 
 TEST(NumericCsvFileReader, ParseMultiReal){
     const uint_t nreal = 5;
-    std::vector<std::string> line = {"-0.00134", "12.22", "-1.33", "4.5463", "-9.012", "4", "3", "9", "9"};
+    strv_t line = {"-0.00134", "12.22", "-1.33", "4.5463", "-9.012", "4", "3", "9", "9"};
     uintv_t inds;
     uintv_t chk_inds = {4, 3, 9, 9};
     NumericCsvFileReader::parse(line.cbegin()+nreal, line.cend(), inds);

@@ -6,7 +6,7 @@
 #include "M7_lib/util/Exsig.h"
 
 
-EbdumpFileReader::EbdumpFileReader(const std::string& fname, bool spin_major) :
+EbdumpFileReader::EbdumpFileReader(const str_t& fname, bool spin_major) :
         HamTextFileReader(fname, 3),
         m_info(FortranNamelistReader(fname)),
         m_norb_distinct((m_info.m_uhf ? 2 : 1)*m_info.m_nsite), m_spin_major(spin_major){}

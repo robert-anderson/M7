@@ -31,9 +31,9 @@ namespace conf {
     };
 
     struct Archive : Section {
-        Param<std::string> m_load_path;
-        Param<std::string> m_save_path;
-        Param<std::string> m_chkpt_path;
+        Param<str_t> m_load_path;
+        Param<str_t> m_save_path;
+        Param<str_t> m_chkpt_path;
         /**
          * the period options are not mutually exclusive, the Archive class will make sure that a checkpoint file does
          * not get dumped twice on the same MC cycle
@@ -88,7 +88,7 @@ namespace conf {
         Param<bool> m_neel;
         //Param<std::vector<uintv_t>> m_csf;
 
-        explicit MbfDef(Group *parent, std::string name);
+        explicit MbfDef(Group *parent, str_t name);
 
         bool enabled() const override;
     };
@@ -166,7 +166,7 @@ namespace conf {
     };
 
     struct Stats : Section {
-        Param<std::string> m_path;
+        Param<str_t> m_path;
         Param<uint_t> m_period;
         Param<bool> m_parallel;
 
@@ -185,13 +185,13 @@ namespace conf {
     };
 
     struct Bilinears : Section {
-        Param<std::vector<std::string>> m_ranks;
+        Param<strv_t> m_ranks;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         LoadBalancing m_load_balancing;
         Archivable m_archivable;
 
-        explicit Bilinears(Group *parent, std::string name, std::string description);
+        explicit Bilinears(Group *parent, str_t name, str_t description);
 
         void verify() override;
     };
@@ -199,14 +199,14 @@ namespace conf {
     struct Rdms : Bilinears {
         Param<bool> m_explicit_ref_conns;
 
-        explicit Rdms(Group *parent, std::string name, std::string description);
+        explicit Rdms(Group *parent, str_t name, str_t description);
     };
 
     struct SpecMoms : Bilinears {
         Param<bool> m_stochastic;
         Param<double> m_nattempt_per_walker;
 
-        explicit SpecMoms(Group *parent, std::string name, std::string description);
+        explicit SpecMoms(Group *parent, str_t name, str_t description);
     };
 
     struct InstEsts : Section {
@@ -228,7 +228,7 @@ namespace conf {
         Param<uint_t> m_delay;
         Param<uint_t> m_ncycle;
         Param<uint_t> m_stats_period;
-        Param<std::string> m_stats_path;
+        Param<str_t> m_stats_path;
         Rdms m_rdm;
         SpecMoms m_spec_mom;
         RefExcits m_ref_excits;
@@ -243,7 +243,7 @@ namespace conf {
     struct Propagator : Section {
         Param<uint_t> m_ncycle;
         Param<bool> m_stochastic;
-        Param<std::string> m_excit_gen;
+        Param<str_t> m_excit_gen;
         Param<double> m_nw_target;
         Param<wf_comp_t> m_max_bloom;
         Param<wf_comp_t> m_nadd;

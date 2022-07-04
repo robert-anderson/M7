@@ -281,7 +281,7 @@ public:
         }
     }
 
-    void load(const hdf5::NodeReader &parent, std::string name) override {
+    void load(const hdf5::NodeReader &parent, str_t name) override {
         RowHdf5Reader<row_t> row_reader(m_row, parent, name);
         uint_t iitem = 0ul;
         clear();

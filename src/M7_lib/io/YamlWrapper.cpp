@@ -5,24 +5,24 @@
 #include "YamlWrapper.h"
 #include "M7_lib/util/String.h"
 
-yaml::Path::Path(std::list<std::string> name_list) : m_name_list(std::move(name_list)) {}
+yaml::Path::Path(std::list<str_t> name_list) : m_name_list(std::move(name_list)) {}
 
-yaml::Path::Path(std::vector<std::string> name_list) : m_name_list(name_list.cbegin(), name_list.cend()) {}
+yaml::Path::Path(strv_t name_list) : m_name_list(name_list.cbegin(), name_list.cend()) {}
 
-yaml::Path::Path(std::string name) : Path(string::split(name, '.')) {}
+yaml::Path::Path(str_t name) : Path(string::split(name, '.')) {}
 
 yaml::Path::Path(const yaml::Path &other) : m_name_list(other.m_name_list) {}
 
-std::string yaml::Path::to_string() const {
+str_t yaml::Path::to_string() const {
     if (m_name_list.empty()) return "";
     auto it = m_name_list.cbegin();
-    std::string out = *it;
+    str_t out = *it;
     ++it;
     for (; it != m_name_list.cend(); ++it) out += "." + *it;
     return out;
 }
 
-yaml::Path yaml::Path::operator+(const std::string &name) const {
+yaml::Path yaml::Path::operator+(const str_t &name) const {
     auto tmp = *this;
     tmp.m_name_list.push_back(name);
     return tmp;
@@ -38,8 +38,8 @@ uint_t yaml::Path::depth() const {
     return m_name_list.size();
 }
 
-yaml::File::File(const std::string &fname) : m_fname(fname) {
-    std::string contents;
+yaml::File::File(const str_t &fname) : m_fname(fname) {
+    str_t contents;
     /*
      * read in YAML file contents on the root node then then bcast to others
      */
@@ -60,11 +60,11 @@ YAML::Node yaml::File::get(yaml::Path path) const {
     return node;
 }
 
-YAML::Node yaml::File::get(std::list<std::string> path) const {
+YAML::Node yaml::File::get(std::list<str_t> path) const {
     return get(Path{path});
 }
 
-YAML::Node yaml::File::get(std::string path) const {
+YAML::Node yaml::File::get(str_t path) const {
     return get(Path{path});
 }
 
@@ -72,10 +72,10 @@ bool yaml::File::exists(yaml::Path path) const {
     return get(path).IsDefined();
 }
 
-bool yaml::File::exists(std::list<std::string> path) const {
+bool yaml::File::exists(std::list<str_t> path) const {
     return exists(Path{path});
 }
 
-bool yaml::File::exists(std::string path) const {
+bool yaml::File::exists(str_t path) const {
     return exists(Path{path});
 }

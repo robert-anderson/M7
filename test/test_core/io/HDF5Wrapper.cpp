@@ -11,14 +11,14 @@
 #include <M7_lib/hdf5/Dataset.h>
 
 TEST(HDF5Wrapper, StringType) {
-    std::string s = "Lorem ipsum dolor sit";
+    str_t s = "Lorem ipsum dolor sit";
     hdf5::Type type(&s);
     ASSERT_EQ(type.m_size, s.size());
 }
 
 //TEST(HDF5Wrapper, StringVector) {
 //    auto definitive_irank = hash::in_range(99, 0, mpi::nrank());
-//    std::vector<std::string> strings = {"Lorem", "ipsum dolor sit", "amet, consectetur adipiscing", "elit"};
+//    strv_t strings = {"Lorem", "ipsum dolor sit", "amet, consectetur adipiscing", "elit"};
 //    {
 //        hdf5::FileWriter fw("table_test.h5");
 //        hdf5::GroupWriter gw(fw, "container");
@@ -29,7 +29,7 @@ TEST(HDF5Wrapper, StringType) {
 
 TEST(HDF5Wrapper, String) {
     auto definitive_irank = hash::in_range(99, 0, mpi::nrank());
-    std::string s = "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
+    str_t s = "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
     {
         hdf5::FileWriter fw("table_test.h5");
         hdf5::GroupWriter gw(fw, "container");

@@ -198,7 +198,7 @@ TEST(Connection, EntireCiPhases) {
     buffered::FrmOnv ket(4);
     buffered::FrmOnv work_det(4);
 
-    std::vector<std::string> tokens;
+    strv_t tokens;
     while (file_reader.next(tokens)) {
         NumericCsvFileReader::parse(tokens.cbegin(), tokens.cbegin()+1, value);
         NumericCsvFileReader::parse(tokens.cbegin()+1, tokens.cend(), inds);

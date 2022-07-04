@@ -5,7 +5,7 @@
 #ifndef M7_SYMLINK_H
 #define M7_SYMLINK_H
 
-#include <string>
+#include "M7_lib/defs.h"
 
 /**
  * simple wrapper to the UNIX standard lib to create a soft link to a file located at "src", to a given path "dst"
@@ -14,8 +14,8 @@
  * current working directory, but working directory-agnostic code is *strongly* preferred elsewhere
  */
 struct Symlink {
-    const std::string m_fname;
-    Symlink(std::string src, std::string dst);
+    const str_t m_fname;
+    Symlink(str_t src, str_t dst);
     ~Symlink();
 };
 
@@ -24,7 +24,7 @@ struct Symlink {
  * "assets" directory
  */
 struct AssetSymlink : Symlink {
-    AssetSymlink(std::string src, std::string dst);
+    AssetSymlink(str_t src, str_t dst);
 };
 
 #endif //M7_SYMLINK_H

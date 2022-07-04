@@ -13,10 +13,10 @@ namespace hdf5 {
         const DataSpace m_space;
         const hid_t m_handle;
 
-        static uint_t get_ndim(hid_t parent_handle, const std::string& name);
+        static uint_t get_ndim(hid_t parent_handle, const str_t& name);
 
         template<typename T>
-        static std::vector<T> get_shape(hid_t parent_handle, const std::string& name) {
+        static std::vector<T> get_shape(hid_t parent_handle, const str_t& name) {
             auto ndim = get_ndim(parent_handle, name);
             auto dataset = H5Dopen1(parent_handle, name.c_str());
             REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));
@@ -28,12 +28,12 @@ namespace hdf5 {
             return convert::vector<T>(shape);
         }
 
-        static uint_t get_nelement(hid_t parent_handle, const std::string& name);
+        static uint_t get_nelement(hid_t parent_handle, const str_t& name);
 
     public:
         const Type m_type;
 
-        DatasetReader(hid_t parent_handle, const std::string& name);
+        DatasetReader(hid_t parent_handle, const str_t& name);
 
         ~DatasetReader();
 
@@ -43,12 +43,12 @@ namespace hdf5 {
     struct DatasetWriter {
         const DataSpace m_space;
         const hid_t m_handle;
-        const std::vector<std::string> m_dim_names;
+        const strv_t m_dim_names;
     public:
         const Type m_type;
 
-        DatasetWriter(hid_t parent_handle, const std::string& name, const std::vector<hsize_t>& shape, Type type,
-                      std::vector<std::string> dim_names={}, uint_t irank=0ul);
+        DatasetWriter(hid_t parent_handle, const str_t& name, const std::vector<hsize_t>& shape, Type type,
+                      strv_t dim_names={}, uint_t irank=0ul);
 
         ~DatasetWriter();
 

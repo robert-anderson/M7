@@ -43,58 +43,58 @@ namespace dtype {
 
 
     template<typename T>
-    static std::string name() { return typeid(T).name(); }
+    static str_t name() { return typeid(T).name(); }
 
     template<>
-    std::string name<char>() { return "char"; }
+    str_t name<char>() { return "char"; }
 
     template<>
-    std::string name<short int>() { return "short int"; }
+    str_t name<short int>() { return "short int"; }
 
     template<>
-    std::string name<int>() { return "int"; }
+    str_t name<int>() { return "int"; }
 
     template<>
-    std::string name<long int>() { return "long int"; }
+    str_t name<long int>() { return "long int"; }
 
     template<>
-    std::string name<long long int>() { return "long long int"; }
+    str_t name<long long int>() { return "long long int"; }
 
     template<>
-    std::string name<unsigned char>() { return "unsigned char"; }
+    str_t name<unsigned char>() { return "unsigned char"; }
 
     template<>
-    std::string name<unsigned short int>() { return "unsigned short int"; }
+    str_t name<unsigned short int>() { return "unsigned short int"; }
 
     template<>
-    std::string name<unsigned int>() { return "unsigned short int"; }
+    str_t name<unsigned int>() { return "unsigned short int"; }
 
     template<>
-    std::string name<unsigned long int>() { return "unsigned long int"; }
+    str_t name<unsigned long int>() { return "unsigned long int"; }
 
     template<>
-    std::string name<unsigned long long int>() { return "unsigned long long int"; }
+    str_t name<unsigned long long int>() { return "unsigned long long int"; }
 
     template<>
-    std::string name<float>() { return "float"; }
+    str_t name<float>() { return "float"; }
 
     template<>
-    std::string name<double>() { return "double"; }
+    str_t name<double>() { return "double"; }
 
     template<>
-    std::string name<long double>() { return "long double"; }
+    str_t name<long double>() { return "long double"; }
 
     template<>
-    std::string name<std::complex<float>>() { return "complex float"; }
+    str_t name<std::complex<float>>() { return "complex float"; }
 
     template<>
-    std::string name<std::complex<double>>() { return "complex double"; }
+    str_t name<std::complex<double>>() { return "complex double"; }
 
     template<>
-    std::string name<std::complex<long double>>() { return "complex long double"; }
+    str_t name<std::complex<long double>>() { return "complex long double"; }
 
     template<>
-    std::string name<bool>() { return "bool"; }
+    str_t name<bool>() { return "bool"; }
 
     /**
      * this is a recursive parameter pack expansion which casts every element to void, this is interpreted by the

@@ -5,11 +5,11 @@
 #include "InteractiveVariable.h"
 
 
-InteractiveVariableFile::InteractiveVariableFile(std::string name) : m_name(name), m_fname(name + ".var") {
+InteractiveVariableFile::InteractiveVariableFile(str_t name) : m_name(name), m_fname(name + ".var") {
     log::info(R"(Listening for changes to interactive variable "{}" in file "{}")", name, m_fname);
 }
 
-bool InteractiveVariableFile::consume_(std::vector<std::string> &lines) {
+bool InteractiveVariableFile::consume_(strv_t &lines) {
     if (mpi::i_am_root()) {
         std::ifstream f(m_fname);
         if (!f.is_open()) return false;
@@ -28,6 +28,6 @@ void InteractiveVariableFile::warn_invalid_input() const {
     log::warn("Invalid value given in file \"{}\", variable left unchanged", m_fname);
 }
 
-void InteractiveVariableFile::info_success(const std::string &str) const {
+void InteractiveVariableFile::info_success(const str_t &str) const {
     log::info("Interactive variable \"{}\" assigned value: {}", m_name, str);
 }

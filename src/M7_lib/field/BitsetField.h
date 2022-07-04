@@ -41,7 +41,7 @@ struct BitsetField : FieldBase {
     using FieldBase::zero;
     using FieldBase::begin;
 
-    BitsetField(Row *row, NdFormat<nind> format, std::string name="") :
+    BitsetField(Row *row, NdFormat<nind> format, str_t name="") :
         FieldBase(row, integer::divceil(format.m_nelement, nbit_dword()) * sizeof(T), typeid(T), name),
         m_format(format), m_dsize(m_size / sizeof(T)), m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {}
 
@@ -248,8 +248,8 @@ struct BitsetField : FieldBase {
         return result;
     }
 
-    std::string to_string() const override {
-        std::string res;
+    str_t to_string() const override {
+        str_t res;
         res.reserve(nbit());
         for (uint_t i = 0ul; i < nbit(); ++i)
             res += get(i) ? "1" : "0";
@@ -268,7 +268,7 @@ struct BitsetField : FieldBase {
         return {m_dsize};
     }
 
-    std::vector<std::string> h5_dim_names() const override {
+    strv_t h5_dim_names() const override {
         if (!nind) return {};
         return {};
     }
@@ -282,7 +282,7 @@ template<typename T>
 struct BitField : BitsetField<T, 0> {
     typedef BitsetField<T, 0> base_t;
 
-    BitField(Row *row, std::string name="") : base_t(row, {}, name) {}
+    BitField(Row *row, str_t name="") : base_t(row, {}, name) {}
 
     BitField &operator=(bool v) {
         base_t::put(0, v);

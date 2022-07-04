@@ -41,34 +41,34 @@ struct log {
     static void finalize();
 
     template<typename ...Args>
-    static std::string format(const std::string& fmt_string, Args&&... args){
+    static str_t format(const str_t& fmt_string, Args&&... args){
         fmt::basic_memory_buffer<char, 250> buf;
         fmt::format_to(buf, fmt_string, std::forward<Args>(args)...);
-        std::string tmp;
+        str_t tmp;
         tmp.assign(buf.data(), buf.size());
         return tmp;
     }
 
     template<typename ...Args>
-    static std::string bold_format(const std::string& fmt_string, Args&&... args){
+    static str_t bold_format(const str_t& fmt_string, Args&&... args){
         return format("\033[1m{}\033[0m", format(fmt_string, args...));
     }
 
-    static std::string get_demangled_symbol(const std::string& symbol);
+    static str_t get_demangled_symbol(const str_t& symbol);
 
-    static std::string get_demangled_prototype(const char* line);
+    static str_t get_demangled_prototype(const char* line);
 
-    static std::vector<std::string> get_backtrace(uint_t depth);
+    static strv_t get_backtrace(uint_t depth);
 
     template<typename ...Args>
-    static void info(const std::string& fmt_string, Args&&... args){
+    static void info(const str_t& fmt_string, Args&&... args){
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->info(fmt_string, args...);
         g_reduced_file_logger->info(fmt_string, args...);
     }
 
     template<typename ...Args>
-    static void info_(const std::string& fmt_string, Args&&... args){
+    static void info_(const str_t& fmt_string, Args&&... args){
 #ifdef ENABLE_LOCAL_LOGGING
         if (mpi::nrank()==1) info(fmt_string, args...);
         g_local_file_logger->info(fmt_string, args...);
@@ -76,9 +76,9 @@ struct log {
         dtype::unused(fmt_string, args...);
     }
 
-    static void info_lines(const std::vector<std::string>& lines);
+    static void info_lines(const strv_t& lines);
 
-    static void info_lines_(const std::vector<std::string>& lines);
+    static void info_lines_(const strv_t& lines);
 
     /**
      * make a pretty table
@@ -91,31 +91,31 @@ struct log {
      * @return
      *  a vector of strings which when printed will display a table in which the rows are vertically aligned
      */
-    static std::vector<std::string> make_table(const std::vector<std::vector<std::string>>& rows,
+    static strv_t make_table(const std::vector<strv_t>& rows,
                                                bool header=false, uint_t padding=2);
 
-    static std::vector<std::string> make_table(const std::string& title, const std::vector<std::vector<std::string>>& rows,
+    static strv_t make_table(const str_t& title, const std::vector<strv_t>& rows,
                                                bool header=false, uint_t padding=2);
 
-    static void info_table(const std::vector<std::vector<std::string>>& rows, bool header=false, uint_t padding=2);
+    static void info_table(const std::vector<strv_t>& rows, bool header=false, uint_t padding=2);
 
-    static void info_table(const std::string& title, const std::vector<std::vector<std::string>>& rows,
+    static void info_table(const str_t& title, const std::vector<strv_t>& rows,
                            bool header=false, uint_t padding=2);
 
-    static void info_table_(const std::vector<std::vector<std::string>>& rows, bool header=false, uint_t padding=2);
+    static void info_table_(const std::vector<strv_t>& rows, bool header=false, uint_t padding=2);
 
-    static void info_table_(const std::string& title, const std::vector<std::vector<std::string>>& rows,
+    static void info_table_(const str_t& title, const std::vector<strv_t>& rows,
                             bool header=false, uint_t padding=2);
 
     template<typename ...Args>
-    static void warn(const std::string& fmt_string, Args&&... args){
+    static void warn(const str_t& fmt_string, Args&&... args){
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->warn(fmt_string, args...);
         g_reduced_file_logger->warn(fmt_string, args...);
     }
 
     template<typename ...Args>
-    static void warn_(const std::string& fmt_string, Args&&... args){
+    static void warn_(const str_t& fmt_string, Args&&... args){
 #ifdef ENABLE_LOCAL_LOGGING
         if (mpi::nrank()==1) warn(fmt_string, args...);
         g_local_file_logger->warn(fmt_string, args...);
@@ -124,14 +124,14 @@ struct log {
     }
 
     template<typename ...Args>
-    static void error(const std::string& fmt_string, Args&&... args){
+    static void error(const str_t& fmt_string, Args&&... args){
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->error(fmt_string, args...);
         g_reduced_file_logger->error(fmt_string, args...);
     }
 
     template<typename ...Args>
-    static void error_(const std::string& fmt_string, Args&&... args){
+    static void error_(const str_t& fmt_string, Args&&... args){
 #ifdef ENABLE_LOCAL_LOGGING
         if (mpi::nrank()==1) error(fmt_string, args...);
         g_local_file_logger->error(fmt_string, args...);
@@ -142,14 +142,14 @@ struct log {
     static void error_backtrace_(uint_t depth=20);
 
     template<typename ...Args>
-    static void critical(const std::string& fmt_string, Args&&... args){
+    static void critical(const str_t& fmt_string, Args&&... args){
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->critical(fmt_string, args...);
         g_reduced_file_logger->critical(fmt_string, args...);
     }
 
     template<typename ...Args>
-    static void critical_(const std::string& fmt_string, Args&&... args){
+    static void critical_(const str_t& fmt_string, Args&&... args){
 #ifdef ENABLE_LOCAL_LOGGING
         if (mpi::nrank()==1) critical(fmt_string, args...);
         g_local_file_logger->critical(fmt_string, args...);
@@ -158,7 +158,7 @@ struct log {
     }
 
     template<typename ...Args>
-    static void debug(const std::string& fmt_string, Args&&... args){
+    static void debug(const str_t& fmt_string, Args&&... args){
 #ifndef NDEBUG
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->debug(fmt_string, args...);
@@ -168,7 +168,7 @@ struct log {
     }
 
     template<typename ...Args>
-    static void debug_(const std::string& fmt_string, Args&&... args){
+    static void debug_(const str_t& fmt_string, Args&&... args){
 #ifndef NDEBUG
 #ifdef ENABLE_LOCAL_LOGGING
         if (mpi::nrank()==1) debug(fmt_string, args...);

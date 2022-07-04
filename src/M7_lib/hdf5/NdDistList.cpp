@@ -26,8 +26,8 @@ void hdf5::NdDistListWriter::write_h5item_bytes(const uint_t &iitem, const void 
     log::debug_("data written");
 }
 
-hdf5::NdDistListWriter::NdDistListWriter(hid_t parent_handle, std::string name, const uintv_t &item_dims,
-                                         const uint_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels)
+hdf5::NdDistListWriter::NdDistListWriter(hid_t parent_handle, str_t name, const uintv_t &item_dims,
+                                         const uint_t &nitem, hid_t h5type, const strv_t &dim_labels)
         :NdDistListBase(parent_handle, name, item_dims, nitem, true, h5type) {
     if (!dim_labels.empty()) {
         DEBUG_ASSERT_EQ(dim_labels.size(), item_dims.size(),
@@ -61,7 +61,7 @@ hsize_t hdf5::NdDistListBase::get_item_offset() {
     return out;
 }
 
-hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, std::string name, const uintv_t &item_dims, const uint_t &nitem,
+hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, str_t name, const uintv_t &item_dims, const uint_t &nitem,
                                      bool writemode, hid_t h5type) :
         m_parent_handle(parent_handle),
         m_item_dims(convert::vector<hsize_t>(item_dims)),

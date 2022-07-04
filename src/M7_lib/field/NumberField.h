@@ -13,7 +13,7 @@ struct NumberFieldBase : FieldBase {
     const bool m_is_complex;
 
     NumberFieldBase(Row *row, uint_t element_size, uint_t nelement, bool is_complex,
-                    const std::type_info &type_info, std::string name = "");
+                    const std::type_info &type_info, str_t name = "");
 
     NumberFieldBase(const NumberFieldBase& other);
 
@@ -22,7 +22,7 @@ struct NumberFieldBase : FieldBase {
         return *this;
     }
     
-    virtual std::string format_string() const = 0;
+    virtual str_t format_string() const = 0;
 };
 
 
@@ -51,7 +51,7 @@ struct NdNumberField : NumberFieldBase {
         return reinterpret_cast<const T*>(dend());
     }
 
-    NdNumberField(Row *row, NdFormat<nind> format, std::string name = "") :
+    NdNumberField(Row *row, NdFormat<nind> format, str_t name = "") :
             NumberFieldBase(row, sizeof(T), format.m_nelement,
                             dtype::is_complex<T>(), typeid(T), name), m_format(format) {}
 
@@ -266,8 +266,8 @@ public:
         return (*this)[0];
     }
 
-    std::string to_string() const override {
-        std::string tmp;
+    str_t to_string() const override {
+        str_t tmp;
         if (nind > 0) tmp += "[";
         for (uint_t ielement = 0ul; ielement < nelement(); ++ielement)
             tmp += convert::to_string((*this)[ielement]) + " ";
@@ -275,8 +275,8 @@ public:
         return tmp;
     }
 
-    std::string format_string() const override {
-        const std::string complex_dim_string = "real/imag (2)";
+    str_t format_string() const override {
+        const str_t complex_dim_string = "real/imag (2)";
         if (!nind && m_is_complex) return complex_dim_string;
         return m_format.to_string() + (m_is_complex ? complex_dim_string : "");
     }
@@ -288,7 +288,7 @@ public:
         return {m_format.m_shape.cbegin(), m_format.m_shape.cend()};
     }
 
-    std::vector<std::string> h5_dim_names() const override {
+    strv_t h5_dim_names() const override {
         if (!nind) return {};
         return {m_format.m_dim_names.cbegin(), m_format.m_dim_names.cend()};
     }
@@ -303,7 +303,7 @@ public:
  */
 struct StringField : NdNumberField<char, 1ul> {
     typedef NdNumberField<char, 1ul> base_t;
-    StringField(Row *row, uint_t length, std::string name = "");
+    StringField(Row *row, uint_t length, str_t name = "");
 
     StringField(const StringField& other);
 
@@ -311,14 +311,14 @@ struct StringField : NdNumberField<char, 1ul> {
 
     StringField& operator=(const char* str);
 
-    StringField& operator=(const std::string& str);
+    StringField& operator=(const str_t& str);
 
     bool operator==(const char* str) const;
-    bool operator==(const std::string& str) const;
+    bool operator==(const str_t& str) const;
     bool operator!=(const char* str) const;
-    bool operator!=(const std::string& str) const;
+    bool operator!=(const str_t& str) const;
 
-    std::string to_string() const override;
+    str_t to_string() const override;
 };
 
 template<typename T>
@@ -326,7 +326,7 @@ struct NumberField : NdNumberField<T, 0ul> {
     typedef NdNumberField<T, 0ul> base_t;
     using base_t::operator=;
 
-    NumberField(Row *row, std::string name = "") : base_t(row, {}, name) {}
+    NumberField(Row *row, str_t name = "") : base_t(row, {}, name) {}
 
     NumberField(const NumberField& other): base_t(other){}
 

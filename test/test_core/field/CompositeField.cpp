@@ -14,7 +14,7 @@ namespace composite_field_test {
         field::Bitset<uint16_t> m_bitset;
         field::Numbers<int, 2> m_ints;
 
-        BitsAndInts(Row *row, uint_t nbit, uinta_t<2> ints_shape, std::string prefix) :
+        BitsAndInts(Row *row, uint_t nbit, uinta_t<2> ints_shape, str_t prefix) :
                 base_t(m_bitset, m_ints),
                 m_bitset(row, nbit, prefix + " bitset"),
                 m_ints(row, ints_shape, prefix + " ints") {}
@@ -36,7 +36,7 @@ namespace composite_field_test {
         typedef CompositeField<BitsAndInts, BitsAndInts> base_t;
         BitsAndInts m_first;
         BitsAndInts m_second;
-        BitsAndIntsPair(Row* row, uint_t nbit, uinta_t<2> ints_shape, std::string prefix):
+        BitsAndIntsPair(Row* row, uint_t nbit, uinta_t<2> ints_shape, str_t prefix):
             base_t(m_first, m_second),
             m_first(row, nbit, ints_shape, prefix + " first"),
             m_second(row, nbit, ints_shape, prefix + " second"){}

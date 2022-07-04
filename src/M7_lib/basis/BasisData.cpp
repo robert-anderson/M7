@@ -180,7 +180,7 @@ strmap_t sys::frm::Basis::info() const {
     return map;
 }
 
-std::string sys::frm::Basis::to_string() const {
+str_t sys::frm::Basis::to_string() const {
     return convert::to_string(info());
 }
 
@@ -209,14 +209,14 @@ bool sys::frm::Electrons::operator==(const sys::frm::Electrons &other) const {
     return m_n==other.m_n && m_ms2==other.m_ms2;
 }
 
-std::map<std::string, std::string> sys::frm::Electrons::info() const {
-    std::map<std::string, std::string> map;
+std::map<str_t, str_t> sys::frm::Electrons::info() const {
+    std::map<str_t, str_t> map;
     map.insert({"number", convert::to_string(m_n)});
     map.insert({"ms2", convert::to_string(m_ms2)});
     return map;
 }
 
-std::string sys::frm::Electrons::to_string() const {
+str_t sys::frm::Electrons::to_string() const {
     return convert::to_string(info());
 }
 
@@ -256,7 +256,7 @@ strmap_t sys::bos::Basis::info() const {
     };
 }
 
-std::string sys::bos::Basis::to_string() const {
+str_t sys::bos::Basis::to_string() const {
     return convert::to_string(info());
 }
 

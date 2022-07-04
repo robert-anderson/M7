@@ -15,7 +15,7 @@ namespace hdf5 {
         const Type m_type;
         const hsize_t m_nelement;
 
-        AttrReader(hid_t parent_handle, const std::string &name);
+        AttrReader(hid_t parent_handle, const str_t &name);
 
         ~AttrReader();
 
@@ -27,7 +27,7 @@ namespace hdf5 {
             read_bytes(reinterpret_cast<char *>(dst));
         }
 
-        void read(std::string *dst, size_t n) const;
+        void read(str_t *dst, size_t n) const;
     };
 
     class AttrWriter {
@@ -36,7 +36,7 @@ namespace hdf5 {
         const hid_t m_handle;
 
     public:
-        AttrWriter(hid_t parent_handle, const std::string &name, const std::vector <hsize_t> &shape, hid_t h5type);
+        AttrWriter(hid_t parent_handle, const str_t &name, const std::vector <hsize_t> &shape, hid_t h5type);
 
         ~AttrWriter();
 

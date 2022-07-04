@@ -158,7 +158,7 @@ void conf::SpfWeightedTwf::verify() {
     }
 }
 
-conf::Bilinears::Bilinears(Group *parent, std::string name, std::string description) :
+conf::Bilinears::Bilinears(Group *parent, str_t name, str_t description) :
         Section(parent, name, description),
         m_ranks(this, "ranks", {}, "Ranks to accumulate"),
         m_buffers(this), m_hash_mapping(this), m_load_balancing(this), m_archivable(this) {}
@@ -170,12 +170,12 @@ void conf::Bilinears::verify() {
 }
 
 
-conf::Rdms::Rdms(Group *parent, std::string name, std::string description) :
+conf::Rdms::Rdms(Group *parent, str_t name, str_t description) :
         Bilinears(parent, name, description),
         m_explicit_ref_conns(this, "explicit_ref_conns", true,
                              "if true, take contributions from reference connections into account exactly") {}
 
-conf::SpecMoms::SpecMoms(Group *parent, std::string name, std::string description) :
+conf::SpecMoms::SpecMoms(Group *parent, str_t name, str_t description) :
         Bilinears(parent, name, description),
         m_stochastic(this, "stochastic", true,
                      "if false, perform exact evaluation of contributing connections"),
@@ -276,7 +276,7 @@ void conf::Document::verify() {
                "number of bosons in a number-conserving system mustn't exceed the maximum occupation cutoff");
 }
 
-conf::MbfDef::MbfDef(Group *parent, std::string name) :
+conf::MbfDef::MbfDef(Group *parent, str_t name) :
         Section(parent, name, "definition of a vector of many-body basis functions"),
         m_frm(this, "fermion", {},
               "fermion sector occupation of the MBF (each element can be a boolean "

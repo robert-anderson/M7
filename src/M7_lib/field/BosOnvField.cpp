@@ -7,19 +7,19 @@
 
 #include <utility>
 
-BosOnvField::BosOnvField(Row *row, const sys::bos::Basis& basis, std::string name) :
+BosOnvField::BosOnvField(Row *row, const sys::bos::Basis& basis, str_t name) :
         base_t(row, {{basis.m_nmode}, {"boson mode occupations"}}, std::move(name)),
         m_basis(basis), m_decoded(*this) {
 }
 
-BosOnvField::BosOnvField(Row *row, const sys::Basis &basis, std::string name) : BosOnvField(row, basis.m_bos, name) {
+BosOnvField::BosOnvField(Row *row, const sys::Basis &basis, str_t name) : BosOnvField(row, basis.m_bos, name) {
     basis.require_pure_bos();
 }
 
-BosOnvField::BosOnvField(Row *row, const sys::bos::Sector &sector, std::string name) :
+BosOnvField::BosOnvField(Row *row, const sys::bos::Sector &sector, str_t name) :
     BosOnvField(row, sector.m_basis, name){}
 
-BosOnvField::BosOnvField(Row *row, const sys::Sector &sector, std::string name) :
+BosOnvField::BosOnvField(Row *row, const sys::Sector &sector, str_t name) :
     BosOnvField(row, sector.m_bos, name){}
 
 BosOnvField::BosOnvField(const BosOnvField &other) :

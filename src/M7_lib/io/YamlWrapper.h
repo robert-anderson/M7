@@ -16,19 +16,19 @@
 
 namespace yaml {
     struct Path {
-        std::list<std::string> m_name_list;
+        std::list<str_t> m_name_list;
 
-        Path(std::list<std::string> name_list);
+        Path(std::list<str_t> name_list);
 
-        Path(std::vector<std::string> name_list);
+        Path(strv_t name_list);
 
-        Path(std::string name);
+        Path(str_t name);
 
         Path(const Path &other);
 
-        std::string to_string() const;
+        str_t to_string() const;
 
-        Path operator+(const std::string &name) const;
+        Path operator+(const str_t &name) const;
 
         Path up() const;
 
@@ -36,22 +36,22 @@ namespace yaml {
     };
 
     struct File {
-        const std::string m_fname;
+        const str_t m_fname;
         YAML::Node m_root;
 
-        File(const std::string &fname);
+        File(const str_t &fname);
 
         YAML::Node get(Path path) const;
 
-        YAML::Node get(std::list<std::string> path) const;
+        YAML::Node get(std::list<str_t> path) const;
 
-        YAML::Node get(std::string path) const;
+        YAML::Node get(str_t path) const;
 
         bool exists(Path path) const;
 
-        bool exists(std::list<std::string> path) const;
+        bool exists(std::list<str_t> path) const;
 
-        bool exists(std::string path) const;
+        bool exists(str_t path) const;
 
         template<typename T>
         T get_as(const Path &path) const {
@@ -59,12 +59,12 @@ namespace yaml {
         }
 
         template<typename T>
-        T get_as(std::list<std::string> path) const {
+        T get_as(std::list<str_t> path) const {
             return get(Path{path}).as<T>();
         }
 
         template<typename T>
-        T get_as(std::string path) const {
+        T get_as(str_t path) const {
             return get(Path{path}).as<T>();
         }
     };

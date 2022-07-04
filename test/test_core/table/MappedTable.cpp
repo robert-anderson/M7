@@ -137,7 +137,7 @@ TEST(MappedTable, Copy) {
     const uint_t ibegin = 16;
     const uint_t nstep = 7;
     const uint_t nentry = 10;
-    const std::vector<std::string> strings {
+    const strv_t strings {
             "Lorem ipsum", "dolor sit amet,", "consectetur", "adipiscing elit,", "sed do",
             "eiusmod tempor", "incididunt", "ut", "labore et", "dolore", "magna aliqua."
     };

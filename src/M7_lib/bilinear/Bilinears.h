@@ -51,7 +51,7 @@ private:
      * @return
      *  integer excitation signature
      */
-    static uint_t parse_exsig(const std::string &string) {
+    static uint_t parse_exsig(const str_t &string) {
         REQUIRE_TRUE_ALL(string.size() == 1 || string.size() == 4, "invalid exsig string specification");
         if (string.size() == 1) {
             uint_t rank = string::parse_decimal_digit(string.c_str());
@@ -74,7 +74,7 @@ private:
      * @return
      *  integer excitation signatures
      */
-    static uintv_t parse_exsigs(const std::vector<std::string> &strings) {
+    static uintv_t parse_exsigs(const strv_t &strings) {
         uintv_t out;
         for (auto &string: strings) out.push_back(parse_exsig(string));
         DEBUG_ASSERT_EQ(out.size(), strings.size(),

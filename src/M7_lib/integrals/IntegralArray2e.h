@@ -65,9 +65,9 @@ namespace integrals_2e {
             Null, None, H, D, DH, DR, DHR
         };
 
-        std::string name(Sym sym);
+        str_t name(Sym sym);
 
-        std::vector<std::string> equivalences(Sym sym);
+        strv_t equivalences(Sym sym);
     }
 
     struct Indexer : IntegralIndexer {

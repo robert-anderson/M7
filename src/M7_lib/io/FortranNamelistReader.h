@@ -19,19 +19,19 @@ class FortranNamelistReader {
 
 public:
 
-    const std::string m_fname;
-    explicit FortranNamelistReader(std::string fname);
+    const str_t m_fname;
+    explicit FortranNamelistReader(str_t fname);
 
-    static std::string isolate_value(const std::string &line, const std::string &label);
+    static str_t isolate_value(const str_t &line, const str_t &label);
 
-    static bool contains_terminator(const std::string &line);
+    static bool contains_terminator(const str_t &line);
 
-    static std::vector<std::string> read(const std::string &line, const std::string &label);
+    static strv_t read(const str_t &line, const str_t &label);
 
-    std::vector<std::string> read(const std::string &label) const;
+    strv_t read(const str_t &label) const;
 
     template<typename T>
-    void read(std::vector<T>& v, const std::string &label, std::vector<T> default_ = {}) const {
+    void read(std::vector<T>& v, const str_t &label, std::vector<T> default_ = {}) const {
         v = default_;
         auto tokens = read(label);
         if (tokens.empty()) return;
@@ -39,19 +39,19 @@ public:
         //for (auto &i: v) i+=offset;
     }
 
-    void read(std::vector<bool>& v, const std::string &label, std::vector<bool> default_ = {}) const;
+    void read(std::vector<bool>& v, const str_t &label, std::vector<bool> default_ = {}) const;
 
-    std::vector<long> read_ints(const std::string &label, std::vector<long> default_ = {}) const;
+    std::vector<long> read_ints(const str_t &label, std::vector<long> default_ = {}) const;
 
-    std::vector<uint_t> read_uints(const std::string &label, std::vector<uint_t> default_ = {}) const;
+    std::vector<uint_t> read_uints(const str_t &label, std::vector<uint_t> default_ = {}) const;
 
-    std::vector<bool> read_bools(const std::string &label, std::vector<bool> default_ = {}) const;
+    std::vector<bool> read_bools(const str_t &label, std::vector<bool> default_ = {}) const;
 
-    long read_int(const std::string &label, long default_ = 0l) const;
+    long read_int(const str_t &label, long default_ = 0l) const;
 
-    uint_t read_uint(const std::string &label, uint_t default_ = 0ul) const;
+    uint_t read_uint(const str_t &label, uint_t default_ = 0ul) const;
 
-    bool read_bool(const std::string &label, bool default_ = false) const;
+    bool read_bool(const str_t &label, bool default_ = false) const;
 
 };
 

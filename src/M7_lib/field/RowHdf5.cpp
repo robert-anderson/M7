@@ -4,7 +4,7 @@
 
 #include "RowHdf5.h"
 
-RowHdf5Base::RowHdf5Base(const Row &row, uint_t nitem, std::vector<std::string> field_names) :
+RowHdf5Base::RowHdf5Base(const Row &row, uint_t nitem, strv_t field_names) :
         m_nitem(nitem), m_nitem_max(mpi::all_max(m_nitem)),
         m_nitem_total(mpi::all_sum(m_nitem)), m_field_names(std::move(field_names)),
         m_selected_field_inds(make_selected_field_inds(row.m_fields)) {}
@@ -60,13 +60,13 @@ void RowHdf5WriterBase::write() {
     write(m_nitem_max);
 }
 
-RowHdf5WriterBase::RowHdf5WriterBase(Row &row, const hdf5::NodeWriter &parent, std::string name, uint_t nitem,
-                                     std::vector<std::string> field_names) :
+RowHdf5WriterBase::RowHdf5WriterBase(Row &row, const hdf5::NodeWriter &parent, str_t name, uint_t nitem,
+                                     strv_t field_names) :
         RowHdf5Base(row, nitem, std::move(field_names)), m_row(row), m_group(parent, name){
     m_column_writers.reserve(m_selected_field_inds.size());
     for (auto &ifield: m_selected_field_inds) {
         auto field = m_row.m_fields[ifield];
-        std::string field_name = field->m_name;
+        str_t field_name = field->m_name;
         m_column_writers.emplace_back(m_group, field_name, field->h5_shape(), nitem, field->h5_type(),
                                       field->h5_dim_names());
         /*
@@ -76,8 +76,8 @@ RowHdf5WriterBase::RowHdf5WriterBase(Row &row, const hdf5::NodeWriter &parent, s
     }
 }
 
-std::vector<std::string> RowHdf5WriterBase::get_all_field_names(const Row &row) {
-    std::vector<std::string> out;
+strv_t RowHdf5WriterBase::get_all_field_names(const Row &row) {
+    strv_t out;
     out.reserve(row.m_fields.size());
     for (FieldBase *field_ptr: row.m_fields) {
         REQUIRE_FALSE(field_ptr->m_name.empty(), "All fields selected for HDF5 write must be named");
@@ -87,24 +87,24 @@ std::vector<std::string> RowHdf5WriterBase::get_all_field_names(const Row &row) 
 }
 
 
-RowHdf5ReaderBase::RowHdf5ReaderBase(Row &row, const hdf5::NodeReader &parent, std::string name,
-                                     std::vector<std::string> field_names) :
+RowHdf5ReaderBase::RowHdf5ReaderBase(Row &row, const hdf5::NodeReader &parent, str_t name,
+                                     strv_t field_names) :
         RowHdf5Base(row, get_nitem(row, parent, name, field_names), field_names),
         m_row(row), m_group(parent, name) {
     m_column_readers.reserve(m_selected_field_inds.size());
     for (auto &ifield: m_selected_field_inds) {
         auto &field = m_row.m_fields[ifield];
-        std::string field_name = field->m_name;
+        str_t field_name = field->m_name;
         m_column_readers.emplace_back(m_group, field_name, field->h5_type());
         // TODO: read attrs
     }
 }
 
 
-std::vector<std::string> RowHdf5ReaderBase::stored_field_names(
-        const Row &row, const hdf5::NodeReader &parent, std::string name) {
+strv_t RowHdf5ReaderBase::stored_field_names(
+        const Row &row, const hdf5::NodeReader &parent, str_t name) {
     hdf5::GroupReader group(parent, name);
-    std::vector<std::string> out;
+    strv_t out;
     out.reserve(row.m_fields.size());
     for (FieldBase *field: row.m_fields) {
         REQUIRE_FALSE(field->m_name.empty(), "All fields selected for HDF5 write must be named");
@@ -114,8 +114,8 @@ std::vector<std::string> RowHdf5ReaderBase::stored_field_names(
 }
 
 
-uint_t RowHdf5ReaderBase::get_nitem(const Row &row, const hdf5::NodeReader& parent, std::string name,
-                                    std::vector<std::string> field_names) {
+uint_t RowHdf5ReaderBase::get_nitem(const Row &row, const hdf5::NodeReader& parent, str_t name,
+                                    strv_t field_names) {
     if (row.m_fields.empty()) return 0ul;
     hdf5::GroupReader group(parent, name);
     // take the number of items in the first selected column

@@ -69,12 +69,12 @@ const uintv_t &sparse::Network::operator[](const uint_t &irow) const{
     return m_rows_icols[irow];
 }
 
-std::string sparse::Network::row_to_string(uint_t irow) const {
+str_t sparse::Network::row_to_string(uint_t irow) const {
     return convert::to_string(m_rows_icols[irow]);
 }
 
-std::string sparse::Network::to_string() const {
-    std::string out;
+str_t sparse::Network::to_string() const {
+    str_t out;
     for (uint_t irow=0ul; irow<nrow(); ++irow) {
         if (m_rows_icols[irow].empty()) continue;
         out+= std::to_string(irow) + ": " + row_to_string(irow)+"\n";

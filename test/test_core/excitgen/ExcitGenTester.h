@@ -32,9 +32,9 @@ namespace excit_gen_tester {
 
     struct RunStatus {
         const uint_t m_nnull;
-        const std::string m_error_message;
+        const str_t m_error_message;
         RunStatus(uint_t nnull): m_nnull(nnull){}
-        RunStatus(std::string error_message): m_nnull(~0ul), m_error_message(std::move(error_message)){}
+        RunStatus(str_t error_message): m_nnull(~0ul), m_error_message(std::move(error_message)){}
     };
 
     struct ExcitGenTester {

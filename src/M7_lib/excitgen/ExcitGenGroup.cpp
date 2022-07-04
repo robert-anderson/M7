@@ -78,7 +78,7 @@ const std::vector<prob_t>& ExcitGenGroup::get_probs() const {
 }
 
 void ExcitGenGroup::log() const {
-    std::vector<std::vector<std::string>> rows = {{"Excitation Signature", "Description", "Probability"}};
+    std::vector<strv_t> rows = {{"Excitation Signature", "Description", "Probability"}};
     for (uint_t icase=0ul; icase<ncase(); ++icase){
         auto exsig_str = exsig::to_string(m_excit_cases[icase].m_exsig);
         auto prob_str = convert::to_string(get_prob(icase));

@@ -44,7 +44,7 @@ void Buffer::Window::resize(uint_t size, double factor) {
     m_buffer->resize(size * m_buffer->m_nwindow_max, factor);
 }
 
-std::string Buffer::Window::name() const {
+str_t Buffer::Window::name() const {
     if (!m_buffer) return "";
     return m_buffer->m_name;
 }
@@ -54,7 +54,7 @@ double Buffer::Window::get_expansion_factor() const {
 }
 
 
-Buffer::Buffer(std::string name, uint_t nwindow_max) :
+Buffer::Buffer(str_t name, uint_t nwindow_max) :
         m_name(std::move(name)), m_nwindow_max(nwindow_max) {
     if (!name.empty()) log::info_("Creating \"{}\" buffer", name);
     REQUIRE_TRUE(nwindow_max, "A buffer must allow at least one window");
@@ -122,7 +122,7 @@ void Buffer::resize(uint_t size, double factor) {
     DEBUG_ASSERT_EQ(m_data.data(), m_windows[0]->m_begin, "first window not pointing at begin of buffer");
 }
 
-std::string Buffer::capacity_string(uint_t size) const {
+str_t Buffer::capacity_string(uint_t size) const {
     const auto ntable = " x " + std::to_string(m_windows.size()) + " tables";
     if (m_windows.size() == 1)
         return string::memsize(size);
@@ -130,6 +130,6 @@ std::string Buffer::capacity_string(uint_t size) const {
         return string::memsize(size / m_nwindow_max) + ntable + " = " + string::memsize(size);
 }
 
-std::string Buffer::capacity_string() const {
+str_t Buffer::capacity_string() const {
     return capacity_string(size());
 }

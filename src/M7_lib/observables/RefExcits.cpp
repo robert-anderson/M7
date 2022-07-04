@@ -22,7 +22,7 @@ uint_t RefExcitsOneExsig::insert(const conn::FrmOnv& key) {
     return MappedTable<MaeRow>::insert(m_working_inds);
 }
 
-std::vector<std::string> RefExcitsOneExsig::h5_field_names() const {
+strv_t RefExcitsOneExsig::h5_field_names() const {
     return {m_row.m_inds.m_name, m_row.m_values.m_name};
 }
 

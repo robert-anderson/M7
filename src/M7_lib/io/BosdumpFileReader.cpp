@@ -5,10 +5,10 @@
 #include "BosdumpFileReader.h"
 #include <M7_lib/util/Exsig.h>
 
-BosdumpHeader::BosdumpHeader(const std::string &fname) :
+BosdumpHeader::BosdumpHeader(const str_t &fname) :
         FortranNamelistReader(fname), m_nmode(read_int("NMODE")), m_nboson(read_int("NBOSON")) {}
 
-BosdumpFileReader::BosdumpFileReader(const std::string &fname) :
+BosdumpFileReader::BosdumpFileReader(const str_t &fname) :
         HamTextFileReader(fname, 4), m_header(BosdumpHeader(fname)) {}
 
 uint_t BosdumpFileReader::ranksig(const uintv_t &inds) const {

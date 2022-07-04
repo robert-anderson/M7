@@ -4,7 +4,7 @@
 
 #include "Dataset.h"
 
-uint_t hdf5::DatasetReader::get_ndim(hid_t parent_handle, const std::string &name) {
+uint_t hdf5::DatasetReader::get_ndim(hid_t parent_handle, const str_t &name) {
     auto status = H5Gget_objinfo(parent_handle, name.c_str(), 0, nullptr);
     REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
     auto dataset = H5Dopen1(parent_handle, name.c_str());
@@ -15,11 +15,11 @@ uint_t hdf5::DatasetReader::get_ndim(hid_t parent_handle, const std::string &nam
     return rank;
 }
 
-uint_t hdf5::DatasetReader::get_nelement(hid_t parent_handle, const std::string &name) {
+uint_t hdf5::DatasetReader::get_nelement(hid_t parent_handle, const str_t &name) {
     return nd::nelement(get_shape<hsize_t>(parent_handle, name));
 }
 
-hdf5::DatasetReader::DatasetReader(hid_t parent_handle, const std::string &name) :
+hdf5::DatasetReader::DatasetReader(hid_t parent_handle, const str_t &name) :
         m_space(get_shape<hsize_t>(parent_handle, name)), m_handle(H5Dopen1(parent_handle, name.c_str())),
         m_type(H5Dget_type(m_handle)) {}
 
@@ -32,8 +32,8 @@ void hdf5::DatasetReader::read(void *dst) const {
     REQUIRE_FALSE_ALL(status, "HDF5 Error on dataset load");
 }
 
-hdf5::DatasetWriter::DatasetWriter(hid_t parent_handle, const std::string &name,
-                                   const std::vector<hsize_t> &shape, Type type, std::vector<std::string> dim_names,
+hdf5::DatasetWriter::DatasetWriter(hid_t parent_handle, const str_t &name,
+                                   const std::vector<hsize_t> &shape, Type type, strv_t dim_names,
                                    uint_t irank) :
         m_space(DataSpace(shape, !mpi::i_am(irank))),
         m_handle(H5Dcreate2(parent_handle, name.c_str(), type, m_space.m_handle, H5P_DEFAULT,

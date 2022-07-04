@@ -30,11 +30,11 @@
 #include "MPIAssert.h"
 
 class Epoch {
-    std::string m_name;
+    str_t m_name;
     Reduction<uint_t> m_icycle_start;
 
 public:
-    explicit Epoch(std::string name);
+    explicit Epoch(str_t name);
 
     /**
      * Update the state of the Epoch, no need to check state before
@@ -67,7 +67,7 @@ public:
 class Epochs {
     std::vector<Epoch> m_epochs;
 public:
-    Epochs(std::string name, uint_t n, std::string element_identifier="element"){
+    Epochs(str_t name, uint_t n, str_t element_identifier="element"){
         m_epochs.reserve(n);
         for (uint_t i=0ul; i<n; ++i) m_epochs.emplace_back(name+" (" +element_identifier + " " + std::to_string(i) + ")");
     }

@@ -24,7 +24,7 @@ struct NdFormatD {
 
     const uintv_t m_shape;
     const uintv_t m_strides;
-    const std::vector<std::string> m_dim_names;
+    const strv_t m_dim_names;
     const uint_t m_nelement;
     const uint_t m_nind;
 
@@ -39,11 +39,11 @@ struct NdFormatD {
         return strides;
     }
 
-    NdFormatD(const uintv_t& shape, std::vector<std::string> dim_names): m_shape(shape),
+    NdFormatD(const uintv_t& shape, strv_t dim_names): m_shape(shape),
                                                                                m_strides(make_strides(shape)), m_dim_names(std::move(dim_names)),
                                                                                m_nelement(shape.empty() ? 1ul: m_strides.front()*m_shape.front()), m_nind(shape.size()){}
 
-    NdFormatD(const uintv_t& shape): NdFormatD(shape, std::vector<std::string>(shape.size(), "")){}
+    NdFormatD(const uintv_t& shape): NdFormatD(shape, strv_t(shape.size(), "")){}
 
     NdFormatD(uint_t nind, uint_t extent): NdFormatD(uintv_t(nind, extent)){}
 

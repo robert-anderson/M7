@@ -7,7 +7,7 @@
 
 TEST(UtilBit, SetBits) {
     uintv_t setbits;
-    std::string bitstr;
+    str_t bitstr;
 
     bitstr = "10011110"; // 158
     setbits.clear();
@@ -41,7 +41,7 @@ TEST(UtilBit, SetBits) {
 
 TEST(UtilBit, ClrBits) {
     uintv_t clrbits;
-    std::string bitstr;
+    str_t bitstr;
 
     bitstr = "10011110"; // 158
     clrbits.clear();

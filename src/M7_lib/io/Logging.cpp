@@ -53,19 +53,19 @@ void log::finalize() {
     spdlog::shutdown();
 }
 
-std::string log::get_demangled_symbol(const std::string &symbol) {
+str_t log::get_demangled_symbol(const str_t &symbol) {
     int status;
     auto demangled = abi::__cxa_demangle(symbol.data(), nullptr, nullptr, &status);
     if (status!=0) {
         free(demangled);
         return "";
     }
-    std::string tmp(demangled);
+    str_t tmp(demangled);
     free(demangled);
     return tmp;
 }
 
-std::string log::get_demangled_prototype(const char *line) {
+str_t log::get_demangled_prototype(const char *line) {
     // parse till first "(", then till "+"
     const char* begin_ptr = nullptr;
     const char* end_ptr = nullptr;
@@ -77,16 +77,16 @@ std::string log::get_demangled_prototype(const char *line) {
         }
     }
     uint_t length = std::distance(begin_ptr, end_ptr);
-    std::string symbol(begin_ptr, length);
+    str_t symbol(begin_ptr, length);
     return get_demangled_symbol(symbol);
 }
 
-std::vector<std::string> log::get_backtrace(uint_t depth) {
+strv_t log::get_backtrace(uint_t depth) {
     std::vector<void*> entries(depth);
     uint_t size;
     size = backtrace(entries.data(), depth);
     auto symbols = backtrace_symbols(entries.data(), size);
-    std::vector<std::string> tmp;
+    strv_t tmp;
     for (uint_t i=0ul; i<size; ++i) {
         tmp.emplace_back(get_demangled_prototype(symbols[i]));
     }
@@ -96,14 +96,14 @@ std::vector<std::string> log::get_backtrace(uint_t depth) {
 
 void log::error_backtrace_(uint_t depth) {
     auto tmp = get_backtrace(depth);
-    std::string str;
+    str_t str;
     error_("Printing backtrace (maximum call depth {}):", depth);
     for (const auto& line: tmp) if (!line.empty()) error_(line);
 }
 
-std::vector<std::string> log::make_table(const std::vector<std::vector<std::string>> &rows, bool header, uint_t padding) {
+strv_t log::make_table(const std::vector<strv_t> &rows, bool header, uint_t padding) {
     if (rows.empty()) return {};
-    auto fn = [](const std::vector<std::string>& row1, const std::vector<std::string>& row2){
+    auto fn = [](const strv_t& row1, const strv_t& row2){
         return row1.size() < row2.size();
     };
 
@@ -116,8 +116,8 @@ std::vector<std::string> log::make_table(const std::vector<std::vector<std::stri
             max_sizes[icol] = std::max(max_sizes[icol], it->size());
         }
     }
-    std::string hline{'+'};
-    std::string header_hline{'+'};
+    str_t hline{'+'};
+    str_t header_hline{'+'};
     for (auto& max_size: max_sizes) {
         hline.append(max_size+2*padding,'-');
         hline.append(1, '+');
@@ -126,11 +126,11 @@ std::vector<std::string> log::make_table(const std::vector<std::vector<std::stri
             header_hline.append(1, '+');
         }
     }
-    std::vector<std::string> row_strs;
+    strv_t row_strs;
     row_strs.reserve(2*rows.size()+1);
     row_strs.push_back(hline);
     for (auto& row: rows) {
-        std::string row_str = "|";
+        str_t row_str = "|";
         for (uint_t icol=0ul; icol<ncol; ++icol){
             row_str.append(padding, ' ');
             row_str.append(icol<row.size() ? row[icol] : "");
@@ -143,13 +143,13 @@ std::vector<std::string> log::make_table(const std::vector<std::vector<std::stri
     return row_strs;
 }
 
-std::vector<std::string> log::make_table(const std::string &title, const std::vector<std::vector<std::string>> &rows,
+strv_t log::make_table(const str_t &title, const std::vector<strv_t> &rows,
                 bool header, uint_t padding) {
     if (rows.empty()) return {};
-    std::vector<std::string> table;
+    strv_t table;
     auto body = make_table(rows, header, padding);
     table.push_back(body.front());
-    std::string title_str = "|";
+    str_t title_str = "|";
     const uint_t titlebar_size = body.front().size()-2;
     const uint_t nspace_left = titlebar_size < title.size() ? 0ul : (titlebar_size - title.size()) / 2;
     const uint_t nspace_right = titlebar_size < title.size() ? 0ul : titlebar_size - (title.size() + nspace_left);
@@ -163,28 +163,28 @@ std::vector<std::string> log::make_table(const std::string &title, const std::ve
     return table;
 }
 
-void log::info_lines(const std::vector<std::string> &lines) {
+void log::info_lines(const strv_t &lines) {
     for (const auto& line: lines) info(line);
 }
 
-void log::info_lines_(const std::vector<std::string> &lines) {
+void log::info_lines_(const strv_t &lines) {
     for (const auto& line: lines) info_(line);
 }
 
-void log::info_table(const std::vector<std::vector<std::string>> &rows, bool header, uint_t padding) {
+void log::info_table(const std::vector<strv_t> &rows, bool header, uint_t padding) {
     info_lines(make_table(rows, header, padding));
 }
 
-void log::info_table(const std::string &title, const std::vector<std::vector<std::string>> &rows, bool header,
+void log::info_table(const str_t &title, const std::vector<strv_t> &rows, bool header,
                      uint_t padding) {
     info_lines(make_table(title, rows, header, padding));
 }
 
-void log::info_table_(const std::vector<std::vector<std::string>> &rows, bool header, uint_t padding) {
+void log::info_table_(const std::vector<strv_t> &rows, bool header, uint_t padding) {
     info_lines_(make_table(rows, header, padding));
 }
 
-void log::info_table_(const std::string &title, const std::vector<std::vector<std::string>> &rows, bool header,
+void log::info_table_(const str_t &title, const std::vector<strv_t> &rows, bool header,
                       uint_t padding) {
     info_lines_(make_table(title, rows, header, padding));
 }

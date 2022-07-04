@@ -7,12 +7,12 @@
 
 
 TEST(UtilString, SplitLine) {
-    const std::string line = "0.5000000000 1 1 2 2";
+    const str_t line = "0.5000000000 1 1 2 2";
     auto tokens = string::split(line, ' ');
 }
 
 TEST(UtilString, JoinAndSplit) {
-    const std::string line = " this is   an   example   string   ";
+    const str_t line = " this is   an   example   string   ";
     auto tokens = string::split(line, ' ');
     ASSERT_EQ(tokens.size(), 5);
     auto joinder = string::join(tokens, " ");
@@ -21,7 +21,7 @@ TEST(UtilString, JoinAndSplit) {
 }
 
 TEST(UtilString, Tokenize) {
-    const std::string line = " this is   an,   example   string   ";
+    const str_t line = " this is   an,   example   string   ";
     auto tokens = string::split(line, " ,");
     ASSERT_EQ(tokens.size(), 5);
 }

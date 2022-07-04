@@ -48,9 +48,9 @@ namespace sparse {
 
         const uintv_t &operator[](const uint_t &irow) const;
 
-        virtual std::string row_to_string(uint_t irow) const;
+        virtual str_t row_to_string(uint_t irow) const;
 
-        std::string to_string() const;
+        str_t to_string() const;
 
         Network get_symmetrized() const;
 
@@ -131,8 +131,8 @@ namespace sparse {
             return {m_rows_icols[irow], m_rows_values[irow]};
         }
 
-        std::string row_to_string(uint_t irow) const override {
-            std::vector<std::string> out;
+        str_t row_to_string(uint_t irow) const override {
+            strv_t out;
             for (uint_t ientry = 0ul; ientry < m_rows_icols[irow].size(); ++ientry) {
                 uint_t icol = m_rows_icols[irow][ientry];
                 auto v = m_rows_values[irow][ientry];

@@ -6,7 +6,7 @@
 #include "M7_lib/basis/AbelianGroup.h"
 
 TEST(AbelianGroup, D2h){
-    std::vector<std::string> labels = {"A1g", "B1g", "B2g", "B3g", "A1u", "B1u", "B2u", "B3u"};
+    strv_t labels = {"A1g", "B1g", "B2g", "B3g", "A1u", "B1u", "B2u", "B3u"};
     AbelianGroup d2h(labels, [](const uint_t& iirrep, const uint_t& jirrep){return iirrep^jirrep;});
     /*
      * D2h A1g B1g B2g B3g A1u B1u B2u B3u

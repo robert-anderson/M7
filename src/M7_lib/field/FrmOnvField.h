@@ -33,17 +33,17 @@ private:
 
 public:
 
-    FrmOnvField(Row* row, const sys::frm::Basis& basis, std::string name="");
+    FrmOnvField(Row* row, const sys::frm::Basis& basis, str_t name="");
     /*
      * all ONVs implement the following ctor
      */
-    FrmOnvField(Row* row, const sys::Basis& basis, std::string name="");
+    FrmOnvField(Row* row, const sys::Basis& basis, str_t name="");
     /*
      * this particular MBF only needs the basis, but future MBF types might need the full sector information, and so
      * a common interface is realised by implementing a ctor of the following form in all MBFs
      */
-    FrmOnvField(Row* row, const sys::frm::Sector& sector, std::string name="");
-    FrmOnvField(Row* row, const sys::Sector& sector, std::string name="");
+    FrmOnvField(Row* row, const sys::frm::Sector& sector, str_t name="");
+    FrmOnvField(Row* row, const sys::Sector& sector, str_t name="");
     FrmOnvField(const FrmOnvField& other);
 
     FrmOnvField& operator=(const FrmOnvField& other) {
@@ -110,7 +110,7 @@ public:
 
     bool all_sites_single_occ() const;
 
-    std::string to_string() const override;
+    str_t to_string() const override;
 
     /**
      * @param idataword

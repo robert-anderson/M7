@@ -29,7 +29,7 @@
 
 namespace asserts {
 
-    static void abort(const char *file, int line, bool collective, const std::string &reason) {
+    static void abort(const char *file, int line, bool collective, const str_t &reason) {
         if (collective || mpi::nrank() == 1) {
             log::error("Aborting in file {} at line {}", file, line);
             mpi::abort(reason);
@@ -42,7 +42,7 @@ namespace asserts {
     template<typename lhs_t, typename rhs_t>
     static void compare_abort(const char *kind, const char *op, const lhs_t &lhs, const rhs_t &rhs, const char *lhs_sym,
                               const char *rhs_sym,
-                              const char *file, int line, bool collective, bool outcome, const std::string &reason) {
+                              const char *file, int line, bool collective, bool outcome, const str_t &reason) {
         if (collective || mpi::nrank() == 1) {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
@@ -65,7 +65,7 @@ namespace asserts {
     static void compare_nearly_abort(const char *kind, const char *op, const T &lhs, const T &rhs,
                                      const arith::comp_t<T>& rtol, const arith::comp_t<T>& atol,
                                      const char *lhs_sym, const char *rhs_sym,
-                                     const char *file, int line, bool collective, bool outcome, const std::string &reason) {
+                                     const char *file, int line, bool collective, bool outcome, const str_t &reason) {
         if (collective || mpi::nrank() == 1) {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
@@ -86,7 +86,7 @@ namespace asserts {
 
     template<typename T>
     static void compare_zero_abort(const char *kind, const char *sym, const char *file, int line, bool collective,
-                                   T v, arith::comp_t<T> atol, const std::string &reason) {
+                                   T v, arith::comp_t<T> atol, const str_t &reason) {
         auto outcome = fptol::nearly_zero(v, atol);
         if (collective || mpi::nrank() == 1) {
             outcome = mpi::all_land(outcome);
@@ -105,7 +105,7 @@ namespace asserts {
     }
 
     static void bool_abort(const char *kind, const char *sym, const char *file, int line, bool collective,
-                           bool outcome, bool truth, const std::string &reason) {
+                           bool outcome, bool truth, const str_t &reason) {
         auto right = truth ? "true" : "false";
         auto wrong = truth ? "false" : "true";
         if (collective || mpi::nrank() == 1) {
@@ -129,13 +129,13 @@ namespace asserts {
 
     template<typename lhs_t, typename rhs_t>
     static void eq(const char *kind, const lhs_t &lhs, const rhs_t &rhs, const char *lhs_sym, const char *rhs_sym,
-                   const char *file, int line, bool collective, const std::string &reason) {
+                   const char *file, int line, bool collective, const str_t &reason) {
         compare_abort(kind, "equal", lhs, rhs, lhs_sym, rhs_sym, file, line, collective, lhs == rhs, reason);
     }
 
     template<typename lhs_t, typename rhs_t>
     static void ne(const char *kind, const lhs_t &lhs, const rhs_t &rhs, const char *lhs_sym, const char *rhs_sym,
-                   const char *file, int line, bool collective, const std::string &reason) {
+                   const char *file, int line, bool collective, const str_t &reason) {
         compare_abort(kind, "not equal", lhs, rhs, lhs_sym, rhs_sym, file, line, collective, lhs != rhs, reason);
     }
 
@@ -143,7 +143,7 @@ namespace asserts {
     static void nearly_eq(const char *kind, const T &lhs, const T &rhs,
                           const arith::comp_t<T> &rtol, const arith::comp_t<T> &atol,
                           const char *lhs_sym, const char *rhs_sym,
-                          const char *file, int line, bool collective, const std::string &reason) {
+                          const char *file, int line, bool collective, const str_t &reason) {
         compare_nearly_abort(kind, "equal", lhs, rhs, rtol, atol,lhs_sym, rhs_sym, file, line,
                              collective, fptol::nearly_equal(lhs, rhs, rtol, atol), reason);
     }
@@ -151,7 +151,7 @@ namespace asserts {
     template<typename T>
     static void nearly_eq(const char *kind, const T &lhs, const T &rhs,
                           const char *lhs_sym, const char *rhs_sym,
-                          const char *file, int line, bool collective, const std::string &reason) {
+                          const char *file, int line, bool collective, const str_t &reason) {
         nearly_eq(kind, lhs, rhs, fptol::default_rtol_near<T>(), fptol::default_atol_near<T>(),
                   lhs_sym, rhs_sym, file, line, collective, reason);
     }
@@ -160,56 +160,56 @@ namespace asserts {
     template<typename T>
     static void numeric_eq(const char *kind, const T &lhs, const T &rhs,
                            const char *lhs_sym, const char *rhs_sym,
-                           const char *file, int line, bool collective, const std::string &reason) {
+                           const char *file, int line, bool collective, const str_t &reason) {
         nearly_eq(kind, lhs, rhs, 0.0, fptol::default_atol_num<T>(), lhs_sym, rhs_sym, file, line, collective, reason);
     }
 
     template<typename T>
     static void nearly_zero(const char *kind, T v, const arith::comp_t<T> &atol, const char *sym,
-                            const char *file, int line, bool collective, const std::string &reason) {
+                            const char *file, int line, bool collective, const str_t &reason) {
         compare_zero_abort(kind, sym, file, line, collective, v, atol, true, reason);
     }
 
     template<typename T>
     static void numeric_zero(const char *kind, T v, const char *sym,
-                            const char *file, int line, bool collective, const std::string &reason) {
+                            const char *file, int line, bool collective, const str_t &reason) {
         nearly_zero(kind, v, fptol::default_atol_num<T>(), sym, file, line, collective, v, atol, true, reason);
     }
 
 
     template<typename lhs_t, typename rhs_t>
     static void lt(const char *kind, const lhs_t &lhs, const rhs_t &rhs, const char *lhs_sym, const char *rhs_sym,
-                   const char *file, int line, bool collective, const std::string &reason) {
+                   const char *file, int line, bool collective, const str_t &reason) {
         compare_abort(kind, "less than", lhs, rhs, lhs_sym, rhs_sym, file, line, collective, lhs < rhs, reason);
     }
 
     template<typename lhs_t, typename rhs_t>
     static void le(const char *kind, const lhs_t &lhs, const rhs_t &rhs, const char *lhs_sym, const char *rhs_sym,
-                   const char *file, int line, bool collective, const std::string &reason) {
+                   const char *file, int line, bool collective, const str_t &reason) {
         compare_abort(kind, "less than or equal", lhs, rhs, lhs_sym, rhs_sym, file, line, collective, lhs <= rhs,
                       reason);
     }
 
     template<typename lhs_t, typename rhs_t>
     static void gt(const char *kind, const lhs_t &lhs, const rhs_t &rhs, const char *lhs_sym, const char *rhs_sym,
-                   const char *file, int line, bool collective, const std::string &reason) {
+                   const char *file, int line, bool collective, const str_t &reason) {
         compare_abort(kind, "greater than", lhs, rhs, lhs_sym, rhs_sym, file, line, collective, lhs > rhs, reason);
     }
 
     template<typename lhs_t, typename rhs_t>
     static void ge(const char *kind, const lhs_t &lhs, const rhs_t &rhs, const char *lhs_sym, const char *rhs_sym,
-                   const char *file, int line, bool collective, const std::string &reason) {
+                   const char *file, int line, bool collective, const str_t &reason) {
         compare_abort(kind, "greater than or equal", lhs, rhs, lhs_sym, rhs_sym, file, line, collective, lhs >= rhs,
                       reason);
     }
 
     static void is_true(const char *kind, bool v, const char *sym, const char *file, int line,
-                        bool collective, const std::string &reason) {
+                        bool collective, const str_t &reason) {
         bool_abort(kind, sym, file, line, collective, v, true, reason);
     }
 
     static void is_false(const char *kind, bool v, const char *sym, const char *file, int line,
-                         bool collective, const std::string &reason) {
+                         bool collective, const str_t &reason) {
         bool_abort(kind, sym, file, line, collective, v, false, reason);
     }
 }

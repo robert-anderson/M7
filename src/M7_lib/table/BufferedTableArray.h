@@ -45,7 +45,7 @@ public:
         return (*this)[0].bw_size();
     }
 
-    BufferedTableArray(std::string name, uint_t ntable, const table_t& table):
+    BufferedTableArray(str_t name, uint_t ntable, const table_t& table):
             m_buffer(name, ntable) {
         m_tables.reserve(ntable);
         for (uint_t itable = 0ul; itable < ntable; ++itable) {
@@ -119,8 +119,8 @@ public:
         m_buffer.m_expansion_factor = f;
     }
 
-    std::string to_string() {
-        std::string tmp;
+    str_t to_string() {
+        str_t tmp;
         for (uint_t itable = 0ul; itable < ntable(); ++itable) {
             tmp+="Table array element " + std::to_string(itable) + ":\n";
             tmp+= static_cast<const Table<row_t> &>(m_tables[itable]).to_string() + "\n";
@@ -128,7 +128,7 @@ public:
         return tmp;
     }
 
-    std::string name() const {
+    str_t name() const {
         if (m_buffer.size()) return m_buffer.m_name;
         return "";
     }

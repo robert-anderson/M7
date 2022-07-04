@@ -7,7 +7,7 @@
 #include "M7_lib/util/Integer.h"
 
 TEST(FortranNamelistReader, IsolateValue) {
-    std::string line = " &FCI NORB=  12,NELEC=12,MS2=0, TREL=.TRUE., ORBSYM=3,2,1,1,4,1,5,3,2,1,5,6";
+    str_t line = " &FCI NORB=  12,NELEC=12,MS2=0, TREL=.TRUE., ORBSYM=3,2,1,1,4,1,5,3,2,1,5,6";
     ASSERT_EQ(FortranNamelistReader::isolate_value(line, "NORB"), "12");
     ASSERT_EQ(FortranNamelistReader::isolate_value(line, "NELEC"), "12");
     ASSERT_EQ(FortranNamelistReader::isolate_value(line, "TREL"), ".TRUE.");

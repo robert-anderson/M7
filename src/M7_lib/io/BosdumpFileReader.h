@@ -10,13 +10,13 @@
 
 struct BosdumpHeader : FortranNamelistReader {
     const uint_t m_nmode, m_nboson;
-    BosdumpHeader(const std::string& fname);
+    BosdumpHeader(const str_t& fname);
 };
 
 struct BosdumpFileReader : HamTextFileReader {
     BosdumpHeader m_header;
 
-    BosdumpFileReader(const std::string &fname);
+    BosdumpFileReader(const str_t &fname);
 
     uint_t ranksig(const uintv_t &inds) const override;
 

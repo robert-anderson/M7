@@ -53,7 +53,7 @@ struct FieldBase {
     /**
      * string identifier for logging purposes
      */
-    const std::string m_name;
+    const str_t m_name;
 
 private:
     /**
@@ -82,7 +82,7 @@ public:
      * @param name
      *  name of the field i.e. "column heading"
      */
-    FieldBase(Row *row, uint_t size, const std::type_info &type_info, std::string name);
+    FieldBase(Row *row, uint_t size, const std::type_info &type_info, str_t name);
 
     FieldBase(const FieldBase &other);
 
@@ -127,7 +127,7 @@ public:
 
     hash::digest_t hash() const;
 
-    virtual std::string to_string() const = 0;
+    virtual str_t to_string() const = 0;
 
     virtual void h5_write_attrs(const hdf5::NodeWriter& /*node*/) const {}
 
@@ -151,7 +151,7 @@ public:
         return {};
     }
 
-    virtual std::vector<std::string> h5_dim_names() const {
+    virtual strv_t h5_dim_names() const {
         return {};
     }
 

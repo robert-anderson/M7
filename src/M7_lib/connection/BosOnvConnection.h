@@ -111,7 +111,7 @@ public:
      */
     uint_t get_imode(uint_t iop) const;
 
-    std::string to_string() const;
+    str_t to_string() const;
 };
 
 struct BosOnvConnection {

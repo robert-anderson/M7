@@ -32,7 +32,7 @@ namespace hdf5 {
                     H5T_NATIVE_UINT64, H5T_NATIVE_INT64,
                     H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE};
 
-    std::string type_name(hid_t type);
+    str_t type_name(hid_t type);
 
     template<typename T=void>
     static constexpr uint_t type_ind() { return 0; }
@@ -86,7 +86,7 @@ namespace hdf5 {
 
     private:
         const bool m_immutable;
-        static hsize_t size_max(const std::vector<std::string>* vec);
+        static hsize_t size_max(const strv_t* vec);
         /*
          * use dummy arg so as not to have same prototype as public ctor in case hsize_t coincides with hid_t
          */
@@ -109,9 +109,9 @@ namespace hdf5 {
         Type(const T*): Type(type<T>()){}
 
 
-        Type(const std::string* str);
+        Type(const str_t* str);
 
-        Type(const std::vector<std::string>* str_vec);
+        Type(const strv_t* str_vec);
 
         ~Type();
 

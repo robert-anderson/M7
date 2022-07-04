@@ -218,7 +218,7 @@ namespace exsig {
                                     decode_nbos_cre(exsig));
     }
 
-    static std::string to_string(uint_t exsig) {
+    static str_t to_string(uint_t exsig) {
         if (exsig > c_ndistinct) return "invalid";
         return std::to_string(decode_nfrm_cre(exsig)) + std::to_string(decode_nfrm_ann(exsig)) +
                std::to_string(decode_nbos_cre(exsig)) + std::to_string(decode_nbos_ann(exsig));

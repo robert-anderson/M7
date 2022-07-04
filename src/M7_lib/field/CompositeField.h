@@ -11,7 +11,7 @@
 
 struct CompositeFieldBase {
 
-    std::string prefix(std::string base, std::string prefix);
+    str_t prefix(str_t base, str_t prefix);
 
     /*
      * functors for implementing the composite analogues of single-Field methods
@@ -35,7 +35,7 @@ protected:
     };
 
     struct ToStringFn {
-        std::string m_str;
+        str_t m_str;
         template<typename T>
         void operator()(const T &v) { m_str += v.to_string() + " "; }
     };
@@ -112,7 +112,7 @@ struct CompositeField : CompositeFieldBase {
         return !(*this<other);
     }
 
-    std::string to_string() const {
+    str_t to_string() const {
         ToStringFn fn;
         tuple::foreach(m_refs, fn);
         return fn.m_str;

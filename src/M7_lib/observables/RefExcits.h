@@ -27,7 +27,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
 
     uint_t insert(const conn::FrmOnv& key);
 
-    std::vector<std::string> h5_field_names() const;
+    strv_t h5_field_names() const;
 
     using Table<MaeRow>::save;
     void save(const hdf5::NodeWriter& gw) const;

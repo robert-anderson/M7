@@ -164,8 +164,8 @@ void TableBase::swap_rows(uint_t irow, uint_t jrow) {
     std::swap_ranges(iptr, iptr+row_size(), jptr);
 }
 
-std::string TableBase::to_string(const uintv_t *ordering) const {
-    std::string out;
+str_t TableBase::to_string(const uintv_t *ordering) const {
+    str_t out;
     auto begin_ptr = begin();
     for (uint_t i=0ul; i<m_hwm; ++i){
         auto irow = ordering ? ordering->at(i) : i;

@@ -24,18 +24,18 @@ namespace conservation {
     template<typename T>
     class Optional {
         const T m_value;
-        const std::string m_name;
+        const str_t m_name;
         const bool m_conserve;
     public:
-        Optional(T v, bool conserve, std::string name): m_value(v), m_name(std::move(name)), m_conserve(conserve){}
+        Optional(T v, bool conserve, str_t name): m_value(v), m_name(std::move(name)), m_conserve(conserve){}
         /*
          * set an undefined value (but state is defined if conserve is false)
          */
-        explicit Optional(bool conserve, std::string name): Optional(std::numeric_limits<T>::max(), conserve, name){}
+        explicit Optional(bool conserve, str_t name): Optional(std::numeric_limits<T>::max(), conserve, name){}
         /*
          * set an undefined state
          */
-        explicit Optional(std::string name): Optional(true, name){}
+        explicit Optional(str_t name): Optional(true, name){}
         explicit Optional(const Optional& o1, const Optional& o2) : Optional(o1.defined() ? o1 : o2){
             if (o1.defined() && o2.defined()) {
                 REQUIRE_EQ(o1, o2, "incompatible "+m_name+" values");
@@ -72,7 +72,7 @@ namespace conservation {
             return {{"value", m_value}, {"conserved", m_conserve}};
         }
 
-        std::string to_string() const {
+        str_t to_string() const {
             return convert::to_string(info());
         }
     };
@@ -204,7 +204,7 @@ namespace sys {
 
             strmap_t info() const;
 
-            std::string to_string() const;
+            str_t to_string() const;
         };
 
         /**
@@ -251,7 +251,7 @@ namespace sys {
             bool operator==(const Electrons& other) const;
 
             strmap_t info() const;
-            std::string to_string() const;
+            str_t to_string() const;
         };
 
         /**
@@ -316,7 +316,7 @@ namespace sys {
             
             strmap_t info() const;
 
-            std::string to_string() const;
+            str_t to_string() const;
         };
 
         struct Bosons : public conservation::Optional<uint_t> {

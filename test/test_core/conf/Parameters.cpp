@@ -10,7 +10,7 @@ namespace parameters_test {
     struct Section1 : conf_components::Section {
         conf_components::Param<std::vector<uint_t>> m_some_numbers;
         conf_components::Param<std::vector<uint_t>> m_some_unspecified_numbers;
-        conf_components::Param<std::string> m_a_string;
+        conf_components::Param<str_t> m_a_string;
 
         struct SubSection1 : conf_components::Section {
             conf_components::Param<uint_t> m_a_number;
@@ -74,7 +74,7 @@ TEST(Parameters, ParsingYaml) {
     ASSERT_TRUE(yf.exists("section1"));
     ASSERT_TRUE(yf.exists("section1.some_numbers"));
     ASSERT_EQ(yf.get_as<uintv_t>("section1.some_numbers"), uintv_t({2, 3, 5, 1}));
-    ASSERT_EQ(yf.get_as<std::string>("section1.a_string"), "this is just a string");
+    ASSERT_EQ(yf.get_as<str_t>("section1.a_string"), "this is just a string");
     ASSERT_TRUE(yf.exists("section1.subsection1"));
     ASSERT_TRUE(yf.exists("section1.subsection1.a_number"));
     ASSERT_EQ(yf.get_as<uint_t>("section1.subsection1.a_number"), 78);

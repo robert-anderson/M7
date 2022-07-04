@@ -113,7 +113,7 @@ namespace dense {
             REQUIRE_TRUE(m_nrow, "matrix must have a non-zero number of rows");
             REQUIRE_TRUE(m_ncol, "matrix must have a non-zero number of columns");
         }
-        Matrix(const hdf5::NodeReader& nr, const std::string name) :
+        Matrix(const hdf5::NodeReader& nr, const str_t name) :
             Matrix(nr.dataset_shape(name)[0], nr.dataset_shape(name)[1]) {
             nr.read_data(name, m_buffer.data(), m_buffer.size());
         }
@@ -332,8 +332,8 @@ namespace dense {
             get_col(icol, v.data());
         }
 
-        std::string to_string() const {
-            std::string out;
+        str_t to_string() const {
+            str_t out;
             for (uint_t irow = 0ul; irow < m_nrow; ++irow) {
                 for (uint_t icol = 0ul; icol < m_ncol; ++icol) {
                     out+=convert::to_string((*this)(irow, icol))+"  ";
@@ -343,7 +343,7 @@ namespace dense {
             return out;
         }
 
-        void save(std::string name, hdf5::NodeWriter& nw, uint_t irank=0) const {
+        void save(str_t name, hdf5::NodeWriter& nw, uint_t irank=0) const {
             uintv_t shape;
             shape.push_back(m_nrow);
             shape.push_back(m_ncol);

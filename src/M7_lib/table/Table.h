@@ -37,8 +37,8 @@ struct Table : TableBase {
 
     virtual ~Table(){}
 
-    std::string to_string(const uintv_t *ordering = nullptr) const override {
-        std::string tmp = m_row.field_names_string();
+    str_t to_string(const uintv_t *ordering = nullptr) const override {
+        str_t tmp = m_row.field_names_string();
         if (!m_hwm) return tmp;
         const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
         auto row = m_row;
@@ -64,15 +64,15 @@ private:
 
 public:
 
-    virtual void save(const hdf5::NodeWriter& parent, std::string name, std::vector<std::string> field_names) const {
+    virtual void save(const hdf5::NodeWriter& parent, str_t name, strv_t field_names) const {
         RowHdf5Writer<row_t>(m_row, parent, name, nrow_to_write(), field_names).write();
     }
 
-    virtual void save(const hdf5::NodeWriter& parent, std::string name) const {
+    virtual void save(const hdf5::NodeWriter& parent, str_t name) const {
         RowHdf5Writer<row_t>(m_row, parent, name, nrow_to_write()).write();
     }
 
-    virtual void load(const hdf5::NodeReader& parent, std::string name) {
+    virtual void load(const hdf5::NodeReader& parent, str_t name) {
         RowHdf5Reader<row_t>(m_row, parent, name).read();
     }
 

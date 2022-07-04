@@ -99,7 +99,7 @@ private:
     uinta_t<4> make_nop_offsets() const;
 
 public:
-    MaeIndsField(Row *row, uint_t exsig, std::string name = "indices");
+    MaeIndsField(Row *row, uint_t exsig, str_t name = "indices");
 
     MaeIndsField(const MaeIndsField& other);
 
@@ -116,7 +116,7 @@ public:
 
     void common_frm_inds(uintv_t &common) const;
 
-    std::string get_exsig_string() const;
+    str_t get_exsig_string() const;
 };
 
 

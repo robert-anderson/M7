@@ -4,9 +4,9 @@
 
 #include "HamTextFileReader.h"
 
-uint_t HamTextFileReader::iline_fn(const std::string &fname) {
+uint_t HamTextFileReader::iline_fn(const str_t &fname) {
     FileReader file_reader(fname);
-    std::string line;
+    str_t line;
     uint_t iline=0ul;
     while (file_reader.next(line)){
         ++iline;
@@ -15,7 +15,7 @@ uint_t HamTextFileReader::iline_fn(const std::string &fname) {
     return ~0ul;
 }
 
-HamTextFileReader::HamTextFileReader(const std::string &fname, uint_t nind) :
+HamTextFileReader::HamTextFileReader(const str_t &fname, uint_t nind) :
         NumericCsvFileReader(fname, ncolumn(fname, iline_fn)),
         m_complex_valued(m_ncolumn==nind+2) {
     REQUIRE_GT(m_ncolumn, nind, "not enough columns in body of file "+fname);

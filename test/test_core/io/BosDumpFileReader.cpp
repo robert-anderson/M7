@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 
 TEST(BosdumpFileReader, ReadFile){
-    std::string fname = PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP";
+    str_t fname = PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP";
     BosdumpFileReader file_reader(fname);
     ASSERT_EQ(file_reader.m_header.m_nmode, 5ul);
     uintv_t inds(4);

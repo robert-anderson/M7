@@ -120,8 +120,8 @@ uint_t BosOps::get_imode(uint_t iop) const {
     return ~0ul;
 }
 
-std::string BosOps::to_string() const {
-    std::vector<std::string> out;
+str_t BosOps::to_string() const {
+    strv_t out;
     for (auto pair : m_pairs) {
         if (pair.m_nop>1){
             // repeated operators are represented as being raised to a power

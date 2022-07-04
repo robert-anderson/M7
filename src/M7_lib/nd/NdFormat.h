@@ -14,7 +14,7 @@
 
 
 struct NdFormatBase{
-    virtual std::string to_string() const = 0;
+    virtual str_t to_string() const = 0;
 };
 
 /**
@@ -36,7 +36,7 @@ struct NdFormat : NdFormatBase {
     /**
      * label each dimension
      */
-    const std::array<std::string, nind> m_dim_names;
+    const std::array<str_t, nind> m_dim_names;
     /**
      * the number of elements in the indexing scheme. the largest value a flat index can take in this scheme is one less
      * than m_nelement
@@ -63,8 +63,8 @@ struct NdFormat : NdFormatBase {
         return nind ? m_shape.front()*m_strides.front() : 1ul;
     }
 
-    std::array<std::string, nind> make_default_dim_names() const {
-        std::array<std::string, nind> dim_names;
+    std::array<str_t, nind> make_default_dim_names() const {
+        std::array<str_t, nind> dim_names;
         for (uint_t i=0ul; i != nind; ++i) dim_names[i] = "dim_" + std::to_string(i);
         return dim_names;
     }
@@ -75,7 +75,7 @@ public:
         static_assert(!nind, "This ctor is only valid in the scalar case");
     }
 
-    NdFormat(const std::array<uint_t, nind>& shape, const std::array<std::string, nind>& dim_names):
+    NdFormat(const std::array<uint_t, nind>& shape, const std::array<str_t, nind>& dim_names):
         m_shape(shape), m_strides(make_strides()), m_dim_names(dim_names), m_nelement(make_nelement()){
         ASSERT(m_nelement!=~0ul);
     }
@@ -116,7 +116,7 @@ public:
         constexpr auto nind_diff = nind-nind_remain;
         std::array<uint_t, nind_remain> shape;
         std::copy(m_shape.cbegin(), m_shape.cend()-nind_diff, shape.begin());
-        std::array<std::string, nind_remain> dim_names;
+        std::array<str_t, nind_remain> dim_names;
         std::copy(m_dim_names.cbegin(), m_dim_names.cend()-nind_diff, dim_names.begin());
         return {shape, dim_names};
     }
@@ -133,7 +133,7 @@ public:
         constexpr auto nind_diff = nind-nind_remain;
         std::array<uint_t, nind_remain> shape;
         std::copy(m_shape.cbegin()+nind_diff, m_shape.cend(), shape.begin());
-        std::array<std::string, nind-nind_diff> dim_names;
+        std::array<str_t, nind-nind_diff> dim_names;
         std::copy(m_dim_names.cbegin()+nind_diff, m_dim_names.cend(), dim_names.begin());
         return {shape, dim_names};
     }
@@ -150,7 +150,7 @@ public:
      * @return
      *  the dim_names array converted to a vector instance
      */
-    std::vector<std::string> dim_names_vector() const {
+    strv_t dim_names_vector() const {
         return array::to_vector(m_dim_names);
     }
 
@@ -230,9 +230,9 @@ public:
         }
     }
 
-    std::string to_string() const override {
+    str_t to_string() const override {
         if (!nind) return "scalar";
-        std::string tmp;
+        str_t tmp;
         for (uint_t i=0ul; i != nind; ++i) {
             tmp+=m_dim_names[i]+" ("+std::to_string(m_shape[i])+") ";
         }

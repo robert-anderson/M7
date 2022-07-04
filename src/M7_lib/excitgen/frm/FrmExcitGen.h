@@ -12,7 +12,7 @@ struct FrmExcitGen : ExcitGen {
 
     const FrmHam& m_h;
 
-    FrmExcitGen(const FrmHam& h, PRNG& prng, uintv_t exsigs, std::string description);
+    FrmExcitGen(const FrmHam& h, PRNG& prng, uintv_t exsigs, str_t description);
 
     bool draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
                      prob_t& prob, conn::FrmBosOnv& conn) override;
@@ -36,7 +36,7 @@ struct FrmLatticeExcitGen : FrmExcitGen {
 protected:
     mutable lattice::adj_row_t m_work_adj_row;
 public:
-    FrmLatticeExcitGen(const FrmHam& h, PRNG& prng, uintv_t exsigs, std::string description):
+    FrmLatticeExcitGen(const FrmHam& h, PRNG& prng, uintv_t exsigs, str_t description):
             FrmExcitGen(h, prng, exsigs, description){
         REQUIRE_TRUE(h.m_basis.m_lattice.get(), "Lattice excitation generator requires lattice definition in basis");
     }

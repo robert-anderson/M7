@@ -7,7 +7,7 @@
 #include "test_core/defs.h"
 
 TEST(EbDumpFileReader, ReadFile){
-    std::string fname = PROJECT_ROOT"/assets/Hubbard_U4_4site/EBDUMP";
+    str_t fname = PROJECT_ROOT"/assets/Hubbard_U4_4site/EBDUMP";
     EbdumpFileReader file_reader(fname);
     ASSERT_FALSE(file_reader.m_info.m_uhf);
     ASSERT_EQ(file_reader.m_info.m_nmode, 4ul);
@@ -35,7 +35,7 @@ TEST(EbDumpFileReader, ReadFile){
 }
 
 TEST(EbDumpFileReader, SpinResolved){
-    std::string fname = PROJECT_ROOT"/assets/SpinResolvedEbdump/EBDUMP";
+    str_t fname = PROJECT_ROOT"/assets/SpinResolvedEbdump/EBDUMP";
     EbdumpFileReader file_reader(fname);
     ASSERT_TRUE(file_reader.m_info.m_uhf);
     ASSERT_EQ(file_reader.m_info.m_nmode, 6ul);

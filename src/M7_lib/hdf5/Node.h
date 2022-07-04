@@ -14,7 +14,7 @@ namespace hdf5 {
         const hid_t m_handle;
         Node(hid_t handle);
         operator hid_t() const;
-        bool attr_exists(const std::string& name) const;
+        bool attr_exists(const str_t& name) const;
     };
 
 
@@ -28,7 +28,7 @@ namespace hdf5 {
 
     private:
         template<typename T>
-        void read_attr_fn(const std::string& name, T& v, T default_) const {
+        void read_attr_fn(const str_t& name, T& v, T default_) const {
             if (!attr_exists(name)) {
                 v = default_;
                 return;
@@ -38,7 +38,7 @@ namespace hdf5 {
         }
 
         template<typename T>
-        void read_attr_fn(const std::string& name, std::vector<T>& v, std::vector<T> default_) const {
+        void read_attr_fn(const str_t& name, std::vector<T>& v, std::vector<T> default_) const {
             if (!attr_exists(name)) {
                 v = default_;
                 return;
@@ -49,55 +49,55 @@ namespace hdf5 {
         }
     public:
 
-        uintv_t dataset_shape(std::string name) const {
+        uintv_t dataset_shape(str_t name) const {
             return DatasetReader::get_shape<uint_t>(m_handle, name);
         }
 
-        uint_t dataset_nelement(std::string name) const {
+        uint_t dataset_nelement(str_t name) const {
             return DatasetReader::get_nelement(m_handle, name);
         }
 
         template<typename T>
-        void read_data(std::string name, T *v, uint_t size) const {
+        void read_data(str_t name, T *v, uint_t size) const {
             DatasetReader dr(*this, name);
             REQUIRE_EQ(size, dr.m_space.m_nelement, "number of elements does not match read size");
             dr.read(v);
         }
         template<typename T>
-        void read_data(std::string name, T &v) const {
+        void read_data(str_t name, T &v) const {
             read_data(name, &v, 1);
         }
         template<typename T>
-        void read_data(std::string name, std::vector<T> &v) const {
+        void read_data(str_t name, std::vector<T> &v) const {
             auto nelement = DatasetReader::get_nelement(m_handle, name);
             v.resize(nelement);
             read_data(name, v.data(), v.size());
         }
         template<typename T>
-        T read_data(std::string name) const {
+        T read_data(str_t name) const {
             T v{};
             read_data(name, v);
             return v;
         }
 
         template<typename T>
-        T read_attr(const std::string& name, T default_ = {}) const {
+        T read_attr(const str_t& name, T default_ = {}) const {
             T v;
             read_attr_fn(name, v, default_);
             return v;
         }
 
-        bool child_exists(const std::string& name) const;
+        bool child_exists(const str_t& name) const;
 
-        uint_t first_existing_child(const std::vector<std::string>& names) const;
+        uint_t first_existing_child(const strv_t& names) const;
 
         uint_t nchild() const;
 
-        std::string child_name(uint_t ichild) const;
+        str_t child_name(uint_t ichild) const;
 
         int child_type(uint_t i) const;
 
-        std::vector<std::string> child_names(int type=-1) const;
+        strv_t child_names(int type=-1) const;
 
 
         /**
@@ -111,7 +111,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, T& v) const {
+        load(str_t name, T& v) const {
             DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             auto dspace_handle = H5Screate(H5S_SCALAR);
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), Type(v), dspace_handle, H5P_DEFAULT,
@@ -134,7 +134,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::complex<T> &v) const {
+        load(str_t name, std::complex<T> &v) const {
             DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             load(name, reinterpret_cast<std::array<T, 2>&>(v)[0]);
             load(name, reinterpret_cast<std::array<T, 2>&>(v)[1]);
@@ -153,7 +153,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, T* v, const uintv_t& shape){
+        load(str_t name, T* v, const uintv_t& shape){
             DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             auto file_shape = get_dataset_shape(name);
             REQUIRE_EQ_ALL(shape, file_shape, "expected a container of a different shape");
@@ -179,7 +179,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::complex<T>* v, const uintv_t& shape){
+        load(str_t name, std::complex<T>* v, const uintv_t& shape){
             DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             auto complex_shape = shape;
             complex_shape.push_back(2ul);
@@ -199,7 +199,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::vector<T>& v, const uintv_t& shape){
+        load(str_t name, std::vector<T>& v, const uintv_t& shape){
             REQUIRE_EQ_ALL(v.size(), nd::nelement(shape), "vector and shape are incompatible");
             load(name, v.data(), shape);
         }
@@ -209,7 +209,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, std::vector<T>& v){
+        load(str_t name, std::vector<T>& v){
             load(name, v, {v.size()});
         }
 
@@ -217,7 +217,7 @@ namespace hdf5 {
          * convenient wrapper for scalar load
          */
         template<typename T>
-        T load(std::string name) const {
+        T load(str_t name) const {
             T tmp;
             load(name, tmp);
             return tmp;
@@ -227,7 +227,7 @@ namespace hdf5 {
          * convenient wrapper for vector load
          */
         template<typename T>
-        std::vector<T> load_vector(std::string name) const {
+        std::vector<T> load_vector(str_t name) const {
             auto nelement = nd::nelement(get_dataset_shape(name));
             std::vector<T> tmp(nelement);
             load(name, tmp);
@@ -236,32 +236,32 @@ namespace hdf5 {
 
     private:
 
-        uint_t get_dataset_ndim(std::string name) const;
+        uint_t get_dataset_ndim(str_t name) const;
 
-        uintv_t get_dataset_shape(std::string name) const;
+        uintv_t get_dataset_shape(str_t name) const;
     };
 
     struct NodeWriter : Node {
         NodeWriter(hid_t handle): Node(handle){}
 
         template<typename T>
-        void write_attr(const std::string& name, const T& v) const {
+        void write_attr(const str_t& name, const T& v) const {
             AttrWriter attr(m_handle, name, {1}, Type(&v));
             attr.write(&v, 1);
         }
 
         template<typename T>
-        void write_attr(const std::string& name, const std::vector<T>& v) const {
+        void write_attr(const str_t& name, const std::vector<T>& v) const {
             AttrWriter attr(m_handle, name, {v.size()}, Type(v.data()));
             attr.write(v.data(), v.size());
         }
 
-        void write_attr(const std::string& name, const std::string& v) const {
+        void write_attr(const str_t& name, const str_t& v) const {
             AttrWriter attr(m_handle, name, {1}, Type(&v));
             attr.write(v.c_str(), 1);
         }
 
-        void write_attr(const std::string& name, const std::vector<std::string>& v) const {
+        void write_attr(const str_t& name, const strv_t& v) const {
             AttrWriter attr(m_handle, name, {v.size()}, Type(v.data()));
             attr.write(v.data()->c_str(), 1);
         }
@@ -275,19 +275,19 @@ namespace hdf5 {
          * @param dim_names
          */
         template<typename T>
-        void write_data(const std::string& name, const T *v, const uintv_t& shape, const std::vector<std::string> dim_names={}) {
+        void write_data(const str_t& name, const T *v, const uintv_t& shape, const strv_t dim_names={}) {
             DatasetWriter(*this, name, convert::vector<hsize_t>(shape), Type(v)).write(v);
         }
         template<typename T>
-        void write_data(const std::string& name, const T *v, uint_t size) {
+        void write_data(const str_t& name, const T *v, uint_t size) {
             write_data(name, v, {size});
         }
         template<typename T>
-        void write_data(std::string name, const T &v) {
+        void write_data(str_t name, const T &v) {
             write_data(name, &v, 1);
         }
         template<typename T>
-        void write_data(std::string name, const std::vector<T> &v) {
+        void write_data(str_t name, const std::vector<T> &v) {
             write_data(name, v.data(), v.size());
         }
 
@@ -304,7 +304,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const T &v, uint_t irank=0ul) const {
+        save(str_t name, const T &v, uint_t irank=0ul) const {
             auto dspace_handle = H5Screate(H5S_SCALAR);
             /**
              * make a null selection if this is not the rank we want to output the value of
@@ -332,7 +332,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::complex<T> &v, uint_t irank=0ul) const {
+        save(str_t name, const std::complex<T> &v, uint_t irank=0ul) const {
             uintv_t shape = {2};
             save(name, reinterpret_cast<const T*>(&v), shape, {"real_imag"}, irank);
         }
@@ -352,8 +352,8 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const T* v, const uintv_t& shape,
-             std::vector<std::string> dim_labels={}, uint_t irank=0ul) const {
+        save(str_t name, const T* v, const uintv_t& shape,
+             strv_t dim_labels={}, uint_t irank=0ul) const {
             auto dims = convert::vector<hsize_t>(shape);
             auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
             /**
@@ -394,8 +394,8 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::complex<T>* v, const uintv_t& shape,
-             std::vector<std::string> dim_labels={}, uint_t irank=0ul) const {
+        save(str_t name, const std::complex<T>* v, const uintv_t& shape,
+             strv_t dim_labels={}, uint_t irank=0ul) const {
             dim_labels.push_back("real_imag");
             auto dims = shape;
             dims.push_back(2ul);
@@ -408,8 +408,8 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::vector<T>& v, const uintv_t& shape,
-             std::vector<std::string> dim_labels={}, uint_t irank=0ul) const {
+        save(str_t name, const std::vector<T>& v, const uintv_t& shape,
+             strv_t dim_labels={}, uint_t irank=0ul) const {
             REQUIRE_EQ_ALL(v.size(), nd  ::nelement(shape), "vector and shape are incompatible");
             save(name, v.data(), shape, {}, irank);
         }
@@ -419,7 +419,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::vector<T>& v, uint_t irank=0ul) const {
+        save(str_t name, const std::vector<T>& v, uint_t irank=0ul) const {
             save(name, v, {v.size()}, {}, irank);
         }
 
@@ -433,10 +433,10 @@ namespace hdf5 {
          * @param irank
          *  index of MPI rank which stores the definitive value of v
          */
-        void save(std::string name, const std::vector<std::string>& v, uint_t irank=0ul) const {
+        void save(str_t name, const strv_t& v, uint_t irank=0ul) const {
             auto memtype = H5Tcopy (H5T_C_S1);
             auto longest = std::max_element(
-                    v.cbegin(), v.cend(),[](const std::string& s1, const std::string& s2){return s1.size()<s2.size();});
+                    v.cbegin(), v.cend(),[](const str_t& s1, const str_t& s2){return s1.size()<s2.size();});
             auto size = longest->size();
             std::vector<char> buffer(size*v.size());
             uint_t istr = 0ul;
@@ -466,8 +466,8 @@ namespace hdf5 {
         /**
          * wrapper for save in the case that only a single string is to be stored
          */
-        void save(std::string name, const std::string& v, uint_t irank=0ul) const {
-            std::vector<std::string> vs = {v};
+        void save(str_t name, const str_t& v, uint_t irank=0ul) const {
+            strv_t vs = {v};
             save(name, vs, irank);
         }
     };

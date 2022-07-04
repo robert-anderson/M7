@@ -10,18 +10,18 @@
 
 namespace hdf5 {
     struct FileBase {
-        const std::string m_fname;
+        const str_t m_fname;
 
-        static bool is_hdf5(const std::string &fname);
+        static bool is_hdf5(const str_t &fname);
 
-        static void require_is_hdf5(const std::string &fname);
+        static void require_is_hdf5(const str_t &fname);
 
-        FileBase(const std::string &fname) : m_fname(fname) {}
+        FileBase(const str_t &fname) : m_fname(fname) {}
     };
 
     struct FileReader : NodeReader, FileBase {
     private:
-        static hid_t get_handle(const std::string &fname) {
+        static hid_t get_handle(const str_t &fname) {
             require_is_hdf5(fname);
             AccessPList p_list;
             H5Pset_fapl_mpio(p_list.m_handle, MPI_COMM_WORLD, MPI_INFO_NULL);
@@ -30,7 +30,7 @@ namespace hdf5 {
         }
 
     public:
-        FileReader(const std::string &fname) : NodeReader(get_handle(fname)), FileBase(fname) {}
+        FileReader(const str_t &fname) : NodeReader(get_handle(fname)), FileBase(fname) {}
 
         ~FileReader() {
             auto status = H5Fclose(m_handle);
@@ -40,7 +40,7 @@ namespace hdf5 {
 
     struct FileWriter : NodeWriter, FileBase {
     private:
-        static hid_t get_handle(const std::string &fname) {
+        static hid_t get_handle(const str_t &fname) {
             AccessPList p_list;
             H5Pset_fapl_mpio(p_list, MPI_COMM_WORLD, MPI_INFO_NULL);
             auto handle = H5Fcreate(fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, p_list);
@@ -49,7 +49,7 @@ namespace hdf5 {
         }
 
     public:
-        FileWriter(const std::string &fname) : NodeWriter(get_handle(fname)), FileBase(fname) {}
+        FileWriter(const str_t &fname) : NodeWriter(get_handle(fname)), FileBase(fname) {}
 
         ~FileWriter() {
             auto status = H5Fclose(m_handle);

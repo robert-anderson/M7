@@ -22,15 +22,15 @@ namespace statistic {
 
         virtual void reset() = 0;
 
-        virtual std::string stats_string() const = 0;
+        virtual str_t stats_string() const = 0;
 
         template<typename T>
-        static std::string stats_string_element(const T &v, uint_t denom) {
+        static str_t stats_string_element(const T &v, uint_t denom) {
             return convert::to_string(v / denom);
         }
 
         template<typename T>
-        static std::string stats_string_element(const std::complex<T> &v, uint_t denom) {
+        static str_t stats_string_element(const std::complex<T> &v, uint_t denom) {
             return convert::to_string(v.real() / denom) + " " + convert::to_string(v.imag() / denom);
         }
     };
@@ -48,7 +48,7 @@ namespace statistic {
 
         std::vector<T> m_reduced;
 
-        Numbers(StatsRow *row, NdFormat<nind> format, std::string name = "", bool mean = true, uint_t precision=6) :
+        Numbers(StatsRow *row, NdFormat<nind> format, str_t name = "", bool mean = true, uint_t precision=6) :
                 NdNumberField<T, nind>(row, format, name), m_mean(mean),
                 m_precision(precision), m_reduced(this->m_nelement) {}
 
@@ -68,8 +68,8 @@ namespace statistic {
             m_ncommit_this_period = 0ul;
         }
 
-        std::string stats_string() const override {
-            std::string tmp;
+        str_t stats_string() const override {
+            str_t tmp;
             for (uint_t ielement = 0ul; ielement < nelement(); ++ielement)
                 tmp += stats_string_element(m_reduced[ielement], m_mean ? m_ncommit_this_period : 1ul) + " ";
             return tmp;
@@ -85,7 +85,7 @@ namespace statistic {
     struct Number : Numbers<T, 0ul> {
         typedef Numbers<T, 0ul> base_t;
         using base_t::operator=;
-        Number(StatsRow *row, std::string name = "", bool mean=true) : base_t(row, {}, name, mean) {}
+        Number(StatsRow *row, str_t name = "", bool mean=true) : base_t(row, {}, name, mean) {}
 
         Number(const Number& other): base_t(other){}
         Number& operator=(const Number<T>& other) {return *this;}
@@ -96,7 +96,7 @@ namespace statistic {
 template<typename row_t>
 struct StatsTable : BufferedTable<row_t> {
     static_assert(std::is_base_of<StatsRow, row_t>::value, "Template arg must be derived from StatsRow");
-    const std::string m_fname, m_description;
+    const str_t m_fname, m_description;
     std::unique_ptr<std::ofstream> m_file;
     const uint_t m_period;
     uint_t m_ncommit = 0;
@@ -104,7 +104,7 @@ struct StatsTable : BufferedTable<row_t> {
     void write_header() const {
         const auto &row = static_cast<const Row &>(Table<row_t>::m_row);
         uint_t ncolumn = 0ul;
-        std::map<std::string, uint_t> m_format_strings;
+        std::map<str_t, uint_t> m_format_strings;
         uint_t nformat = 0ul;
         for (const FieldBase *field : row.m_fields) {
             auto num_field = dynamic_cast<const NumberFieldBase *>(field);
@@ -143,7 +143,7 @@ struct StatsTable : BufferedTable<row_t> {
         *m_file << std::flush;
     }
 
-    StatsTable(std::string fname, std::string description, const row_t &row, uint_t period) :
+    StatsTable(str_t fname, str_t description, const row_t &row, uint_t period) :
             BufferedTable<row_t>(fname, {row}), m_fname(fname), m_description(description),
             m_file(new std::ofstream(fname)), m_period(period) {
         write_header();
@@ -160,8 +160,8 @@ struct StatsTable : BufferedTable<row_t> {
 
 private:
 
-    std::string make_line() const {
-        std::string res;
+    str_t make_line() const {
+        str_t res;
         const auto &row = static_cast<const Row &>(Table<row_t>::m_row);
         for (const FieldBase *field : row.m_fields) {
             auto stats_field = dynamic_cast<const statistic::Base *>(field);

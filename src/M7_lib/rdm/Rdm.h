@@ -96,7 +96,7 @@ struct FermionRdm : Communicator<MaeRow<wf_t>, MaeRow<wf_t>, true>, Archivable {
         m_store.save(parent, std::to_string(nop()), h5_field_names());
     }
 
-    std::vector<std::string> h5_field_names() {
+    strv_t h5_field_names() {
         return {m_store.m_row.m_inds.m_ann.m_name,
                 m_store.m_row.m_inds.m_cre.m_name,
                 m_store.m_row.m_values.m_name};

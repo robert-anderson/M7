@@ -56,7 +56,7 @@ struct Subspace : Wavefunction::DynamicRowSet {
 
     //std::vector<std::forward_list<>> m_
 
-    Subspace(const Wavefunction& wf, std::string name): Wavefunction::DynamicRowSet(wf, name){}
+    Subspace(const Wavefunction& wf, str_t name): Wavefunction::DynamicRowSet(wf, name){}
 
     void update() override;
 

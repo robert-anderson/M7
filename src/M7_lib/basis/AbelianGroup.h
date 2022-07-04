@@ -14,14 +14,14 @@
 struct AbelianGroup {
     typedef std::function<uint_t(const uint_t &, const uint_t &)> direct_prod_fn_t;
     typedef const direct_prod_fn_t &cr_direct_prod_fn_t;
-    const std::vector<std::string> m_labels;
+    const strv_t m_labels;
     dense::Matrix<uint_t> m_products;
 
     uint_t nirrep() const;
 
     const uint_t &product(const uint_t &iirrep, const uint_t &jirrep) const;
 
-    const std::string &product_label(const uint_t &iirrep, const uint_t &jirrep) const;
+    const str_t &product_label(const uint_t &iirrep, const uint_t &jirrep) const;
 
     template<uint_t nirrep>
     bool is_conservative(const uinta_t<nirrep> &iirreps) const {
@@ -43,7 +43,7 @@ struct AbelianGroup {
         return tmp1 == tmp2;
     }
 
-    AbelianGroup(std::vector<std::string> labels, direct_prod_fn_t direct_prod_fn);
+    AbelianGroup(strv_t labels, direct_prod_fn_t direct_prod_fn);
 
     /**
      * default group has only one irrep label
@@ -54,7 +54,7 @@ struct AbelianGroup {
 
     AbelianGroup(AbelianGroup&& other);
 
-    static std::vector<std::string> merge_labels(const AbelianGroup &g1, const AbelianGroup &g2);
+    static strv_t merge_labels(const AbelianGroup &g1, const AbelianGroup &g2);
 
     AbelianGroup(const AbelianGroup &g1, const AbelianGroup &g2);;
 

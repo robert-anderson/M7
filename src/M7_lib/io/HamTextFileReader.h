@@ -14,14 +14,14 @@
  */
 class HamTextFileReader : public NumericCsvFileReader {
 
-    std::vector<std::string> m_work_tokens;
+    strv_t m_work_tokens;
 
 public:
     const bool m_complex_valued;
 
-    static uint_t iline_fn(const std::string& fname);
+    static uint_t iline_fn(const str_t& fname);
 
-    HamTextFileReader(const std::string &fname, uint_t nind);
+    HamTextFileReader(const str_t &fname, uint_t nind);
 
     bool next(uintv_t &inds, ham_t &v);
 

@@ -73,11 +73,11 @@ struct CsvIntegralReader : IntegralReader {
  */
 struct Hdf5IntegralReader : IntegralReader {
     struct KeyNames {
-        const std::string m_ecore;
-        const std::string m_1e_inds;
-        const std::string m_1e_values;
-        const std::string m_2e_inds;
-        const std::string m_2e_values;
+        const str_t m_ecore;
+        const str_t m_1e_inds;
+        const str_t m_1e_values;
+        const str_t m_2e_inds;
+        const str_t m_2e_values;
     };
 private:
     hdf5::FileReader m_reader;

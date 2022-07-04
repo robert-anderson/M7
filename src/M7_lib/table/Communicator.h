@@ -59,7 +59,7 @@ public:
      *  send table instance, this is passed rather than a row, since this class allows for the definition of the send
      *  table as a MappedTable, whose ctor takes additional args
      */
-    CommunicatingPair(std::string name, uint_t comm_nrow_est, double exp_fac, const send_table_t &send) :
+    CommunicatingPair(str_t name, uint_t comm_nrow_est, double exp_fac, const send_table_t &send) :
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
         log::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
@@ -190,7 +190,7 @@ struct Communicator {
     store_t m_store;
     comm_t m_comm;
     mutable RankAllocator<store_row_t> m_ra;
-    std::string m_name;
+    str_t m_name;
 
     /**
      * A set of rows which responds correctly to rank reallocation and is protected from erasure
@@ -213,7 +213,7 @@ struct Communicator {
         uintv_t m_displs;
         uintv_t m_ranks_with_any_rows;
 
-        std::string m_name;
+        str_t m_name;
         /*
          * row = row in mapped table
          * trow = row among transferred rows
@@ -226,7 +226,7 @@ struct Communicator {
         uint_t m_ndrow_found;
 
     public:
-        DynamicRowSet(const Communicator &comm, std::string name) :
+        DynamicRowSet(const Communicator &comm, str_t name) :
                 RankDynamic(comm.m_ra),
                 RowProtector(comm.m_store),
                 m_source(comm),
@@ -381,7 +381,7 @@ struct Communicator {
         typedef std::function<void(const store_row_t &, contig_row_t &)> loading_fn_t;
         const loading_fn_t m_loading_fn;
 
-        PartSharedRowSet(const Communicator &comm, std::string name, contig_row_t contig_row, loading_fn_t loading_fn) :
+        PartSharedRowSet(const Communicator &comm, str_t name, contig_row_t contig_row, loading_fn_t loading_fn) :
                 DynamicRowSet(comm, name),
                 m_local("Dynamic shared row set \"" + name + "\" (local)", contig_row),
                 m_global("Dynamic shared set \"" + name + "\" (global)", contig_row),
@@ -445,7 +445,7 @@ struct Communicator {
             return [](const store_row_t &source, store_row_t &local) { local.copy_in(source); };
         }
 
-        SharedRowSet(const Communicator &comm, std::string name) :
+        SharedRowSet(const Communicator &comm, str_t name) :
                 PartSharedRowSet<store_row_t>(comm, name, comm.m_store.m_row, make_copy_row_fn()) {}
     };
 
@@ -464,7 +464,7 @@ struct Communicator {
 
         uint_t m_iblock_ra;
 
-        SharedRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
+        SharedRow(const Communicator &comm, TableBase::Loc loc, str_t name) :
                 SharedRowSet(comm, name) {
             redefine(loc);
             DEBUG_ASSERT_EQ(loc.is_mine(), comm.m_store.is_protected(),
@@ -538,7 +538,7 @@ struct Communicator {
      * @param nnull_updates_deactivate
      *  number of consecutive acceptably-imbalanced periods required for dynamic load balancing to be deactivated
      */
-    Communicator(std::string name, uint_t store_nrow_est, double store_exp_fac, uint_t comm_nrow_est,
+    Communicator(str_t name, uint_t store_nrow_est, double store_exp_fac, uint_t comm_nrow_est,
                  double comm_exp_fac, const store_table_t &store, const send_table_t &send, uint_t nblock_ra,
                  uint_t period_ra, double acceptable_imbalance, uint_t nnull_updates_deactivate) :
             m_store(name + " store", store),
@@ -569,7 +569,7 @@ struct Communicator {
      * @param send
      *  send table instance
      */
-    Communicator(std::string name, uint_t store_nrow_crude_est, uint_t comm_nrow_crude_est,
+    Communicator(str_t name, uint_t store_nrow_crude_est, uint_t comm_nrow_crude_est,
                  const conf::Buffers &buf_opts, const conf::LoadBalancing &ra_opts,
                  const store_table_t &store, const send_table_t &send) :
             Communicator(name, std::max(1ul, store_nrow_crude_est) * buf_opts.m_store_fac_init, buf_opts.m_store_exp_fac,

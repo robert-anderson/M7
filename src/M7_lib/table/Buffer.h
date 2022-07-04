@@ -73,21 +73,21 @@ public:
          * @return
          *  name of buffer
          */
-        std::string name() const;
+        str_t name() const;
 
         double get_expansion_factor() const;
 
     };
 
     double m_expansion_factor = 0.0;
-    const std::string m_name;
+    const str_t m_name;
 private:
     const uint_t m_nwindow_max;
     std::vector<buf_t> m_data;
     std::vector<Window *> m_windows;
 
 public:
-    Buffer(std::string name, uint_t nwindow_max);
+    Buffer(str_t name, uint_t nwindow_max);
 
     uint_t size() const;
 
@@ -109,9 +109,9 @@ public:
      * @return
      *  space in memory taken up by the buffer in sensible units given the magnitude of the allocation
      */
-    std::string capacity_string(uint_t size) const;
+    str_t capacity_string(uint_t size) const;
 
-    std::string capacity_string() const;
+    str_t capacity_string() const;
 
 };
 

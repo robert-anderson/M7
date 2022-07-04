@@ -6,7 +6,7 @@
 #include "M7_lib/foreach/BasicForeach.h"
 
 
-std::string integrals_2e::syms::name(integrals_2e::syms::Sym sym) {
+str_t integrals_2e::syms::name(integrals_2e::syms::Sym sym) {
     switch (sym) {
         case Null: return "NULL";
         case None: return "no";
@@ -19,7 +19,7 @@ std::string integrals_2e::syms::name(integrals_2e::syms::Sym sym) {
     return {};
 }
 
-std::vector<std::string> integrals_2e::syms::equivalences(integrals_2e::syms::Sym sym) {
+strv_t integrals_2e::syms::equivalences(integrals_2e::syms::Sym sym) {
     switch (sym) {
         case Null: return {};
         case None: return {"<ab|ij>"};

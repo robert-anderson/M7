@@ -21,7 +21,7 @@ struct RowTransfer {
     const int m_nrow_p2p_tag = mpi::new_p2p_tag();
     const int m_irows_p2p_tag = mpi::new_p2p_tag();
 
-    RowTransfer(std::string name) :
+    RowTransfer(str_t name) :
             m_send_buffer("Outward transfer buffer", 1),
             m_recv_buffer("Inward transfer buffer", 1) {
         log::info("Initializing row send/recv buffers for table \"{}\"", name);
@@ -358,7 +358,7 @@ public:
      * @return
      *  string representing table's contents
      */
-    virtual std::string to_string(const uintv_t* ordering = nullptr) const;
+    virtual str_t to_string(const uintv_t* ordering = nullptr) const;
 
     /**
      * gather contents of another table over all MPI ranks into this table on all ranks
@@ -416,7 +416,7 @@ public:
      */
     uint_t nrow_nonzero() const;
 
-    std::string name() const {
+    str_t name() const {
         return m_bw.name();
     }
 };

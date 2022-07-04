@@ -39,7 +39,7 @@ public:
 
     NdIndices(): NdFormat<nind>(), m_inds(make_inds()){}
 
-    NdIndices(const uinta_t<nind>& shape, const std::array<std::string, nind>& dim_names):
+    NdIndices(const uinta_t<nind>& shape, const std::array<str_t, nind>& dim_names):
             NdFormat<nind>(shape, dim_names), m_inds(make_inds()){}
 
     NdIndices(const uinta_t<nind>& shape): NdFormat<nind>(shape), m_inds(make_inds()){}

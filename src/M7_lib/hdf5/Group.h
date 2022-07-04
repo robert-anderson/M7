@@ -12,13 +12,13 @@ namespace hdf5 {
      * carries out all creation of datasets and Groups
      */
     struct GroupWriter : NodeWriter {
-        GroupWriter(const NodeWriter &node, std::string name);
+        GroupWriter(const NodeWriter &node, str_t name);
 
         ~GroupWriter();
     };
 
     struct GroupReader : NodeReader {
-        GroupReader(const NodeReader &node, std::string name);
+        GroupReader(const NodeReader &node, str_t name);
 
         ~GroupReader();
     };

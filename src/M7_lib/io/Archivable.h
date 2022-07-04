@@ -11,7 +11,7 @@
 
 
 struct Archivable {
-    const std::string m_name;
+    const str_t m_name;
     /**
      * include this object in checkpoint saves
      */
@@ -25,9 +25,9 @@ struct Archivable {
      */
     const bool m_chkpt;
 
-    Archivable(std::string name, bool load, bool save, bool chkpt);
+    Archivable(str_t name, bool load, bool save, bool chkpt);
 
-    Archivable(std::string name, const conf::Archivable &opts);
+    Archivable(str_t name, const conf::Archivable &opts);
 
     /**
      * ctor for object which are not optionally archivable
@@ -36,7 +36,7 @@ struct Archivable {
      * @param archive_opts
      *  Global options for the archive
      */
-    Archivable(std::string name, const conf::Archive &archive_opts);
+    Archivable(str_t name, const conf::Archive &archive_opts);
 
     virtual ~Archivable() {}
 

@@ -209,8 +209,8 @@ namespace bit {
     }
 
     template<typename T>
-    static std::string to_string(const T &v) {
-        std::string tmp;
+    static str_t to_string(const T &v) {
+        str_t tmp;
         for (uint_t i = 0ul; i < sizeof(T) * CHAR_BIT; ++i) tmp += get(v, i) ? '1' : '0';
         return tmp;
     }

@@ -33,7 +33,7 @@ private:
     Integrals make_ints(IntegralReader& reader);
 
     Integrals make_ints(const FcidumpInfo& info, bool spin_major) {
-        const std::string fmt = "Reading fermion Hamiltonian coefficients from {} file \"" + info.m_fname + "\"...";
+        const str_t fmt = "Reading fermion Hamiltonian coefficients from {} file \"" + info.m_fname + "\"...";
         if (info.m_impl==FcidumpInfo::CSV) {
             log::info(fmt, "plain text CSV");
             CsvIntegralReader reader(info, spin_major);

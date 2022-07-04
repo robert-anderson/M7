@@ -30,7 +30,7 @@ void RankAllocatorBase::erase_dependent(RankDynamic *dependent) {
     refresh_callback_list();
 }
 
-RankAllocatorBase::RankAllocatorBase(std::string name, uint_t nblock, uint_t period,
+RankAllocatorBase::RankAllocatorBase(str_t name, uint_t nblock, uint_t period,
                                      double acceptable_imbalance, uint_t nnull_updates_deactivate) :
         m_name(name), m_nblock(nblock), m_period(period),
         m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank()),

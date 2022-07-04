@@ -4,20 +4,20 @@
 
 #include "FrmOnvField.h"
 
-FrmOnvField::FrmOnvField(Row *row, const sys::frm::Basis& basis, std::string name) :
+FrmOnvField::FrmOnvField(Row *row, const sys::frm::Basis& basis, str_t name) :
         base_t(row, {{2, basis.m_nsite},{"spin channel", "site"}}, name),
         m_basis(basis), m_decoded(*this),
         m_dsize_spin_channel(integer::divceil(uint_t(m_basis.m_nsite), Buffer::c_nbit_word)){}
 
-FrmOnvField::FrmOnvField(Row *row, const sys::Basis &basis, std::string name) :
+FrmOnvField::FrmOnvField(Row *row, const sys::Basis &basis, str_t name) :
     FrmOnvField(row, basis.m_frm, std::move(name)){
     basis.require_pure_frm();
 }
 
-FrmOnvField::FrmOnvField(Row *row, const sys::frm::Sector& sector, std::string name) :
+FrmOnvField::FrmOnvField(Row *row, const sys::frm::Sector& sector, str_t name) :
     FrmOnvField(row, sector.m_basis, name) {}
 
-FrmOnvField::FrmOnvField(Row *row, const sys::Sector& sector, std::string name) :
+FrmOnvField::FrmOnvField(Row *row, const sys::Sector& sector, str_t name) :
     FrmOnvField(row, sector.m_frm, name){}
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
@@ -60,8 +60,8 @@ bool FrmOnvField::all_sites_single_occ() const {
     return nopen_shell()==m_basis.m_nsite;
 }
 
-std::string FrmOnvField::to_string() const {
-    std::string res;
+str_t FrmOnvField::to_string() const {
+    str_t res;
     res += "(";
     res.reserve(nbit() + 3);
     uint_t i = 0ul;

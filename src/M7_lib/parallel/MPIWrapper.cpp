@@ -88,7 +88,7 @@ bool mpi::on_node_i_am_root() {
     return on_node_i_am(0);
 }
 
-void mpi::abort_(std::string message) {
+void mpi::abort_(str_t message) {
     log::error_("Forcing MPI_Abort from this rank: {}", std::move(message));
     log::error_backtrace_();
     log::finalize();
@@ -97,7 +97,7 @@ void mpi::abort_(std::string message) {
     MPI_Abort(MPI_COMM_WORLD, -1);
 }
 
-void mpi::abort(std::string message){
+void mpi::abort(str_t message){
     if (mpi::nrank()==1)
         log::error("Reason: {}", std::move(message));
     else
@@ -120,7 +120,7 @@ void mpi::setup_mpi_globals() {
     g_irank = tmp;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     MPI_Get_processor_name(processor_name, &tmp);
-    g_processor_name = std::string(processor_name, tmp);
+    g_processor_name = str_t(processor_name, tmp);
     MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, irank(), MPI_INFO_NULL, &g_node_comm);
     MPI_Comm_size(g_node_comm, &tmp);
     g_nrank_on_node = tmp;
@@ -128,7 +128,7 @@ void mpi::setup_mpi_globals() {
     g_irank_on_node = tmp;
 }
 
-void mpi::blocking_print(const std::string &str) {
+void mpi::blocking_print(const str_t &str) {
     for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
         if (mpi::i_am(irank)) {
             std::cout << str << std::endl;
@@ -140,7 +140,7 @@ void mpi::blocking_print(const std::string &str) {
 
 uint_t g_irank = 0;
 uint_t g_nrank = 1;
-std::string g_processor_name = "";
+str_t g_processor_name = "";
 MPI_Comm g_node_comm;
 uint_t g_irank_on_node = 0;
 uint_t g_nrank_on_node = 1;

@@ -5,13 +5,13 @@
 #include <M7_lib/hdf5/Group.h>
 #include "Archivable.h"
 
-Archivable::Archivable(std::string name, bool load, bool save, bool chkpt) :
+Archivable::Archivable(str_t name, bool load, bool save, bool chkpt) :
         m_name(std::move(name)), m_load(load), m_save(save), m_chkpt(chkpt) {}
 
-Archivable::Archivable(std::string name, const conf::Archivable& opts) :
+Archivable::Archivable(str_t name, const conf::Archivable& opts) :
         Archivable(std::move(name), opts.m_load, opts.m_save, opts.m_chkpt) {}
 
-Archivable::Archivable(std::string name, const conf::Archive& opts) :
+Archivable::Archivable(str_t name, const conf::Archive& opts) :
         Archivable(std::move(name), opts.do_load(), opts.do_save(), opts.do_chkpts()) {}
 
 void Archivable::load(const hdf5::NodeReader& parent) {

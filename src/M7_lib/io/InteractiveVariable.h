@@ -15,20 +15,20 @@
  */
 
 struct InteractiveVariableFile {
-    std::string m_name, m_fname;
+    str_t m_name, m_fname;
 
-    InteractiveVariableFile(std::string name);
+    InteractiveVariableFile(str_t name);
 
 private:
-    bool consume_(std::vector<std::string> &lines);
+    bool consume_(strv_t &lines);
 
     void warn_invalid_input() const;
 
-    void info_success(const std::string &str) const;
+    void info_success(const str_t &str) const;
 
     template<typename T>
     typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, bool>::type
-    read_line(const std::string &line, T &v) {
+    read_line(const str_t &line, T &v) {
         auto ptr = line.c_str();
         int64_t tmp = string::read_signed(ptr);
         v = static_cast<T>(tmp);
@@ -37,7 +37,7 @@ private:
 
     template<typename T>
     typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value, bool>::type
-    read_line(const std::string &line, T &v) {
+    read_line(const str_t &line, T &v) {
         if (line[0] == '-') return false;
         auto ptr = line.c_str();
         uint_t tmp = string::read_unsigned(ptr);
@@ -48,7 +48,7 @@ private:
 
     template<typename T>
     typename std::enable_if<std::is_floating_point<T>::value, bool>::type
-    read_line(const std::string &line, T &v) {
+    read_line(const str_t &line, T &v) {
         auto ptr = line.c_str();
         auto tmp = string::read_double(ptr);
         if (tmp==std::numeric_limits<double>::max()) return false;
@@ -58,7 +58,7 @@ private:
 
     template<typename T>
     typename std::enable_if<std::is_floating_point<T>::value, bool>::type
-    read_line(const std::string &line, std::complex<T> &v) {
+    read_line(const str_t &line, std::complex<T> &v) {
         auto ptr = line.c_str();
         auto real = string::read_double(ptr);
         if (real==std::numeric_limits<double>::max()) return false;
@@ -69,7 +69,7 @@ private:
     }
 
     template<typename T>
-    bool read_vector(std::vector<T> &v, std::vector<std::string>& lines) {
+    bool read_vector(std::vector<T> &v, strv_t& lines) {
         uint_t nelement = lines.size();
         mpi::bcast(nelement);
         std::vector<T> tmp;
@@ -90,7 +90,7 @@ private:
     }
 
     template<typename T>
-    bool read_check(T &v, std::vector<std::string>& lines) {
+    bool read_check(T &v, strv_t& lines) {
         std::vector<T> tmp{v};
         auto res = read_vector(tmp, lines);
         if (!res) return false;
@@ -98,7 +98,7 @@ private:
         return true;
     }
 
-    bool read_check(std::vector<bool> &v, std::vector<std::string>& lines) {
+    bool read_check(std::vector<bool> &v, strv_t& lines) {
         std::vector<char> tmp;
         auto res = read_vector(tmp, lines);
         if (!res) return false;
@@ -114,7 +114,7 @@ private:
         return true;
     }
 
-    bool read_check(bool &v, std::vector<std::string>& lines) {
+    bool read_check(bool &v, strv_t& lines) {
         std::vector<bool> tmp{v};
         auto res = read_check(tmp, lines);
         if (!res) return false;
@@ -123,7 +123,7 @@ private:
     }
 
     template<typename T>
-    bool read_check(std::vector<T> &v, std::vector<std::string>& lines) {
+    bool read_check(std::vector<T> &v, strv_t& lines) {
         std::vector<T> tmp{v};
         auto res = read_vector(tmp, lines);
         if (!res) return false;
@@ -145,7 +145,7 @@ public:
      */
     template<typename T>
     bool read(T &v) {
-        std::vector<std::string> lines;
+        strv_t lines;
         bool exists = consume_(lines);
         mpi::bcast(exists, 0);
         if (!exists) return false;
@@ -165,8 +165,8 @@ template<typename T>
 struct InteractiveVariable {
     InteractiveVariableFile m_ivf;
     T m_v;
-    InteractiveVariable(std::string name): m_ivf(name){}
-    InteractiveVariable(std::string name, const T& v): InteractiveVariable(name){
+    InteractiveVariable(str_t name): m_ivf(name){}
+    InteractiveVariable(str_t name, const T& v): InteractiveVariable(name){
         m_v = v;
     }
 

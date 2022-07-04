@@ -7,7 +7,7 @@
 #include "FileReader.h"
 #include "M7_lib/util/SmartPtr.h"
 
-FileReader::FileReader(std::string fname, uint_t iline) : m_fname(std::move(fname)) {
+FileReader::FileReader(str_t fname, uint_t iline) : m_fname(std::move(fname)) {
     reset(iline);
 }
 
@@ -34,7 +34,7 @@ uint_t FileReader::nline() {
     return nline;
 }
 
-bool FileReader::next(std::string &line) const {
+bool FileReader::next(str_t &line) const {
     m_iline++;
     getline(*m_file, line);
     if (line.empty()) return false;
@@ -44,7 +44,7 @@ bool FileReader::next(std::string &line) const {
 }
 
 bool FileReader::next() {
-    std::string tmp;
+    str_t tmp;
     return next(tmp);
 }
 
@@ -52,9 +52,9 @@ void FileReader::skip(uint_t nline) {
     for (uint_t i = 0ul; i < nline; ++i) next();
 }
 
-std::string FileReader::to_string(const std::string &fname) {
-    std::string all;
-    std::string line;
+str_t FileReader::to_string(const str_t &fname) {
+    str_t all;
+    str_t line;
     FileReader reader(fname);
     while (reader.next(line)) {
         all.append("\n"+line);
@@ -63,7 +63,7 @@ std::string FileReader::to_string(const std::string &fname) {
     return all;
 }
 
-bool FileReader::exists(const std::string &fname) {
+bool FileReader::exists(const str_t &fname) {
     auto f = smart_ptr::make_unique<std::ifstream>(fname);
     bool res = f->is_open();
     if (res) f->close();

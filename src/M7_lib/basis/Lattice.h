@@ -56,7 +56,7 @@ namespace lattice {
         virtual ~Base() = default;
         virtual int phase(uint_t isite, uint_t jsite) const = 0;
         virtual void get_adj_row(uint_t isite, adj_row_t &row) const = 0;
-        virtual std::string info() const = 0;
+        virtual str_t info() const = 0;
 
         template<typename T>
         const T* as() const {
@@ -75,7 +75,7 @@ namespace lattice {
     struct OrthoTopology {
         const NdEnumerationD m_inds;
         const std::vector<int> m_bcs;
-        const std::string m_info_string;
+        const str_t m_info_string;
 
         OrthoTopology(const uintv_t &shape, const std::vector<int> &bcs);
 
@@ -96,7 +96,7 @@ namespace lattice {
      * use when there is no lattice structure
      */
     struct NullTopology {
-        const std::string m_info_string = "null";
+        const str_t m_info_string = "null";
 
         uint_t isite_adj(const uintv_t &inds, uint_t idim, uint_t value) const;
 
@@ -137,7 +137,7 @@ namespace lattice {
             return m_topo.get_adj_row(isite, row);
         }
 
-        std::string info() const override {
+        str_t info() const override {
             return m_topo.m_info_string;
         }
     };
@@ -150,7 +150,7 @@ namespace lattice {
      *  shared pointer to a null lattice
      */
     std::shared_ptr<Base> make();
-    std::shared_ptr<Base> make(std::string topo, uintv_t site_shape, std::vector<int> bcs);
+    std::shared_ptr<Base> make(str_t topo, uintv_t site_shape, std::vector<int> bcs);
     std::shared_ptr<Base> make(const conf::LatticeModel& opts);
 }
 

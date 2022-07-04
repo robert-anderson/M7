@@ -7,13 +7,13 @@
 #include "M7_lib/excitgen/frm/Pchb2200.h"
 
 void GeneralFrmHam::log_ints_sym(integrals_1e::syms::Sym sym, bool initial) {
-    const std::string context_str = initial ? "initially" : "conflict detected:";
+    const str_t context_str = initial ? "initially" : "conflict detected:";
     log::info("{} assuming {} permutational symmetry for 1e integrals",
               context_str, integrals_1e::syms::name(sym));
 }
 
 void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
-    const std::string context_str = initial ? "initially" : "conflict detected:";
+    const str_t context_str = initial ? "initially" : "conflict detected:";
     log::info("{} assuming {} permutational symmetry for 2e integrals",
               context_str, integrals_2e::syms::name(sym));
     const auto equivs = integrals_2e::syms::equivalences(sym);

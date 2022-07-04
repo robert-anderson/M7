@@ -45,7 +45,7 @@ namespace mbf {
     void set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, uint_t idef);
 
     template<uint_t mbf_ind>
-    std::string name(){
+    str_t name(){
         switch (mbf_ind) {
             case 0: return "fermion (determinant basis)";
             case 1: return "fermion-boson (determinant-permanent product basis)";

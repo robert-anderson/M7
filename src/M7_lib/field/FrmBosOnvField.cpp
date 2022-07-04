@@ -7,7 +7,7 @@
 #include <utility>
 
 FrmBosOnvField::FrmBosOnvField(
-        Row *row, const sys::frm::Basis &frm_basis, const sys::bos::Basis &bos_basis, std::string name):
+        Row *row, const sys::frm::Basis &frm_basis, const sys::bos::Basis &bos_basis, str_t name):
         base_t(m_frm, m_bos),
         m_frm(row, frm_basis, prefix("fermions", name)),
         m_bos(row, bos_basis, prefix("bosons", name)),
@@ -16,10 +16,10 @@ FrmBosOnvField::FrmBosOnvField(
     DEBUG_ASSERT_TRUE(m_bos.m_basis == bos_basis, "boson basis data incorrectly copied");
 }
 
-FrmBosOnvField::FrmBosOnvField(Row *row, const sys::Basis &basis, std::string name) :
+FrmBosOnvField::FrmBosOnvField(Row *row, const sys::Basis &basis, str_t name) :
     FrmBosOnvField(row, basis.m_frm, basis.m_bos, std::move(name)){}
 
-FrmBosOnvField::FrmBosOnvField(Row *row, const sys::Sector& sector, std::string name) :
+FrmBosOnvField::FrmBosOnvField(Row *row, const sys::Sector& sector, str_t name) :
         FrmBosOnvField(row, sector.basis(), std::move(name)){}
 
 FrmBosOnvField::FrmBosOnvField(const FrmBosOnvField &other) :

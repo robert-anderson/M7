@@ -20,7 +20,7 @@ namespace integrals_1e {
             Null, None, H
         };
 
-        std::string name(Sym sym);
+        str_t name(Sym sym);
     }
 
 

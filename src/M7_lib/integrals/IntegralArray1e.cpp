@@ -5,7 +5,7 @@
 #include "IntegralArray1e.h"
 
 
-std::string integrals_1e::syms::name(integrals_1e::syms::Sym sym) {
+str_t integrals_1e::syms::name(integrals_1e::syms::Sym sym) {
     switch (sym) {
         case Null: return "NULL";
         case None: return "no";

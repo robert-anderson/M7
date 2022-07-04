@@ -16,8 +16,8 @@ protected:
     mutable uint_t m_iline = ~0ul; // the index of the last extracted line
 
 public:
-    const std::string m_fname;
-    explicit FileReader(std::string fname, uint_t iline = 0ul);
+    const str_t m_fname;
+    explicit FileReader(str_t fname, uint_t iline = 0ul);
 
     void reset(uint_t iline=0ul);
 
@@ -27,15 +27,15 @@ public:
 
     uint_t nline();
 
-    bool next(std::string &line) const;
+    bool next(str_t &line) const;
 
     bool next();
 
     void skip(uint_t nline);
 
-    static std::string to_string(const std::string& fname);
+    static str_t to_string(const str_t& fname);
 
-    static bool exists(const std::string& fname);
+    static bool exists(const str_t& fname);
 };
 
 #endif //M7_FILEREADER_H

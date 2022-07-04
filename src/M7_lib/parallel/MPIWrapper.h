@@ -159,7 +159,7 @@ enum MpiPairOp {
 
 extern uint_t g_irank;
 extern uint_t g_nrank;
-extern std::string g_processor_name;
+extern str_t g_processor_name;
 extern MPI_Comm g_node_comm;
 extern uint_t g_irank_on_node;
 extern uint_t g_nrank_on_node;
@@ -188,7 +188,7 @@ namespace mpi {
         return g_irank_on_node;
     }
 
-    static const std::string &processor_name() {
+    static const str_t &processor_name() {
         return g_processor_name;
     }
 
@@ -501,7 +501,7 @@ namespace mpi {
         return MPI_Bcast(data_ptr, snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
-    static bool bcast(std::string &data, uint_t iroot = 0) {
+    static bool bcast(str_t &data, uint_t iroot = 0) {
         uint_t nchar = data.size();
         mpi::bcast(nchar, iroot);
         data.resize(nchar);
@@ -734,21 +734,21 @@ namespace mpi {
      * @param message
      *  string to output to error log
      */
-    void abort_(std::string message);
+    void abort_(str_t message);
 
     /**
      * call on all ranks to terminate the entire communicator
      * @param message
      *  string to output to error log
      */
-    void abort(std::string message);
+    void abort(str_t message);
 
     /**
      * debugging: each rank waits till the one before has finished before starting
      * @param str
      *  string to output to stdout
      */
-    void blocking_print(const std::string &str);
+    void blocking_print(const str_t &str);
 
 }
 

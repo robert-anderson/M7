@@ -197,9 +197,9 @@ public:
         return *this;
     }
 
-    std::string field_names_string() const;
+    str_t field_names_string() const;
 
-    std::string to_string() const;
+    str_t to_string() const;
 
     uint_t add_field(FieldBase *field);
 

@@ -12,18 +12,18 @@ namespace conf_components {
     struct Node {
         const Node *m_parent;
         const yaml::Path m_yaml_path;
-        const std::string m_description;
+        const str_t m_description;
         std::list<Node *> m_children;
-        const std::string m_indent;
+        const str_t m_indent;
 
-        Node(Node *parent, std::string name, std::string description);
+        Node(Node *parent, str_t name, str_t description);
 
         /**
          * only for ParamRoot
          */
-        explicit Node(std::string description);
+        explicit Node(str_t description);
 
-        virtual std::string help_string() const;
+        virtual str_t help_string() const;
 
         virtual void log_value() const {}
 
@@ -31,9 +31,9 @@ namespace conf_components {
 
         virtual const yaml::File *get_file() const;
 
-        virtual std::string invalid_file_key() const;
+        virtual str_t invalid_file_key() const;
 
-        const std::string &name() const;
+        const str_t &name() const;
 
         virtual bool enabled() const {
             return true;
@@ -44,18 +44,18 @@ namespace conf_components {
 
     struct Group : Node {
     private:
-        std::set<std::string> make_file_keys() const;
+        std::set<str_t> make_file_keys() const;
 
-        std::set<std::string> make_child_keys() const;
+        std::set<str_t> make_child_keys() const;
 
     public:
-        Group(Group *parent, std::string name, std::string description);
+        Group(Group *parent, str_t name, str_t description);
 
-        Group(std::string description);
+        Group(str_t description);
 
         void add_child(Node *child);
 
-        std::string invalid_file_key() const override;
+        str_t invalid_file_key() const override;
 
         void verify() override {
             for (auto child: m_children) child->verify();
@@ -64,9 +64,9 @@ namespace conf_components {
 
 
     struct Section : Group {
-        Section(Group *parent, std::string name, std::string description);
+        Section(Group *parent, str_t name, str_t description);
 
-        std::string help_string() const override;
+        str_t help_string() const override;
 
         void log_value() const override {
             for (auto child: m_children) child->log_value();
@@ -74,14 +74,14 @@ namespace conf_components {
     };
 
     struct Document : Group {
-        const std::string m_name;
+        const str_t m_name;
         const yaml::File *m_file;
 
-        Document(const yaml::File *file, std::string name, std::string description);
+        Document(const yaml::File *file, str_t name, str_t description);
 
         const yaml::File *get_file() const override;
 
-        std::string help_string() const override;
+        str_t help_string() const override;
 
         void log_value() const override {
             log::info("Specified values for \"{}\"", m_name);
@@ -92,57 +92,57 @@ namespace conf_components {
     };
 
     struct ParamBase : Node {
-        const std::string m_v_default_str;
-        const std::string m_dim_type_str;
+        const str_t m_v_default_str;
+        const str_t m_dim_type_str;
 
-        ParamBase(Group *parent, std::string name, std::string description, std::string v_default_str,
-                  std::string dim_type_str);
+        ParamBase(Group *parent, str_t name, str_t description, str_t v_default_str,
+                  str_t dim_type_str);
 
-        std::string help_string() const override;
+        str_t help_string() const override;
     };
 
     template<typename T=void>
-    static std::string type_str() {
+    static str_t type_str() {
         ABORT(log::format("Unsupported type for a configuration parameter: {}",
                           log::get_demangled_symbol(typeid(T).name())));
         return "";
     }
 
     template<>
-    std::string type_str<int>() { return "integer"; }
+    str_t type_str<int>() { return "integer"; }
 
     template<>
-    std::string type_str<long>() { return "long integer"; }
+    str_t type_str<long>() { return "long integer"; }
 
     template<>
-    std::string type_str<uint_t>() { return "unsigned integer"; }
+    str_t type_str<uint_t>() { return "unsigned integer"; }
 
     template<>
-    std::string type_str<double>() { return "float"; }
+    str_t type_str<double>() { return "float"; }
 
     template<>
-    std::string type_str<std::string>() { return "string"; }
+    str_t type_str<str_t>() { return "string"; }
 
     template<>
-    std::string type_str<bool>() { return "boolean"; }
+    str_t type_str<bool>() { return "boolean"; }
 
     template<typename T>
-    static std::string dim_str(const T &) {
+    static str_t dim_str(const T &) {
         return log::format("scalar {}", type_str<T>());
     }
 
     template<typename T>
-    static std::string dim_str(const std::vector<T> &) {
+    static str_t dim_str(const std::vector<T> &) {
         return log::format("1D {} array", type_str<T>());
     }
 
     template<typename T>
-    static std::string dim_str(const std::vector<std::vector<T>> &) {
+    static str_t dim_str(const std::vector<std::vector<T>> &) {
         return log::format("2D {} array", type_str<T>());
     }
 
     template<typename T>
-    static std::string dim_str(const std::vector<std::vector<std::vector<T>>> &) {
+    static str_t dim_str(const std::vector<std::vector<std::vector<T>>> &) {
         return log::format("3D {} array", type_str<T>());
     }
 
@@ -152,7 +152,7 @@ namespace conf_components {
         T m_v;
 
     public:
-        Param(Group *parent, std::string name, const T &v_default, std::string description) :
+        Param(Group *parent, str_t name, const T &v_default, str_t description) :
                 ParamBase(parent, name, description, convert::to_string(v_default), dim_str(v_default)),
                 m_v_default(v_default) {
             auto file = parent->get_file();

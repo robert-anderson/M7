@@ -5,8 +5,8 @@
 #include <cstring>
 #include "String.h"
 
-std::string string::join(const std::vector<std::string> &words, const std::string &divider) {
-    auto fn = [&words](uint_t i, std::string& word) {
+str_t string::join(const strv_t &words, const str_t &divider) {
+    auto fn = [&words](uint_t i, str_t& word) {
         if (i >= words.size()) return false;
         word = words[i];
         return true;
@@ -14,31 +14,31 @@ std::string string::join(const std::vector<std::string> &words, const std::strin
     return join(fn, divider);
 }
 
-std::string string::join(const std::vector<std::string> &words) {
+str_t string::join(const strv_t &words) {
     return join(words, " ");
 }
 
-std::string string::join(const std::string &word, const uint_t &nrepeat, const std::string &divider) {
-    return join(std::vector<std::string>(nrepeat, word), divider);
+str_t string::join(const str_t &word, const uint_t &nrepeat, const str_t &divider) {
+    return join(strv_t(nrepeat, word), divider);
 }
 
-std::string string::join(const std::string &word, const uint_t &nrepeat) {
+str_t string::join(const str_t &word, const uint_t &nrepeat) {
     return join(word, nrepeat, " ");
 }
 
-std::vector<std::string> string::split(const std::string &line, char delimiter) {
-    std::vector<std::string> result{};
+strv_t string::split(const str_t &line, char delimiter) {
+    strv_t result{};
     std::stringstream ss(line);
-    std::string token;
+    str_t token;
     while (std::getline(ss, token, delimiter)) {
         if (token.size()) result.push_back(token);
     }
     return result;
 }
 
-std::vector<std::string> string::split(const std::string &line, const std::string &delimiters) {
-    std::string mutable_copy = line;
-    std::vector<std::string> result{};
+strv_t string::split(const str_t &line, const str_t &delimiters) {
+    str_t mutable_copy = line;
+    strv_t result{};
     char *ptr;
     ptr = std::strtok(const_cast<char *>(mutable_copy.c_str()), delimiters.c_str());
     while (ptr != nullptr) {
@@ -48,7 +48,7 @@ std::vector<std::string> string::split(const std::string &line, const std::strin
     return result;
 }
 
-void string::split(std::string &line, std::vector<std::string> &tokens, const std::string &delimiters) {
+void string::split(str_t &line, strv_t &tokens, const str_t &delimiters) {
     tokens.clear();
     char *ptr;
     ptr = std::strtok(const_cast<char *>(line.c_str()), delimiters.c_str());
@@ -58,15 +58,15 @@ void string::split(std::string &line, std::vector<std::string> &tokens, const st
     }
 }
 
-std::string string::yn(bool t) {
+str_t string::yn(bool t) {
     return t ? "yes" : "no";
 }
 
-std::string string::YN(bool t) {
+str_t string::YN(bool t) {
     return t ? "YES" : "NO";
 }
 
-std::string string::memsize(uint_t nbyte) {
+str_t string::memsize(uint_t nbyte) {
     if (nbyte < 1e3) {
         return std::to_string(nbyte) + "B";
     } else if (nbyte < 1e6) {
@@ -78,11 +78,11 @@ std::string string::memsize(uint_t nbyte) {
     }
 }
 
-std::string string::boxed(std::string s, uint_t padding, char c) {
-    std::string res;
-    res += std::string(s.size() + 2 * (padding + 1), c) + '\n';
-    res += c + std::string(padding, ' ') + s + std::string(padding, ' ') + c + "\n";
-    res += std::string(s.size() + 2 * (padding + 1), c) + '\n';
+str_t string::boxed(str_t s, uint_t padding, char c) {
+    str_t res;
+    res += str_t(s.size() + 2 * (padding + 1), c) + '\n';
+    res += c + str_t(padding, ' ') + s + str_t(padding, ' ') + c + "\n";
+    res += str_t(s.size() + 2 * (padding + 1), c) + '\n';
     return res;
 }
 
@@ -160,15 +160,15 @@ uint_t string::parse_decimal_digit(const char *c) {
     return *c - '0';
 }
 
-std::string string::plural(uint_t i, std::string plu_ending, std::string sing_ending) {
+str_t string::plural(uint_t i, str_t plu_ending, str_t sing_ending) {
     return (i == 1) ? sing_ending : plu_ending;
 }
 
-std::string string::plural(std::string base, uint_t i, std::string plu_ending, std::string sing_ending) {
+str_t string::plural(str_t base, uint_t i, str_t plu_ending, str_t sing_ending) {
     return std::to_string(i) + " " + base + plural(i, plu_ending, sing_ending);
 }
 
-std::string string::prefix(std::string base, std::string prefix, char delimiter) {
+str_t string::prefix(str_t base, str_t prefix, char delimiter) {
     if (prefix.empty()) return base;
     prefix.push_back(delimiter);
     return prefix+base;

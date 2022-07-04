@@ -120,7 +120,7 @@ std::shared_ptr<lattice::Base> lattice::make() {
     return smart_ptr::make_poly_shared<Base, Null>(NullTopology());
 }
 
-std::shared_ptr<lattice::Base> lattice::make(std::string topo, uintv_t site_shape, std::vector<int> bcs) {
+std::shared_ptr<lattice::Base> lattice::make(str_t topo, uintv_t site_shape, std::vector<int> bcs) {
     if (topo == "ortho" || topo == "orthogonal")
         return smart_ptr::make_poly_shared<Base, Ortho>(OrthoTopology(site_shape, bcs));
     return make();

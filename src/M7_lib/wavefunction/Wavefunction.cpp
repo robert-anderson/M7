@@ -56,19 +56,19 @@ Wavefunction::~Wavefunction() {
     for (uint_t ipart=0ul; ipart<npart(); ++ipart) log_top_weighted(ipart);
 }
 
-std::vector<std::string> Wavefunction::h5_field_names() {
+strv_t Wavefunction::h5_field_names() {
     if (!c_enable_bosons)
         return {"mbf", "weight"};
     else
         return {"mbf (fermion)", "mbf (boson)", "weight"};
 }
 
-void Wavefunction::h5_write(const hdf5::NodeWriter& parent, std::string name) {
+void Wavefunction::h5_write(const hdf5::NodeWriter& parent, str_t name) {
     m_store.save(parent, name, h5_field_names());
 }
 
 void Wavefunction::h5_read(const hdf5::NodeReader& parent, const Hamiltonian& ham, const field::Mbf& ref,
-                           std::string name) {
+                           str_t name) {
     m_store.clear();
     BufferedTable<WalkerTableRow> m_buffer("", {m_store.m_row});
     m_buffer.push_back();

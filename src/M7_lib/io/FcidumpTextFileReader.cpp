@@ -6,7 +6,7 @@
 #include "M7_lib/util/Exsig.h"
 #include "M7_lib/basis/BasisData.h"
 
-FcidumpTextFileReader::FcidumpTextFileReader(const std::string &fname, bool spin_major) :
+FcidumpTextFileReader::FcidumpTextFileReader(const str_t &fname, bool spin_major) :
         HamTextFileReader(fname, 4), m_info(FortranNamelistReader(fname)), m_spin_major(spin_major) {
     auto nsite = m_info.m_nsite;
     if (m_info.m_spin_resolved) {

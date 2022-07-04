@@ -4,7 +4,7 @@
 
 #include "BosExcitGen.h"
 
-BosExcitGen::BosExcitGen(const BosHam& h, PRNG& prng, uintv_t exsigs, std::string description) :
+BosExcitGen::BosExcitGen(const BosHam& h, PRNG& prng, uintv_t exsigs, str_t description) :
         ExcitGen(prng, std::move(exsigs), std::move(description)), m_h(h) {
     for (auto exsig: m_exsigs)
         REQUIRE_TRUE(exsig::is_pure_bos(exsig), "excitations must be expressed in terms of boson operators only");

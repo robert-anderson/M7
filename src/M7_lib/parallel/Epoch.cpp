@@ -5,7 +5,7 @@
 #include "Epoch.h"
 #include <M7_lib/io/Logging.h>
 
-Epoch::Epoch(std::string name): m_name(std::move(name)) {
+Epoch::Epoch(str_t name): m_name(std::move(name)) {
     m_icycle_start.m_local = ~0ul;
     m_icycle_start.m_reduced = ~0ul;
 }

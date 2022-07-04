@@ -5,6 +5,6 @@
 #include "CompositeField.h"
 #include "M7_lib/util/String.h"
 
-std::string CompositeFieldBase::prefix(std::string base, std::string prefix) {
+str_t CompositeFieldBase::prefix(str_t base, str_t prefix) {
     return string::prefix(base, prefix, '.');
 }

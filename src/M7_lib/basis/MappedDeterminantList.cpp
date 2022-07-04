@@ -4,5 +4,5 @@
 
 #include "MappedDeterminantList.h"
 
-//MappedDeterminantList::MappedDeterminantList(std::string name, uint_t nelement, uint_t nsite, uint_t nbucket) :
+//MappedDeterminantList::MappedDeterminantList(str_t name, uint_t nelement, uint_t nsite, uint_t nbucket) :
 //        MappedList<DeterminantElement>(name, m_determinant, nbucket), m_determinant(this, nelement, nsite){}

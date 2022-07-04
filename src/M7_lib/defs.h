@@ -38,29 +38,19 @@ typedef uint64_t uint_t;
  * vector of such integers
  */
 typedef std::vector<uint_t> uintv_t;
-//typedef const uintv_t& cr_uintv_t;
 /**
  * array of such integers
  */
 template<uint_t n>
 using uinta_t = std::array<uint_t, n>;
-//template<uint_t n>
-//using cr_uinta_t = const uinta_t<n>&;
 /**
  * pair of such integers
  */
 typedef std::pair<uint_t, uint_t> uintp_t;
-//typedef const uintp_t& cr_uintp_t;
-///**
-// * std::string
-// */
-//typedef std::string str_t;
-//typedef const str_t& cr_str_t;
-//typedef std::vector<str_t> strv_t;
-//typedef const strv_t& cr_strv_t;
-//
-typedef std::map<std::string, std::string> strmap_t;
-//typedef const strmap_t& cr_strmap_t;
+
+typedef std::string str_t;
+typedef std::vector<str_t> strv_t;
+typedef std::map<str_t, str_t> strmap_t;
 
 
 #ifndef NDEBUG

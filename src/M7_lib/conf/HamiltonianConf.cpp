@@ -34,7 +34,7 @@ bool conf::Ebdump::enabled() const {
     return !m_path.get().empty();
 }
 
-conf::LatticeModel::LatticeModel(Group *parent, std::string name, std::string description) :
+conf::LatticeModel::LatticeModel(Group *parent, str_t name, str_t description) :
         Section(parent, name, description),
         m_topology(this, "topology", "ortho",
                    "geometric layout of the N-dimensional lattice"),

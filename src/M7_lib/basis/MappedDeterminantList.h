@@ -11,7 +11,7 @@
 //
 //struct MappedDeterminantList : public MappedList<DeterminantElement>{
 //    DeterminantField m_determinant;
-//    MappedDeterminantList(std::string name, uint_t nelement, uint_t nsite, uint_t nbucket);
+//    MappedDeterminantList(str_t name, uint_t nelement, uint_t nsite, uint_t nbucket);
 //};
 
 

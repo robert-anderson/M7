@@ -12,7 +12,7 @@ namespace conf {
     using namespace conf_components;
 
     struct Fcidump : Section {
-        Param<std::string> m_path;
+        Param<str_t> m_path;
         Param<bool> m_spin_major;
 
         explicit Fcidump(Group *parent);
@@ -21,7 +21,7 @@ namespace conf {
     };
 
     struct Bosdump : Section {
-        Param<std::string> m_path;
+        Param<str_t> m_path;
 
         explicit Bosdump(Group *parent);
 
@@ -29,7 +29,7 @@ namespace conf {
     };
 
     struct Ebdump : Section {
-        Param<std::string> m_path;
+        Param<str_t> m_path;
         Param<bool> m_spin_major;
 
         explicit Ebdump(Group *parent);
@@ -38,11 +38,11 @@ namespace conf {
     };
 
     struct LatticeModel : Section {
-        Param<std::string> m_topology;
+        Param<str_t> m_topology;
         Param<uintv_t> m_site_shape;
         Param<std::vector<int>> m_boundary_conds;
 
-        LatticeModel(Group *parent, std::string name, std::string description);
+        LatticeModel(Group *parent, str_t name, str_t description);
 
         void verify() override;
 

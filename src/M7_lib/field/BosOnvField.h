@@ -28,19 +28,19 @@ struct BosOnvField : NdNumberField<bos_occ_t, 1> {
      */
     mutable decoded_mbf::BosOnv m_decoded;
 
-    BosOnvField(Row *row, const sys::bos::Basis &basis, std::string name = "");
+    BosOnvField(Row *row, const sys::bos::Basis &basis, str_t name = "");
 
     /*
      * all ONVs implement the following ctor
      */
-    BosOnvField(Row *row, const sys::Basis &basis, std::string name = "");
+    BosOnvField(Row *row, const sys::Basis &basis, str_t name = "");
 
     /*
      * this particular MBF only needs the basis, but future MBF types might need the full sector information, and so
      * a common interface is realised by implementing a ctor of the following form in all MBFs
      */
-    BosOnvField(Row *row, const sys::bos::Sector &sector, std::string name = "");
-    BosOnvField(Row *row, const sys::Sector &sector, std::string name = "");
+    BosOnvField(Row *row, const sys::bos::Sector &sector, str_t name = "");
+    BosOnvField(Row *row, const sys::Sector &sector, str_t name = "");
 
     BosOnvField(const BosOnvField &other);
 
