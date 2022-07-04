@@ -37,7 +37,7 @@ namespace hdf5 {
 
         ~DatasetReader();
 
-        void read(char* dst) const;
+        void read(void* dst) const;
     };
 
     struct DatasetWriter {
@@ -47,13 +47,12 @@ namespace hdf5 {
     public:
         const Type m_type;
 
-        DatasetWriter(hid_t parent_handle, const std::string& name,
-                      const std::vector<hsize_t>& shape, Type type,
+        DatasetWriter(hid_t parent_handle, const std::string& name, const std::vector<hsize_t>& shape, Type type,
                       std::vector<std::string> dim_names={}, uint_t irank=0ul);
 
         ~DatasetWriter();
 
-        void write(const char* src) const;
+        void write(const void* src) const;
     };
 }
 

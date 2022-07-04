@@ -68,7 +68,7 @@ namespace conservation {
             return m_value==other.m_value && m_conserve==other.m_conserve;
         }
 
-        info_map_t info() const {
+        strmap_t info() const {
             return {{"value", m_value}, {"conserved", m_conserve}};
         }
 
@@ -202,7 +202,7 @@ namespace sys {
 
             uint_t ncoeff_ind() const;
 
-            info_map_t info() const;
+            strmap_t info() const;
 
             std::string to_string() const;
         };
@@ -250,7 +250,7 @@ namespace sys {
 
             bool operator==(const Electrons& other) const;
 
-            info_map_t info() const;
+            strmap_t info() const;
             std::string to_string() const;
         };
 
@@ -314,7 +314,7 @@ namespace sys {
 
             bool operator==(const Basis& other) const;
             
-            info_map_t info() const;
+            strmap_t info() const;
 
             std::string to_string() const;
         };

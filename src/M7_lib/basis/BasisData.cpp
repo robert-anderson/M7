@@ -171,8 +171,8 @@ uint_t sys::frm::Basis::ncoeff_ind() const {
     return Size::ncoeff_ind(m_spin_resolved);
 }
 
-info_map_t sys::frm::Basis::info() const {
-    info_map_t map;
+strmap_t sys::frm::Basis::info() const {
+    strmap_t map;
     map.insert({"nsite", convert::to_string(m_nsite)});
     map.insert({"point group irreps", convert::to_string(m_abgrp_map.m_site_irreps)});
     map.insert({"spin resolved", convert::to_string(m_spin_resolved)});
@@ -249,7 +249,7 @@ bool sys::bos::Basis::operator==(const sys::bos::Basis &other) const {
     return (m_occ_cutoff == other.m_occ_cutoff) && (m_nmode == other.m_nmode);
 }
 
-info_map_t sys::bos::Basis::info() const {
+strmap_t sys::bos::Basis::info() const {
     return {
             {"nmode",      convert::to_string(m_nmode)},
             {"occ_cutoff", convert::to_string(m_occ_cutoff)}

@@ -27,7 +27,7 @@ hdf5::DatasetReader::~DatasetReader() {
     H5Dclose(m_handle);
 }
 
-void hdf5::DatasetReader::read(char *dst) const {
+void hdf5::DatasetReader::read(void *dst) const {
     auto status = H5Dread(m_handle, m_type, m_space, m_space, H5P_DEFAULT, dst);
     REQUIRE_FALSE_ALL(status, "HDF5 Error on dataset load");
 }
@@ -37,21 +37,22 @@ hdf5::DatasetWriter::DatasetWriter(hid_t parent_handle, const std::string &name,
                                    uint_t irank) :
         m_space(DataSpace(shape, !mpi::i_am(irank))),
         m_handle(H5Dcreate2(parent_handle, name.c_str(), type, m_space.m_handle, H5P_DEFAULT,
-                            H5P_DEFAULT, H5P_DEFAULT)), m_dim_names(std::move(dim_names)), m_type(H5Dget_type(m_handle)) {}
+                            H5P_DEFAULT, H5P_DEFAULT)), m_dim_names(std::move(dim_names)), m_type(H5Dget_type(m_handle)) {
+    if (!m_dim_names.empty()) {
+        DEBUG_ASSERT_EQ(m_dim_names.size(), m_space.m_shape.size(),
+                        "Number of dim labels does not match number of dims");
+        for (uint_t idim = 0ul; idim < m_space.m_shape.size(); ++idim) {
+            auto status = H5DSset_label(m_handle, idim, m_dim_names[idim].c_str());
+            REQUIRE_FALSE(status, "HDF5 Error on dimension label assignment");
+        }
+    }
+}
 
 hdf5::DatasetWriter::~DatasetWriter() {
     H5Dclose(m_handle);
 }
 
-void hdf5::DatasetWriter::write(const char *src) const {
+void hdf5::DatasetWriter::write(const void* src) const {
     auto status = H5Dwrite(m_handle, m_type, m_space, m_space, H5P_DEFAULT, src);
     REQUIRE_FALSE(status, "HDF5 Error on multidimensional save");
-    if (!m_dim_names.empty()) {
-        DEBUG_ASSERT_EQ(m_dim_names.size(), m_space.m_shape.size(),
-                        "Number of dim labels does not match number of dims");
-        for (uint_t idim = 0ul; idim < m_space.m_shape.size(); ++idim) {
-            H5DSset_label(m_handle, idim, m_dim_names[idim].c_str());
-            REQUIRE_FALSE(status, "HDF5 Error on dimension label assignment");
-        }
-    }
 }
