@@ -11,15 +11,15 @@ namespace hdf5 {
 
     struct DataSpace {
         const hid_t m_handle;
-        const std::vector <hsize_t> m_shape;
+        const v_t <hsize_t> m_shape;
         const hsize_t m_nelement;
     private:
-        std::vector<hsize_t> make_shape() const;
+        v_t<hsize_t> make_shape() const;
 
     public:
         DataSpace(hid_t handle);
 
-        DataSpace(const std::vector <hsize_t> &shape, bool select_none = false);
+        DataSpace(const v_t <hsize_t> &shape, bool select_none = false);
 
         ~DataSpace();
 

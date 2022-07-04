@@ -146,7 +146,7 @@ namespace arith {
      *  complex combination
      */
     template<typename T>
-    static void zip(const std::vector<T> &real, const std::vector<T> &imag, std::vector<std::complex<T>> &v) {
+    static void zip(const v_t<T> &real, const v_t<T> &imag, v_t<std::complex<T>> &v) {
         auto n = std::min(real.size(), imag.size());
         v.clear();
         v.reserve(n);
@@ -154,8 +154,8 @@ namespace arith {
     }
 
     template<typename T>
-    static std::vector<std::complex<T>> zip(const std::vector<T> &real, const std::vector<T> &imag) {
-        std::vector<std::complex<T>> v;
+    static v_t<std::complex<T>> zip(const v_t<T> &real, const v_t<T> &imag) {
+        v_t<std::complex<T>> v;
         zip(real, imag, v);
         return v;
     }

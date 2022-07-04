@@ -83,10 +83,10 @@ namespace conf {
     };
 
     struct MbfDef : Section {
-        Param<std::vector<uintv_t>> m_frm;
-        Param<std::vector<uintv_t>> m_bos;
+        Param<v_t<uintv_t>> m_frm;
+        Param<v_t<uintv_t>> m_bos;
         Param<bool> m_neel;
-        //Param<std::vector<uintv_t>> m_csf;
+        //Param<v_t<uintv_t>> m_csf;
 
         explicit MbfDef(Group *parent, str_t name);
 
@@ -255,7 +255,7 @@ namespace conf {
         Param<double> m_min_spawn_mag;
         Param<double> m_min_death_mag;
         Param<double> m_min_exlvl_prob;
-        Param<std::vector<double>> m_exlvl_probs_init;
+        Param<v_t<double>> m_exlvl_probs_init;
         Param<uint_t> m_ndraw_min_for_dynamic;
         Param<uint_t> m_period;
         Param<double> m_imp_samp_exp;

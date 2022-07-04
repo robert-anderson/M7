@@ -15,16 +15,16 @@ struct BosOpPair {
 };
 
 class BosOps {
-    std::vector<BosOpPair> m_pairs;
+    v_t<BosOpPair> m_pairs;
     /**
      * vector of length nmode which enables constant-time access to a pair
      */
-    std::vector<BosOpPair*> m_pair_ptrs;
+    v_t<BosOpPair*> m_pair_ptrs;
     uint_t m_nop = 0ul;
 public:
     BosOps(uint_t nmode);
 
-    const std::vector<BosOpPair>& pairs() const;
+    const v_t<BosOpPair>& pairs() const;
 
     /**
      * get vector of mode indices (multiple nop pairs will be duplicated)

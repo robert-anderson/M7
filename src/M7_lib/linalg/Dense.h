@@ -88,7 +88,7 @@ namespace dense {
     }
 
     template<typename T>
-    static bool nearly_equal(const std::vector<T> v1, const std::vector<T> v2, arith::comp_t<T> atol = default_atol_near<T>()) {
+    static bool nearly_equal(const v_t<T> v1, const v_t<T> v2, arith::comp_t<T> atol = default_atol_near<T>()) {
         REQUIRE_EQ(v1.size(), v2.size(), "vectors must have same number of elements to be compared");
         return nearly_equal(v1.data(), v2.data(), v1.size(), atol);
     }
@@ -96,7 +96,7 @@ namespace dense {
 
     template<typename T>
     class Matrix {
-        std::vector<T> m_buffer;
+        v_t<T> m_buffer;
 
         uint_t index(const uint_t &irow, const uint_t &icol) const {
             DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
@@ -128,7 +128,7 @@ namespace dense {
             m_buffer = other.m_buffer;
             return *this;
         }
-        Matrix& operator=(const std::vector<T>& v) {
+        Matrix& operator=(const v_t<T>& v) {
             REQUIRE_EQ(v.size(), m_buffer.size(), "cannot assign due to incorrect buffer size");
             m_buffer = v;
             return *this;
@@ -305,28 +305,28 @@ namespace dense {
         }
 
         template<typename U>
-        void set_row(const uint_t &irow, const std::vector<U> &v) {
+        void set_row(const uint_t &irow, const v_t<U> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
             // copies byte wise if U==T, else converts element wise
             set_row(irow, v.data());
         }
 
         template<typename U>
-        void set_col(const uint_t &icol, const std::vector<U> &v) {
+        void set_col(const uint_t &icol, const v_t<U> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
             // copies element wise if U==T, else converts element wise
             set_col(icol, v.data());
         }
 
         template<typename U>
-        void get_row(const uint_t &irow, std::vector<U> &v) const {
+        void get_row(const uint_t &irow, v_t<U> &v) const {
             v.resize(m_ncol);
             // copies byte wise if U==T, else converts element wise
             get_row(irow, v.data());
         }
 
         template<typename U>
-        void get_col(const uint_t &icol, std::vector<U> &v) const {
+        void get_col(const uint_t &icol, v_t<U> &v) const {
             v.resize(m_nrow);
             // copies element wise if U==T, else converts element wise
             get_col(icol, v.data());
@@ -431,7 +431,7 @@ namespace dense {
     }
 
     template<typename T>
-    void multiply(const Matrix<T>& p, const std::vector<T>& q, std::vector<T>& r,
+    void multiply(const Matrix<T>& p, const v_t<T>& q, v_t<T>& r,
                   char transp='N', char transq='N', T alpha=1.0, T beta=0.0){
         r.resize(transp=='N' ? p.nrow() : p.ncol());
         GemmWrapper wrapper(p.nrow(), p.ncol(), q.size(), 1ul, transp, transq, r.size(), 1ul);
@@ -439,15 +439,15 @@ namespace dense {
     }
 
     template<typename T>
-    std::vector<T> multiply(const Matrix<T>& p, const std::vector<T>& q,
+    v_t<T> multiply(const Matrix<T>& p, const v_t<T>& q,
                                 char transp='N', char transq='N', T alpha=1.0, T beta=0.0){
-        std::vector<T> r;
+        v_t<T> r;
         multiply(p, q, r, transp, transq, alpha, beta);
         return r;
     }
 
     template<typename T>
-    T inner_product(const std::vector<T>& p, const std::vector<T>& q, bool herm=false){
+    T inner_product(const v_t<T>& p, const v_t<T>& q, bool herm=false){
         REQUIRE_EQ(p.size(), q.size(), "vector lengths don't match");
         GemmWrapper wrapper(p.size(), 1ul, q.size(), 1ul, herm ? 'C' : 'T', 'N', 1ul, 1ul);
         T r = 0;
@@ -486,28 +486,28 @@ namespace dense {
      *    complex double  complex double   complex double  complex double  zgeev
      */
 
-    bool diag(const SquareMatrix<float>& mat, std::vector<float>& evals);
+    bool diag(const SquareMatrix<float>& mat, v_t<float>& evals);
 
-    bool diag(const SquareMatrix<float>& mat, SquareMatrix<float>& evecs, std::vector<float>& evals);
+    bool diag(const SquareMatrix<float>& mat, SquareMatrix<float>& evecs, v_t<float>& evals);
 
-    bool diag(const SquareMatrix<float>& mat, std::vector<std::complex<float>>& evals);
-
-
-    bool diag(const SquareMatrix<double>& mat, std::vector<double>& evals);
-
-    bool diag(const SquareMatrix<double>& mat, SquareMatrix<double>& evecs, std::vector<double>& evals);
-
-    bool diag(const SquareMatrix<double>& mat, std::vector<std::complex<double>>& evals);
+    bool diag(const SquareMatrix<float>& mat, v_t<std::complex<float>>& evals);
 
 
+    bool diag(const SquareMatrix<double>& mat, v_t<double>& evals);
 
-    bool diag(const SquareMatrix<std::complex<double>>& mat, std::vector<double>& evals);
+    bool diag(const SquareMatrix<double>& mat, SquareMatrix<double>& evecs, v_t<double>& evals);
+
+    bool diag(const SquareMatrix<double>& mat, v_t<std::complex<double>>& evals);
+
+
+
+    bool diag(const SquareMatrix<std::complex<double>>& mat, v_t<double>& evals);
 
 
     bool diag(const SquareMatrix<std::complex<double>>& mat,
-              SquareMatrix<std::complex<double>>& evecs, std::vector<double>& evals);
+              SquareMatrix<std::complex<double>>& evecs, v_t<double>& evals);
 
-    bool diag(const SquareMatrix<std::complex<double>>& mat, std::vector<double>& evals);
+    bool diag(const SquareMatrix<std::complex<double>>& mat, v_t<double>& evals);
 }
 
 #endif //M7_DENSE_H

@@ -25,7 +25,7 @@ TEST(BasicForeach, CtndUnrestricted3) {
     using namespace basic_foreach;
     constexpr uint_t nind = 3;
     const ctnd::inds_t<nind> shape = {3, 4, 2};
-    const std::vector<ctnd::inds_t<nind>> chk_inds = {
+    const v_t<ctnd::inds_t<nind>> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
             {0, 1, 0},
@@ -66,7 +66,7 @@ TEST(BasicForeach, CtndUnrestrictedExit) {
     using namespace basic_foreach;
     constexpr uint_t nind = 3;
     const ctnd::inds_t<nind> shape = {2, 2, 2};
-    const std::vector<ctnd::inds_t<nind>> chk_inds = {
+    const v_t<ctnd::inds_t<nind>> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
             {0, 1, 0},
@@ -107,7 +107,7 @@ TEST(BasicForeach, CtndOrderedStrictAsc3) {
     using namespace basic_foreach;
     constexpr uint_t nind = 3;
     const uint_t n = 5;
-    const std::vector<ctnd::inds_t<nind>> chk_inds = {
+    const v_t<ctnd::inds_t<nind>> chk_inds = {
             {0, 1, 2},
             {0, 1, 3},
             {0, 2, 3},
@@ -134,7 +134,7 @@ TEST(BasicForeach, CtndOrderedExit) {
     using namespace basic_foreach;
     const uint_t n = 5;
     constexpr uint_t nind = 3;
-    const std::vector<ctnd::inds_t<nind>> chk_inds = {
+    const v_t<ctnd::inds_t<nind>> chk_inds = {
             {0, 1, 2},
             {0, 1, 3},
             {0, 2, 3},
@@ -177,7 +177,7 @@ TEST(BasicForeach, CtndOrderedStrictDesc3) {
     using namespace basic_foreach;
     constexpr uint_t nind = 3;
     const uint_t n = 5;
-    const std::vector<ctnd::inds_t<nind>> chk_inds = {
+    const v_t<ctnd::inds_t<nind>> chk_inds = {
             {2, 1, 0},
             {3, 1, 0},
             {3, 2, 0},
@@ -214,7 +214,7 @@ TEST(BasicForeach, CtndOrderedAsc3) {
     using namespace basic_foreach;
     constexpr uint_t nind = 3;
     const uint_t n = 3;
-    const std::vector<ctnd::inds_t<nind>> chk_inds = {
+    const v_t<ctnd::inds_t<nind>> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
             {0, 1, 1},
@@ -251,7 +251,7 @@ TEST(BasicForeach, CtndOrderedDesc3) {
     using namespace basic_foreach;
     constexpr uint_t nind = 3;
     const uint_t n = 3;
-    const std::vector<ctnd::inds_t<nind>> chk_inds = {
+    const v_t<ctnd::inds_t<nind>> chk_inds = {
             {0, 0, 0},
             {1, 0, 0},
             {1, 1, 0},
@@ -290,7 +290,7 @@ TEST(BasicForeach, RtndUnrestricted0) {
 TEST(BasicForeach, RtndUnrestricted3) {
     using namespace basic_foreach;
     const rtnd::inds_t shape = {3, 4, 2};
-    const std::vector<rtnd::inds_t> chk_inds = {
+    const v_t<rtnd::inds_t> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
             {0, 1, 0},
@@ -331,7 +331,7 @@ TEST(BasicForeach, RtndUnrestricted3) {
 TEST(BasicForeach, RtndUnrestrictedExit) {
     using namespace basic_foreach;
     const rtnd::inds_t shape = {2, 2, 2};
-    const std::vector<rtnd::inds_t> chk_inds = {
+    const v_t<rtnd::inds_t> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
             {0, 1, 0},
@@ -373,7 +373,7 @@ TEST(BasicForeach, RtndOrderedStrictAsc3) {
     using namespace basic_foreach;
     const uint_t nind = 3;
     const uint_t n = 5;
-    const std::vector<rtnd::inds_t> chk_inds = {
+    const v_t<rtnd::inds_t> chk_inds = {
             {0, 1, 2},
             {0, 1, 3},
             {0, 2, 3},
@@ -400,7 +400,7 @@ TEST(BasicForeach, RtndOrderedExit) {
     using namespace basic_foreach;
     const uint_t n = 5;
     const uint_t nind = 3;
-    const std::vector<rtnd::inds_t> chk_inds = {
+    const v_t<rtnd::inds_t> chk_inds = {
             {0, 1, 2},
             {0, 1, 3},
             {0, 2, 3},
@@ -443,7 +443,7 @@ TEST(BasicForeach, RtndOrderedStrictDesc3) {
     using namespace basic_foreach;
     const uint_t nind = 3;
     const uint_t n = 5;
-    const std::vector<rtnd::inds_t> chk_inds = {
+    const v_t<rtnd::inds_t> chk_inds = {
             {2, 1, 0},
             {3, 1, 0},
             {3, 2, 0},
@@ -480,7 +480,7 @@ TEST(BasicForeach, RtndOrderedAsc3) {
     using namespace basic_foreach;
     const uint_t nind = 3;
     const uint_t n = 3;
-    const std::vector<rtnd::inds_t> chk_inds = {
+    const v_t<rtnd::inds_t> chk_inds = {
             {0, 0, 0},
             {0, 0, 1},
             {0, 1, 1},
@@ -517,7 +517,7 @@ TEST(BasicForeach, RtndOrderedDesc3) {
     using namespace basic_foreach;
     const uint_t nind = 3;
     const uint_t n = 3;
-    const std::vector<rtnd::inds_t> chk_inds = {
+    const v_t<rtnd::inds_t> chk_inds = {
             {0, 0, 0},
             {1, 0, 0},
             {1, 1, 0},

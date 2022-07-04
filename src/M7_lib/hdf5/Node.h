@@ -38,7 +38,7 @@ namespace hdf5 {
         }
 
         template<typename T>
-        void read_attr_fn(const str_t& name, std::vector<T>& v, std::vector<T> default_) const {
+        void read_attr_fn(const str_t& name, v_t<T>& v, v_t<T> default_) const {
             if (!attr_exists(name)) {
                 v = default_;
                 return;
@@ -68,7 +68,7 @@ namespace hdf5 {
             read_data(name, &v, 1);
         }
         template<typename T>
-        void read_data(str_t name, std::vector<T> &v) const {
+        void read_data(str_t name, v_t<T> &v) const {
             auto nelement = DatasetReader::get_nelement(m_handle, name);
             v.resize(nelement);
             read_data(name, v.data(), v.size());
@@ -199,7 +199,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(str_t name, std::vector<T>& v, const uintv_t& shape){
+        load(str_t name, v_t<T>& v, const uintv_t& shape){
             REQUIRE_EQ_ALL(v.size(), nd::nelement(shape), "vector and shape are incompatible");
             load(name, v.data(), shape);
         }
@@ -209,7 +209,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(str_t name, std::vector<T>& v){
+        load(str_t name, v_t<T>& v){
             load(name, v, {v.size()});
         }
 
@@ -227,9 +227,9 @@ namespace hdf5 {
          * convenient wrapper for vector load
          */
         template<typename T>
-        std::vector<T> load_vector(str_t name) const {
+        v_t<T> load_vector(str_t name) const {
             auto nelement = nd::nelement(get_dataset_shape(name));
-            std::vector<T> tmp(nelement);
+            v_t<T> tmp(nelement);
             load(name, tmp);
             return tmp;
         }
@@ -251,7 +251,7 @@ namespace hdf5 {
         }
 
         template<typename T>
-        void write_attr(const str_t& name, const std::vector<T>& v) const {
+        void write_attr(const str_t& name, const v_t<T>& v) const {
             AttrWriter attr(m_handle, name, {v.size()}, Type(v.data()));
             attr.write(v.data(), v.size());
         }
@@ -287,7 +287,7 @@ namespace hdf5 {
             write_data(name, &v, 1);
         }
         template<typename T>
-        void write_data(str_t name, const std::vector<T> &v) {
+        void write_data(str_t name, const v_t<T> &v) {
             write_data(name, v.data(), v.size());
         }
 
@@ -408,7 +408,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(str_t name, const std::vector<T>& v, const uintv_t& shape,
+        save(str_t name, const v_t<T>& v, const uintv_t& shape,
              strv_t dim_labels={}, uint_t irank=0ul) const {
             REQUIRE_EQ_ALL(v.size(), nd  ::nelement(shape), "vector and shape are incompatible");
             save(name, v.data(), shape, {}, irank);
@@ -419,7 +419,7 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(str_t name, const std::vector<T>& v, uint_t irank=0ul) const {
+        save(str_t name, const v_t<T>& v, uint_t irank=0ul) const {
             save(name, v, {v.size()}, {}, irank);
         }
 
@@ -438,7 +438,7 @@ namespace hdf5 {
             auto longest = std::max_element(
                     v.cbegin(), v.cend(),[](const str_t& s1, const str_t& s2){return s1.size()<s2.size();});
             auto size = longest->size();
-            std::vector<char> buffer(size*v.size());
+            v_t<char> buffer(size*v.size());
             uint_t istr = 0ul;
             for (auto& str: v) std::strcpy(buffer.data()+(istr++)*size, str.c_str());
 
@@ -448,7 +448,7 @@ namespace hdf5 {
             /*
              * Create dataset with a null dataspace.
              */
-            std::vector<hsize_t> shape = {v.size()};
+            v_t<hsize_t> shape = {v.size()};
             auto dspace_handle = H5Screate_simple(1, shape.data(), NULL);
             /**
              * make a null selection if this is not the rank we want to output the value of

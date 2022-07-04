@@ -78,13 +78,13 @@ namespace integer {
     }
 
     template<typename T>
-    static void shift(std::vector<T>& v, bool increment=true) {
+    static void shift(v_t<T>& v, bool increment=true) {
         if (increment) for (auto& it: v) ++it;
         else for (auto& it: v) --it;
     }
 
     template<typename T>
-    static std::vector<T> shifted(const std::vector<T>& v, bool increment=true) {
+    static v_t<T> shifted(const v_t<T>& v, bool increment=true) {
         auto out = v;
         shift(out, increment);
         return out;

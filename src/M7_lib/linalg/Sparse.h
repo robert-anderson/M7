@@ -20,7 +20,7 @@ namespace sparse {
         uint_t m_max_icol = 0ul;
 
     protected:
-        std::vector<uintv_t> m_rows_icols;
+        v_t<uintv_t> m_rows_icols;
 
     public:
 
@@ -62,7 +62,7 @@ namespace sparse {
 
     template<typename T>
     class Matrix : public Network {
-        std::vector<std::vector<T>> m_rows_values;
+        v_t<v_t<T>> m_rows_values;
 
     public:
 
@@ -87,12 +87,12 @@ namespace sparse {
             return i;
         }
 
-        void add(const uint_t &irow, const uintv_t &icols, const std::vector<T> &vs) {
+        void add(const uint_t &irow, const uintv_t &icols, const v_t<T> &vs) {
             REQUIRE_EQ(icols.size(), vs.size(), "must have same number of column indices and values");
             for (uint_t i = 0ul; i < icols.size(); ++i) add(irow, icols[i], vs[i]);
         }
 
-        void insert(const uint_t &irow, const uintv_t &icols, const std::vector<T> &vs) {
+        void insert(const uint_t &irow, const uintv_t &icols, const v_t<T> &vs) {
             REQUIRE_EQ(icols.size(), vs.size(), "must have same number of column indices and values");
             for (uint_t i = 0ul; i < icols.size(); ++i) insert(irow, icols[i], vs[i]);
         }
@@ -121,12 +121,12 @@ namespace sparse {
             }
         }
 
-        void multiply(const std::vector<T> &v, std::vector<T> &mv) const {
+        void multiply(const v_t<T> &v, v_t<T> &mv) const {
             if (nrow() > mv.size()) mv.resize(nrow());
             multiply(v.data(), mv.data(), mv.size());
         }
 
-        std::pair<const uintv_t &, const std::vector<T> &> operator[](const uint_t &irow) const {
+        std::pair<const uintv_t &, const v_t<T> &> operator[](const uint_t &irow) const {
             DEBUG_ASSERT_LT(irow, nrow(), "row index OOB");
             return {m_rows_icols[irow], m_rows_values[irow]};
         }
@@ -164,7 +164,7 @@ namespace sparse {
             auto begin = m_rows_values.cbegin()+uintv_t::difference_type(displ);
             auto end = begin + uintv_t::difference_type(count);
             REQUIRE_GE(std::distance(end, m_rows_values.cend()), 0, "end iterator OOB");
-            submat.m_rows_values = std::vector<std::vector<T>>(begin, end);
+            submat.m_rows_values = v_t<v_t<T>>(begin, end);
             return submat;
         }
     };

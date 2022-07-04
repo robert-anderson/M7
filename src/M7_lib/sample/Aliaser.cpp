@@ -35,7 +35,7 @@ void Aliaser::update(uint_t irow, const prob_t *probs, const uint_t nprob) {
     }
 }
 
-void Aliaser::update(uint_t irow, const std::vector<prob_t> &probs) {
+void Aliaser::update(uint_t irow, const v_t<prob_t> &probs) {
     update(irow, probs.data(), probs.size());
 }
 
@@ -54,11 +54,11 @@ prob_t Aliaser::norm(uint_t irow) const {
 
 SingleAliaser::SingleAliaser(uint_t nprob) : Aliaser(1, nprob){}
 
-SingleAliaser::SingleAliaser(const std::vector<prob_t> &probs) : Aliaser(1, probs.size()) {
+SingleAliaser::SingleAliaser(const v_t<prob_t> &probs) : Aliaser(1, probs.size()) {
     update(probs);
 }
 
-void SingleAliaser::update(const std::vector<prob_t> &probs) {
+void SingleAliaser::update(const v_t<prob_t> &probs) {
     Aliaser::update(0ul, probs);
 }
 

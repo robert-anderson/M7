@@ -66,7 +66,7 @@ public:
         return 0;
     }
 
-    virtual std::vector<prob_t> excit_gen_case_probs() const {
+    virtual v_t<prob_t> excit_gen_case_probs() const {
         return {};
     }
 

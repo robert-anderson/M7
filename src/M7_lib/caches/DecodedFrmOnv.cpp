@@ -51,7 +51,7 @@ decoded_mbf::frm::LabelledBase::LabelledBase(uint_t nelement, const uintv_t &map
     }
 }
 
-const std::vector<uintv_t> &decoded_mbf::frm::LabelledBase::validated() const {
+const v_t<uintv_t> &decoded_mbf::frm::LabelledBase::validated() const {
     DEBUG_ASSERT_TRUE(is_valid(), "cache is not in sync with current MBF value");
     return m_inds;
 }
@@ -84,7 +84,7 @@ uint_t decoded_mbf::frm::LabelledBase::label(uint_t ispinorb) const {
 decoded_mbf::frm::LabelledOccs::LabelledOccs(uint_t nelement, const uintv_t &map, const FrmOnvField& mbf) :
         LabelledBase(nelement, map, mbf){}
 
-const std::vector<uintv_t>& decoded_mbf::frm::LabelledOccs::get() {
+const v_t<uintv_t>& decoded_mbf::frm::LabelledOccs::get() {
     if (!empty()) return validated();
     // simple uintv_t are all ready cleared
     for (auto& v : m_inds) v.clear();
@@ -108,7 +108,7 @@ const uintv_t &decoded_mbf::frm::LabelledOccs::simple() {
 decoded_mbf::frm::LabelledVacs::LabelledVacs(uint_t nelement, const uintv_t &map, const FrmOnvField& mbf) :
         LabelledBase(nelement, map, mbf){}
 
-const std::vector<uintv_t>& decoded_mbf::frm::LabelledVacs::get() {
+const v_t<uintv_t>& decoded_mbf::frm::LabelledVacs::get() {
     if (!empty()) return validated();
     // simple uintv_t are all ready cleared
     for (auto& v : m_inds) v.clear();

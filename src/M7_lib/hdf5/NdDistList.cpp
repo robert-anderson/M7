@@ -37,16 +37,16 @@ hdf5::NdDistListWriter::NdDistListWriter(hid_t parent_handle, str_t name, const 
     }
 }
 
-std::vector<hsize_t> hdf5::NdDistListBase::get_list_dims_local() {
-    std::vector<hsize_t> out;
+v_t<hsize_t> hdf5::NdDistListBase::get_list_dims_local() {
+    v_t<hsize_t> out;
     out.reserve(m_ndim_list);
     out.push_back(m_nitem_local);
     out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
     return out;
 }
 
-std::vector<hsize_t> hdf5::NdDistListBase::get_list_dims_global() {
-    std::vector<hsize_t> out;
+v_t<hsize_t> hdf5::NdDistListBase::get_list_dims_global() {
+    v_t<hsize_t> out;
     out.reserve(m_ndim_list);
     out.push_back(m_nitem_global);
     out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
@@ -54,7 +54,7 @@ std::vector<hsize_t> hdf5::NdDistListBase::get_list_dims_global() {
 }
 
 hsize_t hdf5::NdDistListBase::get_item_offset() {
-    std::vector<hsize_t> tmp(mpi::nrank());
+    v_t<hsize_t> tmp(mpi::nrank());
     mpi::all_gather(m_nitem_local, tmp);
     hsize_t out = 0ul;
     for (uint_t irank = 0ul; irank < mpi::irank(); ++irank) out += tmp[irank];
@@ -96,7 +96,7 @@ hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, str_t name, const uint
     // select one item at a time
     m_hyperslab_counts[0] = 1;
     m_memspace_handle = H5Screate_simple(m_ndim_list, m_hyperslab_counts.data(), nullptr);
-    std::vector<hsize_t> zeros(m_ndim_list, 0ul);
+    v_t<hsize_t> zeros(m_ndim_list, 0ul);
     m_none_memspace_handle = H5Screate_simple(m_ndim_list, zeros.data(), nullptr);
 
     log::debug_("Opened HDF5 NdList with {} local items", m_nitem_local);

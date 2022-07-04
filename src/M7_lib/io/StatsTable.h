@@ -46,7 +46,7 @@ namespace statistic {
         const uint_t m_precision;
         uint_t m_ncommit_this_period = 0ul;
 
-        std::vector<T> m_reduced;
+        v_t<T> m_reduced;
 
         Numbers(StatsRow *row, NdFormat<nind> format, str_t name = "", bool mean = true, uint_t precision=6) :
                 NdNumberField<T, nind>(row, format, name), m_mean(mean),

@@ -37,7 +37,7 @@ struct MagnitudeLogger {
     /**
      * working array for assigning new probability values to excitation generator group object
      */
-    mutable std::vector<prob_t> m_new_probs;
+    mutable v_t<prob_t> m_new_probs;
     MagnitudeLogger(ham_comp_t max_bloom, uint_t ndraw_min, uint_t nexcase, bool static_tau, bool static_probs,
                     double tau_min, double tau_max, double prob_min, uint_t period);
 

@@ -7,6 +7,6 @@
 
 TEST(InteractiveVariable, Test){
     InteractiveVariableFile iv("some_uint");
-    std::vector<float> i(4);
+    v_t<float> i(4);
     iv.read(i);
 }

@@ -83,8 +83,8 @@ public:
     const str_t m_name;
 private:
     const uint_t m_nwindow_max;
-    std::vector<buf_t> m_data;
-    std::vector<Window *> m_windows;
+    v_t<buf_t> m_data;
+    v_t<Window *> m_windows;
 
 public:
     Buffer(str_t name, uint_t nwindow_max);

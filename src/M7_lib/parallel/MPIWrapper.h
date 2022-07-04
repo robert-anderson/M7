@@ -35,7 +35,7 @@
  * count_t and counts_t are the scalar and vector typedefs for the MPI integer
  *
  * The cleanest way to achieve this aim is to expose only the overloads that use uint_t and
- * std::vector<uint_t> (uintv_t) to define counts and displs. if sizeof(count_t)
+ * v_t<uint_t> (uintv_t) to define counts and displs. if sizeof(count_t)
  * is less than sizeof(uint_t), a narrowing conversion is required, but since this is at the
  * level of communication, and not inside a main loop, this minor overhead will more than
  * pay for itself in code clarity. Hence, **count_t and counts_t should never
@@ -168,7 +168,7 @@ extern int g_p2p_tag;
 namespace mpi {
 
     typedef int count_t;
-    typedef std::vector<count_t> counts_t;
+    typedef v_t<count_t> counts_t;
 
     void setup_mpi_globals();
 
@@ -237,14 +237,14 @@ namespace mpi {
     counts_t evenly_shared_displs(uint_t nitem_global);
 
     template<typename T>
-    static void counts_to_displs_consec(const std::vector<T> &counts, std::vector<T> &displs) {
+    static void counts_to_displs_consec(const v_t<T> &counts, v_t<T> &displs) {
         ASSERT(counts.size() == displs.size())
         displs[0] = 0;
         for (uint_t i = 1ul; i < counts.size(); ++i) displs[i] = displs[i - 1] + counts[i - 1];
     }
 
     template<typename T>
-    static std::vector<T> counts_to_displs_consec(const std::vector<T> &counts) {
+    static v_t<T> counts_to_displs_consec(const v_t<T> &counts) {
         auto displs = counts;
         counts_to_displs_consec(counts, displs);
         return displs;
@@ -267,11 +267,11 @@ namespace mpi {
                            std::pair<T, uint_t> *recv,
                            MpiPairOp op, uint_t ndata = 1) {
         static_assert(mpi_type_ind<T>() != ~0ul, "Not a valid MPI type");
-        std::vector<std::pair<T, count_t>> tmp_send;
+        v_t<std::pair<T, count_t>> tmp_send;
         tmp_send.reserve(ndata);
         for (uint_t idata = 0ul; idata < ndata; ++idata)
             tmp_send.push_back({send[idata].first, snrw(send[idata].second)});
-        std::vector<std::pair<T, count_t>> tmp_recv;
+        v_t<std::pair<T, count_t>> tmp_recv;
         tmp_recv.reserve(ndata);
         auto res = MPI_Allreduce(tmp_send.data(), tmp_recv.data(), ndata, mpi_pair_type<T>(),
                                  pair_op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
@@ -282,8 +282,8 @@ namespace mpi {
 
 
     template<typename T>
-    static bool all_reduce(const std::vector<std::pair<T, uint_t>> &send,
-                           std::vector<std::pair<T, uint_t>> &recv,
+    static bool all_reduce(const v_t<std::pair<T, uint_t>> &send,
+                           v_t<std::pair<T, uint_t>> &recv,
                            MpiPairOp op) {
         ASSERT(send.size() == recv.size());
         return all_reduce(send.data(), recv.data(), op, send.size());
@@ -494,7 +494,7 @@ namespace mpi {
     }
 
     template<typename T>
-    static bool bcast(std::vector<T> &data, uint_t ndata = 0, uint_t iroot = 0) {
+    static bool bcast(v_t<T> &data, uint_t ndata = 0, uint_t iroot = 0) {
         auto data_ptr = reinterpret_cast<void *>(data.data());
         if (!ndata) ndata = data.size();
         data.resize(ndata);
@@ -513,7 +513,7 @@ namespace mpi {
      */
     template<typename T>
     static bool all_maxloc(const T *send, std::pair<T, uint_t> *recv, uint_t ndata) {
-        std::vector<std::pair<T, uint_t>> tmp;
+        v_t<std::pair<T, uint_t>> tmp;
         tmp.reserve(ndata);
         for (uint_t idata = 0ul; idata < ndata; ++idata) tmp.push_back({send[idata], irank()});
         return all_reduce(tmp.data(), recv, MpiMaxLoc, ndata);
@@ -525,7 +525,7 @@ namespace mpi {
     }
 
     template<typename T>
-    static bool all_maxloc(const std::vector<T> &send, std::vector<std::pair<T, uint_t>> &recv) {
+    static bool all_maxloc(const v_t<T> &send, v_t<std::pair<T, uint_t>> &recv) {
         ASSERT(send.size() == recv.size());
         return all_maxloc(send.data(), recv.data(), send.size());
     }
@@ -535,7 +535,7 @@ namespace mpi {
      */
     template<typename T>
     static bool all_minloc(const T *send, std::pair<T, uint_t> *recv, uint_t ndata) {
-        std::vector<std::pair<T, uint_t>> tmp;
+        v_t<std::pair<T, uint_t>> tmp;
         tmp.reserve(ndata);
         for (uint_t idata = 0ul; idata < ndata; ++idata) tmp.push_back({send[idata], irank()});
         return all_reduce(tmp.data(), recv, MpiMinLoc, ndata);
@@ -547,7 +547,7 @@ namespace mpi {
     }
 
     template<typename T>
-    static bool all_minloc(const std::vector<T> &send, std::vector<std::pair<T, uint_t>> &recv) {
+    static bool all_minloc(const v_t<T> &send, v_t<std::pair<T, uint_t>> &recv) {
         ASSERT(send.size() == recv.size());
         return all_minloc(send.data(), recv.data(), send.size());
     }
@@ -585,7 +585,7 @@ namespace mpi {
     }
 
     template<typename T>
-    static bool all_gather(const T &send, std::vector<T> &recv) {
+    static bool all_gather(const T &send, v_t<T> &recv) {
         recv.resize(nrank());
         return all_gather(send, recv.data());
     }
@@ -630,8 +630,8 @@ namespace mpi {
     }
 
     template<typename T>
-    static std::vector<T> all_gathered(const T &send) {
-        std::vector<T> out(mpi::nrank());
+    static v_t<T> all_gathered(const T &send) {
+        v_t<T> out(mpi::nrank());
         all_gather(send, out);
         return out;
     }
@@ -682,7 +682,7 @@ namespace mpi {
     }
 
     template<typename T>
-    static bool all_to_all(const std::vector<T> &send, std::vector<T> &recv) {
+    static bool all_to_all(const v_t<T> &send, v_t<T> &recv) {
         return all_to_all(send.data(), 1ul, recv.data(), 1ul);
     }
 

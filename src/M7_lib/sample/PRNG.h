@@ -12,7 +12,7 @@
 #include <M7_lib/parallel/MPIAssert.h>
 
 class PRNG {
-    typedef std::vector<uint32_t> U;
+    typedef v_t<uint32_t> U;
     U m_data;
     uint_t m_i;
     const uint_t m_seed;

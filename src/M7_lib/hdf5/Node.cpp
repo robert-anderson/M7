@@ -72,7 +72,7 @@ uintv_t hdf5::NodeReader::get_dataset_shape(str_t name) const {
     auto dataset = H5Dopen1(m_handle, name.c_str());
     REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));
     auto dataspace = H5Dget_space(dataset);
-    std::vector<hsize_t> dims(ndim, 0ul);
+    v_t<hsize_t> dims(ndim, 0ul);
     H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
     H5Sclose(dataspace);
     H5Dclose(dataset);

@@ -58,21 +58,21 @@ strv_t FortranNamelistReader::read(const str_t &label) const {
     return {};
 }
 
-std::vector<long> FortranNamelistReader::read_ints(const str_t &label, std::vector<long> default_) const {
-    std::vector<long> tmp;
+v_t<long> FortranNamelistReader::read_ints(const str_t &label, v_t<long> default_) const {
+    v_t<long> tmp;
     read(tmp, label, default_);
     return tmp;
 }
 
-std::vector<uint_t>
-FortranNamelistReader::read_uints(const str_t &label, std::vector<uint_t> default_) const {
-    std::vector<uint_t> tmp;
+v_t<uint_t>
+FortranNamelistReader::read_uints(const str_t &label, v_t<uint_t> default_) const {
+    v_t<uint_t> tmp;
     read(tmp, label, default_);
     return tmp;
 }
 
-std::vector<bool> FortranNamelistReader::read_bools(const str_t &label, std::vector<bool> default_) const {
-    std::vector<bool> tmp;
+v_t<bool> FortranNamelistReader::read_bools(const str_t &label, v_t<bool> default_) const {
+    v_t<bool> tmp;
     read(tmp, label, default_);
     return tmp;
 }
@@ -95,7 +95,7 @@ bool FortranNamelistReader::read_bool(const str_t &label, bool default_) const {
     return tmp[0];
 }
 
-void FortranNamelistReader::read(std::vector<bool> &v, const str_t &label, std::vector<bool> default_) const {
+void FortranNamelistReader::read(v_t<bool> &v, const str_t &label, v_t<bool> default_) const {
     v = default_;
     auto tokens = read(label);
     if (tokens.empty()) return;

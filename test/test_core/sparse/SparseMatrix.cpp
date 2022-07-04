@@ -8,7 +8,7 @@
 TEST(SparseMatrix, RealMultiplication){
     typedef double T;
     const uint_t n=3;
-    std::vector<T> v(n, 0);
+    v_t<T> v(n, 0);
     sparse::Matrix<T> matrix;
     for(uint_t i=0; i<n; ++i) {
         v[i] = i+1;
@@ -16,7 +16,7 @@ TEST(SparseMatrix, RealMultiplication){
             matrix.add(j, i, i*3.0-j*2.0+1);
         }
     }
-    std::vector<T> res(n, 0);
+    v_t<T> res(n, 0);
     matrix.multiply(v, res);
     ASSERT_EQ(res[0], 30);
     ASSERT_EQ(res[1], 18);
@@ -26,7 +26,7 @@ TEST(SparseMatrix, RealMultiplication){
 TEST(SparseMatrix, ComplexMultiplication){
     typedef std::complex<double> T;
     const uint_t n=3;
-    std::vector<T> v(n, 0);
+    v_t<T> v(n, 0);
     sparse::Matrix<T> matrix;
     for(uint_t i=0; i<n; ++i) {
         v[i] = T{double(i+1), 2};
@@ -34,7 +34,7 @@ TEST(SparseMatrix, ComplexMultiplication){
             matrix.add(j, i, T{i*3.0-j*2.0+1, double(i+j)});
         }
     }
-    std::vector<T> res(n, 0);
+    v_t<T> res(n, 0);
     matrix.multiply(v, res);
     ASSERT_EQ(res[0].real(), 24);
     ASSERT_EQ(res[0].imag(), 32);

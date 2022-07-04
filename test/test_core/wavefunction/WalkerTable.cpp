@@ -14,16 +14,16 @@ TEST(WalkerTable, Fields){
      * use overloading to handle the MultiField case of FrmBosOnv
      */
     struct Appender {
-        static void append(std::vector<const FieldBase*>& v, const FieldBase& f){
+        static void append(v_t<const FieldBase*>& v, const FieldBase& f){
             v.push_back(&f);
         }
-        static void append(std::vector<const FieldBase*>& v, const field::FrmBosOnv& f){
+        static void append(v_t<const FieldBase*>& v, const field::FrmBosOnv& f){
             v.push_back(&f.m_frm);
             v.push_back(&f.m_bos);
         }
     };
 
-    std::vector<const FieldBase*> fields;
+    v_t<const FieldBase*> fields;
     Appender::append(fields, row.m_mbf);
     fields.insert(fields.end(), {&row.m_weight, &row.m_hdiag, &row.m_initiator, &row.m_deterministic, &row.m_ref_conn});
     uint_t i = 0ul;

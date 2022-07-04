@@ -13,7 +13,7 @@ struct MeanStd {
     T m_mean {};
     T m_std {};
 
-    MeanStd(typename std::vector<T>::const_iterator begin, typename std::vector<T>::const_iterator end) {
+    MeanStd(typename v_t<T>::const_iterator begin, typename v_t<T>::const_iterator end) {
         // accumulate first the square mean in the m_std member
         for (auto i = begin; i != end; i++) {
             m_mean += *i;
@@ -24,7 +24,7 @@ struct MeanStd {
         m_std = std::sqrt(std::abs(m_std - math::pow<2>(m_mean)));
     }
 
-    MeanStd(const std::vector<T>& v): MeanStd(v.cbegin(), v.cend()){}
+    MeanStd(const v_t<T>& v): MeanStd(v.cbegin(), v.cend()){}
 
     static MeanStd<T> product(const MeanStd<T> &a, const MeanStd<T> &b) {
         /*

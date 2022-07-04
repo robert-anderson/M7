@@ -68,14 +68,14 @@ struct NdNumberField : NumberFieldBase {
         return *this;
     }
 
-    NdNumberField &operator=(const std::vector<T> &v) {
+    NdNumberField &operator=(const v_t<T> &v) {
         DEBUG_ASSERT_EQ(v.size(), nelement(), "Vector size does not match that of numeric field");
         std::copy(v.data(), v.data()+nelement(), dbegin());
         return *this;
     }
 
     template<typename U>
-    bool operator==(const std::vector<U> &v) const {
+    bool operator==(const v_t<U> &v) const {
         DEBUG_ASSERT_EQ(v.size(), nelement(), "Vector size does not match that of numeric field");
         for (uint_t i=0ul; i<m_nelement; ++i) if (v[i]!=(*this)[i]) return false;
         return true;
@@ -123,21 +123,21 @@ struct NdNumberField : NumberFieldBase {
 
 private:
     template<typename U>
-    void copy_to(std::vector<U>& v) const {
+    void copy_to(v_t<U>& v) const {
         DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
         // can't copy since the target type doesn't match: must dereference element-wise and attempt to convert
         for (uint_t i=0ul; i<m_nelement; ++i) v[i] = U((*this)[i]);
     }
 
 public:
-    void copy_to(std::vector<T>& v) const {
+    void copy_to(v_t<T>& v) const {
         DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
         std::memcpy(v.data(), begin(), m_size);
     }
 
     template<typename U=T>
-    std::vector<U> to_vector() const {
-        std::vector<U> tmp(m_nelement);
+    v_t<U> to_vector() const {
+        v_t<U> tmp(m_nelement);
         copy_to(tmp);
         return tmp;
     }
@@ -146,7 +146,7 @@ public:
      * math ops
      */
 
-    void add_to(std::vector<T>& v) const {
+    void add_to(v_t<T>& v) const {
         DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
         for (uint_t i = 0ul; i < m_nelement; ++i) v[i] += (*this)[i];
     }

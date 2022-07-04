@@ -97,10 +97,10 @@ private:
 
 public:
 
-    Solver(const conf::Document& opts, Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> ref_locs);
+    Solver(const conf::Document& opts, Propagator &prop, Wavefunction &wf, v_t<TableBase::Loc> ref_locs);
 
     Solver(const conf::Document& opts, Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc):
-        Solver(opts, prop, wf, std::vector<TableBase::Loc>(wf.npart(), ref_loc)){}
+        Solver(opts, prop, wf, v_t<TableBase::Loc>(wf.npart(), ref_loc)){}
 
     /**
      * Perform ncycle iterations of the solver.

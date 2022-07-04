@@ -17,7 +17,7 @@ struct IntegralIndexer {
 template<typename T, typename storage_t>
 struct IntegralStorage {
     static_assert(
-            std::is_same<storage_t, std::vector<T>>::value ||
+            std::is_same<storage_t, v_t<T>>::value ||
             std::is_same<storage_t, SharedArray<T>>::value, "storage class must be either private or shared");
     storage_t m_data;
     const uint_t m_size;
@@ -36,7 +36,7 @@ private:
         return std::abs(elem) >= c_coeff_atol;
     }
 
-    bool set_data(std::vector<T>& data, uint_t iflat, T elem){
+    bool set_data(v_t<T>& data, uint_t iflat, T elem){
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
         if (!is_significant(elem)) return true;
         auto& ref = data[iflat];
@@ -65,7 +65,7 @@ public:
 };
 
 template<typename T>
-using PrivateIntegralStorage = IntegralStorage<T, std::vector<T>>;
+using PrivateIntegralStorage = IntegralStorage<T, v_t<T>>;
 template<typename T>
 using SharedIntegralStorage = IntegralStorage<T, SharedArray<T>>;
 

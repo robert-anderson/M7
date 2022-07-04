@@ -12,12 +12,12 @@ class SpfTwfBase {
 protected:
     const Hamiltonian& m_ham;
     ConnForeachGroup m_conn_iters;
-    std::vector<ham_t> m_numerator;
-    std::vector<ham_t> m_denominator;
+    v_t<ham_t> m_numerator;
+    v_t<ham_t> m_denominator;
 
 public:
-    std::vector<ham_t> m_numerator_total;
-    std::vector<ham_t> m_denominator_total;
+    v_t<ham_t> m_numerator_total;
+    v_t<ham_t> m_denominator_total;
 
     SpfTwfBase(const Hamiltonian &ham, uint_t npart);
 

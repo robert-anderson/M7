@@ -15,7 +15,7 @@ sparse_matrix_examples::rect_double(const uint_t &nrow, const uint_t &ncol, cons
     out.resize(nrow);
 
     uintv_t icols;
-    std::vector<double> values;
+    v_t<double> values;
 
     for (uint_t irow = 0ul; irow < nrow; ++irow) {
         convert::vector(hash::unique_in_range(irow, nnonzero_per_row, 0, ncol, true), icols);

@@ -39,7 +39,7 @@ struct Row {
     /**
      * vector of the associated fields. These are polymorphic pointers to the symbols defined in the subclasses
      */
-    std::vector<FieldBase *> m_fields;
+    v_t<FieldBase *> m_fields;
 private:
     /**
      * these fields define the position of the currently selected row. when set to these initial "null" values, the

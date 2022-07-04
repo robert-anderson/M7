@@ -8,7 +8,7 @@ Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
         FrmExcitGen(h, prng, {exsig::ex_double}, "precomputed heat-bath fermion doubles"),
         m_nspinorb_pair(m_h.m_basis.m_nspinorb_pair),
         m_pick_ab_given_ij(m_nspinorb_pair, m_nspinorb_pair) {
-    std::vector<prob_t> weights(m_nspinorb_pair, 0.0);
+    v_t<prob_t> weights(m_nspinorb_pair, 0.0);
     uint_t ij = 0ul;
     log::info("Initializing pre-computed heat bath sampling weights for doubles...");
     const auto nspinorb = m_h.m_basis.m_nspinorb;

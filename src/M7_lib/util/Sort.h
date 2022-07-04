@@ -49,7 +49,7 @@ namespace sort {
      *  index vector which would sort v to the desired ordering
      */
     template<typename T>
-    uintv_t inds(const std::vector<T> &v, bool asc, bool abs_val) {
+    uintv_t inds(const v_t<T> &v, bool asc, bool abs_val) {
         uintv_t out(v.size());
         std::iota(out.begin(), out.end(), 0);
         if (asc) {
@@ -85,7 +85,7 @@ namespace sort {
      *  if true, sort according to the magnitudes of the numbers in v, else compare only the real parts
      */
     template<typename T>
-    void inplace(std::vector<T> &v, bool asc, bool abs_val) {
+    void inplace(v_t<T> &v, bool asc, bool abs_val) {
         typedef const T &cr_t;
         if (asc) {
             if (abs_val)

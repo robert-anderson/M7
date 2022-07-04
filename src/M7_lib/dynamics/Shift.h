@@ -31,7 +31,7 @@ struct Shift {
      * queues storing the most recent values of the shift in order to enable constant time
      * computation of the rolling average shift values
      */
-    std::vector<std::queue<ham_comp_t>> m_avg_value_histories;
+    v_t<std::queue<ham_comp_t>> m_avg_value_histories;
     /**
      * total unnormalized average shift values
      */

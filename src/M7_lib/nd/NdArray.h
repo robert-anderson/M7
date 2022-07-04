@@ -10,7 +10,7 @@
 template<typename T, uint_t nind>
 struct NdArrayBase {
     NdFormat<nind> m_format;
-    std::vector<T> m_data;
+    v_t<T> m_data;
 
     NdArrayBase(uinta_t<nind> shape): m_format(shape), m_data(m_format.nelement()) {}
 };

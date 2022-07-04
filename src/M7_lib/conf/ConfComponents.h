@@ -132,17 +132,17 @@ namespace conf_components {
     }
 
     template<typename T>
-    static str_t dim_str(const std::vector<T> &) {
+    static str_t dim_str(const v_t<T> &) {
         return log::format("1D {} array", type_str<T>());
     }
 
     template<typename T>
-    static str_t dim_str(const std::vector<std::vector<T>> &) {
+    static str_t dim_str(const v_t<v_t<T>> &) {
         return log::format("2D {} array", type_str<T>());
     }
 
     template<typename T>
-    static str_t dim_str(const std::vector<std::vector<std::vector<T>>> &) {
+    static str_t dim_str(const v_t<v_t<v_t<T>>> &) {
         return log::format("3D {} array", type_str<T>());
     }
 

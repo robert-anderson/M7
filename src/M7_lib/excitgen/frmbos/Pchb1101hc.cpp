@@ -10,7 +10,7 @@ Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
         m_pick_n_given_pq(math::pow<2>(h.m_basis.m_frm.m_nspinorb), h.m_basis.m_bos.m_nmode) {
     const auto nmode = m_h.m_basis.m_bos.m_nmode;
     const auto nspinorb = m_h.m_basis.m_frm.m_nspinorb;
-    std::vector<prob_t> weights(nmode, 0.0);
+    v_t<prob_t> weights(nmode, 0.0);
     uint_t pq = 0ul;
     log::info("Initializing pre-computed samplers for fermion-boson kinetic term...");
     if (mpi::on_node_i_am_root()) {

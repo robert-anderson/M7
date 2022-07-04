@@ -9,8 +9,8 @@ uintv_t Planewaves::make_momentum_shape(const uintv_t &wave_shape) {
     for (auto extent: wave_shape) shape.push_back(2*extent+1);
     return shape;
 }
-std::vector<std::vector<int>> Planewaves::make_momvecs(const uintv_t &wave_shape) {
-    std::vector<std::vector<int>> momvecs;
+v_t<v_t<int>> Planewaves::make_momvecs(const uintv_t &wave_shape) {
+    v_t<v_t<int>> momvecs;
     auto momentum_shape = make_momentum_shape(wave_shape);
     momvecs.reserve(size(wave_shape));
     auto fn = [&wave_shape, &momvecs](const uintv_t& inds){
@@ -41,7 +41,7 @@ Planewaves::Planewaves(const uintv_t& wave_shape) :
 
 Planewaves::Planewaves(uint_t ndim, uint_t nwave) : Planewaves(uintv_t(ndim, nwave)){}
 
-const std::vector<int> &Planewaves::operator[](const uint_t &i) const {
+const v_t<int> &Planewaves::operator[](const uint_t &i) const {
     DEBUG_ASSERT_LT(i, m_size, "basis function index OOB");
     return m_momvecs[i];
 }
@@ -71,7 +71,7 @@ int Planewaves::diff(const uint_t &idim, const uint_t &i, const uint_t &j) const
     return imom[idim]-jmom[idim];
 }
 
-void Planewaves::diff(std::vector<int> &diff, const uint_t &i, const uint_t &j) const {
+void Planewaves::diff(v_t<int> &diff, const uint_t &i, const uint_t &j) const {
     auto& imom = (*this)[i];
     auto& jmom = (*this)[j];
     diff.clear();
@@ -83,7 +83,7 @@ uint_t Planewaves::diff(const uint_t &i, const uint_t &j) const {
     return encode(m_momvec_work);
 }
 
-uint_t Planewaves::encode(const std::vector<int> &momvec) const {
+uint_t Planewaves::encode(const v_t<int> &momvec) const {
     m_inds_work.clear();
     for (uint_t idim=0ul; idim<m_ndim; ++idim)
         m_inds_work.push_back(momvec[idim]+m_wave_format.m_shape[idim]);

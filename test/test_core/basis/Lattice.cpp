@@ -7,7 +7,7 @@
 
 TEST(Lattice, OrthoObc1d) {
     auto lattice = lattice::make("ortho", {6}, {0});
-    std::vector<lattice::adj_row_t> chk_rows = {
+    v_t<lattice::adj_row_t> chk_rows = {
             {{1ul, 1}},
             {{0ul, 1}, {2ul, 1}},
             {{1ul, 1}, {3ul, 1}},
@@ -25,7 +25,7 @@ TEST(Lattice, OrthoObc1d) {
 
 TEST(Lattice, OrthoApbc1d) {
     auto lattice = lattice::make("ortho", {6}, {-1});
-    std::vector<lattice::adj_row_t> chk_rows = {
+    v_t<lattice::adj_row_t> chk_rows = {
             {{5ul, -1}, {1ul, 1}},
             {{0ul, 1}, {2ul, 1}},
             {{1ul, 1}, {3ul, 1}},
@@ -49,7 +49,7 @@ TEST(Lattice, OrthoObc2d) {
      *  8  9  10 11
      */
     auto lattice = lattice::make("ortho", {3, 4}, {0, 0});
-    std::vector<lattice::adj_row_t> chk_rows = {
+    v_t<lattice::adj_row_t> chk_rows = {
             {{4ul, 1}, {1ul, 1}},
             {{5ul, 1}, {0ul, 1}, {2ul, 1}},
             {{6ul, 1}, {1ul, 1}, {3ul, 1}},
@@ -81,7 +81,7 @@ TEST(Lattice, OrthoPbc2d) {
      *      +
      */
     auto lattice = lattice::make("ortho", {3, 3}, {1, -1});
-    std::vector<lattice::adj_row_t> chk_rows = {
+    v_t<lattice::adj_row_t> chk_rows = {
             {{6ul, 1}, {3ul, 1}, {2ul, -1}, {1ul, 1}},
             {{7ul, 1}, {4ul, 1}, {0ul, 1}, {2ul, 1}},
             {{8ul, 1}, {5ul, 1}, {1ul, 1}, {0ul, -1}},

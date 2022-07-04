@@ -81,7 +81,7 @@ void Wavefunction::h5_read(const hdf5::NodeReader& parent, const Hamiltonian& ha
         row_reader.read(iitem);
         conn[ref].connect(ref, row_reader.m_mbf);
         bool ref_conn = ham::is_significant(ham.get_element(ref, conn[ref]));
-        create_row(0ul, row_reader.m_mbf, ham.get_energy(row_reader.m_mbf), std::vector<bool>(npart(), ref_conn));
+        create_row(0ul, row_reader.m_mbf, ham.get_energy(row_reader.m_mbf), v_t<bool>(npart(), ref_conn));
         set_weight(row_reader.m_weight);
     }
 }
@@ -167,7 +167,7 @@ void Wavefunction::remove_row() {
 }
 
 uint_t Wavefunction::create_row_(const uint_t& icycle, const Mbf& mbf, const ham_comp_t& hdiag,
-                                 const std::vector<bool>& refconns) {
+                                 const v_t<bool>& refconns) {
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
     DEBUG_ASSERT_TRUE(mpi::i_am(m_ra.get_rank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
@@ -193,7 +193,7 @@ uint_t Wavefunction::create_row_(const uint_t& icycle, const Mbf& mbf, const ham
 }
 
 TableBase::Loc Wavefunction::create_row(const uint_t& icycle, const Mbf& mbf, const ham_comp_t& hdiag,
-                                        const std::vector<bool>& refconns) {
+                                        const v_t<bool>& refconns) {
     uint_t irank = m_ra.get_rank(mbf);
     uint_t irow;
     if (mpi::i_am(irank)) {

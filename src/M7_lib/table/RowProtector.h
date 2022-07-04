@@ -18,7 +18,7 @@ struct RowProtector {
     /**
      * stores protected status of every row in m_table. should be implemented as a bitmap
      */
-    std::vector<bool> m_flags;
+    v_t<bool> m_flags;
     /**
      * number of true values in m_flags
      */

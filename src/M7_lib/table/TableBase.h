@@ -57,7 +57,7 @@ struct TableBase {
     Buffer::Window m_bw;
     /**
      * "high water mark" is result of the next call to push_back. Think of this as the Table's size by analogy to
-     * std::vector
+     * v_t
      */
     uint_t m_hwm = 0ul;
     /**
@@ -75,7 +75,7 @@ struct TableBase {
     /**
      * save a buffer of zeros for fast memcmp to determine whether a row is cleared
      */
-    const std::vector<char> m_null_row_string;
+    const v_t<char> m_null_row_string;
 
     TableBase(uint_t row_size);
 
@@ -101,7 +101,7 @@ public:
     TableBase(const TableBase& other);
 
     /**
-     * the number of rows in the BufferWindow. Think of this as the Table's capacity by analogy to std::vector
+     * the number of rows in the BufferWindow. Think of this as the Table's capacity by analogy to v_t
      */
     uint_t nrow() const {
         return m_bw.m_nrow;

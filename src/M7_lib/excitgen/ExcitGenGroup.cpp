@@ -56,7 +56,7 @@ ExcitCase& ExcitGenGroup::operator[](uint_t icase) {
     return m_excit_cases[icase];
 }
 
-void ExcitGenGroup::set_probs(const std::vector<prob_t>& probs) {
+void ExcitGenGroup::set_probs(const v_t<prob_t>& probs) {
     DEBUG_ASSERT_EQ(probs.size(), ncase(), "incorrect number of probabilities given");
     prob_t norm = std::accumulate(probs.cbegin(), probs.cend(), 0.0);
     DEBUG_ASSERT_GE(norm, 1e-8, "prob vector norm is too small");
@@ -73,12 +73,12 @@ prob_t ExcitGenGroup::get_prob(uint_t icase) const {
     return m_probs[icase];
 }
 
-const std::vector<prob_t>& ExcitGenGroup::get_probs() const {
+const v_t<prob_t>& ExcitGenGroup::get_probs() const {
     return m_probs;
 }
 
 void ExcitGenGroup::log() const {
-    std::vector<strv_t> rows = {{"Excitation Signature", "Description", "Probability"}};
+    v_t<strv_t> rows = {{"Excitation Signature", "Description", "Probability"}};
     for (uint_t icase=0ul; icase<ncase(); ++icase){
         auto exsig_str = exsig::to_string(m_excit_cases[icase].m_exsig);
         auto prob_str = convert::to_string(get_prob(icase));
@@ -88,7 +88,7 @@ void ExcitGenGroup::log() const {
 }
 
 void ExcitGenGroup::set_probs(const sys::Particles& particles) {
-    std::vector<prob_t> probs;
+    v_t<prob_t> probs;
     probs.reserve(ncase());
     for (const auto& excase: m_excit_cases)
         probs.push_back(excase.m_excit_gen->approx_nconn(excase.m_exsig, particles));

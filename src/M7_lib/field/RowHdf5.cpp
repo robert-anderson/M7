@@ -10,7 +10,7 @@ RowHdf5Base::RowHdf5Base(const Row &row, uint_t nitem, strv_t field_names) :
         m_selected_field_inds(make_selected_field_inds(row.m_fields)) {}
 
 
-uintv_t RowHdf5Base::make_selected_field_inds(const std::vector<FieldBase *> &fields) const {
+uintv_t RowHdf5Base::make_selected_field_inds(const v_t<FieldBase *> &fields) const {
     uintv_t inds;
     inds.reserve(m_field_names.size());
     for (const auto &field_name: m_field_names) {

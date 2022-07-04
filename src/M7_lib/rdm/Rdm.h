@@ -25,7 +25,7 @@ struct FermionRdm : Communicator<MaeRow<wf_t>, MaeRow<wf_t>, true>, Archivable {
      * all promoters required for an RDM of this rank. Index refers to the number of SQ ops
      * being inserted
      */
-    std::vector<FermionPromoter> m_promoters;
+    v_t<FermionPromoter> m_promoters;
 
     conn::FrmOnv m_conn;
     const bool m_mixed_estimator;

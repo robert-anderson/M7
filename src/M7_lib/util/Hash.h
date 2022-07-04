@@ -63,7 +63,7 @@ namespace hash {
      */
     digest_t in_range(digest_t v, digest_t lo, digest_t hi);
 
-    digest_t in_range(const std::vector<digest_t> &v, digest_t lo, digest_t hi);
+    digest_t in_range(const v_t<digest_t> &v, digest_t lo, digest_t hi);
 
     /**
      * deterministically generate arbitrary testing data: NOT a random number generator
@@ -80,10 +80,10 @@ namespace hash {
      * @return
      *  arbitrary integers with repetition allowed in the [lo, hi) range
      */
-    std::vector<digest_t>
-    in_range(const std::vector<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    v_t<digest_t>
+    in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
 
-    std::vector<digest_t> in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    v_t<digest_t> in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
 
     /**
      * deterministically generate arbitrary testing data: NOT a random number generator
@@ -100,10 +100,10 @@ namespace hash {
      * @return
      *  unrepeated arbitrary integers in the [lo, hi) range
      */
-    std::vector<digest_t>
-    unique_in_range(const std::vector<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    v_t<digest_t>
+    unique_in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
 
-    std::vector<digest_t> unique_in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    v_t<digest_t> unique_in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
 }
 
 

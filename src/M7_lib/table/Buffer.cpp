@@ -96,7 +96,7 @@ void Buffer::resize(uint_t size, double factor) {
         log::info_("Reallocating buffer \"{}\" {} -> {}",
                    m_name, capacity_string(), capacity_string(size));
     }
-    std::vector<buf_t> tmp;
+    v_t<buf_t> tmp;
     try {
         tmp.resize(size, 0);
     }

@@ -14,13 +14,13 @@ template<uint_t nind>
 struct NdSequence {
     NdFormat<nind> m_format;
     typedef uinta_t<nind> inds_t;
-    const std::vector<inds_t> m_inds_vector;
+    const v_t<inds_t> m_inds_vector;
     NdSequence(uinta_t<nind> shape): m_format(shape),
     m_inds_vector(make_inds_vector(m_format)){}
 
     struct Cursor {
         const NdSequence<nind>& m_sequence;
-        typename std::vector<inds_t>::const_iterator m_inds;
+        typename v_t<inds_t>::const_iterator m_inds;
 
         Cursor(const NdSequence<nind>& sequence): m_sequence(sequence){
             to_front();
@@ -67,14 +67,14 @@ struct NdSequence {
         return Cursor(*this);
     }
 
-    static std::vector<uinta_t<nind>> make_inds_vector(const NdFormat<nind>& format) {
+    static v_t<uinta_t<nind>> make_inds_vector(const NdFormat<nind>& format) {
         const uint_t limit = 2<<10;
         if (format.m_nelement > limit){
             log::warn("Attempting to cache {} (> {}) Nd index arrays, this class is intended for small products of Nd extents",
                       format.m_nelement, limit);
         }
         REQUIRE_LE(format.m_nelement, limit, "shape product is too large, highly likely NdSequence is misapplied");
-        std::vector<uinta_t<nind>> tmp;
+        v_t<uinta_t<nind>> tmp;
         uintv_t shape(nind);
         std::copy_n(format.m_shape.cbegin(), nind, shape.begin());
         ProductEnumerator enumerator(std::move(shape));

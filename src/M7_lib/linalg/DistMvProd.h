@@ -37,11 +37,11 @@ namespace dist_mv_prod {
          * input vector buffer whose size is given by the number of columns of M. This size is not assumed to be known
          * until an input vector is passed to the multiply method, whereupon all m_in_vecs are resized accordingly
          */
-        std::vector<T> m_v;
+        v_t<T> m_v;
         /**
          * partial product vector. the full Mv is recovered when these are combined consecutively across all ranks
          */
-        std::vector<T> m_partial_mv;
+        v_t<T> m_partial_mv;
 
     private:
         mpi::counts_t make_counts() const {
@@ -63,7 +63,7 @@ namespace dist_mv_prod {
             all_gather_mv ? all_gather(mv) : gather(mv);
         }
 
-        void parallel_multiply(const std::vector<T> &v, std::vector<T> &mv, bool all_gather_mv) {
+        void parallel_multiply(const v_t<T> &v, v_t<T> &mv, bool all_gather_mv) {
             if (all_gather_mv || mpi::i_am_root()) mv.resize(m_nrow);
             parallel_multiply(v.data(), v.size(), mv.data(), all_gather_mv);
         }

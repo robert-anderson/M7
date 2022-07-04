@@ -13,7 +13,7 @@ public:
     typedef typename std::conditional<mapped, MappedTable<row_t>, Table<row_t>>::type table_t;
 private:
     Buffer m_buffer;
-    std::vector<table_t> m_tables;
+    v_t<table_t> m_tables;
 
     uint_t row_size() const {
         return static_cast<const TableBase &>(m_tables[0]).row_size();

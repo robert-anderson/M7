@@ -109,7 +109,7 @@ struct DeterministicSubspaces {
     /**
      * one instance of DeterministicSubspace per root
      */
-    std::vector<std::unique_ptr<DeterministicSubspace>> m_detsubs;
+    v_t<std::unique_ptr<DeterministicSubspace>> m_detsubs;
 
     DeterministicSubspaces(const conf::Semistochastic &opts);
 

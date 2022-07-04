@@ -94,9 +94,9 @@ private:
          */
         T local_worst_value = 0;
         if (m_lxr.nfound()) local_worst_value = m_lxr.get_value(m_lxr.nfound()-1);
-        std::vector<T> local_worst_values(mpi::nrank());
-        std::vector<uint_t> local_nfounds(mpi::nrank());
-        std::vector<uint_t> local_nrow_nonzero(mpi::nrank());
+        v_t<T> local_worst_values(mpi::nrank());
+        v_t<uint_t> local_nfounds(mpi::nrank());
+        v_t<uint_t> local_nrow_nonzero(mpi::nrank());
         mpi::all_gather(local_worst_value, local_worst_values);
         mpi::all_gather(m_lxr.nfound(), local_nfounds);
         mpi::all_gather(m_lxr.nrow_nonzero(), local_nrow_nonzero);

@@ -7,7 +7,7 @@
 #include "M7_lib/hamiltonian/frm/HeisenbergFrmHam.h"
 
 namespace heisenberg_test {
-    static std::vector<uintv_t> spinvecs() {
+    static v_t<uintv_t> spinvecs() {
         return {{1, 1, 1, 0, 0, 0}, {1, 1, 0, 1, 0, 0}, {1, 1, 0, 0, 1, 0}, {1, 1, 0, 0, 0, 1},
                 {1, 0, 1, 1, 0, 0}, {1, 0, 1, 0, 1, 0}, {1, 0, 1, 0, 0, 1}, {1, 0, 0, 1, 1, 0},
                 {1, 0, 0, 1, 0, 1}, {1, 0, 0, 0, 1, 1}, {0, 1, 1, 1, 0, 0}, {0, 1, 1, 0, 1, 0},
@@ -15,7 +15,7 @@ namespace heisenberg_test {
                 {0, 0, 1, 1, 1, 0}, {0, 0, 1, 1, 0, 1}, {0, 0, 1, 0, 1, 1}, {0, 0, 0, 1, 1, 1}};
     }
 
-    static std::vector<ham_comp_t> energies() {
+    static v_t<ham_comp_t> energies() {
         return {0.5, -0.5, -0.5,  0.5, -0.5, -1.5, -0.5, -0.5, -0.5,  0.5,  0.5,
                 -0.5, -0.5, -0.5, -1.5, -0.5,  0.5, -0.5, -0.5,  0.5};
     }

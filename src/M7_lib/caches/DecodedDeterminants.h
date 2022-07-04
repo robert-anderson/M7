@@ -95,7 +95,7 @@ typedef FlatOrbs<VacantUpdater> VacOrbs;
 template<typename updater_fn, uint_t nind>
 struct NdOrbs__ {
     const NdFormat<nind> m_format;
-    std::vector<uintv_t> m_inds;
+    v_t<uintv_t> m_inds;
     const uintv_t m_map;
 
     FlatOrbs<updater_fn> m_flat;
@@ -179,7 +179,7 @@ struct NdOccupiedUpdater {
      *  the vector of vectors storing set bits in each label
      */
     void operator()(const field::FrmOnv &mbf, const uintv_t& map,
-            uintv_t& flat_inds, std::vector<uintv_t> &nd_inds);
+            uintv_t& flat_inds, v_t<uintv_t> &nd_inds);
 };
 
 
@@ -196,7 +196,7 @@ struct NdVacantUpdater {
      *  the vector of vectors storing clear bits in each label
      */
     void operator()(const field::FrmOnv &mbf, const uintv_t& map,
-            uintv_t& flat_inds, std::vector<uintv_t> &nd_inds);
+            uintv_t& flat_inds, v_t<uintv_t> &nd_inds);
 };
 
 template<uint_t nind>

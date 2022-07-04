@@ -71,7 +71,7 @@ TEST(PRNG, StochasticThreshold) {
 TEST(PRNG, ModularBase){
     PRNG prng(0, 1000);
     const uint32_t modular_base = 6;
-    std::vector<uint_t> frequencies(modular_base, 0ul);
+    v_t<uint_t> frequencies(modular_base, 0ul);
     const uint_t n=10000000;
     for (uint_t i=0; i<n; ++i){
         frequencies[prng.draw_uint(modular_base)]++;

@@ -21,7 +21,7 @@ using namespace exsig;
 class Rdm : public Communicator<MaeRow, MaeRow, true> {
     const uint_t m_ranksig;
     const uint_t m_rank, m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
-    std::vector<FermionPromoter> m_frm_promoters;
+    v_t<FermionPromoter> m_frm_promoters;
     buffered::MaeInds m_lookup_inds;
     static uint_t nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size);
 

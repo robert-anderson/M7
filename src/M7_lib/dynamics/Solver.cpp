@@ -5,7 +5,7 @@
 #include "Solver.h"
 
 Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
-               std::vector<TableBase::Loc> ref_locs) :
+               v_t<TableBase::Loc> ref_locs) :
         m_prop(prop), m_opts(opts), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_exit("exit"),

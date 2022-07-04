@@ -25,7 +25,7 @@ void VacantUpdater::operator()(const field::FrmOnv &onv, uintv_t &uintv_t) {
 
 
 void NdOccupiedUpdater::operator()(const field::FrmOnv &onv, const uintv_t& map,
-        uintv_t& flat_inds, std::vector<uintv_t> &nd_inds) {
+        uintv_t& flat_inds, v_t<uintv_t> &nd_inds) {
     flat_inds.clear();
     for (auto& v :nd_inds) v.clear();
     for (uint_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
@@ -40,7 +40,7 @@ void NdOccupiedUpdater::operator()(const field::FrmOnv &onv, const uintv_t& map,
 
 
 void NdVacantUpdater::operator()(const field::FrmOnv &onv, const uintv_t& map,
-        uintv_t& flat_inds, std::vector<uintv_t> &nd_inds){
+        uintv_t& flat_inds, v_t<uintv_t> &nd_inds){
     flat_inds.clear();
     for (auto& v :nd_inds) v.clear();
     for (uint_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {

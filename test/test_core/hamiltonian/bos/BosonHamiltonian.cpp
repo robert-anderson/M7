@@ -72,7 +72,7 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
     buffered::BosOnv dst(ham.m_basis);
     conn::BosOnv conn(src);
 
-    std::vector<uintv_t> basis =
+    v_t<uintv_t> basis =
             {{0, 0, 0, 5, 0},
              {0, 0, 1, 3, 1},
              {0, 0, 2, 1, 2},
@@ -80,7 +80,7 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
              {0, 1, 1, 0, 3},
              {1, 0, 0, 1, 3}};
 
-    std::vector<ham_comp_t> h_upper_triangle =
+    v_t<ham_comp_t> h_upper_triangle =
             {1.2103072956898178, 0.0, 0.0, 0.0, 0.0, 1.3258252147247769,
             1.0825317547305484, 0.0, 0.0, 0.6123724356957947,
             1.0825317547305484, 0.37500000000000006, 0.6629126073623882,

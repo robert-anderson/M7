@@ -19,7 +19,7 @@ TEST(DistMvProd, SparseRealSym) {
     ASSERT_EQ(global_mat.nrow(), nrow);
     ASSERT_EQ(mpi::all_sum(local_mat.nrow()), nrow);
 
-    std::vector<T> in, out, out_chk;
+    v_t<T> in, out, out_chk;
     if (mpi::i_am_root()) convert::vector(hash::in_range(0, nrow, 0, 12, false), in);
 
     dist_mv_prod::Sparse<T> prod(local_mat);

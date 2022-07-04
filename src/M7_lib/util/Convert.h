@@ -131,7 +131,7 @@ namespace convert {
     }
 
     template<typename T>
-    static str_t to_string(const std::vector<T> &v, uint_t fp = default_fp<T>()) {
+    static str_t to_string(const v_t<T> &v, uint_t fp = default_fp<T>()) {
         auto fn = [&v, &fp](uint_t i, str_t &word) {
             if (i >= v.size()) return false;
             word = to_string(v[i], fp);
@@ -167,7 +167,7 @@ namespace convert {
     template<typename T>
     static str_t to_string(const std::list<T> &v, uint_t fp = default_fp<T>()) {
         auto cpy = v;
-        std::vector<T> tmp;
+        v_t<T> tmp;
         for (const auto &it: v) tmp.push_back(it);
         return to_string(tmp, fp);
     }
@@ -189,8 +189,8 @@ namespace convert {
     }
 
     template<typename narrow_t, typename wide_t>
-    static std::vector<narrow_t> safe_narrow(const std::vector<wide_t> &wides) {
-        std::vector<narrow_t> narrows;
+    static v_t<narrow_t> safe_narrow(const v_t<wide_t> &wides) {
+        v_t<narrow_t> narrows;
         narrows.reserve(wides.size());
         for (auto &it: wides) narrows.push_back(convert::safe_narrow<narrow_t>(it));
         return narrows;
@@ -198,15 +198,15 @@ namespace convert {
 
     namespace {
         template<typename to_t, typename from_t>
-        static void vector(const std::vector<from_t> &from, std::vector<to_t> &to, tag::Int<false> /*same*/) {
+        static void vector(const v_t<from_t> &from, v_t<to_t> &to, tag::Int<false> /*same*/) {
             static_assert(std::is_convertible<from_t, to_t>::value, "incompatible types");
             to.clear();
             to.reserve(from.size());
             for (auto &i: from) to.push_back(i);
         }
         template<typename to_t, typename from_t>
-        static std::vector<to_t> vector(const std::vector<from_t> &from, tag::Int<false> /*same*/) {
-            std::vector<to_t> to;
+        static v_t<to_t> vector(const v_t<from_t> &from, tag::Int<false> /*same*/) {
+            v_t<to_t> to;
             vector(from, to, tag::Int<false>());
             return to;
         }
@@ -214,28 +214,28 @@ namespace convert {
          * no need to iterate when the to and from type are identical
          */
         template<typename to_t, typename from_t>
-        static void vector(const std::vector<from_t> &from, std::vector<to_t> &to, tag::Int<true> /*same*/) {
+        static void vector(const v_t<from_t> &from, v_t<to_t> &to, tag::Int<true> /*same*/) {
             to = from;
         }
         template<typename to_t, typename from_t>
-        static std::vector<to_t> vector(const std::vector<from_t> &from, tag::Int<true> /*same*/) {
+        static v_t<to_t> vector(const v_t<from_t> &from, tag::Int<true> /*same*/) {
             return from;
         }
     }
 
     template<typename to_t, typename from_t>
-    static void vector(const std::vector<from_t> &from, std::vector<to_t> &to) {
+    static void vector(const v_t<from_t> &from, v_t<to_t> &to) {
         vector(from, to, tag::Int<std::is_same<to_t, from_t>::value>());
     }
 
     template<typename to_t, typename from_t>
-    static std::vector<to_t> vector(const std::vector<from_t> &from) {
+    static v_t<to_t> vector(const v_t<from_t> &from) {
         return vector<to_t>(from, tag::Int<std::is_same<to_t, from_t>::value>());
     }
 }
 
 template<typename T>
-static std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
+static std::ostream &operator<<(std::ostream &os, const v_t<T> &v) {
     os << convert::to_string(v);
     return os;
 }

@@ -141,7 +141,7 @@ TEST(MappedTable, Copy) {
             "Lorem ipsum", "dolor sit amet,", "consectetur", "adipiscing elit,", "sed do",
             "eiusmod tempor", "incididunt", "ut", "labore et", "dolore", "magna aliqua."
     };
-    const std::vector<float> floats = {1.3, 1.4, 2.5, 2.6, 3.7, 3.8};
+    const v_t<float> floats = {1.3, 1.4, 2.5, 2.6, 3.7, 3.8};
 
     buffered::Number<uint_t> key;
     for (uint_t i=0ul; i<nentry; ++i) {

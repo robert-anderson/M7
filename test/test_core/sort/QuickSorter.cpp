@@ -35,7 +35,7 @@ namespace quick_sorter_test {
         return {"alpaca", "alpha", "beetle", "catamaran", "catapult"};
     }
 
-    static std::vector<uint_t> correct_counts() {
+    static v_t<uint_t> correct_counts() {
         return {5, 4, 3, 2, 4};
     }
 

@@ -214,24 +214,24 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @return
      */
     uint_t create_row_(const uint_t &icycle, const field::Mbf &mbf,
-                       const ham_comp_t &hdiag, const std::vector<bool>& refconns);
+                       const ham_comp_t &hdiag, const v_t<bool>& refconns);
 
 
     uint_t create_row_(const uint_t &icycle, const field::Mbf &mbf,
                        const ham_comp_t &hdiag, bool refconn) {
-        return create_row_(icycle, mbf, hdiag, std::vector<bool>(npart(), refconn));
+        return create_row_(icycle, mbf, hdiag, v_t<bool>(npart(), refconn));
     }
 
     /**
      * Called on all ranks, dispatching create_row_ on the assigned rank only
      */
     TableBase::Loc create_row(const uint_t& icycle, const field::Mbf &mbf,
-                              const ham_comp_t &hdiag, const std::vector<bool>& refconns);
+                              const ham_comp_t &hdiag, const v_t<bool>& refconns);
 
 
     TableBase::Loc create_row(const uint_t& icycle, const field::Mbf &mbf,
                               const ham_comp_t &hdiag, bool refconn) {
-        return create_row(icycle, mbf, hdiag, std::vector<bool>(npart(), refconn));
+        return create_row(icycle, mbf, hdiag, v_t<bool>(npart(), refconn));
     }
 
     uint_t add_spawn(const field::Mbf &dst_mbf, const wf_t &delta,

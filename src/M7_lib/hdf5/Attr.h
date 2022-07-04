@@ -36,7 +36,7 @@ namespace hdf5 {
         const hid_t m_handle;
 
     public:
-        AttrWriter(hid_t parent_handle, const str_t &name, const std::vector <hsize_t> &shape, hid_t h5type);
+        AttrWriter(hid_t parent_handle, const str_t &name, const v_t <hsize_t> &shape, hid_t h5type);
 
         ~AttrWriter();
 

@@ -30,7 +30,7 @@ FcidumpInfo::FcidumpInfo(const hdf5::FileReader &reader) :
                     reader.read_attr<int64_t>("NORB", 0ul),
                     reader.read_attr<int>("MS2", sys::frm::c_undefined_ms2),
                     integer::shifted(convert::vector<uint_t>(
-                            reader.read_attr<std::vector<int64_t>>("ORBSYM", {})),false)){}
+                            reader.read_attr<v_t<int64_t>>("ORBSYM", {})),false)){}
 
 FcidumpInfo FcidumpInfo::make(const str_t& fname) {
     if (hdf5::FileBase::is_hdf5(fname)) return {hdf5::FileReader(fname)};

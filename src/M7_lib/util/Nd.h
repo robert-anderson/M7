@@ -7,7 +7,7 @@
 
 namespace nd {
     template<typename T>
-    T nelement(const std::vector<T> &v) {
+    T nelement(const v_t<T> &v) {
         T out = 1;
         for (const auto &i: v) out *= i;
         return out;

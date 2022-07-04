@@ -14,10 +14,10 @@ namespace conn_foreach_test {
         Result(uint_t ann, uint_t cre) : m_ann({ann}), m_cre({cre}) {}
     };
 
-    typedef std::vector<Result> results_t;
+    typedef v_t<Result> results_t;
 
-    results_t product_results(const std::vector<uintv_t> &anns, const std::vector<uintv_t> &cres) {
-        const std::vector<uintv_t> default_ops = {{}};
+    results_t product_results(const v_t<uintv_t> &anns, const v_t<uintv_t> &cres) {
+        const v_t<uintv_t> default_ops = {{}};
         const auto &anns_ref = anns.empty() ? default_ops : anns;
         const auto &cres_ref = cres.empty() ? default_ops : cres;
 
@@ -113,13 +113,13 @@ TEST(ConnForeach, FrmGeneralEx2200) {
     mbf = setbits;
     uintv_t clrbits = {0, 2, 4, 7};
     ASSERT_EQ(mbf.m_decoded.m_simple_vacs.get(), clrbits);
-    std::vector<uintv_t> setbit_pairs = {{1, 3},
+    v_t<uintv_t> setbit_pairs = {{1, 3},
                                                {1, 5},
                                                {3, 5},
                                                {1, 6},
                                                {3, 6},
                                                {5, 6}};
-    std::vector<uintv_t> clrbit_pairs = {{0, 2},
+    v_t<uintv_t> clrbit_pairs = {{0, 2},
                                                {0, 4},
                                                {2, 4},
                                                {0, 7},

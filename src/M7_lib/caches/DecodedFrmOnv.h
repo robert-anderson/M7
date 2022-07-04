@@ -61,7 +61,7 @@ namespace decoded_mbf {
             /**
              * ragged array of vectors to store set or clear positions. one vector per label
              */
-            std::vector<uintv_t> m_inds;
+            v_t<uintv_t> m_inds;
             /**
              * map from the spinorb index to the "label"
              */
@@ -74,7 +74,7 @@ namespace decoded_mbf {
 
             LabelledBase(uint_t nelement, const uintv_t &map, const FrmOnvField &mbf);
 
-            const std::vector<uintv_t> &validated() const;
+            const v_t<uintv_t> &validated() const;
 
         public:
             /**
@@ -101,7 +101,7 @@ namespace decoded_mbf {
             LabelledOccs(uint_t nelement, const uintv_t &map, const FrmOnvField &mbf);
 
         public:
-            const std::vector<uintv_t> &get();
+            const v_t<uintv_t> &get();
 
             const uintv_t &simple();
         };
@@ -114,7 +114,7 @@ namespace decoded_mbf {
             LabelledVacs(uint_t nelement, const uintv_t &map, const FrmOnvField &mbf);
 
         public:
-            const std::vector<uintv_t> &get();
+            const v_t<uintv_t> &get();
 
             const uintv_t &simple();
         };
@@ -134,10 +134,10 @@ namespace decoded_mbf {
             /**
              * ragged array of indices from a LabelledOccs or LabelledVacs instance
              */
-            const std::vector<uintv_t> &m_inds_ref;
+            const v_t<uintv_t> &m_inds_ref;
 
         public:
-            NdBase(uinta_t<nind> shape, const std::vector<uintv_t> &inds) :
+            NdBase(uinta_t<nind> shape, const v_t<uintv_t> &inds) :
                     m_format(shape), m_inds_ref(inds) {}
 
             uint_t size(const uint_t &i) const {

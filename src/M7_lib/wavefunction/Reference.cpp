@@ -27,7 +27,7 @@ void Reference::update_ref_conn_flags() {
 }
 
 void Reference::accept_candidate(double redefinition_thresh) {
-    std::vector<wf_comp_t> gather(mpi::nrank());
+    v_t<wf_comp_t> gather(mpi::nrank());
     mpi::all_gather(m_candidate_abs_weight, gather);
     DEBUG_ASSERT_EQ(m_candidate_abs_weight, gather[mpi::irank()], "Gather error");
     uint_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
@@ -102,7 +102,7 @@ wf_t Reference::norm_average_weight(const uint_t& icycle, const uint_t& ipart) c
 }
 
 References::References(const conf::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf,
-                       std::vector<TableBase::Loc> locs) :
+                       v_t<TableBase::Loc> locs) :
         m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
     DEBUG_ASSERT_EQ(locs.size(), wf.m_format.m_nelement,
                     "there should be a parallel table location specifying each reference row");
@@ -127,8 +127,8 @@ void References::contrib_row() {
     for (auto& ref: m_refs) ref.contrib_row();
 }
 
-std::vector<bool> References::is_connected(const field::Mbf &mbf) const {
-    std::vector<bool> out;
+v_t<bool> References::is_connected(const field::Mbf &mbf) const {
+    v_t<bool> out;
     out.reserve(m_refs.size());
     for (uint_t ipart=0ul; ipart<m_refs.size(); ++ipart)
         out.push_back(m_refs[ipart].is_connected(mbf));

@@ -52,12 +52,12 @@ TEST(NumericCsvFileReader, ParseSingleReal){
     uintv_t chk_inds = {4, 3, 9, 9};
     NumericCsvFileReader::parse(line.cbegin()+nreal, line.cend(), inds);
     ASSERT_EQ(inds, chk_inds);
-    std::vector<double> real_values;
-    std::vector<double> chk_real_values = {-0.001368384767972724};
+    v_t<double> real_values;
+    v_t<double> chk_real_values = {-0.001368384767972724};
     NumericCsvFileReader::parse(line.cbegin(), line.cbegin()+nreal, real_values);
     ASSERT_EQ(real_values, chk_real_values);
-    std::vector<std::complex<double>> complex_values;
-    std::vector<std::complex<double>> chk_complex_values = {{-0.001368384767972724, 0.0}};
+    v_t<std::complex<double>> complex_values;
+    v_t<std::complex<double>> chk_complex_values = {{-0.001368384767972724, 0.0}};
     NumericCsvFileReader::parse(line.cbegin(), line.cbegin()+nreal, complex_values);
     ASSERT_EQ(complex_values, chk_complex_values);
 }
@@ -69,12 +69,12 @@ TEST(NumericCsvFileReader, ParseMultiReal){
     uintv_t chk_inds = {4, 3, 9, 9};
     NumericCsvFileReader::parse(line.cbegin()+nreal, line.cend(), inds);
     ASSERT_EQ(inds, chk_inds);
-    std::vector<double> real_values;
-    std::vector<double> chk_real_values = {-0.00134, 12.22, -1.33, 4.5463, -9.012};
+    v_t<double> real_values;
+    v_t<double> chk_real_values = {-0.00134, 12.22, -1.33, 4.5463, -9.012};
     NumericCsvFileReader::parse(line.cbegin(), line.cbegin()+nreal, real_values);
     ASSERT_EQ(real_values, chk_real_values);
-    std::vector<std::complex<double>> complex_values;
-    std::vector<std::complex<double>> chk_complex_values = {{-0.00134, 12.22}, {-1.33, 4.5463}, {-9.012, 0.0}};
+    v_t<std::complex<double>> complex_values;
+    v_t<std::complex<double>> chk_complex_values = {{-0.00134, 12.22}, {-1.33, 4.5463}, {-9.012, 0.0}};
     NumericCsvFileReader::parse(line.cbegin(), line.cbegin()+nreal, complex_values);
     ASSERT_EQ(complex_values, chk_complex_values);
 }

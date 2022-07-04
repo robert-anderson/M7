@@ -27,7 +27,7 @@ namespace lattice {
         int m_phase;
         bool operator==(const AdjElement& other) const;
     };
-    typedef std::vector<AdjElement> adj_row_t;
+    typedef v_t<AdjElement> adj_row_t;
 
     struct Base {
         const uint_t m_nsite;
@@ -74,10 +74,10 @@ namespace lattice {
 
     struct OrthoTopology {
         const NdEnumerationD m_inds;
-        const std::vector<int> m_bcs;
+        const v_t<int> m_bcs;
         const str_t m_info_string;
 
-        OrthoTopology(const uintv_t &shape, const std::vector<int> &bcs);
+        OrthoTopology(const uintv_t &shape, const v_t<int> &bcs);
 
     private:
         int one_dim_phase(uint_t iind, uint_t jind, uint_t idim) const;
@@ -150,7 +150,7 @@ namespace lattice {
      *  shared pointer to a null lattice
      */
     std::shared_ptr<Base> make();
-    std::shared_ptr<Base> make(str_t topo, uintv_t site_shape, std::vector<int> bcs);
+    std::shared_ptr<Base> make(str_t topo, uintv_t site_shape, v_t<int> bcs);
     std::shared_ptr<Base> make(const conf::LatticeModel& opts);
 }
 

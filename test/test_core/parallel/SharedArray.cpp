@@ -28,7 +28,7 @@ TEST(SharedArray, Test) {
 TEST(SharedArray, VectorTest) {
     const uint_t nrow = 10;
     const uint_t nelement_per_rank = 10;
-    std::vector<SharedArray<double>> arrays{};
+    v_t<SharedArray<double>> arrays{};
     for (uint_t i = 0ul; i < nrow; ++i) {
         arrays.emplace_back(mpi::nrank() * nelement_per_rank);
     }

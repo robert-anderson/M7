@@ -65,7 +65,7 @@ public:
 };
 
 class Epochs {
-    std::vector<Epoch> m_epochs;
+    v_t<Epoch> m_epochs;
 public:
     Epochs(str_t name, uint_t n, str_t element_identifier="element"){
         m_epochs.reserve(n);

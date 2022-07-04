@@ -62,7 +62,7 @@ public:
     }
 
     template<typename T>
-    static void parse(c_iter_token_t begin, c_iter_token_t end, std::vector<T>& v){
+    static void parse(c_iter_token_t begin, c_iter_token_t end, v_t<T>& v){
         static_assert(std::is_arithmetic<T>::value, "can only parse arithmetic types");
         v.clear();
         for (auto it = begin; it!=end; ++it) {
@@ -72,7 +72,7 @@ public:
     }
 
     template<typename T>
-    static void parse(c_iter_token_t begin, c_iter_token_t end, std::vector<std::complex<T>>& v){
+    static void parse(c_iter_token_t begin, c_iter_token_t end, v_t<std::complex<T>>& v){
         static_assert(std::is_arithmetic<T>::value, "can only parse arithmetic types");
         v.clear();
         for (auto it = begin; it != end; ++it) {

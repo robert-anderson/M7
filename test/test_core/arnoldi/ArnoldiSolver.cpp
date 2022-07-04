@@ -21,7 +21,7 @@ TEST(ArnoldiSolver, SymNonDist) {
      * check Arnoldi solution against dense LAPACK full diagonalization
      */
     dense::SquareMatrix<double> dense(sym);
-    std::vector<double> evals;
+    v_t<double> evals;
     dense::diag(dense, evals);
     // Arnoldi finds the extremal eigenvalue. in this case, the most positive
     auto dense_eval_it = evals.cbegin()+(nrow-nroot);
@@ -45,7 +45,7 @@ TEST(ArnoldiSolver, SymDist) {
      */
     if (mpi::i_am_root()) {
         dense::SquareMatrix<double> dense(sym);
-        std::vector<double> evals;
+        v_t<double> evals;
         dense::diag(dense, evals);
         auto dense_eval_it = evals.cbegin() + (nrow - nroot);
         for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
@@ -67,7 +67,7 @@ TEST(ArnoldiSolver, NonSymNonDist) {
      */
     dense::SquareMatrix<double> dense(mat);
     // complex eigenvalues required for non-symmetric matrix diagonalization
-    std::vector<std::complex<double>> evals;
+    v_t<std::complex<double>> evals;
     ASSERT_TRUE(dense::diag(dense, evals));
     // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
     sort::inplace(evals, false, true);
@@ -91,7 +91,7 @@ TEST(ArnoldiSolver, NonSymDist) {
      */
     if (mpi::i_am_root()) {
         dense::SquareMatrix<double> dense(mat);
-        std::vector<std::complex<double>> evals;
+        v_t<std::complex<double>> evals;
         dense::diag(dense, evals);
         // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
         sort::inplace(evals, false, true);

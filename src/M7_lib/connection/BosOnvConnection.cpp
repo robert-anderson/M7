@@ -13,7 +13,7 @@ BosOps::BosOps(uint_t nmode): m_pair_ptrs(nmode, nullptr){
     m_pairs.reserve(nmode);
 }
 
-const std::vector<BosOpPair> &BosOps::pairs() const {
+const v_t<BosOpPair> &BosOps::pairs() const {
     return m_pairs;
 }
 

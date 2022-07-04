@@ -40,7 +40,7 @@ namespace conf {
     struct LatticeModel : Section {
         Param<str_t> m_topology;
         Param<uintv_t> m_site_shape;
-        Param<std::vector<int>> m_boundary_conds;
+        Param<v_t<int>> m_boundary_conds;
 
         LatticeModel(Group *parent, str_t name, str_t description);
 

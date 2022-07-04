@@ -14,13 +14,13 @@
  */
 namespace prob {
 
-    static void normalize(std::vector <prob_t> &v, prob_t norm = 1.0) {
+    static void normalize(v_t <prob_t> &v, prob_t norm = 1.0) {
         auto tot = std::accumulate(v.begin(), v.end(), 0.0);
         auto fac = norm / tot;
         for (auto &i: v) i *= fac;
     }
 
-    static void rectify(std::vector <prob_t> &v, prob_t min) {
+    static void rectify(v_t <prob_t> &v, prob_t min) {
         for (auto &prob: v) if (prob < min) prob = min;
         normalize(v);
     }

@@ -127,7 +127,7 @@ TEST(FrmOnvField, ForeachSetBitPair) {
      * the order of set bit pairs returned should match that of the ascending-ordered basic foreach pair iterator
      */
     using namespace basic_foreach;
-    std::vector<ctnd::inds_t<2>> setbit_pairs;
+    v_t<ctnd::inds_t<2>> setbit_pairs;
     {
         auto fn = [&](const ctnd::inds_t<2>& inds) {
             setbit_pairs.push_back({setbits[inds[0]], setbits[inds[1]]});
@@ -158,7 +158,7 @@ TEST(FrmOnvField, ForeachSetBitTriple) {
      * the order of set bit pairs returned should match that of the ascending-ordered basic foreach pair iterator
      */
     using namespace basic_foreach;
-    std::vector<ctnd::inds_t<3>> setbit_triples;
+    v_t<ctnd::inds_t<3>> setbit_triples;
     {
         auto fn = [&](const ctnd::inds_t<3>& inds) {
             setbit_triples.push_back({setbits[inds[0]], setbits[inds[1]], setbits[inds[2]]});

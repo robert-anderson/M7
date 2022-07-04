@@ -59,7 +59,7 @@ private:
     /**
      * a zero-valued string so that memory can be cleared by copy
      */
-    std::vector<char> m_null_string;
+    v_t<char> m_null_string;
     /**
      * number of bytes by which Field is offset from the beginning of the Row (first Field to be added has offset 0)
      */

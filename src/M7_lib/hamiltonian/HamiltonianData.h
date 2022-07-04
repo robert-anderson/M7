@@ -19,7 +19,7 @@ namespace ham {
         const uint_t m_basesig;
         const uint_t m_nexsig_contrib_frm, m_nexsig_contrib_bos;
 
-        std::vector<bool> m_exsig_nonzero;
+        v_t<bool> m_exsig_nonzero;
 
         uint_t ind(uint_t exsig) const;
 

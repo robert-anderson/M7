@@ -117,18 +117,18 @@ struct RankAllocatorBase {
      * push inward-transferred blocks indices to front
      * pop outward-transferred block indices to back
      */
-    std::vector<std::list<uint_t>> m_rank_to_blocks;
+    v_t<std::list<uint_t>> m_rank_to_blocks;
     /**
      * "work time" stands for the figure of merit representing the cost associated with a
      * block. The vector is of length m_nblock but of course only elements at block indices
      * allocated to the local rank are non-zero.
      */
-    std::vector<double> m_mean_work_times;
+    v_t<double> m_mean_work_times;
     /**
      * work times must be summed to give the total work time for the local rank, and then
      * that total is gathered in order to determine the "busiest" and "laziest" ranks.
      */
-    std::vector<double> m_gathered_total_times;
+    v_t<double> m_gathered_total_times;
     /**
      * If the fractional difference in work done by the busiest and laziest ranks is less
      * than this number, then do a null update.

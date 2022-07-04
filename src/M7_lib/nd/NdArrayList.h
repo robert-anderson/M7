@@ -10,7 +10,7 @@
 template<typename T, uint_t nind>
 struct NdArrayList {
     NdFormat<nind> m_format;
-    std::vector<T> m_data;
+    v_t<T> m_data;
     uint_t m_size;
 
     template<typename ...Args>

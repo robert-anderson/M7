@@ -82,7 +82,7 @@ str_t log::get_demangled_prototype(const char *line) {
 }
 
 strv_t log::get_backtrace(uint_t depth) {
-    std::vector<void*> entries(depth);
+    v_t<void*> entries(depth);
     uint_t size;
     size = backtrace(entries.data(), depth);
     auto symbols = backtrace_symbols(entries.data(), size);
@@ -101,7 +101,7 @@ void log::error_backtrace_(uint_t depth) {
     for (const auto& line: tmp) if (!line.empty()) error_(line);
 }
 
-strv_t log::make_table(const std::vector<strv_t> &rows, bool header, uint_t padding) {
+strv_t log::make_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
     if (rows.empty()) return {};
     auto fn = [](const strv_t& row1, const strv_t& row2){
         return row1.size() < row2.size();
@@ -143,7 +143,7 @@ strv_t log::make_table(const std::vector<strv_t> &rows, bool header, uint_t padd
     return row_strs;
 }
 
-strv_t log::make_table(const str_t &title, const std::vector<strv_t> &rows,
+strv_t log::make_table(const str_t &title, const v_t<strv_t> &rows,
                 bool header, uint_t padding) {
     if (rows.empty()) return {};
     strv_t table;
@@ -171,20 +171,20 @@ void log::info_lines_(const strv_t &lines) {
     for (const auto& line: lines) info_(line);
 }
 
-void log::info_table(const std::vector<strv_t> &rows, bool header, uint_t padding) {
+void log::info_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
     info_lines(make_table(rows, header, padding));
 }
 
-void log::info_table(const str_t &title, const std::vector<strv_t> &rows, bool header,
+void log::info_table(const str_t &title, const v_t<strv_t> &rows, bool header,
                      uint_t padding) {
     info_lines(make_table(title, rows, header, padding));
 }
 
-void log::info_table_(const std::vector<strv_t> &rows, bool header, uint_t padding) {
+void log::info_table_(const v_t<strv_t> &rows, bool header, uint_t padding) {
     info_lines_(make_table(rows, header, padding));
 }
 
-void log::info_table_(const str_t &title, const std::vector<strv_t> &rows, bool header,
+void log::info_table_(const str_t &title, const v_t<strv_t> &rows, bool header,
                       uint_t padding) {
     info_lines_(make_table(title, rows, header, padding));
 }

@@ -83,9 +83,9 @@ struct ReductionSyndicateGroupBase {
 
 template<typename T>
 struct ReductionSyndicateGroup : ReductionSyndicateGroupBase {
-    std::vector<ReductionBase<T> *> m_members;
-    std::vector<T> m_local_buffer;
-    std::vector<T> m_reduced_buffer;
+    v_t<ReductionBase<T> *> m_members;
+    v_t<T> m_local_buffer;
+    v_t<T> m_reduced_buffer;
 
     ReductionSyndicateGroup() {}
 

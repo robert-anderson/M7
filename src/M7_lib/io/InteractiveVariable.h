@@ -69,10 +69,10 @@ private:
     }
 
     template<typename T>
-    bool read_vector(std::vector<T> &v, strv_t& lines) {
+    bool read_vector(v_t<T> &v, strv_t& lines) {
         uint_t nelement = lines.size();
         mpi::bcast(nelement);
-        std::vector<T> tmp;
+        v_t<T> tmp;
         tmp.reserve(nelement);
         bool invalid = false;
         if (mpi::i_am_root()) {
@@ -91,18 +91,18 @@ private:
 
     template<typename T>
     bool read_check(T &v, strv_t& lines) {
-        std::vector<T> tmp{v};
+        v_t<T> tmp{v};
         auto res = read_vector(tmp, lines);
         if (!res) return false;
         v = tmp[0];
         return true;
     }
 
-    bool read_check(std::vector<bool> &v, strv_t& lines) {
-        std::vector<char> tmp;
+    bool read_check(v_t<bool> &v, strv_t& lines) {
+        v_t<char> tmp;
         auto res = read_vector(tmp, lines);
         if (!res) return false;
-        std::vector<bool> tmp2;
+        v_t<bool> tmp2;
         tmp.reserve(tmp.size());
         for (const auto &c: tmp) {
             if (c == 0 || c == 1) tmp2.push_back(!!c);
@@ -115,7 +115,7 @@ private:
     }
 
     bool read_check(bool &v, strv_t& lines) {
-        std::vector<bool> tmp{v};
+        v_t<bool> tmp{v};
         auto res = read_check(tmp, lines);
         if (!res) return false;
         v = tmp[0];
@@ -123,8 +123,8 @@ private:
     }
 
     template<typename T>
-    bool read_check(std::vector<T> &v, strv_t& lines) {
-        std::vector<T> tmp{v};
+    bool read_check(v_t<T> &v, strv_t& lines) {
+        v_t<T> tmp{v};
         auto res = read_vector(tmp, lines);
         if (!res) return false;
         if (tmp.size()==v.size()) v = tmp;

@@ -57,7 +57,7 @@ struct NdFormatD {
     }
 
     template<typename T>
-    void decode_flat(const uint_t& iflat, std::vector<T>& inds) const {
+    void decode_flat(const uint_t& iflat, v_t<T>& inds) const {
         static_assert(std::is_integral<T>::value, "index type must be integral");
         inds.clear();
         uint_t remainder = iflat;
@@ -71,11 +71,11 @@ struct NdFormatD {
 
 struct NdEnumerationD : NdFormatD {
 private:
-    const std::vector<uintv_t> m_inds;
+    const v_t<uintv_t> m_inds;
 
-    static std::vector<uintv_t> make_inds(const NdFormatD& format) {
+    static v_t<uintv_t> make_inds(const NdFormatD& format) {
         using namespace basic_foreach::rtnd;
-        std::vector<uintv_t> out(format.m_nelement);
+        v_t<uintv_t> out(format.m_nelement);
         uint_t i=0ul;
         auto fn = [&out, &i](const uintv_t& inds){
             out[i] = inds;

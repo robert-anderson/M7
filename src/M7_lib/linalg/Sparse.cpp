@@ -103,7 +103,7 @@ void sparse::Network::get_row_subset(Network &subnet, uint_t count, uint_t displ
     subnet.resize(count);
     auto begin = m_rows_icols.cbegin()+uintv_t::difference_type(displ);
     auto end = begin + uintv_t::difference_type(count);
-    subnet.m_rows_icols = std::vector<uintv_t>(begin, end);
+    subnet.m_rows_icols = v_t<uintv_t>(begin, end);
     // data is now copied, now update metadata
     for (const auto& row: subnet.m_rows_icols){
         if (row.empty()) continue;

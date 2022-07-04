@@ -24,7 +24,7 @@ namespace hdf5 {
         /**
          * shape of the list items
          */
-        const std::vector<hsize_t> m_item_dims;
+        const v_t<hsize_t> m_item_dims;
         /**
          * length of the item shape
          */
@@ -48,11 +48,11 @@ namespace hdf5 {
         /**
          * local shape of the list
          */
-        const std::vector<hsize_t> m_list_dims_local;
+        const v_t<hsize_t> m_list_dims_local;
         /**
          * global shape of the list
          */
-        const std::vector<hsize_t> m_list_dims_global;
+        const v_t<hsize_t> m_list_dims_global;
         /**
          * sum of m_nitem_local for all MPI ranks with index less than this rank
          */
@@ -61,11 +61,11 @@ namespace hdf5 {
         /**
          * extent of the currently selected hyperslab in the HDF5 dataset
          */
-        std::vector<hsize_t> m_hyperslab_counts;
+        v_t<hsize_t> m_hyperslab_counts;
         /**
          * multidimensional offset for the currently selected hyperslab
          */
-        std::vector<hsize_t> m_hyperslab_offsets;
+        v_t<hsize_t> m_hyperslab_offsets;
         /**
          * HDF5 handles
          */
@@ -90,14 +90,14 @@ namespace hdf5 {
          * @return
          *  list dims aka the overall shape of the local dataset
          */
-        std::vector<hsize_t> get_list_dims_local();
+        v_t<hsize_t> get_list_dims_local();
 
         /**
          * stick the global number of items onto the front of the item shape
          * @return
          *  list dims aka the overall shape of the global dataset
          */
-        std::vector<hsize_t> get_list_dims_global();
+        v_t<hsize_t> get_list_dims_global();
 
         /**
          * @return
@@ -181,7 +181,7 @@ namespace hdf5 {
             auto rank = extract_list_ndim(parent_handle, name);
             auto dataset = H5Dopen1(parent_handle, name.c_str());
             auto dataspace = H5Dget_space(dataset);
-            std::vector<hsize_t> dims(rank, 0ul);
+            v_t<hsize_t> dims(rank, 0ul);
             H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
             H5Sclose(dataspace);
             H5Dclose(dataset);

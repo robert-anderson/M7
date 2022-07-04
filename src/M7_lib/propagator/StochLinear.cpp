@@ -141,7 +141,7 @@ uint_t StochLinear::ncase_excit_gen() const {
     return m_excit_gen_group.ncase();
 }
 
-std::vector<prob_t> StochLinear::excit_gen_case_probs() const {
+v_t<prob_t> StochLinear::excit_gen_case_probs() const {
     return m_excit_gen_group.get_probs();
 }
 

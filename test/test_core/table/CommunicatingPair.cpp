@@ -87,7 +87,7 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
 
     auto nrow_max = mpi::all_max(nrow_this_rank);
 
-    std::vector<uint_t> nrows_expect;
+    v_t<uint_t> nrows_expect;
     nrows_expect.reserve(mpi::nrank());
     for (auto irank=0ul; irank<mpi::nrank(); ++irank)
         nrows_expect.push_back(hash::in_range(irank, nrow_rank_lo, nrow_rank_hi));

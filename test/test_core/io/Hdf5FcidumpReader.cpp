@@ -15,7 +15,7 @@ TEST(Hdf5FcidumpReader, Header) {
     auto shape = hdf5::DatasetReader::get_shape<hsize_t>(fr, "FOCK_INDEX");
     ASSERT_EQ(shape[0], 6ul);
     ASSERT_EQ(shape[1], 2ul);
-    auto inds = fr.read_data<std::vector<int64_t>>("FOCK_INDEX");
+    auto inds = fr.read_data<v_t<int64_t>>("FOCK_INDEX");
 
     std::cout << inds << std::endl;
 

@@ -50,7 +50,7 @@ struct FermionPromoter {
     /**
      * enumeration of all possible combinations
      */
-    std::vector<mev_ind_t> m_all_combs;
+    v_t<mev_ind_t> m_all_combs;
 
     FermionPromoter(uint_t ncom, uint_t nop_insert);
 

@@ -28,7 +28,7 @@ uint_t lattice::Base::make_nadj_max() {
     return *std::max_element(m_nadjs.cbegin(), m_nadjs.cend());
 }
 
-lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const std::vector<int> &bcs) :
+lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs) :
     m_inds(shape), m_bcs(bcs),
     m_info_string(log::format("orthogonal lattice with shape {} and boundary conds {}",
                               convert::to_string(m_inds.m_shape), convert::to_string(m_bcs))) {}
@@ -120,7 +120,7 @@ std::shared_ptr<lattice::Base> lattice::make() {
     return smart_ptr::make_poly_shared<Base, Null>(NullTopology());
 }
 
-std::shared_ptr<lattice::Base> lattice::make(str_t topo, uintv_t site_shape, std::vector<int> bcs) {
+std::shared_ptr<lattice::Base> lattice::make(str_t topo, uintv_t site_shape, v_t<int> bcs) {
     if (topo == "ortho" || topo == "orthogonal")
         return smart_ptr::make_poly_shared<Base, Ortho>(OrthoTopology(site_shape, bcs));
     return make();

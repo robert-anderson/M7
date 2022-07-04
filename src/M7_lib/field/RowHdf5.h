@@ -48,7 +48,7 @@ struct RowHdf5Base {
 
 protected:
 
-    uintv_t make_selected_field_inds(const std::vector<FieldBase *>& fields) const;
+    uintv_t make_selected_field_inds(const v_t<FieldBase *>& fields) const;
 
 };
 
@@ -58,7 +58,7 @@ struct RowHdf5ReaderBase : RowHdf5Base {
      */
     Row& m_row;
     hdf5::GroupReader m_group;
-    std::vector<hdf5::NdDistListReader> m_column_readers;
+    v_t<hdf5::NdDistListReader> m_column_readers;
 
     RowHdf5ReaderBase(Row& row, const hdf5::NodeReader& parent, str_t name, strv_t field_names);
 
@@ -114,7 +114,7 @@ struct RowHdf5WriterBase : RowHdf5Base {
      */
     Row& m_row;
     hdf5::GroupWriter m_group;
-    std::vector<hdf5::NdDistListWriter> m_column_writers;
+    v_t<hdf5::NdDistListWriter> m_column_writers;
 
     RowHdf5WriterBase(Row& row, const hdf5::NodeWriter& parent, str_t name, uint_t nitem,
                       strv_t field_names);

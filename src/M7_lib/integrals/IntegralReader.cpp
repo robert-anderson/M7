@@ -63,9 +63,9 @@ bool CsvIntegralReader::complex_valued() const {
 Hdf5IntegralReader::Hdf5IntegralReader(const FcidumpInfo& info, Hdf5IntegralReader::KeyNames names, bool) :
         m_reader(info.m_fname), m_names(std::move(names)),
         m_indices_2e(m_reader, m_names.m_2e_inds),
-        m_values_2e(m_reader.read_data<std::vector<ham_t>>(m_names.m_2e_values)),
+        m_values_2e(m_reader.read_data<v_t<ham_t>>(m_names.m_2e_values)),
         m_indices_1e(m_reader, m_names.m_1e_inds),
-        m_values_1e(m_reader.read_data<std::vector<ham_t>>(m_names.m_1e_values)){
+        m_values_1e(m_reader.read_data<v_t<ham_t>>(m_names.m_1e_values)){
     REQUIRE_EQ(m_indices_2e.nrow(), m_values_2e.size(),
                "number of 2e matrix index arrays should match the number of values");
     REQUIRE_EQ(m_indices_1e.nrow(), m_values_1e.size(),

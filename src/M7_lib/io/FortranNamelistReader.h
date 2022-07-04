@@ -31,7 +31,7 @@ public:
     strv_t read(const str_t &label) const;
 
     template<typename T>
-    void read(std::vector<T>& v, const str_t &label, std::vector<T> default_ = {}) const {
+    void read(v_t<T>& v, const str_t &label, v_t<T> default_ = {}) const {
         v = default_;
         auto tokens = read(label);
         if (tokens.empty()) return;
@@ -39,13 +39,13 @@ public:
         //for (auto &i: v) i+=offset;
     }
 
-    void read(std::vector<bool>& v, const str_t &label, std::vector<bool> default_ = {}) const;
+    void read(v_t<bool>& v, const str_t &label, v_t<bool> default_ = {}) const;
 
-    std::vector<long> read_ints(const str_t &label, std::vector<long> default_ = {}) const;
+    v_t<long> read_ints(const str_t &label, v_t<long> default_ = {}) const;
 
-    std::vector<uint_t> read_uints(const str_t &label, std::vector<uint_t> default_ = {}) const;
+    v_t<uint_t> read_uints(const str_t &label, v_t<uint_t> default_ = {}) const;
 
-    std::vector<bool> read_bools(const str_t &label, std::vector<bool> default_ = {}) const;
+    v_t<bool> read_bools(const str_t &label, v_t<bool> default_ = {}) const;
 
     long read_int(const str_t &label, long default_ = 0l) const;
 

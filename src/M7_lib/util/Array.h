@@ -16,8 +16,8 @@ namespace array {
     }
 
     template<typename T, uint_t nind>
-    static std::vector<T> to_vector(const std::array<T, nind> &array) {
-        std::vector<T> tmp;
+    static v_t<T> to_vector(const std::array<T, nind> &array) {
+        v_t<T> tmp;
         tmp.assign(array.cbegin(), array.cend());
         return tmp;
     }

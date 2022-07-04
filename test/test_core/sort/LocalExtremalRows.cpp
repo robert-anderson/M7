@@ -13,7 +13,7 @@ namespace local_extremal_rows_test {
     typedef BufferedTable<complex_scalar_row_t> complex_scalar_table_t;
     static constexpr uint_t c_nfind = 4;
 
-    static std::vector<std::complex<float>> get_complex_data() {
+    static v_t<std::complex<float>> get_complex_data() {
         return {
                 {1.0,  2.0},
                 {1.5,  0.4},
@@ -27,7 +27,7 @@ namespace local_extremal_rows_test {
     }
 
     static void setup(int_scalar_table_t &table) {
-        const std::vector<int> data = {1, 4, -2, 6, 325, -234, 21, -7, 321};
+        const v_t<int> data = {1, 4, -2, 6, 325, -234, 21, -7, 321};
         table.clear();
         auto row = table.m_row;
         for (auto &i: data) {

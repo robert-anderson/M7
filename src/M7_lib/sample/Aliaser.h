@@ -25,7 +25,7 @@ public:
 
     void update(uint_t irow, const prob_t *probs, uint_t nprob);
 
-    void update(uint_t irow, const std::vector<prob_t> &probs);
+    void update(uint_t irow, const v_t<prob_t> &probs);
 
     uint_t draw(uint_t irow, PRNG &prng) const;
 
@@ -36,9 +36,9 @@ class SingleAliaser : public Aliaser {
 public:
     SingleAliaser(uint_t nprob);
 
-    SingleAliaser(const std::vector<prob_t> &probs);
+    SingleAliaser(const v_t<prob_t> &probs);
 
-    void update(const std::vector<prob_t> &probs);
+    void update(const v_t<prob_t> &probs);
 
     uint_t draw(PRNG &prng) const;
 

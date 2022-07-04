@@ -9,7 +9,7 @@
 TEST(Aliaser, DistributionCheck) {
     PRNG prng(18, 1e4);
 
-    std::vector<prob_t> probs =
+    v_t<prob_t> probs =
         {0, 0.648, 0.025, 0.035, 0.036, 0, 0.0648, 0.053, 0.0723, 0.1234};
     SingleAliaser aliaser(probs);
     uintv_t results(probs.size(), 0ul);

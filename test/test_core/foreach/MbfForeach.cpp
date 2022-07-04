@@ -11,7 +11,7 @@
 namespace mbf_foreach_test {
     namespace frm {
         namespace general {
-            static std::vector<uintv_t> chk_inds() {
+            static v_t<uintv_t> chk_inds() {
                 return {
                         {0, 1, 2, 3}, {0, 1, 2, 4}, {0, 1, 3, 4}, {0, 2, 3, 4}, {1, 2, 3, 4}, {0, 1, 2, 5},
                         {0, 1, 3, 5}, {0, 2, 3, 5}, {1, 2, 3, 5}, {0, 1, 4, 5}, {0, 2, 4, 5}, {1, 2, 4, 5},
@@ -21,7 +21,7 @@ namespace mbf_foreach_test {
         }
 
         namespace spins {
-            static std::vector<uintv_t> chk_inds() {
+            static v_t<uintv_t> chk_inds() {
                 return {
                         {0, 1, 6, 7}, {0, 2, 5, 7}, {1, 2, 4, 7}, {0, 3, 5, 6}, {1, 3, 4, 6}, {2, 3, 4, 5}
                 };
@@ -29,7 +29,7 @@ namespace mbf_foreach_test {
         }
 
         namespace ms2_conserve {
-            static std::vector<uintv_t> chk_inds() {
+            static v_t<uintv_t> chk_inds() {
                 return {
                         {0, 1, 2, 4, 5}, {0, 1, 2, 4, 6}, {0, 1, 2, 5, 6}, {0, 1, 2, 4, 7}, {0, 1, 2, 5, 7},
                         {0, 1, 2, 6, 7},
@@ -46,7 +46,7 @@ namespace mbf_foreach_test {
 
     namespace bos {
         namespace general_open {
-            static std::vector<uintv_t> chk_inds() {
+            static v_t<uintv_t> chk_inds() {
                 return {
                         {0, 0, 0}, {0, 0, 1}, {0, 0, 2}, {0, 1, 0}, {0, 1, 1}, {0, 1, 2}, {0, 2, 0}, {0, 2, 1},
                         {0, 2, 2},

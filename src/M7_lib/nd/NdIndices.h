@@ -28,14 +28,14 @@ class NdIndices : NdFormat<nind> {
         DEBUG_ASSERT_EQ(iflat, 0ul, "invert should not leave a remainder");
         return inds;
     }
-    std::vector<uinta_t<nind>> make_inds() const {
-        std::vector<uinta_t<nind>> inds;
+    v_t<uinta_t<nind>> make_inds() const {
+        v_t<uinta_t<nind>> inds;
         inds.reserve(m_nelement);
         for (uint_t iflat=0ul; iflat<m_nelement; ++iflat) inds.push_back(invert(iflat));
         return inds;
     }
 public:
-    const std::vector<uinta_t<nind>> m_inds;
+    const v_t<uinta_t<nind>> m_inds;
 
     NdIndices(): NdFormat<nind>(), m_inds(make_inds()){}
 

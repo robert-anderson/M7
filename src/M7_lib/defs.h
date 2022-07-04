@@ -35,9 +35,14 @@
  */
 typedef uint64_t uint_t;
 /**
+ * the vector STL container is used ubiquitously, so here a shortcut is created
+ */
+template<typename T>
+using v_t = std::vector<T>;
+/**
  * vector of such integers
  */
-typedef std::vector<uint_t> uintv_t;
+typedef v_t<uint_t> uintv_t;
 /**
  * array of such integers
  */
@@ -49,7 +54,7 @@ using uinta_t = std::array<uint_t, n>;
 typedef std::pair<uint_t, uint_t> uintp_t;
 
 typedef std::string str_t;
-typedef std::vector<str_t> strv_t;
+typedef v_t<str_t> strv_t;
 typedef std::map<str_t, str_t> strmap_t;
 
 

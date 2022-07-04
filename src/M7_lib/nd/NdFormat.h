@@ -278,11 +278,11 @@ public:
 template <uint_t nind>
 struct NdEnumeration : NdFormat<nind>{
 private:
-    const std::vector<std::array<uint_t, nind>> m_inds;
+    const v_t<std::array<uint_t, nind>> m_inds;
 
-    static std::vector<std::array<uint_t, nind>> make_inds(const NdFormat<nind>& format) {
+    static v_t<std::array<uint_t, nind>> make_inds(const NdFormat<nind>& format) {
         using namespace basic_foreach::ctnd;
-        std::vector<std::array<uint_t, nind>> out(format.m_nelement);
+        v_t<std::array<uint_t, nind>> out(format.m_nelement);
         uint_t i=0ul;
         auto fn = [&out, &i](const inds_t<nind>& inds){
             out[i] = inds;

@@ -83,9 +83,9 @@ private:
     hdf5::FileReader m_reader;
     const KeyNames m_names;
     dense::Matrix<int64_t> m_indices_2e;
-    std::vector<ham_t> m_values_2e;
+    v_t<ham_t> m_values_2e;
     dense::Matrix<int64_t> m_indices_1e;
-    std::vector<ham_t> m_values_1e;
+    v_t<ham_t> m_values_1e;
     uint_t m_iline = 0ul;
 public:
     Hdf5IntegralReader(const FcidumpInfo& info, KeyNames names, bool /*spin_major*/);

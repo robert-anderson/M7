@@ -41,7 +41,7 @@ struct MappedTableBase {
     uint_t m_nskip_total = 0.0;
     uint_t m_nlookup_total = 0.0;
 
-    std::vector<std::forward_list<uint_t>> m_buckets;
+    v_t<std::forward_list<uint_t>> m_buckets;
     const uint_t m_remap_nlookup;
     const double m_remap_ratio;
 
@@ -143,7 +143,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
      * @param key
      *  key to lookup
      */
-    LookupResult lookup(const key_field_t &key, std::vector<std::forward_list<uint_t>>& buckets) {
+    LookupResult lookup(const key_field_t &key, v_t<std::forward_list<uint_t>>& buckets) {
         m_nlookup_total++;
         auto nbucket = buckets.size();
         LookupResult res(buckets[key.hash() % nbucket]);
@@ -226,7 +226,7 @@ public:
      * @param buckets
      *  vector of buckets into which the row indices are stored
      */
-    void post_insert_buckets(uint_t irow, std::vector<std::forward_list<uint_t>> &buckets) {
+    void post_insert_buckets(uint_t irow, v_t<std::forward_list<uint_t>> &buckets) {
         DEBUG_ASSERT_FALSE(TableBase::is_cleared(irow), "cannot map to a cleared row");
         m_insert_row.jump(irow);
         // row mustn't have already been added
@@ -258,7 +258,7 @@ public:
             log::info_("replacing current bucket vector of size {} with a new one of size {}",
                        nbucket(), nbucket_new);
         }
-        std::vector<std::forward_list<uint_t>> new_buckets(nbucket_new);
+        v_t<std::forward_list<uint_t>> new_buckets(nbucket_new);
         for (const auto &old_bucket : m_buckets) {
             for (const auto irow : old_bucket) {
                 post_insert_buckets(irow, new_buckets);

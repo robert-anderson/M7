@@ -8,8 +8,8 @@
 namespace parameters_test {
 
     struct Section1 : conf_components::Section {
-        conf_components::Param<std::vector<uint_t>> m_some_numbers;
-        conf_components::Param<std::vector<uint_t>> m_some_unspecified_numbers;
+        conf_components::Param<v_t<uint_t>> m_some_numbers;
+        conf_components::Param<v_t<uint_t>> m_some_unspecified_numbers;
         conf_components::Param<str_t> m_a_string;
 
         struct SubSection1 : conf_components::Section {
@@ -49,7 +49,7 @@ namespace parameters_test {
     };
 
     struct Section3 : conf_components::Section {
-        conf_components::Param <std::vector<double>> m_some_numbers;
+        conf_components::Param <v_t<double>> m_some_numbers;
         conf_components::Param<bool> m_some_flag;
 
         Section3(conf_components::Group *parent) :

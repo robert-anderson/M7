@@ -177,7 +177,7 @@ private:
      * the beginning of the bit string and the beginning of each each dataword to be cached
      */
     const uint_t m_ndataword;
-    mutable std::vector<bool> m_dataword_phases;
+    mutable v_t<bool> m_dataword_phases;
 public:
 
     explicit FrmOnvConnection(const sys::frm::Size& size);

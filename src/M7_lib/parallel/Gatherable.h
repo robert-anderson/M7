@@ -11,17 +11,17 @@
 template<typename T>
 class Gatherable : public Distributed<T> {
 protected:
-    std::vector<T> m_gathered{}; // result of MPI gather
+    v_t<T> m_gathered{}; // result of MPI gather
 public:
     using Distributed<T>::m_local;
     using Distributed<T>::operator=;
     Gatherable() : m_gathered(mpi::nrank()) {}
 
-    const std::vector<T> &gathered() {
+    const v_t<T> &gathered() {
         return m_gathered;
     }
 
-    const std::vector<T> &mpi_gather() {
+    const v_t<T> &mpi_gather() {
         mpi::all_gather(m_local, m_gathered);
         return m_gathered;
     }

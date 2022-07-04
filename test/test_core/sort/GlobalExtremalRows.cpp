@@ -30,9 +30,9 @@ namespace global_extremal_rows_test {
         return nrow;
     }
 
-    static std::vector<int> get_data(uint_t irank) {
+    static v_t<int> get_data(uint_t irank) {
         const auto nrow = get_nrow(irank);
-        std::vector<int> out;
+        v_t<int> out;
         out.reserve(nrow);
         const int vmax = 20;
         for (uint_t i = 0ul; i < nrow; ++i)
@@ -40,7 +40,7 @@ namespace global_extremal_rows_test {
         return out;
     }
 
-    static std::vector<int> get_data_with_skips(uint_t irank) {
+    static v_t<int> get_data_with_skips(uint_t irank) {
         auto data = get_data(irank);
         auto out = data;
         out.clear();
@@ -79,8 +79,8 @@ namespace global_extremal_rows_test {
         Item(uint_t irank, uint_t irow, int value) : m_irank(irank), m_irow(irow), m_value(value) {}
     };
 
-    static std::vector<Item> get_all_sorted(bool largest, bool absval) {
-        std::vector<Item> all_items;
+    static v_t<Item> get_all_sorted(bool largest, bool absval) {
+        v_t<Item> all_items;
         all_items.reserve(get_global_nrow());
         for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
             auto rank_data = get_data(irank);

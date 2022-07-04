@@ -130,11 +130,11 @@ public:
  * a vector of the above-defined single part Reference class
  */
 struct References {
-    std::vector<Reference> m_refs;
+    v_t<Reference> m_refs;
     buffered::Numbers<ham_t, c_ndim_wf> m_proj_energy_nums;
     buffered::Numbers<wf_t, c_ndim_wf> m_weights;
 
-    References(const conf::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs);
+    References(const conf::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf, v_t<TableBase::Loc> locs);
 
     const Reference& operator[](const uint_t& ipart) const;
 
@@ -144,7 +144,7 @@ struct References {
 
     void contrib_row();
 
-    std::vector<bool> is_connected(const field::Mbf &onv) const;
+    v_t<bool> is_connected(const field::Mbf &onv) const;
 
     const field::Numbers<ham_t, c_ndim_wf>& proj_energy_nums();
 

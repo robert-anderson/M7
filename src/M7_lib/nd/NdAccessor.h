@@ -33,13 +33,13 @@ struct NdAccessor {
     }
 
     template<typename U>
-    NdAccessor& operator=(const std::vector<U> &v){
+    NdAccessor& operator=(const v_t<U> &v){
         ASSERT(v.size()==nelement());
         for (uint_t i = 0ul; i < nelement(); ++i) (*this)(i) = v[i];
         return *this;
     }
 
-    NdAccessor &operator=(const std::vector<T> &v) {
+    NdAccessor &operator=(const v_t<T> &v) {
         ASSERT(v.size() == nelement());
         std::memcpy(
                 reinterpret_cast<void*>(m_data),
