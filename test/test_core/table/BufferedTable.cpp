@@ -13,10 +13,20 @@ TEST(BufferedTable, Empty) {
     ASSERT_EQ(table.m_hwm, 0);
     ASSERT_EQ(table.m_bw.m_size, 0);
     ASSERT_EQ(table.m_bw.m_begin, nullptr);
-    auto& row = table.m_row;
-    row.restart();
-    ASSERT_FALSE(row.in_range());
-    ASSERT_FALSE(row.ptr_in_range());
+    table.m_row.restart();
+    ASSERT_FALSE(table.m_row.in_range());
+    ASSERT_FALSE(table.m_row.ptr_in_range());
+    auto cpy = table;
+    ASSERT_EQ(cpy.nrow(), 0);
+    ASSERT_EQ(cpy.m_hwm, 0);
+    ASSERT_EQ(cpy.m_bw.m_size, 0);
+    ASSERT_EQ(cpy.m_bw.m_begin, nullptr);
+    cpy.m_row.restart();
+    ASSERT_FALSE(cpy.m_row.in_range());
+    ASSERT_FALSE(cpy.m_row.ptr_in_range());
+    ASSERT_NE(&cpy.m_row, &table.m_row);
+    ASSERT_EQ(&table, table.m_row.m_table);
+    ASSERT_EQ(&cpy, cpy.m_row.m_table);
 }
 
 TEST(BufferedTable, AllGathervEmpty) {

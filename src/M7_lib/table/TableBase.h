@@ -89,8 +89,10 @@ protected:
      *  ref to this
      */
     TableBase& operator=(const TableBase& other) {
-        resize(other.nrow(), 0.0);
-        m_bw = other.m_bw;
+        if (other.nrow()) {
+            resize(other.nrow(), 0.0);
+            m_bw = other.m_bw;
+        }
         m_hwm = other.m_hwm;
         m_free_rows = other.m_free_rows;
         m_row_protectors = other.m_row_protectors;
