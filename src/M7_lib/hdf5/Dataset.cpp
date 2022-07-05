@@ -32,9 +32,8 @@ void hdf5::DatasetReader::read(void *dst) const {
     REQUIRE_FALSE_ALL(status, "HDF5 Error on dataset load");
 }
 
-hdf5::DatasetWriter::DatasetWriter(hid_t parent_handle, const str_t &name,
-                                   const v_t<hsize_t> &shape, Type type, strv_t dim_names,
-                                   uint_t irank) :
+hdf5::DatasetWriter::DatasetWriter(hid_t parent_handle, const str_t &name, const v_t<hsize_t> &shape,
+                                   Type type, strv_t dim_names, uint_t irank) :
         m_space(DataSpace(shape, !mpi::i_am(irank))),
         m_handle(H5Dcreate2(parent_handle, name.c_str(), type, m_space.m_handle, H5P_DEFAULT,
                             H5P_DEFAULT, H5P_DEFAULT)), m_dim_names(std::move(dim_names)), m_type(H5Dget_type(m_handle)) {

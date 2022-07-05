@@ -94,11 +94,10 @@ namespace hdf5 {
 
     public:
 
-
         template<typename T>
         static const hid_t &type() {
             typedef arith::comp_t<T> comp_t;
-            //static_assert(type_ind<comp_t>(), "type has no HDF5 native equivalent");
+            static_assert(type_ind<comp_t>(), "type has no HDF5 native equivalent");
             return c_types[type_ind<comp_t>()];
         }
 

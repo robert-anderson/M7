@@ -56,7 +56,7 @@ strv_t hdf5::NodeReader::child_names(int type) const {
     return names;
 }
 
-uint_t hdf5::NodeReader::get_dataset_ndim(str_t name) const {
+uint_t hdf5::NodeReader::get_dataset_ndim(const str_t& name) const {
     auto status = H5Gget_objinfo(m_handle, name.c_str(), 0, nullptr);
     REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
     auto dataset = H5Dopen1(m_handle, name.c_str());
@@ -67,7 +67,7 @@ uint_t hdf5::NodeReader::get_dataset_ndim(str_t name) const {
     return rank;
 }
 
-uintv_t hdf5::NodeReader::get_dataset_shape(str_t name) const {
+uintv_t hdf5::NodeReader::get_dataset_shape(const str_t& name) const {
     auto ndim = get_dataset_ndim(name);
     auto dataset = H5Dopen1(m_handle, name.c_str());
     REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));

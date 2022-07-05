@@ -33,7 +33,7 @@ TEST(HDF5Wrapper, String) {
     {
         hdf5::FileWriter fw("table_test.h5");
         hdf5::GroupWriter gw(fw, "container");
-        gw.save("a_string", s, definitive_irank);
+        gw.write_data("a_string", s, definitive_irank);
     }
 }
 
@@ -45,18 +45,15 @@ TEST(HDF5Wrapper, FloatArray) {
     v[2] = hash::in_range(mpi::irank(), 4, 18);
     {
         hdf5::FileWriter fw("table_test.h5");
-        hdf5::GroupWriter gw(fw, "container");
-        gw.write_data("a_float_array", v);//, shape);//, {"dim0", "dim1"}, definitive_irank);
+        fw.write_data("a_float_array", v);
     }
     mpi::barrier();
     {
         hdf5::FileReader fr("table_test.h5");
-        hdf5::GroupReader gr(fr, "container");
         auto nelement = nd::nelement(shape);
         ASSERT_EQ(nelement, v.size());
-        v_t<float> v_read(nelement);
-        ASSERT_TRUE(gr.child_exists("a_float_array"));
-        gr.load("a_float_array", v_read.data(), shape);
+        ASSERT_TRUE(fr.child_exists("a_float_array"));
+        auto v_read = fr.read_data<v_t<float>>("a_float_array");
         auto v_def = v;
         v_def[2] = hash::in_range(definitive_irank, 4, 18);
         ASSERT_EQ(v_read, v_def);
@@ -71,17 +68,12 @@ TEST(HDF5Wrapper, ComplexArray) {
     v[2].imag(hash::in_range(mpi::irank(), 4, 18));
     {
         hdf5::FileWriter fw("table_test.h5");
-        hdf5::GroupWriter gw(fw, "container");
-        gw.save("a_complex_array", v.data(), shape, {"dim0", "dim1"}, definitive_irank);
+        fw.write_data("a_complex_array", v.data(), shape, {"dim0", "dim1"}, definitive_irank);
     }
     mpi::barrier();
     {
         hdf5::FileReader fr("table_test.h5");
-        hdf5::GroupReader gr(fr, "container");
-        auto nelement = nd::nelement(shape);
-        ASSERT_EQ(nelement, v.size());
-        v_t<std::complex<float>> v_read(nelement);
-        gr.load("a_complex_array", v_read.data(), shape);
+        const auto v_read = fr.read_data<v_t<std::complex<float>>>("a_complex_array");
         auto v_def = v;
         v_def[2].imag(hash::in_range(definitive_irank, 4, 18));
         ASSERT_EQ(v_read, v_def);
@@ -115,6 +107,7 @@ TEST(HDF5Wrapper, ComplexArray) {
 
 TEST(HDF5Wrapper, NumberDistributed) {
     BufferedTable<SingleFieldRow<field::Number<hash::digest_t>>> write_table("test int table", {{"integer_field"}});
+    ASSERT_EQ(write_table.nrow(), 0ul);
     auto read_table = write_table;
     const auto nrow = hash::in_range(mpi::irank() + 1, 10, 20);
     log::debug_("number of local rows {}", nrow);
