@@ -143,8 +143,7 @@ strv_t log::make_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
     return row_strs;
 }
 
-strv_t log::make_table(const str_t &title, const v_t<strv_t> &rows,
-                bool header, uint_t padding) {
+strv_t log::make_table(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
     if (rows.empty()) return {};
     strv_t table;
     auto body = make_table(rows, header, padding);
@@ -175,8 +174,7 @@ void log::info_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
     info_lines(make_table(rows, header, padding));
 }
 
-void log::info_table(const str_t &title, const v_t<strv_t> &rows, bool header,
-                     uint_t padding) {
+void log::info_table(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
     info_lines(make_table(title, rows, header, padding));
 }
 
@@ -184,7 +182,6 @@ void log::info_table_(const v_t<strv_t> &rows, bool header, uint_t padding) {
     info_lines_(make_table(rows, header, padding));
 }
 
-void log::info_table_(const str_t &title, const v_t<strv_t> &rows, bool header,
-                      uint_t padding) {
+void log::info_table_(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
     info_lines_(make_table(title, rows, header, padding));
 }

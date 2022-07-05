@@ -91,21 +91,17 @@ struct log {
      * @return
      *  a vector of strings which when printed will display a table in which the rows are vertically aligned
      */
-    static strv_t make_table(const v_t<strv_t>& rows,
-                                               bool header=false, uint_t padding=2);
+    static strv_t make_table(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
-    static strv_t make_table(const str_t& title, const v_t<strv_t>& rows,
-                                               bool header=false, uint_t padding=2);
+    static strv_t make_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
     static void info_table(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
-    static void info_table(const str_t& title, const v_t<strv_t>& rows,
-                           bool header=false, uint_t padding=2);
+    static void info_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
     static void info_table_(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
-    static void info_table_(const str_t& title, const v_t<strv_t>& rows,
-                            bool header=false, uint_t padding=2);
+    static void info_table_(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
     template<typename ...Args>
     static void warn(const str_t& fmt_string, Args&&... args){
