@@ -9,6 +9,7 @@
 
 using namespace integer;
 
+
 TEST(UtilInteger, Factorial) {
     ASSERT_EQ(factorial(0), 1ul);
     ASSERT_EQ(factorial(1), 1ul);
@@ -78,4 +79,23 @@ TEST(UtilInteger, CompileTimeNtup) {
     ASSERT_EQ(ntup<1>(1), 1);
     ASSERT_EQ(ntup<0>(1), 1);
     ASSERT_EQ(ntup<0>(15), 1);
+}
+
+TEST(UtilInteger, LeastCommonMultipleLe) {
+    ASSERT_EQ(integer::lcm_le(1), 1);
+    ASSERT_EQ(integer::lcm_le(2), 2);
+    ASSERT_EQ(integer::lcm_le(3), 3*2);
+    ASSERT_EQ(integer::lcm_le(4), 3*2*2);
+    ASSERT_EQ(integer::lcm_le(5), 5*3*2*2);
+    ASSERT_EQ(integer::lcm_le(6), 5*3*2*2);
+    ASSERT_EQ(integer::lcm_le(7), 7*5*3*2*2);
+    ASSERT_EQ(integer::lcm_le(8), 7*5*3*2*2*2);
+    ASSERT_EQ(integer::lcm_le(9), 7*5*3*3*2*2*2);
+    ASSERT_EQ(integer::lcm_le(10), 7*5*3*3*2*2*2);
+    ASSERT_EQ(integer::lcm_le(11), 11*7*5*3*3*2*2*2);
+    ASSERT_EQ(integer::lcm_le(12), 11*7*5*3*3*2*2*2);
+    ASSERT_EQ(integer::lcm_le(13), 13*11*7*5*3*3*2*2*2);
+    ASSERT_EQ(integer::lcm_le(14), 13*11*7*5*3*3*2*2*2);
+    ASSERT_EQ(integer::lcm_le(15), 13*11*7*5*3*3*2*2*2);
+    ASSERT_EQ(integer::lcm_le(16), 13*11*7*5*3*3*2*2*2*2);
 }

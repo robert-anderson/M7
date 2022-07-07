@@ -62,6 +62,24 @@ namespace integer {
 
     uint_t combinatorial_with_repetition(uint_t n, uint_t r);
 
+    /**
+     * get greatest common divisor of the two given whole numbers
+     */
+    uint_t gcd(uint_t a, uint_t b);
+
+    /**
+     * get least common multiple of the two given whole numbers
+     */
+    uint_t lcm(uint_t a, uint_t b);
+
+    /**
+     * @param n
+     *  maximum number in range
+     * @return
+     *  least common multiple of all whole numbers less than or equal to n
+     */
+    uint_t lcm_le(uint_t n);
+
     template<uint_t n>
     static typename std::enable_if<n == 0ul, uint_t>::type ntup_num(uint_t /*extent*/) {
         return 1ul;

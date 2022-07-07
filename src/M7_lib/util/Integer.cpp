@@ -3,7 +3,7 @@
 //
 
 #include "Integer.h"
-
+#include "M7_lib/parallel/MPIAssert.h"
 
 uint_t integer::rectmap(uint_t irow, uint_t icol, uint_t ncol) {
     // rectangular map
@@ -68,7 +68,7 @@ uint_t integer::nspair(uint_t ndim) {
 }
 
 uint_t integer::factorial(uint_t n) {
-    ASSERT(n < ((uint_t) -1) / 2);
+    DEBUG_ASSERT_LT(n, ((uint_t) -1) / 2, "invalid n");
     uint_t out = 1ul;
     if (n < 1) return 1ul;
     for (uint_t i = 1ul; i <= n; ++i) out *= i;
@@ -81,7 +81,7 @@ uint_t integer::combinatorial(uint_t n, uint_t r) {
      * compute numerator and denominator simultaneously whenever an
      * exact quotient can be computed to avoid premature overflow
      */
-    ASSERT(n >= r);
+    DEBUG_ASSERT_GE(n, r, "selection must be smaller than number of items in combinatorial");
     if (r == 0) return 1ul;
     if (n == 1) return 1ul;
     if (r == n) return 1ul;
@@ -93,11 +93,27 @@ uint_t integer::combinatorial(uint_t n, uint_t r) {
         if (ri < r && out % (r - ri) == 0) {
             out /= r - (ri++);
         } else out *= n - (ni++);
-        ASSERT(ni <= r); // overflow occurred.
+        DEBUG_ASSERT_LE(ni, r, "overflow occurred in exact combinatorial");
         if (ri == r && ni == r) return out;
     }
 }
 
 uint_t integer::combinatorial_with_repetition(uint_t n, uint_t r) {
     return combinatorial(n + r - 1, r);
+}
+
+uint_t integer::gcd(uint_t a, uint_t b) {
+    if (b == 0) return a;
+    return gcd(b, a % b);
+}
+
+uint_t integer::lcm(uint_t a, uint_t b) {
+    return (a*b)/gcd(a, b);
+}
+
+uint_t integer::lcm_le(uint_t n) {
+    DEBUG_ASSERT_TRUE(n, "number must be non-zero");
+    uint_t out = 1;
+    for (uint_t i = 2; i <= n; i++) out = (i * out) / gcd(i, out);
+    return out;
 }

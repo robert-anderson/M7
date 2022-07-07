@@ -18,9 +18,9 @@ bool HeisenbergExchange::draw_frm(uint_t exsig, const field::FrmOnv& src,
      * picked is an integral multiple of all possible numbers of accessible sites, then in any case the modular
      * remainder will provide an unbiased index - saving a PRNG call
      */
-    const auto& nconn_product = lattice->m_unique_nadj_product;
-    const auto rand = m_prng.draw_uint(m_h.m_basis.m_nsite*nconn_product);
-    const auto isite = m_h.m_basis.isite(rand / nconn_product);
+    const auto& nconn_lcm = lattice->m_lcm_le_nadj_max;
+    const auto rand = m_prng.draw_uint(m_h.m_basis.m_nsite * nconn_lcm);
+    const auto isite = m_h.m_basis.isite(rand / nconn_lcm);
     const auto ispin = src.get({1, isite});
     lattice->get_adj_row(isite, m_work_adj_row);
     const auto nvac = m_work_adj_row.size();

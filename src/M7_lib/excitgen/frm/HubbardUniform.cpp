@@ -16,15 +16,15 @@ bool HubbardUniform::draw_frm(uint_t, const field::FrmOnv &src, prob_t &prob, co
      * picked is an integral multiple of all possible numbers of accessible sites, then in any case the modular
      * remainder will provide an unbiased index - saving a PRNG call
      */
-    const auto nconn_product = h.m_basis.m_lattice->m_unique_nadj_product;
+    const auto nconn_lcm = h.m_basis.m_lattice->m_lcm_le_nadj_max;
     const auto &occs = src.m_decoded.m_simple_occs.get();
     const auto nelec = occs.size();
     /*
      * draw a random number with enough entropy to choose both the occupied spin orbital and a connected site regardless
      * of the actual connectivity
      */
-    auto rand = m_prng.draw_uint(nelec * nconn_product);
-    const auto occ = occs[rand / nconn_product];
+    auto rand = m_prng.draw_uint(nelec * nconn_lcm);
+    const auto occ = occs[rand / nconn_lcm];
     const auto isite = src.m_basis.isite(occ);
     const auto ispin = src.m_basis.ispin(occ);
     /*

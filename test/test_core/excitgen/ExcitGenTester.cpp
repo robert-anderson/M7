@@ -4,6 +4,24 @@
 
 #include "ExcitGenTester.h"
 
+
+str_t excit_gen_tester::ExcitGenTester::status_error_msg(Status status) {
+    switch (status) {
+        case Success: return "";
+        case AllNull: return "no non-null excitations were drawn";
+        case GenWithZeroProb: return "non-null excitation generated with zero probability";
+        case ProbMismatch: return "prob of connection doesn't match prob resulting from the draw method";
+        case ProbMismatchGivenHElem: return "prob of connection doesn't match prob resulting from the draw method given helem";
+        case WrongExsig: return "drawn connection has wrong excitation signature";
+        case Unconnected: return "excit generated that was not found in deterministic enumeration";
+        case WrongHElem: return "H element returned by draw method is not consistent with value from Hamiltonian class";
+        case NotAllDrawnAtLeastOnce: return "not all expected connections were drawn at least once";
+        case VarianceIncrease: return "variance in normalized weights did not decrease after doubling number of draws";
+        case WrongWeights: return "normalized weights are not all correct within given tolerance";
+    }
+    return "unknown error";
+}
+
 bool excit_gen_tester::ExcitGenTester::all_drawn_at_least_once() const {
     auto &row = m_results.m_row;
     for (row.restart(); row.in_range(); row.step()){

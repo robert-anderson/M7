@@ -36,6 +36,10 @@ namespace lattice {
          */
         const uintv_t m_nadjs;
         /**
+         * maximum number of adjacent sites for any one site
+         */
+        const uint_t m_nadj_max;
+        /**
          * to help with excitation generation. The number of connections possible from a site i cannot be known before i is
          * selected, and it is efficient to select i and a connected j in a single random number draw. If the random number
          * R is chosen is in the range [0, nsite*m_unique_nconn_product) then R/m_unique_nconn_product gives i and also
@@ -43,14 +47,10 @@ namespace lattice {
          * range is an integral multiple of nconn_i, the modular remainder R%nconn_i is a suitable selecting index for the
          * connected site.
          *
-         * when a set of connections is reached for which is not a divisor of this member, then it is multiplied by the new
-         * number of connections. Thus the ultimate value of this integer is divisible by all nconns
+         * therefore, the least common multiple of all whole numbers less than or equal to the maximum number of
+         * adjacent sites is stored to facilitate this efficient drawing
          */
-        const uint_t m_unique_nadj_product;
-        /**
-         * maximum number of adjacent sites for any one site
-         */
-        const uint_t m_nadj_max;
+        const uint_t m_lcm_le_nadj_max;
 
         Base(const uintv_t& nadjs);
         virtual ~Base() = default;
@@ -68,7 +68,6 @@ namespace lattice {
         }
 
     private:
-        uint_t make_unique_nadj_product();
         uint_t make_nadj_max();
     };
 

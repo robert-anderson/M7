@@ -30,18 +30,29 @@ namespace excit_gen_tester {
     typedef BufferedTable<ResultRow, true> result_table_t;
 
 
-    struct RunStatus {
-        const uint_t m_nnull;
-        const str_t m_error_message;
-        RunStatus(uint_t nnull): m_nnull(nnull){}
-        RunStatus(str_t error_message): m_nnull(~0ul), m_error_message(std::move(error_message)){}
-    };
-
     struct ExcitGenTester {
         const Hamiltonian &m_h;
         ExcitGen& m_excit_gen;
         conn_foreach::Base &m_conn_iter;
         result_table_t m_results;
+
+        /**
+         * a success flag, and flags corresponding to each of the reasons for which an excitation generator can fail
+         */
+        enum Status {
+            Success, /* no issues with draw loop */
+            AllNull, GenWithZeroProb, ProbMismatch, ProbMismatchGivenHElem, WrongExsig, Unconnected, WrongHElem,
+            NotAllDrawnAtLeastOnce, VarianceIncrease, WrongWeights
+        };
+
+        /**
+         * each non-success Status is associated with an error message
+         * @param status
+         *  status flag emitted by the draw loop
+         * @return
+         *  associated error message
+         */
+        str_t status_error_msg(Status status);
 
         ExcitGenTester(const Hamiltonian &h, ExcitGen &excit_gen, conn_foreach::Base &conn_iter) :
                 m_h(h), m_excit_gen(excit_gen), m_conn_iter(conn_iter),
@@ -76,7 +87,7 @@ namespace excit_gen_tester {
         }
 
         template<typename mbf_t>
-        RunStatus run(const mbf_t &src_mbf, uint_t ndraw) {
+        Status perform_draws(const mbf_t &src_mbf, uint_t ndraw) {
             typedef conn::from_field_t<mbf_t> conn_t;
             conn_t conn(src_mbf);
             uint_t exsig = m_conn_iter.m_exsig;
@@ -93,22 +104,19 @@ namespace excit_gen_tester {
                     ++nnull;
                     continue;
                 }
-                if (fptol::numeric_zero(prob)) return {"non-null excitation generated with zero prob!"};
-                if (!fptol::numeric_equal(prob, m_excit_gen.prob(src_mbf, conn)))
-                    return {"prob of connection doesn't match prob resulting from the draw method"};
-                if (!fptol::numeric_equal(prob, m_excit_gen.prob(src_mbf, conn, helem)))
-                    return {"prob of connection doesn't match prob resulting from the draw method given helem"};
-                if (conn.exsig()!=exsig) return {"generated excitation has the wrong exsig"};
+                if (fptol::numeric_zero(prob)) return GenWithZeroProb;
+                if (!fptol::numeric_equal(prob, m_excit_gen.prob(src_mbf, conn))) return ProbMismatch;
+                if (!fptol::numeric_equal(prob, m_excit_gen.prob(src_mbf, conn, helem))) return ProbMismatchGivenHElem;
+                if (conn.exsig()!=exsig) return WrongExsig;
                 work_inds = conn;
                 auto irow = *m_results[work_inds];
-                if (irow==~0ul) return {"excit generated that was not found in deterministic enumeration"};
+                if (irow==~0ul) return Unconnected;
                 row.jump(irow);
                 row.m_occur++;
                 row.m_weight += 1 / prob;
-                if (!fptol::numeric_equal(ham_t(row.m_helem), helem))
-                    return {"excit gen returned the wrong H matrix element"};
+                if (!fptol::numeric_equal(ham_t(row.m_helem), helem)) return WrongHElem;
             }
-            return {nnull};
+            return Success;
         }
 
         /**
@@ -126,9 +134,9 @@ namespace excit_gen_tester {
          * @param tol
          *  tolerance on which to decide correctness
          * @return
-         *  true if all weights are correct within tolerance
+         *  true if all weights are correct within absolute tolerance
          */
-        bool all_correct_weights(uint_t ndraw, double cutoff = 1e-2, prob_t tol = 1e-2) const;
+        bool all_correct_weights(uint_t ndraw, double cutoff, prob_t atol) const;
 
         /**
          * @param ndraw
@@ -137,6 +145,30 @@ namespace excit_gen_tester {
          *  the average absolute error in the normalized weights
          */
         prob_t mean_abs_error(uint_t ndraw) const;
+
+    private:
+        template<typename mbf_t>
+        void run(const mbf_t &src_mbf, uint_t ndraw, Status& status, double cutoff, prob_t atol) {
+            fill_results_table(src_mbf);
+            status = perform_draws(src_mbf, ndraw);
+            if (status!=Success) return;
+            status = all_drawn_at_least_once() ? Success : NotAllDrawnAtLeastOnce;
+            if (status!=Success) return;
+            auto av_err1 = mean_abs_error(ndraw);
+            status = perform_draws(src_mbf, ndraw);
+            if (status!=Success) return;
+            auto av_err2 = mean_abs_error(2 * ndraw);
+            status = (av_err2 < av_err1) ? Success : VarianceIncrease;
+            if (status!=Success) return;
+            status = all_correct_weights(2 * ndraw, cutoff, atol) ? Success : WrongWeights;
+        }
+    public:
+        template<typename mbf_t>
+        std::string run(const mbf_t &src_mbf, uint_t ndraw, double cutoff = 1e-2, prob_t atol = 1e-2) {
+            Status status;
+            run(src_mbf, ndraw, status, cutoff, atol);
+            return status_error_msg(status);
+        }
     };
 }
 

@@ -24,14 +24,5 @@ TEST(Pchb1101hc, Test){
 
     foreach_t conn_iter;
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
-
-    tester.fill_results_table(src_mbf);
-    const uint_t ndraw = 5000000;
-    ASSERT_EQ(tester.run(src_mbf, ndraw).m_error_message, "");
-    ASSERT_TRUE(tester.all_drawn_at_least_once());
-    auto av_err1 = tester.mean_abs_error(ndraw);
-    ASSERT_EQ(tester.run(src_mbf, ndraw).m_error_message, "");
-    auto av_err2 = tester.mean_abs_error(2 * ndraw);
-    ASSERT_LE(av_err2, av_err1);
-    ASSERT_TRUE(tester.all_correct_weights(2 * ndraw));
+    ASSERT_EQ(tester.run(src_mbf, 5000000), "");
 }

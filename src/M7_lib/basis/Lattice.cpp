@@ -10,18 +10,8 @@ bool lattice::AdjElement::operator==(const lattice::AdjElement &other) const {
 }
 
 lattice::Base::Base(const uintv_t &nadjs) :
-        m_nsite(nadjs.size()), m_nadjs(nadjs), m_unique_nadj_product(make_unique_nadj_product()),
-        m_nadj_max(make_nadj_max()){}
-
-uint_t lattice::Base::make_unique_nadj_product() {
-    uint_t out = 1ul;
-    for (uint_t nadj: m_nadjs) {
-        if (!nadj) continue;
-        if ((out/nadj)*nadj != out) out*=nadj;
-    }
-    return out;
-}
-
+        m_nsite(nadjs.size()), m_nadjs(nadjs), m_nadj_max(make_nadj_max()), m_lcm_le_nadj_max(m_nadj_max){}
+        
 uint_t lattice::Base::make_nadj_max() {
     if (!*this) return 0ul;
     REQUIRE_FALSE(m_nadjs.empty(), "number of adjacent sites vector is not set");
