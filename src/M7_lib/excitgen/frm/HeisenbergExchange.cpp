@@ -11,6 +11,7 @@ HeisenbergExchange::HeisenbergExchange(const FrmHam& h, PRNG& prng) :
 
 bool HeisenbergExchange::draw_frm(uint_t exsig, const field::FrmOnv& src,
                                   prob_t& prob, conn::FrmOnv& conn) {
+    DEBUG_ONLY(exsig);
     DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
     const auto& lattice = m_h.m_basis.m_lattice;
     /*

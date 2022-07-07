@@ -26,7 +26,6 @@ uint_t BosonSumConservingDoubles::na(uint_t i, uint_t j) const {
 
 bool BosonSumConservingDoubles::draw_bos(uint_t, const field::BosOnv &src, prob_t &prob, conn::BosOnv &conn) {
     const auto &op_inds = src.m_decoded.m_expanded.get();
-    const auto nmode = src.m_nelement;
     const auto nboson_pair = integer::nspair(op_inds.size());
     uint_t ij = m_prng.draw_uint(nboson_pair);
     uint_t i, j;
@@ -61,8 +60,8 @@ bool BosonSumConservingDoubles::draw_bos(uint_t, const field::BosOnv &src, prob_
     prob /= (max - min) - nexclude;
     DEBUG_ASSERT_TRUE(i != a && j != a && i != b && j != b,
                       "should never draw same index for a pair of creation and annihilation ops");
-    DEBUG_ASSERT_LT(a, nmode, "boson index OOB");
-    DEBUG_ASSERT_LT(b, nmode, "boson index OOB");
+    DEBUG_ASSERT_LT(a, src.m_nelement, "boson index OOB");
+    DEBUG_ASSERT_LT(b, src.m_nelement, "boson index OOB");
     DEBUG_ASSERT_EQ(i + j, a + b, "sum should be conserved");
     conn.m_ann.set(i, j);
     conn.m_cre.set(a, b);

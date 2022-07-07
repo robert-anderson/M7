@@ -18,7 +18,7 @@ struct HubbardUniform : FrmLatticeExcitGen {
 
     virtual ~HubbardUniform(){}
 
-    bool draw_frm(uint_t /*exsig*/, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) override;
+    bool draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) override;
 
     prob_t prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const override;
 

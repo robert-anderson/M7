@@ -81,7 +81,8 @@ namespace convert {
     static string_if_arith_t<T> to_string(const T &v, uint_t fp = default_fp<T>()) {
         if (v == std::numeric_limits<T>::max()) return "inf";
         std::stringstream tmp;
-        tmp << std::scientific << std::setprecision(fp) << v;
+        // unary "+" ensures that char types are always printed as ints
+        tmp << std::scientific << std::setprecision(fp) << (+v);
         return tmp.str();
     }
 

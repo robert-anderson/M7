@@ -9,7 +9,9 @@ HubbardUniform::HubbardUniform(const FrmHam &h, PRNG &prng) :
     REQUIRE_TRUE(h.is<HubbardFrmHam>(), "given hamiltonian is not of HubbardFrmHam type");
 }
 
-bool HubbardUniform::draw_frm(uint_t, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) {
+bool HubbardUniform::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) {
+    DEBUG_ONLY(exsig);
+    DEBUG_ASSERT_EQ(exsig, exsig::ex_single, "this excitation generator is only suitable for exsig 1100");
     const auto& h = *m_h.as<HubbardFrmHam>();
     /*
      * the number of adjacent sites accessible is not decided till the occupied index has been chosen. If the integer
@@ -40,7 +42,8 @@ bool HubbardUniform::draw_frm(uint_t, const field::FrmOnv &src, prob_t &prob, co
      * if there are no vacants from which to choose, this occupied pick is a dead end
      */
     if (!nvac) return false;
-    auto vac = src.m_format.flatten({ispin, m_valid_in_adj_row[rand % nvac]->m_isite});
+    auto ivalid = rand % nvac;
+    auto vac = src.m_format.flatten({ispin, m_valid_in_adj_row[ivalid]->m_isite});
     DEBUG_ASSERT_FALSE(src.get(vac), "should not have picked an occupied spin orb for the vacant");
     prob = 1.0 / double(nelec * nvac);
     conn.m_ann.set(occ);

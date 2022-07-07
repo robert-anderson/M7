@@ -21,7 +21,7 @@ void ExactLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     src_mbf.m_decoded.clear();
 
     DEBUG_ASSERT_TRUE(weight,"shouldn't be trying to propagate off-diagonal from zero weight");
-    conn::Mbf conn(src_mbf.m_basis);
+    conn::Mbf conn(src_mbf);
     auto body = [&]() {
         DEBUG_ASSERT_NE(conn.exsig(), 0ul, "diagonal connection generated");
         auto helement = m_ham.get_element(src_mbf, conn);

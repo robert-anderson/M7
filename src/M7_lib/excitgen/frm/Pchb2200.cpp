@@ -38,6 +38,7 @@ Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
 
 bool Pchb2200::draw_h_frm(uint_t exsig, const field::FrmOnv& src, prob_t& prob,
                           ham_t& helem, conn::FrmOnv& conn) {
+    DEBUG_ONLY(exsig);
     DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
     uint_t i, j, a, b;
     const auto& occs = src.m_decoded.m_simple_occs.get();
