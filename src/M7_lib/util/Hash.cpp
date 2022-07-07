@@ -44,8 +44,7 @@ v_t<digest_t> hash::in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, 
     return in_range(v_t<digest_t>{v}, ngen, lo, hi, sorted);
 }
 
-
-v_t<digest_t> hash::unique_in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted) {
+v_t<digest_t> hash::unique_digest_in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted) {
     REQUIRE_LE(lo + ngen, hi, "number of unique values can't exceed the range of allowed values");
     v_t<digest_t> out;
     out.reserve(ngen);
@@ -63,6 +62,6 @@ v_t<digest_t> hash::unique_in_range(const v_t<digest_t> &v, uint_t ngen, digest_
     return out;
 }
 
-v_t<digest_t> hash::unique_in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted) {
-    return unique_in_range(v_t<digest_t>{v}, ngen, lo, hi, sorted);
+v_t<digest_t> hash::unique_digest_in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted) {
+    return unique_digest_in_range(v_t<digest_t>{v}, ngen, lo, hi, sorted);
 }

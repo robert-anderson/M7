@@ -24,7 +24,7 @@ namespace frm_onv_field_test {
                 nsetbit_chk+=nsite;
             }
             else {
-                alpha_setbits = hash::unique_in_range(0, nset, 0, nsite, true);
+                alpha_setbits = hash::unique_in_range<uint_t>(0, nset, 0, nsite, true);
                 nsetbit_chk+=nset;
             }
             uintv_t beta_setbits(nsite);
@@ -33,7 +33,7 @@ namespace frm_onv_field_test {
                 nsetbit_chk+=nsite;
             }
             else {
-                beta_setbits = hash::unique_in_range(1, nset, 0, nsite, true);
+                beta_setbits = hash::unique_in_range<uint_t>(1, nset, 0, nsite, true);
                 nsetbit_chk+=nset;
             }
 
@@ -104,7 +104,7 @@ TEST(FrmOnvField, ClrSpinChannel) {
 TEST(FrmOnvField, ForeachSetBit) {
     const uint_t nsite = 123;
     buffered::FrmOnv mbf(nsite);
-    auto setbits = hash::unique_in_range(0, 64, 0, mbf.m_basis.m_nspinorb, true);
+    auto setbits = hash::unique_in_range<uint_t>(0, 64, 0, mbf.m_basis.m_nspinorb, true);
     mbf = setbits;
 
     auto it = setbits.cbegin();
@@ -119,7 +119,7 @@ TEST(FrmOnvField, ForeachSetBit) {
 TEST(FrmOnvField, ForeachSetBitPair) {
     const uint_t nsite = 123;
     buffered::FrmOnv mbf(nsite);
-    auto setbits = hash::unique_in_range(0, 64, 0, mbf.m_basis.m_nspinorb, true);
+    auto setbits = hash::unique_in_range<uint_t>(0, 64, 0, mbf.m_basis.m_nspinorb, true);
     mbf = setbits;
 
     /*
@@ -150,7 +150,7 @@ TEST(FrmOnvField, ForeachSetBitPair) {
 TEST(FrmOnvField, ForeachSetBitTriple) {
     const uint_t nsite = 123;
     buffered::FrmOnv mbf(nsite);
-    auto setbits = hash::unique_in_range(0, 64, 0, mbf.m_basis.m_nspinorb, true);
+    auto setbits = hash::unique_in_range<uint_t>(0, 64, 0, mbf.m_basis.m_nspinorb, true);
     mbf = setbits;
 
     /*

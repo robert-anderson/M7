@@ -6,7 +6,10 @@
 #define M7_HASH_H
 
 #include <M7_lib/defs.h>
+#include "Convert.h"
 
+#include "M7_lib/parallel/MPIAssert.h"
+#include <set>
 
 namespace hash {
 
@@ -80,8 +83,7 @@ namespace hash {
      * @return
      *  arbitrary integers with repetition allowed in the [lo, hi) range
      */
-    v_t<digest_t>
-    in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    v_t<digest_t> in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
 
     v_t<digest_t> in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
 
@@ -100,10 +102,22 @@ namespace hash {
      * @return
      *  unrepeated arbitrary integers in the [lo, hi) range
      */
-    v_t<digest_t>
-    unique_in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    v_t<digest_t> unique_digest_in_range(const v_t<digest_t> &v, uint_t ngen,
+                                         digest_t lo, digest_t hi, bool sorted = false);
 
-    v_t<digest_t> unique_in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+
+    v_t<digest_t> unique_digest_in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+
+    template<typename T=digest_t>
+    v_t<T> unique_in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false) {
+        static_assert(std::is_integral<T>::value, "vector of unique digests can only be converted to integers");
+        return convert::safe_narrow<T>(unique_digest_in_range(v, ngen, lo, hi, sorted));
+    }
+
+    template<typename T=digest_t>
+    v_t<T> unique_in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false) {
+        return unique_in_range<T>(v_t<digest_t>{v}, ngen, lo, hi, sorted);
+    }
 }
 
 
