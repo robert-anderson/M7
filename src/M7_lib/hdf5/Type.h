@@ -24,51 +24,32 @@ namespace hdf5 {
     static_assert(c_have_parallel, "HDF5 must be compiled with parallel functionality");
 
 
-    static const std::array<hid_t, 12> c_types =
-            {0, H5T_NATIVE_CHAR,
-                    H5T_NATIVE_UINT8, H5T_NATIVE_INT8,
-                    H5T_NATIVE_UINT16, H5T_NATIVE_INT16,
-                    H5T_NATIVE_UINT32, H5T_NATIVE_INT32,
-                    H5T_NATIVE_UINT64, H5T_NATIVE_INT64,
-                    H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE};
+
+    static const std::array<hid_t, 14> c_types = {
+        0, H5T_NATIVE_CHAR, H5T_NATIVE_SCHAR, H5T_NATIVE_UCHAR, H5T_NATIVE_SHORT, H5T_NATIVE_USHORT,
+        H5T_NATIVE_INT, H5T_NATIVE_UINT, H5T_NATIVE_LONG, H5T_NATIVE_ULONG, H5T_NATIVE_LLONG, H5T_NATIVE_ULLONG,
+        H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE
+    };
 
     str_t type_name(hid_t type);
 
     template<typename T=void>
     static constexpr uint_t type_ind() { return 0; }
 
-    template<>
-    constexpr uint_t type_ind<char>() { return 1; }
+    template<> constexpr uint_t type_ind<char>() { return 1; }
+    template<> constexpr uint_t type_ind<signed char>() { return 2; }
+    template<> constexpr uint_t type_ind<unsigned char>() { return 3; }
+    template<> constexpr uint_t type_ind<short>() { return 4; }
+    template<> constexpr uint_t type_ind<unsigned short>() { return 5; }
+    template<> constexpr uint_t type_ind<int>() { return 6; }
+    template<> constexpr uint_t type_ind<unsigned int>() { return 7; }
+    template<> constexpr uint_t type_ind<long>() { return 8; }
+    template<> constexpr uint_t type_ind<unsigned long>() { return 9; }
+    template<> constexpr uint_t type_ind<long long>() { return 10; }
+    template<> constexpr uint_t type_ind<unsigned long long>() { return 11; }
+    template<> constexpr uint_t type_ind<float>() { return 12; }
+    template<> constexpr uint_t type_ind<double>() { return 13; }
 
-    template<>
-    constexpr uint_t type_ind<uint8_t>() { return 2; }
-
-    template<>
-    constexpr uint_t type_ind<int8_t>() { return 3; }
-
-    template<>
-    constexpr uint_t type_ind<uint16_t>() { return 4; }
-
-    template<>
-    constexpr uint_t type_ind<int16_t>() { return 5; }
-
-    template<>
-    constexpr uint_t type_ind<uint32_t>() { return 6; }
-
-    template<>
-    constexpr uint_t type_ind<int32_t>() { return 7; }
-
-    template<>
-    constexpr uint_t type_ind<uint64_t>() { return 8; }
-
-    template<>
-    constexpr uint_t type_ind<int64_t>() { return 9; }
-
-    template<>
-    constexpr uint_t type_ind<float>() { return 10; }
-
-    template<>
-    constexpr uint_t type_ind<double>() { return 11; }
 
     /**
      * @param h5type

@@ -10,6 +10,53 @@
 #include <M7_lib/table/BufferedTable.h>
 #include <M7_lib/hdf5/Dataset.h>
 
+TEST(HDF5Wrapper, NativeTypes) {
+    using namespace hdf5;
+    /*
+     * char
+     * signed char
+     * unsigned char
+     * short
+     * unsigned short
+     * int
+     * unsigned int
+     * long
+     * unsigned long
+     * long long
+     * unsigned long long
+     * float
+     * double
+     */
+    /*
+     * first, the native types
+     */
+    ASSERT_EQ(type_ind<char>(), 1ul);
+    ASSERT_EQ(type_ind<signed char>(), 2ul);
+    ASSERT_EQ(type_ind<unsigned char>(), 3ul);
+    ASSERT_EQ(type_ind<short>(), 4ul);
+    ASSERT_EQ(type_ind<unsigned short>(), 5ul);
+    ASSERT_EQ(type_ind<int>(), 6ul);
+    ASSERT_EQ(type_ind<unsigned int>(), 7ul);
+    ASSERT_EQ(type_ind<long>(), 8ul);
+    ASSERT_EQ(type_ind<unsigned long>(), 9ul);
+    ASSERT_EQ(type_ind<long long>(), 10ul);
+    ASSERT_EQ(type_ind<unsigned long long>(), 11ul);
+    ASSERT_EQ(type_ind<float>(), 12ul);
+    ASSERT_EQ(type_ind<double>(), 13ul);
+    /*
+     * now we don't know which native types correspond to the fixed-width integer types on any given machine, so just
+     * assert that their type indices are non-zero
+     */
+    ASSERT_TRUE(type_ind<int8_t>());
+    ASSERT_TRUE(type_ind<int16_t>());
+    ASSERT_TRUE(type_ind<int32_t>());
+    ASSERT_TRUE(type_ind<int64_t>());
+    ASSERT_TRUE(type_ind<uint8_t>());
+    ASSERT_TRUE(type_ind<uint16_t>());
+    ASSERT_TRUE(type_ind<uint32_t>());
+    ASSERT_TRUE(type_ind<uint64_t>());
+}
+
 TEST(HDF5Wrapper, StringType) {
     str_t s = "Lorem ipsum dolor sit";
     hdf5::Type type(&s);
