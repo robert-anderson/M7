@@ -43,13 +43,11 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    target_compile_options(unittest
+    target_compile_options(M7_lib
         PUBLIC
-            -g
+             -mbmi -g
         PRIVATE
-            -Wno-unused-function
-            -rdynamic
-            -Wall -Wextra
+            -Wno-unused-function -Wno-bad-function-cast
     )
     if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")

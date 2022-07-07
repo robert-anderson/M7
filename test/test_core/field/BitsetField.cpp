@@ -10,7 +10,7 @@ TEST(BitsetField, SetFromInds) {
     const uint_t nsetbit = 50;
     // deliberately using non-standard container type
     buffered::Bitset<uint16_t> field(nbit);
-    auto setbits = hash::unique_in_range(0, nsetbit, 0, nbit, true);
+    auto setbits = convert::vector<uint_t>(hash::unique_in_range(0, nsetbit, 0, nbit, true));
     field = setbits;
     auto it = setbits.cbegin();
     for (uint_t ibit=0ul; ibit<nbit; ++ibit){
