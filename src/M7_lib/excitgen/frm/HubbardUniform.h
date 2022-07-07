@@ -9,8 +9,8 @@
 #include "M7_lib/hamiltonian/frm/HubbardFrmHam.h"
 
 /**
- * excitation generator for the N-dimensional Hubbard model which does not constrain the creation operator drawn based
- * on the occupation
+ * excitation generator for the N-dimensional Hubbard model which does constrains the creation operator drawn based
+ * on the occupation of the adjacent sites of the chosen electron
  */
 struct HubbardUniform : FrmLatticeExcitGen {
 
