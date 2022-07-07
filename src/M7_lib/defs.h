@@ -33,7 +33,7 @@
 /**
  * the integral type used throughout the code to count and number items. thus, it is unsigned
  */
-typedef uint64_t uint_t;
+typedef std::size_t uint_t;
 /**
  * the vector STL container is used ubiquitously, so here a shortcut is created
  */

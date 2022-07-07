@@ -7,6 +7,7 @@
 
 #include <x86intrin.h>
 #include "M7_lib/defs.h"
+#include "Tag.h"
 
 
 /**
@@ -14,20 +15,23 @@
  */
 namespace bit {
     /**
-     * masks whose ith elements retain i bits when bitwise and-ed with another value of the same size (4 or 8 bytes)
+     * masks whose ith elements retain i bits when bitwise and-ed with another value of the same size (1, 2, 4 or 8 bytes)
      */
-    static constexpr std::array<uint8_t, 9> c_trunc_mask_8 =
+    template<typename T>
+    using trunc_mask_array_t = std::array<T, sizeof(T)*8+1>;
+
+    static constexpr trunc_mask_array_t<uint8_t> c_trunc_mask_8 =
             {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff};
-    static constexpr std::array<uint16_t, 17> c_trunc_mask_16 =
+    static constexpr trunc_mask_array_t<uint16_t> c_trunc_mask_16 =
             {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff, 0x1ff, 0x3ff,
              0x7ff, 0xfff, 0x1fff, 0x3fff, 0x7fff, 0xffff};
-    static constexpr std::array<uint32_t, 33> c_trunc_mask_32 =
+    static constexpr trunc_mask_array_t<uint32_t> c_trunc_mask_32 =
             {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff, 0x1ff, 0x3ff,
              0x7ff, 0xfff, 0x1fff, 0x3fff, 0x7fff, 0xffff, 0x1ffff, 0x3ffff,
              0x7ffff, 0xfffff, 0x1fffff, 0x3fffff, 0x7fffff, 0xffffff,
              0x1ffffff, 0x3ffffff, 0x7ffffff, 0xfffffff, 0x1fffffff,
              0x3fffffff, 0x7fffffff, 0xffffffff};
-    static constexpr std::array<uint64_t, 65> c_trunc_mask_64 =
+    static constexpr trunc_mask_array_t<uint64_t> c_trunc_mask_64 =
             {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff, 0x1ff, 0x3ff,
              0x7ff, 0xfff, 0x1fff, 0x3fff, 0x7fff, 0xffff, 0x1ffff,
              0x3ffff, 0x7ffff, 0xfffff, 0x1fffff, 0x3fffff, 0x7fffff,
@@ -43,6 +47,20 @@ namespace bit {
              0x3ffffffffffffff, 0x7ffffffffffffff, 0xfffffffffffffff,
              0x1fffffffffffffff, 0x3fffffffffffffff, 0x7fffffffffffffff,
              0xffffffffffffffff};
+
+
+    static uint8_t get_trunc_element(uint_t n, tag::Int<1> /*size*/) {
+        return c_trunc_mask_8[n];
+    }
+    static uint16_t get_trunc_element(uint_t n, tag::Int<2> /*size*/) {
+        return c_trunc_mask_16[n];
+    }
+    static uint32_t get_trunc_element(uint_t n, tag::Int<4> /*size*/) {
+        return c_trunc_mask_32[n];
+    }
+    static uint64_t get_trunc_element(uint_t n, tag::Int<8> /*size*/) {
+        return c_trunc_mask_64[n];
+    }
 
     /**
      * clear the bit in x at position i
@@ -112,55 +130,19 @@ namespace bit {
     /**
      * return v with the first n bits cleared
      */
-    static uint8_t truncate(const uint8_t &v, uint_t n) {
-        return v & c_trunc_mask_8[n];
-    }
-
-    static uint16_t truncate(const uint16_t &v, uint_t n) {
-        return v & c_trunc_mask_16[n];
-    }
-
-    static uint32_t truncate(const uint32_t &v, uint_t n) {
-        return v & c_trunc_mask_32[n];
-    }
-
-    static uint64_t truncate(const uint64_t &v, uint_t n) {
-        return v & c_trunc_mask_64[n];
-    }
-
-    static int8_t truncate(const int8_t &v, uint_t n) {
-        return truncate(uint8_t(v), n);
-    }
-
-    static int16_t truncate(const int16_t &v, uint_t n) {
-        return truncate(uint16_t(v), n);
-    }
-
-    static int32_t truncate(const int32_t &v, uint_t n) {
-        return truncate(uint32_t(v), n);
-    }
-
-    static int64_t truncate(const int64_t &v, uint_t n) {
-        return truncate(uint64_t(v), n);
+    template<typename T>
+    static T truncate(const T &v, uint_t n) {
+        static_assert(std::is_integral<T>(), "can only bit-truncate integers");
+        return v & get_trunc_element(n, tag::Int<sizeof(T)>());
     }
 
     /**
      * make a mask which is set (1) in the range [ibegin, iend), and clear (0) elsewhere
      */
-    static void make_range_mask(uint8_t &v, uint_t ibegin, uint_t iend) {
-        v = c_trunc_mask_8[iend] & ~c_trunc_mask_8[ibegin];
-    }
-
-    static void make_range_mask(uint16_t &v, uint_t ibegin, uint_t iend) {
-        v = c_trunc_mask_16[iend] & ~c_trunc_mask_16[ibegin];
-    }
-
-    static void make_range_mask(uint32_t &v, uint_t ibegin, uint_t iend) {
-        v = c_trunc_mask_32[iend] & ~c_trunc_mask_32[ibegin];
-    }
-
-    static void make_range_mask(uint64_t &v, uint_t ibegin, uint_t iend) {
-        v = c_trunc_mask_64[iend] & ~c_trunc_mask_64[ibegin];
+    template<typename T>
+    static void make_range_mask(T &v, uint_t ibegin, uint_t iend) {
+        static_assert(std::is_integral<T>(), "can only make an integer-typed mask");
+        v = get_trunc_element(iend, tag::Int<sizeof(T)>()) & ~get_trunc_element(ibegin, tag::Int<sizeof(T)>());
     }
 
     template<typename T>
