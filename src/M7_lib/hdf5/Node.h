@@ -50,7 +50,7 @@ namespace hdf5 {
     public:
 
         uintv_t dataset_shape(const str_t& name) const {
-            return DatasetReader::get_shape<uint_t>(m_handle, name);
+            return convert::vector<uint_t>(DatasetReader::get_hdf5_shape(m_handle, name));
         }
 
         uint_t dataset_nelement(const str_t& name) const {
@@ -64,20 +64,24 @@ namespace hdf5 {
             REQUIRE_EQ(size, dr.m_space.m_nelement, "number of elements does not match read size");
             dr.read(v);
         }
+
         template<typename T>
         void read_data(const str_t& name, std::complex<T> *v, uint_t size) const {
             read_data(name, &arith::real_ref(*v), size*2);
         }
+
         template<typename T>
         void read_data(const str_t& name, T &v) const {
             read_data(name, &v, 1);
         }
+
         template<typename T>
         void read_data(const str_t& name, v_t<T> &v) const {
             auto nelement = DatasetReader::get_nelement(m_handle, name);
             v.resize(nelement);
             read_data(name, v.data(), v.size());
         }
+
         template<typename T>
         void read_data(const str_t& name, v_t<std::complex<T>> &v) const {
             auto nelement = DatasetReader::get_nelement(m_handle, name);
@@ -85,6 +89,7 @@ namespace hdf5 {
             v.resize(nelement/2);
             read_data(name, v.data(), v.size());
         }
+
         template<typename T>
         T read_data(const str_t& name) const {
             T v{};
@@ -440,10 +445,9 @@ namespace hdf5 {
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(const str_t& name, const v_t<T>& v, const uintv_t& shape,
-             strv_t dim_labels={}, uint_t irank=0ul) const {
-            REQUIRE_EQ_ALL(v.size(), nd  ::nelement(shape), "vector and shape are incompatible");
-            save(name, v.data(), shape, {}, irank);
+        save(const str_t& name, const v_t<T>& v, const uintv_t& shape, strv_t dim_labels={}, uint_t irank=0ul) const {
+            REQUIRE_EQ_ALL(v.size(), nd::nelement(shape), "vector and shape are incompatible");
+            save(name, v.data(), shape, dim_labels, irank);
         }
 
         /**

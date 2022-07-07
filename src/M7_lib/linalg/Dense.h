@@ -347,7 +347,7 @@ namespace dense {
             uintv_t shape;
             shape.push_back(m_nrow);
             shape.push_back(m_ncol);
-            nw.save(name, m_buffer, shape, {"nrow", "ncol"}, irank);
+            nw.write_data(name, m_buffer, shape, {"nrow", "ncol"}, irank);
         }
     };
 

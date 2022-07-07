@@ -15,18 +15,7 @@ namespace hdf5 {
 
         static uint_t get_ndim(hid_t parent_handle, const str_t& name);
 
-        template<typename T>
-        static v_t<T> get_shape(hid_t parent_handle, const str_t& name) {
-            auto ndim = get_ndim(parent_handle, name);
-            auto dataset = H5Dopen1(parent_handle, name.c_str());
-            REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));
-            auto dataspace = H5Dget_space(dataset);
-            v_t<hsize_t> shape(ndim);
-            H5Sget_simple_extent_dims(dataspace, shape.data(), nullptr);
-            H5Sclose(dataspace);
-            H5Dclose(dataset);
-            return convert::vector<T>(shape);
-        }
+        static v_t<hsize_t> get_hdf5_shape(hid_t parent_handle, const str_t& name);
 
         static uint_t get_nelement(hid_t parent_handle, const str_t& name);
 

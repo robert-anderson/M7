@@ -15,12 +15,24 @@ uint_t hdf5::DatasetReader::get_ndim(hid_t parent_handle, const str_t &name) {
     return rank;
 }
 
+v_t<hsize_t> hdf5::DatasetReader::get_hdf5_shape(hid_t parent_handle, const str_t &name) {
+    auto ndim = get_ndim(parent_handle, name);
+    auto dataset = H5Dopen1(parent_handle, name.c_str());
+    REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));
+    auto dataspace = H5Dget_space(dataset);
+    v_t<hsize_t> shape(ndim);
+    H5Sget_simple_extent_dims(dataspace, shape.data(), nullptr);
+    H5Sclose(dataspace);
+    H5Dclose(dataset);
+    return shape;
+}
+
 uint_t hdf5::DatasetReader::get_nelement(hid_t parent_handle, const str_t &name) {
-    return nd::nelement(get_shape<hsize_t>(parent_handle, name));
+    return nd::nelement(get_hdf5_shape(parent_handle, name));
 }
 
 hdf5::DatasetReader::DatasetReader(hid_t parent_handle, const str_t &name) :
-        m_space(get_shape<hsize_t>(parent_handle, name)), m_handle(H5Dopen1(parent_handle, name.c_str())),
+        m_space(get_hdf5_shape(parent_handle, name)), m_handle(H5Dopen1(parent_handle, name.c_str())),
         m_type(H5Dget_type(m_handle)) {}
 
 hdf5::DatasetReader::~DatasetReader() {
