@@ -26,15 +26,7 @@ bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t
      * of the actual connectivity
      */
     auto rand = m_prng.draw_uint(nelec * nconn_lcm);
-    /*
-     * set the uniformly-picked occupied orbital and probability
-     */
-    auto occ = occs[rand / nconn_lcm];
-    prob = 1/double(nelec);
-    /*
-     * if this implementation has a non-uniform picker, redefine the occupied spin orbital and probability
-     */
-    set_non_uniform_occ(occ, src, prob);
+    const auto occ = get_occ(rand, src, prob);
     const auto isite = src.m_basis.isite(occ);
     const auto ispin = src.m_basis.ispin(occ);
     /*
@@ -61,24 +53,4 @@ bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t
 
 uint_t exgen::HubbardBase::approx_nconn(uint_t, sys::Particles particles) const {
     return particles.m_frm;
-}
-
-void exgen::HubbardUniform::set_non_uniform_occ(uint_t &, const field::FrmOnv &src, prob_t &prob) const {
-    prob = 1/double(src.m_decoded.m_simple_occs.get().size());
-}
-
-prob_t exgen::HubbardUniform::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
-    const auto &occs = src.m_decoded.m_simple_occs.get();
-    const auto nelec = occs.size();
-    const auto isite = src.m_basis.isite(conn.m_ann[0]);
-    const auto ispin = src.m_basis.ispin(conn.m_ann[0]);
-    /*
-     * fill the working vector with the adjacency of the occupied site
-     */
-    m_h.m_basis.m_lattice->get_adj_row(isite, m_work_adj_row);
-    /*
-     * when selecting the vacant site, skip the sites which are occupied in the same spin channel as the chosen electron
-     */
-    set_valid_adj_vacant(src, ispin);
-    return 1.0/(m_valid_in_adj_row.size()*nelec);
 }
