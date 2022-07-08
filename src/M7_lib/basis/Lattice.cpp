@@ -10,7 +10,8 @@ bool lattice::AdjElement::operator==(const lattice::AdjElement &other) const {
 }
 
 lattice::Base::Base(const uintv_t &nadjs) :
-        m_nsite(nadjs.size()), m_nadjs(nadjs), m_nadj_max(make_nadj_max()), m_lcm_le_nadj_max(m_nadj_max){}
+        m_nsite(nadjs.size()), m_nadjs(nadjs), m_nadj_max(make_nadj_max()),
+        m_lcm_le_nadj_max(integer::lcm_le(m_nadj_max)){}
         
 uint_t lattice::Base::make_nadj_max() {
     if (!*this) return 0ul;

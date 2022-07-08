@@ -31,9 +31,5 @@ TEST(HubbardUniform, PbcFromNeel2D) {
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
     buffered::FrmOnv src_mbf(h.m_basis);
     mbf::set_neel_mbf(src_mbf, h.default_particles().m_frm);
-    //ASSERT_EQ(tester.run(src_mbf, 10000000), "");
-    ASSERT_NE(tester.run(src_mbf, 3000000), "");
-    std::cout <<
-              tester.m_results.to_string()
-            << std::endl;
+    ASSERT_EQ(tester.run(src_mbf, 3000000), "");
 }

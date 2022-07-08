@@ -112,7 +112,7 @@ uint_t integer::lcm(uint_t a, uint_t b) {
 }
 
 uint_t integer::lcm_le(uint_t n) {
-    DEBUG_ASSERT_TRUE(n, "number must be non-zero");
+    if (!n) return 0;
     uint_t out = 1;
     for (uint_t i = 2; i <= n; i++) out = (i * out) / gcd(i, out);
     return out;
