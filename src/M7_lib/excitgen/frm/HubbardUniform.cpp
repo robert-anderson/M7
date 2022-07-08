@@ -4,12 +4,12 @@
 
 #include "HubbardUniform.h"
 
-HubbardUniform::HubbardUniform(const FrmHam &h, PRNG &prng) :
-        FrmLatticeExcitGen(h, prng, {exsig::ex_single}, "hubbard hopping") {
+exgen::HubbardBase::HubbardBase(const FrmHam &h, PRNG &prng, str_t description) :
+        FrmLatticeExcitGen(h, prng, {exsig::ex_single}, description) {
     REQUIRE_TRUE(h.is<HubbardFrmHam>(), "given hamiltonian is not of HubbardFrmHam type");
 }
 
-bool HubbardUniform::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) {
+bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) {
     DEBUG_ONLY(exsig);
     DEBUG_ASSERT_EQ(exsig, exsig::ex_single, "this excitation generator is only suitable for exsig 1100");
     const auto& h = *m_h.as<HubbardFrmHam>();
@@ -26,7 +26,15 @@ bool HubbardUniform::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &pr
      * of the actual connectivity
      */
     auto rand = m_prng.draw_uint(nelec * nconn_lcm);
-    const auto occ = occs[rand / nconn_lcm];
+    /*
+     * set the uniformly-picked occupied orbital and probability
+     */
+    auto occ = occs[rand / nconn_lcm];
+    prob = 1/double(nelec);
+    /*
+     * if this implementation has a non-uniform picker, redefine the occupied spin orbital and probability
+     */
+    set_non_uniform_occ(occ, src, prob);
     const auto isite = src.m_basis.isite(occ);
     const auto ispin = src.m_basis.ispin(occ);
     /*
@@ -45,13 +53,21 @@ bool HubbardUniform::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &pr
     auto ivalid = rand % nvac;
     auto vac = src.m_format.flatten({ispin, m_valid_in_adj_row[ivalid]->m_isite});
     DEBUG_ASSERT_FALSE(src.get(vac), "should not have picked an occupied spin orb for the vacant");
-    prob = 1.0 / double(nelec * nvac);
+    prob /= double(nvac);
     conn.m_ann.set(occ);
     conn.m_cre.set(vac);
     return true;
 }
 
-prob_t HubbardUniform::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
+uint_t exgen::HubbardBase::approx_nconn(uint_t, sys::Particles particles) const {
+    return particles.m_frm;
+}
+
+void exgen::HubbardUniform::set_non_uniform_occ(uint_t &, const field::FrmOnv &src, prob_t &prob) const {
+    prob = 1/double(src.m_decoded.m_simple_occs.get().size());
+}
+
+prob_t exgen::HubbardUniform::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
     const auto &occs = src.m_decoded.m_simple_occs.get();
     const auto nelec = occs.size();
     const auto isite = src.m_basis.isite(conn.m_ann[0]);
@@ -65,8 +81,4 @@ prob_t HubbardUniform::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &co
      */
     set_valid_adj_vacant(src, ispin);
     return 1.0/(m_valid_in_adj_row.size()*nelec);
-}
-
-uint_t HubbardUniform::approx_nconn(uint_t, sys::Particles particles) const {
-    return particles.m_frm;
 }

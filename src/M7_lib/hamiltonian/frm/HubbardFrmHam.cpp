@@ -44,7 +44,7 @@ ham_t HubbardFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
 
 HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const conf::Propagator&) const {
     excit_gen_list_t list;
-    list.emplace_front(new HubbardUniform(*this, prng));
+    list.emplace_front(new exgen::HubbardUniform(*this, prng));
     return list;
 }
 
