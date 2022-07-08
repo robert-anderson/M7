@@ -3,7 +3,7 @@
 //
 
 #include "HubbardFrmHam.h"
-#include "M7_lib/excitgen/frm/HubbardUniform.h"
+#include "M7_lib/excitgen/frm/Hubbard.h"
 
 
 HubbardFrmHam::HubbardFrmHam(ham_t u, const std::shared_ptr<lattice::Base>& lattice) :

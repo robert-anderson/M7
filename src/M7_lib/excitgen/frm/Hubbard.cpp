@@ -2,7 +2,7 @@
 // Created by Robert J. Anderson on 04/04/2022.
 //
 
-#include "HubbardUniform.h"
+#include "Hubbard.h"
 
 exgen::HubbardBase::HubbardBase(const FrmHam &h, PRNG &prng, str_t description) :
         FrmLatticeExcitGen(h, prng, {exsig::ex_single}, description) {

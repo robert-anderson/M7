@@ -4,8 +4,8 @@ target_sources(M7_lib
         FrmExcitGen.h
         HeisenbergExchange.h
         HeisenbergExchange.cpp
-        HubbardUniform.cpp
-        HubbardUniform.h
+        Hubbard.cpp
+        Hubbard.h
         Pchb2200.cpp
         Pchb2200.h
         UniformSingles.cpp
