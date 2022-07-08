@@ -7,28 +7,29 @@
 
 #include "FrmExcitGen.h"
 
-struct UniformSingles : FrmExcitGen {
-    UniformSingles(const FrmHam& h, PRNG& prng):
-            FrmExcitGen(h, prng, {exsig::ex_single}, "uniform"){}
+namespace exgen {
+    struct UniformSingles : FrmExcitGen {
+        UniformSingles(const FrmHam &h, PRNG &prng) :
+                FrmExcitGen(h, prng, {exsig::ex_single}, "uniform") {}
 
-    bool draw_frm(uint_t exsig, const field::FrmOnv& src, prob_t& prob, conn::FrmOnv& conn) override;
+        bool draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) override;
 
-    static bool draw_spin_conserve_fn(PRNG& prng, const field::FrmOnv& src, prob_t& prob, conn::FrmOnv& conn);
+        static bool draw_spin_conserve_fn(PRNG &prng, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn);
 
-    static bool draw_spin_nonconserve_fn(PRNG& prng, const field::FrmOnv& src, prob_t& prob, conn::FrmOnv& conn);
+        static bool draw_spin_nonconserve_fn(PRNG &prng, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn);
 
-    static prob_t prob_spin_conserve_fn(const field::FrmOnv& src, const conn::FrmOnv& conn);
+        static prob_t prob_spin_conserve_fn(const field::FrmOnv &src, const conn::FrmOnv &conn);
 
-    static prob_t prob_spin_nonconserve_fn(const field::FrmOnv& src, const conn::FrmOnv& /*conn*/);
+        static prob_t prob_spin_nonconserve_fn(const field::FrmOnv &src, const conn::FrmOnv & /*conn*/);
 
-    static prob_t prob_fn(const field::FrmOnv& src, const conn::FrmOnv& conn, bool spin_conserve);
+        static prob_t prob_fn(const field::FrmOnv &src, const conn::FrmOnv &conn, bool spin_conserve);
 
-public:
+    public:
 
-    prob_t prob_frm(const field::FrmOnv& src, const conn::FrmOnv& conn) const override;
+        prob_t prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const override;
 
-    uint_t approx_nconn(uint_t /*exsig*/, sys::Particles particles) const override;
-};
-
+        uint_t approx_nconn(uint_t /*exsig*/, sys::Particles particles) const override;
+    };
+}
 
 #endif //M7_UNIFORMSINGLES_H

@@ -14,7 +14,7 @@ TEST(Pchb1101hc, Test){
     Hamiltonian h(&frmbos_ham);
     auto particles = h.default_particles(6);
     ASSERT_TRUE(frmbos_ham.m_basis.m_frm.m_abgrp_map);
-    Pchb1101hc excit_gen(h.m_frmbos, prng);
+    exgen::Pchb1101hc excit_gen(h.m_frmbos, prng);
     buffered::FrmBosOnv src_mbf(h.m_basis);
     mbf::set_aufbau_mbf(src_mbf.m_frm, particles.m_frm);
     ASSERT_EQ(src_mbf.m_frm.nsetbit(), particles.m_frm);

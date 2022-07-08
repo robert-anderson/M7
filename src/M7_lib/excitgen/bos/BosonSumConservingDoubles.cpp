@@ -5,10 +5,10 @@
 #include "BosonSumConservingDoubles.h"
 
 
-BosonSumConservingDoubles::BosonSumConservingDoubles(const BosHam &h, PRNG &prng) :
+exgen::BosonSumConservingDoubles::BosonSumConservingDoubles(const BosHam &h, PRNG &prng) :
         BosExcitGen(h, prng, {exsig::ex_0022}, "boson mode index sum conserving") {}
 
-void BosonSumConservingDoubles::set_a_range(uint_t i, uint_t j, uint_t &min, uint_t &max, uint_t &nexclude) const {
+void exgen::BosonSumConservingDoubles::set_a_range(uint_t i, uint_t j, uint_t &min, uint_t &max, uint_t &nexclude) const {
     const auto nmode = m_h.m_basis.m_nmode;
     min = 0ul;
     // e.g. nmode = 5, i = 3, j = 3. a can't be 0 or 1, since b would need to be 6 or 5 respectively to conserve sum
@@ -18,13 +18,13 @@ void BosonSumConservingDoubles::set_a_range(uint_t i, uint_t j, uint_t &min, uin
     nexclude = 1 + (i != j);
 }
 
-uint_t BosonSumConservingDoubles::na(uint_t i, uint_t j) const {
+uint_t exgen::BosonSumConservingDoubles::na(uint_t i, uint_t j) const {
     uint_t min, max, nexclude;
     set_a_range(i, j, min, max, nexclude);
     return (max - min) - nexclude;
 }
 
-bool BosonSumConservingDoubles::draw_bos(uint_t, const field::BosOnv &src, prob_t &prob, conn::BosOnv &conn) {
+bool exgen::BosonSumConservingDoubles::draw_bos(uint_t, const field::BosOnv &src, prob_t &prob, conn::BosOnv &conn) {
     const auto &op_inds = src.m_decoded.m_expanded.get();
     const auto nboson_pair = integer::nspair(op_inds.size());
     uint_t ij = m_prng.draw_uint(nboson_pair);
@@ -68,7 +68,7 @@ bool BosonSumConservingDoubles::draw_bos(uint_t, const field::BosOnv &src, prob_
     return true;
 }
 
-prob_t BosonSumConservingDoubles::prob_bos(const field::BosOnv &src, const conn::BosOnv &conn) const {
+prob_t exgen::BosonSumConservingDoubles::prob_bos(const field::BosOnv &src, const conn::BosOnv &conn) const {
     const auto nboson_pair = integer::nspair(src.m_decoded.m_expanded.get().size());
     const auto i = conn.m_ann[0].m_imode;
     const auto j = conn.m_ann[0].m_imode==1 ? conn.m_ann[1].m_imode : i;

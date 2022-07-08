@@ -11,7 +11,7 @@ TEST(HeisenbergExchange, Pbc2D) {
     PRNG prng(14, 1000000);
     HeisenbergFrmHam frm_ham(1.0, lattice::make("ortho", {3, 3}, {1, 1}));
     Hamiltonian h(&frm_ham);
-    HeisenbergExchange excit_gen(frm_ham, prng);
+    exgen::HeisenbergExchange excit_gen(frm_ham, prng);
     conn_foreach::frm::Heisenberg conn_iter;
 
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);

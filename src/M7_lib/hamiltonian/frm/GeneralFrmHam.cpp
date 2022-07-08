@@ -152,9 +152,9 @@ HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
     using namespace exsig;
     excit_gen_list_t list;
     bool any_singles = h.m_contribs_1100.is_nonzero(ex_single) || h.m_contribs_2200.is_nonzero(ex_single);
-    if (any_singles) list.emplace_front(new UniformSingles(h, prng));
+    if (any_singles) list.emplace_front(new exgen::UniformSingles(h, prng));
     bool any_doubles = h.m_contribs_2200.is_nonzero(ex_double);
-    if (any_doubles) list.emplace_front(new Pchb2200(h, prng));
+    if (any_doubles) list.emplace_front(new exgen::Pchb2200(h, prng));
     return list;
 }
 
