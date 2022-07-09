@@ -17,7 +17,7 @@ namespace conf {
 
         explicit Fcidump(Group *parent);
 
-        bool locally_enabled() const override;
+        bool internally_enabled() const override;
     };
 
     struct Bosdump : Section {
@@ -25,7 +25,7 @@ namespace conf {
 
         explicit Bosdump(Group *parent);
 
-        bool locally_enabled() const override;
+        bool internally_enabled() const override;
     };
 
     struct Ebdump : Section {
@@ -34,7 +34,7 @@ namespace conf {
 
         explicit Ebdump(Group *parent);
 
-        bool locally_enabled() const override;
+        bool internally_enabled() const override;
     };
 
     struct LatticeModel : Section {
@@ -46,7 +46,7 @@ namespace conf {
 
         void verify() override;
 
-        bool locally_enabled() const override;
+        bool internally_enabled() const override;
     };
 
     struct Hubbard : LatticeModel {
@@ -73,7 +73,7 @@ namespace conf {
 
         void verify() override;
 
-        bool locally_enabled() const override;
+        bool internally_enabled() const override;
     };
 
     struct FrmBosHam : Section {
@@ -82,7 +82,7 @@ namespace conf {
 
         explicit FrmBosHam(Group *parent);
 
-        bool locally_enabled() const override;
+        bool internally_enabled() const override;
     };
 
     struct InteractingBoseGas : Section {
@@ -92,7 +92,7 @@ namespace conf {
 
         explicit InteractingBoseGas(Group *parent);
 
-        bool locally_enabled() const override;
+        bool internally_enabled() const override;
     };
 
     struct BosHam : Section {
@@ -102,7 +102,7 @@ namespace conf {
 
         explicit BosHam(Group *parent);
 
-        bool locally_enabled() const override;
+        bool internally_enabled() const override;
     };
 
     struct Hamiltonian : Section {

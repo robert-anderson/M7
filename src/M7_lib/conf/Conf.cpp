@@ -109,7 +109,7 @@ conf::Shift::Shift(Group *parent) :
                {}
 
 conf::Semistochastic::Semistochastic(Group *parent) :
-        OptFunc(parent, "semistochastic", "options related to semi-stochastic propagation", false),
+        Section(parent, "semistochastic", "options related to semi-stochastic propagation", true),
         m_size(this, "size", 0ul, "number of MBFs selected to comprise the semi-stochastic space"),
         m_l1_fraction_cutoff(this, "l1_fraction_cutoff", 1.0,
                              "requisite fraction of the total number of walkers required to reside on an MBF for inclusion in the semistochastic space"),
@@ -280,6 +280,6 @@ conf::MbfDef::MbfDef(Group *parent, str_t name) :
         m_neel(this, "neel", false,
                         "initialize the MBF to a Neel state rather than assuming Aufbau principle"){}
 
-bool conf::MbfDef::locally_enabled() const {
+bool conf::MbfDef::internally_enabled() const {
     return !m_bos.get().empty() || !m_frm.get().empty() || m_neel.get();
 }

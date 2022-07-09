@@ -5,12 +5,13 @@
 #include "ConfComponents.h"
 #include "M7_lib/util/String.h"
 
-conf_components::Node::Node(conf_components::Node *parent, str_t name, str_t description) :
+conf_components::Node::Node(conf_components::Node *parent, str_t name, str_t description, bool impl_enable) :
         m_parent(parent), m_yaml_path(parent ? yaml::Path(parent->m_yaml_path + name) : yaml::Path(name)),
-        m_description(description), m_indent(2 * m_yaml_path.depth(), ' ') {
+        m_description(description), m_indent(2 * m_yaml_path.depth(), ' '), m_impl_enable(impl_enable) {
 }
 
-conf_components::Node::Node(str_t description) : Node(nullptr, "", description){}
+conf_components::Node::Node(str_t description, bool impl_enable) :
+    Node(nullptr, "", description, impl_enable){}
 
 str_t conf_components::Node::help_string() const {
     return "";
@@ -21,6 +22,11 @@ const yaml::File *conf_components::Node::get_file() const {
     return m_parent->get_file();
 }
 
+bool conf_components::Node::exists_in_file() const {
+    auto file = get_file();
+    return file->exists(m_yaml_path);
+}
+
 str_t conf_components::Node::invalid_file_key() const {
     return "";
 }
@@ -29,13 +35,18 @@ const str_t &conf_components::Node::name() const {
     return m_yaml_path.m_name_list.back();
 }
 
-bool conf_components::Node::locally_enabled() const {
+bool conf_components::Node::internally_enabled() const {
     return true;
 }
 
 bool conf_components::Node::enabled() const {
+    /*
+     * only need to check for existence in file for the current node. if this node is in the file, then all its
+     * ancestors must also be
+     */
+    if (!m_impl_enable && !exists_in_file()) return false;
     for (auto node = m_parent; node!= nullptr; node=node->m_parent){
-        if (!node->locally_enabled()) return false;
+        if (!node->internally_enabled()) return false;
     }
     return true;
 }
@@ -60,12 +71,12 @@ std::set<str_t> conf_components::Group::make_child_keys() const {
     return child_keys;
 }
 
-conf_components::Group::Group(conf_components::Group *parent, str_t name, str_t description) :
-        Node(parent, name, description) {
+conf_components::Group::Group(conf_components::Group *parent, str_t name, str_t description, bool impl_enable) :
+        Node(parent, name, description, impl_enable) {
     if (parent) parent->add_child(this);
 }
 
-conf_components::Group::Group(str_t description) : Node(description) {}
+conf_components::Group::Group(str_t description) : Node(description, false) {}
 
 void conf_components::Group::add_child(conf_components::Node *child) {
     m_children.push_back(child);
@@ -85,12 +96,14 @@ str_t conf_components::Group::invalid_file_key() const {
     return "";
 }
 
-conf_components::Section::Section(conf_components::Group *parent, str_t name, str_t description) :
-        Group(parent, name, description) {}
+conf_components::Section::Section(conf_components::Group *parent, str_t name, str_t description, bool impl_enabled) :
+        Group(parent, name, description, impl_enabled) {}
 
 str_t conf_components::Section::help_string() const {
     str_t str;
+    const str_t enablement = m_impl_enable ? "implicit" : "explicit";
     str.append(log::format("{}Section:       {}\n", m_indent, log::bold_format(m_yaml_path.to_string())));
+    str.append(log::format("{}Enablement:    {}\n", m_indent, enablement));
     str.append(log::format("{}Description:   {}\n\n", m_indent, m_description));
     for (auto child: m_children) str.append(child->help_string() + "\n");
     return str;
@@ -122,7 +135,7 @@ void conf_components::Document::verify() {
 
 conf_components::ParamBase::ParamBase(conf_components::Group *parent, str_t name, str_t description,
                              str_t v_default_str, str_t dim_type_str) :
-        Node(parent, name, description), m_v_default_str(v_default_str),
+        Node(parent, name, description, false), m_v_default_str(v_default_str),
         m_dim_type_str(dim_type_str) {
     REQUIRE_TRUE(m_parent, "Non-root conf_components::Nodes must have a parent");
     parent->add_child(this);

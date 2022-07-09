@@ -8,20 +8,47 @@
 #include <M7_lib/io/YamlWrapper.h>
 
 namespace conf_components {
-
+    /**
+     * Basic type for all YAML elements (Documents, Sections, Params). The concept of node enablement has three strands:
+     * - internally_enabled: based on the node's own contents
+     * - implicitly_enabled: based on whether it appears in the YAML file
+     * - enabled: (node and all ancestors are internally_enabled) AND (appears in YAML file OR implicitly_enabled)
+     *            this is the only definition of enablement which should be exposed to parts of the code which are not
+     *            concerned with configuration document specification
+     */
     struct Node {
+        /**
+         * pointer to the parent node (nullptr if this is the root)
+         */
         const Node *m_parent;
+        /**
+         * absolute path from the root
+         */
         const yaml::Path m_yaml_path;
+        /**
+         * description of the usage and significance of this node
+         */
         const str_t m_description;
+        /**
+         * non-owning pointers to all nodes defined inside this one
+         */
         std::list<Node *> m_children;
+        /**
+         * indentation string for help document rendering (spaces)
+         */
         const str_t m_indent;
+        /**
+         * if true, the node must be present in the YAML file to be designated as "locally enabled",
+         * else if false, the node need not be present in the file to be designated as "locally_"
+         */
+        const bool m_impl_enable;
 
-        Node(Node *parent, str_t name, str_t description);
+        Node(Node *parent, str_t name, str_t description, bool impl_enable=true);
 
         /**
          * only for ParamRoot
          */
-        explicit Node(str_t description);
+        explicit Node(str_t description, bool impl_enable);
 
         virtual str_t help_string() const;
 
@@ -31,12 +58,20 @@ namespace conf_components {
 
         virtual const yaml::File *get_file() const;
 
+        bool exists_in_file() const;
+
         virtual str_t invalid_file_key() const;
 
         const str_t &name() const;
 
-        virtual bool locally_enabled() const;
+        virtual bool internally_enabled() const;
 
+        /**
+         * not to be called from hot code
+         * @return
+         *  true if the node is enabled :
+         *      (node and all ancestors are internally_enabled) AND (appears in YAML file OR implicitly_enabled)
+         */
         bool enabled() const;
     };
 
@@ -47,7 +82,7 @@ namespace conf_components {
         std::set<str_t> make_child_keys() const;
 
     public:
-        Group(Group *parent, str_t name, str_t description);
+        Group(Group *parent, str_t name, str_t description, bool impl_enable);
 
         Group(str_t description);
 
@@ -62,7 +97,7 @@ namespace conf_components {
 
 
     struct Section : Group {
-        Section(Group *parent, str_t name, str_t description);
+        Section(Group *parent, str_t name, str_t description, bool impl_enabled=true);
 
         str_t help_string() const override;
 
@@ -153,18 +188,16 @@ namespace conf_components {
         Param(Group *parent, str_t name, const T &v_default, str_t description) :
                 ParamBase(parent, name, description, convert::to_string(v_default), dim_str(v_default)),
                 m_v_default(v_default) {
+            m_v = m_v_default;
             auto file = parent->get_file();
-            if (file) {
-                try {
-                    if (file->exists(m_yaml_path)) m_v = file->get_as<T>(m_yaml_path);
-                    else m_v = m_v_default;
-                }
-                catch (const YAML::BadConversion &ex) {
-                    ABORT(log::format("failed reading value {} from line {} of YAML config file",
-                                      m_yaml_path.to_string(), ex.mark.line));
-                }
-            } else {
-                m_v = m_v_default;
+            if (!file) return;
+            try {
+                if (file->exists(m_yaml_path)) m_v = file->get_as<T>(m_yaml_path);
+                else m_v = m_v_default;
+            }
+            catch (const YAML::BadConversion &ex) {
+                ABORT(log::format("failed reading value {} from line {} of YAML config file",
+                                  m_yaml_path.to_string(), ex.mark.line));
             }
         }
 
@@ -183,41 +216,6 @@ namespace conf_components {
         Param& operator=(const T& v){
             m_v = v;
             return *this;
-        }
-    };
-
-    /**
-     * Optional Functionality.
-     * We have to deal with the reality that users will make input files and expect them to work with future versions
-     * of YAML document specifications.
-     *
-     * Therefore, if some program behavior initially only needs to be toggled on and off, it would be satisfactory for
-     * this flag to be directly associated with a Param<bool>. However, if the functionality develops to require further
-     * configuration, the format cannot be extended without breaking existing input files.
-     *
-     * This is the reason for the OptFunc class: units of optional functionality are toggled on and off explicitly using
-     * the m_enable parameter. Then if further options become required in a future version of M7, these can be
-     * seamlessly incorporated as Param and Section children of the OptFunc node.
-     */
-    struct OptFunc : Section {
-        Param<bool> m_enable;
-        OptFunc(Group *parent, str_t name, str_t description, bool default_enable):
-            Section(parent, name, description),
-            m_enable(this, "enable", default_enable, "enable this functionality"){}
-        /**
-         * nested optional functionality is only enabled if all ancestor optional functionality is also enabled
-         * @return
-         *  true is m_enable is true and all ancestor OptFuncs are also true
-         */
-        operator bool () const {
-            if (!m_enable.get()) return false;
-            const Node* node = this;
-            while (node->m_parent) {
-                node = node->m_parent;
-                auto ptr = dynamic_cast<const OptFunc*>(node);
-                if (ptr && !ptr->m_enable.get()) return false;
-            }
-            return true;
         }
     };
 
