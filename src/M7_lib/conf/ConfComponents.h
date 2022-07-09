@@ -188,6 +188,41 @@ namespace conf_components {
         }
     };
 
+    /**
+     * Optional Functionality.
+     * We have to deal with the reality that users will make input files and expect them to work with future versions
+     * of YAML document specifications.
+     *
+     * Therefore, if some program behavior initially only needs to be toggled on and off, it would be satisfactory for
+     * this flag to be directly associated with a Param<bool>. However, if the functionality develops to require further
+     * configuration, the format cannot be extended without breaking existing input files.
+     *
+     * This is the reason for the OptFunc class: units of optional functionality are toggled on and off explicitly using
+     * the m_enable parameter. Then if further options become required in a future version of M7, these can be
+     * seamlessly incorporated as Param and Section children of the OptFunc node.
+     */
+    struct OptFunc : Section {
+        Param<bool> m_enable;
+        OptFunc(Group *parent, str_t name, str_t description, bool default_enable):
+            Section(parent, name, description),
+            m_enable(this, "enable", default_enable, "enable this functionality"){}
+        /**
+         * nested optional functionality is only enabled if all ancestor optional functionality is also enabled
+         * @return
+         *  true is m_enable is true and all ancestor OptFuncs are also true
+         */
+        operator bool () const {
+            if (!m_enable.get()) return false;
+            const Node* node = this;
+            while (node->m_parent) {
+                node = node->m_parent;
+                auto ptr = dynamic_cast<const OptFunc*>(node);
+                if (ptr && !ptr->m_enable.get()) return false;
+            }
+            return true;
+        }
+    };
+
     template<typename T>
     struct ChoiceBase {
         const v_t<T> m_choices;
