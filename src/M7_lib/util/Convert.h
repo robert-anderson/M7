@@ -233,6 +233,18 @@ namespace convert {
     static v_t<to_t> vector(const v_t<from_t> &from) {
         return vector<to_t>(from, tag::Int<std::is_same<to_t, from_t>::value>());
     }
+
+    template<typename T1, typename T2>
+    static std::pair<v_t<T1>, v_t<T2>> split(const v_t<std::pair<T1, T2>>& v) {
+        std::pair<v_t<T1>, v_t<T2>> out;
+        out.first.reserve(v.size());
+        out.second.reserve(v.size());
+        for (auto& pair: v) {
+            out.first.push_back(pair.first);
+            out.second.push_back(pair.second);
+        }
+        return out;
+    }
 }
 
 template<typename T>

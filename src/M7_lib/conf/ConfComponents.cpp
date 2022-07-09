@@ -126,9 +126,9 @@ conf_components::ParamBase::ParamBase(conf_components::Group *parent, str_t name
 
 str_t conf_components::ParamBase::help_string() const {
     str_t str;
-    str.append(log::format("{}Parameter:       {}\n", m_indent, log::bold_format(name())));
-    str.append(log::format("{}Type:            {}\n", m_indent, m_dim_type_str));
-    str.append(log::format("{}Default value:   {}\n", m_indent, m_v_default_str));
-    str.append(log::format("{}Description:     {}\n", m_indent, m_description));
+    str.append(log::format("{}Parameter:        {}\n", m_indent, log::bold_format(name())));
+    str.append(log::format("{}Type:             {}\n", m_indent, m_dim_type_str));
+    str.append(log::format("{}Default value:    {}\n", m_indent, m_v_default_str));
+    str.append(log::format("{}Description:      {}\n", m_indent, m_description));
     return str;
 }

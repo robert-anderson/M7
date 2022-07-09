@@ -136,20 +136,12 @@ namespace conf {
         explicit Wavefunction(Group *parent);
     };
 
-    struct Reweight : Section {
-        Param<uint_t> m_ncycle;
-        Param<uint_t> m_delay;
-
-        explicit Reweight(Group *parent);
-    };
-
     struct Shift : Section {
         Param<double> m_init;
         Param<double> m_damp;
         Param<uint_t> m_period;
         Param<uint_t> m_ncycle_av;
         Param<bool> m_jump;
-        Reweight m_reweight;
 
         explicit Shift(Group *parent);
 
@@ -239,6 +231,33 @@ namespace conf {
             return !(m_rdm.m_ranks.get().empty() && m_spec_mom.m_ranks.get().empty());
         }
     };
+
+
+//    struct FrmExcitGens : Section {
+//        SingleChoice<str_t> m_general_doubles;
+//        SingleChoice<str_t> m_general_singles;
+//        SingleChoice<str_t> m_hubbard;
+//        SingleChoice<str_t> m_heisenberg;
+//        FrmExcitGens(Group *parent): Section(parent, "excitgen",
+//             "options relating to fermion hamiltonian excitation generation"),
+//             m_general_doubles(this, "general_doubles", {"pchb"},
+//                               "approach for doubles generation in the case that fermion hamiltonian is defined by an FCIDUMP"),
+//                                     m_general_singles(this, "general_singles", {"uniform"},
+//                                                       "approach for singles generation in the case that fermion hamiltonian is defined by an FCIDUMP"),
+//                                     m_hubbard(this, "hubbard", {"uniform", ""},
+//                                                       "approach for singles generation in the case that fermion hamiltonian is defined by an FCIDUMP"),
+//                                     m_general_singles(this, "general_singles", {"uniform"},
+//                                                       "approach for singles generation in the case that fermion hamiltonian is defined by an FCIDUMP"),
+//
+//
+//    };
+
+
+//    struct ExcitGens : Section {
+//        SingleChoice<str_t> m_frm_doubles;
+//        ExcitGens(Group *parent): Section(parent, "excitgen", "options relating to excitation generation")
+//        m_frm_doubles(){}
+//    };
 
     struct Propagator : Section {
         Param<uint_t> m_ncycle;

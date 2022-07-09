@@ -97,12 +97,6 @@ conf::Wavefunction::Wavefunction(Group *parent) :
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
         m_buffers(this), m_hash_mapping(this), m_archivable(this), m_load_balancing(this) {}
 
-conf::Reweight::Reweight(Group *parent) :
-        Section(parent, "reweight", "options relating to the on-the-fly correction of population control bias"),
-        m_ncycle(this, "ncycle", 1500ul, "number of past cycles to accumulate the reweighting product over"),
-        m_delay(this, "delay", 1000ul,
-                "number of MC cycles to wait before beginning to reweight coefficients based on historical shift data") {}
-
 conf::Shift::Shift(Group *parent) :
         Section(parent, "shift",
                         "options relating to the diagonal shift parameter and the manner in which it is varied"),
@@ -111,8 +105,8 @@ conf::Shift::Shift(Group *parent) :
         m_period(this, "period", 5, "number of MC cycles between shift updates"),
         m_ncycle_av(this, "ncycle_av", 100ul, "number of cycles over which to maintain a rolling average"),
         m_jump(this, "jump", false,
-               "ignore growth data in the shift update, and instead use a projected energy estimator"),
-        m_reweight(this) {}
+               "ignore growth data in the shift update, and instead use a projected energy estimator")
+               {}
 
 conf::Semistochastic::Semistochastic(Group *parent) :
         Section(parent, "semistochastic", "options related to semi-stochastic propagation"),

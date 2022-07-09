@@ -40,8 +40,8 @@ conf::LatticeModel::LatticeModel(Group *parent, str_t name, str_t description) :
                    "geometric layout of the N-dimensional lattice"),
         m_site_shape(this, "site_shape", {},
                      "dimensionality of the N-dimensional lattice"),
-        m_boundary_conds(this, "boundary_conds", {},
-                         "boundary conditions for each dimension of the lattice (-1: anti-periodic, 0: open, 1: periodic)"){}
+        m_boundary_conds(this, "boundary_conds", {{-1, "anti-periodic"}, {0, "open"}, {1, "periodic"}}, {},
+                         "boundary conditions for each dimension of the lattice", true){}
 
 void conf::LatticeModel::verify() {
     REQUIRE_EQ(m_site_shape.get().size(), m_boundary_conds.get().size(),
