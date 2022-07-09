@@ -29,9 +29,13 @@ const str_t &conf_components::Node::name() const {
     return m_yaml_path.m_name_list.back();
 }
 
-bool conf_components::Node::parents_enabled() const {
+bool conf_components::Node::locally_enabled() const {
+    return true;
+}
+
+bool conf_components::Node::enabled() const {
     for (auto node = m_parent; node!= nullptr; node=node->m_parent){
-        if (!node->enabled()) return false;
+        if (!node->locally_enabled()) return false;
     }
     return true;
 }

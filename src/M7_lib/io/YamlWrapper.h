@@ -15,6 +15,9 @@
 #include "FileReader.h"
 
 namespace yaml {
+
+    bool contains_tabs(const str_t& contents);
+
     struct Path {
         std::list<str_t> m_name_list;
 

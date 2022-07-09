@@ -2,8 +2,16 @@
 // Created by Robert J. Anderson on 25/06/2021.
 //
 
+#include <regex>
 #include "YamlWrapper.h"
 #include "M7_lib/util/String.h"
+
+bool yaml::contains_tabs(const str_t& contents) {
+    std::regex r("(\\t)");
+    auto begin = std::sregex_iterator(contents.cbegin(), contents.cend(), r);
+    auto end = std::sregex_iterator();
+    return std::distance(begin, end);
+}
 
 yaml::Path::Path(std::list<str_t> name_list) : m_name_list(std::move(name_list)) {}
 
@@ -45,6 +53,7 @@ yaml::File::File(const str_t &fname) : m_fname(fname) {
      */
     if (mpi::i_am_root()) contents = FileReader::to_string(fname);
     mpi::bcast(contents);
+    REQUIRE_FALSE_ALL(contains_tabs(contents), "tab characters are forbidden by the YAML standard: please use spaces");
     try {
         m_root = YAML::Load(contents);
     }

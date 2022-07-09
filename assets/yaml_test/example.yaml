@@ -12,3 +12,6 @@ section2:
 section3:
   some_numbers: [4.3, 7.8]
   some_flag: yes
+
+section4:
+  hello: "world"

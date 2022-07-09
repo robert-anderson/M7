@@ -35,11 +35,9 @@ namespace conf_components {
 
         const str_t &name() const;
 
-        virtual bool enabled() const {
-            return true;
-        }
+        virtual bool locally_enabled() const;
 
-        bool parents_enabled() const;
+        bool enabled() const;
     };
 
     struct Group : Node {

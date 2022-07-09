@@ -10,6 +10,8 @@ CsvFileReader::CsvFileReader(const str_t& fname, str_t delimiters, uint_t iline)
 
 bool CsvFileReader::next(strv_t& tokens) {
     if (!FileReader::next(m_work_line)) return false;
+    // stop reading at the first empty line:
+    if (m_work_line.empty()) return false;
     string::split(m_work_line, tokens, m_delimiters);
     return true;
 }

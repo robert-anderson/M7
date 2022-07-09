@@ -37,10 +37,10 @@ uint_t FileReader::nline() {
 bool FileReader::next(str_t &line) const {
     m_iline++;
     getline(*m_file, line);
-    if (line.empty()) return false;
+    if (m_file->eof()) return false;
     // deal with carriage return character
-    if (line[line.size()-1]=='\r') line.resize(line.size()-1);
-    return !line.empty();
+    if (!line.empty() && line[line.size() - 1] == '\r') line.resize(line.size() - 1);
+    return true;
 }
 
 bool FileReader::next() {
