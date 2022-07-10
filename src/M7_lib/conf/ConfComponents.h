@@ -10,9 +10,9 @@
 namespace conf_components {
     /**
      * Basic type for all YAML elements (Documents, Sections, Params). The concept of node enablement has three strands:
-     * - internally_enabled: based on the node's own contents
+     * - enabled_internal: based on the node's own contents
      * - implicitly_enabled: based on whether it appears in the YAML file
-     * - enabled: (node and all ancestors are internally_enabled) AND (appears in YAML file OR implicitly_enabled)
+     * - enabled: (node and all ancestors are enabled_internal) AND (appears in YAML file OR implicitly_enabled)
      *            this is the only definition of enablement which should be exposed to parts of the code which are not
      *            concerned with configuration document specification
      */
@@ -64,13 +64,13 @@ namespace conf_components {
 
         const str_t &name() const;
 
-        virtual bool internally_enabled() const;
+        virtual bool enabled_internal() const;
 
         /**
          * not to be called from hot code
          * @return
          *  true if the node is enabled :
-         *      (node and all ancestors are internally_enabled) AND (appears in YAML file OR implicitly_enabled)
+         *      (node and all ancestors are enabled_internal) AND (appears in YAML file OR implicitly_enabled)
          */
         bool enabled() const;
     };

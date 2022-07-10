@@ -90,7 +90,7 @@ namespace conf {
 
         explicit MbfDef(Group *parent, str_t name);
 
-        bool internally_enabled() const override;
+        bool enabled_internal() const override;
     };
 
     struct Reference : Section {

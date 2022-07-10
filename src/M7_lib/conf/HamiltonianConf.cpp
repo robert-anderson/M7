@@ -10,7 +10,7 @@ conf::Fcidump::Fcidump(Group *parent) :
         m_spin_major(this, "spin_major", false,
                      "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... otherwise.") {}
 
-bool conf::Fcidump::internally_enabled() const {
+bool conf::Fcidump::enabled_internal() const {
     return !m_path.get().empty();
 }
 
@@ -19,7 +19,7 @@ conf::Bosdump::Bosdump(Group *parent) :
                         "options relating to 4-indexed text file defining arbitrary number-conserving boson interactions"),
         m_path(this, "path", "", "path to BOSDUMP format file") {}
 
-bool conf::Bosdump::internally_enabled() const {
+bool conf::Bosdump::enabled_internal() const {
     return !m_path.get().empty();
 }
 
@@ -30,7 +30,7 @@ conf::Ebdump::Ebdump(Group *parent) :
         m_spin_major(this, "spin_major", false,
                      "if true, spin-resolved EBDUMP orders the spin orbitals aaa...bbb..., and ababab... otherwise.") {}
 
-bool conf::Ebdump::internally_enabled() const {
+bool conf::Ebdump::enabled_internal() const {
     return !m_path.get().empty();
 }
 
@@ -48,7 +48,7 @@ void conf::LatticeModel::verify() {
                "boundary conditions must be defined for each element of the lattice shape");
 }
 
-bool conf::LatticeModel::internally_enabled() const {
+bool conf::LatticeModel::enabled_internal() const {
     return !m_site_shape.get().empty();
 }
 
@@ -71,12 +71,12 @@ conf::FrmHam::FrmHam(Group *parent) :
 
 void conf::FrmHam::verify() {
     uint_t ndefined =
-            m_fcidump.internally_enabled() + m_hubbard.internally_enabled() + m_heisenberg.internally_enabled();
+            m_fcidump.enabled_internal() + m_hubbard.enabled_internal() + m_heisenberg.enabled_internal();
     REQUIRE_LE(ndefined, 1ul, "conflicting hamiltonian definitions are defined");
 }
 
-bool conf::FrmHam::internally_enabled() const {
-    return m_fcidump.internally_enabled() || m_hubbard.internally_enabled();
+bool conf::FrmHam::enabled_internal() const {
+    return m_fcidump.enabled_internal() || m_hubbard.enabled_internal();
 }
 
 conf::FrmBosHam::FrmBosHam(Group *parent) :
@@ -86,8 +86,8 @@ conf::FrmBosHam::FrmBosHam(Group *parent) :
         m_holstein_coupling(this, "holstein_coupling", 0.0,
                             "constant coupling between the electronic density and the boson (de-)excitation operators"){}
 
-bool conf::FrmBosHam::internally_enabled() const {
-    return m_ebdump.internally_enabled() || m_holstein_coupling.get() != 0.0;
+bool conf::FrmBosHam::enabled_internal() const {
+    return m_ebdump.enabled_internal() || m_holstein_coupling.get() != 0.0;
 }
 
 conf::InteractingBoseGas::InteractingBoseGas(Group *parent) :
@@ -96,7 +96,7 @@ conf::InteractingBoseGas::InteractingBoseGas(Group *parent) :
         m_nwave(this, "nwave", 0ul, "number of plane waves per dimension (number of degrees of freedom is 2*nwave + 1)"),
         m_ek_scale(this, "ek_scale", 0.0, "scale of the kinetic energy in terms of the scattering interaction strength"){}
 
-bool conf::InteractingBoseGas::internally_enabled() const {
+bool conf::InteractingBoseGas::enabled_internal() const {
     return m_nwave.get();
 }
 
@@ -106,7 +106,7 @@ conf::BosHam::BosHam(Group *parent) :
         m_num_op_weight(this, "num_op_weight", 0.0, "scalar factor of the bosonic number operator"),
         m_interacting_bose_gas(this){}
 
-bool conf::BosHam::internally_enabled() const {
+bool conf::BosHam::enabled_internal() const {
     return !m_bosdump.m_path.get().empty();
 }
 

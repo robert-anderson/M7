@@ -280,6 +280,6 @@ conf::MbfDef::MbfDef(Group *parent, str_t name) :
         m_neel(this, "neel", false,
                         "initialize the MBF to a Neel state rather than assuming Aufbau principle"){}
 
-bool conf::MbfDef::internally_enabled() const {
+bool conf::MbfDef::enabled_internal() const {
     return !m_bos.get().empty() || !m_frm.get().empty() || m_neel.get();
 }

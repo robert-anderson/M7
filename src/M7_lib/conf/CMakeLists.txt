@@ -4,6 +4,10 @@ target_sources(M7_lib
         ConfComponents.h
         Conf.cpp
         Conf.h
+        ExcitgenConf.cpp
+        ExcitgenConf.h
         HamiltonianConf.cpp
         HamiltonianConf.h
+        YamlWrapper.cpp
+        YamlWrapper.h
 )

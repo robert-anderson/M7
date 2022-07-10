@@ -8,10 +8,8 @@ section1:
     another_number: 213
   subsection2:
     a_number: 45
-section2:
+section2: yes
+# comments: this is the next section
 section3:
   some_numbers: [4.3, 7.8]
   some_flag: yes
-
-section4:
-  hello: "world"
