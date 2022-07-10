@@ -8,6 +8,4 @@ target_sources(M7_lib
         ExcitgenConf.h
         HamiltonianConf.cpp
         HamiltonianConf.h
-        YamlWrapper.cpp
-        YamlWrapper.h
 )

@@ -90,11 +90,11 @@ struct HamiltonianTerms {
 
     std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
         using namespace smart_ptr;
-        if (opts.m_ham.m_hubbard.enabled())
+        if (opts.m_ham.m_hubbard.m_enabled)
             return make_frm<HubbardFrmHam>(opts);
-        else if (opts.m_ham.m_heisenberg.enabled())
+        else if (opts.m_ham.m_heisenberg.m_enabled)
             return make_frm<HeisenbergFrmHam>(opts);
-        else if (opts.m_ham.m_fcidump.enabled())
+        else if (opts.m_ham.m_fcidump.m_enabled)
             return make_frm<GeneralFrmHam>(opts);
         return make_poly_unique<FrmHam, NullFrmHam>();
     }
@@ -105,7 +105,7 @@ struct HamiltonianTerms {
             const auto g = opts.m_ham.m_holstein_coupling.m_value;
             return make_poly_unique<FrmBosHam, HolsteinLadderHam>(m_frm->m_basis, g, opts.m_basis.m_bos_occ_cutoff);
         }
-        else if (opts.m_ham.m_ebdump.enabled()) {
+        else if (opts.m_ham.m_ebdump.m_enabled) {
             return make_poly_unique<FrmBosHam, GeneralLadderHam>(opts);
         }
         return make_poly_unique<FrmBosHam, NullFrmBosHam>();
@@ -119,9 +119,9 @@ struct HamiltonianTerms {
             const auto omega = opts.m_ham.m_num_op_weight.m_value;
             return make_poly_unique<BosHam, NumOpBosHam>(basis, omega);
         }
-        else if (opts.m_ham.m_interacting_bose_gas.enabled())
+        else if (opts.m_ham.m_interacting_bose_gas.m_enabled)
             return make_poly_unique<BosHam, InteractingBoseGasBosHam>(opts);
-        else if (opts.m_ham.m_bosdump.enabled())
+        else if (opts.m_ham.m_bosdump.m_enabled)
             return make_poly_unique<BosHam, GeneralBosHam>(opts);
         return make_poly_unique<BosHam, NullBosHam>();
     }

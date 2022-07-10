@@ -2,34 +2,35 @@
 // Created by Robert J. Anderson on 23/06/2021.
 //
 
-#include <M7_lib/conf/ConfComponents.h>
 #include "gtest/gtest.h"
-#include "M7_lib/conf/YamlWrapper.h"
+#include <M7_lib/conf/ConfComponents.h>
 
 namespace parameters_test {
 
-    struct Section1 : conf_components::Section {
-        conf_components::Param<v_t<uint_t>> m_some_numbers;
-        conf_components::Param<v_t<uint_t>> m_some_unspecified_numbers;
-        conf_components::Param<str_t> m_a_string;
+    using namespace conf_components;
+    
+    struct Section1 : Section {
+        Param<v_t<uint_t>> m_some_numbers;
+        Param<v_t<uint_t>> m_some_unspecified_numbers;
+        Param<str_t> m_a_string;
 
-        struct SubSection1 : conf_components::Section {
-            conf_components::Param<uint_t> m_a_number;
-            conf_components::Param<double> m_a_float;
-            conf_components::Param<uint_t> m_another_number;
+        struct SubSection1 : Section {
+            Param<uint_t> m_a_number;
+            Param<double> m_a_float;
+            Param<uint_t> m_another_number;
 
             SubSection1(conf_components::Group *parent) :
-                    conf_components::Section(parent, "subsection1", "minor options"),
+                    Section(parent, "subsection1", "minor options"),
                     m_a_number(this, "a_number", 0ul, "bla blah minor number"),
                     m_a_float(this, "a_float", 0.0, "bla blah minor float"),
                     m_another_number(this, "another_number", 6ul, "bla blah another minor number") {}
         };
 
-        struct SubSection2 : conf_components::Section {
-            conf_components::Param<uint_t> m_a_number;
+        struct SubSection2 : Section {
+            Param<uint_t> m_a_number;
 
             SubSection2(conf_components::Group *parent) :
-                    conf_components::Section(parent, "subsection2", "different minor options"),
+                    Section(parent, "subsection2", "different minor options"),
                     m_a_number(this, "a_number", 0ul, "bla blah different minor number") {}
         };
 
@@ -37,7 +38,7 @@ namespace parameters_test {
         SubSection2 m_subsection2;
 
         Section1(conf_components::Group *parent) :
-                conf_components::Section(parent, "section1", "parameter nodes relating to section1"),
+                Section(parent, "section1", "parameter nodes relating to section1"),
                 m_some_numbers(this, "some_numbers", {3, 4, 6, 9}, "blah blah numbers"),
                 m_some_unspecified_numbers(this, "some_unspecified_numbers", {3, 4, 6},
                                            "these numbers are not in the YAML file, and so the default value should be assigned"),
@@ -45,16 +46,16 @@ namespace parameters_test {
                 m_subsection1(this), m_subsection2(this) {}
     };
 
-    struct Section2 : conf_components::Section {
-        Section2(conf_components::Group *parent) : conf_components::Section(parent, "section2", "blah blah empty section") {}
+    struct Section2 : Section {
+        Section2(conf_components::Group *parent) : Section(parent, "section2", "blah blah empty section") {}
     };
 
-    struct Section3 : conf_components::Section {
-        conf_components::Param <v_t<double>> m_some_numbers;
-        conf_components::Param<bool> m_some_flag;
+    struct Section3 : Section {
+        Param <v_t<double>> m_some_numbers;
+        Param<bool> m_some_flag;
 
         Section3(conf_components::Group *parent) :
-                conf_components::Section(parent, "section3", "blah blah final section"),
+                Section(parent, "section3", "blah blah final section"),
                 m_some_numbers(this, "some_numbers", {3, 4, 6}, "blah blah final section numbers"),
                 m_some_flag(this, "some_flag", false, "blah blah final section flag") {}
     };
@@ -110,7 +111,7 @@ TEST(Parameters, ParameterGroups) {
 TEST(Parameters, New){
     using namespace parameters_test;
     TestDocument f(PROJECT_ROOT"/assets/yaml_test/example.yaml");
-    f.require_valid();
+    f.validate();
     f.print_help();
 
 //    auto i = Node(n, "section2").nchild_in_file();

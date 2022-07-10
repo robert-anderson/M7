@@ -1,136 +1,230 @@
 //
-// Created by Robert J. Anderson on 25/06/2021.
+// Created by rja on 10/07/22.
 //
 
-#ifndef M7_yaml_H
-#define M7_yaml_H
+#ifndef M7_CONF_YAMLWRAPPER_H
+#define M7_CONF_YAMLWRAPPER_H
 
-#if 0
-namespace yaml {
-    /**
-     * Basic type for all YAML elements (Documents, Sections, Params). The concept of node enablement has three strands:
-     * - enabled_internal: based on the node's own contents
-     * - implicitly_enabled: based on whether it appears in the YAML file
-     * - enabled: (node and all ancestors are enabled_internal) AND (appears in YAML file OR implicitly_enabled)
-     *            this is the only definition of enablement which should be exposed to parts of the code which are not
-     *            concerned with configuration document specification
-     */
-    struct Node {
-        /**
-         * pointer to the parent node (nullptr if this is the root)
-         */
-        const Node *m_parent;
-        /**
-         * absolute path from the root
-         */
-        const conf_components::Path m_yaml_path;
-        /**
-         * description of the usage and significance of this node
-         */
-        const str_t m_description;
-        /**
-         * non-owning pointers to all nodes defined inside this one
-         */
-        std::list<Node *> m_children;
-        /**
-         * indentation string for help document rendering (spaces)
-         */
-        const str_t m_indent;
-        /**
-         * if true, the node must be present in the YAML file to be designated as "locally enabled",
-         * else if false, the node need not be present in the file to be designated as "locally_"
-         */
-        const bool m_impl_enable;
+#include <yaml-cpp/yaml.h>
+#include <yaml-cpp/node/node.h>
+#include <yaml-cpp/parser.h>
 
-        Node(Node *parent, str_t name, str_t description, bool impl_enable=true);
+#include <M7_lib/parallel/MPIAssert.h>
 
-        /**
-         * only for ParamRoot
-         */
-        explicit Node(str_t description, bool impl_enable);
+#include <M7_lib/io/Logging.h>
+#include <M7_lib/io/FileReader.h>
+#include <regex>
+#include <utility>
 
-        virtual str_t help_string() const;
+namespace conf_components {
 
-        virtual void log_value() const {}
+    struct Path {
+        const std::list<str_t> m_list;
+        const str_t m_string;
 
-        virtual void verify() {}
+        Path(std::list<str_t> list):
+                m_list(std::move(list)),
+                m_string(string::join(v_t<str_t>(m_list.cbegin(), m_list.cend()), ".")){}
 
-        virtual const conf_components::Document *get_file() const;
-
-        bool exists_in_file() const;
-
-        virtual str_t invalid_file_key() const;
-
-        const str_t &name() const;
-
-        virtual bool enabled_internal() const;
-
-        /**
-         * not to be called from hot code
-         * @return
-         *  true if the node is enabled :
-         *      (node and all ancestors are enabled_internal) AND (appears in YAML file OR implicitly_enabled)
-         */
-        bool enabled() const;
+        Path operator+(const str_t &name) const {
+            auto tmp = m_list;
+            tmp.push_back(name);
+            return {tmp};
+        }
     };
+
+    struct Node {
+        const Path m_path;
+    protected:
+        const Node* m_parent;
+        const YAML::Node m_yaml_node;
+        const str_t m_desc;
+        std::vector<Node*> m_children;
+
+    protected:
+
+        v_t<str_t> child_names() const {
+            if (!m_yaml_node.IsDefined()) return {};
+            if (m_yaml_node.IsSequence()) return {};
+            v_t<str_t> out;
+            out.reserve(m_yaml_node.size());
+            for (auto it=m_yaml_node.begin(); it!=m_yaml_node.end(); ++it) {
+                out.push_back(it->first.Scalar());
+            }
+            return out;
+        }
+
+        template<typename T>
+        bool parseable_as() const {
+            try { m_yaml_node.as<T>(); }
+            catch (const YAML::BadConversion &ex) { return false; }
+            return true;
+        }
+
+        template<typename T>
+        T parse_as() const {
+            REQUIRE_TRUE(parseable_as<T>(), "value in file is not parseable as the required type");
+            return m_yaml_node.as<T>();
+        }
+
+        bool null_in_file() const {
+            if (!m_yaml_node.IsDefined() || m_yaml_node.size()) return false;
+            return parse_as<str_t>() == "null";
+        }
+
+        Node(Path path, Node* parent, const YAML::Node& yaml_node, str_t desc):
+                m_path(std::move(path)), m_parent(parent), m_yaml_node(yaml_node), m_desc(std::move(desc)){
+            if (parent) parent->m_children.push_back(this);
+        }
+
+        Node(const YAML::Node& yaml_node, str_t desc):
+            Node({{}}, nullptr, yaml_node, std::move(desc)){}
+
+
+        virtual void validate_node_contents() {}
+
+        /**
+         * children may be defined in memory that are not present in the file contents, but file contents which do
+         * not correspond to children in memory are invalid
+         */
+        void validate_file_contents() const {
+            if (!m_yaml_node.IsDefined()) return;
+            v_t<str_t> node_names;
+            node_names.reserve(m_children.size());
+            for (auto child: m_children) node_names.push_back(child->m_path.m_list.back());
+            for (auto& content_name: child_names()) {
+                auto found = std::find(node_names.cbegin(), node_names.cend(), content_name) != node_names.cend();
+                REQUIRE_TRUE(found, log::format("file node \"{}\" is unrecognized", (m_path+content_name).m_string));
+            }
+        }
+
+        virtual v_t<std::pair<str_t, str_t>> help_pairs() const {
+            return {};
+        }
+    public:
+
+        Node(Node* parent, const str_t& name, str_t desc):
+            Node(parent->m_path+name, parent, parent->m_yaml_node[name], std::move(desc)){
+            REQUIRE_FALSE(null_in_file(), "there should be no null values in YAML file");
+        }
+
+        void validate() {
+            for (auto child : m_children) child->validate();
+            validate_file_contents();
+            validate_node_contents();
+        }
+
+        void print_help(bool embolden_first = true, size_t ilevel=0) const {
+            auto pairs = help_pairs();
+            if (!pairs.empty() && embolden_first) pairs.front().second = log::bold_format(pairs.front().second);
+            for (auto& pair: pairs) {
+                std::cout << log::format(
+                        "{}{:<16}| {}\n",std::string(ilevel*2, ' '), pair.first, pair.second);
+            }
+            std::cout << '\n';
+            for (auto child: m_children) child->print_help(embolden_first, ilevel+1);
+        }
+    };
+
+    /**
+     * enablement policy of a Group:
+     *  - implicitly enabled: even if the node does not appear in the input file, it is considered enabled
+     *  - mandatory: impliticly enabled, and cannot be disabled
+     *  - explicitly enabled: considered disabled unless the node appears in the input file
+     */
+    enum EnablePolicy {Implicit, Mandatory, Explicit};
+
+    static str_t enable_policy_string(EnablePolicy enable_policy) {
+        switch (enable_policy) {
+            case Implicit: return "implicit";
+            case Mandatory: return "mandatory";
+            case Explicit: return "explicit";
+        }
+        return {};
+    }
 
     struct Group : Node {
-    private:
-        std::set<str_t> make_file_keys() const;
+        const EnablePolicy m_enable_policy;
+        const bool m_enabled;
 
-        std::set<str_t> make_child_keys() const;
-
-    public:
-        Group(Group *parent, str_t name, str_t description, bool impl_enable);
-
-        Group(str_t description);
-
-        void add_child(Node *child);
-
-        str_t invalid_file_key() const override;
-
-        void verify() override {
-            for (auto child: m_children) child->verify();
+        bool make_enabled() const {
+            if (!m_parent) return true;
+            auto parent_group = dynamic_cast<const Group*>(m_parent);
+            REQUIRE_TRUE(parent_group, "parent must be a group");
+            if (m_enable_policy!=Explicit)
+                REQUIRE_FALSE(parent_group->m_enable_policy==Explicit,
+                              "group cannot be implicitly enabled or mandatory if its parent is explicitly enabled");
+            if (m_yaml_node.size()) return true;
+            REQUIRE_TRUE(parseable_as<bool>(), "null nodes are forbidden");
+            if (parse_as<bool>()) {
+                if (m_enable_policy!=Explicit)
+                    log::warn("explicitly enabling mandatory or implicitly enabled group {} "
+                              "by boolean value is redundant", m_path.m_string);
+                return true;
+            }
+            REQUIRE_FALSE(m_enable_policy==Mandatory, "mandatory group cannot be disabled");
+            return false;
         }
+
+        Group(Node* parent, const str_t& name, str_t desc, EnablePolicy enable_policy=Mandatory):
+                Node(parent, name, std::move(desc)), m_enable_policy(enable_policy), m_enabled(make_enabled()){
+        }
+
+    protected:
+
+        Group(const YAML::Node& root, str_t desc): Node(root, std::move(desc)),
+            m_enable_policy(Mandatory), m_enabled(true) {}
     };
 
-
     struct Section : Group {
-        Section(Group *parent, str_t name, str_t description, bool impl_enabled=true);
+        Section(Node* parent, const str_t& name, str_t desc, EnablePolicy enable_policy=Mandatory):
+                Group(parent, name, std::move(desc), enable_policy){}
 
-        str_t help_string() const override;
-
-        void log_value() const override {
-            for (auto child: m_children) child->log_value();
+        v_t<std::pair<str_t, str_t>> help_pairs() const override {
+            return {
+                    {"Section",     m_path.m_string},
+                    {"Enabled",     enable_policy_string(m_enable_policy)},
+                    {"Description", m_desc}
+            };
         }
+        // inherit implicit enabled from parent
+        //Section(const Node* parent, const str_t& name): Section(parent, name, parent->m_impl_enabled){}
     };
 
     struct Document : Group {
-        const str_t m_name;
-        const conf_components::Document *m_file;
-
-        Document(const conf_components::Document *file, str_t name, str_t description);
-
-        const conf_components::Document *get_file() const override;
-
-        str_t help_string() const override;
-
-        void log_value() const override {
-            log::info("Specified values for \"{}\"", m_name);
-            for (auto child: m_children) child->log_value();
+    private:
+        static bool contains_tabs(const str_t& contents){
+            std::regex r("(\\t)");
+            auto begin = std::sregex_iterator(contents.cbegin(), contents.cend(), r);
+            auto end = std::sregex_iterator();
+            return std::distance(begin, end);
         }
 
-        void verify() override;
-    };
+        static YAML::Node load(const str_t& fname) {
+            /*
+             * no file given: fills every Param with default values
+             */
+            if (fname.empty()) return {};
+            str_t contents;
+            /*
+             * read in YAML file contents on the root node then then bcast to others
+             */
+            if (mpi::i_am_root()) contents = FileReader::to_string(fname);
+            mpi::bcast(contents);
+            REQUIRE_FALSE_ALL(contains_tabs(contents),
+                              "tab characters are forbidden by the YAML standard: please use spaces");
+            try {
+                return YAML::Load(contents);
+            }
+            catch (const YAML::ParserException& ex) {
+                ABORT(log::format("YAML syntax error in file {}, line {}, column {}",
+                                  fname, ex.mark.line, ex.mark.pos));
+            }
+            return {};
+        }
 
-    struct ParamBase : Node {
-        const str_t m_v_default_str;
-        const str_t m_dim_type_str;
-
-        ParamBase(Group *parent, str_t name, str_t description, str_t v_default_str,
-                  str_t dim_type_str);
-
-        str_t help_string() const override;
+    public:
+        Document(const str_t& fname, str_t desc): Group(load(fname), std::move(desc)) {}
     };
 
     template<typename T=void>
@@ -178,42 +272,41 @@ namespace yaml {
         return log::format("3D {} array", type_str<T>());
     }
 
-    template<typename T>
-    class Param : public ParamBase {
-        const T m_v_default;
+
+    struct ParamBase : Node {
+    private:
+        const str_t m_dim_type_str, m_default_value;
     protected:
-        T m_v;
-    public:
-        Param(Group *parent, str_t name, const T &v_default, str_t description) :
-                ParamBase(parent, name, description, convert::to_string(v_default), dim_str(v_default)),
-                m_v_default(v_default) {
-            m_v = m_v_default;
-            auto file = parent->get_file();
-            if (!file) return;
-            try {
-                if (file->exists(m_yaml_path)) m_v = file->get_as<T>(m_yaml_path);
-                else m_v = m_v_default;
-            }
-            catch (const YAML::BadConversion &ex) {
-                ABORT(log::format("failed reading value {} from line {} of YAML config file",
-                                  m_yaml_path.to_string(), ex.mark.line));
-            }
-        }
+        ParamBase(Node* parent, const str_t& name, str_t desc, str_t dim_type, str_t default_value) :
+            Node(parent, name, std::move(desc)),
+            m_dim_type_str(std::move(dim_type)), m_default_value(std::move(default_value)){}
 
-        const T &get() const {
-            return m_v;
+        v_t<std::pair<str_t, str_t>> help_pairs() const override {
+            return {
+                    {"Parameter",    m_path.m_string},
+                    {"Type",         m_dim_type_str},
+                    {"Default value",m_default_value},
+                    {"Description",  m_desc},
+            };
         }
+    };
 
-        operator const T &() const {
-            return get();
-        }
+    template<typename T>
+    struct Param : ParamBase {
+        const T m_default_value;
+        T m_value;
 
-        void log_value() const override {
-            log::info("{}: {}", m_yaml_path.to_string(), convert::to_string(m_v));
+        Param(Group* parent, const str_t& name, T default_value, str_t desc):
+            ParamBase(parent, name, std::move(desc), dim_str(default_value),
+                      convert::to_string(default_value)), m_default_value(default_value),
+                      m_value(m_yaml_node.IsDefined() ? parse_as<T>() : m_default_value){}
+
+        operator const T&() const {
+            return m_value;
         }
 
         Param& operator=(const T& v){
-            m_v = v;
+            m_value = v;
             return *this;
         }
     };
@@ -226,7 +319,7 @@ namespace yaml {
         ChoiceBase(v_t<T> choices, v_t<str_t> choice_descriptions = {}):
                 m_choices(std::move(choices)), m_choice_descriptions(std::move(choice_descriptions)){
             if (!choice_descriptions.empty()) REQUIRE_EQ(m_choices.size(), m_choice_descriptions.size(),
-               "if descriptions are defined, each choice must have one");
+                                                         "if descriptions are defined, each choice must have one");
         }
         ChoiceBase(const v_t<std::pair<T, str_t>>& choice_and_descs):
                 ChoiceBase<T>(convert::split(choice_and_descs).first, convert::split(choice_and_descs).second){}
@@ -256,7 +349,7 @@ namespace yaml {
         using ChoiceBase<T>::is_choices;
         void require_is_choice(const T& v) const {
             REQUIRE_TRUE(is_choices(v), log::format("\"{}\" is not among the valid choices for param {}",
-                                                     convert::to_string(v), Node::m_yaml_path.to_string()));
+                                                    convert::to_string(v), Node::m_path.m_string));
         }
         static T get_first(const v_t<T>& choices) {
             REQUIRE_FALSE(choices.empty(), "choices vector must be non-empty");
@@ -267,17 +360,17 @@ namespace yaml {
             return choice_and_descs.front().first;
         }
     public:
-        using Param<T>::get;
+        using Param<T>::m_value;
         using Param<T>::operator const T&;
     private:
         void validate(const T &v_default) const {
             require_is_choice(v_default);
-            require_is_choice(get());
+            require_is_choice(m_value);
         }
 
     private:
         SingleChoice(Group *parent, str_t name, v_t<T> choices, v_t<str_t> choice_descriptions,
-                    const T &v_default, str_t description):
+                     const T &v_default, str_t description):
                 ChoiceBase<T>(choices, choice_descriptions),
                 Param<T>(parent, name, v_default, description){
             validate(v_default);
@@ -285,7 +378,7 @@ namespace yaml {
 
     public:
         SingleChoice(Group *parent, str_t name, const v_t<std::pair<T, str_t>>& choice_and_descs,
-                    const v_t<T> &v_default, str_t description):
+                     const v_t<T> &v_default, str_t description):
                 ChoiceBase<T>(choice_and_descs), Param<v_t<T>>(parent, name, v_default, description){
             validate(v_default);
         }
@@ -304,10 +397,11 @@ namespace yaml {
                 SingleChoice(parent, name, choices, get_first(choices), description){}
 
     private:
-        str_t help_string() const override {
-            auto str = ParamBase::help_string();
-            str.append(log::format("{}Select one from:  {}\n", ParamBase::m_indent, ChoiceBase<T>::to_string()));
-            return str;
+
+        v_t<std::pair<str_t, str_t>> help_pairs() const override {
+            auto tmp = ParamBase::help_pairs();
+            tmp.emplace_back("Select one from", ChoiceBase<T>::to_string());
+            return tmp;
         }
     };
 
@@ -318,25 +412,26 @@ namespace yaml {
         using ChoiceBase<T>::are_choices;
         void require_are_choices(const v_t<T>& v) const {
             REQUIRE_TRUE(are_choices(v), log::format("\"{}\" are not all among the valid choices for param {}",
-                                                     convert::to_string(v), Node::m_yaml_path.to_string()));
+                                                     convert::to_string(v), Node::m_path.m_string));
         }
     public:
-        using Param<v_t<T>>::get;
+        using Param<v_t<T>>::m_value;
         using Param<v_t<T>>::operator const v_t<T>&;
     private:
         void validate(const v_t<T> &v_default, bool repetition) const {
             require_are_choices(v_default);
-            require_are_choices(get());
+            require_are_choices(m_value);
             if (!repetition) {
-                REQUIRE_EQ(std::set<T>(get().begin(), get().end()).size(), get().size(), "repeated choices are not allowed");
+                REQUIRE_EQ(std::set<T>(m_value.begin(), m_value.end()).size(),
+                           m_value.size(), "repeated choices are not allowed");
             }
         }
 
     private:
         MultiChoice(Group *parent, str_t name, v_t<T> choices, v_t<str_t> choice_descriptions,
-               const T &v_default, str_t description, bool repetition):
-               ChoiceBase<T>(choices, choice_descriptions),
-               Param<v_t<T>>(parent, name, v_default, description){
+                    const T &v_default, str_t description, bool repetition):
+                ChoiceBase<T>(choices, choice_descriptions),
+                Param<v_t<T>>(parent, name, v_default, description){
             validate(v_default, repetition);
         }
 
@@ -350,23 +445,17 @@ namespace yaml {
         MultiChoice(Group *parent, str_t name, v_t<T> choices, const v_t<T> &v_default,
                     str_t description, bool repetition):
                 ChoiceBase<T>(choices), Param<v_t<T>>(parent, name, v_default, description){
-                    validate(v_default, repetition);
+            validate(v_default, repetition);
         }
 
     private:
-        str_t help_string() const override {
-            auto str = ParamBase::help_string();
-            str.append(log::format("{}Select many from: {}\n", ParamBase::m_indent, ChoiceBase<T>::to_string()));
-            return str;
+
+        v_t<std::pair<str_t, str_t>> help_pairs() const override {
+            auto tmp = ParamBase::help_pairs();
+            tmp.emplace_back("Select many from", ChoiceBase<T>::to_string());
+            return tmp;
         }
     };
 }
 
-template<typename T>
-static std::ostream &operator<<(std::ostream &os, const conf_components::Param<T> &v) {
-    os << v.get();
-    return os;
-}
-
-#endif //M7_yaml_H
-#endif //M7_yaml_H
+#endif //M7_CONF_YAMLWRAPPER_H

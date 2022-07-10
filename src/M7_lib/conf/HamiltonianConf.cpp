@@ -31,10 +31,9 @@ conf::LatticeModel::LatticeModel(Group *parent, str_t name, str_t description) :
         m_boundary_conds(this, "boundary_conds", {{-1, "anti-periodic"}, {0, "open"}, {1, "periodic"}}, {},
                          "boundary conditions for each dimension of the lattice", true){}
 
-str_t conf::LatticeModel::valid_logic() {
-    if (m_site_shape.m_value.size() != m_boundary_conds.m_value.size())
-        return "boundary conditions must be defined for each element of the lattice shape";
-    return {};
+void conf::LatticeModel::validate_node_contents() {
+    REQUIRE_EQ(m_site_shape.m_value.size(), m_boundary_conds.m_value.size(),
+        "boundary conditions must be defined for each element of the lattice shape");
 }
 
 conf::Hubbard::Hubbard(Group *parent) :
@@ -54,10 +53,9 @@ conf::FrmHam::FrmHam(Group *parent) :
         m_fcidump(this), m_hubbard(this), m_heisenberg(this),
         m_spin_penalty_j(this, "spin_penalty_j", 0.0, "scalar multiple of the total spin operator used in the spin penalty fermion Hamiltonian modification"){}
 
-str_t conf::FrmHam::valid_logic() {
-    uint_t ndefined = m_fcidump.enabled() + m_hubbard.enabled() + m_heisenberg.enabled();
-    if (ndefined>1ul) return "conflicting hamiltonian definitions are defined";
-    return {};
+void conf::FrmHam::validate_node_contents() {
+    uint_t ndefined = m_fcidump.m_enabled + m_hubbard.m_enabled + m_heisenberg.m_enabled;
+    REQUIRE_LE(ndefined, 1ul, "conflicting hamiltonian definitions are defined");
 }
 
 conf::FrmBosHam::FrmBosHam(Group *parent) :

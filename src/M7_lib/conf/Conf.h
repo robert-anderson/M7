@@ -6,7 +6,7 @@
 #define M7_CONF_H
 
 
-#include "YamlWrapper.h"
+#include "ConfComponents.h"
 #include "HamiltonianConf.h"
 #include "M7_lib/basis/BasisData.h"
 
@@ -56,7 +56,7 @@ namespace conf {
         }
 
     protected:
-        str_t valid_logic() override;
+        void validate_node_contents() override;
     };
 
     struct Archivable : Section {
@@ -107,10 +107,9 @@ namespace conf {
                          "maximum allowed occupation of each boson mode"){}
 
     protected:
-        str_t valid_logic() override {
-            if (m_bos_occ_cutoff > sys::bos::c_max_occ)
-                return log::format("given nboson_max exceeds limit of {}", sys::bos::c_max_occ);
-            return {};
+        void validate_node_contents() override {
+            REQUIRE_LE(m_bos_occ_cutoff, sys::bos::c_max_occ,
+                       log::format("given nboson_max exceeds limit of {}", sys::bos::c_max_occ));
         }
     };
 
@@ -156,7 +155,7 @@ namespace conf {
         explicit Semistochastic(Group *parent);
 
     protected:
-        str_t valid_logic() override;
+        void validate_node_contents() override;
     };
 
     struct Stats : Section {
@@ -167,7 +166,7 @@ namespace conf {
         explicit Stats(Group *parent);
 
     protected:
-        str_t valid_logic() override;
+        void validate_node_contents() override;
     };
 
     struct SpfWeightedTwf : Section {
@@ -177,7 +176,7 @@ namespace conf {
         explicit SpfWeightedTwf(Group *parent);
 
     protected:
-        str_t valid_logic() override;
+        void validate_node_contents() override;
     };
 
     struct Bilinears : Section {
@@ -190,7 +189,7 @@ namespace conf {
         explicit Bilinears(Group *parent, str_t name, str_t description);
 
     protected:
-        str_t valid_logic() override;
+        void validate_node_contents() override;
     };
 
     struct Rdms : Bilinears {
@@ -307,7 +306,7 @@ namespace conf {
         explicit Document(const str_t& fname="");
 
     protected:
-        str_t valid_logic() override;
+        void validate_node_contents() override;
     };
 }
 

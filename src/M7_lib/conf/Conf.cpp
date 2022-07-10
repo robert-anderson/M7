@@ -4,6 +4,7 @@
 
 #include "Conf.h"
 
+using namespace conf_components;
 
 conf::HashMapping::HashMapping(Group *parent) :
         Section(parent, "hash_mapping", "options relating to the behavior of hash-mapped tables"),
@@ -37,24 +38,23 @@ conf::Archive::Archive(Group *parent) :
         m_period(this, "period", 0ul, "number of MC cycles between checkpoint dumps"),
         m_period_mins(this, "period_mins", 0ul, "time in minutes between checkpoint dumps") {}
         
-str_t conf::Archive::valid_logic() {
+void conf::Archive::validate_node_contents() {
     if (bool(m_period) && bool(m_period_mins))
         log::warn("both cycle number and time periods are defined for checkpointing");
 
     auto &str = m_chkpt_path.m_value;
     uint_t token_count = std::count(str.cbegin(), str.cend(), '{');
-    if (token_count > 1ul) return "checkpoint paths can have at most one {} token";
+    REQUIRE_LE(token_count, 1ul, "checkpoint paths can have at most one {} token");
     if (token_count) {
         auto it_open = std::find(str.cbegin(), str.cend(), '{');
         auto it_close = std::find(str.cbegin(), str.cend(), '}');
-        if (std::distance(it_open, it_close) != 1l)
-            return "checkpoint path for periodic output should contain at most one {} formatting point";
+        REQUIRE_EQ(std::distance(it_open, it_close), 1l,
+                   "checkpoint path for periodic output should contain at most one {} formatting point");
         log::info("formatting token found in path, "
                   "successive checkpoints will not overwrite previous checkpoints from the same run");
     } else
         log::info("formatting token not found in path, "
                   "successive checkpoints will overwrite previous checkpoints from the same run");
-    return {};
 }
 
 conf::Archivable::Archivable(Group *parent) :
@@ -110,17 +110,16 @@ conf::Shift::Shift(Group *parent) :
                {}
 
 conf::Semistochastic::Semistochastic(Group *parent) :
-        Section(parent, "semistochastic", "options related to semi-stochastic propagation", true),
+        Section(parent, "semistochastic", "options related to semi-stochastic propagation", Explicit),
         m_size(this, "size", 0ul, "number of MBFs selected to comprise the semi-stochastic space"),
         m_l1_fraction_cutoff(this, "l1_fraction_cutoff", 1.0,
                              "requisite fraction of the total number of walkers required to reside on an MBF for inclusion in the semistochastic space"),
         m_delay(this, "delay", 0ul,
                 "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space") {}
 
-str_t conf::Semistochastic::valid_logic() {
-    if (bool(m_size) == (m_l1_fraction_cutoff == 1.0)) return "incompatible methods of subspace selection specified";
-    if (m_l1_fraction_cutoff > 1.0) return "cutoff must not exceed 1.0";
-    return {};
+void conf::Semistochastic::validate_node_contents() {
+    REQUIRE_NE(bool(m_size), m_l1_fraction_cutoff != 1.0, "incompatible methods of subspace selection specified");
+    REQUIRE_LE(m_l1_fraction_cutoff, 1.0, "cutoff must not exceed 1.0");
 }
 
 conf::Stats::Stats(Group *parent) :
@@ -133,9 +132,8 @@ conf::Stats::Stats(Group *parent) :
         m_parallel(this, "parallel", false,
                    "output additional stats from each MPI rank") {}
 
-str_t conf::Stats::valid_logic() {
-    if (!m_period.m_value) return "Stats output period must be non-zero";
-    return {};
+void conf::Stats::validate_node_contents() {
+    REQUIRE_TRUE(m_period.m_value, "Stats output period must be non-zero");
 }
 
 conf::SpfWeightedTwf::SpfWeightedTwf(Group *parent) :
@@ -146,11 +144,10 @@ conf::SpfWeightedTwf::SpfWeightedTwf(Group *parent) :
         m_boson_fac(this, "boson_fac", 0.0, "Exponential constant penalising boson occupancy in weighted TWF") {}
 
 
-str_t conf::SpfWeightedTwf::valid_logic() {
-    if (!c_enable_bosons && m_boson_fac.m_value != 0.0)
-        return "Boson exponential parameter is non-zero but bosons are compile time disabled. "
-               "Set CMake variable -DMBF_TYPE_IND to 1 or 2 and recompile";
-    return {};
+void conf::SpfWeightedTwf::validate_node_contents() {
+    if (!c_enable_bosons)
+        REQUIRE_EQ(m_boson_fac.m_value, 0.0, "Boson exponential parameter is non-zero but bosons are compile time "
+                                             "disabled. Set CMake variable -DMBF_TYPE_IND to 1 or 2 and recompile");
 }
 
 conf::Bilinears::Bilinears(Group *parent, str_t name, str_t description) :
@@ -158,11 +155,9 @@ conf::Bilinears::Bilinears(Group *parent, str_t name, str_t description) :
         m_ranks(this, "ranks", {}, "Ranks to accumulate"),
         m_buffers(this), m_hash_mapping(this), m_load_balancing(this), m_archivable(this) {}
 
-str_t conf::Bilinears::valid_logic() {
-    for (const auto &rank: m_ranks.m_value) {
-        if (rank.size() != 1 && rank.size() != 4) return "invalid rank specifier";
-    }
-    return {};
+void conf::Bilinears::validate_node_contents() {
+    for (const auto &rank: m_ranks.m_value)
+        REQUIRE_TRUE(rank.size() == 1 || rank.size() == 4, "invalid rank specifier");
 }
 
 conf::Rdms::Rdms(Group *parent, str_t name, str_t description) :
@@ -258,16 +253,15 @@ conf::Document::Document(const str_t& fname) :
         m_shift(this), m_propagator(this),
         m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this) {}
 
-str_t conf::Document::valid_logic() {
-    if (m_wavefunction.m_nw_init > m_propagator.m_nw_target)
-        return "initial number of walkers must not exceed the target population";
+void conf::Document::validate_node_contents() {
+    REQUIRE_LE(m_wavefunction.m_nw_init, m_propagator.m_nw_target,
+               "initial number of walkers must not exceed the target population");
     if (m_wavefunction.m_nw_init < m_propagator.m_nadd) {
         m_wavefunction.m_nw_init.m_value = m_propagator.m_nadd.m_value;
         log::warn("initial number of walkers must be at least the initiator threshold");
     }
-    if (m_particles.m_nboson > m_basis.m_bos_occ_cutoff)
-        return "number of bosons in a number-conserving system mustn't exceed the maximum occupation cutoff";
-    return {};
+    REQUIRE_LE(m_particles.m_nboson, m_basis.m_bos_occ_cutoff,
+               "number of bosons in a number-conserving system mustn't exceed the maximum occupation cutoff");
 }
 
 conf::MbfDef::MbfDef(Group *parent, str_t name) :

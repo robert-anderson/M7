@@ -5,7 +5,7 @@
 #ifndef M7_HAMILTONIAN_CONF_H
 #define M7_HAMILTONIAN_CONF_H
 
-#include "YamlWrapper.h"
+#include "ConfComponents.h"
 
 namespace conf {
 
@@ -39,7 +39,7 @@ namespace conf {
         LatticeModel(Group *parent, str_t name, str_t description);
 
     protected:
-        str_t valid_logic() override;
+        void validate_node_contents() override;
     };
 
     struct Hubbard : LatticeModel {
@@ -65,7 +65,7 @@ namespace conf {
         explicit FrmHam(Group *parent);
 
     protected:
-        str_t valid_logic() override;
+        void validate_node_contents() override;
     };
 
     struct FrmBosHam : Section {
