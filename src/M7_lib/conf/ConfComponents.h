@@ -23,7 +23,7 @@ namespace yaml {
         /**
          * absolute path from the root
          */
-        const yaml::Path m_yaml_path;
+        const conf_components::Path m_yaml_path;
         /**
          * description of the usage and significance of this node
          */
@@ -55,7 +55,7 @@ namespace yaml {
 
         virtual void verify() {}
 
-        virtual const yaml::Document *get_file() const;
+        virtual const conf_components::Document *get_file() const;
 
         bool exists_in_file() const;
 
@@ -107,11 +107,11 @@ namespace yaml {
 
     struct Document : Group {
         const str_t m_name;
-        const yaml::Document *m_file;
+        const conf_components::Document *m_file;
 
-        Document(const yaml::Document *file, str_t name, str_t description);
+        Document(const conf_components::Document *file, str_t name, str_t description);
 
-        const yaml::Document *get_file() const override;
+        const conf_components::Document *get_file() const override;
 
         str_t help_string() const override;
 
@@ -363,7 +363,7 @@ namespace yaml {
 }
 
 template<typename T>
-static std::ostream &operator<<(std::ostream &os, const yaml::Param<T> &v) {
+static std::ostream &operator<<(std::ostream &os, const conf_components::Param<T> &v) {
     os << v.get();
     return os;
 }

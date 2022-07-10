@@ -16,7 +16,7 @@
 #include <regex>
 #include <utility>
 
-namespace yaml {
+namespace conf_components {
 
     struct Path {
         const std::list<str_t> m_name_list;

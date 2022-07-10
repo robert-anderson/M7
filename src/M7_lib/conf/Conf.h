@@ -12,7 +12,7 @@
 
 namespace conf {
     
-    using namespace yaml;
+    using namespace conf_components;
 
     struct HashMapping : Section {
         Param<double> m_remap_ratio;
@@ -290,7 +290,7 @@ namespace conf {
         void verify();
     };
 
-    struct Document : yaml::Document {
+    struct Document : conf_components::Document {
         Prng m_prng;
         Archive m_archive;
         Basis m_basis;

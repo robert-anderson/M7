@@ -252,7 +252,7 @@ void conf::Propagator::verify() {
 }
 
 conf::Document::Document(const str_t& fname) :
-        yaml::Document(fname, "Configuration document prescribing the behavior of an FCIQMC calculation in M7"),
+        conf_components::Document(fname, "Configuration document prescribing the behavior of an FCIQMC calculation in M7"),
         m_prng(this), m_archive(this), m_basis(this), m_particles(this),
         m_wavefunction(this), m_reference(this),
         m_shift(this), m_propagator(this),

@@ -9,7 +9,7 @@
 
 namespace conf {
 
-    using namespace yaml;
+    using namespace conf_components;
 
     struct Fcidump : Section {
         Param<str_t> m_path;
