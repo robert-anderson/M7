@@ -21,7 +21,7 @@ FciqmcCalculation::FciqmcCalculation(const conf::Document &opts) :
     m_wf.create_row(0, ref_mbf, ref_energy, v_t<bool>(m_wf.npart(), true));
     if (ref_loc.is_mine()){
         for (uint_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
-            m_wf.set_weight(ipart, opts.m_wavefunction.m_nw_init.get());
+            m_wf.set_weight(ipart, opts.m_wavefunction.m_nw_init);
     }
     m_prop->m_shift.m_values = ref_energy+opts.m_shift.m_init;
     Solver solver(opts, *m_prop, m_wf, ref_loc);

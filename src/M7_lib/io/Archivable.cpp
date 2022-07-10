@@ -41,16 +41,16 @@ Archive::Archive(const conf::Document& opts) :
         m_opts(opts), m_do_load(m_opts.m_archive.do_load()),
         m_do_save(opts.m_archive.do_save()), m_do_chkpts(opts.m_archive.do_chkpts()) {
     m_timer.unpause();
-    if (m_do_load) log::info("reading archive from file \"{}\"", m_opts.m_archive.m_load_path.get());
+    if (m_do_load) log::info("reading archive from file \"{}\"", m_opts.m_archive.m_load_path.m_value);
     else log::info("not reading archive from file");
-    if (m_do_save) log::info("saving archive to file \"{}\" upon termination of the solver loop", m_opts.m_archive.m_save_path.get());
+    if (m_do_save) log::info("saving archive to file \"{}\" upon termination of the solver loop", m_opts.m_archive.m_save_path.m_value);
     else log::info("not saving archive to file");
     if (m_do_chkpts) {
-        log::info("dumping checkpoint archives on file \"{}\"", m_opts.m_archive.m_chkpt_path.get());
+        log::info("dumping checkpoint archives on file \"{}\"", m_opts.m_archive.m_chkpt_path.m_value);
         if (m_opts.m_archive.m_period)
-            log::info("checkpoints will be made every {} cycles", m_opts.m_archive.m_period.get());
+            log::info("checkpoints will be made every {} cycles", m_opts.m_archive.m_period.m_value);
         if (m_opts.m_archive.m_period_mins)
-            log::info("checkpoints will be made every {} minutes", m_opts.m_archive.m_period_mins.get());
+            log::info("checkpoints will be made every {} minutes", m_opts.m_archive.m_period_mins.m_value);
     } else log::info("not dumping checkpoint archives");
 }
 

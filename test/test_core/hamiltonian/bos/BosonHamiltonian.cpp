@@ -65,7 +65,6 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
      *  [0.         0.         1.08253175 0.66291261 3.9140625  0.4330127 ]
      *  [0.         0.         0.375      0.61237244 0.4330127  3.0859375 ]]
      */
-    conf::Document opts;
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP"}, sys::bos::c_max_occ);
     Hamiltonian ham(&bos_ham);
     buffered::BosOnv src(ham.m_basis);

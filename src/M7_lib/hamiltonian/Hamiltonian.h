@@ -102,7 +102,7 @@ struct HamiltonianTerms {
     std::unique_ptr<FrmBosHam> make_frmbos(FrmBosHam::opt_pair_t opts) {
         using namespace smart_ptr;
         if (opts.m_ham.m_holstein_coupling) {
-            const auto g = opts.m_ham.m_holstein_coupling.get();
+            const auto g = opts.m_ham.m_holstein_coupling.m_value;
             return make_poly_unique<FrmBosHam, HolsteinLadderHam>(m_frm->m_basis, g, opts.m_basis.m_bos_occ_cutoff);
         }
         else if (opts.m_ham.m_ebdump.enabled()) {
@@ -116,7 +116,7 @@ struct HamiltonianTerms {
         if (opts.m_ham.m_num_op_weight) {
             const uint_t nsite = m_frm->m_basis.m_nsite;
             const sys::bos::Basis basis(nsite);
-            const auto omega = opts.m_ham.m_num_op_weight.get();
+            const auto omega = opts.m_ham.m_num_op_weight.m_value;
             return make_poly_unique<BosHam, NumOpBosHam>(basis, omega);
         }
         else if (opts.m_ham.m_interacting_bose_gas.enabled())

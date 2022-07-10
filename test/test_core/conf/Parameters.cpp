@@ -8,36 +8,36 @@
 
 namespace parameters_test {
 
-    struct Section1 : conf_components::Section {
-        conf_components::Param<v_t<uint_t>> m_some_numbers;
-        conf_components::Param<v_t<uint_t>> m_some_unspecified_numbers;
-        conf_components::Param<str_t> m_a_string;
+    struct Section1 : yaml::Section {
+        yaml::Param<v_t<uint_t>> m_some_numbers;
+        yaml::Param<v_t<uint_t>> m_some_unspecified_numbers;
+        yaml::Param<str_t> m_a_string;
 
-        struct SubSection1 : conf_components::Section {
-            conf_components::Param<uint_t> m_a_number;
-            conf_components::Param<double> m_a_float;
-            conf_components::Param<uint_t> m_another_number;
+        struct SubSection1 : yaml::Section {
+            yaml::Param<uint_t> m_a_number;
+            yaml::Param<double> m_a_float;
+            yaml::Param<uint_t> m_another_number;
 
-            SubSection1(conf_components::Group *parent) :
-                    conf_components::Section(parent, "subsection1", "minor options"),
+            SubSection1(yaml::Group *parent) :
+                    yaml::Section(parent, "subsection1", "minor options"),
                     m_a_number(this, "a_number", 0ul, "bla blah minor number"),
                     m_a_float(this, "a_float", 0.0, "bla blah minor float"),
                     m_another_number(this, "another_number", 6ul, "bla blah another minor number") {}
         };
 
-        struct SubSection2 : conf_components::Section {
-            conf_components::Param<uint_t> m_a_number;
+        struct SubSection2 : yaml::Section {
+            yaml::Param<uint_t> m_a_number;
 
-            SubSection2(conf_components::Group *parent) :
-                    conf_components::Section(parent, "subsection2", "different minor options"),
+            SubSection2(yaml::Group *parent) :
+                    yaml::Section(parent, "subsection2", "different minor options"),
                     m_a_number(this, "a_number", 0ul, "bla blah different minor number") {}
         };
 
         SubSection1 m_subsection1;
         SubSection2 m_subsection2;
 
-        Section1(conf_components::Group *parent) :
-                conf_components::Section(parent, "section1", "parameter nodes relating to section1"),
+        Section1(yaml::Group *parent) :
+                yaml::Section(parent, "section1", "parameter nodes relating to section1"),
                 m_some_numbers(this, "some_numbers", {3, 4, 6, 9}, "blah blah numbers"),
                 m_some_unspecified_numbers(this, "some_unspecified_numbers", {3, 4, 6},
                                            "these numbers are not in the YAML file, and so the default value should be assigned"),
@@ -45,33 +45,34 @@ namespace parameters_test {
                 m_subsection1(this), m_subsection2(this) {}
     };
 
-    struct Section2 : conf_components::Section {
-        Section2(conf_components::Group *parent) : conf_components::Section(parent, "section2", "blah blah empty section") {}
+    struct Section2 : yaml::Section {
+        Section2(yaml::Group *parent) : yaml::Section(parent, "section2", "blah blah empty section") {}
     };
 
-    struct Section3 : conf_components::Section {
-        conf_components::Param <v_t<double>> m_some_numbers;
-        conf_components::Param<bool> m_some_flag;
+    struct Section3 : yaml::Section {
+        yaml::Param <v_t<double>> m_some_numbers;
+        yaml::Param<bool> m_some_flag;
 
-        Section3(conf_components::Group *parent) :
-                conf_components::Section(parent, "section3", "blah blah final section"),
+        Section3(yaml::Group *parent) :
+                yaml::Section(parent, "section3", "blah blah final section"),
                 m_some_numbers(this, "some_numbers", {3, 4, 6}, "blah blah final section numbers"),
                 m_some_flag(this, "some_flag", false, "blah blah final section flag") {}
     };
 
-    struct TestDocument : conf_components::Document {
+    struct TestDocument : yaml::Document {
         Section1 m_section1;
         Section2 m_section2;
         Section3 m_section3;
 
-        explicit TestDocument(const yaml::File *yf) :
-                conf_components::Document(yf, "test options", "options describing the behavior of something"),
+        explicit TestDocument(const str_t& fname) :
+                yaml::Document(fname, "options describing the behavior of something"),
                 m_section1(this), m_section2(this), m_section3(this) {}
     };
 }
 
+#if 0
 TEST(Parameters, ParsingYaml) {
-    yaml::File yf(PROJECT_ROOT"/assets/yaml_test/example.yaml");
+    yaml::Document yf(PROJECT_ROOT"/assets/yaml_test/example.yaml", "");
     ASSERT_TRUE(yf.exists("section1"));
     ASSERT_TRUE(yf.exists("section1.some_numbers"));
     ASSERT_EQ(yf.get_as<uintv_t>("section1.some_numbers"), uintv_t({2, 3, 5, 1}));
@@ -95,7 +96,7 @@ TEST(Parameters, DefaultValues) {
 }
 
 TEST(Parameters, ParameterGroups) {
-    yaml::File yf(PROJECT_ROOT"/assets/yaml_test/example.yaml");
+    yaml::Document yf(PROJECT_ROOT"/assets/yaml_test/example.yaml");
     using namespace parameters_test;
     TestDocument doc(&yf);
     auto invalid = doc.invalid_file_key();
@@ -103,11 +104,11 @@ TEST(Parameters, ParameterGroups) {
 }
 
 
-
+#endif
 
 namespace yaml_new_test {
 
-    using namespace yaml_new;
+    using namespace yaml;
 
     struct Section1 : Section {
         Param<v_t<uint_t>> m_some_numbers;
@@ -160,20 +161,20 @@ namespace yaml_new_test {
                 m_some_flag(this, "some_flag", false, "blah blah final section flag") {}
     };
 
-    struct TestFile : File {
+    struct TestDocument : Document {
         Section1 m_section1;
         Section2 m_section2;
         Section3 m_section3;
 
-        explicit TestFile(const str_t& fname) :
-                File(fname, "options describing the behavior of something"),
+        explicit TestDocument(const str_t& fname) :
+                Document(fname, "options describing the behavior of something"),
                 m_section1(this), m_section2(this), m_section3(this) {}
     };
 }
 
 TEST(Parameters, New){
     using namespace yaml_new_test;
-    TestFile f(PROJECT_ROOT"/assets/yaml_test/example.yaml");
+    TestDocument f(PROJECT_ROOT"/assets/yaml_test/example.yaml");
     f.require_valid();
     f.print_help();
 

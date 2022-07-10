@@ -16,7 +16,7 @@
 #include <regex>
 #include <utility>
 
-namespace yaml_new {
+namespace yaml {
 
     struct Path {
         const std::list<str_t> m_name_list;
@@ -50,7 +50,7 @@ namespace yaml_new {
         const Node* m_parent;
         const YAML::Node m_yaml_node;
         const str_t m_desc;
-        std::vector<const Node*> m_children;
+        std::vector<Node*> m_children;
 
         v_t<str_t> child_names() const {
             if (!m_yaml_node.IsDefined()) return {};
@@ -92,7 +92,7 @@ namespace yaml_new {
 
         virtual bool has_contents() const = 0;
 
-        virtual str_t valid_logic() const {return {};}
+        virtual str_t valid_logic() {return {};}
 
         /**
          * children may be defined in memory that are not present in the file contents, but file contents which do
@@ -128,7 +128,7 @@ namespace yaml_new {
             return true;
         }
 
-        str_t valid() const {
+        str_t valid() {
             str_t str;
             str = valid_contents();
             if (!str.empty()) return str;
@@ -141,7 +141,7 @@ namespace yaml_new {
             return str;
         }
 
-        void require_valid() const {
+        void require_valid() {
             auto str = valid();
             REQUIRE_TRUE(str.empty(), str);
         }
@@ -197,7 +197,7 @@ namespace yaml_new {
         //Section(const Node* parent, const str_t& name): Section(parent, name, parent->m_impl_enabled){}
     };
 
-    struct File : Group {
+    struct Document : Group {
     private:
         static bool contains_tabs(const str_t& contents){
             std::regex r("(\\t)");
@@ -207,6 +207,10 @@ namespace yaml_new {
         }
 
         static YAML::Node load(const str_t& fname) {
+            /*
+             * no file given: fills every Param with default values
+             */
+            if (fname.empty()) return {};
             str_t contents;
             /*
              * read in YAML file contents on the root node then then bcast to others
@@ -226,7 +230,7 @@ namespace yaml_new {
         }
 
     public:
-        File(const str_t& fname, str_t desc): Group(load(fname), std::move(desc)) {}
+        Document(const str_t& fname, str_t desc): Group(load(fname), std::move(desc)) {}
 
     protected:
         bool has_contents() const override {
@@ -279,6 +283,7 @@ namespace yaml_new {
         return log::format("3D {} array", type_str<T>());
     }
 
+
     struct ParamBase : Node {
     private:
         const str_t m_dim_type_str, m_default_value;
@@ -300,11 +305,12 @@ namespace yaml_new {
     template<typename T>
     struct Param : ParamBase {
         const T m_default_value;
-        const T m_value;
+        T m_value;
+
         Param(Group* parent, const str_t& name, T default_value, str_t desc):
-                ParamBase(parent, name, std::move(desc), dim_str(default_value),
-                          convert::to_string(default_value)), m_default_value(default_value),
-            m_value(m_yaml_node.IsDefined() ? parse_as<T>() : m_default_value){}
+            ParamBase(parent, name, std::move(desc), dim_str(default_value),
+                      convert::to_string(default_value)), m_default_value(default_value),
+                      m_value(m_yaml_node.IsDefined() ? parse_as<T>() : m_default_value){}
 
     protected:
         bool has_contents() const override {
@@ -312,9 +318,13 @@ namespace yaml_new {
         }
 
     public:
-
-        operator T() const {
+        operator const T&() const {
             return m_value;
+        }
+
+        Param& operator=(const T& v){
+            m_value = v;
+            return *this;
         }
     };
 
@@ -367,12 +377,12 @@ namespace yaml_new {
             return choice_and_descs.front().first;
         }
     public:
-        using Param<T>::get;
+        using Param<T>::m_value;
         using Param<T>::operator const T&;
     private:
         void validate(const T &v_default) const {
             require_is_choice(v_default);
-            require_is_choice(get());
+            require_is_choice(m_value);
         }
 
     private:
@@ -422,14 +432,15 @@ namespace yaml_new {
                                                      convert::to_string(v), Node::m_path.m_string));
         }
     public:
-        using Param<v_t<T>>::get;
+        using Param<v_t<T>>::m_value;
         using Param<v_t<T>>::operator const v_t<T>&;
     private:
         void validate(const v_t<T> &v_default, bool repetition) const {
             require_are_choices(v_default);
-            require_are_choices(get());
+            require_are_choices(m_value);
             if (!repetition) {
-                REQUIRE_EQ(std::set<T>(get().begin(), get().end()).size(), get().size(), "repeated choices are not allowed");
+                REQUIRE_EQ(std::set<T>(m_value.begin(), m_value.end()).size(),
+                           m_value.size(), "repeated choices are not allowed");
             }
         }
 
@@ -462,7 +473,6 @@ namespace yaml_new {
             return tmp;
         }
     };
-
 }
 
 #endif //M7_CONF_YAMLWRAPPER_H

@@ -36,6 +36,4 @@ target_sources(M7_lib
         Symlink.h
         TimingStats.cpp
         TimingStats.h
-        YamlWrapper.cpp
-        YamlWrapper.h
 )

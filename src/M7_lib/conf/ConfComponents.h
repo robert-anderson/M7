@@ -2,12 +2,11 @@
 // Created by Robert J. Anderson on 25/06/2021.
 //
 
-#ifndef M7_CONF_COMPONENTS_H
-#define M7_CONF_COMPONENTS_H
+#ifndef M7_yaml_H
+#define M7_yaml_H
 
-#include <M7_lib/io/YamlWrapper.h>
-
-namespace conf_components {
+#if 0
+namespace yaml {
     /**
      * Basic type for all YAML elements (Documents, Sections, Params). The concept of node enablement has three strands:
      * - enabled_internal: based on the node's own contents
@@ -56,7 +55,7 @@ namespace conf_components {
 
         virtual void verify() {}
 
-        virtual const yaml::File *get_file() const;
+        virtual const yaml::Document *get_file() const;
 
         bool exists_in_file() const;
 
@@ -108,11 +107,11 @@ namespace conf_components {
 
     struct Document : Group {
         const str_t m_name;
-        const yaml::File *m_file;
+        const yaml::Document *m_file;
 
-        Document(const yaml::File *file, str_t name, str_t description);
+        Document(const yaml::Document *file, str_t name, str_t description);
 
-        const yaml::File *get_file() const override;
+        const yaml::Document *get_file() const override;
 
         str_t help_string() const override;
 
@@ -364,9 +363,10 @@ namespace conf_components {
 }
 
 template<typename T>
-static std::ostream &operator<<(std::ostream &os, const conf_components::Param<T> &v) {
+static std::ostream &operator<<(std::ostream &os, const yaml::Param<T> &v) {
     os << v.get();
     return os;
 }
 
-#endif //M7_CONF_COMPONENTS_H
+#endif //M7_yaml_H
+#endif //M7_yaml_H

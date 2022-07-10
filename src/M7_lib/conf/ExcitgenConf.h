@@ -9,7 +9,7 @@
 
 namespace conf {
 
-//    using namespace conf_components;
+//    using namespace yaml;
 //
 //    struct Pchb : Section {
 //        Param<str_t> m_path;

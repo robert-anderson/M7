@@ -34,7 +34,7 @@ ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explicit_hf_
             wf.set_weight(ipart, wf_t(opts.m_wavefunction.m_nw_init));
     }
 
-    prop.m_shift.m_values = ref_energy+opts.m_shift.m_init.get();
+    prop.m_shift.m_values = ref_energy+opts.m_shift.m_init;
 
     Solver solver(opts, prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
@@ -64,7 +64,7 @@ TEST(FermionRdm, EnergyExactAverageEveryCycle) {
     fermion_rdm_energy_opts(opts);
     // accumulate the average coefficient values every cycle
     opts.m_av_ests.m_stats_period = 1;
-    opts.verify();
+    opts.require_valid();
     ASSERT_FLOAT_EQ(fermion_rdm_energy_test(opts, false), -99.9421389039332);
 }
 
@@ -72,7 +72,7 @@ TEST(FermionRdm, EnergyExactAverageDivisibleNCycles) {
     conf::Document opts;
     fermion_rdm_energy_opts(opts);
     // accumulate the average coefficient values every 10 cycles (100%10=0 so no need for finalization)
-    opts.verify();
+    opts.require_valid();
     ASSERT_FLOAT_EQ(fermion_rdm_energy_test(opts, false), -99.9421389039332);
 }
 
@@ -80,7 +80,7 @@ TEST(FermionRdm, EnergyExactAllLeftoverIters) {
     conf::Document opts;
     fermion_rdm_energy_opts(opts);
     opts.m_av_ests.m_stats_period = 300;
-    opts.verify();
+    opts.require_valid();
     // 300>100 cycles so all contribs are averaged at the final loop over occupied ONVs
     ASSERT_FLOAT_EQ(fermion_rdm_energy_test(opts, false), -99.9421389039332);
 }
@@ -93,7 +93,7 @@ TEST(FermionRdm, EnergyExactLeftoverIters) {
      * 100%13 = 9 cycles left over in averaging block when the ncycle_accumulate_mevs limit is reached, so a finalizing
      * loop is required for averaging correctness. this will be the default case for the remainder of the tests.
      */
-    opts.verify();
+    opts.require_valid();
     ASSERT_FLOAT_EQ(fermion_rdm_energy_test(opts, false), -99.9421389039332);
 }
 

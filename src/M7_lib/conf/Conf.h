@@ -6,13 +6,13 @@
 #define M7_CONF_H
 
 
-#include "ConfComponents.h"
+#include "YamlWrapper.h"
 #include "HamiltonianConf.h"
 #include "M7_lib/basis/BasisData.h"
 
 namespace conf {
     
-    using namespace conf_components;
+    using namespace yaml;
 
     struct HashMapping : Section {
         Param<double> m_remap_ratio;
@@ -43,19 +43,20 @@ namespace conf {
 
         explicit Archive(Group *parent);
 
-        void verify() override;
-
         bool do_load() const {
-            return !m_load_path.get().empty();
+            return !m_load_path.m_value.empty();
         }
 
         bool do_save() const {
-            return !m_save_path.get().empty();
+            return !m_save_path.m_value.empty();
         }
 
         bool do_chkpts() const {
-            return !m_chkpt_path.get().empty() && (m_period_mins || m_period);
+            return !m_chkpt_path.m_value.empty() && (m_period_mins || m_period);
         }
+
+    protected:
+        str_t valid_logic() override;
     };
 
     struct Archivable : Section {
@@ -89,8 +90,6 @@ namespace conf {
         //Param<v_t<uintv_t>> m_csf;
 
         explicit MbfDef(Group *parent, str_t name);
-
-        bool enabled_internal() const override;
     };
 
     struct Reference : Section {
@@ -107,9 +106,11 @@ namespace conf {
         m_bos_occ_cutoff(this, "bos_occ_cutoff", sys::bos::c_max_occ,
                          "maximum allowed occupation of each boson mode"){}
 
-        void verify() override {
-            REQUIRE_LE(m_bos_occ_cutoff, sys::bos::c_max_occ,
-                       log::format("given nboson_max exceeds limit of {}", sys::bos::c_max_occ));
+    protected:
+        str_t valid_logic() override {
+            if (m_bos_occ_cutoff > sys::bos::c_max_occ)
+                return log::format("given nboson_max exceeds limit of {}", sys::bos::c_max_occ);
+            return {};
         }
     };
 
@@ -154,7 +155,8 @@ namespace conf {
 
         explicit Semistochastic(Group *parent);
 
-        void verify() override;
+    protected:
+        str_t valid_logic() override;
     };
 
     struct Stats : Section {
@@ -164,7 +166,8 @@ namespace conf {
 
         explicit Stats(Group *parent);
 
-        void verify() override;
+    protected:
+        str_t valid_logic() override;
     };
 
     struct SpfWeightedTwf : Section {
@@ -173,7 +176,8 @@ namespace conf {
 
         explicit SpfWeightedTwf(Group *parent);
 
-        void verify() override;
+    protected:
+        str_t valid_logic() override;
     };
 
     struct Bilinears : Section {
@@ -185,7 +189,8 @@ namespace conf {
 
         explicit Bilinears(Group *parent, str_t name, str_t description);
 
-        void verify() override;
+    protected:
+        str_t valid_logic() override;
     };
 
     struct Rdms : Bilinears {
@@ -228,7 +233,7 @@ namespace conf {
         explicit AvEsts(Group *parent);
 
         bool any_bilinears() const {
-            return !(m_rdm.m_ranks.get().empty() && m_spec_mom.m_ranks.get().empty());
+            return !(m_rdm.m_ranks.m_value.empty() && m_spec_mom.m_ranks.m_value.empty());
         }
     };
 
@@ -285,7 +290,7 @@ namespace conf {
         void verify();
     };
 
-    struct Document : conf_components::Document {
+    struct Document : yaml::Document {
         Prng m_prng;
         Archive m_archive;
         Basis m_basis;
@@ -299,9 +304,10 @@ namespace conf {
         InstEsts m_inst_ests;
         AvEsts m_av_ests;
 
-        explicit Document(const yaml::File *file = nullptr);
+        explicit Document(const str_t& fname="");
 
-        void verify();
+    protected:
+        str_t valid_logic() override;
     };
 }
 

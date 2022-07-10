@@ -5,27 +5,23 @@
 #ifndef M7_HAMILTONIAN_CONF_H
 #define M7_HAMILTONIAN_CONF_H
 
-#include "ConfComponents.h"
+#include "YamlWrapper.h"
 
 namespace conf {
 
-    using namespace conf_components;
+    using namespace yaml;
 
     struct Fcidump : Section {
         Param<str_t> m_path;
         Param<bool> m_spin_major;
 
         explicit Fcidump(Group *parent);
-
-        bool enabled_internal() const override;
     };
 
     struct Bosdump : Section {
         Param<str_t> m_path;
 
         explicit Bosdump(Group *parent);
-
-        bool enabled_internal() const override;
     };
 
     struct Ebdump : Section {
@@ -33,8 +29,6 @@ namespace conf {
         Param<bool> m_spin_major;
 
         explicit Ebdump(Group *parent);
-
-        bool enabled_internal() const override;
     };
 
     struct LatticeModel : Section {
@@ -44,9 +38,8 @@ namespace conf {
 
         LatticeModel(Group *parent, str_t name, str_t description);
 
-        void verify() override;
-
-        bool enabled_internal() const override;
+    protected:
+        str_t valid_logic() override;
     };
 
     struct Hubbard : LatticeModel {
@@ -71,9 +64,8 @@ namespace conf {
 
         explicit FrmHam(Group *parent);
 
-        void verify() override;
-
-        bool enabled_internal() const override;
+    protected:
+        str_t valid_logic() override;
     };
 
     struct FrmBosHam : Section {
@@ -81,8 +73,6 @@ namespace conf {
         Param<ham_t> m_holstein_coupling;
 
         explicit FrmBosHam(Group *parent);
-
-        bool enabled_internal() const override;
     };
 
     struct InteractingBoseGas : Section {
@@ -91,8 +81,6 @@ namespace conf {
         Param<ham_t> m_ek_scale;
 
         explicit InteractingBoseGas(Group *parent);
-
-        bool enabled_internal() const override;
     };
 
     struct BosHam : Section {
@@ -101,8 +89,6 @@ namespace conf {
         InteractingBoseGas m_interacting_bose_gas;
 
         explicit BosHam(Group *parent);
-
-        bool enabled_internal() const override;
     };
 
     struct Hamiltonian : Section {

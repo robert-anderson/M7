@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    auto yf = yaml::File(str_t(argv[1]));
+    auto yf = yaml::Document(str_t(argv[1]));
     conf::Document opts(&yf);
     opts.verify();
     opts.log_value();

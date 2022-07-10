@@ -92,7 +92,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     void log_top_weighted(uint_t ipart, uint_t nrow=20);
 
     static bool need_send_parents(const conf::Document &opts) {
-        return opts.m_av_ests.m_rdm.m_ranks.get().size();
+        return opts.m_av_ests.m_rdm.m_ranks.m_value.size();
     }
 
     static bool need_av_weights(const conf::Document &opts) {

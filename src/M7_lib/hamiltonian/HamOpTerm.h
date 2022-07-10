@@ -36,8 +36,8 @@ struct HamOpTerm {
 
     template<typename ham_opt_t>
     struct OptPair {
-        static_assert(std::is_base_of<conf_components::Section, ham_opt_t>::value,
-                "template arg must be derived from conf_components::Section");
+        static_assert(std::is_base_of<yaml::Section, ham_opt_t>::value,
+                "template arg must be derived from yaml::Section");
         const ham_opt_t& m_ham;
         const conf::Basis& m_basis;
     };

@@ -10,18 +10,10 @@ conf::Fcidump::Fcidump(Group *parent) :
         m_spin_major(this, "spin_major", false,
                      "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... otherwise.") {}
 
-bool conf::Fcidump::enabled_internal() const {
-    return !m_path.get().empty();
-}
-
 conf::Bosdump::Bosdump(Group *parent) :
         Section(parent, "bosdump",
                         "options relating to 4-indexed text file defining arbitrary number-conserving boson interactions"),
         m_path(this, "path", "", "path to BOSDUMP format file") {}
-
-bool conf::Bosdump::enabled_internal() const {
-    return !m_path.get().empty();
-}
 
 conf::Ebdump::Ebdump(Group *parent) :
         Section(parent, "ebdump",
@@ -29,10 +21,6 @@ conf::Ebdump::Ebdump(Group *parent) :
         m_path(this, "path", "", "path to EBDUMP format file"),
         m_spin_major(this, "spin_major", false,
                      "if true, spin-resolved EBDUMP orders the spin orbitals aaa...bbb..., and ababab... otherwise.") {}
-
-bool conf::Ebdump::enabled_internal() const {
-    return !m_path.get().empty();
-}
 
 conf::LatticeModel::LatticeModel(Group *parent, str_t name, str_t description) :
         Section(parent, name, description),
@@ -43,13 +31,10 @@ conf::LatticeModel::LatticeModel(Group *parent, str_t name, str_t description) :
         m_boundary_conds(this, "boundary_conds", {{-1, "anti-periodic"}, {0, "open"}, {1, "periodic"}}, {},
                          "boundary conditions for each dimension of the lattice", true){}
 
-void conf::LatticeModel::verify() {
-    REQUIRE_EQ(m_site_shape.get().size(), m_boundary_conds.get().size(),
-               "boundary conditions must be defined for each element of the lattice shape");
-}
-
-bool conf::LatticeModel::enabled_internal() const {
-    return !m_site_shape.get().empty();
+str_t conf::LatticeModel::valid_logic() {
+    if (m_site_shape.m_value.size() != m_boundary_conds.m_value.size())
+        return "boundary conditions must be defined for each element of the lattice shape";
+    return {};
 }
 
 conf::Hubbard::Hubbard(Group *parent) :
@@ -69,14 +54,10 @@ conf::FrmHam::FrmHam(Group *parent) :
         m_fcidump(this), m_hubbard(this), m_heisenberg(this),
         m_spin_penalty_j(this, "spin_penalty_j", 0.0, "scalar multiple of the total spin operator used in the spin penalty fermion Hamiltonian modification"){}
 
-void conf::FrmHam::verify() {
-    uint_t ndefined =
-            m_fcidump.enabled_internal() + m_hubbard.enabled_internal() + m_heisenberg.enabled_internal();
-    REQUIRE_LE(ndefined, 1ul, "conflicting hamiltonian definitions are defined");
-}
-
-bool conf::FrmHam::enabled_internal() const {
-    return m_fcidump.enabled_internal() || m_hubbard.enabled_internal();
+str_t conf::FrmHam::valid_logic() {
+    uint_t ndefined = m_fcidump.enabled() + m_hubbard.enabled() + m_heisenberg.enabled();
+    if (ndefined>1ul) return "conflicting hamiltonian definitions are defined";
+    return {};
 }
 
 conf::FrmBosHam::FrmBosHam(Group *parent) :
@@ -86,29 +67,18 @@ conf::FrmBosHam::FrmBosHam(Group *parent) :
         m_holstein_coupling(this, "holstein_coupling", 0.0,
                             "constant coupling between the electronic density and the boson (de-)excitation operators"){}
 
-bool conf::FrmBosHam::enabled_internal() const {
-    return m_ebdump.enabled_internal() || m_holstein_coupling.get() != 0.0;
-}
-
 conf::InteractingBoseGas::InteractingBoseGas(Group *parent) :
         Section(parent, "interacting_bose_gas", "options relating to the N-dimensional interacting boson gas"),
         m_ndim(this, "ndim", 1ul, "number of dimensions"),
         m_nwave(this, "nwave", 0ul, "number of plane waves per dimension (number of degrees of freedom is 2*nwave + 1)"),
         m_ek_scale(this, "ek_scale", 0.0, "scale of the kinetic energy in terms of the scattering interaction strength"){}
 
-bool conf::InteractingBoseGas::enabled_internal() const {
-    return m_nwave.get();
-}
 
 conf::BosHam::BosHam(Group *parent) :
         Section(parent, "boson", "options relating to the number-conserving boson hamiltonian terms"),
         m_bosdump(this),
         m_num_op_weight(this, "num_op_weight", 0.0, "scalar factor of the bosonic number operator"),
         m_interacting_bose_gas(this){}
-
-bool conf::BosHam::enabled_internal() const {
-    return !m_bosdump.m_path.get().empty();
-}
 
 conf::Hamiltonian::Hamiltonian(Group *parent) :
         Section(parent, "hamiltonian", "options relating to the Hamiltonian operator terms"),
