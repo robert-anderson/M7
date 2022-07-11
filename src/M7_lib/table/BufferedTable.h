@@ -31,6 +31,7 @@ public:
 
     BufferedTable(const BufferedTable<row_t, mapped> &other) : BufferedTable(other.m_buffer.m_name, other){
         *this = other;
+        table_t::m_row.restart();
     }
 
     void set_expansion_factor(double f) {
