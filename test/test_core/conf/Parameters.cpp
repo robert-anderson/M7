@@ -60,62 +60,68 @@ namespace parameters_test {
                 m_some_flag(this, "some_flag", false, "blah blah final section flag") {}
     };
 
+    struct MissingSection : Section {
+        Param<bool> m_missing_flag;
+
+        MissingSection(conf_components::Group *parent) :
+                Section(parent, "missing_section", "blah blah this section is not in the YAML file"),
+                m_missing_flag(this, "missing_flag", false, "blah blah flag") {}
+    };
+
     struct TestDocument : conf_components::Document {
         Section1 m_section1;
         Section2 m_section2;
         Section3 m_section3;
+        MissingSection m_missing_section;
 
         explicit TestDocument(const str_t& fname) :
                 conf_components::Document(fname, "options describing the behavior of something"),
-                m_section1(this), m_section2(this), m_section3(this) {}
+                m_section1(this), m_section2(this), m_section3(this), m_missing_section(this) {}
     };
 }
 
-#if 0
-TEST(Parameters, ParsingYaml) {
-    conf_components::Document yf(PROJECT_ROOT"/assets/yaml_test/example.yaml", "");
-    ASSERT_TRUE(yf.exists("section1"));
-    ASSERT_TRUE(yf.exists("section1.some_numbers"));
-    ASSERT_EQ(yf.get_as<uintv_t>("section1.some_numbers"), uintv_t({2, 3, 5, 1}));
-    ASSERT_EQ(yf.get_as<str_t>("section1.a_string"), "this is just a string");
-    ASSERT_TRUE(yf.exists("section1.subsection1"));
-    ASSERT_TRUE(yf.exists("section1.subsection1.a_number"));
-    ASSERT_EQ(yf.get_as<uint_t>("section1.subsection1.a_number"), 78);
-    ASSERT_TRUE(yf.exists("section1.subsection1.a_float"));
-    ASSERT_EQ(yf.get_as<double>("section1.subsection1.a_float"), 4.5);
-    ASSERT_TRUE(yf.exists("section2"));
-    ASSERT_TRUE(yf.exists("section3"));
-    ASSERT_TRUE(yf.exists("section4"));
-    ASSERT_FALSE(yf.exists("section5"));
-}
-
-TEST(Parameters, DefaultValues) {
-    using namespace parameters_test;
-    TestDocument doc(nullptr);
-    ASSERT_EQ(doc.m_section1.m_some_unspecified_numbers.get(), uintv_t({3, 4, 6}));
-    auto str = doc.help_string();
-}
-
-TEST(Parameters, ParameterGroups) {
-    conf_components::Document yf(PROJECT_ROOT"/assets/yaml_test/example.yaml");
-    using namespace parameters_test;
-    TestDocument doc(&yf);
-    auto invalid = doc.invalid_file_key();
-    ASSERT_EQ(doc.m_section1.m_some_numbers.get(), uintv_t({2, 3, 5, 1}));
-}
-
-
-#endif
+//TEST(Parameters, ParsingYaml) {
+//    conf_components::Document yf(PROJECT_ROOT"/assets/yaml_test/example.yaml", "");
+//    ASSERT_TRUE(yf.exists("section1"));
+//    ASSERT_TRUE(yf.exists("section1.some_numbers"));
+//    ASSERT_EQ(yf.get_as<uintv_t>("section1.some_numbers"), uintv_t({2, 3, 5, 1}));
+//    ASSERT_EQ(yf.get_as<str_t>("section1.a_string"), "this is just a string");
+//    ASSERT_TRUE(yf.exists("section1.subsection1"));
+//    ASSERT_TRUE(yf.exists("section1.subsection1.a_number"));
+//    ASSERT_EQ(yf.get_as<uint_t>("section1.subsection1.a_number"), 78);
+//    ASSERT_TRUE(yf.exists("section1.subsection1.a_float"));
+//    ASSERT_EQ(yf.get_as<double>("section1.subsection1.a_float"), 4.5);
+//    ASSERT_TRUE(yf.exists("section2"));
+//    ASSERT_TRUE(yf.exists("section3"));
+//    ASSERT_TRUE(yf.exists("section4"));
+//    ASSERT_FALSE(yf.exists("section5"));
+//}
+//
+//TEST(Parameters, DefaultValues) {
+//    using namespace parameters_test;
+//    TestDocument doc(nullptr);
+//    ASSERT_EQ(doc.m_section1.m_some_unspecified_numbers.get(), uintv_t({3, 4, 6}));
+//    auto str = doc.help_string();
+//}
+//
+//TEST(Parameters, ParameterGroups) {
+//    conf_components::Document yf(PROJECT_ROOT"/assets/yaml_test/example.yaml");
+//    using namespace parameters_test;
+//    TestDocument doc(&yf);
+//    auto invalid = doc.invalid_file_key();
+//    ASSERT_EQ(doc.m_section1.m_some_numbers.get(), uintv_t({2, 3, 5, 1}));
+//}
 
 
 TEST(Parameters, New){
     using namespace parameters_test;
-    TestDocument f("");
-    //TestDocument f(PROJECT_ROOT"/assets/yaml_test/example.yaml");
-    f.validate();
-    f.print_help();
+    TestDocument f(PROJECT_ROOT"/assets/yaml_test/example.yaml");
     f.log();
 
+//    std::cout << node3.Type() << std::endl;
+    //f.validate();
+    //f.print_help();
+    //f.log();
 //    auto i = Node(n, "section2").nchild_in_file();
 //    std::cout << i << std::endl;
 }

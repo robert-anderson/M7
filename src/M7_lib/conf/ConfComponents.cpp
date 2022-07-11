@@ -25,11 +25,6 @@ v_t<str_t> conf_components::Node::child_names_in_file() const {
     return out;
 }
 
-bool conf_components::Node::null_in_file() const {
-    if (m_path.m_list.empty() || !m_yaml_node.IsDefined() || m_yaml_node.size()) return false;
-    return parse_as<str_t>() == "null";
-}
-
 void conf_components::Node::validate_file_contents() const {
     if (!m_yaml_node.IsDefined()) return;
     v_t<str_t> node_names;
@@ -45,21 +40,29 @@ v_t<std::pair<str_t, str_t>> conf_components::Node::help_pairs() const {
     return {};
 }
 
-conf_components::Node::Node(conf_components::Path path, conf_components::Node* parent,
-                            const YAML::Node& yaml_node, str_t desc) :
-        m_path(std::move(path)), m_parent(parent), m_yaml_node(yaml_node), m_desc(std::move(desc)){
+bool conf_components::Node::make_in_file() const {
+    if (!m_parent) return true;
+    if (!m_parent->m_in_file) return false;
+    try {
+        m_parent->m_yaml_node[m_path.m_list.back()].Type();
+        return true;
+    }
+    catch (const YAML::InvalidNode&){}
+    return false;
+}
+
+conf_components::Node::Node(conf_components::Node* parent, const str_t& name, str_t desc) :
+        m_path(parent->m_path+name), m_parent(parent), m_in_file(make_in_file()),
+        m_yaml_node(m_in_file ? parent->m_yaml_node[name] : YAML::Node()),
+        m_desc(std::move(desc)){
     if (parent) parent->m_children.push_back(this);
+    if (m_in_file)
+        REQUIRE_FALSE(m_yaml_node.IsNull(), "there should be no null values in YAML file");
 }
 
 conf_components::Node::Node(const YAML::Node& yaml_node, str_t desc) :
-        Node({{}}, nullptr, yaml_node, std::move(desc)){}
-
-conf_components::Node::Node(Node* parent, const str_t& name, str_t desc) :
-        Node(parent->m_path+name, parent,
-             parent->m_yaml_node.IsMap() ? parent->m_yaml_node[name] : parent->m_yaml_node,
-             std::move(desc)){
-    REQUIRE_FALSE(null_in_file(), "there should be no null values in YAML file");
-}
+        m_path({}), m_parent(nullptr), m_in_file(true),
+        m_yaml_node(yaml_node), m_desc(std::move(desc)){}
 
 void conf_components::Node::validate() {
     for (auto child : m_children) child->validate();
@@ -82,44 +85,72 @@ void conf_components::Node::log() const {
     for (auto child: m_children) child->log();
 }
 
-str_t conf_components::enable_policy_string(EnablePolicy enable_policy) {
+str_t conf_components::enable_policy_string(conf_components::EnablePolicy enable_policy) {
     switch (enable_policy) {
         case Implicit: return "implicit";
-        case Mandatory: return "mandatory";
+        case Required: return "required";
         case Explicit: return "explicit";
     }
     return {};
 }
 
 bool conf_components::Group::make_enabled() const {
+    /*
+     * a Group without a parent is the root Node (Document) this is always enabled
+     */
     if (!m_parent) return true;
+    /*
+     * if absent from file, only enable if Required or Implicit
+     */
+    if (!m_in_file) return m_enable_policy!=Explicit;
+    /*
+     * m_parent is a Node, convert it to Group
+     */
     auto parent_group = dynamic_cast<const Group*>(m_parent);
     REQUIRE_TRUE(parent_group, "parent must be a group");
+    /*
+     * check that a non-Explicit does not have an Explicit parent
+     */
     if (m_enable_policy!=Explicit)
         REQUIRE_FALSE(parent_group->m_enable_policy==Explicit,
-                      "group cannot be implicitly enabled or mandatory if its parent is explicitly enabled");
-    if (m_yaml_node.size()) return true;
-    REQUIRE_TRUE(m_is_scalar_bool, "null nodes are forbidden");
+                      "group cannot be implicitly enabled or required if its parent is explicitly enabled");
+    /*
+     * if the Node is in the file, and has a non-zero number of key-value pairs defined within it, it is enabled
+     */
+    if (m_yaml_node.IsMap()) return true;
+    /*
+     * otherwise, the group should be scalar, and boolean
+     */
+    REQUIRE_TRUE(m_yaml_node.IsScalar() && m_is_bool, "non-map type sections must be scalar boolean");
+    /*
+     * deal with the case that the group has been set to a scalar bool (true)
+     */
     if (parse_as<bool>()) {
         if (m_enable_policy!=Explicit)
             log::warn("explicitly enabling {} group {} by boolean value is redundant",
-                      m_enable_policy==Implicit ? "implicitly enabled" : "mandatory", m_path.m_string);
+                      m_enable_policy==Implicit ? "implicitly enabled" : "required", m_path.m_string);
         return true;
     }
-    REQUIRE_FALSE(m_enable_policy==Mandatory, "mandatory group cannot be disabled");
+    /*
+     * we have group set to scalar bool (false), check that this is allowed by the policy before signaling disablement
+     */
+    REQUIRE_FALSE(m_enable_policy == Required, "required group cannot be disabled");
     return false;
 }
 
-conf_components::Group::Group(Node* parent, const str_t& name, str_t desc,
+conf_components::Group::Group(conf_components::Group* parent, const str_t& name, str_t desc,
                               conf_components::EnablePolicy enable_policy) :
         Node(parent, name, std::move(desc)), m_enable_policy(enable_policy),
-        m_is_scalar_bool(parseable_as<bool>()), m_enabled(make_enabled()){
+        m_is_bool(m_in_file && m_yaml_node.IsScalar()), m_enabled(make_enabled()) {
+    if (m_is_bool) REQUIRE_TRUE(parseable_as<bool>(),
+                                "If group is scalar rather than map typed, it must be boolean");
 }
 
 conf_components::Group::Group(const YAML::Node& root, str_t desc) :
-    Node(root, std::move(desc)), m_enable_policy(Mandatory), m_is_scalar_bool(false), m_enabled(true){}
+        Node(root, std::move(desc)), m_enable_policy(Required), m_is_bool(false), m_enabled(true){}
 
-conf_components::Section::Section(Node* parent, const str_t& name, str_t desc, EnablePolicy enable_policy) :
+conf_components::Section::Section(conf_components::Group* parent, const str_t& name, str_t desc,
+                                  conf_components::EnablePolicy enable_policy) :
         Group(parent, name, std::move(desc), enable_policy){}
 
 v_t<std::pair<str_t, str_t>> conf_components::Section::help_pairs() const {
@@ -165,8 +196,10 @@ YAML::Node conf_components::Document::load(const str_t& fname) {
     return {};
 }
 
-conf_components::ParamBase::ParamBase(Group* parent, const str_t& name,
-                                      str_t desc, str_t dim_type, str_t default_value) :
+conf_components::Document::Document(const str_t& fname, str_t desc) : Group(load(fname), std::move(desc)) {}
+
+conf_components::ParamBase::ParamBase(conf_components::Group* parent, const str_t& name, str_t desc, str_t dim_type,
+                                      str_t default_value) :
         Node(parent, name, std::move(desc)),
         m_dim_type_str(std::move(dim_type)), m_default_value(std::move(default_value)){}
 

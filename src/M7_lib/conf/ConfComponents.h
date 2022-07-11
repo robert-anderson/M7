@@ -30,21 +30,26 @@ namespace conf_components {
         Path(std::list<str_t> list);
 
         Path operator+(const str_t &name) const;
+
     };
 
     /**
-     * basic object use to represent a Node in the tree structure of the YAML configuration document
+     * basic object used to represent a Node in the tree structure of the YAML configuration document
      */
     struct Node {
         /**
          * absolute path from document root (YAML file Node) to this Node
          */
         const Path m_path;
-    protected:
         /**
          * pointer to parent Node (nullptr if document root)
          */
         const Node* m_parent;
+        /**
+         * true if the node exists in the file being parsed
+         */
+        const bool m_in_file;
+    protected:
         /**
          * object of the yaml-cpp parser
          */
@@ -54,7 +59,7 @@ namespace conf_components {
          */
         const str_t m_desc;
         /**
-         * all Nodes which have this one as m_parent
+         * all Nodes with this one as m_parent
          */
         std::vector<Node*> m_children;
 
@@ -87,12 +92,6 @@ namespace conf_components {
             REQUIRE_TRUE(parseable_as<T>(), "value in file is not parseable as the required type");
             return m_yaml_node.as<T>();
         }
-        /**
-         * @return
-         *  true if the file content associated with this Node has a null value e.g. "some_field: ~".
-         *  such specifications are valid YAML but not accepted in this interface
-         */
-        bool null_in_file() const;
 
         /**
          * check the loaded contents and perform any logical corrections to the tree (hence non-const)
@@ -110,12 +109,21 @@ namespace conf_components {
          */
         virtual v_t<std::pair<str_t, str_t>> help_pairs() const;
 
-        Node(Path path, Node* parent, const YAML::Node& yaml_node, str_t desc);
+    private:
+        /**
+         * given that the m_parent and a m_path members are already set, determine whether this node is present in the
+         * YAML input file
+         * @return
+         *  true if the node is present
+         */
+        bool make_in_file() const;
+
+    protected:
+        Node(Node* parent, const str_t& name, str_t desc);
 
         Node(const YAML::Node& yaml_node, str_t desc);
 
     public:
-        Node(Node* parent, const str_t& name, str_t desc);
         /**
          * perform validation on all descendants, then on this Node. This means the modifications performed in
          * validate_node_contents occur in a bottom-up order
@@ -138,10 +146,10 @@ namespace conf_components {
     /**
      * enablement policy of a Group:
      *  - implicitly enabled: even if the Node does not appear in the input file, it is considered enabled
-     *  - mandatory: impliticly enabled, and cannot be disabled
+     *  - required: impliticly enabled, and cannot be disabled
      *  - explicitly enabled: considered disabled unless the Node appears in the input file
      */
-    enum EnablePolicy {Implicit, Mandatory, Explicit};
+    enum EnablePolicy {Implicit, Required, Explicit};
 
     str_t enable_policy_string(EnablePolicy enable_policy);
 
@@ -150,7 +158,7 @@ namespace conf_components {
         /**
          * groups can be enabled and disabled by treating their key as that of a scalar boolean
          */
-        const bool m_is_scalar_bool;
+        const bool m_is_bool;
         /**
          * true if the state of the YAML file (given the enablement policy) implies that the functionality represented
          * by this Group
@@ -158,16 +166,20 @@ namespace conf_components {
         const bool m_enabled;
 
     private:
+        /**
+         * @return
+         *  true if this Group is determined to be enabled
+         */
         bool make_enabled() const;
 
     protected:
-        Group(Node* parent, const str_t& name, str_t desc, EnablePolicy enable_policy=Mandatory);
+        Group(Group* parent, const str_t& name, str_t desc, EnablePolicy enable_policy=Required);
 
         Group(const YAML::Node& root, str_t desc);
     };
 
     struct Section : Group {
-        Section(Node* parent, const str_t& name, str_t desc, EnablePolicy enable_policy=Mandatory);
+        Section(Group* parent, const str_t& name, str_t desc, EnablePolicy enable_policy=Required);
 
         v_t<std::pair<str_t, str_t>> help_pairs() const override;
 
@@ -181,7 +193,7 @@ namespace conf_components {
         static YAML::Node load(const str_t& fname);
 
     public:
-        Document(const str_t& fname, str_t desc): Group(load(fname), std::move(desc)) {}
+        Document(const str_t& fname, str_t desc);
     };
 
     template<typename T=void>
@@ -247,11 +259,7 @@ namespace conf_components {
         Param(Group* parent, const str_t& name, T default_value, str_t desc):
             ParamBase(parent, name, std::move(desc), dim_str(default_value),
                       convert::to_string(default_value)), m_default_value(default_value){
-            if (parent->m_is_scalar_bool) {
-                m_value = m_default_value;
-                return;
-            }
-            m_value = m_yaml_node.IsDefined() ? parse_as<T>() : m_default_value;
+            m_value = m_in_file ? parse_as<T>() : m_default_value;
         }
 
         operator const T&() const {
