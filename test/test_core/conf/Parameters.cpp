@@ -20,7 +20,7 @@ namespace parameters_test {
             Param<uint_t> m_another_number;
 
             SubSection1(conf_components::Group *parent) :
-                    Section(parent, "subsection1", "minor options"),
+                    Section(parent, "subsection1", "minor options", conf_components::Implicit),
                     m_a_number(this, "a_number", 0ul, "bla blah minor number"),
                     m_a_float(this, "a_float", 0.0, "bla blah minor float"),
                     m_another_number(this, "another_number", 6ul, "bla blah another minor number") {}
@@ -113,6 +113,7 @@ TEST(Parameters, New){
     TestDocument f(PROJECT_ROOT"/assets/yaml_test/example.yaml");
     f.validate();
     f.print_help();
+    f.log();
 
 //    auto i = Node(n, "section2").nchild_in_file();
 //    std::cout << i << std::endl;
