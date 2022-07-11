@@ -21,7 +21,7 @@
  */
 namespace conf_components {
     /**
-     * sequence of string keys between document root and a specific node in the YAML tree
+     * sequence of string keys between document root and a specific Node in the YAML tree
      */
     struct Path {
         const std::list<str_t> m_list;
@@ -33,16 +33,16 @@ namespace conf_components {
     };
 
     /**
-     * basic object use to represent a node in the tree structure of the YAML configuration document
+     * basic object use to represent a Node in the tree structure of the YAML configuration document
      */
     struct Node {
         /**
-         * absolute path from document root (YAML file node) to this node
+         * absolute path from document root (YAML file Node) to this Node
          */
         const Path m_path;
     protected:
         /**
-         * pointer to parent node (nullptr if document root)
+         * pointer to parent Node (nullptr if document root)
          */
         const Node* m_parent;
         /**
@@ -54,14 +54,14 @@ namespace conf_components {
          */
         const str_t m_desc;
         /**
-         * all nodes which have this one as m_parent
+         * all Nodes which have this one as m_parent
          */
         std::vector<Node*> m_children;
 
     protected:
         /**
          * @return
-         *  vector of all keys within this YAML node
+         *  vector of all keys within this YAML Node
          */
         v_t<str_t> child_names_in_file() const;
         /**
@@ -89,7 +89,7 @@ namespace conf_components {
         }
         /**
          * @return
-         *  true if the file content associated with this node has a null value e.g. "some_field: ~".
+         *  true if the file content associated with this Node has a null value e.g. "some_field: ~".
          *  such specifications are valid YAML but not accepted in this interface
          */
         bool null_in_file() const;
@@ -117,7 +117,7 @@ namespace conf_components {
     public:
         Node(Node* parent, const str_t& name, str_t desc);
         /**
-         * perform validation on all descendants, then on this node. This means the modifications performed in
+         * perform validation on all descendants, then on this Node. This means the modifications performed in
          * validate_node_contents occur in a bottom-up order
          */
         void validate();
@@ -137,9 +137,9 @@ namespace conf_components {
 
     /**
      * enablement policy of a Group:
-     *  - implicitly enabled: even if the node does not appear in the input file, it is considered enabled
+     *  - implicitly enabled: even if the Node does not appear in the input file, it is considered enabled
      *  - mandatory: impliticly enabled, and cannot be disabled
-     *  - explicitly enabled: considered disabled unless the node appears in the input file
+     *  - explicitly enabled: considered disabled unless the Node appears in the input file
      */
     enum EnablePolicy {Implicit, Mandatory, Explicit};
 
@@ -234,7 +234,7 @@ namespace conf_components {
     private:
         const str_t m_dim_type_str, m_default_value;
     protected:
-        ParamBase(Node* parent, const str_t& name, str_t desc, str_t dim_type, str_t default_value);
+        ParamBase(Group* parent, const str_t& name, str_t desc, str_t dim_type, str_t default_value);
 
         v_t<std::pair<str_t, str_t>> help_pairs() const override;
     };

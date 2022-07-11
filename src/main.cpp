@@ -2,7 +2,6 @@
 #include <iomanip>
 #include <M7_lib/parallel/MPIWrapper.h>
 #include <M7_lib/dynamics/FciqmcCalculation.h>
-#include <M7_lib/io/YamlWrapper.h>
 #include <M7_lib/field/Mbf.h>
 #include <M7_lib/conf/Conf.h>
 
@@ -21,15 +20,14 @@ int main(int argc, char **argv) {
 
     if (argc == 1) {
         // input file not provided, print out help string
-        std::cout << conf::Document(nullptr).help_string() << std::endl;
+        conf::Document().print_help();
         mpi::finalize();
         return 0;
     }
 
-    auto yf = conf_components::Document(str_t(argv[1]));
-    conf::Document opts(&yf);
-    opts.verify();
-    opts.log_value();
+    conf::Document opts(argv[1]);
+    opts.validate();
+    opts.log();
 
     std::streambuf *original_stdout_buffer = nullptr;
     std::streambuf *original_stderr_buffer = nullptr;

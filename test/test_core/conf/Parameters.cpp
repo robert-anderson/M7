@@ -110,7 +110,8 @@ TEST(Parameters, ParameterGroups) {
 
 TEST(Parameters, New){
     using namespace parameters_test;
-    TestDocument f(PROJECT_ROOT"/assets/yaml_test/example.yaml");
+    TestDocument f("");
+    //TestDocument f(PROJECT_ROOT"/assets/yaml_test/example.yaml");
     f.validate();
     f.print_help();
     f.log();

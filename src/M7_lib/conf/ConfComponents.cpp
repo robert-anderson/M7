@@ -26,7 +26,7 @@ v_t<str_t> conf_components::Node::child_names_in_file() const {
 }
 
 bool conf_components::Node::null_in_file() const {
-    if (!m_yaml_node.IsDefined() || m_yaml_node.size()) return false;
+    if (m_path.m_list.empty() || !m_yaml_node.IsDefined() || m_yaml_node.size()) return false;
     return parse_as<str_t>() == "null";
 }
 
@@ -54,7 +54,7 @@ conf_components::Node::Node(conf_components::Path path, conf_components::Node* p
 conf_components::Node::Node(const YAML::Node& yaml_node, str_t desc) :
         Node({{}}, nullptr, yaml_node, std::move(desc)){}
 
-conf_components::Node::Node(conf_components::Node* parent, const str_t& name, str_t desc) :
+conf_components::Node::Node(Node* parent, const str_t& name, str_t desc) :
         Node(parent->m_path+name, parent,
              parent->m_yaml_node.IsMap() ? parent->m_yaml_node[name] : parent->m_yaml_node,
              std::move(desc)){
@@ -82,7 +82,7 @@ void conf_components::Node::log() const {
     for (auto child: m_children) child->log();
 }
 
-str_t conf_components::enable_policy_string(conf_components::EnablePolicy enable_policy) {
+str_t conf_components::enable_policy_string(EnablePolicy enable_policy) {
     switch (enable_policy) {
         case Implicit: return "implicit";
         case Mandatory: return "mandatory";
@@ -110,7 +110,7 @@ bool conf_components::Group::make_enabled() const {
     return false;
 }
 
-conf_components::Group::Group(conf_components::Node* parent, const str_t& name, str_t desc,
+conf_components::Group::Group(Node* parent, const str_t& name, str_t desc,
                               conf_components::EnablePolicy enable_policy) :
         Node(parent, name, std::move(desc)), m_enable_policy(enable_policy),
         m_is_scalar_bool(parseable_as<bool>()), m_enabled(make_enabled()){
@@ -119,8 +119,7 @@ conf_components::Group::Group(conf_components::Node* parent, const str_t& name, 
 conf_components::Group::Group(const YAML::Node& root, str_t desc) :
     Node(root, std::move(desc)), m_enable_policy(Mandatory), m_is_scalar_bool(false), m_enabled(true){}
 
-conf_components::Section::Section(conf_components::Node* parent, const str_t& name, str_t desc,
-                                  conf_components::EnablePolicy enable_policy) :
+conf_components::Section::Section(Node* parent, const str_t& name, str_t desc, EnablePolicy enable_policy) :
         Group(parent, name, std::move(desc), enable_policy){}
 
 v_t<std::pair<str_t, str_t>> conf_components::Section::help_pairs() const {
@@ -166,7 +165,7 @@ YAML::Node conf_components::Document::load(const str_t& fname) {
     return {};
 }
 
-conf_components::ParamBase::ParamBase(conf_components::Node* parent, const str_t& name,
+conf_components::ParamBase::ParamBase(Group* parent, const str_t& name,
                                       str_t desc, str_t dim_type, str_t default_value) :
         Node(parent, name, std::move(desc)),
         m_dim_type_str(std::move(dim_type)), m_default_value(std::move(default_value)){}
