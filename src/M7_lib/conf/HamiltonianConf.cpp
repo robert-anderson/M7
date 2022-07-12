@@ -5,25 +5,25 @@
 #include "HamiltonianConf.h"
 
 conf::Fcidump::Fcidump(Group *parent) :
-        Section(parent, "fcidump", "options relating to the FCIDUMP file"),
-        m_path(this, "path", "", "path to file defining fermionic Hamiltonian"),
+        Section(parent, "fcidump", "options relating to the FCIDUMP file", Explicit),
+        m_path(this, "path", "FCIDUMP", "path to file defining fermionic Hamiltonian"),
         m_spin_major(this, "spin_major", false,
                      "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... otherwise.") {}
 
 conf::Bosdump::Bosdump(Group *parent) :
-        Section(parent, "bosdump",
-                        "options relating to 4-indexed text file defining arbitrary number-conserving boson interactions"),
-        m_path(this, "path", "", "path to BOSDUMP format file") {}
+        Section(parent, "bosdump", "options relating to 4-indexed text file defining arbitrary "
+                                   "number-conserving boson interactions", Explicit),
+        m_path(this, "path", "BOSDUMP", "path to BOSDUMP format file") {}
 
 conf::Ebdump::Ebdump(Group *parent) :
-        Section(parent, "ebdump",
-                        "options relating to 3-indexed text file defining arbitrary couplings between electron hopping (and one-electron density) and boson (de-)excitations"),
-        m_path(this, "path", "", "path to EBDUMP format file"),
+        Section(parent, "ebdump","options relating to 3-indexed text file defining arbitrary couplings "
+                                 "between electron hopping (and one-electron density) and boson (de-)excitations", Explicit),
+        m_path(this, "path", "EBDUMP", "path to EBDUMP format file"),
         m_spin_major(this, "spin_major", false,
                      "if true, spin-resolved EBDUMP orders the spin orbitals aaa...bbb..., and ababab... otherwise.") {}
 
 conf::LatticeModel::LatticeModel(Group *parent, str_t name, str_t description) :
-        Section(parent, name, description),
+        Section(parent, name, description, Explicit),
         m_topology(this, "topology", "ortho",
                    "geometric layout of the N-dimensional lattice"),
         m_site_shape(this, "site_shape", {},
@@ -39,7 +39,7 @@ void conf::LatticeModel::validate_node_contents() {
 conf::Hubbard::Hubbard(Group *parent) :
         LatticeModel(parent, "hubbard",
                      "parameters of the arbitrarily dimensioned Hubbard model in the site basis. half-filling is the default, and doping can be achieved by modifying the charge parameter of the hamiltonian section"),
-        m_repulsion(this, "repulsion", 0ul, "on-site repulsion coefficient \"U\" in units of the hopping") {}
+        m_repulsion(this, "repulsion", 0.0, "on-site repulsion coefficient \"U\" in units of the hopping") {}
 
 conf::Heisenberg::Heisenberg(Group *parent) :
         LatticeModel(parent, "heisenberg",
@@ -49,7 +49,7 @@ conf::Heisenberg::Heisenberg(Group *parent) :
 
 
 conf::FrmHam::FrmHam(Group *parent) :
-        Section(parent, "fermion", "options relating to the fermion hamiltonian terms"),
+        Section(parent, "fermion", "options relating to the fermion hamiltonian terms", Implicit),
         m_fcidump(this), m_hubbard(this), m_heisenberg(this),
         m_spin_penalty_j(this, "spin_penalty_j", 0.0, "scalar multiple of the total spin operator used in the spin penalty fermion Hamiltonian modification"){}
 
@@ -60,20 +60,22 @@ void conf::FrmHam::validate_node_contents() {
 
 conf::FrmBosHam::FrmBosHam(Group *parent) :
         Section(parent, "ladder",
-                        "options relating to the \"ladder\" hamiltonian term, which couples number-conserving electronic single excitations to boson (de-)excitations"),
+                        "options relating to the fermion-boson product term, which couples number-conserving "
+                        "electronic single excitations to boson (de-)excitations", Explicit),
         m_ebdump(this),
         m_holstein_coupling(this, "holstein_coupling", 0.0,
                             "constant coupling between the electronic density and the boson (de-)excitation operators"){}
 
 conf::InteractingBoseGas::InteractingBoseGas(Group *parent) :
-        Section(parent, "interacting_bose_gas", "options relating to the N-dimensional interacting boson gas"),
+        Section(parent, "interacting_bose_gas",
+                "options relating to the N-dimensional interacting boson gas", Explicit),
         m_ndim(this, "ndim", 1ul, "number of dimensions"),
         m_nwave(this, "nwave", 0ul, "number of plane waves per dimension (number of degrees of freedom is 2*nwave + 1)"),
         m_ek_scale(this, "ek_scale", 0.0, "scale of the kinetic energy in terms of the scattering interaction strength"){}
 
 
 conf::BosHam::BosHam(Group *parent) :
-        Section(parent, "boson", "options relating to the number-conserving boson hamiltonian terms"),
+        Section(parent, "boson", "options relating to the number-conserving boson hamiltonian terms", Explicit),
         m_bosdump(this),
         m_num_op_weight(this, "num_op_weight", 0.0, "scalar factor of the bosonic number operator"),
         m_interacting_bose_gas(this){}

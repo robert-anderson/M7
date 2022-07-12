@@ -365,7 +365,7 @@ namespace conf_components {
 
         v_t<std::pair<str_t, str_t>> help_pairs() const override {
             auto tmp = ParamBase::help_pairs();
-            tmp.emplace_back("Select one from", ChoiceBase<T>::to_string());
+            tmp.emplace_back("Select one", ChoiceBase<T>::to_string());
             return tmp;
         }
     };
@@ -417,7 +417,7 @@ namespace conf_components {
 
         v_t<std::pair<str_t, str_t>> help_pairs() const override {
             auto tmp = ParamBase::help_pairs();
-            tmp.emplace_back("Select many from", ChoiceBase<T>::to_string());
+            tmp.emplace_back("Select many", ChoiceBase<T>::to_string());
             return tmp;
         }
     };

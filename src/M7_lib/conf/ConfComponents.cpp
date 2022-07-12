@@ -48,6 +48,7 @@ bool conf_components::Node::make_in_file() const {
         return true;
     }
     catch (const YAML::InvalidNode&){}
+    catch (const YAML::BadSubscript&){}
     return false;
 }
 
@@ -71,11 +72,18 @@ void conf_components::Node::validate() {
 }
 
 void conf_components::Node::print_help(bool emph_first, size_t ilevel) const {
+    if (!ilevel) std::cout << log::format("\nPrinting input specification for {}\n", m_desc);
     auto pairs = help_pairs();
     if (!pairs.empty() && emph_first) pairs.front().second = log::bold_format(pairs.front().second);
+
+    typedef std::pair<str_t, str_t> pair_t;
+    auto longest_key_pair = std::max_element(pairs.cbegin(), pairs.cend(),
+                                     [](const pair_t& p1, const pair_t& p2){return p1.first.size()<p2.first.size();});
+    auto longest_key_size = longest_key_pair==pairs.cend() ? 0ul : longest_key_pair->first.size();
+    std::string fmt_str = "{}{:<"+convert::to_string(longest_key_size+1)+"}| {}\n";
+
     for (auto& pair: pairs) {
-        std::cout << log::format(
-                "{}{:<16}| {}\n",std::string(ilevel*2, ' '), pair.first, pair.second);
+        std::cout << log::format(fmt_str, std::string(ilevel*2, ' '), pair.first, pair.second);
     }
     std::cout << '\n';
     for (auto child: m_children) child->print_help(emph_first, ilevel + 1);
