@@ -286,7 +286,8 @@ namespace conf {
 
         explicit Propagator(Group *parent);
 
-        void verify();
+    protected:
+        void validate_node_contents() override;
     };
 
     struct Document : conf_components::Document {

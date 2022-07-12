@@ -118,7 +118,7 @@ conf::Semistochastic::Semistochastic(Group *parent) :
                 "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space") {}
 
 void conf::Semistochastic::validate_node_contents() {
-    REQUIRE_NE(bool(m_size), m_l1_fraction_cutoff != 1.0, "incompatible methods of subspace selection specified");
+    REQUIRE_NE(bool(m_size), m_l1_fraction_cutoff == 1.0, "incompatible methods of subspace selection specified");
     REQUIRE_LE(m_l1_fraction_cutoff, 1.0, "cutoff must not exceed 1.0");
 }
 
@@ -138,7 +138,8 @@ void conf::Stats::validate_node_contents() {
 
 conf::SpfWeightedTwf::SpfWeightedTwf(Group *parent) :
         Section(parent, "spf_weighted_twf",
-                        "options related to the weighted trial wavefunction defined for Hamiltonians in which the sign structure of the FCI wavefunction is known"),
+                        "options related to the weighted trial wavefunction defined for Hamiltonians in which the "
+                        "sign structure of the FCI wavefunction is known", Explicit),
         m_fermion_fac(this, "fermion_fac", 0.0,
                       "Exponential constant penalising fermion double-occupancy in weighted TWF"),
         m_boson_fac(this, "boson_fac", 0.0, "Exponential constant penalising boson occupancy in weighted TWF") {}
@@ -151,7 +152,7 @@ void conf::SpfWeightedTwf::validate_node_contents() {
 }
 
 conf::Bilinears::Bilinears(Group *parent, str_t name, str_t description) :
-        Section(parent, name, description),
+        Section(parent, name, description, Explicit),
         m_ranks(this, "ranks", {}, "Ranks to accumulate"),
         m_buffers(this), m_hash_mapping(this), m_load_balancing(this), m_archivable(this) {}
 
@@ -174,7 +175,7 @@ conf::SpecMoms::SpecMoms(Group *parent, str_t name, str_t description) :
 
 conf::InstEsts::InstEsts(Group *parent) :
         Section(parent, "inst_ests",
-                        "options relating to instantaneous (MC cycle-resolved) estimators"),
+                        "options relating to instantaneous (MC cycle-resolved) estimators", Explicit),
 
         m_spf_uniform_twf(this, "spf_uniform_twf", false,
                           "switch on estimation of energy by uniform TWF (applicable only in sign problem-free systems)"),
@@ -182,14 +183,15 @@ conf::InstEsts::InstEsts(Group *parent) :
 
 conf::RefExcits::RefExcits(Group *parent) :
         Section(parent, "ref_excits",
-                        "options relating to averaged amplitudes of reference-connected MBFs"),
+                        "options relating to averaged amplitudes of reference-connected MBFs", Explicit),
         m_max_exlvl(this, "max_exlvl", 0ul,
                     "maximum excitation level from the reference for which to accumulate average amplitudes"),
         m_buffers(this), m_archivable(this) {}
 
 conf::AvEsts::AvEsts(Group *parent) :
         Section(parent, "av_ests",
-                        "options related to quantities estimated from the many-body wavefunction(s) and averaged on-the-fly over a number of MC cycles"),
+                        "options related to quantities estimated from the many-body wavefunction(s) and averaged "
+                        "on-the-fly over a number of MC cycles", Explicit),
         m_delay(this, "delay", 1000ul,
                 "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate MEVs"),
         m_ncycle(this, "ncycle", ~0ul,
@@ -232,7 +234,7 @@ conf::Propagator::Propagator(Group *parent) :
                "exponential factor in the Gutzwiller-like guiding wavefunction"),
         m_semistochastic(this) {}
 
-void conf::Propagator::verify() {
+void conf::Propagator::validate_node_contents() {
     if (m_min_death_mag.m_value==0.0) {
         m_min_death_mag.m_value = m_min_spawn_mag.m_value;
         log::warn("{} was zero, defaulting to the specified value of {}",
@@ -247,7 +249,7 @@ void conf::Propagator::verify() {
 }
 
 conf::Document::Document(const str_t& fname) :
-        conf_components::Document(fname, "Configuration document prescribing the behavior of an FCIQMC calculation in M7"),
+        conf_components::Document(fname, "a calculation in M7"),
         m_prng(this), m_archive(this), m_basis(this), m_particles(this),
         m_wavefunction(this), m_reference(this),
         m_shift(this), m_propagator(this),
@@ -265,7 +267,7 @@ void conf::Document::validate_node_contents() {
 }
 
 conf::MbfDef::MbfDef(Group *parent, str_t name) :
-        Section(parent, name, "definition of a vector of many-body basis functions"),
+        Section(parent, name, "definition of a vector of many-body basis functions", Explicit),
         m_frm(this, "fermion", {},
               "fermion sector occupation of the MBF (each element can be a boolean "
               "array of occupation status of all spin-orbitals or list of occupied spin-obrital indices)"),
