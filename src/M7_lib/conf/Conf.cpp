@@ -209,7 +209,7 @@ conf::Propagator::Propagator(Group *parent) :
         m_ncycle(this, "ncycle", ~0ul, "number of MC cycles for which to iterate the solver"),
         m_stochastic(this, "stochastic", true,
                      "if false, perform exact projective FCI (only practical for debugging in small systems)"),
-        m_excit_gen(this, "excit_gen", "pchb", "excitation generation algorithm to use"),
+        m_excit_gen(this),
         m_nw_target(this, "nw_target", 10000ul, "the L1 norm of the wavefunction at which the shift should begin to vary"),
         m_max_bloom(this, "max_bloom", 0.0,
                     "the maximum acceptable magnitude for an off-diagonal propagated contribution. If tau is dynamic, it is updated to keep spawned contributions below this magnitude"),

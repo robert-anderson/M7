@@ -9,6 +9,7 @@
 #include "ConfComponents.h"
 #include "HamiltonianConf.h"
 #include "M7_lib/basis/BasisData.h"
+#include "ExcitgenConf.h"
 
 namespace conf {
     
@@ -266,7 +267,7 @@ namespace conf {
     struct Propagator : Section {
         Param<uint_t> m_ncycle;
         Param<bool> m_stochastic;
-        Param<str_t> m_excit_gen;
+        conf::ExcitGen m_excit_gen;
         Param<double> m_nw_target;
         Param<wf_comp_t> m_max_bloom;
         Param<wf_comp_t> m_nadd;

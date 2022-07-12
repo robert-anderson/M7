@@ -42,9 +42,15 @@ ham_t HubbardFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
     return -m_basis.m_lattice->phase(a, i);
 }
 
-HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const conf::Propagator&) const {
+HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const conf::Propagator& opts) const {
     excit_gen_list_t list;
-    list.emplace_front(new exgen::HubbardUniform(*this, prng));
+    auto pref_doub_occ = opts.m_excit_gen.m_hubbard_prefer_double_occ;
+    if (pref_doub_occ.m_enabled) {
+        list.emplace_front(new exgen::HubbardPreferDoubleOcc(*this, prng, pref_doub_occ.m_doub_occ_u_fac));
+    }
+    else {
+        list.emplace_front(new exgen::HubbardUniform(*this, prng));
+    }
     return list;
 }
 
