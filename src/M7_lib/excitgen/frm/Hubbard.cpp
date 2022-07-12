@@ -27,6 +27,8 @@ bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t
      */
     auto rand = m_prng.draw_uint(nelec * nconn_lcm);
     const auto occ = get_occ(rand, src, prob);
+    DEBUG_ASSERT_GE(prob, 0.0, "prob is non-positive");
+    DEBUG_ASSERT_LE(prob, 1.0, "prob is more than 1");
     const auto isite = src.m_basis.isite(occ);
     const auto ispin = src.m_basis.ispin(occ);
     /*

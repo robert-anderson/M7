@@ -43,9 +43,8 @@ TEST(HubbardPreferDoubleOcc, Pbc2DNoDoubOccs) {
 
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
     buffered::FrmOnv src_mbf(h.m_basis);
-    const uintv_t alpha_sites = {0, 1, 1, 0, 0, 1, 1, 1, 0};
-    const uintv_t beta_sites =  {1, 0, 0, 1, 1, 0, 0, 0, 1};
-    src_mbf.set(alpha_sites, beta_sites);
+    const uintv_t alpha_sites = {1, 2, 5, 6, 7};
+    src_mbf.set_spins(alpha_sites);
     ASSERT_EQ(tester.run(src_mbf, 3000000), "");
 }
 
@@ -58,8 +57,9 @@ TEST(HubbardPreferDoubleOcc, Pbc2D) {
 
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
     buffered::FrmOnv src_mbf(h.m_basis);
-    const uintv_t alpha_sites = {0, 1, 0, 0, 0, 1, 1, 1, 0};
-    const uintv_t beta_sites =  {1, 1, 0, 1, 0, 0, 0, 1, 1};
+    const uintv_t alpha_sites = {1, 5, 6, 7};
+    const uintv_t beta_sites =  {0, 1, 3, 7, 8};
     src_mbf.set(alpha_sites, beta_sites);
+    std::cout << src_mbf << std::endl;
     ASSERT_EQ(tester.run(src_mbf, 3000000), "");
 }

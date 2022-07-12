@@ -128,7 +128,7 @@ namespace exgen {
                      * be scaled by the probability that the uniform draw was attempted in the presence of a double
                      * occupation
                      */
-                    prob /= 1.0 - m_prob_doub_occ;
+                    prob *= 1.0 - m_prob_doub_occ;
                 }
                 return occ;
             }
@@ -146,7 +146,19 @@ namespace exgen {
         prob_t prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const override {
             const auto& doub_occs = src.m_decoded.m_doubly_occ_sites.get();
             if (doub_occs.empty()) return prob_uniform(src, conn);
-            return combined_occ_prob(src.m_decoded.m_simple_occs.get().size(), doub_occs.size());
+            const auto occ_prob = combined_occ_prob(src.m_decoded.m_simple_occs.get().size(), 2*doub_occs.size());
+            /*
+             * fill the working vector with the adjacency of the occupied site
+             */
+            const auto isite = src.m_basis.isite(conn.m_ann[0]);
+            const auto ispin = src.m_basis.ispin(conn.m_ann[0]);
+            m_h.m_basis.m_lattice->get_adj_row(isite, m_work_adj_row);
+            /*
+             * when selecting the vacant site, skip the sites which are occupied in the same spin channel as the chosen electron
+             */
+            set_valid_adj_vacant(src, ispin);
+            const auto nvac = m_valid_in_adj_row.size();
+            return occ_prob/nvac;
         }
     };
 }

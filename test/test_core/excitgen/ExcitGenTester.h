@@ -41,7 +41,8 @@ namespace excit_gen_tester {
          */
         enum Status {
             Success, /* no issues with draw loop */
-            AllNull, GenWithZeroProb, ProbMismatch, ProbMismatchGivenHElem, WrongExsig, Unconnected, WrongHElem,
+            AllNull, GenWithZeroProb, InvalidDrawProb, InvalidProb, InvalidProbGivenHElem,
+            ProbMismatch, ProbMismatchGivenHElem, WrongExsig, Unconnected, WrongHElem,
             NotAllDrawnAtLeastOnce, VarianceIncrease, WrongWeights
         };
 
@@ -99,14 +100,26 @@ namespace excit_gen_tester {
             ham_t helem = 0.0;
             auto &row = m_results.m_row;
             for (uint_t idraw = 0ul; idraw < ndraw; ++idraw) {
+
                 auto success = m_excit_gen.draw(exsig, src_mbf, prob, helem, conn);
                 if (!success) {
                     ++nnull;
                     continue;
                 }
+
+                std::cout << conn << std::endl;
+                if (prob < 0.0 || prob > 1.0) {
+                    return InvalidDrawProb;
+                }
                 if (fptol::numeric_zero(prob)) return GenWithZeroProb;
-                if (!fptol::numeric_equal(prob, m_excit_gen.prob(src_mbf, conn))) return ProbMismatch;
-                if (!fptol::numeric_equal(prob, m_excit_gen.prob(src_mbf, conn, helem))) return ProbMismatchGivenHElem;
+                const auto chk_prob = m_excit_gen.prob(src_mbf, conn);
+                if (chk_prob < 0.0 || chk_prob > 1.0) return InvalidProb;
+                if (!fptol::numeric_equal(prob, chk_prob)) {
+                    return ProbMismatch;
+                }
+                const auto chk_prob_given_helem = m_excit_gen.prob(src_mbf, conn, helem);
+                if (chk_prob_given_helem < 0.0 || chk_prob_given_helem > 1.0) return InvalidProbGivenHElem;
+                if (!fptol::numeric_equal(prob, chk_prob_given_helem)) return ProbMismatchGivenHElem;
                 if (conn.exsig()!=exsig) return WrongExsig;
                 work_inds = conn;
                 auto irow = *m_results[work_inds];

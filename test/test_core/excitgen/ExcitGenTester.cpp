@@ -10,8 +10,13 @@ str_t excit_gen_tester::ExcitGenTester::status_error_msg(Status status) {
         case Success: return "";
         case AllNull: return "no non-null excitations were drawn";
         case GenWithZeroProb: return "non-null excitation generated with zero probability";
+        case InvalidDrawProb: return "draw probability is not in valid range";
+        case InvalidProb: return "probability is not in valid range";
+        case InvalidProbGivenHElem:
+            return "probability given the H matrix element is not in valid range";
         case ProbMismatch: return "prob of connection doesn't match prob resulting from the draw method";
-        case ProbMismatchGivenHElem: return "prob of connection doesn't match prob resulting from the draw method given helem";
+        case ProbMismatchGivenHElem:
+            return "prob of connection doesn't match prob resulting from the draw method given H matrix element";
         case WrongExsig: return "drawn connection has wrong excitation signature";
         case Unconnected: return "excit generated that was not found in deterministic enumeration";
         case WrongHElem: return "H element returned by draw method is not consistent with value from Hamiltonian class";
