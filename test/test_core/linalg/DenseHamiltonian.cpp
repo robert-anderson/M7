@@ -110,6 +110,15 @@ TEST(DenseHamiltonian, Hubbard6Site) {
     ASSERT_NEARLY_EQ(evals[0], -3.0925653194551845);
 }
 
+TEST(DenseHamiltonian, Hubbard2x3Site) {
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {2, 3}, {0, 0}));
+    Hamiltonian ham(&frm_ham);
+    v_t<double> evals;
+    DenseHamiltonian hmat(ham);
+    dense::diag(hmat, evals);
+    ASSERT_NEARLY_EQ(evals[0], -3.6346030549073807);
+}
+
 TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
     HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     ASSERT_EQ(frm_ham.m_basis.m_nsite, 3ul);
