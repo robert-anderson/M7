@@ -73,3 +73,13 @@ ham_t HeisenbergFrmHam::get_element_2200(const field::FrmOnv& , const conn::FrmO
     // fermi phase is always negative
     return -HeisenbergFrmHam::get_coeff_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[1], conn.m_ann[0]);
 }
+
+HamOpTerm::excit_gen_list_t HeisenbergFrmHam::make_excit_gens(PRNG& prng, const conf::Propagator& propagator) const {
+    return HamOpTerm::make_excit_gens(prng, propagator);
+}
+
+conn_foreach::base_list_t HeisenbergFrmHam::make_foreach_iters() const {
+    conn_foreach_list_t list;
+    list.emplace_front(new conn_foreach::frm::Heisenberg);
+    return list;
+}

@@ -44,6 +44,10 @@ struct HeisenbergFrmHam : SpinModelFrmHam {
 
     ham_t get_element_2200(const field::FrmOnv& /*onv*/, const conn::FrmOnv& conn) const override;
 
+    excit_gen_list_t make_excit_gens(PRNG& prng, const conf::Propagator& propagator) const override;
+
+    conn_foreach::base_list_t make_foreach_iters() const override;
+
 };
 
 

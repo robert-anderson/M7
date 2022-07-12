@@ -46,7 +46,6 @@ TEST(HubbardPreferDoubleOcc, Pbc2DNoDoubOccs) {
     const uintv_t alpha_sites = {0, 1, 1, 0, 0, 1, 1, 1, 0};
     const uintv_t beta_sites =  {1, 0, 0, 1, 1, 0, 0, 0, 1};
     src_mbf.set(alpha_sites, beta_sites);
-    mbf::set_neel_mbf(src_mbf, h.default_particles().m_frm);
     ASSERT_EQ(tester.run(src_mbf, 3000000), "");
 }
 
@@ -62,6 +61,5 @@ TEST(HubbardPreferDoubleOcc, Pbc2D) {
     const uintv_t alpha_sites = {0, 1, 0, 0, 0, 1, 1, 1, 0};
     const uintv_t beta_sites =  {1, 1, 0, 1, 0, 0, 0, 1, 1};
     src_mbf.set(alpha_sites, beta_sites);
-    mbf::set_neel_mbf(src_mbf, h.default_particles().m_frm);
     ASSERT_EQ(tester.run(src_mbf, 3000000), "");
 }
