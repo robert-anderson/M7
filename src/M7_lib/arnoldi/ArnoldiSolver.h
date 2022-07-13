@@ -55,7 +55,7 @@ struct ArnoldiProblemWithProduct : ArnoldiProblemBase {
 
     virtual bool solve(dist_mv_prod::Base<T> &mv_prod) = 0;
 
-    virtual bool solve(sparse::Matrix<T> &sparse_mat) = 0;
+    virtual bool solve(sparse::dynamic::Matrix<T> &sparse_mat) = 0;
 
     virtual T real_eigenvalue(uint_t i) = 0;
 
@@ -74,7 +74,7 @@ protected:
      * @param sparse_mat
      *  sparse representation of the whole square matrix to be diagonalized on this MPI rank
      */
-    virtual void product(sparse::Matrix<T> &sparse_mat) = 0;
+    virtual void product(sparse::dynamic::Matrix<T> &sparse_mat) = 0;
 };
 
 
@@ -113,7 +113,7 @@ private:
         mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector(), mv_prod.m_nrow);
     }
 
-    void product(sparse::Matrix<T> &sparse_mat) override {
+    void product(sparse::dynamic::Matrix<T> &sparse_mat) override {
         sparse_mat.multiply(get_vector(), put_vector(), sparse_mat.nrow());
     }
 
@@ -134,7 +134,7 @@ public:
         return solve_base(prod_fn, true);
     }
 
-    bool solve(sparse::Matrix<T> &sparse_mat) override {
+    bool solve(sparse::dynamic::Matrix<T> &sparse_mat) override {
         setup(sparse_mat.nrow(), false);
         auto prod_fn = [&]() { sparse_mat.multiply(m_solver->GetVector(), m_solver->PutVector(), sparse_mat.nrow()); };
         return solve_base(prod_fn, false);
@@ -183,7 +183,7 @@ private:
         mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector(), mv_prod.m_nrow);
     }
 
-    void product(sparse::Matrix<T> &sparse_mat) override {
+    void product(sparse::dynamic::Matrix<T> &sparse_mat) override {
         sparse_mat.multiply(get_vector(), put_vector(), sparse_mat.nrow());
     }
 
@@ -204,7 +204,7 @@ public:
         return solve_base(prod_fn, true);
     }
 
-    bool solve(sparse::Matrix<T> &sparse_mat) override {
+    bool solve(sparse::dynamic::Matrix<T> &sparse_mat) override {
         setup(sparse_mat.nrow(), false);
         auto prod_fn = [&]() { sparse_mat.multiply(m_solver->GetVector(), m_solver->PutVector(), sparse_mat.nrow()); };
         return solve_base(prod_fn, false);

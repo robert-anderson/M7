@@ -9,7 +9,7 @@ TEST(SparseMatrix, RealMultiplication){
     typedef double T;
     const uint_t n=3;
     v_t<T> v(n, 0);
-    sparse::Matrix<T> matrix;
+    sparse::dynamic::Matrix<T> matrix;
     for(uint_t i=0; i<n; ++i) {
         v[i] = i+1;
         for(uint_t j=0; j<n; ++j) {
@@ -27,7 +27,7 @@ TEST(SparseMatrix, ComplexMultiplication){
     typedef std::complex<double> T;
     const uint_t n=3;
     v_t<T> v(n, 0);
-    sparse::Matrix<T> matrix;
+    sparse::dynamic::Matrix<T> matrix;
     for(uint_t i=0; i<n; ++i) {
         v[i] = T{double(i+1), 2};
         for(uint_t j=0; j<n; ++j) {

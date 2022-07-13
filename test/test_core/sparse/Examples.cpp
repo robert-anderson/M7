@@ -6,12 +6,12 @@
 #include "M7_lib/util/Hash.h"
 #include "M7_lib/parallel/MPIAssert.h"
 
-sparse::Matrix<double>
+sparse::dynamic::Matrix<double>
 sparse_matrix_examples::rect_double(const uint_t &nrow, const uint_t &ncol, const uint_t &nnonzero_per_row) {
     REQUIRE_LE(nnonzero_per_row, ncol,
                "specified number of non-zero elements per row exceeds column count");
     const uint_t v_hi = 7;
-    sparse::Matrix<double> out;
+    sparse::dynamic::Matrix<double> out;
     out.resize(nrow);
 
     uintv_t icols;
@@ -26,10 +26,10 @@ sparse_matrix_examples::rect_double(const uint_t &nrow, const uint_t &ncol, cons
     return out;
 }
 
-sparse::Matrix<std::complex<double>>
+sparse::dynamic::Matrix<std::complex<double>>
 sparse_matrix_examples::rect_double_complex(const uint_t &nrow, const uint_t &ncol, const uint_t &nnonzero_per_row) {
     auto real = rect_double(nrow, ncol, nnonzero_per_row);
-    sparse::Matrix<std::complex<double>> out;
+    sparse::dynamic::Matrix<std::complex<double>> out;
     out.resize(nrow);
     for (uint_t irow=0ul; irow<nrow; ++irow) {
         const auto real_row = real[irow];

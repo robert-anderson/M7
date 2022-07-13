@@ -245,6 +245,19 @@ namespace convert {
         }
         return out;
     }
+
+    /**
+     * opposite of split
+     */
+    template<typename T1, typename T2>
+    static v_t<std::pair<T1, T2>> zip(const std::pair<v_t<T1>, v_t<T2>>& v) {
+        v_t<std::pair<T1, T2>> out;
+        const auto nentry = std::min(v.first.size(), v.second.size());
+        out.reserve(nentry);
+        for (uint_t ientry=0ul; ientry<nentry; ++ientry)
+            out.emplace_back(v.first[ientry], v.second[ientry]);
+        return out;
+    }
 }
 
 template<typename T>

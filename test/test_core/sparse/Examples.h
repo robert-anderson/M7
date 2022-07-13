@@ -9,8 +9,8 @@
 
 namespace sparse_matrix_examples {
 
-    sparse::Matrix<double> rect_double(const uint_t &nrow, const uint_t &ncol, const uint_t &nnonzero_per_row);
-    sparse::Matrix<std::complex<double>> rect_double_complex(const uint_t &nrow, const uint_t &ncol, const uint_t &nnonzero_per_row);
+    sparse::dynamic::Matrix<double> rect_double(const uint_t &nrow, const uint_t &ncol, const uint_t &nnonzero_per_row);
+    sparse::dynamic::Matrix<std::complex<double>> rect_double_complex(const uint_t &nrow, const uint_t &ncol, const uint_t &nnonzero_per_row);
 
 }
 

@@ -7,7 +7,7 @@
 
 TEST(Sparse, RectMatrixVectorProduct){
     typedef int T;
-    sparse::Matrix<T> mat;
+    sparse::dynamic::Matrix<T> mat;
     /*
      *  a[0,0], a[0,1], a[1,2], a[2,2], a[3,0], a[4,1], a[4,2], a[5, 0], a[5,2], a[6, 1] =
      *      1, -1, 2, -2, 3, -3, 4, -4, 5, -5

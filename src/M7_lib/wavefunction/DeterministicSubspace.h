@@ -48,13 +48,13 @@ struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataR
      * all the non-zero Hamiltonian connections and their matrix elements for the locally-stored rows (with respect to
      * columns distributed across all ranks)
      */
-    sparse::Matrix<ham_t> m_ham_matrix;
+    sparse::dynamic::Matrix<ham_t> m_ham_matrix;
     /**
      * in general RDMs take contributions from MBF connections which correspond to H matrix elements of zero. These
      * are stored here. We do NOT duplicate elements from the sparse_ham here, only those MBF pairs which may
      * contribute to RDM elements, but which are H-unconnected
      */
-    sparse::Network m_rdm_network;
+    sparse::dynamic::Network m_rdm_network;
     /**
      * associated WF root index
      */

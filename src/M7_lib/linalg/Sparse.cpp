@@ -5,27 +5,27 @@
 #include "Sparse.h"
 #include "M7_lib/util/String.h"
 
-void sparse::Network::resize(const uint_t& nrow) {
+void sparse::dynamic::Network::resize(uint_t nrow) {
     if (nrow > m_rows_icols.size()) m_rows_icols.resize(nrow);
 }
 
-uint_t sparse::Network::nrow() const {
+uint_t sparse::dynamic::Network::nrow() const {
     return m_rows_icols.size();
 }
 
-uint_t sparse::Network::nentry() const {
+uint_t sparse::dynamic::Network::nentry() const {
     return m_nentry;
 }
 
-uint_t sparse::Network::nentry(const uint_t& irow) const {
+uint_t sparse::dynamic::Network::nentry(uint_t irow) const {
     return (*this)[irow].size();
 }
 
-uint_t sparse::Network::max_column_index() const {
+uint_t sparse::dynamic::Network::max_column_index() const {
     return m_max_icol;
 }
 
-uint_t sparse::Network::add(const uint_t &irow, const uint_t &icol) {
+uint_t sparse::dynamic::Network::add(uint_t irow, uint_t icol) {
     if (irow >= m_rows_icols.size()) {
         if (!m_resized_by_add) {
             log::warn("Resizing sparse matrix by adding a row (this entails reallocation which is inefficient)");
@@ -40,7 +40,7 @@ uint_t sparse::Network::add(const uint_t &irow, const uint_t &icol) {
     return m_rows_icols[irow].size()-1;
 }
 
-uint_t sparse::Network::insert(const uint_t &irow, const uint_t &icol) {
+uint_t sparse::dynamic::Network::insert(uint_t irow, uint_t icol) {
     auto& row = m_rows_icols[irow];
     auto element = std::find(row.begin(), row.end(), icol);
     if (element==row.end()) return add(irow, icol);
@@ -48,32 +48,32 @@ uint_t sparse::Network::insert(const uint_t &irow, const uint_t &icol) {
     return std::distance(row.begin(), element);
 }
 
-void sparse::Network::add(const uint_t &irow, const uintv_t &icols) {
+void sparse::dynamic::Network::add(uint_t irow, const uintv_t &icols) {
     for (auto &icol: icols) add(irow, icol);
 }
 
-void sparse::Network::insert(const uint_t &irow, const uintv_t &icols) {
+void sparse::dynamic::Network::insert(uint_t irow, const uintv_t &icols) {
     for (auto &icol: icols) insert(irow, icol);
 }
 
-bool sparse::Network::empty() const {
+bool sparse::dynamic::Network::empty() const {
     return m_rows_icols.empty();
 }
 
-bool sparse::Network::empty(const uint_t &irow) const {
+bool sparse::dynamic::Network::empty(uint_t irow) const {
     return (*this)[irow].empty();
 }
 
-const uintv_t &sparse::Network::operator[](const uint_t &irow) const{
+const uintv_t &sparse::dynamic::Network::operator[](uint_t irow) const{
     ASSERT(irow<nrow());
     return m_rows_icols[irow];
 }
 
-str_t sparse::Network::row_to_string(uint_t irow) const {
+str_t sparse::dynamic::Network::row_to_string(uint_t irow) const {
     return convert::to_string(m_rows_icols[irow]);
 }
 
-str_t sparse::Network::to_string() const {
+str_t sparse::dynamic::Network::to_string() const {
     str_t out;
     for (uint_t irow=0ul; irow<nrow(); ++irow) {
         if (m_rows_icols[irow].empty()) continue;
@@ -82,7 +82,7 @@ str_t sparse::Network::to_string() const {
     return out;
 }
 
-sparse::Network sparse::Network::get_symmetrized() const {
+sparse::dynamic::Network sparse::dynamic::Network::get_symmetrized() const {
     Network sym_net;
     sym_net.resize(nrow());
     REQUIRE_LT(max_column_index(), nrow(), "too many columns for this to be a symmetric matrix");
@@ -97,7 +97,7 @@ sparse::Network sparse::Network::get_symmetrized() const {
     return sym_net;
 }
 
-void sparse::Network::get_row_subset(Network &subnet, uint_t count, uint_t displ) const {
+void sparse::dynamic::Network::get_row_subset(Network &subnet, uint_t count, uint_t displ) const {
     REQUIRE_LE(displ, nrow(), "row offset OOB");
     REQUIRE_LE(displ+count, nrow(), "row offset+count OOB");
     subnet.resize(count);
@@ -113,8 +113,81 @@ void sparse::Network::get_row_subset(Network &subnet, uint_t count, uint_t displ
     }
 }
 
-sparse::Network sparse::Network::get_row_subset(uint_t count, uint_t displ) const {
+sparse::dynamic::Network sparse::dynamic::Network::get_row_subset(uint_t count, uint_t displ) const {
     Network subnet;
     get_row_subset(subnet, count, displ);
     return subnet;
+}
+
+uintv_t sparse::fixed::Base::make_counts(const sparse::dynamic::Network &src) {
+    uintv_t counts;
+    counts.reserve(src.nrow());
+    for (uint_t irow=0ul; irow<src.nrow(); ++irow) counts.push_back(src.nentry(irow));
+    return counts;
+}
+
+uintv_t sparse::fixed::Base::make_displs(const uintv_t &counts) {
+    uintv_t displs;
+    /*
+     * include the last one so that the cend iterator for the last entry is directly accessible
+     */
+    displs.reserve(counts.size()+1);
+    displs.push_back(0ul);
+    for (auto it = counts.cbegin(); it!=counts.cend(); ++it) displs.push_back(displs.back()+*it);
+    return displs;
+}
+
+sparse::fixed::Base::Base(const uintv_t &counts) :  m_nrow(counts.size()), m_displs(make_displs(counts)),
+                                                    m_nentry(m_displs.back()) {}
+
+sparse::fixed::Base::Base(const sparse::dynamic::Network &src) : Base(make_counts(src)){
+    DEBUG_ASSERT_EQ(m_nentry, src.nentry(),
+                    "number of entries calculated from offsets should match that counted by the dynamic::Network instance");
+}
+
+uintv_t sparse::fixed::Network::make_entries(const sparse::dynamic::Network &src) {
+    uintv_t out;
+    out.reserve(src.nrow());
+    for (uint_t irow=0ul; irow<src.nrow(); ++irow)
+        out.insert(out.cend(), src[irow].cbegin(), src[irow].cend());
+    return out;
+}
+
+uintv_t::const_iterator sparse::fixed::Network::citer(uint_t irow) const {
+    auto it = m_entries.cbegin();
+    std::advance(it, m_displs[irow]);
+    return it;
+}
+
+sparse::fixed::Network::Network(const sparse::dynamic::Network &src) : Base(src), m_entries(make_entries(src)){
+    DEBUG_ASSERT_EQ(m_entries.size(), m_nentry, "incorrect number of entries");
+}
+
+uintv_t::const_iterator sparse::fixed::Network::cbegin(uint_t irow) const {
+    DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
+    return citer(irow);
+}
+
+uintv_t::const_iterator sparse::fixed::Network::cend(uint_t irow) const {
+    DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
+    return citer(irow+1);
+}
+
+uint_t sparse::fixed::Network::nentry(uint_t irow) const {
+    return std::distance(cbegin(irow), cend(irow));
+}
+
+sparse::inverse::Network::Network(const sparse::dynamic::Network &src) {
+    for (auto irow=0ul; irow<src.nrow(); ++irow)
+        for (const auto& it: src[irow])
+            m_conns.insert({irow, it});
+}
+
+sparse::inverse::Network::Network(const sparse::fixed::Network &src) {
+    for (auto irow=0ul; irow<src.m_nrow; ++irow)
+        for (auto it = src.cbegin(irow); it != src.cend(irow); ++it) m_conns.insert({irow, *it});
+}
+
+bool sparse::inverse::Network::lookup(uint_t i, uint_t j) const {
+    return m_conns.find({i, j}) != m_conns.cend();
 }

@@ -97,8 +97,8 @@ namespace dist_mv_prod {
 
     template<typename T>
     struct Sparse: public Base<T> {
-        const sparse::Matrix<T>& m_mat;
-        Sparse(const sparse::Matrix<T>& mat): Base<T>(mat.nrow()), m_mat(mat){}
+        const sparse::dynamic::Matrix<T>& m_mat;
+        Sparse(const sparse::dynamic::Matrix<T>& mat): Base<T>(mat.nrow()), m_mat(mat){}
 
     protected:
         void multiply(const T *v, uint_t v_size) override {

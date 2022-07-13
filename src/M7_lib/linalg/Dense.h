@@ -117,7 +117,7 @@ namespace dense {
             Matrix(nr.dataset_shape(name)[0], nr.dataset_shape(name)[1]) {
             nr.read_data(name, m_buffer.data(), m_buffer.size());
         }
-        Matrix(const sparse::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_column_index()+1){
+        Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_column_index() + 1){
             *this = sparse;
         }
 
@@ -133,7 +133,7 @@ namespace dense {
             m_buffer = v;
             return *this;
         }
-        Matrix& operator=(const sparse::Matrix<T>& sparse){
+        Matrix& operator=(const sparse::dynamic::Matrix<T>& sparse){
             REQUIRE_GE(m_nrow, sparse.nrow(), "not enough rows in dense matrix ");
             REQUIRE_GT(m_ncol, sparse.max_column_index(), "not enough columns in dense matrix ");
             for (uint_t irow = 0ul; irow < sparse.nrow(); ++irow) {
@@ -356,7 +356,7 @@ namespace dense {
     public:
         using Matrix<T>::operator=;
         SquareMatrix(uint_t n): Matrix<T>(n, n){}
-        SquareMatrix(const sparse::Matrix<T>& sparse) :
+        SquareMatrix(const sparse::dynamic::Matrix<T>& sparse) :
                 SquareMatrix(std::max(sparse.nrow(), sparse.max_column_index()+1)){
             *this = sparse;
         }
