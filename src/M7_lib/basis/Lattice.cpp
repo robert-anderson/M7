@@ -22,7 +22,15 @@ uint_t lattice::Base::make_nadj_max() {
 lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs) :
     m_inds(shape), m_bcs(bcs),
     m_info_string(log::format("orthogonal lattice with shape {} and boundary conds {}",
-                              convert::to_string(m_inds.m_shape), convert::to_string(m_bcs))) {}
+                              convert::to_string(m_inds.m_shape), convert::to_string(m_bcs))) {
+    for (uint_t idim=0ul; idim<m_inds.m_nind; ++idim){
+        REQUIRE_TRUE(m_inds.m_shape[idim], "every extent in the site shape must be non-zero");
+        if (m_inds.m_shape[idim] == 1ul)
+            log::warn("redundant dimension in orthogonal lattice definition");
+        if (m_inds.m_shape[idim] <= 2ul)
+            REQUIRE_FALSE(m_bcs[idim], "(anti-)periodic boundary conditions are not compatible with extents <= 2");
+    }
+}
 
 int lattice::OrthoTopology::one_dim_phase(uint_t iind, uint_t jind, uint_t idim) const {
     if ((iind + 1 == jind) || (iind - 1 == jind)) return 1;
