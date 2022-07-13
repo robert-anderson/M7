@@ -33,9 +33,10 @@ bool FrmExcitGen::draw_h_frmbos(uint_t exsig, const field::FrmBosOnv &src, prob_
     return ham::is_significant(helem);
 }
 
-void FrmLatticeExcitGen::set_valid_adj_vacant(const field::FrmOnv &src, uint_t ispin) const {
+const FrmLatticeExcitGen::valid_adj_t& FrmLatticeExcitGen::valid_adj(
+        const lattice::adj_row_t& adj_row, const field::FrmOnv &src, uint_t ispin) const {
     auto fn = [&src, &ispin](uint_t isite) {
         return !src.get({ispin, isite});
     };
-    set_valid_adj(fn);
+    return valid_adj(adj_row, fn);
 }

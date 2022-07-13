@@ -9,6 +9,25 @@ exgen::HubbardBase::HubbardBase(const FrmHam &h, PRNG &prng, str_t description) 
     REQUIRE_TRUE(h.is<HubbardFrmHam>(), "given hamiltonian is not of HubbardFrmHam type");
 }
 
+uint_t exgen::HubbardBase::get_occ_uniform(uint32_t rand, const field::FrmOnv& src, prob_t& prob) const {
+    const auto &occs = src.m_decoded.m_simple_occs.get();
+    const auto nconn_lcm = m_h.m_basis.m_lattice->m_lcm_le_nadj_max;
+    const auto nelec = occs.size();
+    prob = 1/double(nelec);
+    return occs[rand / nconn_lcm];
+}
+
+prob_t exgen::HubbardBase::prob_uniform(const field::FrmOnv& src, const conn::FrmOnv& conn) const {
+    const auto &occs = src.m_decoded.m_simple_occs.get();
+    const auto nelec = occs.size();
+    const auto isite = src.m_basis.isite(conn.m_ann[0]);
+    const auto ispin = src.m_basis.ispin(conn.m_ann[0]);
+
+    auto& valid_adj = this->valid_adj(adj_row(isite), src, ispin);
+    return 1.0/double(valid_adj.size()*nelec);
+}
+
+
 bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) {
     DEBUG_ONLY(exsig);
     DEBUG_ASSERT_EQ(exsig, exsig::ex_single, "this excitation generator is only suitable for exsig 1100");
@@ -31,21 +50,15 @@ bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t
     DEBUG_ASSERT_LE(prob, 1.0, "prob is more than 1");
     const auto isite = src.m_basis.isite(occ);
     const auto ispin = src.m_basis.ispin(occ);
-    /*
-     * fill the working vector with the adjacency of the occupied site
-     */
-    h.m_basis.m_lattice->get_adj_row(isite, m_work_adj_row);
-    /*
-     * when selecting the vacant site, skip the sites which are occupied in the same spin channel as the chosen electron
-     */
-    set_valid_adj_vacant(src, ispin);
-    const auto nvac = m_valid_in_adj_row.size();
+
+    auto& valid_adj = this->valid_adj(adj_row(isite), src, ispin);
+    const auto nvac = valid_adj.size();
     /*
      * if there are no vacants from which to choose, this occupied pick is a dead end
      */
     if (!nvac) return false;
     auto ivalid = rand % nvac;
-    auto vac = src.m_format.flatten({ispin, m_valid_in_adj_row[ivalid]->m_isite});
+    auto vac = src.m_format.flatten({ispin, valid_adj[ivalid]->m_isite});
     DEBUG_ASSERT_FALSE(src.get(vac), "should not have picked an occupied spin orb for the vacant");
     prob /= double(nvac);
     conn.m_ann.set(occ);
@@ -55,4 +68,78 @@ bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t
 
 uint_t exgen::HubbardBase::approx_nconn(uint_t, sys::Particles particles) const {
     return particles.m_frm;
+}
+
+exgen::HubbardPreferDoubleOcc::HubbardPreferDoubleOcc(const FrmHam& h, PRNG& prng, prob_t doub_occ_u_fac) :
+        HubbardBase(h, prng, "doubly occupied site-preferring hubbard hopping"),
+        m_prob_doub_occ(1.0/(1.0+1.0/(doub_occ_u_fac*m_h.as<HubbardFrmHam>()->m_u))){}
+
+prob_t exgen::HubbardPreferDoubleOcc::combined_occ_prob(uint_t nelec, uint_t nelec_doub_occ) const {
+    // prob = prob_uni + prob_pref
+    return (1.0 - m_prob_doub_occ)/nelec + m_prob_doub_occ/nelec_doub_occ;
+}
+
+uint_t exgen::HubbardPreferDoubleOcc::get_occ(uint32_t rand, const field::FrmOnv& src, prob_t& prob) const {
+    /*
+     * total number of electrons
+     */
+    const auto nelec = src.m_decoded.m_simple_occs.get().size();
+    const auto& doub_occs = src.m_decoded.m_doubly_occ_sites.get();
+    /*
+     * if there are no double occupations, then do uniform selection without alteration of prob
+     */
+    if (doub_occs.empty()) return get_occ_uniform(rand, src, prob);
+    /*
+     * number of electrons in doubly occupied sites
+     */
+    const auto nelec_doub_occ = 2*doub_occs.size();
+    /*
+     * it should still be possible to draw any electron
+     */
+    if (m_prng.draw_float() > m_prob_doub_occ) {
+        /*
+         * uniform branch: draw using the uniform strategy
+         */
+        const auto occ = get_occ_uniform(rand, src, prob);
+        const auto isite = src.m_basis.isite(occ);
+        const auto ispin = src.m_basis.ispin(occ);
+        if (src.get({!ispin, isite})) {
+            DEBUG_ASSERT_EQ(src.site_nocc(isite), 2ul, "should have a double occupation");
+            /*
+             * this electron on a doubly-occupied site could have been drawn either by this way (uniform branch)
+             * or by the preferential branch
+             */
+            prob = combined_occ_prob(nelec, nelec_doub_occ);
+        }
+        else {
+            /*
+             * there is only one way to draw this electron in a singly-occupied site, but the probability must
+             * be scaled by the probability that the uniform draw was attempted in the presence of a double
+             * occupation
+             */
+            prob *= 1.0 - m_prob_doub_occ;
+        }
+        return occ;
+    }
+    /*
+     * preferential branch
+     */
+    rand = m_prng.draw_uint(nelec_doub_occ);
+    const size_t ispin = rand%2;
+    const auto isite = doub_occs[rand/2];
+    prob = combined_occ_prob(nelec, nelec_doub_occ);
+    return src.m_basis.ispinorb(ispin, isite);
+}
+
+prob_t exgen::HubbardPreferDoubleOcc::prob_frm(const field::FrmOnv& src, const conn::FrmOnv& conn) const {
+    const auto& doub_occs = src.m_decoded.m_doubly_occ_sites.get();
+    if (doub_occs.empty()) return prob_uniform(src, conn);
+    const auto isite = src.m_basis.isite(conn.m_ann[0]);
+    const auto ispin = src.m_basis.ispin(conn.m_ann[0]);
+    const auto is_doub_occ = src.get({!ispin, isite});
+    if (!is_doub_occ) return prob_uniform(src, conn) * (1-m_prob_doub_occ);
+    const auto nelec = src.m_decoded.m_simple_occs.get().size();
+    const auto nelec_doub_occ = 2*doub_occs.size();
+    const auto nvac = this->valid_adj(adj_row(isite), src, ispin).size();
+    return combined_occ_prob(nelec, nelec_doub_occ)/double(nvac);
 }

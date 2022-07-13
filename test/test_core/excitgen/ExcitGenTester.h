@@ -107,7 +107,6 @@ namespace excit_gen_tester {
                     continue;
                 }
 
-                std::cout << conn << std::endl;
                 if (prob < 0.0 || prob > 1.0) {
                     return InvalidDrawProb;
                 }

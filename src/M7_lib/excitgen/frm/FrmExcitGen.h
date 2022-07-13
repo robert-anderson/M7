@@ -33,9 +33,16 @@ struct FrmExcitGen : ExcitGen {
 };
 
 struct FrmLatticeExcitGen : FrmExcitGen {
-protected:
+private:
     mutable lattice::adj_row_t m_work_adj_row;
-    mutable v_t<const lattice::AdjElement*> m_valid_in_adj_row;
+    typedef v_t<const lattice::AdjElement*> valid_adj_t;
+    mutable valid_adj_t m_work_valid_adj;
+protected:
+
+    const lattice::adj_row_t& adj_row(uint_t isite) const {
+        m_h.m_basis.m_lattice->get_adj_row(isite, m_work_adj_row);
+        return m_work_adj_row;
+    }
 
     /**
      * set the vector of pointers to "valid" elements of the adjacent row. the validity criterion is determined by the
@@ -44,14 +51,17 @@ protected:
      *  functor which returns true if the given site is to be included in the list of valid elements of m_work_adj_row
      * @param is_valid_fn
      *  instance of the functor
+     * @return
+     *  const ref to filled vector of pointers to valid adjacent site indices
      */
     template<typename is_valid_fn_t>
-    void set_valid_adj(const is_valid_fn_t& is_valid_fn) const {
+    const valid_adj_t& valid_adj(const lattice::adj_row_t& adj_row, const is_valid_fn_t& is_valid_fn) const {
         functor::assert_prototype<bool(uint_t)>(is_valid_fn);
-        m_valid_in_adj_row.clear();
-        for (const auto& adj : m_work_adj_row) {
-            if (is_valid_fn(adj.m_isite)) m_valid_in_adj_row.push_back(&adj);
+        m_work_valid_adj.clear();
+        for (const auto& adj : adj_row) {
+            if (is_valid_fn(adj.m_isite)) m_work_valid_adj.push_back(&adj);
         }
+        return m_work_valid_adj;
     }
     /**
      * convenient wrapper for the above general method, which includes those elements of m_work_adj_row which represent
@@ -60,8 +70,10 @@ protected:
      *  fermion ONV
      * @param ispin
      *  spin channel in which to look for occupied spin orbitals
+     * @return
+     *  const ref to filled vector of pointers to valid adjacent site indices
      */
-    void set_valid_adj_vacant(const field::FrmOnv& src, uint_t ispin) const;
+    const valid_adj_t& valid_adj(const lattice::adj_row_t& adj_row, const field::FrmOnv& src, uint_t ispin) const;
 
 
 public:
@@ -70,7 +82,7 @@ public:
         REQUIRE_TRUE(m_h.m_basis.m_lattice.get(), "Lattice excitation generator requires lattice definition in basis");
         const auto nadj_max = m_h.m_basis.m_lattice->m_nadj_max;
         m_work_adj_row.reserve(nadj_max);
-        m_valid_in_adj_row.reserve(nadj_max);
+        m_work_valid_adj.reserve(nadj_max);
     }
 };
 

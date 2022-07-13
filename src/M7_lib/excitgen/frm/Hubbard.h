@@ -19,29 +19,9 @@ namespace exgen {
         virtual ~HubbardBase() {}
 
     protected:
-        uint_t get_occ_uniform(uint32_t rand, const field::FrmOnv &src, prob_t &prob) const {
-            const auto &occs = src.m_decoded.m_simple_occs.get();
-            const auto nconn_lcm = m_h.m_basis.m_lattice->m_lcm_le_nadj_max;
-            const auto nelec = occs.size();
-            prob = 1/double(nelec);
-            return occs[rand / nconn_lcm];
-        }
+        uint_t get_occ_uniform(uint32_t rand, const field::FrmOnv &src, prob_t &prob) const;
 
-        prob_t prob_uniform(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
-            const auto &occs = src.m_decoded.m_simple_occs.get();
-            const auto nelec = occs.size();
-            const auto isite = src.m_basis.isite(conn.m_ann[0]);
-            const auto ispin = src.m_basis.ispin(conn.m_ann[0]);
-            /*
-             * fill the working vector with the adjacency of the occupied site
-             */
-            m_h.m_basis.m_lattice->get_adj_row(isite, m_work_adj_row);
-            /*
-             * when selecting the vacant site, skip the sites which are occupied in the same spin channel as the chosen electron
-             */
-            set_valid_adj_vacant(src, ispin);
-            return 1.0/(m_valid_in_adj_row.size()*nelec);
-        }
+        prob_t prob_uniform(const field::FrmOnv &src, const conn::FrmOnv &conn) const;
 
         virtual uint_t get_occ(uint32_t rand, const field::FrmOnv &src, prob_t &prob) const = 0;
 
@@ -80,86 +60,15 @@ namespace exgen {
          */
         const prob_t m_prob_doub_occ;
 
-        HubbardPreferDoubleOcc(const FrmHam &h, PRNG &prng, prob_t doub_occ_u_fac):
-            HubbardBase(h, prng, "doubly occupied site-preferring hubbard hopping"),
-            m_prob_doub_occ(1.0/(1.0+1.0/(doub_occ_u_fac*m_h.as<HubbardFrmHam>()->m_u))){}
+        HubbardPreferDoubleOcc(const FrmHam &h, PRNG &prng, prob_t doub_occ_u_fac);
     protected:
 
-        prob_t combined_occ_prob(uint_t nelec, uint_t nelec_doub_occ) const {
-            // prob = prob_uni + prob_pref
-            return (1.0 - m_prob_doub_occ)/nelec + m_prob_doub_occ/nelec_doub_occ;
-        }
+        prob_t combined_occ_prob(uint_t nelec, uint_t nelec_doub_occ) const;
 
-        uint_t get_occ(uint32_t rand, const field::FrmOnv &src, prob_t &prob) const override {
-            /*
-             * total number of electrons
-             */
-            const auto nelec = src.m_decoded.m_simple_occs.get().size();
-            const auto& doub_occs = src.m_decoded.m_doubly_occ_sites.get();
-            /*
-             * if there are no double occupations, then do uniform selection without alteration of prob
-             */
-            if (doub_occs.empty()) return get_occ_uniform(rand, src, prob);
-            /*
-             * number of electrons in doubly occupied sites
-             */
-            const auto nelec_doub_occ = 2*doub_occs.size();
-            /*
-             * it should still be possible to draw any electron
-             */
-            if (m_prng.draw_float() > m_prob_doub_occ) {
-                /*
-                 * uniform branch: draw using the uniform strategy
-                 */
-                const auto occ = get_occ_uniform(rand, src, prob);
-                const auto isite = src.m_basis.isite(occ);
-                const auto ispin = src.m_basis.ispin(occ);
-                if (src.get({!ispin, isite})) {
-                    DEBUG_ASSERT_EQ(src.site_nocc(isite), 2ul, "should have a double occupation");
-                    /*
-                     * this electron on a doubly-occupied site could have been drawn either by this way (uniform branch)
-                     * or by the preferential branch
-                     */
-                    prob = combined_occ_prob(nelec, nelec_doub_occ);
-                }
-                else {
-                    /*
-                     * there is only one way to draw this electron in a singly-occupied site, but the probability must
-                     * be scaled by the probability that the uniform draw was attempted in the presence of a double
-                     * occupation
-                     */
-                    prob *= 1.0 - m_prob_doub_occ;
-                }
-                return occ;
-            }
-            /*
-             * preferential branch
-             */
-            rand = m_prng.draw_uint(nelec_doub_occ);
-            const size_t ispin = rand%2;
-            const auto isite = doub_occs[rand/2];
-            prob = combined_occ_prob(nelec, nelec_doub_occ);
-            return src.m_basis.ispinorb(ispin, isite);
-        }
+        uint_t get_occ(uint32_t rand, const field::FrmOnv &src, prob_t &prob) const override;
 
     public:
-        prob_t prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const override {
-            const auto& doub_occs = src.m_decoded.m_doubly_occ_sites.get();
-            if (doub_occs.empty()) return prob_uniform(src, conn);
-            const auto occ_prob = combined_occ_prob(src.m_decoded.m_simple_occs.get().size(), 2*doub_occs.size());
-            /*
-             * fill the working vector with the adjacency of the occupied site
-             */
-            const auto isite = src.m_basis.isite(conn.m_ann[0]);
-            const auto ispin = src.m_basis.ispin(conn.m_ann[0]);
-            m_h.m_basis.m_lattice->get_adj_row(isite, m_work_adj_row);
-            /*
-             * when selecting the vacant site, skip the sites which are occupied in the same spin channel as the chosen electron
-             */
-            set_valid_adj_vacant(src, ispin);
-            const auto nvac = m_valid_in_adj_row.size();
-            return occ_prob/nvac;
-        }
+        prob_t prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const override;
     };
 }
 
