@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "M7_lib/basis/Lattice.h"
 
+#if 0
 TEST(Lattice, OrthoObc1d) {
     auto lattice = lattice::make("ortho", {6}, {0});
     v_t<lattice::adj_row_t> chk_rows = {
@@ -100,3 +101,4 @@ TEST(Lattice, OrthoPbc2d) {
         ASSERT_EQ(adj_row, chk_rows[i]);
     }
 }
+#endif

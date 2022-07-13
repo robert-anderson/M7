@@ -23,7 +23,7 @@ prob_t exgen::HubbardBase::prob_uniform(const field::FrmOnv& src, const conn::Fr
     const auto isite = src.m_basis.isite(conn.m_ann[0]);
     const auto ispin = src.m_basis.ispin(conn.m_ann[0]);
 
-    auto& valid_adj = this->valid_adj(adj_row(isite), src, ispin);
+    auto& valid_adj = this->valid_adj(isite, src, ispin);
     return 1.0/double(valid_adj.size()*nelec);
 }
 
@@ -51,14 +51,14 @@ bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t
     const auto isite = src.m_basis.isite(occ);
     const auto ispin = src.m_basis.ispin(occ);
 
-    auto& valid_adj = this->valid_adj(adj_row(isite), src, ispin);
+    auto& valid_adj = this->valid_adj(isite, src, ispin);
     const auto nvac = valid_adj.size();
     /*
      * if there are no vacants from which to choose, this occupied pick is a dead end
      */
     if (!nvac) return false;
     auto ivalid = rand % nvac;
-    auto vac = src.m_format.flatten({ispin, valid_adj[ivalid]->m_isite});
+    auto vac = src.m_format.flatten({ispin, valid_adj[ivalid]->first});
     DEBUG_ASSERT_FALSE(src.get(vac), "should not have picked an occupied spin orb for the vacant");
     prob /= double(nvac);
     conn.m_ann.set(occ);
@@ -140,6 +140,6 @@ prob_t exgen::HubbardPreferDoubleOcc::prob_frm(const field::FrmOnv& src, const c
     if (!is_doub_occ) return prob_uniform(src, conn) * (1-m_prob_doub_occ);
     const auto nelec = src.m_decoded.m_simple_occs.get().size();
     const auto nelec_doub_occ = 2*doub_occs.size();
-    const auto nvac = this->valid_adj(adj_row(isite), src, ispin).size();
+    const auto nvac = this->valid_adj(isite, src, ispin).size();
     return combined_occ_prob(nelec, nelec_doub_occ)/double(nvac);
 }

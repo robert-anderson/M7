@@ -16,7 +16,7 @@
 namespace sparse {
 
     /**
-     * number of rows is constant, but the vectors storing the contents of each can be resized. Ideal for building up
+     * number of rows is variable, and the vectors storing the contents of each can be resized. Ideal for building up
      * sparse structures from an empty state
      */
     namespace dynamic {
@@ -184,12 +184,14 @@ namespace sparse {
     namespace fixed {
 
         class Base {
+
             static uintv_t make_counts(const dynamic::Network& src);
 
             static uintv_t make_displs(const uintv_t& counts);
 
         public:
             const uint_t m_nrow;
+            const uint_t m_max_nentry;
         protected:
             const uintv_t m_displs;
             const uint_t m_nentry;
@@ -217,15 +219,17 @@ namespace sparse {
 
         template<typename T>
         class Matrix : public Base {
+        public:
             typedef std::pair<uint_t, T> pair_t;
             typedef v_t<pair_t> entries_t;
+        private:
             const entries_t m_entries;
 
             entries_t make_entries(const dynamic::Matrix<T>& src) {
                 v_t<pair_t> out;
                 out.reserve(src.nrow());
                 for (uint_t irow=0ul; irow<src.nrow(); ++irow) {
-                    const auto row = convert::zip(src[irow]);
+                    const auto row = convert::zip<uint_t, int>(src[irow]);
                     out.insert(out.cend(), row.cbegin(), row.cend());
                 }
                 return out;
@@ -254,6 +258,13 @@ namespace sparse {
 
             uint_t nentry(uint_t irow) const {
                 return std::distance(cbegin(irow), cend(irow));
+            }
+
+            const pair_t& get(uint_t irow, uint_t ientry) const {
+                DEBUG_ASSERT_LT(ientry, nentry(irow), "entry index OOB");
+                auto it = cbegin(irow);
+                std::advance(it, ientry);
+                return *it;
             }
         };
     }
@@ -289,7 +300,7 @@ namespace sparse {
             Matrix(const fixed::Matrix<T>& src) {
                 for (auto irow=0ul; irow<src.m_nrow; ++irow)
                     for (auto it = src.cbegin(irow); it != src.cend(irow); ++it)
-                        m_conns.insert({irow, it->first}, it->second);
+                        m_conns.insert({{irow, it->first}, it->second});
             }
 
             /**

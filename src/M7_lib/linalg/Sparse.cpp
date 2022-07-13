@@ -137,12 +137,15 @@ uintv_t sparse::fixed::Base::make_displs(const uintv_t &counts) {
     return displs;
 }
 
-sparse::fixed::Base::Base(const uintv_t &counts) :  m_nrow(counts.size()), m_displs(make_displs(counts)),
-                                                    m_nentry(m_displs.back()) {}
+sparse::fixed::Base::Base(const uintv_t &counts) :
+    m_nrow(counts.size()), m_max_nentry(counts.empty() ? 0ul : *std::max(counts.cbegin(), counts.cend())),
+    m_displs(make_displs(counts)), m_nentry(m_displs.back()) {}
 
 sparse::fixed::Base::Base(const sparse::dynamic::Network &src) : Base(make_counts(src)){
     DEBUG_ASSERT_EQ(m_nentry, src.nentry(),
                     "number of entries calculated from offsets should match that counted by the dynamic::Network instance");
+    DEBUG_ASSERT_EQ(m_max_nentry, src.max_column_index()+1,
+                    "max number of entries in row calculated from offsets should match dynamic::Network::m_icol_max+1");
 }
 
 uintv_t sparse::fixed::Network::make_entries(const sparse::dynamic::Network &src) {
@@ -164,12 +167,12 @@ sparse::fixed::Network::Network(const sparse::dynamic::Network &src) : Base(src)
 }
 
 uintv_t::const_iterator sparse::fixed::Network::cbegin(uint_t irow) const {
-    DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
+    if (irow>=m_nrow) return m_entries.cend();
     return citer(irow);
 }
 
 uintv_t::const_iterator sparse::fixed::Network::cend(uint_t irow) const {
-    DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
+    if (irow>=m_nrow) return m_entries.cend();
     return citer(irow+1);
 }
 

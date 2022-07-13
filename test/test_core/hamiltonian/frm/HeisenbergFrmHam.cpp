@@ -30,7 +30,7 @@ namespace heisenberg_test {
 TEST(HeisenbergFrmHam, LocalExchangeOnly){
     auto lattice = lattice::make("ortho", {6}, {1});
     for (uint_t isite=0ul; isite < lattice->m_nsite; ++isite) {
-        ASSERT_EQ(lattice->m_nadjs[isite], 2);
+        ASSERT_EQ(lattice->m_sparse_adj.nentry(isite), 2);
     }
     HeisenbergFrmHam ham(1, lattice);
     buffered::FrmOnv src(ham.m_basis);
@@ -58,7 +58,7 @@ TEST(HeisenbergFrmHam, LocalExchangeOnly){
 TEST(HeisenbergFrmHam, Elements){
     auto lattice = lattice::make("ortho", {6}, {1});
     for (uint_t isite=0ul; isite < lattice->m_nsite; ++isite) {
-        ASSERT_EQ(lattice->m_nadjs[isite], 2);
+        ASSERT_EQ(lattice->m_sparse_adj.nentry(isite), 2);
     }
     HeisenbergFrmHam ham(1, lattice);
     buffered::FrmOnv src(ham.m_basis);

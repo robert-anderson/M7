@@ -174,15 +174,15 @@ namespace conn_foreach {
                 const auto lattice = src.m_basis.m_lattice;
                 REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
                 const auto &occs = src.m_decoded.m_simple_occs.get();
-                lattice::adj_row_t adj_row;
                 for (const auto &occ: occs) {
                     conn.m_ann.clear();
                     conn.m_ann.add(occ);
                     auto ispin_occ = src.m_basis.ispin(occ);
                     auto isite_occ = src.m_basis.isite(occ);
-                    lattice->get_adj_row(isite_occ, adj_row);
-                    for (const auto &adj_elem: adj_row) {
-                        auto vac = src.m_basis.ispinorb(ispin_occ, adj_elem.m_isite);
+
+                    const auto& adj=lattice->m_sparse_adj;
+                    for (auto it=adj.cbegin(isite_occ); it!=adj.cend(isite_occ); ++it){
+                        auto vac = src.m_basis.ispinorb(ispin_occ, it->first);
                         if (src.get(vac)) continue;
                         conn.m_cre.clear();
                         conn.m_cre.add(vac);
@@ -208,16 +208,16 @@ namespace conn_foreach {
                 const auto lattice = src.m_basis.m_lattice;
                 REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
                 const auto &occs = src.m_decoded.m_simple_occs.get();
-                lattice::adj_row_t adj_row;
+
+                const auto& adj=lattice->m_sparse_adj;
                 for (const auto &occ: occs) {
                     auto ispin_occ = src.m_basis.ispin(occ);
                     if (ispin_occ) return; // all alpha bits have been dealt with
                     auto isite_occ = src.m_basis.isite(occ);
                     // cannot exchange if the site is doubly occupied:
                     if (src.get({!ispin_occ, isite_occ})) continue;
-                    lattice->get_adj_row(isite_occ, adj_row);
-                    for (const auto &adj_elem: adj_row) {
-                        const auto i = adj_elem.m_isite;
+                    for (auto it=adj.cbegin(isite_occ); it!=adj.cend(isite_occ); ++it){
+                        const auto i = it->first;
                         if (src.get({ispin_occ, i})) continue;
                         if (!src.get({!ispin_occ, i})) continue;
                         conn.m_ann.set({0, isite_occ}, {1, i});

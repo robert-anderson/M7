@@ -22,23 +22,40 @@
  */
 namespace lattice {
 
-    struct AdjElement {
-        uint_t m_isite;
-        int m_phase;
-        bool operator==(const AdjElement& other) const;
+    struct Topology {
+        const uint_t m_nsite;
+        const str_t m_info;
+        Topology(uint_t nsite, str_t info): m_nsite(nsite), m_info(std::move(info)){}
+        typedef sparse::dynamic::Matrix<int> adj_t;
+        virtual adj_t make_adj() const = 0;
+        virtual ~Topology() = default;
     };
-    typedef v_t<AdjElement> adj_row_t;
 
-    struct Base {
+    struct Lattice {
+        /**
+         * number of sites in the basis
+         */
         const uint_t m_nsite;
         /**
-         * number of adjacent sites for each site
+         * information string
          */
-        const uintv_t m_nadjs;
+         const str_t m_info;
+        /**
+         * sparse map of adjacent sites (access to connected sites and phases given a site index)
+         */
+        typedef sparse::fixed::Matrix<int> sparse_adj_t;
+        const sparse_adj_t m_sparse_adj;
+        typedef sparse_adj_t::pair_t adj_t;
+
         /**
          * maximum number of adjacent sites for any one site
          */
         const uint_t m_nadj_max;
+        /**
+         * inverse sparse map (access to adjacency + phase given two site indices)
+         */
+        typedef sparse::inverse::Matrix<int> sparse_inv_t;
+        const sparse_inv_t m_sparse_inv;
         /**
          * to help with excitation generation. The number of connections possible from a site i cannot be known before i is
          * selected, and it is efficient to select i and a connected j in a single random number draw. If the random number
@@ -52,105 +69,50 @@ namespace lattice {
          */
         const uint_t m_lcm_le_nadj_max;
 
-        Base(const uintv_t& nadjs);
-        virtual ~Base() = default;
-        virtual int phase(uint_t isite, uint_t jsite) const = 0;
-        virtual void get_adj_row(uint_t isite, adj_row_t &row) const = 0;
-        virtual str_t info() const = 0;
+    private:
+        Lattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str);
 
-        template<typename T>
-        const T* as() const {
-            return dynamic_cast<const T*>(this);
-        }
+    public:
+        explicit Lattice(const Topology& topo);
 
         operator bool() const {
             return m_nsite;
         }
-
-    private:
-        uint_t make_nadj_max();
     };
 
-    struct OrthoTopology {
+    struct OrthoTopology : Topology {
         const NdEnumerationD m_inds;
         const v_t<int> m_bcs;
-        const str_t m_info_string;
 
         OrthoTopology(const uintv_t &shape, const v_t<int> &bcs);
 
     private:
-        int one_dim_phase(uint_t iind, uint_t jind, uint_t idim) const;
-
-    public:
         uint_t isite_adj(const uintv_t &inds, uint_t idim, uint_t value) const;
+    public:
 
-        uint_t nsite() const;
-
-        int phase(uint_t isite, uint_t jsite) const;
-
-        void get_adj_row(uint_t isite, lattice::adj_row_t &row) const;
+        adj_t make_adj() const override;
     };
 
     /**
      * use when there is no lattice structure
      */
-    struct NullTopology {
-        const str_t m_info_string = "null";
+    struct NullTopology : Topology {
 
-        uint_t isite_adj(const uintv_t &inds, uint_t idim, uint_t value) const;
+        NullTopology() : Topology(0ul, "null") {}
 
-        uint_t nsite() const;
-
-        int phase(uint_t isite, uint_t jsite) const;
-
-        void get_adj_row(uint_t isite, lattice::adj_row_t &row) const;
-    };
-
-    template<typename topo_t>
-    struct Lattice : Base {
-        /**
-         * instance of the topology implementation
-         */
-        const topo_t m_topo;
-    protected:
-        static uintv_t make_nadjs(const topo_t& topo) {
-            const auto nsite = topo.nsite();
-            uintv_t out;
-            out.reserve(nsite);
-            adj_row_t row;
-            for (uint_t isite=0; isite < nsite; ++isite) {
-                topo.get_adj_row(isite, row);
-                out.push_back(row.size());
-            }
-            return out;
-        }
-    public:
-
-        Lattice(const topo_t& topo): Base(make_nadjs(topo)), m_topo(topo){}
-
-        int phase(uint_t isite, uint_t jsite) const override {
-            return m_topo.phase(isite, jsite);
-        }
-
-        void get_adj_row(uint_t isite, adj_row_t &row) const override {
-            return m_topo.get_adj_row(isite, row);
-        }
-
-        str_t info() const override {
-            return m_topo.m_info_string;
+        adj_t make_adj() const override {
+            return {};
         }
     };
 
-    typedef Lattice<OrthoTopology> Ortho;
-    typedef Lattice<NullTopology> Null;
 
     /**
      * @return
      *  shared pointer to a null lattice
      */
-    std::shared_ptr<Base> make();
-    std::shared_ptr<Base> make(str_t topo, uintv_t site_shape, v_t<int> bcs);
-    std::shared_ptr<Base> make(const conf::LatticeModel& opts);
+    std::shared_ptr<Lattice> make();
+    std::shared_ptr<Lattice> make(str_t topo, uintv_t site_shape, v_t<int> bcs);
+    std::shared_ptr<Lattice> make(const conf::LatticeModel& opts);
 }
 
 #endif //M7_LATTICE_H

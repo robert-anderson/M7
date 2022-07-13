@@ -177,7 +177,7 @@ namespace sys {
             /**
              * set to non-null if the basis has lattice structure
              */
-            const std::shared_ptr<lattice::Base> m_lattice;
+            const std::shared_ptr<lattice::Lattice> m_lattice;
 
         private:
             using Size::operator unsigned long;
@@ -188,9 +188,9 @@ namespace sys {
                 return m_nsite;
             }
 
-            Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, std::shared_ptr<lattice::Base> lattice);
+            Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, std::shared_ptr<lattice::Lattice> lattice);
 
-            Basis(std::shared_ptr<lattice::Base> lattice);
+            Basis(std::shared_ptr<lattice::Lattice> lattice);
 
             Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved);
             /*

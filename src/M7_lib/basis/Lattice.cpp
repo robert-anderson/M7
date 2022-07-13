@@ -5,24 +5,23 @@
 #include "Lattice.h"
 #include "M7_lib/util/SmartPtr.h"
 
-bool lattice::AdjElement::operator==(const lattice::AdjElement &other) const {
-    return m_isite==other.m_isite && m_phase==other.m_phase;
+lattice::Lattice::Lattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str) :
+        m_nsite(nsite), m_info(std::move(info_str)), m_sparse_adj(adj), m_nadj_max(m_sparse_adj.m_max_nentry),
+        m_sparse_inv(m_sparse_adj), m_lcm_le_nadj_max(integer::lcm_le(m_nadj_max)){
+    REQUIRE_LE(adj.nrow(), m_nsite, "highest site index in adjacency map is OOB");
+    for (uint_t isite=0ul; isite<m_nsite; ++isite) {
+        if (isite >= adj.nrow() || !adj.nentry(isite))
+            log::warn("lattice site {} has no adjacent sites!", isite);
+    }
 }
 
-lattice::Base::Base(const uintv_t &nadjs) :
-        m_nsite(nadjs.size()), m_nadjs(nadjs), m_nadj_max(make_nadj_max()),
-        m_lcm_le_nadj_max(integer::lcm_le(m_nadj_max)){}
-        
-uint_t lattice::Base::make_nadj_max() {
-    if (!*this) return 0ul;
-    REQUIRE_FALSE(m_nadjs.empty(), "number of adjacent sites vector is not set");
-    return *std::max_element(m_nadjs.cbegin(), m_nadjs.cend());
-}
+lattice::Lattice::Lattice(const lattice::Topology &topo) : Lattice(topo.make_adj(), topo.m_nsite, topo.m_info){}
 
 lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs) :
-    m_inds(shape), m_bcs(bcs),
-    m_info_string(log::format("orthogonal lattice with shape {} and boundary conds {}",
-                              convert::to_string(m_inds.m_shape), convert::to_string(m_bcs))) {
+        Topology(NdFormatD(shape).m_nelement,
+                 log::format("orthogonal lattice with shape {} and boundary conds {}",
+                             convert::to_string(m_inds.m_shape), convert::to_string(m_bcs))),
+    m_inds(shape), m_bcs(bcs) {
     for (uint_t idim=0ul; idim<m_inds.m_nind; ++idim){
         REQUIRE_TRUE(m_inds.m_shape[idim], "every extent in the site shape must be non-zero");
         if (m_inds.m_shape[idim] == 1ul)
@@ -30,15 +29,6 @@ lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs)
         if (m_inds.m_shape[idim] <= 2ul)
             REQUIRE_FALSE(m_bcs[idim], "(anti-)periodic boundary conditions are not compatible with extents <= 2");
     }
-}
-
-int lattice::OrthoTopology::one_dim_phase(uint_t iind, uint_t jind, uint_t idim) const {
-    if ((iind + 1 == jind) || (iind == jind + 1)) return 1;
-    auto bc = m_bcs[idim];
-    if (!bc) return 0;
-    auto max_ind = m_inds.m_shape[idim] - 1;
-    if (((iind == 0) && (jind == max_ind)) || ((jind == 0) && (iind == max_ind))) return bc;
-    return 0;
 }
 
 uint_t lattice::OrthoTopology::isite_adj(const uintv_t &inds, uint_t idim, uint_t value) const {
@@ -51,80 +41,47 @@ uint_t lattice::OrthoTopology::isite_adj(const uintv_t &inds, uint_t idim, uint_
     return i;
 }
 
-uint_t lattice::OrthoTopology::nsite() const {
-    return m_inds.m_nelement;
-}
-
-int lattice::OrthoTopology::phase(uint_t isite, uint_t jsite) const {
-    const auto &iinds = m_inds[isite];
-    const auto &jinds = m_inds[jsite];
-    int res = 0;
-    const auto ndim = m_inds.m_nind;
-    for (uint_t idim = 0ul; idim < ndim; ++idim) {
-        auto adj = one_dim_phase(iinds[idim], jinds[idim], idim);
-        // only return non-zero if adjacent in a single dimension
-        if (adj) {
-            if (res) return 0;
-            else res = adj;
+lattice::Topology::adj_t lattice::OrthoTopology::make_adj() const {
+    adj_t adj;
+    adj.resize(m_nsite);
+    for (uint_t isite=0ul; isite<m_inds.m_nelement; ++isite) {
+        const auto &iinds = m_inds[isite];
+        const auto ndim = m_inds.m_nind;
+        for (uint_t idim = 0ul; idim < ndim; ++idim) {
+            const auto ind = iinds[idim];
+            const auto max_ind = m_inds.m_shape[idim] - 1;
+            const auto bc = m_bcs[idim];
+            if (!max_ind) continue;
+            if (max_ind == 1ul) {
+                adj.insert(isite, isite_adj(iinds, idim, !ind), 1);
+                continue;
+            }
+            if (ind == 0) {
+                if (bc) adj.insert(isite, isite_adj(iinds, idim, max_ind), bc);
+                adj.insert(isite, isite_adj(iinds, idim, 1ul), 1);
+            } else if (ind == max_ind) {
+                adj.insert(isite, isite_adj(iinds, idim, max_ind - 1), 1);
+                if (bc) adj.insert(isite, isite_adj(iinds, idim, 0ul), bc);
+            } else {
+                adj.insert(isite, isite_adj(iinds, idim, ind - 1), 1);
+                adj.insert(isite, isite_adj(iinds, idim, ind + 1), 1);
+            }
         }
     }
-    return res;
+    return adj;
 }
 
-void lattice::OrthoTopology::get_adj_row(uint_t isite, lattice::adj_row_t &row) const {
-    row.clear();
-    const auto &iinds = m_inds[isite];
-    const auto ndim = m_inds.m_nind;
-    for (uint_t idim = 0ul; idim < ndim; ++idim) {
-        const auto ind = iinds[idim];
-        const auto max_ind = m_inds.m_shape[idim] - 1;
-        const auto bc = m_bcs[idim];
-        if (!max_ind) continue;
-        if (max_ind == 1ul) {
-            row.push_back({isite_adj(iinds, idim, !ind), 1});
-            continue;
-        }
-        if (ind == 0) {
-            if (bc) row.push_back({isite_adj(iinds, idim, max_ind), bc});
-            row.push_back({isite_adj(iinds, idim, 1ul), 1});
-        }
-        else if (ind == max_ind) {
-            row.push_back({isite_adj(iinds, idim, max_ind - 1), 1});
-            if (bc) row.push_back({isite_adj(iinds, idim, 0ul), bc});
-        }
-        else {
-            row.push_back({isite_adj(iinds, idim, ind - 1), 1});
-            row.push_back({isite_adj(iinds, idim, ind + 1), 1});
-        }
-    }
+
+std::shared_ptr<lattice::Lattice> lattice::make() {
+    return smart_ptr::make_shared<Lattice>(NullTopology());
 }
 
-uint_t lattice::NullTopology::isite_adj(const uintv_t &/*inds*/, uint_t /*idim*/, uint_t /*value*/) const {
-    return ~0ul;
-}
-
-uint_t lattice::NullTopology::nsite() const {
-    return 0ul;
-}
-
-int lattice::NullTopology::phase(uint_t /*isite*/, uint_t /*jsite*/) const {
-    return 0;
-}
-
-void lattice::NullTopology::get_adj_row(uint_t /*isite*/, lattice::adj_row_t &row) const {
-    row.clear();
-}
-
-std::shared_ptr<lattice::Base> lattice::make() {
-    return smart_ptr::make_poly_shared<Base, Null>(NullTopology());
-}
-
-std::shared_ptr<lattice::Base> lattice::make(str_t topo, uintv_t site_shape, v_t<int> bcs) {
+std::shared_ptr<lattice::Lattice> lattice::make(str_t topo, uintv_t site_shape, v_t<int> bcs) {
     if (topo == "ortho" || topo == "orthogonal")
-        return smart_ptr::make_poly_shared<Base, Ortho>(OrthoTopology(site_shape, bcs));
+        return smart_ptr::make_shared<Lattice>(OrthoTopology(site_shape, bcs));
     return make();
 }
 
-std::shared_ptr<lattice::Base> lattice::make(const conf::LatticeModel &opts) {
+std::shared_ptr<lattice::Lattice> lattice::make(const conf::LatticeModel &opts) {
     return make(opts.m_topology, opts.m_site_shape, opts.m_boundary_conds);
 }

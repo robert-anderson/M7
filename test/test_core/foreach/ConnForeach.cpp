@@ -157,20 +157,20 @@ TEST(ConnForeach, FrmHubbardEx1100) {
     const uint_t nrow = 3, ncol = 4;
     const sys::frm::Basis basis(lattice::make("ortho", {nrow, ncol}, {1, 0}));
     // horizontal neighbors
-    ASSERT_TRUE(basis.m_lattice->phase(1, 2));
-    ASSERT_TRUE(basis.m_lattice->phase(2, 1));
+    ASSERT_TRUE(basis.m_lattice->m_sparse_inv.lookup(1, 2).second);
+    ASSERT_TRUE(basis.m_lattice->m_sparse_inv.lookup(2, 1).second);
     // vertical neighbors
-    ASSERT_TRUE(basis.m_lattice->phase(1, 5));
-    ASSERT_TRUE(basis.m_lattice->phase(5, 1));
+    ASSERT_TRUE(basis.m_lattice->m_sparse_inv.lookup(1, 5).second);
+    ASSERT_TRUE(basis.m_lattice->m_sparse_inv.lookup(5, 1).second);
     // periodic vertical neighbors
-    ASSERT_TRUE(basis.m_lattice->phase(1, 9));
-    ASSERT_TRUE(basis.m_lattice->phase(9, 1));
+    ASSERT_TRUE(basis.m_lattice->m_sparse_inv.lookup(1, 9).second);
+    ASSERT_TRUE(basis.m_lattice->m_sparse_inv.lookup(9, 1).second);
     // horizontal neighbors
-    ASSERT_TRUE(basis.m_lattice->phase(4, 5));
-    ASSERT_TRUE(basis.m_lattice->phase(5, 4));
+    ASSERT_TRUE(basis.m_lattice->m_sparse_inv.lookup(4, 5).second);
+    ASSERT_TRUE(basis.m_lattice->m_sparse_inv.lookup(5, 4).second);
     // NOT periodic horizontal neighbors
-    ASSERT_FALSE(basis.m_lattice->phase(4, 7));
-    ASSERT_FALSE(basis.m_lattice->phase(7, 4));
+    ASSERT_FALSE(basis.m_lattice->m_sparse_inv.lookup(4, 7).second);
+    ASSERT_FALSE(basis.m_lattice->m_sparse_inv.lookup(7, 4).second);
 
     buffered::FrmOnv mbf(basis);
     mbf = {0, 2, 7, 8, 9};

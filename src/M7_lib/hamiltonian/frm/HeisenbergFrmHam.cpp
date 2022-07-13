@@ -5,11 +5,11 @@
 #include "HeisenbergFrmHam.h"
 
 
-HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::Base>& lattice) :
+HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::Lattice>& lattice) :
     SpinModelFrmHam(lattice), m_j(j){
     m_contribs_2200.set_nonzero(exsig::ex_double);
     m_contribs_2200.set_nonzero(0);
-    log::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_basis.m_lattice->info());
+    log::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_basis.m_lattice->m_info);
 }
 
 
@@ -38,7 +38,7 @@ ham_t HeisenbergFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) c
         return 0.0;
     }
     // fermi phase not included here, minus sign is due to product of opposite spins
-    return -m_j * m_basis.m_lattice->phase(asite, bsite) / 2.0;
+    return -m_j * m_basis.m_lattice->m_sparse_inv.lookup(asite, bsite).second / 2.0;
 }
 
 ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv& onv) const {
@@ -52,13 +52,13 @@ ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv& onv) const {
     for (uint_t isite=0ul; isite<m_basis.m_nsite; ++isite){
         DEBUG_ASSERT_EQ(onv.site_nocc(isite), 1ul,
                         "spin system is assumed, must not have unoccupied or doubly occupied sites");
-        m_basis.m_lattice->get_adj_row(isite, m_work_adj_row);
+        const auto& adj = m_basis.m_lattice->m_sparse_adj;
         int sj_tot = 0;
-        for (const auto& elem: m_work_adj_row){
-            auto jsite = elem.m_isite;
+        for (auto it=adj.cbegin(isite); it!=adj.cend(isite); ++it){
+            auto jsite = it->first;
             if (jsite<isite) continue; // don't double count contributions
             int jspin = onv.get({0, jsite}) ? 1: -1;
-            sj_tot+= elem.m_phase*jspin;
+            sj_tot+=it->second*jspin;
         }
         int ispin = onv.get({0, isite}) ? 1: -1;
         si_sj_tot+=sj_tot*ispin;

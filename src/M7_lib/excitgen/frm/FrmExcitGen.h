@@ -34,16 +34,9 @@ struct FrmExcitGen : ExcitGen {
 
 struct FrmLatticeExcitGen : FrmExcitGen {
 private:
-    mutable lattice::adj_row_t m_work_adj_row;
-    typedef v_t<const lattice::AdjElement*> valid_adj_t;
+    typedef v_t<const lattice::Lattice::adj_t*> valid_adj_t;
     mutable valid_adj_t m_work_valid_adj;
 protected:
-
-    const lattice::adj_row_t& adj_row(uint_t isite) const {
-        m_h.m_basis.m_lattice->get_adj_row(isite, m_work_adj_row);
-        return m_work_adj_row;
-    }
-
     /**
      * set the vector of pointers to "valid" elements of the adjacent row. the validity criterion is determined by the
      * logic prescribed in the is_valid_fn functor
@@ -55,11 +48,12 @@ protected:
      *  const ref to filled vector of pointers to valid adjacent site indices
      */
     template<typename is_valid_fn_t>
-    const valid_adj_t& valid_adj(const lattice::adj_row_t& adj_row, const is_valid_fn_t& is_valid_fn) const {
+    const valid_adj_t& valid_adj(uint_t isite, const is_valid_fn_t& is_valid_fn) const {
         functor::assert_prototype<bool(uint_t)>(is_valid_fn);
         m_work_valid_adj.clear();
-        for (const auto& adj : adj_row) {
-            if (is_valid_fn(adj.m_isite)) m_work_valid_adj.push_back(&adj);
+        const auto& adj = m_h.m_basis.m_lattice->m_sparse_adj;
+        for (auto it=adj.cbegin(isite); it!=adj.cend(isite); ++it){
+            if (is_valid_fn(it->first)) m_work_valid_adj.push_back(it.base());
         }
         return m_work_valid_adj;
     }
@@ -73,7 +67,7 @@ protected:
      * @return
      *  const ref to filled vector of pointers to valid adjacent site indices
      */
-    const valid_adj_t& valid_adj(const lattice::adj_row_t& adj_row, const field::FrmOnv& src, uint_t ispin) const;
+    const valid_adj_t& valid_adj(uint_t isite, const field::FrmOnv& src, uint_t ispin) const;
 
 
 public:
@@ -81,7 +75,6 @@ public:
         FrmExcitGen(h, prng, exsigs, description){
         REQUIRE_TRUE(m_h.m_basis.m_lattice.get(), "Lattice excitation generator requires lattice definition in basis");
         const auto nadj_max = m_h.m_basis.m_lattice->m_nadj_max;
-        m_work_adj_row.reserve(nadj_max);
         m_work_valid_adj.reserve(nadj_max);
     }
 };

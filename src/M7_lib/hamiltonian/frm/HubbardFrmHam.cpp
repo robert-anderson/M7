@@ -6,11 +6,11 @@
 #include "M7_lib/excitgen/frm/Hubbard.h"
 
 
-HubbardFrmHam::HubbardFrmHam(ham_t u, const std::shared_ptr<lattice::Base>& lattice) :
+HubbardFrmHam::HubbardFrmHam(ham_t u, const std::shared_ptr<lattice::Lattice>& lattice) :
         FrmHam(lattice), m_u(u){
     m_contribs_1100.set_nonzero(exsig::ex_single);
     m_contribs_2200.set_nonzero(0);
-    log::info("Hubbard Hamiltonian initialized with U={}; {}", m_u, m_basis.m_lattice->info());
+    log::info("Hubbard Hamiltonian initialized with U={}; {}", m_u, m_basis.m_lattice->m_info);
 }
 
 HubbardFrmHam::HubbardFrmHam(opt_pair_t opts) :
@@ -18,7 +18,7 @@ HubbardFrmHam::HubbardFrmHam(opt_pair_t opts) :
 
 ham_t HubbardFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
     // hopping coeff is always -t
-    return -m_basis.m_lattice->phase(a, i);
+    return -m_basis.m_lattice->m_sparse_inv.lookup(a, i).second;
 }
 
 ham_t HubbardFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const {
@@ -37,7 +37,7 @@ ham_t HubbardFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmO
     auto isite = m_basis.isite(conn.m_ann[0]);
     auto jsite = m_basis.isite(conn.m_cre[0]);
     if (m_basis.ispin(conn.m_ann[0])!=m_basis.ispin(conn.m_cre[0])) return 0.0;
-    int t_mat_element = -m_basis.m_lattice->phase(isite, jsite);
+    int t_mat_element = -m_basis.m_lattice->m_sparse_inv.lookup(isite, jsite).second;
     if (!t_mat_element) return 0.0;
     return conn.phase(onv) ? -t_mat_element : t_mat_element;
 }

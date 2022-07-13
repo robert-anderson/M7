@@ -148,14 +148,14 @@ uint_t sys::frm::Size::ncoeff_ind(bool spin_resolved, uint_t nsite) {
 }
 
 sys::frm::Basis::Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved,
-                       std::shared_ptr<lattice::Base> lattice) :
+                       std::shared_ptr<lattice::Lattice> lattice) :
         Size(nsite), m_abgrp_map(std::move(abgrp_map)), m_spin_resolved(spin_resolved), m_lattice(lattice){
     if (*m_lattice) {
         REQUIRE_EQ(m_nsite, m_lattice->m_nsite, "incompatible lattice and site number");
     }
 }
 
-sys::frm::Basis::Basis(std::shared_ptr<lattice::Base> lattice) :
+sys::frm::Basis::Basis(std::shared_ptr<lattice::Lattice> lattice) :
         Basis(lattice->m_nsite, {lattice->m_nsite}, false, lattice){
     REQUIRE_TRUE(*m_lattice, "cannot build a basis from a null lattice");
 }
@@ -176,7 +176,7 @@ strmap_t sys::frm::Basis::info() const {
     map.insert({"nsite", convert::to_string(m_nsite)});
     map.insert({"point group irreps", convert::to_string(m_abgrp_map.m_site_irreps)});
     map.insert({"spin resolved", convert::to_string(m_spin_resolved)});
-    map.insert({"lattice", convert::to_string(m_lattice->info())});
+    map.insert({"lattice", convert::to_string(m_lattice->m_info)});
     return map;
 }
 

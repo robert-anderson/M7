@@ -12,7 +12,6 @@ TEST(HubbardUniform, ObcFromNeel1D) {
     HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {6}, {0}));
     Hamiltonian h(&frm_ham);
     exgen::HubbardUniform excit_gen(h.m_frm, prng);
-    ASSERT_FALSE(frm_ham.m_basis.m_lattice->as<lattice::Ortho>()->m_topo.m_bcs[0]);
 
     conn_foreach::frm::Hubbard conn_iter;
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);

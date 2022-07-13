@@ -23,10 +23,9 @@ bool exgen::HeisenbergExchange::draw_frm(uint_t exsig, const field::FrmOnv& src,
     const auto rand = m_prng.draw_uint(m_h.m_basis.m_nsite * nconn_lcm);
     const auto isite = m_h.m_basis.isite(rand / nconn_lcm);
     const auto ispin = src.get({1, isite});
-    auto& adj_row = this->adj_row(isite);
-    const auto nvac = adj_row.size();
-    const auto adj_elem = adj_row[rand % nvac];
-    const auto jsite = adj_elem.m_isite;
+    const auto nvac = lattice->m_sparse_adj.nentry(isite);
+    const auto adj_elem = lattice->m_sparse_adj.get(isite, rand % nvac);
+    const auto jsite = adj_elem.first;
     const auto jspin = src.get({1, jsite});
     if (jspin == ispin) return false; // no exchange
     DEBUG_ASSERT_NE(src.get({0, isite}), src.get({0, jsite}), "sites do not have opposite spins");
@@ -46,8 +45,10 @@ prob_t exgen::HeisenbergExchange::prob_frm(const field::FrmOnv& src, const conn:
     const auto& basis = src.m_basis;
     prob_t prob = 0.0;
     // either site could have been the one from which the other was generated, so sum the probs
-    prob += 1.0/double(this->adj_row(basis.isite(conn.m_ann[0])).size());
-    prob += 1.0/double(this->adj_row(basis.isite(conn.m_ann[1])).size());
+    const auto isite = basis.isite(conn.m_ann[0]);
+    const auto jsite = basis.isite(conn.m_ann[1]);
+    prob += 1.0/double(basis.m_lattice->m_sparse_adj.nentry(isite));
+    prob += 1.0/double(basis.m_lattice->m_sparse_adj.nentry(jsite));
     return prob / basis.m_nsite;
 }
 
