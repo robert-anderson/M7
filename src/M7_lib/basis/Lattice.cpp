@@ -33,11 +33,11 @@ lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs)
 }
 
 int lattice::OrthoTopology::one_dim_phase(uint_t iind, uint_t jind, uint_t idim) const {
-    if ((iind + 1 == jind) || (iind - 1 == jind)) return 1;
+    if ((iind + 1 == jind) || (iind == jind + 1)) return 1;
     auto bc = m_bcs[idim];
     if (!bc) return 0;
     auto max_ind = m_inds.m_shape[idim] - 1;
-    if ((iind == 0 && jind == max_ind) || (jind == 0 && iind == max_ind)) return bc;
+    if (((iind == 0) && (jind == max_ind)) || ((jind == 0) && (iind == max_ind))) return bc;
     return 0;
 }
 

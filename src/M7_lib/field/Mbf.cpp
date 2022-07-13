@@ -31,7 +31,7 @@ void mbf::set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
     REQUIRE_LE(std::abs(elecs.m_ms2), 1,
                "Neel state requires overall spin of -1, 0, or 1");
     onv.zero();
-    uint_t ispin = elecs.m_ms2 >= 1;
+    uint_t ispin = elecs.m_ms2 < 0;
     for (uint_t isite = 0ul; isite < elecs; ++isite) {
         onv.set({ispin, isite});
         ispin = !ispin;

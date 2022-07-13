@@ -16,6 +16,15 @@ HubbardFrmHam::HubbardFrmHam(ham_t u, const std::shared_ptr<lattice::Base>& latt
 HubbardFrmHam::HubbardFrmHam(opt_pair_t opts) :
         HubbardFrmHam(opts.m_ham.m_hubbard.m_repulsion, lattice::make(opts.m_ham.m_hubbard)){}
 
+ham_t HubbardFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
+    // hopping coeff is always -t
+    return -m_basis.m_lattice->phase(a, i);
+}
+
+ham_t HubbardFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const {
+    return (a==i && b==j) ? m_u : 0.0;
+}
+
 ham_t HubbardFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     ham_t h = 0.0;
     for (uint_t isite = 0ul; isite < m_basis.m_nsite; ++isite)
@@ -35,11 +44,6 @@ ham_t HubbardFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmO
 
 void HubbardFrmHam::log_data() const {
     FrmHam::log_data();
-}
-
-ham_t HubbardFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
-    // hopping coeff is always -t
-    return -m_basis.m_lattice->phase(a, i);
 }
 
 HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const conf::Propagator& opts) const {
