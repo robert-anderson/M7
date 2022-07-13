@@ -25,154 +25,6 @@ namespace sparse {
         }
     };
 
-    struct Base {
-    protected:
-        const uint_t m_init_row_nentry;
-        uint_t m_nentry = 0ul;
-        uint_t m_max_col_ind = 0ul;
-        Base(uint_t init_row_nentry): m_init_row_nentry(init_row_nentry){}
-
-        virtual str_t row_to_string(uint_t irow) const = 0;
-    public:
-        virtual str_t to_string() const = 0;
-    };
-
-
-    template<typename T>
-    struct Generic : Base {
-        static_assert(std::is_base_of<Element, T>::value, "template arg must be derived from Element");
-    private:
-        typedef v_t<v_t<T>> rows_t;
-        rows_t m_rows;
-    public:
-
-        Generic(uint_t nrow=0ul, uint_t init_row_nentry=6ul):
-                Base(init_row_nentry), m_rows(nrow, v_t<T>(init_row_nentry)) {
-            for (auto& row: m_rows) row.clear();
-        }
-
-        /*
-         * ctor for a subset block of rows
-         */
-        Generic(const Generic& other, uint_t count, uint_t displ):
-            Generic(count, other.m_init_row_nentry) {
-            REQUIRE_LE(displ, nrow(), "row offset OOB");
-            REQUIRE_LE(displ + count, nrow(), "row offset+count OOB");
-            auto begin = m_rows.cbegin();
-            std::advance(begin, displ);
-            auto end = begin;
-            std::advance(end, count);
-            m_rows = rows_t(begin, end);
-            // data is now copied, now update metadata
-            for (const auto &row: m_rows) {
-                if (row.empty()) continue;
-                m_nentry += row.size();
-                auto max_element = std::max_element(row.cbegin(), row.cend());
-                m_max_col_ind = std::max(m_max_col_ind, *max_element);
-            }
-        }
-
-        Generic& operator=(const Generic& other) {
-            if (&other==this) return *this;
-            m_rows = other.m_rows;
-            m_max_col_ind = other.m_max_col_ind;
-            m_nentry = other.m_nentry;
-            return *this;
-        }
-
-        Generic(const Generic& other, bool symmetrize): Generic(other.nrow(), other.m_init_row_nentry){
-            if (!symmetrize) {
-                *this = other;
-                return;
-            }
-            REQUIRE_LT(other.m_max_col_ind, nrow(), "too many columns for this to be a symmetric matrix");
-            for (uint_t irow=0ul; irow<nrow(); ++irow) {
-                const auto& row = m_rows[irow];
-                for (uint_t iicol=0ul; iicol < row.size(); ++iicol) {
-                    const auto& icol = row[iicol];
-                    add(irow, icol);
-                    if (icol != irow) insert(icol, irow);
-                }
-            }
-        }
-
-        Generic(const Generic& other): Generic(other, false){}
-
-        /**
-         * reallocate the m_rows vector
-         * @param nrow
-         *  new length of m_rows
-         */
-        void resize(uint nrow) {
-            const auto nrow_old = m_rows.size();
-            if (nrow <= nrow_old) return;
-            m_rows.resize(nrow, v_t<T>(m_init_row_nentry));
-            for (uint_t irow=nrow_old; irow<nrow; ++irow) m_rows[irow].clear();
-        }
-
-        uint_t nrow() const {
-            return m_rows.size();
-        }
-
-        const v_t<T>& operator[](uint_t irow) const {
-            DEBUG_ASSERT_LT(irow, nrow(), "row index OOB");
-            return m_rows[irow];
-        }
-
-        v_t<T>& operator[](uint_t irow) {
-            DEBUG_ASSERT_LT(irow, nrow(), "row index OOB");
-            return m_rows[irow];
-        }
-
-        /**
-         * append the element to the given row
-         * @param irow
-         *  row index onto which the element is appended
-         * @param elem
-         *  element to append
-         */
-        void add(uint_t irow, const T& elem) {
-            if (irow >= nrow()) resize(irow + 1);
-            auto base_elem = static_cast<const Element&>(elem);
-            (*this)[irow].emplace_back(elem);
-            const auto icol = base_elem.m_i;
-            if (icol > m_max_col_ind) m_max_col_ind = icol;
-            ++m_nentry;
-            //return m_rows[irow].size()-1;
-        }
-
-        /**
-         * lookup the element index in the row first. if it exists, overwrite it, else simply delegate to add
-         * @param irow
-         *  row index
-         * @param elem
-         *  element which is either added, or clobbers existing element
-         */
-        void insert(uint_t irow, const T& elem) {
-            auto& row = (*this)[irow];
-            const auto icol = static_cast<const Element&>(elem).m_i;
-            auto pred = [&icol](const T& v){
-                return static_cast<const Element&>(v).m_i == icol;
-            };
-            auto it = std::find_if(row.begin(), row.end(), pred);
-            if (it==row.end()) {
-                add(irow, elem);
-            }
-            else {
-                *it = elem;
-            }
-        }
-
-        bool empty() const {
-            return !m_nentry;
-        }
-
-        bool empty(uint_t irow) const {
-            return (*this)[irow].empty();
-        }
-
-    };
-
     template<typename T>
     struct MatrixElement : Element {
         /**
@@ -181,13 +33,187 @@ namespace sparse {
         T m_v;
 
         str_t to_string() const override {
-            return log::format("({}, {})", m_i, convert::to_string(m_v));
+            return log::format("({} -> {})", m_i, convert::to_string(m_v));
         }
     };
 
-    typedef Generic<Element> Network;
-    template<typename T>
-    using Matrix = Generic<MatrixElement<T>>;
+    namespace dynamic {
+        struct Base {
+        protected:
+            const uint_t m_init_row_nentry;
+            uint_t m_nentry = 0ul;
+            uint_t m_max_col_ind = 0ul;
+
+            Base(uint_t init_row_nentry) : m_init_row_nentry(init_row_nentry) {}
+
+            virtual str_t row_to_string(uint_t irow) const = 0;
+
+        public:
+            virtual str_t to_string() const = 0;
+        };
+
+
+        template<typename T>
+        struct Generic : Base {
+            static_assert(std::is_base_of<Element, T>::value, "template arg must be derived from Element");
+        private:
+            typedef v_t<v_t<T>> rows_t;
+            rows_t m_rows;
+        public:
+
+            Generic(uint_t nrow = 0ul, uint_t init_row_nentry = 6ul) :
+                    Base(init_row_nentry), m_rows(nrow, v_t<T>(init_row_nentry)) {
+                for (auto &row: m_rows) row.clear();
+            }
+
+            /*
+             * ctor for a subset block of rows
+             */
+            Generic(const Generic &other, uint_t count, uint_t displ) :
+                    Generic(count, other.m_init_row_nentry) {
+                REQUIRE_LE(displ, nrow(), "row offset OOB");
+                REQUIRE_LE(displ + count, nrow(), "row offset+count OOB");
+                auto begin = m_rows.cbegin();
+                std::advance(begin, displ);
+                auto end = begin;
+                std::advance(end, count);
+                m_rows = rows_t(begin, end);
+                // data is now copied, now update metadata
+                for (const auto &row: m_rows) {
+                    if (row.empty()) continue;
+                    m_nentry += row.size();
+                    auto max_element = std::max_element(row.cbegin(), row.cend());
+                    m_max_col_ind = std::max(m_max_col_ind, *max_element);
+                }
+            }
+
+            Generic &operator=(const Generic &other) {
+                if (&other == this) return *this;
+                m_rows = other.m_rows;
+                m_max_col_ind = other.m_max_col_ind;
+                m_nentry = other.m_nentry;
+                return *this;
+            }
+
+            Generic(const Generic &other, bool symmetrize) : Generic(other.nrow(), other.m_init_row_nentry) {
+                if (!symmetrize) {
+                    *this = other;
+                    return;
+                }
+                REQUIRE_LT(other.m_max_col_ind, nrow(), "too many columns for this to be a symmetric matrix");
+                for (uint_t irow = 0ul; irow < nrow(); ++irow) {
+                    const auto &row = m_rows[irow];
+                    for (uint_t ientry = 0ul; ientry < row.size(); ++ientry) {
+                        const auto &entry = row[ientry];
+                        add(irow, entry);
+                        if (entry != irow) insert(entry, irow);
+                    }
+                }
+            }
+
+            Generic(const Generic &other) : Generic(other, false) {}
+
+            /**
+             * reallocate the m_rows vector
+             * @param nrow
+             *  new length of m_rows
+             */
+            void resize(uint nrow) {
+                const auto nrow_old = m_rows.size();
+                if (nrow <= nrow_old) return;
+                m_rows.resize(nrow, v_t<T>(m_init_row_nentry));
+                for (uint_t irow = nrow_old; irow < nrow; ++irow) m_rows[irow].clear();
+            }
+
+            uint_t nrow() const {
+                return m_rows.size();
+            }
+
+            const v_t<T> &operator[](uint_t irow) const {
+                DEBUG_ASSERT_LT(irow, nrow(), "row index OOB");
+                return m_rows[irow];
+            }
+
+        protected:
+            /*
+             * no modification of the rows outside of this class definition
+             */
+            v_t<T> &operator[](uint_t irow) {
+                DEBUG_ASSERT_LT(irow, nrow(), "row index OOB");
+                return m_rows[irow];
+            }
+
+        public:
+            /**
+             * append the element to the given row
+             * @param irow
+             *  row index onto which the element is appended
+             * @param elem
+             *  element to append
+             */
+            void add(uint_t irow, const T &elem) {
+                if (irow >= nrow()) resize(irow + 1);
+                auto base_elem = static_cast<const Element &>(elem);
+                (*this)[irow].emplace_back(elem);
+                const auto icol = base_elem.m_i;
+                if (icol > m_max_col_ind) m_max_col_ind = icol;
+                ++m_nentry;
+                //return m_rows[irow].size()-1;
+            }
+
+            /**
+             * lookup the element index in the row first. if it exists, overwrite it, else simply delegate to add
+             * @param irow
+             *  row index
+             * @param elem
+             *  element which is either added, or clobbers existing element
+             */
+            void insert(uint_t irow, const T &elem) {
+                auto &row = (*this)[irow];
+                const auto icol = static_cast<const Element &>(elem).m_i;
+                auto pred = [&icol](const T &v) {
+                    return static_cast<const Element &>(v).m_i == icol;
+                };
+                auto it = std::find_if(row.begin(), row.end(), pred);
+                if (it == row.end()) {
+                    add(irow, elem);
+                } else {
+                    *it = elem;
+                }
+            }
+
+            bool empty() const {
+                return !m_nentry;
+            }
+
+            bool empty(uint_t irow) const {
+                return (*this)[irow].empty();
+            }
+
+            str_t to_string() const override {
+                str_t out;
+                for (uint_t irow = 0ul; irow < nrow(); ++irow) {
+                    if (m_rows[irow].empty()) continue;
+                    out += std::to_string(irow) + ": " + row_to_string(irow) + "\n";
+                }
+                return out;
+            }
+
+        protected:
+            str_t row_to_string(uint_t irow) const override {
+                strv_t out;
+                const auto &row = m_rows[irow];
+                for (auto &entry: row)
+                    out.push_back(static_cast<const Element &>(entry).to_string());
+                return convert::to_string(out);
+            }
+
+        };
+
+        typedef Generic<Element> Network;
+        template<typename T>
+        using Matrix = Generic<MatrixElement<T>>;
+    }
 
     /**
      * number of rows is variable, and the vectors storing the contents of each can be resized. Ideal for building up
