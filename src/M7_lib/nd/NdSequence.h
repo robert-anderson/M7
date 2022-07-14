@@ -70,7 +70,7 @@ struct NdSequence {
     static v_t<uinta_t<nind>> make_inds_vector(const NdFormat<nind>& format) {
         const uint_t limit = 2<<10;
         if (format.m_nelement > limit){
-            log::warn("Attempting to cache {} (> {}) Nd index arrays, this class is intended for small products of Nd extents",
+            logging::warn("Attempting to cache {} (> {}) Nd index arrays, this class is intended for small products of Nd extents",
                       format.m_nelement, limit);
         }
         REQUIRE_LE(format.m_nelement, limit, "shape product is too large, highly likely NdSequence is misapplied");

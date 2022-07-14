@@ -198,8 +198,8 @@ namespace conf_components {
 
     template<typename T=void>
     static str_t type_str() {
-        ABORT(log::format("Unsupported type for a configuration parameter: {}",
-                          log::get_demangled_symbol(typeid(T).name())));
+        ABORT(logging::format("Unsupported type for a configuration parameter: {}",
+                          logging::get_demangled_symbol(typeid(T).name())));
         return "";
     }
 
@@ -223,22 +223,22 @@ namespace conf_components {
 
     template<typename T>
     static str_t dim_str(const T &) {
-        return log::format("scalar {}", type_str<T>());
+        return logging::format("scalar {}", type_str<T>());
     }
 
     template<typename T>
     static str_t dim_str(const v_t<T> &) {
-        return log::format("1D {} array", type_str<T>());
+        return logging::format("1D {} array", type_str<T>());
     }
 
     template<typename T>
     static str_t dim_str(const v_t<v_t<T>> &) {
-        return log::format("2D {} array", type_str<T>());
+        return logging::format("2D {} array", type_str<T>());
     }
 
     template<typename T>
     static str_t dim_str(const v_t<v_t<v_t<T>>> &) {
-        return log::format("3D {} array", type_str<T>());
+        return logging::format("3D {} array", type_str<T>());
     }
 
 
@@ -272,7 +272,7 @@ namespace conf_components {
         }
 
         void log() const override {
-            log::info("{:<40}| {}", m_path.m_string, convert::to_string(m_value));
+            logging::info("{:<40}| {}", m_path.m_string, convert::to_string(m_value));
         }
     };
 
@@ -294,7 +294,7 @@ namespace conf_components {
             v_t<str_t> out;
             out.reserve(m_choices.size());
             for (uint_t i=0ul; i<m_choices.size(); ++i)
-                out.push_back(log::format("{} ({})", m_choices[i], m_choice_descriptions[i]));
+                out.push_back(logging::format("{} ({})", m_choices[i], m_choice_descriptions[i]));
             return "["+string::join(out, ", ")+"]";
         }
     protected:
@@ -313,7 +313,7 @@ namespace conf_components {
         using ChoiceBase<T>::m_choice_descriptions;
         using ChoiceBase<T>::is_choices;
         void require_is_choice(const T& v) const {
-            REQUIRE_TRUE(is_choices(v), log::format("\"{}\" is not among the valid choices for param {}",
+            REQUIRE_TRUE(is_choices(v), logging::format("\"{}\" is not among the valid choices for param {}",
                                                     convert::to_string(v), Node::m_path.m_string));
         }
         static T get_first(const v_t<T>& choices) {
@@ -376,7 +376,7 @@ namespace conf_components {
         using ChoiceBase<T>::m_choice_descriptions;
         using ChoiceBase<T>::are_choices;
         void require_are_choices(const v_t<T>& v) const {
-            REQUIRE_TRUE(are_choices(v), log::format("\"{}\" are not all among the valid choices for param {}",
+            REQUIRE_TRUE(are_choices(v), logging::format("\"{}\" are not all among the valid choices for param {}",
                                                      convert::to_string(v), Node::m_path.m_string));
         }
     public:

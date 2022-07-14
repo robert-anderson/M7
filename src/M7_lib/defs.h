@@ -131,4 +131,16 @@ constexpr uint_t c_ndim_wf = 2;
 constexpr uint_t c_ndim_root = 1;
 typedef uinta_t<c_ndim_wf> wf_inds_t;
 
+#ifdef ENABLE_TCHINT
+constexpr bool c_enable_tchint = true;
+#else
+constexpr bool c_enable_tchint = false;
+#endif
+
+#ifdef ENABLE_LOCAL_LOGGING
+constexpr bool c_enable_local_logging = true;
+#else
+constexpr bool c_enable_local_logging = false;
+#endif
+
 #endif //M7_DEFS_H

@@ -8,15 +8,13 @@
 int main(int argc, char **argv) {
 
     mpi::initialize(&argc, &argv);
-    log::initialize();
+    logging::initialize();
 
-    log::info("Initializing M7 instance");
+    logging::title();
     /*
      * log compile-time defintions
      */
-    log::info("M7 {} build", c_enable_debug ? "DEBUG" : "RELEASE");
-    log::info("Many-body basis definition: {}", mbf::name<c_mbf_type_ind>());
-    log::info("Walker arithmetic type: {}", c_enable_complex_wf ? "complex" : "real");
+    logging::defs();
 
     if (argc == 1) {
         // input file not provided, print out help string

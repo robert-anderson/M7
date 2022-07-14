@@ -19,7 +19,7 @@ uint_t FermionRdm::nrow_estimate(uint_t nann, uint_t ncre, uint_t nsite) {
 
 FermionRdm::FermionRdm(const conf::FermionRdm &opts, uint_t nrow_crude_est, uint_t nsite, uint_t nelec) :
 base_t(
-        log::format("{}-body RDM", opts.m_rank),
+        logging::format("{}-body RDM", opts.m_rank),
         nrow_crude_est / mpi::nrank(),
         nrow_crude_est / mpi::nrank(),
         opts.m_buffers, opts.m_load_balancing,

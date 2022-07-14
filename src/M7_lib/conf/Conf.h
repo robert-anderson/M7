@@ -110,7 +110,7 @@ namespace conf {
     protected:
         void validate_node_contents() override {
             REQUIRE_LE(m_bos_occ_cutoff, sys::bos::c_max_occ,
-                       log::format("given nboson_max exceeds limit of {}", sys::bos::c_max_occ));
+                       logging::format("given nboson_max exceeds limit of {}", sys::bos::c_max_occ));
         }
     };
 

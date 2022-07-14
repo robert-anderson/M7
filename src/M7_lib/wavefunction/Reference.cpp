@@ -10,7 +10,7 @@ Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
-    log::info("Initial reference ONV for WF part {} is {} with energy {}",
+    logging::info("Initial reference ONV for WF part {} is {} with energy {}",
               m_ipart, get_mbf(), m_global.m_row.m_hdiag);
 }
 
@@ -34,10 +34,10 @@ void Reference::accept_candidate(double redefinition_thresh) {
     mpi::bcast(m_irow_candidate, irank);
     auto current_weight = weight();
     if (std::abs(gather[irank]) > std::abs(current_weight*redefinition_thresh)){
-        log::info("Changing the reference ONV for WF part {}. current ONV: {}, weight: {}",
+        logging::info("Changing the reference ONV for WF part {}. current ONV: {}, weight: {}",
                   m_ipart, get_mbf().to_string(), current_weight);
         redefine({irank, m_irow_candidate});
-        log::info("Changed the reference ONV for WF part {}. new ONV: {}, weight: {}",
+        logging::info("Changed the reference ONV for WF part {}. new ONV: {}, weight: {}",
                   m_ipart, get_mbf().to_string(), gather[irank]);
         m_candidate_abs_weight = 0.0;
         update_ref_conn_flags();

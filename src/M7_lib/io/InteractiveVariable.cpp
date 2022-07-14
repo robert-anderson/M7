@@ -6,7 +6,7 @@
 
 
 InteractiveVariableFile::InteractiveVariableFile(str_t name) : m_name(name), m_fname(name + ".var") {
-    log::info(R"(Listening for changes to interactive variable "{}" in file "{}")", name, m_fname);
+    logging::info(R"(Listening for changes to interactive variable "{}" in file "{}")", name, m_fname);
 }
 
 bool InteractiveVariableFile::consume_(strv_t &lines) {
@@ -25,9 +25,9 @@ bool InteractiveVariableFile::consume_(strv_t &lines) {
 }
 
 void InteractiveVariableFile::warn_invalid_input() const {
-    log::warn("Invalid value given in file \"{}\", variable left unchanged", m_fname);
+    logging::warn("Invalid value given in file \"{}\", variable left unchanged", m_fname);
 }
 
 void InteractiveVariableFile::info_success(const str_t &str) const {
-    log::info("Interactive variable \"{}\" assigned value: {}", m_name, str);
+    logging::info("Interactive variable \"{}\" assigned value: {}", m_name, str);
 }

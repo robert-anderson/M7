@@ -17,7 +17,7 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, uint
     ham_t value;
     EbdumpFileReader file_reader(info.m_fname, spin_major);
 
-    log::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
+    logging::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
         if (fptol::numeric_zero(value)) continue;
         auto ranksig = file_reader.ranksig(inds);

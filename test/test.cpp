@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
 
     mpi::initialize(&argc, &argv);
-    log::initialize();
+    logging::initialize();
 
     //std::streambuf *original_stdout_buffer = nullptr;
     //std::streambuf *original_stderr_buffer = nullptr;

@@ -40,7 +40,7 @@ conf::Archive::Archive(Group *parent) :
         
 void conf::Archive::validate_node_contents() {
     if (bool(m_period) && bool(m_period_mins))
-        log::warn("both cycle number and time periods are defined for checkpointing");
+        logging::warn("both cycle number and time periods are defined for checkpointing");
 
     auto &str = m_chkpt_path.m_value;
     uint_t token_count = std::count(str.cbegin(), str.cend(), '{');
@@ -50,10 +50,10 @@ void conf::Archive::validate_node_contents() {
         auto it_close = std::find(str.cbegin(), str.cend(), '}');
         REQUIRE_EQ(std::distance(it_open, it_close), 1l,
                    "checkpoint path for periodic output should contain at most one {} formatting point");
-        log::info("formatting token found in path, "
+        logging::info("formatting token found in path, "
                   "successive checkpoints will not overwrite previous checkpoints from the same run");
     } else
-        log::info("formatting token not found in path, "
+        logging::info("formatting token not found in path, "
                   "successive checkpoints will overwrite previous checkpoints from the same run");
 }
 
@@ -238,12 +238,12 @@ conf::Propagator::Propagator(Group *parent) :
 void conf::Propagator::validate_node_contents() {
     if (m_min_death_mag.m_value==0.0) {
         m_min_death_mag.m_value = m_min_spawn_mag.m_value;
-        log::warn("{} was zero, defaulting to the specified value of {}",
+        logging::warn("{} was zero, defaulting to the specified value of {}",
                   m_min_death_mag.m_path.m_string, m_min_spawn_mag.m_path.m_string);
     }
     if (m_max_bloom.m_value==0.0) {
         m_max_bloom.m_value = m_nadd.m_value;
-        log::warn("{} was zero, defaulting to the specified value of {}",
+        logging::warn("{} was zero, defaulting to the specified value of {}",
                   m_max_bloom.m_path.m_string, m_nadd.m_path.m_string);
     }
     REQUIRE_GE(m_imp_samp_exp.m_value, 0.0, "importance sampling exponent must be non-negative");
@@ -261,7 +261,7 @@ void conf::Document::validate_node_contents() {
                "initial number of walkers must not exceed the target population");
     if (m_wavefunction.m_nw_init < m_propagator.m_nadd) {
         m_wavefunction.m_nw_init.m_value = m_propagator.m_nadd.m_value;
-        log::warn("initial number of walkers must be at least the initiator threshold");
+        logging::warn("initial number of walkers must be at least the initiator threshold");
     }
     REQUIRE_LE(m_particles.m_nboson, m_basis.m_bos_occ_cutoff,
                "number of bosons in a number-conserving system mustn't exceed the maximum occupation cutoff");

@@ -39,13 +39,13 @@ ham_t FrmHam::get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) co
 void FrmHam::log_data() const {
     if (!*this) return;
     if (!m_contribs_1100.is_nonzero(0ul))
-        log::info("1-electron term has no diagonal contributions");
+        logging::info("1-electron term has no diagonal contributions");
     if (!m_contribs_1100.is_nonzero(exsig::ex_single))
-        log::info("1-electron term has no single-excitation contributions");
+        logging::info("1-electron term has no single-excitation contributions");
     if (!m_contribs_2200.is_nonzero(0ul))
-        log::info("2-electron term has no diagonal contributions");
+        logging::info("2-electron term has no diagonal contributions");
     if (!m_contribs_2200.is_nonzero(exsig::ex_single))
-        log::info("2-electron term has no single-excitation contributions");
+        logging::info("2-electron term has no single-excitation contributions");
     if (!m_contribs_2200.is_nonzero(exsig::ex_double))
-        log::info("2-electron term has no double-excitation contributions");
+        logging::info("2-electron term has no double-excitation contributions");
 }

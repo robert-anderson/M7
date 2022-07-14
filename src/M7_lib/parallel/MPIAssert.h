@@ -24,17 +24,17 @@
  * MPI finalization will be called on all ranks. Macros with the INDEPENDENT_ prefix do not require any synchronization
  * and any rank which evaluates the expression to false will abort. COLLECTIVE_ macros are favoured where applicable.
  */
-#define MPI_ABORT(msg) {log::error("MPI_ABORT_ called at {}:{}", __FILE__, __LINE__); mpi::abort(msg);}
+#define MPI_ABORT(msg) {logging::error("MPI_ABORT_ called at {}:{}", __FILE__, __LINE__); mpi::abort(msg);}
 
 
 namespace asserts {
 
     static void abort(const char *file, int line, bool collective, const str_t &reason) {
         if (collective || mpi::nrank() == 1) {
-            log::error("Aborting in file {} at line {}", file, line);
+            logging::error("Aborting in file {} at line {}", file, line);
             mpi::abort(reason);
         } else {
-            log::error_("Aborting in file {} at line {}", file, line);
+            logging::error_("Aborting in file {} at line {}", file, line);
             mpi::abort_(reason);
         }
     }
@@ -46,16 +46,16 @@ namespace asserts {
         if (collective || mpi::nrank() == 1) {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
-                log::error("{} {} failed", kind, op);
-                log::error("LHS \"{}\" value is: {}", lhs_sym, convert::to_string(lhs));
-                log::error("RHS \"{}\" value is: {}", rhs_sym, convert::to_string(rhs));
+                logging::error("{} {} failed", kind, op);
+                logging::error("LHS \"{}\" value is: {}", lhs_sym, convert::to_string(lhs));
+                logging::error("RHS \"{}\" value is: {}", rhs_sym, convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         } else {
             if (!outcome) {
-                log::error_("{} {} failed", kind, op);
-                log::error_("{} value is: {}", lhs_sym, convert::to_string(lhs));
-                log::error_("{} value is: {}", rhs_sym, convert::to_string(rhs));
+                logging::error_("{} {} failed", kind, op);
+                logging::error_("{} value is: {}", lhs_sym, convert::to_string(lhs));
+                logging::error_("{} value is: {}", rhs_sym, convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         }
@@ -69,16 +69,16 @@ namespace asserts {
         if (collective || mpi::nrank() == 1) {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
-                log::error("{} {} failed with rtol={}, atol={}", kind, op, rtol, atol);
-                log::error("LHS \"{}\" value is: {}", lhs_sym, convert::to_string(lhs));
-                log::error("RHS \"{}\" value is: {}", rhs_sym, convert::to_string(rhs));
+                logging::error("{} {} failed with rtol={}, atol={}", kind, op, rtol, atol);
+                logging::error("LHS \"{}\" value is: {}", lhs_sym, convert::to_string(lhs));
+                logging::error("RHS \"{}\" value is: {}", rhs_sym, convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         } else {
             if (!outcome) {
-                log::error_("{} {} failed with rtol={}, atol={}", kind, op, rtol, atol);
-                log::error_("LHS \"{}\" value is: {}", lhs_sym, convert::to_string(lhs));
-                log::error_("RHS \"{}\" value is: {}", rhs_sym, convert::to_string(rhs));
+                logging::error_("{} {} failed with rtol={}, atol={}", kind, op, rtol, atol);
+                logging::error_("LHS \"{}\" value is: {}", lhs_sym, convert::to_string(lhs));
+                logging::error_("RHS \"{}\" value is: {}", rhs_sym, convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         }
@@ -91,14 +91,14 @@ namespace asserts {
         if (collective || mpi::nrank() == 1) {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
-                log::error("{} zero failed with atol={}", kind, atol);
-                log::error("\"{}\" value is: {}", sym, convert::to_string(v));
+                logging::error("{} zero failed with atol={}", kind, atol);
+                logging::error("\"{}\" value is: {}", sym, convert::to_string(v));
                 abort(file, line, collective, reason);
             }
         } else {
             if (!outcome) {
-                log::error_("{} zero failed with atol={}", kind, atol);
-                log::error_("\"{}\" value is: {}", sym, convert::to_string(v));
+                logging::error_("{} zero failed with atol={}", kind, atol);
+                logging::error_("\"{}\" value is: {}", sym, convert::to_string(v));
                 abort(file, line, collective, reason);
             }
         }
@@ -113,15 +113,15 @@ namespace asserts {
             outcome = mpi::all_land(outcome); // true only if all input outcomes across all ranks are false
 
             if (!outcome) {
-                log::error("{} {} failed", kind, right);
-                log::error("{} value is {}", sym, wrong);
+                logging::error("{} {} failed", kind, right);
+                logging::error("{} value is {}", sym, wrong);
                 abort(file, line, collective, reason);
             }
         } else {
             if (!truth) outcome = !outcome;
             if (!outcome) {
-                log::error_("{} {} failed", kind, right);
-                log::error_("{} value is {}", sym, wrong);
+                logging::error_("{} {} failed", kind, right);
+                logging::error_("{} value is {}", sym, wrong);
                 abort(file, line, collective, reason);
             }
         }

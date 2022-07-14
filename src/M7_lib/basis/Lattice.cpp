@@ -11,7 +11,7 @@ lattice::Lattice::Lattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite,
     REQUIRE_LE(adj.nrow(), m_nsite, "highest site index in adjacency map is OOB");
     for (uint_t isite=0ul; isite<m_nsite; ++isite) {
         if (isite >= adj.nrow() || !adj.nentry(isite))
-            log::warn("lattice site {} has no adjacent sites!", isite);
+            logging::warn("lattice site {} has no adjacent sites!", isite);
     }
 }
 
@@ -19,13 +19,13 @@ lattice::Lattice::Lattice(const lattice::Topology &topo) : Lattice(topo.make_adj
 
 lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs) :
         Topology(NdFormatD(shape).m_nelement,
-                 log::format("orthogonal lattice with shape {} and boundary conds {}",
+                 logging::format("orthogonal lattice with shape {} and boundary conds {}",
                              convert::to_string(shape), convert::to_string(bcs))),
     m_inds(shape), m_bcs(bcs) {
     for (uint_t idim=0ul; idim<m_inds.m_nind; ++idim){
         REQUIRE_TRUE(m_inds.m_shape[idim], "every extent in the site shape must be non-zero");
         if (m_inds.m_shape[idim] == 1ul)
-            log::warn("redundant dimension in orthogonal lattice definition");
+            logging::warn("redundant dimension in orthogonal lattice definition");
         if (m_inds.m_shape[idim] <= 2ul)
             REQUIRE_FALSE(m_bcs[idim], "(anti-)periodic boundary conditions are not compatible with extents <= 2");
     }

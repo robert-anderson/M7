@@ -37,7 +37,7 @@ void Shift::update(const Wavefunction &wf, const uint_t &icycle, const double &t
          */
         uint_t a = 0ul;
         if (variable_mode.update(icycle, nw >= m_nwalker_target)) {
-            log::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
+            logging::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
                       ipart, icycle-1, wf.m_nwalker.m_reduced[ipart], icycle, nw);
             a = icycle % m_opts.m_shift.m_period;
         }

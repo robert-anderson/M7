@@ -28,17 +28,17 @@ extern std::shared_ptr<spdlog::logger> g_reduced_stdout_logger;
 extern std::shared_ptr<spdlog::logger> g_reduced_file_logger;
 extern std::shared_ptr<spdlog::logger> g_local_file_logger;
 
-struct log {
+namespace logging {
 
-    static void initialize();
+    void initialize();
 
-    static void flush();
+    void flush();
 
-    static void flush_();
+    void flush_();
 
-    static void flush_all();
+    void flush_all();
 
-    static void finalize();
+    void finalize();
 
     template<typename ...Args>
     static str_t format(const str_t& fmt_string, Args&&... args){
@@ -54,11 +54,11 @@ struct log {
         return format("\033[1m{}\033[0m", format(fmt_string, args...));
     }
 
-    static str_t get_demangled_symbol(const str_t& symbol);
+    str_t get_demangled_symbol(const str_t& symbol);
 
-    static str_t get_demangled_prototype(const char* line);
+    str_t get_demangled_prototype(const char* line);
 
-    static strv_t get_backtrace(uint_t depth);
+    strv_t get_backtrace(uint_t depth);
 
     template<typename ...Args>
     static void info(const str_t& fmt_string, Args&&... args){
@@ -69,16 +69,16 @@ struct log {
 
     template<typename ...Args>
     static void info_(const str_t& fmt_string, Args&&... args){
-#ifdef ENABLE_LOCAL_LOGGING
-        if (mpi::nrank()==1) info(fmt_string, args...);
-        g_local_file_logger->info(fmt_string, args...);
-#endif
+        if (c_enable_local_logging) {
+            if (mpi::nrank() == 1) info(fmt_string, args...);
+            g_local_file_logger->info(fmt_string, args...);
+        }
         dtype::unused(fmt_string, args...);
     }
 
-    static void info_lines(const strv_t& lines);
+    void info_lines(const strv_t& lines);
 
-    static void info_lines_(const strv_t& lines);
+    void info_lines_(const strv_t& lines);
 
     /**
      * make a pretty table
@@ -91,17 +91,17 @@ struct log {
      * @return
      *  a vector of strings which when printed will display a table in which the rows are vertically aligned
      */
-    static strv_t make_table(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    strv_t make_table(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
-    static strv_t make_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    strv_t make_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
-    static void info_table(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    void info_table(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
-    static void info_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    void info_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
-    static void info_table_(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    void info_table_(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
-    static void info_table_(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    void info_table_(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
 
     template<typename ...Args>
     static void warn(const str_t& fmt_string, Args&&... args){
@@ -112,11 +112,10 @@ struct log {
 
     template<typename ...Args>
     static void warn_(const str_t& fmt_string, Args&&... args){
-#ifdef ENABLE_LOCAL_LOGGING
-        if (mpi::nrank()==1) warn(fmt_string, args...);
-        g_local_file_logger->warn(fmt_string, args...);
-#endif
-        dtype::unused(fmt_string, args...);
+        if (c_enable_local_logging) {
+            if (mpi::nrank() == 1) warn(fmt_string, args...);
+            g_local_file_logger->warn(fmt_string, args...);
+        }
     }
 
     template<typename ...Args>
@@ -128,14 +127,13 @@ struct log {
 
     template<typename ...Args>
     static void error_(const str_t& fmt_string, Args&&... args){
-#ifdef ENABLE_LOCAL_LOGGING
-        if (mpi::nrank()==1) error(fmt_string, args...);
-        g_local_file_logger->error(fmt_string, args...);
-#endif
-        dtype::unused(fmt_string, args...);
+        if (c_enable_local_logging) {
+            if (mpi::nrank() == 1) error(fmt_string, args...);
+            g_local_file_logger->error(fmt_string, args...);
+        }
     }
 
-    static void error_backtrace_(uint_t depth=20);
+    void error_backtrace_(uint_t depth=20);
 
     template<typename ...Args>
     static void critical(const str_t& fmt_string, Args&&... args){
@@ -146,33 +144,49 @@ struct log {
 
     template<typename ...Args>
     static void critical_(const str_t& fmt_string, Args&&... args){
-#ifdef ENABLE_LOCAL_LOGGING
-        if (mpi::nrank()==1) critical(fmt_string, args...);
-        g_local_file_logger->critical(fmt_string, args...);
-#endif
-        dtype::unused(fmt_string, args...);
+        if (c_enable_local_logging) {
+            if (mpi::nrank() == 1) critical(fmt_string, args...);
+            g_local_file_logger->critical(fmt_string, args...);
+        }
     }
 
     template<typename ...Args>
     static void debug(const str_t& fmt_string, Args&&... args){
-#ifndef NDEBUG
-        if (!mpi::i_am_root()) return;
-        g_reduced_stdout_logger->debug(fmt_string, args...);
-        g_reduced_file_logger->debug(fmt_string, args...);
-#endif
-        dtype::unused(fmt_string, args...);
+        if (c_enable_debug) {
+            if (!mpi::i_am_root()) return;
+            g_reduced_stdout_logger->debug(fmt_string, args...);
+            g_reduced_file_logger->debug(fmt_string, args...);
+        }
     }
 
     template<typename ...Args>
     static void debug_(const str_t& fmt_string, Args&&... args){
-#ifndef NDEBUG
-#ifdef ENABLE_LOCAL_LOGGING
-        if (mpi::nrank()==1) debug(fmt_string, args...);
-        g_local_file_logger->debug(fmt_string, args...);
-#endif
-#endif
-        dtype::unused(fmt_string, args...);
+        if (c_enable_debug && c_enable_local_logging) {
+            if (mpi::nrank() == 1) debug(fmt_string, args...);
+            g_local_file_logger->debug(fmt_string, args...);
+        }
     }
-};
+
+    template<uint_t mbf_ind>
+    static str_t mbf_name(){
+        switch (mbf_ind) {
+            case 0: return "fermion (determinant basis)";
+            case 1: return "fermion-boson (determinant-permanent product basis)";
+            case 2: return "boson (permanent basis)";
+            case 3: return "fermion spin-adapted (CSF basis)";
+            default: return "";
+        }
+    }
+
+    /**
+     * print the M7 title image
+     */
+    void title();
+
+    /**
+     * print the compile-time definitions to standard output
+     */
+    void defs();
+}
 
 #endif

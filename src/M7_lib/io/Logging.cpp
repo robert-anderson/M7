@@ -8,52 +8,43 @@ std::shared_ptr<spdlog::logger> g_reduced_stdout_logger = nullptr;
 std::shared_ptr<spdlog::logger> g_reduced_file_logger = nullptr;
 std::shared_ptr<spdlog::logger> g_local_file_logger = nullptr;
 
-void log::initialize() {
+void logging::initialize() {
     if (!mpi::initialized())
         throw std::runtime_error("Logging requires that the MPIWrapper is initialized");
     if (mpi::i_am_root()) {
         g_reduced_stdout_logger = spdlog::stdout_color_st("stdout");
         g_reduced_file_logger = spdlog::basic_logger_st("fileout", "M7.log", true);
     }
-#ifdef ENABLE_LOCAL_LOGGING
-    g_local_file_logger = spdlog::basic_logger_st("fileout_", "M7.log."+std::to_string(mpi::irank()), true);
-#endif
+    if (c_enable_local_logging)
+        g_local_file_logger = spdlog::basic_logger_st("fileout_", "M7.log."+std::to_string(mpi::irank()), true);
     spdlog::set_pattern("[%E] %^[%l]%$ %v");
 
-#ifndef NDEBUG
-    spdlog::set_level(spdlog::level::debug);
-#else
-    spdlog::set_level(spdlog::level::info);
-#endif
-#ifdef ENABLE_LOCAL_LOGGING
-    g_local_file_logger->flush_on(spdlog::level::debug);
-#endif
+    spdlog::set_level(c_enable_debug ? spdlog::level::debug : spdlog::level::info);
+    if (c_enable_local_logging) g_local_file_logger->flush_on(spdlog::level::debug);
 }
 
-void log::flush() {
+void logging::flush() {
     if (!mpi::i_am_root()) return;
     g_reduced_stdout_logger->flush();
     g_reduced_file_logger->flush();
 }
 
-void log::flush_() {
-#ifdef ENABLE_LOCAL_LOGGING
-    g_local_file_logger->flush();
-#endif
+void logging::flush_() {
+    if (c_enable_local_logging) g_local_file_logger->flush();
 }
 
-void log::flush_all() {
+void logging::flush_all() {
     flush();
     flush_();
 }
 
-void log::finalize() {
+void logging::finalize() {
     // spdlog::shutdown() doesn't seem to flush all streams in synchronous mode
     flush_all();
     spdlog::shutdown();
 }
 
-str_t log::get_demangled_symbol(const str_t &symbol) {
+str_t logging::get_demangled_symbol(const str_t &symbol) {
     int status;
     auto demangled = abi::__cxa_demangle(symbol.data(), nullptr, nullptr, &status);
     if (status!=0) {
@@ -65,7 +56,7 @@ str_t log::get_demangled_symbol(const str_t &symbol) {
     return tmp;
 }
 
-str_t log::get_demangled_prototype(const char *line) {
+str_t logging::get_demangled_prototype(const char *line) {
     // parse till first "(", then till "+"
     const char* begin_ptr = nullptr;
     const char* end_ptr = nullptr;
@@ -81,7 +72,7 @@ str_t log::get_demangled_prototype(const char *line) {
     return get_demangled_symbol(symbol);
 }
 
-strv_t log::get_backtrace(uint_t depth) {
+strv_t logging::get_backtrace(uint_t depth) {
     v_t<void*> entries(depth);
     uint_t size;
     size = backtrace(entries.data(), depth);
@@ -94,14 +85,14 @@ strv_t log::get_backtrace(uint_t depth) {
     return tmp;
 }
 
-void log::error_backtrace_(uint_t depth) {
+void logging::error_backtrace_(uint_t depth) {
     auto tmp = get_backtrace(depth);
     str_t str;
     error_("Printing backtrace (maximum call depth {}):", depth);
     for (const auto& line: tmp) if (!line.empty()) error_(line);
 }
 
-strv_t log::make_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
+strv_t logging::make_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
     if (rows.empty()) return {};
     auto fn = [](const strv_t& row1, const strv_t& row2){
         return row1.size() < row2.size();
@@ -143,7 +134,7 @@ strv_t log::make_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
     return row_strs;
 }
 
-strv_t log::make_table(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
+strv_t logging::make_table(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
     if (rows.empty()) return {};
     strv_t table;
     auto body = make_table(rows, header, padding);
@@ -162,26 +153,51 @@ strv_t log::make_table(const str_t &title, const v_t<strv_t> &rows, bool header,
     return table;
 }
 
-void log::info_lines(const strv_t &lines) {
+void logging::info_lines(const strv_t &lines) {
     for (const auto& line: lines) info(line);
 }
 
-void log::info_lines_(const strv_t &lines) {
+void logging::info_lines_(const strv_t &lines) {
     for (const auto& line: lines) info_(line);
 }
 
-void log::info_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
+void logging::info_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
     info_lines(make_table(rows, header, padding));
 }
 
-void log::info_table(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
+void logging::info_table(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
     info_lines(make_table(title, rows, header, padding));
 }
 
-void log::info_table_(const v_t<strv_t> &rows, bool header, uint_t padding) {
+void logging::info_table_(const v_t<strv_t> &rows, bool header, uint_t padding) {
     info_lines_(make_table(rows, header, padding));
 }
 
-void log::info_table_(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
+void logging::info_table_(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
     info_lines_(make_table(title, rows, header, padding));
+}
+
+void logging::title() {
+    std::cout << R"(   ____    ____   _________              )" << '\n';
+    std::cout << R"(  |****\  /****| |********/  M any-body  )" << '\n';
+    std::cout << R"(  |**|\*\/*/|**|      /**/   S tochastic )" << '\n';
+    std::cout << R"(  |**| \**/ |**|     /**/    E xpectation)" << '\n';
+    std::cout << R"(  |**|      |**|    /**/     V alue      )" << '\n';
+    std::cout << R"(  |**|      |**|   /**/      E stimation )" << '\n';
+    std::cout << R"(  |**|      |**|  /**/       N etworks   )" << '\n';
+    std::cout << std::endl;
+}
+
+void logging::defs() {
+    v_t<strv_t> rows = {
+            {"build mode", c_enable_debug ? "DEBUG" : "RELEASE"},
+            {"compilation timestamp", __DATE__ " " __TIME__},
+            {"many-body basis function", mbf_name<c_mbf_type_ind>()},
+            {"walker arithmetic", c_enable_complex_wf ? "complex" : "real"},
+            {"Hamiltonian arithmetic", c_enable_complex_ham ? "complex" : "real"},
+            {"TCHINT interface enabled", c_enable_tchint ? "complex" : "real"},
+            {"rank-resolved logging", c_enable_local_logging ? "enabled" : "disabled"},
+    };
+    const auto table = make_table("compile definitions", rows);
+    for (const auto& line: table) std::cout << "  " << line << '\n';
 }

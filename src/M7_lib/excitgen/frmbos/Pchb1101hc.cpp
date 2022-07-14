@@ -12,7 +12,7 @@ exgen::Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
     const auto nspinorb = m_h.m_basis.m_frm.m_nspinorb;
     v_t<prob_t> weights(nmode, 0.0);
     uint_t pq = 0ul;
-    log::info("Initializing pre-computed samplers for fermion-boson kinetic term...");
+    logging::info("Initializing pre-computed samplers for fermion-boson kinetic term...");
     if (mpi::on_node_i_am_root()) {
         for (uint_t p = 0ul; p < nspinorb; ++p) {
             for (uint_t q = 0ul; q < nspinorb; ++q) {

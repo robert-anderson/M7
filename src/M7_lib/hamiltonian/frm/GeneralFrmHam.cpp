@@ -8,17 +8,17 @@
 
 void GeneralFrmHam::log_ints_sym(integrals_1e::syms::Sym sym, bool initial) {
     const str_t context_str = initial ? "initially" : "conflict detected:";
-    log::info("{} assuming {} permutational symmetry for 1e integrals",
+    logging::info("{} assuming {} permutational symmetry for 1e integrals",
               context_str, integrals_1e::syms::name(sym));
 }
 
 void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
     const str_t context_str = initial ? "initially" : "conflict detected:";
-    log::info("{} assuming {} permutational symmetry for 2e integrals",
+    logging::info("{} assuming {} permutational symmetry for 2e integrals",
               context_str, integrals_2e::syms::name(sym));
     const auto equivs = integrals_2e::syms::equivalences(sym);
     if (equivs.size()<2) return;
-    log::info("this storage scheme assumes that {} integrals are equivalent", convert::to_string(equivs));
+    logging::info("this storage scheme assumes that {} integrals are equivalent", convert::to_string(equivs));
 }
 
 GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader& reader) {
@@ -80,7 +80,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader& reader) {
         } else MPI_ABORT("File reader error");
     }
     mpi::barrier();
-    log::info("FCIDUMP loading complete.");
+    logging::info("FCIDUMP loading complete.");
     log_data();
     return {std::move(ints_1e), std::move(ints_2e)};
 }

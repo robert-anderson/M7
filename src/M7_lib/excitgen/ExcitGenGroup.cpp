@@ -84,7 +84,7 @@ void ExcitGenGroup::log() const {
         auto prob_str = convert::to_string(get_prob(icase));
         rows.push_back({exsig_str, m_excit_cases[icase].m_excit_gen->m_description, prob_str});
     }
-    log::info_table("Excitation generation breakdown", rows, true);
+    logging::info_table("Excitation generation breakdown", rows, true);
 }
 
 void ExcitGenGroup::set_probs(const sys::Particles& particles) {

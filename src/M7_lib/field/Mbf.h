@@ -6,7 +6,6 @@
 #define M7_MBF_H
 
 #include <M7_lib/conf/Conf.h>
-
 #include "Fields.h"
 
 /**
@@ -44,16 +43,6 @@ namespace mbf {
 
     void set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, uint_t idef);
 
-    template<uint_t mbf_ind>
-    str_t name(){
-        switch (mbf_ind) {
-            case 0: return "fermion (determinant basis)";
-            case 1: return "fermion-boson (determinant-permanent product basis)";
-            case 2: return "boson (permanent basis)";
-            case 3: return "fermion spin-adapted (CSF basis)";
-            default: return "";
-        }
-    }
 };
 
 

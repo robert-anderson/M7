@@ -42,7 +42,7 @@ void RowHdf5WriterBase::null_write_all_fields() {
 }
 
 bool RowHdf5WriterBase::write(const uint_t &n) {
-    log::debug_("beginning HDF5 write loop over rows");
+    logging::debug_("beginning HDF5 write loop over rows");
     if (!m_iitem) m_row.restart();
     auto limit = std::min(m_iitem + n, m_nitem_max);
     while (m_iitem < limit){
@@ -52,7 +52,7 @@ bool RowHdf5WriterBase::write(const uint_t &n) {
         ++m_iitem;
     }
     mpi::barrier();
-    log::debug_("ending HDF5 write loop over rows");
+    logging::debug_("ending HDF5 write loop over rows");
     return mpi::all_lor(m_iitem >= m_nitem);
 }
 
@@ -137,7 +137,7 @@ void RowHdf5ReaderBase::null_read_all_fields() {
 }
 
 bool RowHdf5ReaderBase::read(const uint_t &n) {
-    log::debug_("beginning HDF5 read loop over multidimensional list dataset");
+    logging::debug_("beginning HDF5 read loop over multidimensional list dataset");
     if (!m_iitem) {
         // first call, so reset table and row
         m_row.m_table->clear();
@@ -152,7 +152,7 @@ bool RowHdf5ReaderBase::read(const uint_t &n) {
         ++m_iitem;
     }
     mpi::barrier();
-    log::debug_("ending HDF5 read loop over multidimensional list dataset");
+    logging::debug_("ending HDF5 read loop over multidimensional list dataset");
     return mpi::all_lor(m_iitem >= m_nitem);
 }
 

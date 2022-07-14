@@ -64,7 +64,7 @@ void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, con
 
 void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
     update();
-    log::info("Forming a deterministic subspace with {} ONVs", m_global.m_hwm);
+    logging::info("Forming a deterministic subspace with {} ONVs", m_global.m_hwm);
     suite::Conns conns_work(m_wf.m_sector.size());
     auto &row_local = m_local.m_row;
     auto &conn_work = conns_work[row_local.m_mbf];
@@ -91,9 +91,9 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
             }
         }
     }
-    log::info("Number of H-connected pairs of MBFs in the deterministic subspace: {}", n_hconn);
+    logging::info("Number of H-connected pairs of MBFs in the deterministic subspace: {}", n_hconn);
     if (bilinears.m_rdms)
-        log::info("Number of H-unconnected, but RDM-contributing pairs of MBFs: {}", n_rdm_conn);
+        logging::info("Number of H-unconnected, but RDM-contributing pairs of MBFs: {}", n_rdm_conn);
 }
 
 void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref) {

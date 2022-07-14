@@ -177,7 +177,7 @@ private:
 
     void save_fn(const hdf5::NodeWriter& parent) override {
         if (!m_accum_epoch) {
-            log::warn("MAE accumulation epoch was not reached in this calculation: omitting RDM save");
+            logging::warn("MAE accumulation epoch was not reached in this calculation: omitting RDM save");
             return;
         }
         hdf5::GroupWriter gw(parent, "rdms");

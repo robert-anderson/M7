@@ -71,17 +71,17 @@ uint_t RankAllocatorBase::get_nskip_() const {
 }
 
 void RankAllocatorBase::deactivate() {
-    log::info("Deactivating dynamic load balancing.");
+    logging::info("Deactivating dynamic load balancing.");
     m_icycle_active = ~0ul;
 }
 
 void RankAllocatorBase::activate(uint_t icycle) {
     if (mpi::nrank()==1) return;
     if (!m_period) {
-        log::info("Dynamic load balancing disabled for \"{}\"", m_name);
+        logging::info("Dynamic load balancing disabled for \"{}\"", m_name);
         return;
     }
-    log::info("Activating dynamic load balancing on cycle {}.", icycle);
+    logging::info("Activating dynamic load balancing on cycle {}.", icycle);
     m_icycle_active = icycle;
     // rezero the counter in case of later reactivation
     m_nnull_updates = 0ul;
@@ -112,8 +112,8 @@ void RankAllocatorBase::update(uint_t icycle) {
     auto it_lazy = std::min_element(m_gathered_total_times.begin(), m_gathered_total_times.end());
     auto it_busy = std::max_element(m_gathered_total_times.begin(), m_gathered_total_times.end());
     if (*it_lazy==0.0) {
-        log::warn("The most idle rank appears to have done no work at all");
-        log::debug("Gathered times: {}", convert::to_string(m_gathered_total_times));
+        logging::warn("The most idle rank appears to have done no work at all");
+        logging::debug("Gathered times: {}", convert::to_string(m_gathered_total_times));
     }
     REQUIRE_GT_ALL(*it_busy, 0.0, "The busiest rank appears to have done no work. "
                                   "record_work_time must be called by application");
@@ -123,9 +123,9 @@ void RankAllocatorBase::update(uint_t icycle) {
     // this rank has done the most work, so it should send a block
     uint_t irank_send = std::distance(m_gathered_total_times.begin(), it_busy);
     if (m_rank_to_blocks[irank_send].size()==1){
-        log::warn("Busiest rank has only one (very expensive) block remaining ({})",
+        logging::warn("Busiest rank has only one (very expensive) block remaining ({})",
                   m_rank_to_blocks[irank_send].front());
-        log::warn("Load balance cannot be further improved");
+        logging::warn("Load balance cannot be further improved");
         /*
          * if the cause is many expensive rows in a single block, they can probably be broken up by
          * increasing the number of blocks. otherwise, there's nothing to be done to improve parallel
@@ -140,7 +140,7 @@ void RankAllocatorBase::update(uint_t icycle) {
     if (m_gathered_total_times[irank_recv] > realloc_ratio * m_gathered_total_times[irank_send]) {
         ++m_nnull_updates;
         if(m_nnull_updates>=m_nnull_updates_deactivate) {
-            log::info(
+            logging::info(
                     "Load imbalance has been below {}% for over {} periods of {} cycles.",
                     m_acceptable_imbalance * 100, m_nnull_updates, m_period);
             deactivate();
@@ -165,7 +165,7 @@ void RankAllocatorBase::update(uint_t icycle) {
     auto it_block_transfer = m_rank_to_blocks[irank_send].begin();
     for (uint_t iskip=0ul; iskip<nskip; ++iskip) ++it_block_transfer;
 
-    log::info("Sending block {} of rank allocator \"{}\" from rank {} to {} on cycle {}",
+    logging::info("Sending block {} of rank allocator \"{}\" from rank {} to {} on cycle {}",
               *it_block_transfer, m_name, irank_send, irank_recv, icycle);
     // prepare vector of row indices to send
     uintv_t irows_send;

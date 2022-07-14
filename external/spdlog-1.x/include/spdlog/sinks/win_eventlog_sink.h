@@ -228,11 +228,11 @@ protected:
         details::os::utf8_to_wstrbuf(string_view_t(formatted.data(), formatted.size()), buf);
 
         LPCWSTR lp_wstr = buf.data();
-        succeeded = ::ReportEventW(event_log_handle(), eventlog::get_event_type(msg), eventlog::get_event_category(msg), event_id_,
+        succeeded = ::ReportEventW(event_log_handle(), eventlogging::get_event_type(msg), eventlogging::get_event_category(msg), event_id_,
                 current_user_sid_.as_sid(), 1, 0, &lp_wstr, nullptr);
 #else
         LPCSTR lp_str = formatted.data();
-        succeeded = ::ReportEventA(event_log_handle(), eventlog::get_event_type(msg), eventlog::get_event_category(msg), event_id_,
+        succeeded = ::ReportEventA(event_log_handle(), eventlogging::get_event_type(msg), eventlogging::get_event_category(msg), event_id_,
                 current_user_sid_.as_sid(), 1, 0, &lp_str, nullptr);
 #endif
 
@@ -269,8 +269,8 @@ public:
 
 } // namespace win_eventlog
 
-using win_eventlog_sink_mt = win_eventlog::win_eventlog_sink<std::mutex>;
-using win_eventlog_sink_st = win_eventlog::win_eventlog_sink<details::null_mutex>;
+using win_eventlog_sink_mt = win_eventlogging::win_eventlog_sink<std::mutex>;
+using win_eventlog_sink_st = win_eventlogging::win_eventlog_sink<details::null_mutex>;
 
 } // namespace sinks
 } // namespace spdlog

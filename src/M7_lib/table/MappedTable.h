@@ -252,10 +252,10 @@ public:
         // use the same expansion factor as for the Table buffer
         nbucket_new *= 1.0 + this->m_bw.get_expansion_factor();
         if (!TableBase::name().empty()) {
-            log::info_("remapping hash table for \"{}\"", TableBase::name());
-            log::info_("current ratio of skips to total lookups ({}) exceeds set limit ({})",
+            logging::info_("remapping hash table for \"{}\"", TableBase::name());
+            logging::info_("current ratio of skips to total lookups ({}) exceeds set limit ({})",
                        skip_lookup_ratio(), m_remap_ratio);
-            log::info_("replacing current bucket vector of size {} with a new one of size {}",
+            logging::info_("replacing current bucket vector of size {} with a new one of size {}",
                        nbucket(), nbucket_new);
         }
         v_t<std::forward_list<uint_t>> new_buckets(nbucket_new);

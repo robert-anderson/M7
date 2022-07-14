@@ -8,7 +8,7 @@
 
 RefExcitsOneExsig::RefExcitsOneExsig(uint_t exsig, uint_t nroot, uint_t nbucket) :
         BufferedTable<MaeRow, true>(
-                log::format("average {} reference excitation coefficients", exsig::to_string(exsig)),
+                logging::format("average {} reference excitation coefficients", exsig::to_string(exsig)),
                 {{exsig, nroot}, nbucket}),
         m_working_inds(exsig) {}
 

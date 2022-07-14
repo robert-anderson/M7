@@ -195,10 +195,10 @@ private:
             m_basis(m_frmbos ? m_frmbos.m_basis : sys::Basis(m_frm.m_basis, m_bos.m_basis)),
             m_boson_number_conserve(boson_number_conserve()), m_work_conn(m_basis.size()){
         REQUIRE_TRUE(m_basis, "No system defined");
-        if (!m_frm) log::info("Fermion Hamiltonian is disabled");
+        if (!m_frm) logging::info("Fermion Hamiltonian is disabled");
         if (c_enable_bosons) {
-            if (!m_frmbos) log::info("Fermion-boson ladder Hamiltonian is disabled");
-            if (!m_bos) log::info("Number-conserving boson Hamiltonian is disabled");
+            if (!m_frmbos) logging::info("Fermion-boson ladder Hamiltonian is disabled");
+            if (!m_bos) logging::info("Number-conserving boson Hamiltonian is disabled");
         }
 
         if (m_frm && m_frmbos) REQUIRE_EQ(m_frm.m_basis, m_frmbos.m_basis.m_frm,
@@ -324,7 +324,7 @@ public:
         if (m_frm && ms2==sys::frm::c_undefined_ms2) ms2 = m_frm.default_ms2_value();
         if (m_frmbos && ms2==sys::frm::c_undefined_ms2) ms2 = m_frmbos.default_ms2_value();
         if (ms2==sys::frm::c_undefined_ms2) {
-            log::info("2*Ms value not defined by configuration document or Hamiltonian, "
+            logging::info("2*Ms value not defined by configuration document or Hamiltonian, "
                       "defaulting to lowest valid positive value");
             ms2 = sys::frm::Ms2::lowest_value(nelec);
         }

@@ -24,9 +24,9 @@ struct RowTransfer {
     RowTransfer(str_t name) :
             m_send_buffer("Outward transfer buffer", 1),
             m_recv_buffer("Inward transfer buffer", 1) {
-        log::info("Initializing row send/recv buffers for table \"{}\"", name);
-        log::debug("P2P tag for number of row indices to transfer for \"{}\": {}", name, m_nrow_p2p_tag);
-        log::debug("P2P tag for array of row indices to transfer for \"{}\": {}", name, m_irows_p2p_tag);
+        logging::info("Initializing row send/recv buffers for table \"{}\"", name);
+        logging::debug("P2P tag for number of row indices to transfer for \"{}\": {}", name, m_nrow_p2p_tag);
+        logging::debug("P2P tag for array of row indices to transfer for \"{}\": {}", name, m_irows_p2p_tag);
         m_send_buffer.append_window(&m_send_bw);
         m_recv_buffer.append_window(&m_recv_bw);
     }

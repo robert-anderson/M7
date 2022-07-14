@@ -89,9 +89,9 @@ bool mpi::on_node_i_am_root() {
 }
 
 void mpi::abort_(str_t message) {
-    log::error_("Forcing MPI_Abort from this rank: {}", std::move(message));
-    log::error_backtrace_();
-    log::finalize();
+    logging::error_("Forcing MPI_Abort from this rank: {}", std::move(message));
+    logging::error_backtrace_();
+    logging::finalize();
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
     if (mpi::nrank()==1) std::abort();
     MPI_Abort(MPI_COMM_WORLD, -1);
@@ -99,11 +99,11 @@ void mpi::abort_(str_t message) {
 
 void mpi::abort(str_t message){
     if (mpi::nrank()==1)
-        log::error("Reason: {}", std::move(message));
+        logging::error("Reason: {}", std::move(message));
     else
-        log::error_("Reason: {}", std::move(message));
-    log::error_backtrace_();
-    log::finalize();
+        logging::error_("Reason: {}", std::move(message));
+    logging::error_backtrace_();
+    logging::finalize();
     MPI_Barrier(MPI_COMM_WORLD);
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
     if (mpi::nrank()==1) std::abort();

@@ -62,7 +62,7 @@ public:
     CommunicatingPair(str_t name, uint_t comm_nrow_est, double exp_fac, const send_table_t &send) :
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
-        log::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
+        logging::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
                   string::memsize(mpi::nrank() * comm_nrow_est*m_recv.row_size()), name);
         m_send.resize(comm_nrow_est, 0.0);
         m_recv.resize(mpi::nrank() * comm_nrow_est, 0.0);
@@ -121,7 +121,7 @@ public:
         auto all_sends_empty = !std::accumulate(sendcounts.cbegin(), sendcounts.cend(), 0ul);
         DEBUG_ONLY(all_sends_empty);
         if (all_sends_empty && m_last_recv_count) {
-            log::debug_("this rank is sending no data at all, but it received data in the previous communication");
+            logging::debug_("this rank is sending no data at all, but it received data in the previous communication");
         }
 
         mpi::all_to_all(sendcounts, recvcounts);
@@ -235,9 +235,9 @@ struct Communicator {
                 m_name(name),
                 m_ntrow_to_track_p2p_tag(mpi::new_p2p_tag()),
                 m_itrows_to_track_p2p_tag(mpi::new_p2p_tag()) {
-            log::debug("P2P tag for number of dynamic row indices to transfer for \"{}\": {}", m_name,
+            logging::debug("P2P tag for number of dynamic row indices to transfer for \"{}\": {}", m_name,
                        m_ntrow_to_track_p2p_tag);
-            log::debug("P2P tag for array of dynamic row indices to transfer for \"{}\": {}", m_name,
+            logging::debug("P2P tag for array of dynamic row indices to transfer for \"{}\": {}", m_name,
                        m_itrows_to_track_p2p_tag);
             m_ranks_with_any_rows.reserve(mpi::nrank());
         }
@@ -302,10 +302,10 @@ struct Communicator {
                 mpi::send(&nrow_transfer, 1, irank_recv, m_ntrow_to_track_p2p_tag);
                 // only bother with vector send if there's anything to transfer
                 if (!nrow_transfer) {
-                    log::debug_("No dynamic rows to transfer for \"{}\"", m_name);
+                    logging::debug_("No dynamic rows to transfer for \"{}\"", m_name);
                     return;
                 }
-                log::debug_("Sending {} dynamic rows for \"{}\" from rank {} to {}",
+                logging::debug_("Sending {} dynamic rows for \"{}\" from rank {} to {}",
                             nrow_transfer, m_name, irank_send, irank_recv);
                 mpi::send(m_idrows.data(), nrow_transfer, irank_recv, m_itrows_to_track_p2p_tag);
             }
@@ -319,14 +319,14 @@ struct Communicator {
                 m_idrows.clear();
                 mpi::recv(&nrow_transfer, 1, irank_send, m_ntrow_to_track_p2p_tag);
                 if (!nrow_transfer) {
-                    log::debug_("No dynamic rows to transfer for \"{}\"", m_name);
+                    logging::debug_("No dynamic rows to transfer for \"{}\"", m_name);
                     return;
                 }
-                log::debug_("Recving {} dynamic rows for \"{}\" to rank {} from {}",
+                logging::debug_("Recving {} dynamic rows for \"{}\" to rank {} from {}",
                             nrow_transfer, m_name, irank_recv, irank_send);
                 m_idrows.resize(nrow_transfer, ~0ul);
                 mpi::recv(m_idrows.data(), nrow_transfer, irank_send, m_itrows_to_track_p2p_tag);
-                log::debug_("idrows: {}", convert::to_string(m_idrows));
+                logging::debug_("idrows: {}", convert::to_string(m_idrows));
             }
         }
 
@@ -399,7 +399,7 @@ struct Communicator {
              * into the local contiguous table (m_local)
              */
             DEBUG_ASSERT_TRUE_ALL(nrow(),
-                                  log::format("Total number of rows across all ranks should be non-zero (\"{}\").",
+                                  logging::format("Total number of rows across all ranks should be non-zero (\"{}\").",
                                               m_name));
             m_local.clear();
             auto nrow = m_displs.back() + m_counts.back();
@@ -482,7 +482,7 @@ struct Communicator {
             }
             mpi::bcast(m_iblock_ra, newloc.m_irank);
             update();
-            log::debug("Shared row \"{}\" is now in block {} on rank {}", m_name, m_iblock_ra, newloc.m_irank);
+            logging::debug("Shared row \"{}\" is now in block {} on rank {}", m_name, m_iblock_ra, newloc.m_irank);
         }
 
         uint_t irank() const {
@@ -496,10 +496,10 @@ struct Communicator {
             REQUIRE_EQ_ALL(m_ranks_with_any_rows.size(), 1ul, "Only one rank should have a row");
             auto irank_final = irank();
             if (irank_initial == ~0ul)
-                log::info("Dynamic row \"{}\" is in block {} of {}, which is initially stored on rank {}",
+                logging::info("Dynamic row \"{}\" is in block {} of {}, which is initially stored on rank {}",
                           m_name, m_iblock_ra, this->m_ra.m_nblock, irank_final);
             else if (irank_initial != irank_final)
-                log::info("Dynamic row \"{}\" moved from rank {} to rank {}",
+                logging::info("Dynamic row \"{}\" moved from rank {} to rank {}",
                           m_name, irank_initial, irank_final);
         }
 
@@ -545,7 +545,7 @@ struct Communicator {
             m_comm(name, comm_nrow_est, comm_exp_fac, send),
             m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
             m_name(name) {
-        log::info("Initially allocating {} per rank for store buffer of \"{}\" ",
+        logging::info("Initially allocating {} per rank for store buffer of \"{}\" ",
                   string::memsize(store_nrow_est*m_store.row_size()), name);
         m_store.resize(store_nrow_est, 0.0);
         m_store.set_expansion_factor(store_exp_fac);

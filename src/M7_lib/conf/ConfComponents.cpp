@@ -32,7 +32,7 @@ void conf_components::Node::validate_file_contents() const {
     for (auto child: m_children) node_names.push_back(child->m_path.m_list.back());
     for (auto& content_name: child_names_in_file()) {
         auto found = std::find(node_names.cbegin(), node_names.cend(), content_name) != node_names.cend();
-        REQUIRE_TRUE(found, log::format("file node \"{}\" is unrecognized", (m_path+content_name).m_string));
+        REQUIRE_TRUE(found, logging::format("file node \"{}\" is unrecognized", (m_path+content_name).m_string));
     }
 }
 
@@ -72,9 +72,9 @@ void conf_components::Node::validate() {
 }
 
 void conf_components::Node::print_help(bool emph_first, size_t ilevel) const {
-    if (!ilevel) std::cout << log::format("\nPrinting input specification for {}\n", m_desc);
+    if (!ilevel) std::cout << logging::format("\n  Input specification for {}\n", m_desc);
     auto pairs = help_pairs();
-    if (!pairs.empty() && emph_first) pairs.front().second = log::bold_format(pairs.front().second);
+    if (!pairs.empty() && emph_first) pairs.front().second = logging::bold_format(pairs.front().second);
 
     typedef std::pair<str_t, str_t> pair_t;
     auto longest_key_pair = std::max_element(pairs.cbegin(), pairs.cend(),
@@ -83,7 +83,7 @@ void conf_components::Node::print_help(bool emph_first, size_t ilevel) const {
     std::string fmt_str = "{}{:<"+convert::to_string(longest_key_size+1)+"}| {}\n";
 
     for (auto& pair: pairs) {
-        std::cout << log::format(fmt_str, std::string(ilevel*2, ' '), pair.first, pair.second);
+        std::cout << logging::format(fmt_str, std::string(ilevel*2, ' '), pair.first, pair.second);
     }
     std::cout << '\n';
     for (auto child: m_children) child->print_help(emph_first, ilevel + 1);
@@ -135,7 +135,7 @@ bool conf_components::Group::make_enabled() const {
      */
     if (parse_as<bool>()) {
         if (m_enable_policy!=Explicit)
-            log::warn("explicitly enabling {} group {} by boolean value is redundant",
+            logging::warn("explicitly enabling {} group {} by boolean value is redundant",
                       m_enable_policy==Implicit ? "implicitly enabled" : "required", m_path.m_string);
         return true;
     }
@@ -170,7 +170,7 @@ v_t<std::pair<str_t, str_t>> conf_components::Section::help_pairs() const {
 }
 
 void conf_components::Section::log() const {
-    log::info("{} ({})", m_path.m_string, m_enabled ? "enabled" : "disabled");
+    logging::info("{} ({})", m_path.m_string, m_enabled ? "enabled" : "disabled");
     if (m_enabled) Node::log();
 }
 
@@ -198,7 +198,7 @@ YAML::Node conf_components::Document::load(const str_t& fname) {
         return YAML::Load(contents);
     }
     catch (const YAML::ParserException& ex) {
-        ABORT(log::format("YAML syntax error in file {}, line {}, column {}",
+        ABORT(logging::format("YAML syntax error in file {}, line {}, column {}",
                           fname, ex.mark.line, ex.mark.pos));
     }
     return {};

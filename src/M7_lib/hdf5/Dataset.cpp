@@ -18,7 +18,7 @@ uint_t hdf5::DatasetReader::get_ndim(hid_t parent_handle, const str_t &name) {
 v_t<hsize_t> hdf5::DatasetReader::get_hdf5_shape(hid_t parent_handle, const str_t &name) {
     auto ndim = get_ndim(parent_handle, name);
     auto dataset = H5Dopen1(parent_handle, name.c_str());
-    REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));
+    REQUIRE_GT_ALL(dataset, 0, logging::format("no such dataset \"{}\"", name));
     auto dataspace = H5Dget_space(dataset);
     v_t<hsize_t> shape(ndim);
     H5Sget_simple_extent_dims(dataspace, shape.data(), nullptr);

@@ -255,7 +255,7 @@ namespace hdf5 {
          */
         void read_h5item_bytes(const uint_t &iitem, void *data) {
             select_hyperslab(iitem);
-            log::debug_("reading data...");
+            logging::debug_("reading data...");
             if (data) {
                 auto status = H5Dread(m_dataset_handle, m_h5type, m_memspace_handle,
                                       m_filespace_handle, m_coll_plist, data);
@@ -267,7 +267,7 @@ namespace hdf5 {
                 DEBUG_ONLY(status);
                 DEBUG_ASSERT_TRUE(!status, "HDF5 read failed");
             }
-            log::debug_("data read");
+            logging::debug_("data read");
         }
     };
 }

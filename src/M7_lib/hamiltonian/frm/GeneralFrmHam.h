@@ -35,12 +35,12 @@ private:
     Integrals make_ints(const FcidumpInfo& info, bool spin_major) {
         const str_t fmt = "Reading fermion Hamiltonian coefficients from {} file \"" + info.m_fname + "\"...";
         if (info.m_impl==FcidumpInfo::CSV) {
-            log::info(fmt, "plain text CSV");
+            logging::info(fmt, "plain text CSV");
             CsvIntegralReader reader(info, spin_major);
             return make_ints(reader);
         }
         else if (info.m_impl==FcidumpInfo::MolcasHDF5) {
-            log::info(fmt, "Molcas HDF5 binary");
+            logging::info(fmt, "Molcas HDF5 binary");
             MolcasHdf5IntegralReader reader(info, spin_major);
             return make_ints(reader);
         }

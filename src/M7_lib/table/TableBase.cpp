@@ -117,10 +117,10 @@ void TableBase::transfer_rows(const uintv_t &irows, uint_t irank_send, uint_t ir
         nrow = irows.size();
         mpi::send(&nrow, 1, irank_recv, m_transfer->m_nrow_p2p_tag);
         if (!nrow){
-            log::debug_("Sending rank notifying recving rank that no rows are transferred");
+            logging::debug_("Sending rank notifying recving rank that no rows are transferred");
             return;
         }
-        log::info_("Transferring {} rows outward to rank {}", nrow, irank_recv);
+        logging::info_("Transferring {} rows outward to rank {}", nrow, irank_recv);
 
         auto size_required = nrow*row_size();
         if (send_bw.m_size < size_required) send_bw.resize(size_required);
@@ -138,12 +138,12 @@ void TableBase::transfer_rows(const uintv_t &irows, uint_t irank_send, uint_t ir
         auto& recv_bw = m_transfer->m_send_bw;
         mpi::recv(&nrow, 1, irank_send, m_transfer->m_nrow_p2p_tag);
         if (!nrow){
-            log::debug_("Recving rank notified by sending rank that no rows are transferred");
+            logging::debug_("Recving rank notified by sending rank that no rows are transferred");
             return;
         }
         auto size_required = nrow * row_size();
         if (recv_bw.m_size<size_required) recv_bw.resize(size_required);
-        log::info_("Transferring {} rows inward from rank {}", nrow, irank_send);
+        logging::info_("Transferring {} rows inward from rank {}", nrow, irank_send);
         mpi::recv(recv_bw.m_begin, row_size() * nrow, irank_send, m_transfer->m_irows_p2p_tag);
         /*
          * now emplace received rows in TableBase buffer window, and call all callbacks for each

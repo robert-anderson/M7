@@ -60,7 +60,7 @@ namespace sparse {
         MatrixElement(uint_t i=~0ul, T v={}): Element(i), m_v(v){}
 
         str_t to_string() const override {
-            return log::format("({} -> {})", m_i, convert::to_string(m_v));
+            return logging::format("({} -> {})", m_i, convert::to_string(m_v));
         }
     };
 }

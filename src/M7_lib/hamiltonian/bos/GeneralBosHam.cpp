@@ -13,7 +13,7 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, uint_t occ_cutoff) :
     uintv_t inds(4);
     ham_t value;
 
-    log::info("Reading Boson Hamiltonian coefficients from file \"" + file_reader.m_fname + "\"...");
+    logging::info("Reading Boson Hamiltonian coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
         if (fptol::numeric_zero(value)) continue;
         auto ranksig = file_reader.ranksig(inds);

@@ -9,17 +9,17 @@ ProgressMonitor::ProgressMonitor(bool local, str_t name, str_t item_name, uint_t
         m_local(local), m_name(name), m_item_name(item_name), m_nexpect(nexpect),
         m_pc_resolution(pc_resolution), m_period(std::round(nexpect * (pc_resolution / 100.0))) {
     if (m_local)
-        log::info_("Starting process \"{}\"...", m_name);
+        logging::info_("Starting process \"{}\"...", m_name);
     else
-        log::info("Starting process \"{}\"...", m_name);
+        logging::info("Starting process \"{}\"...", m_name);
 }
 
 void ProgressMonitor::log(const uint_t &pc) const {
     if (m_local)
-        log::info_("process \"{}\" is {}% ({}/{} {}) complete",
+        logging::info_("process \"{}\" is {}% ({}/{} {}) complete",
                    m_name, pc, m_i + 1, m_nexpect, m_item_name);
     else
-        log::info("process \"{}\" is {}% ({}/{} {}) complete",
+        logging::info("process \"{}\" is {}% ({}/{} {}) complete",
                   m_name, pc, m_i + 1, m_nexpect, m_item_name);
 }
 

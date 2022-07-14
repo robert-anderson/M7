@@ -17,22 +17,22 @@ Archivable::Archivable(str_t name, const conf::Archive& opts) :
 void Archivable::load(const hdf5::NodeReader& parent) {
     if (m_load) {
         REQUIRE_TRUE_ALL(parent.child_exists(m_name),
-                         log::format("Load failed: \"{}\" does not exist in archive", m_name));
-        log::info("loading \"{}\" from archive", m_name);
+                         logging::format("Load failed: \"{}\" does not exist in archive", m_name));
+        logging::info("loading \"{}\" from archive", m_name);
         load_fn(parent);
     }
 }
 
 void Archivable::save(const hdf5::NodeWriter& parent) {
     if (m_save) {
-        log::info("saving \"{}\" to archive", m_name);
+        logging::info("saving \"{}\" to archive", m_name);
         save_fn(parent);
     }
 }
 
 void Archivable::chkpt(const hdf5::NodeWriter& parent) {
     if (m_chkpt) {
-        log::info("saving \"{}\" checkpoint to archive", m_name);
+        logging::info("saving \"{}\" checkpoint to archive", m_name);
         save_fn(parent);
     }
 }
@@ -41,17 +41,17 @@ Archive::Archive(const conf::Document& opts) :
         m_opts(opts), m_do_load(m_opts.m_archive.do_load()),
         m_do_save(opts.m_archive.do_save()), m_do_chkpts(opts.m_archive.do_chkpts()) {
     m_timer.unpause();
-    if (m_do_load) log::info("reading archive from file \"{}\"", m_opts.m_archive.m_load_path.m_value);
-    else log::info("not reading archive from file");
-    if (m_do_save) log::info("saving archive to file \"{}\" upon termination of the solver loop", m_opts.m_archive.m_save_path.m_value);
-    else log::info("not saving archive to file");
+    if (m_do_load) logging::info("reading archive from file \"{}\"", m_opts.m_archive.m_load_path.m_value);
+    else logging::info("not reading archive from file");
+    if (m_do_save) logging::info("saving archive to file \"{}\" upon termination of the solver loop", m_opts.m_archive.m_save_path.m_value);
+    else logging::info("not saving archive to file");
     if (m_do_chkpts) {
-        log::info("dumping checkpoint archives on file \"{}\"", m_opts.m_archive.m_chkpt_path.m_value);
+        logging::info("dumping checkpoint archives on file \"{}\"", m_opts.m_archive.m_chkpt_path.m_value);
         if (m_opts.m_archive.m_period)
-            log::info("checkpoints will be made every {} cycles", m_opts.m_archive.m_period.m_value);
+            logging::info("checkpoints will be made every {} cycles", m_opts.m_archive.m_period.m_value);
         if (m_opts.m_archive.m_period_mins)
-            log::info("checkpoints will be made every {} minutes", m_opts.m_archive.m_period_mins.m_value);
-    } else log::info("not dumping checkpoint archives");
+            logging::info("checkpoints will be made every {} minutes", m_opts.m_archive.m_period_mins.m_value);
+    } else logging::info("not dumping checkpoint archives");
 }
 
 Archive::~Archive() {
@@ -98,7 +98,7 @@ void Archive::chkpt(uint_t icycle) {
     if (output && (icycle == m_icycle_last_chkpt)) output = false;
     if (!output) return;
 
-    hdf5::FileWriter fw(log::format(m_opts.m_archive.m_chkpt_path, m_nchkpt));
+    hdf5::FileWriter fw(logging::format(m_opts.m_archive.m_chkpt_path, m_nchkpt));
     save(fw);
 }
 

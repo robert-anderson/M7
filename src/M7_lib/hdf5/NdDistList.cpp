@@ -9,7 +9,7 @@ void hdf5::NdDistListWriter::write_h5item_bytes(const uint_t &iitem, const void 
     DEBUG_ASSERT_EQ(bool(data), iitem < m_nitem_local,
                     "data is null and items remain, or this is a runoff write op and data is not null");
     select_hyperslab(iitem);
-    log::debug_("writing data...");
+    logging::debug_("writing data...");
 
     if (data) {
         auto status = H5Dwrite(m_dataset_handle, m_h5type, m_memspace_handle,
@@ -23,7 +23,7 @@ void hdf5::NdDistListWriter::write_h5item_bytes(const uint_t &iitem, const void 
         DEBUG_ONLY(status);
         DEBUG_ASSERT_FALSE(status, "HDF5 write failed");
     }
-    log::debug_("data written");
+    logging::debug_("data written");
 }
 
 hdf5::NdDistListWriter::NdDistListWriter(hid_t parent_handle, str_t name, const uintv_t &item_dims,
@@ -99,24 +99,24 @@ hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, str_t name, const uint
     v_t<hsize_t> zeros(m_ndim_list, 0ul);
     m_none_memspace_handle = H5Screate_simple(m_ndim_list, zeros.data(), nullptr);
 
-    log::debug_("Opened HDF5 NdList with {} local items", m_nitem_local);
+    logging::debug_("Opened HDF5 NdList with {} local items", m_nitem_local);
 }
 
 void hdf5::NdDistListBase::select_hyperslab(const uint_t &iitem) {
     if (iitem < m_nitem_local) {
         m_hyperslab_offsets[0] = m_item_offset + iitem;
-        log::debug_("selecting hyperslab with offsets: {}", convert::to_string(m_hyperslab_offsets));
+        logging::debug_("selecting hyperslab with offsets: {}", convert::to_string(m_hyperslab_offsets));
         auto status = H5Sselect_hyperslab(m_filespace_handle, H5S_SELECT_SET, m_hyperslab_offsets.data(),
                                           nullptr, m_hyperslab_counts.data(), nullptr);
         DEBUG_ONLY(status);
         DEBUG_ASSERT_FALSE(status, "HDF5 hyperslab selection failed");
-        log::debug_("hyperslab selected");
+        logging::debug_("hyperslab selected");
     } else {
         /*
          * the item index exceeds local bounds, so make a null selection instead
          * of a hyperslab selection
          */
-        log::debug_("making null selection");
+        logging::debug_("making null selection");
         DEBUG_ASSERT_LT(iitem, m_nitem_local_max, "Item index exceeds global maximum");
         auto status = H5Sselect_none(m_filespace_handle);
         DEBUG_ONLY(status);

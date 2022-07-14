@@ -47,9 +47,9 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
     BufferedTable<WalkerTableRow> xr_gathered("global top weighted", {m_store.m_row});
     gxr.gatherv(xr_gathered);
     auto& row = xr_gathered.m_row;
-    log::info("Top-weighted WF elements for part {}:", ipart);
+    logging::info("Top-weighted WF elements for part {}:", ipart);
     for (row.restart(); row.in_range(); row.step()) {
-        log::info("{:<4} {}  {: .8e}  {}", row.index(), row.m_mbf, row.m_weight[ipart], row.m_initiator[ipart]);
+        logging::info("{:<4} {}  {: .8e}  {}", row.index(), row.m_mbf, row.m_weight[ipart], row.m_initiator[ipart]);
     }
 }
 

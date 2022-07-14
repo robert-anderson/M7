@@ -388,13 +388,13 @@ namespace sys {
 
 /*
 static std::ostream &operator<<(std::ostream &os, const sys::frm::Basis &v) {
-    os << log::format("[nsite: {}, spin resolved: {}, site irreps: {}]",
+    os << logging::format("[nsite: {}, spin resolved: {}, site irreps: {}]",
                       v.m_nsite, v.m_spin_resolved, convert::to_string(v.m_abgrp_map.m_site_irreps));
     return os;
 }
 
 static std::ostream &operator<<(std::ostream &os, const sys::bos::Basis &v) {
-    os << log::format("[nmode: {}, max mode occ: {}]", v.m_nmode, v.m_occ_cutoff);
+    os << logging::format("[nmode: {}, max mode occ: {}]", v.m_nmode, v.m_occ_cutoff);
     return os;
 }
  */

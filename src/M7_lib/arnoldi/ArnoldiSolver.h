@@ -213,7 +213,7 @@ public:
     T real_eigenvalue(uint_t i) override {
         auto z = complex_eigenvalue(i);
         if (!fptol::numeric_zero(z.imag()))
-            log::warn("taking real part of eigenvalue with non-zero imaginary part");
+            logging::warn("taking real part of eigenvalue with non-zero imaginary part");
         return arith::real(complex_eigenvalue(i));
     }
 

@@ -157,12 +157,12 @@ TEST(HDF5Wrapper, NumberDistributed) {
     ASSERT_EQ(write_table.nrow(), 0ul);
     auto read_table = write_table;
     const auto nrow = hash::in_range(mpi::irank() + 1, 10, 20);
-    log::debug_("number of local rows {}", nrow);
+    logging::debug_("number of local rows {}", nrow);
     write_table.push_back(nrow);
     auto row = write_table.m_row;
     for (row.restart(); row.in_range(); row.step()) {
         row.m_field = hash::in_range((row.index() + 1) * (mpi::irank() + 1), 4, 123);
-        log::debug_("writing value: {}", hash::digest_t(row.m_field));
+        logging::debug_("writing value: {}", hash::digest_t(row.m_field));
     }
     {
         hdf5::FileWriter fw("table_test.h5");

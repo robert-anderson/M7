@@ -14,12 +14,12 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
         m_annihilator(m_wf, m_prop, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_archive(opts), m_detsubs(opts.m_propagator.m_semistochastic) {
 
-    log::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
+    logging::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
     if (m_wf.nreplica() == 2 && !m_prop.ncase_excit_gen())
-        log::warn("Replica populations are redundant when doing exact propagation");
+        logging::warn("Replica populations are redundant when doing exact propagation");
 
     if (m_maes.m_bilinears && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
-        log::warn("Attempting a stochastic propagation estimation of bilinear MAEs without replication, "
+        logging::warn("Attempting a stochastic propagation estimation of bilinear MAEs without replication, "
                   "this is biased");
 
     if (mpi::i_am_root()) {
@@ -44,9 +44,9 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
     }
     if (m_maes.m_bilinears.m_rdms) {
         if (m_maes.m_bilinears.m_rdms.is_energy_sufficient(m_prop.m_ham))
-            log::info("Specified RDM rank signatures are sufficient for variational energy estimation");
+            logging::info("Specified RDM rank signatures are sufficient for variational energy estimation");
         else
-            log::warn("Specified RDM rank signatures are insufficient for variational energy estimation");
+            logging::warn("Specified RDM rank signatures are insufficient for variational energy estimation");
     }
     /**
      * read previous calculation data into archivable objects if archive loading is enabled
@@ -57,7 +57,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
 }
 
 void Solver::execute(uint_t ncycle) {
-    log::info("Beginning solver loop...");
+    logging::info("Beginning solver loop...");
     for (uint_t i = 0ul; i < ncycle; ++i) {
         m_cycle_timer.reset();
         m_cycle_timer.unpause();
@@ -93,20 +93,20 @@ void Solver::execute(uint_t ncycle) {
         ++m_icycle;
 
         if (m_exit.read() && m_exit.m_v) {
-            log::info("exit requested from file, terminating solver loop at MC cycle {}", i);
+            logging::info("exit requested from file, terminating solver loop at MC cycle {}", i);
             break;
         }
         if (m_maes.m_accum_epoch) {
             if (i == m_maes.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) {
                 if (m_icycle == ncycle)
-                    log::info("maximum number of MEV accumulating cycles ({}) "
+                    logging::info("maximum number of MEV accumulating cycles ({}) "
                               "reached at MC cycle {}", m_opts.m_av_ests.m_ncycle, i);
                 break;
             }
         }
-        log::flush();
+        logging::flush();
     }
-    if (m_icycle == ncycle) log::info("maximum cycle number ({}) reached", m_icycle);
+    if (m_icycle == ncycle) logging::info("maximum cycle number ({}) reached", m_icycle);
     if (m_maes.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
         finalizing_loop_over_occupied_mbfs(m_icycle - 1);
@@ -144,7 +144,7 @@ void Solver::begin_cycle() {
     if (m_opts.m_propagator.m_semistochastic.m_size && !m_detsubs) {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
             m_detsubs.build_from_most_occupied(m_prop.m_ham, m_maes.m_bilinears, m_wf, m_icycle);
-            log::info("Initialized deterministic subspace");
+            logging::info("Initialized deterministic subspace");
         }
     }
 }
@@ -245,7 +245,7 @@ void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
 void Solver::loop_over_spawned() {
     mpi::barrier();
     if (!m_wf.recv().m_hwm) {
-        log::debug_("no rows received, omitting loop over spawned");
+        logging::debug_("no rows received, omitting loop over spawned");
         return;
     }
     auto hwm_before = m_wf.m_store.m_hwm;

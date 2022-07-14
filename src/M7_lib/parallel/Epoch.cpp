@@ -16,7 +16,7 @@ bool Epoch::update(uint_t icycle, bool condition) {
     m_icycle_start.m_local = condition?icycle:~0ul;
     m_icycle_start.all_min();
     if (*this) {
-        log::info("Entering \"{}\" epoch on cycle {} ", m_name, icycle);
+        logging::info("Entering \"{}\" epoch on cycle {} ", m_name, icycle);
         return true;
     }
     return false;
@@ -25,7 +25,7 @@ bool Epoch::update(uint_t icycle, bool condition) {
 void Epoch::terminate(uint_t icycle) {
     if (!*this) return;
     ASSERT(icycle_start() != ~0ul)
-    log::info("Terminating \"{}\" epoch on cycle {} ", m_name, icycle);
+    logging::info("Terminating \"{}\" epoch on cycle {} ", m_name, icycle);
     m_icycle_start.m_local = ~0ul;
     m_icycle_start.m_reduced = ~0ul;
 }

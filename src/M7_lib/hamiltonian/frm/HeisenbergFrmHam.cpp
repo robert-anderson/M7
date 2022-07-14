@@ -9,7 +9,7 @@ HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::Latti
     SpinModelFrmHam(lattice), m_j(j){
     m_contribs_2200.set_nonzero(exsig::ex_double);
     m_contribs_2200.set_nonzero(0);
-    log::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_basis.m_lattice->m_info);
+    logging::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_basis.m_lattice->m_info);
 }
 
 
