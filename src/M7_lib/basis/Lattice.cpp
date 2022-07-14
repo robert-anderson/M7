@@ -20,7 +20,7 @@ lattice::Lattice::Lattice(const lattice::Topology &topo) : Lattice(topo.make_adj
 lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs) :
         Topology(NdFormatD(shape).m_nelement,
                  log::format("orthogonal lattice with shape {} and boundary conds {}",
-                             convert::to_string(m_inds.m_shape), convert::to_string(m_bcs))),
+                             convert::to_string(shape), convert::to_string(bcs))),
     m_inds(shape), m_bcs(bcs) {
     for (uint_t idim=0ul; idim<m_inds.m_nind; ++idim){
         REQUIRE_TRUE(m_inds.m_shape[idim], "every extent in the site shape must be non-zero");

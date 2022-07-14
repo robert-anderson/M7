@@ -23,12 +23,10 @@ uintv_t sparse::fixed::Base::make_displs(const uintv_t &counts) {
 }
 
 sparse::fixed::Base::Base(const uintv_t &counts) :
-        m_nrow(counts.size()), m_max_nentry(counts.empty() ? 0ul : *std::max(counts.cbegin(), counts.cend())),
+        m_nrow(counts.size()), m_max_nentry(counts.empty() ? 0ul : *std::max_element(counts.cbegin(), counts.cend())),
         m_displs(make_displs(counts)), m_nentry(m_displs.back()) {}
 
 sparse::fixed::Base::Base(const sparse::dynamic::Base &src) : Base(make_counts(src)){
     DEBUG_ASSERT_EQ(m_nentry, src.nentry(),
                     "number of entries calculated from offsets should match that counted by the dynamic::Network instance");
-    DEBUG_ASSERT_EQ(m_max_nentry, src.max_col_ind()+1,
-                    "max number of entries in row calculated from offsets should match dynamic::Network::m_icol_max+1");
 }
