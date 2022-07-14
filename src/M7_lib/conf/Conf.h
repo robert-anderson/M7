@@ -129,6 +129,7 @@ namespace conf {
     struct Wavefunction : Section {
         Param<double> m_nw_init;
         Param<uint_t> m_nroot;
+        Param<bool> m_fci_init;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Archivable m_archivable;

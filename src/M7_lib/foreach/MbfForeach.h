@@ -221,7 +221,8 @@ namespace mbf_foreach {
                           "template arg must be derived from mbf_foreach::frm::Base");
             typedef mbf_foreach::Pair<field::FrmOnv, foreach_t> base_t;
 
-            Pair(const sys::frm::Sector &sector) : base_t(foreach_t(sector)) {}
+            Pair(const foreach_t& foreach) : base_t(foreach) {}
+            Pair(const sys::frm::Sector &sector) : Pair(foreach_t(sector)) {}
 
         protected:
             void frm_loop(field::FrmOnv& bra, field::FrmOnv& ket, const PairBase::function_t& fn) override {
@@ -291,7 +292,8 @@ namespace mbf_foreach {
                           "template arg must be derived from mbf_foreach::bos::Base");
             typedef mbf_foreach::Pair<field::BosOnv, foreach_t> base_t;
 
-            Pair(const sys::bos::Sector &sector) : base_t(foreach_t(sector)) {}
+            Pair(const foreach_t& foreach) : base_t(foreach) {}
+            Pair(const sys::bos::Sector &sector) : Pair(foreach_t(sector)) {}
 
         protected:
             void bos_loop(field::BosOnv& bra, field::BosOnv& ket, const PairBase::function_t& fn) override {
@@ -378,7 +380,8 @@ namespace mbf_foreach {
                           "template arg must be derived from mbf_foreach::frm_bos::Base");
             typedef mbf_foreach::Pair<field::FrmBosOnv, foreach_t> base_t;
 
-            Pair(const sys::Sector& sector) : base_t(foreach_t(sector)) {}
+            Pair(const foreach_t& foreach) : base_t(foreach) {}
+            Pair(const sys::Sector& sector) : Pair(foreach_t(sector)) {}
 
         protected:
             void frmbos_loop(field::FrmBosOnv& bra, field::FrmBosOnv& ket, const PairBase::function_t& fn) override {

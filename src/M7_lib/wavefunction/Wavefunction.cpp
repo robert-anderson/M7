@@ -38,6 +38,7 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
     m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
+    if (opts.m_wavefunction.m_fci_init) fci_init();
 }
 
 void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
@@ -230,6 +231,11 @@ uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta, boo
     }
     DEBUG_ASSERT_NE(dst_mbf, src_mbf, "spawning diagonally");
     return irow;
+}
+
+
+void Wavefunction::fci_init() {
+
 }
 
 void Wavefunction::load_fn(const hdf5::NodeReader& /*parent*/) {

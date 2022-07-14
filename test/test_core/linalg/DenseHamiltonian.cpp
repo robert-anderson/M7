@@ -227,7 +227,6 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff3) {
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
-    conf::Hamiltonian opts(nullptr);
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP"}, true);
     GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 1);
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
@@ -240,7 +239,6 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
-    conf::Hamiltonian opts(nullptr);
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP"}, true);
     GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 2);
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
@@ -253,7 +251,6 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3) {
-    conf::Hamiltonian opts(nullptr);
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP"}, true);
     GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 3);
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);

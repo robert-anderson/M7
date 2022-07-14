@@ -96,6 +96,7 @@ conf::Wavefunction::Wavefunction(Group *parent) :
                         "options relating to the storage and update of a distributed many-body wavefunction"),
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
+        m_fci_init(this, "fci_init", false, "call the ARPACK interface to initialize the required roots to their exact values"),
         m_buffers(this), m_hash_mapping(this), m_archivable(this), m_load_balancing(this) {}
 
 conf::Shift::Shift(Group *parent) :
