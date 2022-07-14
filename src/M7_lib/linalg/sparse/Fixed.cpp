@@ -1,9 +1,8 @@
 //
-// Created by Robert J. Anderson on 14/06/2020.
+// Created by rja on 14/07/22.
 //
 
-#include "Sparse.h"
-#include "M7_lib/util/String.h"
+#include "Fixed.h"
 
 uintv_t sparse::fixed::Base::make_counts(const sparse::dynamic::Base &src) {
     uintv_t counts;
@@ -24,8 +23,8 @@ uintv_t sparse::fixed::Base::make_displs(const uintv_t &counts) {
 }
 
 sparse::fixed::Base::Base(const uintv_t &counts) :
-    m_nrow(counts.size()), m_max_nentry(counts.empty() ? 0ul : *std::max(counts.cbegin(), counts.cend())),
-    m_displs(make_displs(counts)), m_nentry(m_displs.back()) {}
+        m_nrow(counts.size()), m_max_nentry(counts.empty() ? 0ul : *std::max(counts.cbegin(), counts.cend())),
+        m_displs(make_displs(counts)), m_nentry(m_displs.back()) {}
 
 sparse::fixed::Base::Base(const sparse::dynamic::Base &src) : Base(make_counts(src)){
     DEBUG_ASSERT_EQ(m_nentry, src.nentry(),

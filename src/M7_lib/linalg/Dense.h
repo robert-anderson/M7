@@ -15,7 +15,7 @@
 #include <M7_lib/util/FpTol.h>
 #include <M7_lib/defs.h>
 #include <M7_lib/hdf5/Node.h>
-#include "Sparse.h"
+#include "M7_lib/linalg/sparse/Dynamic.h"
 
 
 extern "C" void ssyev_(const char *jobz, const char *uplo, const int *n, float *a, const int *lda, float *w,

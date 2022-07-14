@@ -6,7 +6,7 @@
 #define M7_DISTMVPROD_H
 
 #include <M7_lib/parallel/MPIWrapper.h>
-#include "Sparse.h"
+#include "M7_lib/linalg/sparse/Dynamic.h"
 
 namespace dist_mv_prod {
     /**

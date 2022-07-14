@@ -10,7 +10,7 @@
 #include <M7_lib/linalg/Dense.h>
 #include <M7_lib/nd/NdFormatD.h>
 #include <M7_lib/conf/HamiltonianConf.h>
-#include <M7_lib/linalg/Sparse.h>
+#include "M7_lib/linalg/sparse/Inverse.h"
 
 /**
  * In lattice models and potentially other systems of interest, the sums over sites, modes, or spin orbitals in the

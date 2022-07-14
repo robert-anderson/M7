@@ -2,8 +2,8 @@
 // Created by Robert J. Anderson on 07/01/2022.
 //
 
-#include "M7_lib/linalg/Sparse.h"
 #include "gtest/gtest.h"
+#include "M7_lib/linalg/sparse/Dynamic.h"
 
 TEST(Sparse, RectMatrixVectorProduct){
     typedef int T;
