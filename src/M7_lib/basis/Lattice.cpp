@@ -44,27 +44,53 @@ uint_t lattice::OrthoTopology::isite_adj(const uintv_t &inds, uint_t idim, uint_
 lattice::Topology::adj_t lattice::OrthoTopology::make_adj() const {
     adj_t adj;
     adj.resize(m_nsite);
+    /*
+     * number of dimensions in the lattice
+     */
+    const auto ndim = m_inds.m_nind;
     for (uint_t isite=0ul; isite<m_inds.m_nelement; ++isite) {
+        /*
+         * ndim-dimensional coordinates of isite
+         */
         const auto &iinds = m_inds[isite];
-        const auto ndim = m_inds.m_nind;
         for (uint_t idim = 0ul; idim < ndim; ++idim) {
+            /*
+             * inserts an (index, phase) pair into the current isite's adjacency matrix row
+             */
+            auto insert = [&](uint_t jsite, int phase) {
+                DEBUG_ASSERT_TRUE(phase, "shouldn't add lattice unconnected pairs");
+                sparse::MatrixElement<int> adj_elem(isite_adj(iinds, idim, jsite), phase);
+                adj.insert(isite, adj_elem);
+            };
+            /*
+             * number of sites along this dimension of the lattice
+             */
             const auto ind = iinds[idim];
+            /*
+             * maximum value taken by the indices along this dimension
+             */
             const auto max_ind = m_inds.m_shape[idim] - 1;
-            const auto bc = m_bcs[idim];
+            // go to next dimension if this one only contains a single site
             if (!max_ind) continue;
             if (max_ind == 1ul) {
-                adj.insert(isite, {isite_adj(iinds, idim, !ind), 1});
-                continue;
+                // if this dimension only has two sites, then they are set to adjacent and BCs are not considered
+                insert(!ind, 1);
             }
-            if (ind == 0) {
-                if (bc) adj.insert(isite, {isite_adj(iinds, idim, max_ind), bc});
-                adj.insert(isite, {isite_adj(iinds, idim, 1ul), 1});
-            } else if (ind == max_ind) {
-                adj.insert(isite, {isite_adj(iinds, idim, max_ind - 1), 1});
-                if (bc) adj.insert(isite, {isite_adj(iinds, idim, 0ul), bc});
-            } else {
-                adj.insert(isite, {isite_adj(iinds, idim, ind - 1), 1});
-                adj.insert(isite, {isite_adj(iinds, idim, ind + 1), 1});
+            else {
+                const auto bc = m_bcs[idim];
+                if (ind == 0) {
+                    // lower boundary in dimension idim
+                    if (bc) insert(max_ind, bc);
+                    insert(1ul, 1);
+                } else if (ind == max_ind) {
+                    // upper boundary in dimension idim
+                    insert(max_ind - 1, 1);
+                    if (bc) insert(0ul, bc);
+                } else {
+                    // not a boundary site
+                    insert(ind - 1, 1);
+                    insert(ind + 1, 1);
+                }
             }
         }
     }

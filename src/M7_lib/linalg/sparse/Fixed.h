@@ -49,6 +49,7 @@ namespace sparse {
 
         public:
 
+            // TODO: sort option for row entries
             Generic(const dynamic::Generic<T>& src) : Base(src), m_entries(make_entries(src)) {
                 DEBUG_ASSERT_EQ(m_entries.size(), m_nentry, "incorrect number of entries");
             }

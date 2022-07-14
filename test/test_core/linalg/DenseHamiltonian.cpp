@@ -116,7 +116,28 @@ TEST(DenseHamiltonian, Hubbard2x3Site) {
     v_t<double> evals;
     DenseHamiltonian hmat(ham);
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], -3.6346030549073807);
+    ASSERT_NEARLY_EQ(evals[0], -3.6193213239575694);
+}
+
+TEST(DenseHamiltonian, Hubbard3x2Site) {
+    /*
+     * check that transposing the site shape has no effect on energy
+     */
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3, 2}, {0, 0}));
+    Hamiltonian ham(&frm_ham);
+    v_t<double> evals;
+    DenseHamiltonian hmat(ham);
+    dense::diag(hmat, evals);
+    ASSERT_NEARLY_EQ(evals[0], -3.6193213239575694);
+}
+
+TEST(DenseHamiltonian, Hubbard3x2SiteApbc) {
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3, 2}, {1, 0}));
+    Hamiltonian ham(&frm_ham);
+    v_t<double> evals;
+    DenseHamiltonian hmat(ham);
+    dense::diag(hmat, evals);
+    ASSERT_NEARLY_EQ(evals[0], -3.7898230716677883);
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
