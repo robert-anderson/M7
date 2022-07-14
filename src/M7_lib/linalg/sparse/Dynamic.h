@@ -158,6 +158,17 @@ namespace sparse {
                 return m_rows[irow];
             }
 
+        private:
+            T* find(uint_t irow, uint_t icol) {
+                auto& row = get(irow);
+                if (row.empty()) return nullptr;
+                auto pred = [&icol](const T& v) {
+                    return static_cast<const Element&>(v).m_i == icol;
+                };
+                auto it = std::find_if(row.begin(), row.end(), pred);
+                return it == row.end() ? nullptr : it.base();
+            }
+
         public:
 
             const row_t& operator[](uint_t irow) const {
@@ -173,11 +184,11 @@ namespace sparse {
              */
             void add(uint_t irow, const T& elem) {
                 if (irow >= nrow()) resize(irow + 1);
-                get(irow).emplace_back(elem);
                 const auto icol = Element::cast(elem).m_i;
+                DEBUG_ASSERT_FALSE(find(irow, icol), "multiple occurrences of the same connected index in row");
+                get(irow).emplace_back(elem);
                 if (icol > m_max_col_ind) m_max_col_ind = icol;
                 ++m_nentry;
-                //return m_rows[irow].size()-1;
             }
 
             /**
@@ -188,17 +199,20 @@ namespace sparse {
              *  element which is either added, or clobbers existing element
              */
             void insert(uint_t irow, const T& elem) {
-                auto& row = get(irow);
-                const auto icol = Element::cast(elem).m_i;
-                auto pred = [&icol](const T& v) {
-                    return static_cast<const Element&>(v).m_i == icol;
-                };
-                auto it = std::find_if(row.begin(), row.end(), pred);
-                if (it == row.end()) {
+                if (irow >= nrow()) {
                     add(irow, elem);
-                } else {
-                    *it = elem;
+                    return;
                 }
+                auto ptr = find(irow, Element::cast(elem).m_i);
+                if (ptr) *ptr = elem;
+                else add(irow, elem);
+            }
+
+            bool operator==(const Generic<T>& other) const {
+                if (nrow()!=other.nrow()) return false;
+                if (m_nentry!=other.m_nentry) return false;
+                if (m_max_col_ind!=other.m_max_col_ind) return false;
+                return m_rows==other.m_rows;
             }
 
             str_t to_string() const override {
@@ -224,7 +238,7 @@ namespace sparse {
                 const auto& row = m_rows[irow];
                 for (auto& entry: row)
                     out.push_back(static_cast<const Element&>(entry).to_string());
-                return convert::to_string(out);
+                return string::join(out, ", ");
             }
 
         };

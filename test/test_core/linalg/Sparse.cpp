@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "M7_lib/linalg/sparse/Dynamic.h"
+#include "M7_lib/linalg/sparse/Inverse.h"
 
 TEST(Sparse, RectMatrixVectorProduct){
     typedef int T;
@@ -28,4 +28,39 @@ TEST(Sparse, RectMatrixVectorProduct){
     v_t<T> out_chk = {-17, 4, -4, -27, -16,  46, -40};
     mat.multiply(in, out);
     ASSERT_EQ(out, out_chk);
+}
+
+TEST(Sparse, DynamicToFixed){
+    typedef float T;
+    v_t<std::pair<uint_t, sparse::MatrixElement<T>>> contents {
+            {11, {14, 0.12}},
+            {11, {12, 1.23}},
+            {11, {16, 2.34}},
+            {11, {13, 3.45}},
+            {11, {2, 4.56}},
+            {3, {2, 5.67}},
+            {3, {1, 6.78}},
+            {3, {11, 7.89}}
+    };
+
+    v_t<std::pair<uint_t, sparse::MatrixElement<T>>> contents_sorted {
+            {11, {2, 4.56}},
+            {11, {12, 1.23}},
+            {11, {13, 3.45}},
+            {11, {14, 0.12}},
+            {11, {16, 2.34}},
+            {3, {1, 6.78}},
+            {3, {2, 5.67}},
+            {3, {11, 7.89}}
+    };
+
+    sparse::dynamic::Matrix<T> dynamic;
+    for (auto& elem: contents) dynamic.insert(elem.first, elem.second);
+    sparse::dynamic::Matrix<T> dynamic_sorted;
+    for (auto& elem: contents_sorted) dynamic_sorted.insert(elem.first, elem.second);
+
+    sparse::fixed::Matrix<T> fixed(dynamic_sorted, false);
+    sparse::fixed::Matrix<T> fixed_sorted(dynamic, true);
+
+    ASSERT_EQ(fixed, fixed_sorted);
 }
