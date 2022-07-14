@@ -247,7 +247,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
 private:
 
-    void fci_init();
+    void fci_init(const Hamiltonian& h);
 
     void orthogonalize(NdReduction<wf_t, 3>& overlaps,
                        const uint_t& iroot, const uint_t& jroot, const uint_t& ireplica) {

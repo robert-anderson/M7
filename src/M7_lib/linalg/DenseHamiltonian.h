@@ -10,11 +10,11 @@
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 
 #include "Dense.h"
-#include "Fci.h"
+#include "FciIters.h"
 
 struct DenseHamiltonianBase {
     const Hamiltonian& m_h;
-    fci::BasisIters m_basis_iters;
+    FciIters m_basis_iters;
     DenseHamiltonianBase(const Hamiltonian& h, sys::Particles particles, bool force_general);
 };
 

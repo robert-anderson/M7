@@ -2,15 +2,15 @@
 // Created by rja on 14/07/22.
 //
 
-#include "Fci.h"
+#include "FciIters.h"
 
 
-uint_t fci::BasisIters::niter_single() const {
+uint_t FciIters::niter_single() const {
     if (!m_single) return 0ul;
     return m_single->m_niter;
 }
 
-fci::BasisIters fci::BasisIters::make(const Hamiltonian& h, sys::Particles particles, bool force_general) {
+FciIters FciIters::make(const Hamiltonian& h, sys::Particles particles, bool force_general) {
     using namespace mbf_foreach;
     const sys::Sector sector(h.m_basis, particles);
 
@@ -46,11 +46,11 @@ fci::BasisIters fci::BasisIters::make(const Hamiltonian& h, sys::Particles parti
     return make_general(h, particles);
 }
 
-fci::BasisIters fci::BasisIters::make(const Hamiltonian& h) {
+FciIters FciIters::make(const Hamiltonian& h) {
     return make(h, h.default_particles(), false);
 }
 
-fci::BasisIters fci::BasisIters::make_general(const Hamiltonian& h, sys::Particles particles) {
+FciIters FciIters::make_general(const Hamiltonian& h, sys::Particles particles) {
     using namespace mbf_foreach;
     const sys::Sector sector(h.m_basis, particles);
     if (!sector.m_bos) {

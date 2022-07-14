@@ -6,5 +6,4 @@ target_sources(unittest
         Sparse.cpp
         DenseTcFermionHamiltonian.cpp
         DenseTcBosonHamiltonian.cpp
-        Fci.cpp
 )

@@ -5,7 +5,7 @@ target_sources(M7_lib
         DenseHamiltonian.cpp
         DenseHamiltonian.h
         DistMvProd.h
-        Fci.cpp
-        Fci.h
+        FciIters.cpp
+        FciIters.h
 )
 add_subdirectory(sparse)

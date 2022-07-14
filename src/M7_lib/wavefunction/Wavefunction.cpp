@@ -4,6 +4,7 @@
 
 #include <M7_lib/basis/Suites.h>
 #include "Wavefunction.h"
+#include "M7_lib/linalg/FciIters.h"
 
 Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector) :
         Communicator<WalkerTableRow, SpawnTableRow, false>(
@@ -38,7 +39,6 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
     m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
-    if (opts.m_wavefunction.m_fci_init) fci_init();
 }
 
 void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
@@ -233,9 +233,16 @@ uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta, boo
     return irow;
 }
 
-
-void Wavefunction::fci_init() {
-
+void Wavefunction::fci_init(const Hamiltonian& h) {
+    auto iters = FciIters::make(h);
+    buffered::Mbf mbf(m_sector);
+    auto fn = [this, &mbf, &h]() {
+        uint_t irank = m_ra.get_rank(mbf);
+        if (mpi::i_am(irank)) {
+            create_row_(0, mbf, h.get_element(mbf), {});
+        }
+    };
+    iters.m_single->loop(mbf, fn);
 }
 
 void Wavefunction::load_fn(const hdf5::NodeReader& /*parent*/) {

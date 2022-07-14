@@ -6,7 +6,7 @@
 
 
 DenseHamiltonianBase::DenseHamiltonianBase(const Hamiltonian& h, sys::Particles particles, bool force_general):
-    m_h(h), m_basis_iters(fci::BasisIters::make(h, particles, force_general)){}
+    m_h(h), m_basis_iters(FciIters::make(h, particles, force_general)){}
 
 
 DenseHamiltonian::DenseHamiltonian(const Hamiltonian &h, sys::Particles particles, bool force_general) :
