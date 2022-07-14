@@ -5,28 +5,43 @@
 #include "gtest/gtest.h"
 #include "M7_lib/basis/Lattice.h"
 
-#if 0
-TEST(Lattice, OrthoObc1d) {
-    auto lattice = lattice::make("ortho", {6}, {0});
-    v_t<lattice::adj_row_t> chk_rows = {
-            {{1ul, 1}},
-            {{0ul, 1}, {2ul, 1}},
-            {{1ul, 1}, {3ul, 1}},
-            {{2ul, 1}, {4ul, 1}},
-            {{3ul, 1}, {5ul, 1}},
-            {{4ul, 1}}
-    };
-    ASSERT_EQ(lattice->m_nsite, chk_rows.size());
-    lattice::adj_row_t adj_row;
-    for (uint_t i=0ul; i<lattice->m_nsite; ++i){
-        lattice->get_adj_row(i, adj_row);
-        ASSERT_EQ(adj_row, chk_rows[i]);
+namespace lattice_test {
+    typedef sparse::MatrixElement<int> elem_t;
+    typedef v_t<elem_t> row_t;
+    typedef v_t<row_t> rows_t;
+
+    row_t make_row(row_t::const_iterator cbegin, row_t::const_iterator cend) {
+        return {cbegin, cend};
+    }
+    bool verify_rows(const lattice::Lattice& lattice, const rows_t& rows){
+        const auto& adj = lattice.m_sparse_adj;
+        if (lattice.m_nsite != rows.size()) return false;
+        for (uint_t isite=0ul; isite < lattice.m_nsite; ++isite){
+            auto row = make_row(adj.cbegin(isite), adj.cend(isite));
+            if (row != rows[isite]) return false;
+        }
+        return true;
     }
 }
 
+TEST(Lattice, OrthoObc1d) {
+    using namespace lattice_test;
+    auto lattice = lattice::make("ortho", {6}, {0});
+    rows_t chk_rows = {
+        {{1ul, 1}},
+        {{0ul, 1}, {2ul, 1}},
+        {{1ul, 1}, {3ul, 1}},
+        {{2ul, 1}, {4ul, 1}},
+        {{3ul, 1}, {5ul, 1}},
+        {{4ul, 1}}
+    };
+    ASSERT_TRUE(verify_rows(*lattice, chk_rows));
+}
+
 TEST(Lattice, OrthoApbc1d) {
+    using namespace lattice_test;
     auto lattice = lattice::make("ortho", {6}, {-1});
-    v_t<lattice::adj_row_t> chk_rows = {
+    rows_t chk_rows = {
             {{5ul, -1}, {1ul, 1}},
             {{0ul, 1}, {2ul, 1}},
             {{1ul, 1}, {3ul, 1}},
@@ -34,12 +49,7 @@ TEST(Lattice, OrthoApbc1d) {
             {{3ul, 1}, {5ul, 1}},
             {{4ul, 1}, {0ul, -1}}
     };
-    ASSERT_EQ(lattice->m_nsite, chk_rows.size());
-    lattice::adj_row_t adj_row;
-    for (uint_t i=0ul; i<lattice->m_nsite; ++i){
-        lattice->get_adj_row(i, adj_row);
-        ASSERT_EQ(adj_row, chk_rows[i]);
-    }
+    ASSERT_TRUE(verify_rows(*lattice, chk_rows));
 }
 
 
@@ -49,8 +59,9 @@ TEST(Lattice, OrthoObc2d) {
      *  4  5  6  7
      *  8  9  10 11
      */
+    using namespace lattice_test;
     auto lattice = lattice::make("ortho", {3, 4}, {0, 0});
-    v_t<lattice::adj_row_t> chk_rows = {
+    rows_t chk_rows = {
             {{4ul, 1}, {1ul, 1}},
             {{5ul, 1}, {0ul, 1}, {2ul, 1}},
             {{6ul, 1}, {1ul, 1}, {3ul, 1}},
@@ -64,12 +75,7 @@ TEST(Lattice, OrthoObc2d) {
             {{6ul, 1}, {9ul, 1}, {11ul, 1}},
             {{7ul, 1}, {10ul, 1}}
     };
-    ASSERT_EQ(lattice->m_nsite, chk_rows.size());
-    lattice::adj_row_t adj_row;
-    for (uint_t i=0ul; i<lattice->m_nsite; ++i){
-        lattice->get_adj_row(i, adj_row);
-        ASSERT_EQ(adj_row, chk_rows[i]);
-    }
+    ASSERT_TRUE(verify_rows(*lattice, chk_rows));
 }
 
 
@@ -81,8 +87,9 @@ TEST(Lattice, OrthoPbc2d) {
      *   6  7  8
      *      +
      */
+    using namespace lattice_test;
     auto lattice = lattice::make("ortho", {3, 3}, {1, -1});
-    v_t<lattice::adj_row_t> chk_rows = {
+    rows_t chk_rows = {
             {{6ul, 1}, {3ul, 1}, {2ul, -1}, {1ul, 1}},
             {{7ul, 1}, {4ul, 1}, {0ul, 1}, {2ul, 1}},
             {{8ul, 1}, {5ul, 1}, {1ul, 1}, {0ul, -1}},
@@ -94,11 +101,5 @@ TEST(Lattice, OrthoPbc2d) {
             {{5ul, 1}, {2ul, 1}, {7ul, 1}, {6ul, -1}},
 
     };
-    ASSERT_EQ(lattice->m_nsite, chk_rows.size());
-    lattice::adj_row_t adj_row;
-    for (uint_t i=0ul; i<lattice->m_nsite; ++i){
-        lattice->get_adj_row(i, adj_row);
-        ASSERT_EQ(adj_row, chk_rows[i]);
-    }
+    ASSERT_TRUE(verify_rows(*lattice, chk_rows));
 }
-#endif
