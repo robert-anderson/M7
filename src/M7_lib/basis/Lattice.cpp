@@ -53,18 +53,18 @@ lattice::Topology::adj_t lattice::OrthoTopology::make_adj() const {
             const auto bc = m_bcs[idim];
             if (!max_ind) continue;
             if (max_ind == 1ul) {
-                adj.insert(isite, isite_adj(iinds, idim, !ind), 1);
+                adj.insert(isite, {isite_adj(iinds, idim, !ind), 1});
                 continue;
             }
             if (ind == 0) {
-                if (bc) adj.insert(isite, isite_adj(iinds, idim, max_ind), bc);
-                adj.insert(isite, isite_adj(iinds, idim, 1ul), 1);
+                if (bc) adj.insert(isite, {isite_adj(iinds, idim, max_ind), bc});
+                adj.insert(isite, {isite_adj(iinds, idim, 1ul), 1});
             } else if (ind == max_ind) {
-                adj.insert(isite, isite_adj(iinds, idim, max_ind - 1), 1);
-                if (bc) adj.insert(isite, isite_adj(iinds, idim, 0ul), bc);
+                adj.insert(isite, {isite_adj(iinds, idim, max_ind - 1), 1});
+                if (bc) adj.insert(isite, {isite_adj(iinds, idim, 0ul), bc});
             } else {
-                adj.insert(isite, isite_adj(iinds, idim, ind - 1), 1);
-                adj.insert(isite, isite_adj(iinds, idim, ind + 1), 1);
+                adj.insert(isite, {isite_adj(iinds, idim, ind - 1), 1});
+                adj.insert(isite, {isite_adj(iinds, idim, ind + 1), 1});
             }
         }
     }

@@ -12,7 +12,7 @@ TEST(ArnoldiSolver, SymNonDist) {
     const uint_t nrow = 20;
     const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
-    auto sym = mat.get_symmetrized(false);
+    auto sym = mat.symmetrized(false);
 
     ArnoldiProblemSym<double> arnoldi_problem(nroot);
     arnoldi_problem.solve(sym);
@@ -34,7 +34,7 @@ TEST(ArnoldiSolver, SymDist) {
     const uint_t nrow = 20;
     const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
-    auto sym = mat.get_symmetrized(false);
+    auto sym = mat.symmetrized(false);
     dist_mv_prod::Sparse<double> prod(sym);
 
     ArnoldiProblemSym<double> arnoldi_problem(nroot);

@@ -53,7 +53,7 @@ protected:
         m_work_valid_adj.clear();
         const auto& adj = m_h.m_basis.m_lattice->m_sparse_adj;
         for (auto it=adj.cbegin(isite); it!=adj.cend(isite); ++it){
-            if (is_valid_fn(it->first)) m_work_valid_adj.push_back(it.base());
+            if (is_valid_fn(it->m_i)) m_work_valid_adj.push_back(it.base());
         }
         return m_work_valid_adj;
     }

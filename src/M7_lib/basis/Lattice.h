@@ -45,7 +45,7 @@ namespace lattice {
          */
         typedef sparse::fixed::Matrix<int> sparse_adj_t;
         const sparse_adj_t m_sparse_adj;
-        typedef sparse_adj_t::pair_t adj_t;
+        typedef sparse_adj_t::elem_t adj_t;
 
         /**
          * maximum number of adjacent sites for any one site

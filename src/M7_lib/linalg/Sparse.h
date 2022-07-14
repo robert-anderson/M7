@@ -15,13 +15,38 @@
 
 namespace sparse {
 
+    /**
+     * In a sparse structure, rows are made up of many elements.
+     * each row corresponds to a single basis vector of a matrix, or node of a network
+     * A network element carries no more than an integer identifying the connected node index.
+     */
     struct Element {
         /**
          * sparsely-connected index
          */
         uint_t m_i;
+        Element(uint_t i=~0ul): m_i(i){}
+
+        virtual ~Element() = default;
+
         virtual str_t to_string() const {
             return convert::to_string(m_i);
+        }
+
+        operator uint_t () const {
+            return m_i;
+        }
+
+        template<typename T>
+        static const Element& cast(const T& elem) {
+            static_assert(std::is_base_of<Element, T>::value, "template arg must be derived from Element");
+            return elem;
+        }
+
+        template<typename T>
+        static Element& cast(T& elem) {
+            static_assert(std::is_base_of<Element, T>::value, "template arg must be derived from Element");
+            return elem;
         }
     };
 
@@ -32,11 +57,17 @@ namespace sparse {
          */
         T m_v;
 
+        MatrixElement(uint_t i=~0ul, T v={}): Element(i), m_v(v){}
+
         str_t to_string() const override {
             return log::format("({} -> {})", m_i, convert::to_string(m_v));
         }
     };
 
+    /**
+     * number of rows is variable, and the vectors storing the contents of each can be resized. Ideal for building up
+     * sparse structures from an empty state
+     */
     namespace dynamic {
         struct Base {
         protected:
@@ -45,24 +76,64 @@ namespace sparse {
             uint_t m_max_col_ind = 0ul;
 
             Base(uint_t init_row_nentry) : m_init_row_nentry(init_row_nentry) {}
+            virtual ~Base() = default;
 
             virtual str_t row_to_string(uint_t irow) const = 0;
 
         public:
+            bool empty() const {
+                return !m_nentry;
+            }
+
+            uint_t nentry() const {
+                return m_nentry;
+            }
+
+            virtual uint_t nentry(uint_t irow) const = 0;
+
+            virtual uint_t nrow() const = 0;
+
+            bool empty(uint_t irow) const {
+                return !nentry(irow);
+            }
+
+            uint_t max_col_ind() const {
+                return m_max_col_ind;
+            }
+
             virtual str_t to_string() const = 0;
+
         };
 
 
         template<typename T>
         struct Generic : Base {
+            typedef T elem_t;
             static_assert(std::is_base_of<Element, T>::value, "template arg must be derived from Element");
-        private:
-            typedef v_t<v_t<T>> rows_t;
+        protected:
+            typedef v_t<T> row_t;
+            typedef v_t<row_t> rows_t;
             rows_t m_rows;
+
+            template<typename fn_t>
+            void set_symmetrized(const Generic& src, fn_t fn) {
+                functor::assert_prototype<T(T, uint_t)>(fn);
+                resize(src.nrow());
+                REQUIRE_LT(src.max_col_ind(), src.nrow(), "too many columns for this to be a symmetric matrix");
+                for (uint_t irow = 0ul; irow < nrow(); ++irow) {
+                    const auto& row = src.get(irow);
+                    for (auto& elem : row) {
+                        uint_t icol = Element::cast(elem);
+                        insert(irow, elem);
+                        if (icol != irow) insert(icol, fn(elem, irow));
+                    }
+                }
+            }
+
         public:
 
             Generic(uint_t nrow = 0ul, uint_t init_row_nentry = 6ul) :
-                    Base(init_row_nentry), m_rows(nrow, v_t<T>(init_row_nentry)) {
+                    Base(init_row_nentry), m_rows(nrow, row_t(init_row_nentry, T())) {
                 for (auto &row: m_rows) row.clear();
             }
 
@@ -79,11 +150,17 @@ namespace sparse {
                 std::advance(end, count);
                 m_rows = rows_t(begin, end);
                 // data is now copied, now update metadata
+                /*
+                 * predicate to compare column indices so that m_max_col_ind can be updated properly
+                 */
+                auto pred = [](const Element& e1, const Element& e2){
+                    return e1.m_i > e2.m_i;
+                };
                 for (const auto &row: m_rows) {
                     if (row.empty()) continue;
                     m_nentry += row.size();
-                    auto max_element = std::max_element(row.cbegin(), row.cend());
-                    m_max_col_ind = std::max(m_max_col_ind, *max_element);
+                    auto max_element = std::max_element(row.cbegin(), row.cend(), pred);
+                    m_max_col_ind = std::max(m_max_col_ind, Element::cast(*max_element).m_i);
                 }
             }
 
@@ -100,15 +177,12 @@ namespace sparse {
                     *this = other;
                     return;
                 }
-                REQUIRE_LT(other.m_max_col_ind, nrow(), "too many columns for this to be a symmetric matrix");
-                for (uint_t irow = 0ul; irow < nrow(); ++irow) {
-                    const auto &row = m_rows[irow];
-                    for (uint_t ientry = 0ul; ientry < row.size(); ++ientry) {
-                        const auto &entry = row[ientry];
-                        add(irow, entry);
-                        if (entry != irow) insert(entry, irow);
-                    }
-                }
+                auto fn = [](T elem, uint_t irow) {
+                    auto out = elem;
+                    Element::cast(out).m_i = irow;
+                    return out;
+                };
+                set_symmetrized(other, fn);
             }
 
             Generic(const Generic &other) : Generic(other, false) {}
@@ -121,29 +195,30 @@ namespace sparse {
             void resize(uint nrow) {
                 const auto nrow_old = m_rows.size();
                 if (nrow <= nrow_old) return;
-                m_rows.resize(nrow, v_t<T>(m_init_row_nentry));
+                m_rows.resize(nrow, row_t(m_init_row_nentry));
                 for (uint_t irow = nrow_old; irow < nrow; ++irow) m_rows[irow].clear();
-            }
-
-            uint_t nrow() const {
-                return m_rows.size();
-            }
-
-            const v_t<T> &operator[](uint_t irow) const {
-                DEBUG_ASSERT_LT(irow, nrow(), "row index OOB");
-                return m_rows[irow];
             }
 
         protected:
             /*
-             * no modification of the rows outside of this class definition
+             * no modification of the rows outside of this class definition and descendents
              */
-            v_t<T> &operator[](uint_t irow) {
+            row_t & get(uint_t irow) {
+                DEBUG_ASSERT_LT(irow, nrow(), "row index OOB");
+                return m_rows[irow];
+            }
+
+            const row_t & get(uint_t irow) const {
                 DEBUG_ASSERT_LT(irow, nrow(), "row index OOB");
                 return m_rows[irow];
             }
 
         public:
+
+            const row_t &operator[](uint_t irow) const {
+                return get(irow);
+            }
+
             /**
              * append the element to the given row
              * @param irow
@@ -153,9 +228,8 @@ namespace sparse {
              */
             void add(uint_t irow, const T &elem) {
                 if (irow >= nrow()) resize(irow + 1);
-                auto base_elem = static_cast<const Element &>(elem);
-                (*this)[irow].emplace_back(elem);
-                const auto icol = base_elem.m_i;
+                get(irow).emplace_back(elem);
+                const auto icol = Element::cast(elem).m_i;
                 if (icol > m_max_col_ind) m_max_col_ind = icol;
                 ++m_nentry;
                 //return m_rows[irow].size()-1;
@@ -169,8 +243,8 @@ namespace sparse {
              *  element which is either added, or clobbers existing element
              */
             void insert(uint_t irow, const T &elem) {
-                auto &row = (*this)[irow];
-                const auto icol = static_cast<const Element &>(elem).m_i;
+                auto &row = get(irow);
+                const auto icol = Element::cast(elem).m_i;
                 auto pred = [&icol](const T &v) {
                     return static_cast<const Element &>(v).m_i == icol;
                 };
@@ -182,14 +256,6 @@ namespace sparse {
                 }
             }
 
-            bool empty() const {
-                return !m_nentry;
-            }
-
-            bool empty(uint_t irow) const {
-                return (*this)[irow].empty();
-            }
-
             str_t to_string() const override {
                 str_t out;
                 for (uint_t irow = 0ul; irow < nrow(); ++irow) {
@@ -197,6 +263,14 @@ namespace sparse {
                     out += std::to_string(irow) + ": " + row_to_string(irow) + "\n";
                 }
                 return out;
+            }
+
+            uint_t nentry(uint_t irow) const override {
+                return (*this)[irow].size();
+            }
+
+            uint_t nrow() const override {
+                return m_rows.size();
             }
 
         protected:
@@ -211,14 +285,191 @@ namespace sparse {
         };
 
         typedef Generic<Element> Network;
+
+        template<typename T>
+        struct Matrix : Generic<MatrixElement<T>> {
+            typedef MatrixElement<T> elem_t;
+            using Generic<elem_t>::nrow;
+            using Generic<elem_t>::get;
+            using Generic<elem_t>::set_symmetrized;
+            using Generic<elem_t>::insert;
+            Matrix(uint_t nrow = 0ul, uint_t init_row_nentry = 6ul): Generic<elem_t>(nrow, init_row_nentry){}
+
+            Matrix(const Matrix &other, uint_t count, uint_t displ) : Generic<elem_t>(other, count, displ){}
+
+            Matrix(const Matrix &other, bool conj) : Generic<elem_t>(other.nrow(), other.m_init_row_nentry) {
+                auto fn = [&conj](elem_t elem, uint_t irow) {
+                    return elem_t(irow, conj ? arith::conj(elem.m_v) : elem.m_v);
+                };
+                set_symmetrized(other, fn);
+            }
+
+            Matrix(const Matrix &other) : Generic<elem_t>(other, false) {}
+
+            void insert(uint_t irow, const uintv_t& icols, const v_t<T>& values) {
+                REQUIRE_EQ(icols.size(), values.size(), "number of column indices and values inserted must match");
+                for (uint_t i=0ul; i<icols.size(); ++i) insert(irow, {icols[i], values[i]});
+            }
+
+            Matrix symmetrized(bool conj) {
+                return {*this, conj};
+            }
+
+            Matrix row_subset(uint_t count, uint_t displ) {
+                return {*this, count, displ};
+            }
+
+            void multiply(const T *v, T *mv, uint_t mv_size) const {
+                // each row of the mv vector receives a contribution from every
+                // corresponding entry v the sparse matrix row
+                // (Mv)_i = sum_j M_ij v_j
+                memset(static_cast<void*>(mv), 0, sizeof(T) * mv_size);
+                for (uint_t irow = 0; irow < nrow(); ++irow) {
+                    const auto& row = get(irow);
+                    for (const elem_t& elem : row) mv[irow] += elem.m_v * v[elem.m_i];
+                }
+            }
+
+            void multiply(const v_t<T> &v, v_t<T> &mv) const {
+                if (nrow() > mv.size()) mv.resize(nrow());
+                multiply(v.data(), mv.data(), mv.size());
+            }
+        };
+    }
+
+    /**
+     * number of entries is constant, therefore all data can be stored contiguously in memory. This should confer
+     * performance benefits
+     */
+    namespace fixed {
+
+        struct Base {
+            const uint_t m_nrow;
+            const uint_t m_max_nentry;
+        protected:
+            const uintv_t m_displs;
+            const uint_t m_nentry;
+
+            Base(const uintv_t& counts);
+
+            Base(const dynamic::Base& src);
+
+            static uintv_t make_counts(const dynamic::Base& src);
+
+            static uintv_t make_displs(const uintv_t& counts);
+        };
+
+
+        template<typename T>
+        struct Generic : Base {
+            typedef T elem_t;
+            static_assert(std::is_base_of<Element, T>::value, "template arg must be derived from Element");
+        private:
+            typedef v_t<T> entries_t;
+            const v_t<T> m_entries;
+
+            static entries_t make_entries(const dynamic::Generic<T>& src) {
+                entries_t out;
+                out.reserve(src.nrow());
+                for (uint_t irow = 0ul; irow < src.nrow(); ++irow)
+                    out.insert(out.cend(), src[irow].cbegin(), src[irow].cend());
+                return out;
+            }
+
+        public:
+
+            Generic(const dynamic::Generic<T>& src) : Base(src), m_entries(make_entries(src)) {
+                DEBUG_ASSERT_EQ(m_entries.size(), m_nentry, "incorrect number of entries");
+            }
+
+            typename entries_t::const_iterator cbegin(uint_t irow) const {
+                if (irow >= m_nrow) return m_entries.cend();
+                auto it = m_entries.cbegin();
+                std::advance(it, m_displs[irow]);
+                return it;
+            }
+
+            typename entries_t::const_iterator cend(uint_t irow) const {
+                return cbegin(irow + 1);
+            }
+
+            uint_t nentry(uint_t irow) const {
+                DEBUG_ASSERT_LT(irow, m_nrow, "Row index OOB");
+                return m_displs[irow + 1] - m_displs[irow];
+            }
+
+            const T& get(uint_t irow, uint_t ientry) const {
+                DEBUG_ASSERT_LT(ientry, nentry(irow), "entry index OOB");
+                auto it = cbegin(irow);
+                std::advance(it, ientry);
+                return *it;
+            }
+        };
+
+        typedef Generic<Element> Network;
         template<typename T>
         using Matrix = Generic<MatrixElement<T>>;
     }
 
     /**
-     * number of rows is variable, and the vectors storing the contents of each can be resized. Ideal for building up
-     * sparse structures from an empty state
+     * more space-efficient representations of the inverse mappings of sparse structures than are available from the
+     * dense::Matrix
      */
+    namespace inverse {
+
+        template<typename T>
+        struct Generic {
+            typedef T elem_t;
+            static_assert(std::is_base_of<Element, T>::value, "template arg must be derived from Element");
+            typedef std::pair<uint_t, uint_t> key_t;
+            typedef std::pair<key_t, T> pair_t;
+        private:
+            const T m_not_found_entry;
+            std::map<key_t, T> m_conns;
+        public:
+            Generic(const dynamic::Generic<T>& src) {
+                for (uint_t irow=0ul; irow<src.nrow(); ++irow) {
+                    for (auto& it: src[irow]){
+                        const auto elem = static_cast<const Element&>(it);
+                        m_conns.insert({{irow, elem.m_i}, it});
+                    }
+                }
+            }
+
+            Generic(const fixed::Generic<T>& src) {
+                for (uint_t irow=0ul; irow<src.m_nrow; ++irow) {
+                    for (auto it = src.cbegin(irow); it != src.cend(irow); ++it) {
+                        const auto elem = static_cast<const Element&>(*it);
+                        m_conns.insert({{irow, elem.m_i}, *it});
+                    }
+                }
+            }
+
+            const T& entry(uint_t i, uint_t j) const {
+                auto it = m_conns.find({i, j});
+                return it==m_conns.cend() ? m_not_found_entry : it->second;
+            }
+
+            bool exists(uint_t i, uint_t j) const {
+                return m_conns.find({i, j}) != m_conns.cend();
+            }
+        };
+
+        typedef Generic<Element> Network;
+
+        template<typename T>
+        struct Matrix : Generic<MatrixElement<T>> {
+            typedef MatrixElement<T> elem_t;
+            Matrix(const dynamic::Matrix<T>& src): Generic<elem_t>(src){}
+            Matrix(const fixed::Matrix<T>& src): Generic<elem_t>(src){}
+
+            T get(uint_t i, uint_t j) const {
+                return Generic<elem_t>::entry(i, j).m_v;
+            }
+        };
+    }
+
+#if 0
     namespace dynamic {
 
         class Network {
@@ -468,50 +719,7 @@ namespace sparse {
             }
         };
     }
-
-    /**
-     * more space-efficient representations of the inverse mappings of sparse structures than are available from the
-     * dense::Matrix
-     */
-    namespace inverse {
-
-        class Network {
-            std::set<std::pair<uint_t, uint_t>> m_conns;
-        public:
-            Network(const dynamic::Network& src);
-
-            Network(const fixed::Network& src);
-
-            bool lookup(uint_t i, uint_t j) const;
-        };
-
-        template<typename T>
-        class Matrix {
-            std::map<std::pair<uint_t, uint_t>, T> m_conns;
-        public:
-            Matrix(const dynamic::Matrix<T>& src) {
-                for (uint_t irow=0ul; irow<src.nrow(); ++irow) {
-                    const auto& inds = src[irow].first;
-                    const auto& values = src[irow].second;
-                    for (uint_t i=0ul; i<inds.size(); ++i) m_conns.insert({irow, inds[i]}, values[i]);
-                }
-            }
-
-            Matrix(const fixed::Matrix<T>& src) {
-                for (auto irow=0ul; irow<src.m_nrow; ++irow)
-                    for (auto it = src.cbegin(irow); it != src.cend(irow); ++it)
-                        m_conns.insert({{irow, it->first}, it->second});
-            }
-
-            /**
-             * first element in returned pair is true only if the entry was found in the map
-             */
-            std::pair<bool, T> lookup(uint_t i, uint_t j) const {
-                auto it = m_conns.find({i, j});
-                return {it!=m_conns.cend(), it!=m_conns.cend() ? it->second : T{}};
-            }
-        };
-    }
+#endif
 }
 
 #endif //M7_SPARSE_H

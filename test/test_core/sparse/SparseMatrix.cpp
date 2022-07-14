@@ -13,7 +13,7 @@ TEST(SparseMatrix, RealMultiplication){
     for(uint_t i=0; i<n; ++i) {
         v[i] = i+1;
         for(uint_t j=0; j<n; ++j) {
-            matrix.add(j, i, i*3.0-j*2.0+1);
+            matrix.add(j, {i, i * 3.0 - j * 2.0 + 1});
         }
     }
     v_t<T> res(n, 0);
@@ -31,7 +31,7 @@ TEST(SparseMatrix, ComplexMultiplication){
     for(uint_t i=0; i<n; ++i) {
         v[i] = T{double(i+1), 2};
         for(uint_t j=0; j<n; ++j) {
-            matrix.add(j, i, T{i*3.0-j*2.0+1, double(i+j)});
+            matrix.add(j, {i, T(i * 3.0 - j * 2.0 + 1, double(i + j))});
         }
     }
     v_t<T> res(n, 0);

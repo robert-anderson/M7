@@ -37,8 +37,9 @@ ham_t HeisenbergFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) c
     else {
         return 0.0;
     }
+    const auto phase = m_basis.m_lattice->m_sparse_inv.get(asite, bsite);
     // fermi phase not included here, minus sign is due to product of opposite spins
-    return -m_j * m_basis.m_lattice->m_sparse_inv.lookup(asite, bsite).second / 2.0;
+    return -m_j * phase / 2.0;
 }
 
 ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv& onv) const {
@@ -55,10 +56,10 @@ ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv& onv) const {
         const auto& adj = m_basis.m_lattice->m_sparse_adj;
         int sj_tot = 0;
         for (auto it=adj.cbegin(isite); it!=adj.cend(isite); ++it){
-            auto jsite = it->first;
+            auto jsite = it->m_i;
             if (jsite<isite) continue; // don't double count contributions
             int jspin = onv.get({0, jsite}) ? 1: -1;
-            sj_tot+=it->second*jspin;
+            sj_tot+=it->m_v*jspin;
         }
         int ispin = onv.get({0, isite}) ? 1: -1;
         si_sj_tot+=sj_tot*ispin;

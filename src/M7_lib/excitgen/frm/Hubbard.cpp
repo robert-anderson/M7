@@ -58,7 +58,7 @@ bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t
      */
     if (!nvac) return false;
     auto ivalid = rand % nvac;
-    auto vac = src.m_format.flatten({ispin, valid_adj[ivalid]->first});
+    auto vac = src.m_format.flatten({ispin, valid_adj[ivalid]->m_i});
     DEBUG_ASSERT_FALSE(src.get(vac), "should not have picked an occupied spin orb for the vacant");
     prob /= double(nvac);
     conn.m_ann.set(occ);

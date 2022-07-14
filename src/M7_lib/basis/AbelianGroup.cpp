@@ -17,7 +17,7 @@ const str_t &AbelianGroup::product_label(const uint_t &iirrep, const uint_t &jir
 }
 
 AbelianGroup::AbelianGroup(strv_t labels, AbelianGroup::direct_prod_fn_t direct_prod_fn) :
-        m_labels(std::move(labels)), m_products({nirrep(), nirrep()}) {
+        m_labels(std::move(labels)), m_products(nirrep(), nirrep()) {
     for (uint_t iirrep = 0ul; iirrep < nirrep(); ++iirrep)
         for (uint_t jirrep = 0ul; jirrep < nirrep(); ++jirrep)
             m_products(iirrep, jirrep) = direct_prod_fn(iirrep, jirrep);

@@ -24,22 +24,19 @@ uintv_t DeterministicSubspace::make_iparts() {
     return {ipart, ipart + 1};
 }
 
-void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const Mbf &ref, const uintv_t &icol_list) {
+void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const Mbf &ref, const sparse::Element& elem) {
     auto &row_local = m_local.m_row;
     auto &row_global = m_global.m_row;
 
-    auto icol_it = icol_list.cbegin();
-    for (; icol_it != icol_list.cend(); ++icol_it) {
-        row_global.jump(*icol_it);
-        if (row_global.m_mbf == ref) continue;
-        if (m_wf.nreplica() == 2) {
-            rdms.make_contribs(row_local.m_mbf, row_global.m_mbf,
-                               row_local.m_weight[0] * row_global.m_weight[1]);
-            rdms.make_contribs(row_local.m_mbf, row_global.m_mbf,
-                               row_local.m_weight[1] * row_global.m_weight[0]);
-        } else {
-            rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, row_local.m_weight[0] * row_global.m_weight[0]);
-        }
+    row_global.jump(elem);
+    if (row_global.m_mbf == ref) return;
+    if (m_wf.nreplica() == 2) {
+        rdms.make_contribs(row_local.m_mbf, row_global.m_mbf,
+                           row_local.m_weight[0] * row_global.m_weight[1]);
+        rdms.make_contribs(row_local.m_mbf, row_global.m_mbf,
+                           row_local.m_weight[1] * row_global.m_weight[0]);
+    } else {
+        rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, row_local.m_weight[0] * row_global.m_weight[0]);
     }
 }
 
@@ -86,7 +83,7 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
             if (!exsig || exsig > exsig::c_ndistinct) continue; // diagonal
             auto helem = ham.get_element(row_local.m_mbf, conn_work);
             if (ham::is_significant(helem)) {
-                m_ham_matrix.add(row_local.index(), row_global.index(), helem);
+                m_ham_matrix.add(row_local.index(), {row_global.index(), helem});
                 ++n_hconn;
             } else if (bilinears.m_rdms.takes_contribs_from(conn_work.exsig())) {
                 m_rdm_network.add(row_local.index(), row_global.index());
@@ -104,8 +101,18 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref)
     auto &row_local = m_local.m_row;
     for (row_local.restart(); row_local.in_range(); row_local.step()) {
         if (row_local.m_mbf == ref) continue;
-        make_rdm_contribs(rdms, ref, m_ham_matrix[row_local.index()].first);
-        make_rdm_contribs(rdms, ref, m_rdm_network[row_local.index()]);
+        /*
+         * make contributions due to hamiltonian connections
+         */
+        for (auto& elem : m_ham_matrix[row_local.index()]){
+            make_rdm_contrib(rdms, ref, elem);
+        }
+        /*
+         * make contributions due to RDM-only connections
+         */
+        for (auto& elem : m_rdm_network[row_local.index()]){
+            make_rdm_contrib(rdms, ref, elem);
+        }
     }
 }
 
@@ -116,15 +123,12 @@ void DeterministicSubspace::project(double tau) {
     auto irow_wf_it = m_irows.cbegin();
     for (row_local.restart(); row_local.in_range(); row_local.step()) {
         row_wf.jump(*irow_wf_it);
-        auto lists = m_ham_matrix[row_local.index()];
-        auto icol_it = lists.first.cbegin();
-        auto value_it = lists.second.cbegin();
-        for (; icol_it != lists.first.cend(); (++icol_it, ++value_it)) {
-            DEBUG_ASSERT_FALSE(value_it == lists.second.cend(), "values list incongruent with column indices list");
-            row_global.jump(*icol_it);
+        const auto& elems = m_ham_matrix[row_local.index()];
+        for (auto& elem: elems){
+            row_global.jump(elem.m_i);
             // one replica or two
             for (const auto &ipart: m_iparts)
-                m_wf.change_weight(ipart, -*value_it * tau * row_global.m_weight[ipart]);
+                m_wf.change_weight(ipart, -elem.m_v * tau * row_global.m_weight[ipart]);
         }
         ++irow_wf_it;
     }

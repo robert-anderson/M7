@@ -67,7 +67,7 @@ private:
 
     uintv_t make_iparts();
 
-    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref, const uintv_t& icol_list);
+    void make_rdm_contrib(Rdms &rdms, const field::Mbf &ref, const sparse::Element& elem);
 
 
 public:

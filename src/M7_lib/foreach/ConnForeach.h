@@ -182,7 +182,7 @@ namespace conn_foreach {
 
                     const auto& adj=lattice->m_sparse_adj;
                     for (auto it=adj.cbegin(isite_occ); it!=adj.cend(isite_occ); ++it){
-                        auto vac = src.m_basis.ispinorb(ispin_occ, it->first);
+                        auto vac = src.m_basis.ispinorb(ispin_occ, it->m_i);
                         if (src.get(vac)) continue;
                         conn.m_cre.clear();
                         conn.m_cre.add(vac);
@@ -217,7 +217,7 @@ namespace conn_foreach {
                     // cannot exchange if the site is doubly occupied:
                     if (src.get({!ispin_occ, isite_occ})) continue;
                     for (auto it=adj.cbegin(isite_occ); it!=adj.cend(isite_occ); ++it){
-                        const auto i = it->first;
+                        const auto i = it->m_i;
                         if (src.get({ispin_occ, i})) continue;
                         if (!src.get({!ispin_occ, i})) continue;
                         conn.m_ann.set({0, isite_occ}, {1, i});

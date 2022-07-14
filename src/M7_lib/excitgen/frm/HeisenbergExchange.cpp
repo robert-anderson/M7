@@ -25,7 +25,7 @@ bool exgen::HeisenbergExchange::draw_frm(uint_t exsig, const field::FrmOnv& src,
     const auto ispin = src.get({1, isite});
     const auto nvac = lattice->m_sparse_adj.nentry(isite);
     const auto adj_elem = lattice->m_sparse_adj.get(isite, rand % nvac);
-    const auto jsite = adj_elem.first;
+    const auto jsite = adj_elem.m_i;
     const auto jspin = src.get({1, jsite});
     if (jspin == ispin) return false; // no exchange
     DEBUG_ASSERT_NE(src.get({0, isite}), src.get({0, jsite}), "sites do not have opposite spins");

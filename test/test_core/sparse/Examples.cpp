@@ -32,10 +32,11 @@ sparse_matrix_examples::rect_double_complex(const uint_t &nrow, const uint_t &nc
     sparse::dynamic::Matrix<std::complex<double>> out;
     out.resize(nrow);
     for (uint_t irow=0ul; irow<nrow; ++irow) {
-        const auto real_row = real[irow];
-        for (uint_t ielem=0ul; ielem<real_row.first.size(); ++ielem){
+        const auto& real_row = real[irow];
+        for (uint_t ielem=0ul; ielem<real_row.size(); ++ielem){
+            auto& elem = real_row[ielem];
             double imag = hash::in_range({irow, ielem}, 0, 4);
-            out.add(irow, {real_row.first[ielem], {real_row.second[ielem], imag}});
+            out.add(irow, {elem.m_i, {elem.m_v, imag}});
         }
     }
     return out;
