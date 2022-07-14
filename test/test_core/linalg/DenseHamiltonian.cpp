@@ -193,17 +193,6 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff3) {
     ASSERT_NEARLY_EQ(evals[0], -11.07271962268484);
 }
 
-TEST(DenseHamiltonian, HubbardHolsteinOccCutoff2) {
-    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
-    HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 1.4, 2);
-    NumOpBosHam bos_ham(frmbos_ham.m_basis.m_bos, 0.3);
-    Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
-    DenseHamiltonian ham(ham_src, ham_src.default_particles(4));
-    v_t<double> evals;
-    dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], -6.692966463435127);
-}
-
 TEST(DenseHamiltonian, HubbardHolsteinOccCutoff1) {
     HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 1.4, 1);
@@ -213,6 +202,17 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff1) {
     v_t<double> evals;
     dense::diag(ham, evals);
     ASSERT_NEARLY_EQ(evals[0], -3.1699561178752873);
+}
+
+TEST(DenseHamiltonian, HubbardHolsteinOccCutoff2) {
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
+    HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 1.4, 2);
+    NumOpBosHam bos_ham(frmbos_ham.m_basis.m_bos, 0.3);
+    Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
+    DenseHamiltonian ham(ham_src, ham_src.default_particles(4));
+    v_t<double> evals;
+    dense::diag(ham, evals);
+    ASSERT_NEARLY_EQ(evals[0], -6.692966463435127);
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinOccCutoff3) {
