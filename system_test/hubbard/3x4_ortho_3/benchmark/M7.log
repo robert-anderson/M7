@@ -1,0 +1,167 @@
+[1658059650] [info] formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run
+[1658059650] [warning] propagator.min_death_mag was zero, defaulting to the specified value of propagator.min_spawn_mag
+[1658059650] [warning] propagator.max_bloom was zero, defaulting to the specified value of propagator.nadd
+[1658059650] [info] prng (enabled)
+[1658059650] [info] prng.seed                               | 123
+[1658059650] [info] prng.ngen_block                         | 10000
+[1658059650] [info] archive (enabled)
+[1658059650] [info] archive.load_path                       | ""
+[1658059650] [info] archive.save_path                       | ""
+[1658059650] [info] archive.chkpt_path                      | ""
+[1658059650] [info] archive.period                          | 0
+[1658059650] [info] archive.period_mins                     | 0
+[1658059650] [info] basis (enabled)
+[1658059650] [info] basis.bos_occ_cutoff                    | 255
+[1658059650] [info] particles (enabled)
+[1658059650] [info] particles.nelec                         | 0
+[1658059650] [info] particles.ms2                           | inf
+[1658059650] [info] particles.nboson                        | 0
+[1658059650] [info] wavefunction (enabled)
+[1658059650] [info] wavefunction.nw_init                    | 1.000000e+00
+[1658059650] [info] wavefunction.nroot                      | 1
+[1658059650] [info] wavefunction.fci_init                   | false
+[1658059650] [info] wavefunction.buffers (enabled)
+[1658059650] [info] wavefunction.buffers.store_fac_init     | 1.000000e+00
+[1658059650] [info] wavefunction.buffers.store_expand_fac   | 5.000000e-01
+[1658059650] [info] wavefunction.buffers.comm_fac_init      | 1.000000e+00
+[1658059650] [info] wavefunction.buffers.comm_expand_fac    | 5.000000e-01
+[1658059650] [info] wavefunction.hash_mapping (enabled)
+[1658059650] [info] wavefunction.hash_mapping.remap_ratio   | 2.000000e+00
+[1658059650] [info] wavefunction.hash_mapping.remap_nlookup | 500
+[1658059650] [info] wavefunction.archive (enabled)
+[1658059650] [info] wavefunction.archive.load               | false
+[1658059650] [info] wavefunction.archive.save               | false
+[1658059650] [info] wavefunction.archive.chkpt              | false
+[1658059650] [info] wavefunction.load_balancing (enabled)
+[1658059650] [info] wavefunction.load_balancing.nblock_per_rank| 6
+[1658059650] [info] wavefunction.load_balancing.period      | 10
+[1658059650] [info] wavefunction.load_balancing.acceptable_imbalance| 5.000000e-02
+[1658059650] [info] wavefunction.load_balancing.nnull_updates_deactivate| 20
+[1658059650] [info] reference (enabled)
+[1658059650] [info] reference.mbf_init (enabled)
+[1658059650] [info] reference.mbf_init.fermion              | []
+[1658059650] [info] reference.mbf_init.boson                | []
+[1658059650] [info] reference.mbf_init.neel                 | true
+[1658059650] [info] reference.redef_thresh                  | 1.000000e+01
+[1658059650] [info] shift (enabled)
+[1658059650] [info] shift.init                              | 0.000000e+00
+[1658059650] [info] shift.damp                              | 5.000000e-01
+[1658059650] [info] shift.period                            | 5
+[1658059650] [info] shift.ncycle_av                         | 100
+[1658059650] [info] shift.jump                              | false
+[1658059650] [info] propagator (enabled)
+[1658059650] [info] propagator.ncycle                       | 2000
+[1658059650] [info] propagator.stochastic                   | true
+[1658059650] [info] propagator.excit_gen (enabled)
+[1658059650] [info] propagator.excit_gen.hubbard_prefer_double_occ (disabled)
+[1658059650] [info] propagator.nw_target                    | 1.000000e+04
+[1658059650] [info] propagator.max_bloom                    | 0.000000e+00
+[1658059650] [info] propagator.nadd                         | 0.000000e+00
+[1658059650] [info] propagator.tau_init                     | 1.000000e-03
+[1658059650] [info] propagator.tau_min                      | 1.000000e-05
+[1658059650] [info] propagator.tau_max                      | 1.000000e-02
+[1658059650] [info] propagator.static_tau                   | true
+[1658059650] [info] propagator.static_probs                 | true
+[1658059650] [info] propagator.min_spawn_mag                | 4.000000e-01
+[1658059650] [info] propagator.min_death_mag                | 4.000000e-01
+[1658059650] [info] propagator.min_exlvl_prob               | 1.000000e-03
+[1658059650] [info] propagator.exlvl_probs_init             | []
+[1658059650] [info] propagator.ndraw_min_for_dynamic        | 1000
+[1658059650] [info] propagator.period                       | 10
+[1658059650] [info] propagator.imp_samp_exp                 | 0.000000e+00
+[1658059650] [info] propagator.semistochastic (disabled)
+[1658059650] [info] hamiltonian (enabled)
+[1658059650] [info] hamiltonian.fermion (enabled)
+[1658059650] [info] hamiltonian.fermion.fcidump (disabled)
+[1658059650] [info] hamiltonian.fermion.hubbard (enabled)
+[1658059650] [info] hamiltonian.fermion.hubbard.topology    | "ortho"
+[1658059650] [info] hamiltonian.fermion.hubbard.site_shape  | [3, 4]
+[1658059650] [info] hamiltonian.fermion.hubbard.boundary_conds| [1, 1]
+[1658059650] [info] hamiltonian.fermion.hubbard.repulsion   | 4.000000e+00
+[1658059650] [info] hamiltonian.fermion.heisenberg (disabled)
+[1658059650] [info] hamiltonian.fermion.spin_penalty_j      | 0.000000e+00
+[1658059650] [info] hamiltonian.ladder (disabled)
+[1658059650] [info] hamiltonian.boson (disabled)
+[1658059650] [info] stats (enabled)
+[1658059650] [info] stats.path                              | "M7.stats"
+[1658059650] [info] stats.period                            | 5
+[1658059650] [info] stats.parallel                          | false
+[1658059650] [info] inst_ests (disabled)
+[1658059650] [info] av_ests (disabled)
+[1658059650] [info] Hubbard Hamiltonian initialized with U=4; orthogonal lattice with shape [3, 4] and boundary conds [1, 1]
+[1658059650] [info] 2*Ms value not defined by configuration document or Hamiltonian, defaulting to lowest valid positive value
+[1658059650] [info] Initially allocating 240B per rank for each communicating buffer of "wavefunction" (send and recv)
+[1658059650] [info] Initially allocating 320.000000KB per rank for store buffer of "wavefunction" 
+[1658059650] [info] Listening for changes to interactive variable "nwalker_target" in file "nwalker_target.var"
+[1658059650] [info] +------------------------+---------------------------+----------------+
+[1658059650] [info] |                   Excitation generation breakdown                   |
+[1658059650] [info] +------------------------+---------------------------+----------------+
+[1658059650] [info] |  Excitation Signature  |  Description              |  Probability   |
+[1658059650] [info] +========================+===========================+================+
+[1658059650] [info] |  1100                  |  uniform hubbard hopping  |  1.000000e+00  |
+[1658059650] [info] +------------------------+---------------------------+----------------+
+[1658059650] [info] Initializing magnitude logger with max_bloom 0 for 1 excitation levels
+[1658059650] [info] Dynamic tau optimization: false
+[1658059650] [info] Dynamic excitation level probability optimization: false
+[1658059650] [info] Dynamic row "reference" is in block 5 of 6, which is initially stored on rank 0
+[1658059650] [info] Initial reference ONV for WF part 0 is (101010101010,010101010101) with energy 0.000000e+00 
+[1658059650] [info] Listening for changes to interactive variable "exit" in file "exit.var"
+[1658059650] [info] not reading archive from file
+[1658059650] [info] not saving archive to file
+[1658059650] [info] not dumping checkpoint archives
+[1658059650] [info] Replicating walker populations: false
+[1658059650] [info] Beginning solver loop...
+[1658059651] [info] Entering "variable shift mode (WF part 0)" epoch on cycle 514 
+[1658059651] [info] Variable shift triggered for WF part 0. Cycle 513 nw: 9864.599999995746, cycle 514 nw: 10018.599999995746
+[1658059657] [info] Changing the reference ONV for WF part 0. current ONV: (101010101010,010101010101), weight: 0
+[1658059657] [info] Changed the reference ONV for WF part 0. new ONV: (101101100100,010000111011), weight: 1.6
+[1658059662] [info] Changing the reference ONV for WF part 0. current ONV: (101101100100,010000111011), weight: 0
+[1658059662] [info] Changed the reference ONV for WF part 0. new ONV: (110010110001,001101101100), weight: 1.2000000000000002
+[1658059662] [info] Changing the reference ONV for WF part 0. current ONV: (110010110001,001101101100), weight: 0
+[1658059662] [info] Changed the reference ONV for WF part 0. new ONV: (000011110101,100101111000), weight: 1.2000000000000002
+[1658059663] [info] Changing the reference ONV for WF part 0. current ONV: (000011110101,100101111000), weight: 0
+[1658059663] [info] Changed the reference ONV for WF part 0. new ONV: (100001111010,001100011101), weight: 1.2000000000000002
+[1658059664] [info] Changing the reference ONV for WF part 0. current ONV: (100001111010,001100011101), weight: 0
+[1658059664] [info] Changed the reference ONV for WF part 0. new ONV: (100011110100,000111001011), weight: 1.2000000000000002
+[1658059665] [info] Changing the reference ONV for WF part 0. current ONV: (100011110100,000111001011), weight: 0
+[1658059665] [info] Changed the reference ONV for WF part 0. new ONV: (100001110011,100110010110), weight: 1.2000000000000002
+[1658059666] [info] Changing the reference ONV for WF part 0. current ONV: (100001110011,100110010110), weight: 0
+[1658059666] [info] Changed the reference ONV for WF part 0. new ONV: (010111100001,101000110110), weight: 1.6
+[1658059667] [info] Changing the reference ONV for WF part 0. current ONV: (010111100001,101000110110), weight: 0
+[1658059667] [info] Changed the reference ONV for WF part 0. new ONV: (100001110011,110110010010), weight: 1.2000000000000002
+[1658059670] [info] Changing the reference ONV for WF part 0. current ONV: (100001110011,110110010010), weight: 0
+[1658059670] [info] Changed the reference ONV for WF part 0. new ONV: (000101111010,111010010100), weight: 1.2000000000000002
+[1658059671] [info] Changing the reference ONV for WF part 0. current ONV: (000101111010,111010010100), weight: 0
+[1658059671] [info] Changed the reference ONV for WF part 0. new ONV: (101001111000,101001010011), weight: 1.2000000000000002
+[1658059672] [info] Changing the reference ONV for WF part 0. current ONV: (101001111000,101001010011), weight: 0
+[1658059672] [info] Changed the reference ONV for WF part 0. new ONV: (101001010101,000110101110), weight: 1.6
+[1658059673] [info] Changing the reference ONV for WF part 0. current ONV: (101001010101,000110101110), weight: 0
+[1658059673] [info] Changed the reference ONV for WF part 0. new ONV: (110001110100,011110010001), weight: 1.2000000000000002
+[1658059674] [info] Changing the reference ONV for WF part 0. current ONV: (110001110100,011110010001), weight: 0
+[1658059674] [info] Changed the reference ONV for WF part 0. new ONV: (100001111100,011110001010), weight: 1.2000000000000002
+[1658059674] [info] Changing the reference ONV for WF part 0. current ONV: (100001111100,011110001010), weight: 0
+[1658059674] [info] Changed the reference ONV for WF part 0. new ONV: (011111000001,010111100010), weight: 1.6
+[1658059675] [info] Changing the reference ONV for WF part 0. current ONV: (011111000001,010111100010), weight: 0
+[1658059675] [info] Changed the reference ONV for WF part 0. new ONV: (001001111001,001110001110), weight: 1.2000000000000002
+[1658059676] [info] maximum cycle number (2000) reached
+[1658059676] [info] Top-weighted WF elements for part 0:
+[1658059676] [info] 0    (100010100111,001101011001)  -1.20000000e+00  true
+[1658059676] [info] 1    (001101100101,011000011110)  -1.20000000e+00  true
+[1658059676] [info] 2    (000110101110,010011100011)   1.20000000e+00  true
+[1658059676] [info] 3    (100100101101,011100101010)   1.20000000e+00  true
+[1658059676] [info] 4    (011101010100,110010101001)   1.20000000e+00  true
+[1658059676] [info] 5    (001010101101,110101010010)   1.20000000e+00  true
+[1658059676] [info] 6    (111010100001,001001011101)   1.20000000e+00  true
+[1658059676] [info] 7    (000110001111,110011110000)  -1.20000000e+00  true
+[1658059676] [info] 8    (101000011110,010101101010)  -1.20000000e+00  true
+[1658059676] [info] 9    (110010010110,111101100000)  -1.20000000e+00  true
+[1658059676] [info] 10   (010100101110,001111100001)  -1.20000000e+00  true
+[1658059676] [info] 11   (010101010011,101010100011)   1.20000000e+00  true
+[1658059676] [info] 12   (011111000100,100001111010)   1.20000000e+00  true
+[1658059676] [info] 13   (100010100111,100101011001)  -1.20000000e+00  true
+[1658059676] [info] 14   (111001001001,001100110101)   1.20000000e+00  true
+[1658059676] [info] 15   (011010100101,010100111010)  -1.20000000e+00  true
+[1658059676] [info] 16   (101100001101,110010001011)  -1.20000000e+00  true
+[1658059676] [info] 17   (011100011010,000111100110)  -1.20000000e+00  true
+[1658059676] [info] 18   (010101011010,101100011001)  -1.20000000e+00  true
+[1658059676] [info] 19   (010100111010,101101010100)  -1.20000000e+00  true
