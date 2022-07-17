@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <map>
+#include <utility>
 
 #include <M7_lib/field/Row.h>
 #include <M7_lib/table/BufferedTable.h>
@@ -144,7 +145,7 @@ struct StatsTable : BufferedTable<row_t> {
     }
 
     StatsTable(str_t fname, str_t description, const row_t &row, uint_t period) :
-            BufferedTable<row_t>(fname, {row}), m_fname(fname), m_description(description),
+            BufferedTable<row_t>(fname, {row}), m_fname(fname), m_description(std::move(description)),
             m_file(new std::ofstream(fname)), m_period(period) {
         write_header();
         BufferedTable<row_t>::push_back();
