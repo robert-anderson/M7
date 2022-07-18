@@ -162,7 +162,8 @@ struct ArnoldiProblemNonSym : ArnoldiProblemWithProduct<T> {
     std::unique_ptr<ARrcNonSymStdEig<T>> m_solver;
 
     ArnoldiProblemNonSym(uint_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){
-        dtype::unused(sigma);}
+        dtype::unused(sigma);
+    }
 
 private:
     bool basis_found() override { return m_solver->ArnoldiBasisFound(); }

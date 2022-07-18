@@ -26,11 +26,11 @@ struct FciInitializer {
         sparse::dynamic::Matrix<double> sparse_ham;
         sparse_ham.resize(count_local);
 
-
         uint_t irow = ~0ul;
         auto fn_row_loop = [&]() {
             ++irow;
             if ((irow < displ_local) || (irow >= (displ_local+count_local))) return;
+            DEBUG_ASSERT_LT(irow-displ_local, uint_t(count_local), "local row index OOB");
             uint_t icol = ~0ul;
             auto fn_col_loop = [&]() {
                 ++icol;
@@ -42,13 +42,13 @@ struct FciInitializer {
         };
         row_iters.m_single->loop(row_mbf, fn_row_loop);
 
-//        hdf5::FileWriter fw("ham.h5");
-//        dense::Matrix<double>(sparse_ham).save("data", fw);
         const uint_t nroot = 3;
         ArnoldiProblemNonSym<double> solver(nroot);
-        solver.solve(sparse_ham);
-        m_eval = solver.real_eigenvalue(nroot-1);
-        logging::info("Non-symmetric arnoldi eigenvalue: {}", m_eval);
+        dist_mv_prod::Sparse<double> dist(sparse_ham);
+        solver.solve(dist);
+        if (mpi::i_am_root()) m_eval = solver.real_eigenvalue(nroot-1);
+        mpi::bcast(m_eval);
+        logging::info("Non-symmetric Arnoldi eigenvalue: {}", m_eval);
     }
 };
 

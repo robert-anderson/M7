@@ -22,6 +22,8 @@ TEST(DenseHamiltonian, N2Rhf) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"}, true);
     Hamiltonian ham(&frm_ham);
     DenseHamiltonian hmat(ham);
+    hdf5::FileWriter fw("ham.h5");
+    hmat.save("data", fw);
     v_t<ham_t> evals;
     dense::diag(hmat, evals);
     ASSERT_NEARLY_EQ(evals[0], -108.916561245585);
