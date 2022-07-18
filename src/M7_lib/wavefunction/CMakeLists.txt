@@ -2,6 +2,8 @@ target_sources(M7_lib
     PRIVATE
         DeterministicSubspace.cpp
         DeterministicSubspace.h
+        FciInitializer.cpp
+        FciInitializer.h
         Reference.cpp
         Reference.h
         SpawnTable.cpp

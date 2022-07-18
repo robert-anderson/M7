@@ -8,6 +8,7 @@
 #include "M7_lib/parallel/MPIWrapper.h"
 
 TEST(MPIWrapper, AllSum){
+    ASSERT_EQ(mpi::nrank(), mpi::all_sum(1ul));
     uint_t i = mpi::irank()+1;
     uint_t res = mpi::all_sum(i);
     ASSERT_EQ(res, (mpi::nrank()*(mpi::nrank()+1))/2);

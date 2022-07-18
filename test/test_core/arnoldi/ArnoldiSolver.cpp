@@ -24,7 +24,8 @@ TEST(ArnoldiSolver, SymNonDist) {
     v_t<double> evals;
     dense::diag(dense, evals);
     // Arnoldi finds the extremal eigenvalue. in this case, the most positive
-    auto dense_eval_it = evals.cbegin()+(nrow-nroot);
+    auto dense_eval_it = evals.cbegin();
+    std::advance(dense_eval_it, nrow-nroot);
     for (uint_t iroot=0ul; iroot<nroot; ++iroot){
         ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
     }

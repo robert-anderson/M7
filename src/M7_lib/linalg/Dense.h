@@ -117,7 +117,7 @@ namespace dense {
             Matrix(nr.dataset_shape(name)[0], nr.dataset_shape(name)[1]) {
             nr.read_data(name, m_buffer.data(), m_buffer.size());
         }
-        explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_column_index() + 1){
+        explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_col_ind() + 1){
             *this = sparse;
         }
 

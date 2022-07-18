@@ -54,8 +54,8 @@ namespace asserts {
         } else {
             if (!outcome) {
                 logging::error_("{} {} failed", kind, op);
-                logging::error_("{} value is: {}", lhs_sym, convert::to_string(lhs));
-                logging::error_("{} value is: {}", rhs_sym, convert::to_string(rhs));
+                logging::error_("LHS \"{}\" value is: {}", lhs_sym, convert::to_string(lhs));
+                logging::error_("RHS \"{}\" value is: {}", rhs_sym, convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         }

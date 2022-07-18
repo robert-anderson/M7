@@ -87,9 +87,9 @@ namespace sparse {
              */
             Generic(const Generic& other, uint_t count, uint_t displ) :
                     Generic(count, other.m_init_row_nentry) {
-                REQUIRE_LE(displ, nrow(), "row offset OOB");
-                REQUIRE_LE(displ + count, nrow(), "row offset+count OOB");
-                auto begin = m_rows.cbegin();
+                REQUIRE_LE(displ, other.nrow(), "row offset OOB");
+                REQUIRE_LE(displ + count, other.nrow(), "row offset+count OOB");
+                auto begin = other.m_rows.cbegin();
                 std::advance(begin, displ);
                 auto end = begin;
                 std::advance(end, count);

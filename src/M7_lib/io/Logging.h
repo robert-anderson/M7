@@ -69,11 +69,10 @@ namespace logging {
 
     template<typename ...Args>
     static void info_(const str_t& fmt_string, Args&&... args){
+        if (mpi::nrank() == 1) info(fmt_string, args...);
         if (c_enable_local_logging) {
-            if (mpi::nrank() == 1) info(fmt_string, args...);
             g_local_file_logger->info(fmt_string, args...);
         }
-        dtype::unused(fmt_string, args...);
     }
 
     void info_lines(const strv_t& lines);
@@ -112,8 +111,8 @@ namespace logging {
 
     template<typename ...Args>
     static void warn_(const str_t& fmt_string, Args&&... args){
+        if (mpi::nrank() == 1) warn(fmt_string, args...);
         if (c_enable_local_logging) {
-            if (mpi::nrank() == 1) warn(fmt_string, args...);
             g_local_file_logger->warn(fmt_string, args...);
         }
     }
@@ -127,8 +126,8 @@ namespace logging {
 
     template<typename ...Args>
     static void error_(const str_t& fmt_string, Args&&... args){
+        if (mpi::nrank() == 1) error(fmt_string, args...);
         if (c_enable_local_logging) {
-            if (mpi::nrank() == 1) error(fmt_string, args...);
             g_local_file_logger->error(fmt_string, args...);
         }
     }
@@ -144,8 +143,8 @@ namespace logging {
 
     template<typename ...Args>
     static void critical_(const str_t& fmt_string, Args&&... args){
+        if (mpi::nrank() == 1) critical(fmt_string, args...);
         if (c_enable_local_logging) {
-            if (mpi::nrank() == 1) critical(fmt_string, args...);
             g_local_file_logger->critical(fmt_string, args...);
         }
     }
@@ -161,8 +160,8 @@ namespace logging {
 
     template<typename ...Args>
     static void debug_(const str_t& fmt_string, Args&&... args){
+        if (mpi::nrank() == 1) debug(fmt_string, args...);
         if (c_enable_debug && c_enable_local_logging) {
-            if (mpi::nrank() == 1) debug(fmt_string, args...);
             g_local_file_logger->debug(fmt_string, args...);
         }
     }

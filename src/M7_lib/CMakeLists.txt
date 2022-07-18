@@ -83,14 +83,19 @@ endif()
 
 target_compile_definitions(M7_lib PUBLIC MBF_TYPE=${MBF_TYPE})
 
-option(ENABLE_COMPLEX "ENABLE_COMPLEX")
-if (ENABLE_COMPLEX)
-    target_compile_definitions(M7_lib PRIVATE ENABLE_COMPLEX)
+option(ENABLE_COMPLEX_WF "ENABLE_COMPLEX_WF")
+if (ENABLE_COMPLEX_WF)
+    target_compile_definitions(M7_lib PUBLIC ENABLE_COMPLEX_WF)
+endif ()
+
+option(ENABLE_COMPLEX_HAM "ENABLE_COMPLEX_HAM")
+if (ENABLE_COMPLEX_HAM)
+    target_compile_definitions(M7_lib PUBLIC ENABLE_COMPLEX_HAM)
 endif ()
 
 option(ENABLE_LOCAL_LOGGING "ENABLE_LOCAL_LOGGING")
 if (ENABLE_LOCAL_LOGGING)
-    target_compile_definitions(M7_lib PRIVATE ENABLE_LOCAL_LOGGING)
+    target_compile_definitions(M7_lib PUBLIC ENABLE_LOCAL_LOGGING)
 endif ()
 
 

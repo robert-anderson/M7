@@ -150,7 +150,7 @@ public:
 };
 
 /**
- * Real, symmetric eigenvalue problem. It is the user's responsibility to ensure the operator is actually real symmetric
+ * Non-real, or non-symmetric eigenvalue problem.
  * @tparam T
  *  floating point type of Krylov vectors
  */

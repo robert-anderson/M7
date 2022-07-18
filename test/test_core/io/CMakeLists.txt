@@ -9,4 +9,5 @@ target_sources(unittest
         Hdf5FcidumpReader.cpp
         HDF5Wrapper.cpp
         InteractiveVariable.cpp
+        Logging.cpp
 )
