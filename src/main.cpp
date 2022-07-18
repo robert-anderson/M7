@@ -8,7 +8,6 @@
 int main(int argc, char **argv) {
 
     mpi::initialize(&argc, &argv);
-    logging::initialize();
 
     logging::title();
     /*
@@ -22,6 +21,8 @@ int main(int argc, char **argv) {
         mpi::finalize();
         return 0;
     }
+
+    logging::initialize();
 
     conf::Document opts(argv[1]);
     opts.validate();
