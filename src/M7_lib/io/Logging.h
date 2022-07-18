@@ -170,10 +170,10 @@ namespace logging {
     template<uint_t mbf_ind>
     static str_t mbf_name(){
         switch (mbf_ind) {
-            case 0: return "fermion (determinant basis)";
-            case 1: return "fermion-boson (determinant-permanent product basis)";
-            case 2: return "boson (permanent basis)";
-            case 3: return "fermion spin-adapted (CSF basis)";
+            case 0: return "fermion (determinant)";
+            case 1: return "fermion-boson (determinant-permanent product)";
+            case 2: return "boson (permanent)";
+            case 3: return "fermion spin-adapted (CSF)";
             default: return "";
         }
     }

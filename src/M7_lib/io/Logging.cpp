@@ -191,11 +191,11 @@ void logging::title() {
 void logging::defs() {
     v_t<strv_t> rows = {
             {"build mode", c_enable_debug ? "DEBUG" : "RELEASE"},
-            {"compilation timestamp", __DATE__ " " __TIME__},
+            {"compilation timestamp", c_timestamp},
             {"many-body basis function", mbf_name<c_mbf_type_ind>()},
             {"walker arithmetic", c_enable_complex_wf ? "complex" : "real"},
             {"Hamiltonian arithmetic", c_enable_complex_ham ? "complex" : "real"},
-            {"TCHINT interface enabled", c_enable_tchint ? "complex" : "real"},
+            {"TCHINT interface", c_enable_tchint ? "enabled" : "disabled"},
             {"rank-resolved logging", c_enable_local_logging ? "enabled" : "disabled"},
     };
     const auto table = make_table("compile definitions", rows);

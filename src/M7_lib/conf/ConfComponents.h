@@ -272,7 +272,7 @@ namespace conf_components {
         }
 
         void log() const override {
-            logging::info("{:<40}| {}", m_path.m_string, convert::to_string(m_value));
+            logging::info("{:<50}| {}", m_path.m_string, convert::to_string(m_value));
         }
     };
 
