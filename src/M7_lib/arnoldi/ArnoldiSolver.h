@@ -110,7 +110,7 @@ private:
     }
 
     void product(dist_mv_prod::Base<T> &mv_prod) override {
-        mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector(), mv_prod.m_nrow);
+        mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector());
     }
 
     void product(sparse::dynamic::Matrix<T> &sparse_mat) override {
@@ -129,7 +129,7 @@ public:
     bool solve(dist_mv_prod::Base<T> &mv_prod) override {
         setup(mv_prod.m_nrow, true);
         auto prod_fn = [&]() {
-            mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector(), mv_prod.m_nrow);
+            mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector());
         };
         return solve_base(prod_fn, true);
     }
@@ -180,7 +180,7 @@ private:
     }
 
     void product(dist_mv_prod::Base<T> &mv_prod) override {
-        mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector(), mv_prod.m_nrow);
+        mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector());
     }
 
     void product(sparse::dynamic::Matrix<T> &sparse_mat) override {
@@ -199,7 +199,7 @@ public:
     bool solve(dist_mv_prod::Base<T> &mv_prod) override {
         setup(mv_prod.m_nrow, true);
         auto prod_fn = [&]() {
-            mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector(), mv_prod.m_nrow);
+            mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector());
         };
         return solve_base(prod_fn, true);
     }
