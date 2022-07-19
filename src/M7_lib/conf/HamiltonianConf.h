@@ -87,6 +87,7 @@ namespace conf {
         Bosdump m_bosdump;
         Param<ham_comp_t> m_num_op_weight;
         InteractingBoseGas m_interacting_bose_gas;
+        Hubbard m_hubbard;
 
         explicit BosHam(Group *parent);
     };

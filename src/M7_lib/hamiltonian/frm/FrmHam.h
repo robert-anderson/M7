@@ -81,13 +81,6 @@ struct FrmHam : HamOpTerm {
 
     FrmHam(const sys::frm::Basis& basis);
 
-private:
-
-    /**
-     * workspace for computing connections
-     */
-    mutable suite::Conns m_work_conn;
-
 public:
 
     FrmHam(const FrmHam& other): FrmHam(other.m_basis){}

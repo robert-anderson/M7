@@ -78,7 +78,7 @@ conf::BosHam::BosHam(Group *parent) :
         Section(parent, "boson", "options relating to the number-conserving boson hamiltonian terms", Explicit),
         m_bosdump(this),
         m_num_op_weight(this, "num_op_weight", 0.0, "scalar factor of the bosonic number operator"),
-        m_interacting_bose_gas(this){}
+        m_interacting_bose_gas(this), m_hubbard(this){}
 
 conf::Hamiltonian::Hamiltonian(Group *parent) :
         Section(parent, "hamiltonian", "options relating to the Hamiltonian operator terms"),

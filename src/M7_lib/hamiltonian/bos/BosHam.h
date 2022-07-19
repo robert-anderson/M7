@@ -43,8 +43,7 @@ struct BosHam : HamOpTerm {
 	virtual ~BosHam(){}
 
     virtual ham_t get_coeff_0011(uint_t /*i*/, uint_t /*j*/) const {return 0;}
-    virtual ham_t get_coeff_0022(uint_t /*i*/, uint_t /*j*/,
-                                       uint_t /*k*/, uint_t /*l*/) const {return 0;}
+    virtual ham_t get_coeff_0022(uint_t /*i*/, uint_t /*j*/, uint_t /*k*/, uint_t /*l*/) const {return 0;}
 
     virtual ham_t get_element_0000(const field::BosOnv& /*onv*/) const {return 0;}
     virtual ham_t get_element_0011(const field::BosOnv& /*onv*/, const conn::BosOnv& /*conn*/) const {return 0;}
