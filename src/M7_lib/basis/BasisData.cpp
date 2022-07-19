@@ -155,7 +155,7 @@ sys::frm::Basis::Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolv
     }
 }
 
-sys::frm::Basis::Basis(std::shared_ptr<lattice::Lattice> lattice) :
+sys::frm::Basis::Basis(const std::shared_ptr<lattice::Lattice>& lattice) :
         Basis(lattice->m_nsite, {lattice->m_nsite}, false, lattice){
     REQUIRE_TRUE(*m_lattice, "cannot build a basis from a null lattice");
 }
@@ -172,12 +172,12 @@ uint_t sys::frm::Basis::ncoeff_ind() const {
 }
 
 strmap_t sys::frm::Basis::info() const {
-    strmap_t map;
-    map.insert({"nsite", convert::to_string(m_nsite)});
-    map.insert({"point group irreps", convert::to_string(m_abgrp_map.m_site_irreps)});
-    map.insert({"spin resolved", convert::to_string(m_spin_resolved)});
-    map.insert({"lattice", convert::to_string(m_lattice->m_info)});
-    return map;
+    return {
+            {"nsite", convert::to_string(m_nsite)},
+            {"point group irreps", convert::to_string(m_abgrp_map.m_site_irreps)},
+            {"spin resolved", convert::to_string(m_spin_resolved)},
+            {"lattice", convert::to_string(m_lattice->m_info)}
+    };
 }
 
 str_t sys::frm::Basis::to_string() const {
@@ -210,10 +210,10 @@ bool sys::frm::Electrons::operator==(const sys::frm::Electrons &other) const {
 }
 
 std::map<str_t, str_t> sys::frm::Electrons::info() const {
-    std::map<str_t, str_t> map;
-    map.insert({"number", convert::to_string(m_n)});
-    map.insert({"ms2", convert::to_string(m_ms2)});
-    return map;
+    return {
+            {"number", convert::to_string(m_n)},
+            {"ms2", convert::to_string(m_ms2)}
+    };
 }
 
 str_t sys::frm::Electrons::to_string() const {
@@ -243,16 +243,25 @@ uint_t sys::frm::Sector::size() const {
 
 sys::bos::Size::Size(uint_t nmode) : m_nmode(nmode){}
 
-sys::bos::Basis::Basis(uint_t nmode, uint_t occ_cutoff) : Size(nmode), m_occ_cutoff(occ_cutoff){}
+
 
 bool sys::bos::Basis::operator==(const sys::bos::Basis &other) const {
     return (m_occ_cutoff == other.m_occ_cutoff) && (m_nmode == other.m_nmode);
 }
 
+sys::bos::Basis::Basis(uint_t nmode, const std::shared_ptr<lattice::Lattice>& lattice, uint_t occ_cutoff) :
+        Size(nmode), m_lattice(lattice), m_occ_cutoff(occ_cutoff){}
+
+sys::bos::Basis::Basis(const std::shared_ptr<lattice::Lattice>& lattice, uint_t occ_cutoff) :
+        Basis(lattice->m_nsite, lattice, occ_cutoff){}
+
+sys::bos::Basis::Basis(uint_t nmode, uint_t occ_cutoff) : Basis(nmode, lattice::make(), occ_cutoff){}
+
 strmap_t sys::bos::Basis::info() const {
     return {
             {"nmode",      convert::to_string(m_nmode)},
-            {"occ_cutoff", convert::to_string(m_occ_cutoff)}
+            {"occ_cutoff", convert::to_string(m_occ_cutoff)},
+            {"lattice", convert::to_string(m_lattice->m_info)}
     };
 }
 

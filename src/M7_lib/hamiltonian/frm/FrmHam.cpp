@@ -8,8 +8,7 @@
 
 
 FrmHam::FrmHam(const sys::frm::Basis& basis):
-        m_basis(basis), m_contribs_1100(exsig::ex_single), m_contribs_2200(exsig::ex_double),
-        m_work_conn({99, 99}){}
+        m_basis(basis), m_contribs_1100(exsig::ex_single), m_contribs_2200(exsig::ex_double){}
 
 ham_t FrmHam::get_element(const field::FrmOnv &onv) const {
     return get_element_0000(onv);

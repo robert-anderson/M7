@@ -4,6 +4,8 @@ target_sources(M7_lib
         BosHam.h
         GeneralBosHam.cpp
         GeneralBosHam.h
+        HubbardBosHam.cpp
+        HubbardBosHam.h
         NumOpBosHam.cpp
         NumOpBosHam.h
         TcBosHam.cpp
