@@ -38,9 +38,14 @@ struct ArnoldiProblemBase {
     virtual bool do_another_mv_call() = 0;
 
     /**
-     * after the Arnoldi iteration procedure  has converged, prepare the eigenvalues and optionally the Ritz vectors
+     * after the Arnoldi iteration procedure has converged, prepare the eigenvalues
      */
     virtual void find_eigenvalues() = 0;
+
+    /**
+     * after the Arnoldi iteration procedure has converged, prepare the eigenvalues and the Ritz vectors
+     */
+    virtual void find_eigenvectors() = 0;
 
 protected:
     bool solve_base(const std::function<void()> &product_fn, bool dist);
@@ -104,6 +109,10 @@ private:
     }
 
     void find_eigenvalues() override { m_solver->FindEigenvalues(); }
+
+    void find_eigenvectors() override { m_solver->FindEigenvectors(); }
+
+private:
 
     void setup(uint_t nrow, bool dist) override {
         if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcSymStdEig<T>>(nrow, m_nroot);
@@ -175,6 +184,8 @@ private:
     }
 
     void find_eigenvalues() override { m_solver->FindEigenvalues(); }
+
+    void find_eigenvectors() override { m_solver->FindEigenvectors(); }
 
     void setup(uint_t nrow, bool dist) override {
         if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcNonSymStdEig<T>>(nrow, m_nroot);

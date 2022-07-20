@@ -4,38 +4,48 @@
 
 #include <M7_lib/util/ProgressMonitor.h>
 #include "FciInitializer.h"
+#include "M7_lib/foreach/ConnForeachGroup.h"
 
-FciInitializer::FciInitializer(const Hamiltonian &h) {
-    auto row_iters = FciIters::make(h);
-    auto col_iters = FciIters::make(h);
-    const auto count = row_iters.niter_single();
+FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift):
+        m_mbf_order_table("MBF order table", {{h.m_basis}}){
+    auto iters = FciIters::make(h);
+    const auto count = iters.niter_single();
+    const uint_t count_local = mpi::evenly_shared_count(count);
+    const uint_t displ_local = mpi::evenly_shared_displ(count);
 
-    auto count_local = mpi::evenly_shared_count(count);
-    auto displ_local = mpi::evenly_shared_displ(count);
+    m_mbf_order_table.resize(iters.niter_single());
+    buffered::Mbf mbf(h.m_basis);
+    auto setup_fn = [&](){ m_mbf_order_table.insert(mbf);};
+    iters.m_single->loop(mbf, setup_fn);
 
-    buffered::Mbf row_mbf(h.m_basis);
-    auto col_mbf = row_mbf;
+    conn::Mbf conn(mbf);
+    ConnForeachGroup conn_iters(h);
 
     sparse::dynamic::Matrix<double> sparse_ham;
     sparse_ham.resize(count_local);
 
     ProgressMonitor pm(true, "building sparse H", "basis functions", count_local);
-    uint_t irow = ~0ul;
-    auto fn_row_loop = [&]() {
-        ++irow;
-        if ((irow < displ_local) || (irow >= (displ_local+count_local))) return;
-        DEBUG_ASSERT_LT(irow-displ_local, uint_t(count_local), "local row index OOB");
-        uint_t icol = ~0ul;
-        auto fn_col_loop = [&]() {
-            ++icol;
-            auto helem = h.get_element(row_mbf, col_mbf);
+    auto& row = m_mbf_order_table.m_row;
+    for (row.jump(displ_local); row.in_range(displ_local+count_local); row.step()) {
+        const auto& src_mbf = row.m_mbf;
+        auto& dst_mbf = mbf;
+        const auto irow = row.index()-displ_local;
+
+        const auto helem_diag = h.get_element(src_mbf) + shift;
+        DEBUG_ASSERT_TRUE(sparse_ham[irow].empty(), "sparse row should be empty");
+        if (ham::is_significant(helem_diag))
+            sparse_ham.insert(irow, {row.index(), helem_diag});
+        auto filling_fn = [&](){
+            const auto helem = h.get_element(src_mbf, conn);
             if (!ham::is_significant(helem)) return;
-            sparse_ham.insert(irow-displ_local, {icol, helem});
+            conn.apply(src_mbf, dst_mbf);
+            const auto icol = *m_mbf_order_table[dst_mbf];
+            sparse_ham.insert(irow, {icol, helem});
         };
-        col_iters.m_single->loop(col_mbf, fn_col_loop);
+        src_mbf.m_decoded.clear();
+        conn_iters.loop(conn, src_mbf, filling_fn);
         pm.next();
-    };
-    row_iters.m_single->loop(row_mbf, fn_row_loop);
+    }
 
     const uint_t nroot = 3;
     ArnoldiProblemNonSym<double> solver(nroot);
