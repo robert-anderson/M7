@@ -12,7 +12,15 @@
 struct FciInitializer {
     double m_eval;
 
-    explicit FciInitializer(const Hamiltonian& h);
+    struct MbfOrderRow : Row {
+        field::Mbf m_mbf;
+        MbfOrderRow(sys::Basis basis): m_mbf(this, basis, "key"){}
+
+        field::Mbf &key_field(){return m_mbf;}
+    };
+
+    BufferedTable<MbfOrderRow, true> m_mbf_order_table;
+    explicit FciInitializer(const Hamiltonian& h, ham_comp_t shift);
 };
 
 

@@ -21,7 +21,7 @@ bool ArnoldiProblemBase::solve_base(const std::function<void()> &product_fn, boo
         if (dist) mpi::bcast(stop);
     }
     // Finding eigenvalues and eigenvectors.
-    if (i_am_solver_rank) find_eigenvalues();
+    if (i_am_solver_rank) find_eigenvectors();
     logging::info("{} converged after {} {}distributed matrix-vector multiplication{}",
               string::plural("eigenpair", m_nroot),
               nmv_call, dist ? "" : "non-",
