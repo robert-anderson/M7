@@ -2,5 +2,8 @@ target_sources(M7_lib
     PRIVATE
         FrmBosExcitGen.cpp
         FrmBosExcitGen.h
+        HolsteinUniform.cpp
+        HolsteinUniform.h
         Pchb1101hc.cpp
+        Pchb1101hc.h
 )

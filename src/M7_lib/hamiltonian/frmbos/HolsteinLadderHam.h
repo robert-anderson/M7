@@ -18,13 +18,17 @@ struct HolsteinLadderHam : FrmBosHam {
         m_contribs_1110.set_nonzero(exsig::ex_0010);
     }
 
-    ham_t get_coeff_1110(uint_t imode, uint_t i, uint_t j) const override;
+    ham_t get_coeff_1110(uint_t imode, uint_t a, uint_t i) const override;
 
-    ham_t get_coeff_1101(uint_t imode, uint_t i, uint_t j) const override;
+    ham_t get_coeff_1101(uint_t imode, uint_t a, uint_t i) const override;
 
     ham_t get_element_0010(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const override;
 
     ham_t get_element_0001(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const override;
+
+    excit_gen_list_t make_excit_gens(PRNG& prng, const conf::Propagator& propagator) const override;
+
+    conn_foreach::base_list_t make_foreach_iters() const override;
 
 };
 
