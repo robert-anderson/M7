@@ -166,7 +166,7 @@ namespace logging {
         }
     }
 
-    template<uint_t mbf_ind>
+    template<uint_t mbf_ind=c_mbf_type_ind>
     static str_t mbf_name(){
         switch (mbf_ind) {
             case 0: return "fermion (determinant)";

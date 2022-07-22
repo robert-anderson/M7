@@ -245,7 +245,6 @@ namespace conn_foreach {
         protected:
             void frmbos_loop(conn::FrmBosOnv& conn, const field::FrmBosOnv& src, const function_t& fn) override {
                 bos_loop(conn.m_bos, src.m_bos, fn);
-
             }
         };
 

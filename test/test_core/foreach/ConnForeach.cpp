@@ -113,18 +113,8 @@ TEST(ConnForeach, FrmGeneralEx2200) {
     mbf = setbits;
     uintv_t clrbits = {0, 2, 4, 7};
     ASSERT_EQ(mbf.m_decoded.m_simple_vacs.get(), clrbits);
-    v_t<uintv_t> setbit_pairs = {{1, 3},
-                                               {1, 5},
-                                               {3, 5},
-                                               {1, 6},
-                                               {3, 6},
-                                               {5, 6}};
-    v_t<uintv_t> clrbit_pairs = {{0, 2},
-                                               {0, 4},
-                                               {2, 4},
-                                               {0, 7},
-                                               {2, 7},
-                                               {4, 7}};
+    v_t<uintv_t> setbit_pairs = {{1, 3}, {1, 5}, {3, 5}, {1, 6}, {3, 6}, {5, 6}};
+    v_t<uintv_t> clrbit_pairs = {{0, 2}, {0, 4}, {2, 4}, {0, 7}, {2, 7}, {4, 7}};
     auto results = conn_foreach_test::product_results(setbit_pairs, clrbit_pairs);
 
     conn::FrmOnv conn(mbf);
@@ -176,18 +166,18 @@ TEST(ConnForeach, FrmHubbardEx1100) {
     mbf = {0, 2, 7, 8, 9};
 
     conn_foreach_test::results_t results = {
-            {0, 4},
             {0, 1},
-            {2, 10},
-            {2, 6},
+            {0, 4},
             {2, 1},
             {2, 3},
+            {2, 6},
+            {2, 10},
             {7, 3},
-            {7, 11},
             {7, 6},
+            {7, 11},
             {8, 4},
-            {9, 5},
             {9, 1},
+            {9, 5},
             {9, 10}};
     conn::FrmOnv conn(basis);
     auto result = results.cbegin();
@@ -218,8 +208,8 @@ TEST(ConnForeach, FrmHeisenbergEx2200) {
     mbf.set_spins({0, 3, 5});
 
     conn_foreach_test::results_t results = {
-            {{0, 15}, {7, 8}},
             {{0, 9},  {1, 8}},
+            {{0, 15}, {7, 8}},
             {{3, 10}, {2, 11}},
             {{3, 12}, {4, 11}},
             {{5, 12}, {4, 13}},
