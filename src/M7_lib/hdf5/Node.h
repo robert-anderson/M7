@@ -23,7 +23,7 @@ namespace hdf5 {
         H5O_info_t m_info;
     public:
         NodeReader(hid_t handle) : Node(handle) {
-            H5Oget_info2(m_handle, &m_info, H5O_INFO_ALL);
+            H5Oget_info1(m_handle, &m_info);
         }
 
     private:
