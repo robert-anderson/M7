@@ -19,12 +19,8 @@ namespace hdf5 {
 
 
     struct NodeReader : Node {
-    protected:
-        H5O_info_t m_info;
-    public:
-        NodeReader(hid_t handle) : Node(handle) {
-            H5Oget_info1(m_handle, &m_info);
-        }
+
+        NodeReader(hid_t handle) : Node(handle) {}
 
     private:
         template<typename T>
