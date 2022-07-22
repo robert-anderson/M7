@@ -1,0 +1,24 @@
+---
+shift:
+    damp: 0.5
+stats:
+    period: 5
+propagator:
+    tau_init: 0.001
+    stochastic: no
+    nw_target: 1000
+    nadd: 0.0
+    ncycle: 2000
+hamiltonian:
+    fermion:
+        hubbard:
+            site_shape: [3]
+            boundary_conds: [0]
+            repulsion: 4.0
+    boson:
+        num_op_weight: 0.3
+    ladder:
+        holstein_coupling: 1.3
+reference:
+    mbf_init:
+        neel: yes
