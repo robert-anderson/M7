@@ -166,6 +166,8 @@ namespace logging {
         }
     }
 
+    str_t quoted(const str_t& str);
+
     template<uint_t mbf_ind=c_mbf_type_ind>
     static str_t mbf_name(){
         switch (mbf_ind) {

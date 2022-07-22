@@ -188,6 +188,10 @@ void logging::title() {
     std::cout << std::endl;
 }
 
+str_t logging::quoted(const str_t &str) {
+    return "\""+str+"\"";
+}
+
 void logging::defs() {
     v_t<strv_t> rows = {
             {"build mode", c_enable_debug ? "DEBUG" : "RELEASE"},

@@ -115,7 +115,7 @@ struct HamiltonianTerms {
         using namespace smart_ptr;
         if (opts.m_ham.m_num_op_weight) {
             const uint_t nsite = m_frm->m_basis.m_nsite;
-            const sys::bos::Basis basis(nsite);
+            const sys::bos::Basis basis(nsite, opts.m_basis.m_bos_occ_cutoff);
             const auto omega = opts.m_ham.m_num_op_weight.m_value;
             return make_poly_unique<BosHam, NumOpBosHam>(basis, omega);
         }

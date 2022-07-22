@@ -8,7 +8,11 @@ propagator:
     stochastic: no
     nw_target: 1000
     nadd: 0.0
-    ncycle: 2000
+    ncycle: 40000
+basis:
+    bos_occ_cutoff: 3
+particles:
+    nelec: 4
 hamiltonian:
     fermion:
         hubbard:
@@ -18,7 +22,4 @@ hamiltonian:
     boson:
         num_op_weight: 0.3
     ladder:
-        holstein_coupling: 1.3
-reference:
-    mbf_init:
-        neel: yes
+        holstein_coupling: 1.4

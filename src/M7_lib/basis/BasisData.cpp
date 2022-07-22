@@ -284,15 +284,15 @@ bool sys::bos::Sector::operator==(const sys::bos::Sector &other) const {
 sys::Size::Size(uint_t nsite, uint_t nmode) : m_frm(nsite), m_bos(nmode){}
 
 void sys::Size::require_pure_frm() const {
-    REQUIRE_FALSE(m_bos, logging::format(
-            "Single particle basis not purely fermionic. Perhaps compiled with incorrect MBF type? ()",
-            logging::mbf_name<>()));
+    using namespace logging;
+    REQUIRE_FALSE(m_bos, format("Single particle basis not purely fermionic. "
+            "Perhaps compiled with incorrect MBF type {}?", quoted(mbf_name<>())));
 }
 
 void sys::Size::require_pure_bos() const {
-    REQUIRE_FALSE(m_frm, logging::format(
-            "Single particle basis not purely bosonic. Perhaps compiled with incorrect MBF type? ()",
-            logging::mbf_name<>()));
+    using namespace logging;
+    REQUIRE_FALSE(m_frm, format("Single particle basis not purely bosonic. "
+                                "Perhaps compiled with incorrect MBF type {}?", quoted(mbf_name<>())));
 }
 
 sys::Basis::Basis(sys::frm::Basis frm, sys::bos::Basis bos) : m_frm(std::move(frm)), m_bos(bos){}
