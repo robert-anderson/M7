@@ -21,7 +21,10 @@ public:
 
     template<typename mbf_t>
     void loop(conn::from_field_t<mbf_t> &conn, const mbf_t &src, const function_t &fn) {
-        for(const auto& foreach : m_list) foreach->loop(conn, src, fn);
+        for(const auto& foreach : m_list) {
+            conn.clear();
+            foreach->loop(conn, src, fn);
+        }
     }
 
     void log() const;
