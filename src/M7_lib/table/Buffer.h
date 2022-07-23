@@ -115,4 +115,16 @@ public:
 
 };
 
+
+struct Sizing {
+    /**
+     * estimate of the number of rows that will ultimately be required in a buffer
+     */
+    const uint_t m_nrow_est;
+    /**
+     * fractional over-allocation to make when buffer is resized
+     */
+    const double m_exp_fac;
+};
+
 #endif //M7_BUFFER_H
