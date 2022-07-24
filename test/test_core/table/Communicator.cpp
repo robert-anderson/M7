@@ -6,7 +6,7 @@
 #include "M7_lib/table/Communicator.h"
 #include "gtest/gtest.h"
 
-namespace communicator_test {
+namespace communicator_new_test {
     struct TestRow : Row {
         field::Number<uint_t> m_key;
         field::Number<double> m_value;
@@ -17,7 +17,7 @@ namespace communicator_test {
     };
 }
 TEST(Communicator, SharedRow) {
-    using namespace communicator_test;
+    using namespace communicator_new_test;
     typedef Communicator<TestRow, TestRow> comm_t;
     const uint_t nrow_store_est = 20;
     const double store_exp_fac = 0.0;

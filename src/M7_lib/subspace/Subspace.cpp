@@ -4,6 +4,6 @@
 
 #include "Subspace.h"
 
-void Subspace::update() {
-    DynamicRowSet::update();
-}
+//void Subspace::update() {
+//    DynamicRowSet::update();
+//}

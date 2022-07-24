@@ -197,6 +197,22 @@ public:
         return *this;
     }
 
+    /**
+     * increment protection level of the currently indexed row
+     */
+    void protect();
+    /**
+     * @return
+     *  (number of times protect() has been called) - (number of times release() has been called) on the currently
+     *  indexed row
+     */
+    uint_t protection_level() const;
+    bool is_protected() const;
+    /**
+     * decrement protection level of the currently indexed row
+     */
+    void release();
+
     str_t field_names_string() const;
 
     str_t to_string() const;
@@ -211,7 +227,6 @@ public:
 
     virtual bool is_h5_write_exempt() const;
 
-    bool is_protected() const;
 
 };
 

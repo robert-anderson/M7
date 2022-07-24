@@ -2,11 +2,13 @@ target_sources(M7_lib
     PRIVATE
         Distributed.h
         DistributedAccumulation.h
+        DynamicRowSet.cpp
+        DynamicRowSet.h
         Epoch.cpp
         Epoch.h
         Gatherable.h
         LoadBalancer.cpp
-        LoadBalancer.h
+        Redistributor.h
         MPIAssert.h
         MPIWrapper.cpp
         MPIWrapper.h

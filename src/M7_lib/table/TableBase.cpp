@@ -9,6 +9,7 @@
 
 #include "TableBase.h"
 #include "RowProtector.h"
+#include "M7_lib/util/SmartPtr.h"
 
 TableBase::TableBase(uint_t row_size) :
         m_bw(row_size), m_null_row_string(row_size, 0){}
@@ -87,7 +88,6 @@ void TableBase::resize(uint_t nrow, double factor) {
     DEBUG_ASSERT_GE(nrow, m_hwm, "resize would discard uncleared data");
     m_bw.resize(nrow * row_size(), factor);
     DEBUG_ASSERT_LT(m_hwm, m_bw.m_size/row_size(), "resize has discarded uncleared data");
-    for(const auto &rp : m_row_protectors) rp->on_resize(this->nrow());
 }
 
 void TableBase::expand(uint_t nrow, double factor) {
@@ -214,18 +214,8 @@ void TableBase::gatherv(const TableBase &src, uint_t irank) {
         post_insert_range(0, nrow_total);
 }
 
-void TableBase::erase_protector(RowProtector *rp) const {
-    m_row_protectors.erase(rp->m_it);
-}
-
 bool TableBase::is_protected() const {
-    return std::any_of(m_row_protectors.cbegin(), m_row_protectors.cend(),
-                       [](const RowProtector* rp){return rp->is_protected();});
-}
-
-bool TableBase::is_protected(uint_t irow) const {
-    return std::any_of(m_row_protectors.cbegin(), m_row_protectors.cend(),
-                       [&](const RowProtector* rp){return rp->is_protected(irow);});
+    return !m_protected_rows.empty();
 }
 
 uint_t TableBase::nrow_nonzero() const {

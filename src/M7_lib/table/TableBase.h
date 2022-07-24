@@ -69,13 +69,20 @@ struct TableBase {
      */
     std::unique_ptr<RowTransfer> m_transfer = nullptr;
     /**
-     * list of "row protectors". If any of these is protecting a row it should not be cleared
-     */
-    mutable std::list<RowProtector *> m_row_protectors;
-    /**
      * save a buffer of zeros for fast memcmp to determine whether a row is cleared
      */
     const v_t<char> m_null_row_string;
+    /**
+     * if a row is to be protected, its index must appear as a key in the following map.
+     * the value associated with the key is the "protection level" of the row. if one object requires that a row i not
+     * be deleted, then {i: 1} appears in the map. If a second object requires that row i not be deleted, then the
+     * record is looked up, then the value is incremented so than {i: 2} appears in the map. If then the first object
+     * releases its protection of row i, the record returns to {i: 1}, so that the row will still not be deleted even
+     * though the first dependent object has no objection. the row will remain protected until the second object
+     * releases, and the record is deleted from the map
+     */
+    mutable std::map<uint_t, uint_t> m_protected_rows;
+
 
     TableBase(uint_t row_size);
 
@@ -95,7 +102,7 @@ protected:
         }
         m_hwm = other.m_hwm;
         m_free_rows = other.m_free_rows;
-        m_row_protectors = other.m_row_protectors;
+        m_protected_rows = other.m_protected_rows;
         return *this;
     }
 
@@ -324,6 +331,31 @@ public:
      */
     void swap_rows(uint_t irow, uint_t jrow);
 
+
+    void protect(uint_t irow) const {
+        auto it = m_protected_rows.find(irow);
+        if (it==m_protected_rows.end()) m_protected_rows.insert({irow, 1ul});
+        else ++it->second;
+    }
+
+    uint_t protection_level(uint_t irow) const {
+        auto it = m_protected_rows.find(irow);
+        if (it==m_protected_rows.end()) return 0ul;
+        else return it->second;
+    }
+
+    bool is_protected(uint_t irow) const {
+        return protection_level(irow);
+    }
+
+    void release(uint_t irow) const {
+        DEBUG_ASSERT_TRUE(protection_level(irow), "can't release an unprotected row");
+        auto it = m_protected_rows.find(irow);
+        if (it->second==1ul) m_protected_rows.erase(it);
+        --it->second;
+    }
+
+
     /**
      * "Location" class which describes the location of a row in a distributed table i.e. by a row index and a rank index
      */
@@ -379,38 +411,10 @@ public:
     virtual void gatherv(const TableBase& src, uint_t irank = 0ul);
 
     /**
-     * adds a rank-dynamic object to the RankAllocator
-     * @param rp
-     *  address of object being added to the std::list of RowProtectors
-     * @return
-     *  iterator within list which points to the added RowProtector
-     */
-    typename std::list<RowProtector *>::iterator add_protector(RowProtector *rp) const {
-        m_row_protectors.push_back(rp);
-        auto it = m_row_protectors.end();
-        return --it;
-    }
-
-    /**
-     * remove RowProtector from list
-     * @param rp
-     *  address of object being removed by its stored std::list iterator
-     */
-    void erase_protector(RowProtector *rp) const;
-
-    /**
      * @return
      *  true if any of the associated RowProtectors are protecting any rows of this table
      */
     bool is_protected() const;
-
-    /**
-     * @param irow
-     *  row index
-     * @return
-     *  true if any of the associated RowProtectors are protecting irow
-     */
-    bool is_protected(uint_t irow) const;
 
     /**
      * @return

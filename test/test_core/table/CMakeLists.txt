@@ -5,6 +5,7 @@ target_sources(unittest
         BufferedTableArray.cpp
         CommunicatingPair.cpp
         Communicator.cpp
+        CommuniatorNew.cpp
         DynamicRowSet.cpp
         MappedTable.cpp
         Table.cpp

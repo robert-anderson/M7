@@ -2,8 +2,8 @@
 // Created by rja on 17/07/22.
 //
 
-#ifndef M7_LOADBALANCER_H
-#define M7_LOADBALANCER_H
+#ifndef M7_REDISTRIBUTOR_H
+#define M7_REDISTRIBUTOR_H
 
 #include <numeric>
 #include <algorithm>
@@ -12,64 +12,6 @@
 #include "M7_lib/table/BufferedTable.h"
 #include "RankAllocator.h"
 
-/**
- * decide which block transfers to make in order to equalize load across all ranks
- */
-class RankReallocator {
-    /**
-     * map from block index to rank index
-     */
-    const uintv_t& m_block_iranks;
-    /**
-     * workload figure for each block
-     */
-    const v_t<double>& m_block_work_figs;
-    /**
-     * vectors of block indices for each rank
-     */
-    v_t<uintv_t> m_rank_iblocks;
-    /**
-     * total workload figure for each rank
-     */
-    v_t<double> m_total_work_figs;
-    /**
-     * total workload figure per rank with perfect load balancing
-     */
-    const double m_perfect_work_fig;
-
-    /**
-     * @param irank_busiest
-     *  index of busiest rank (after already decided transfers)
-     * @param limit
-     *  maximum value of workload figure
-     * @return
-     *  index of block with the largest workload figure less than limit
-     */
-    uint_t iblock_max_le(uint_t irank_busiest, double limit);
-
-    /**
-     * do one iteration of the reallocation algorithm
-     * @param iblock
-     *  index of the block to transfer
-     * @param irank_dst
-     *  index of MPI rank to which block iblock is destined
-     * @return
-     *  false if no further transfers could be found
-     */
-    bool update(uint_t& iblock, uint_t& irank_dst);
-public:
-
-    /**
-     * block indices to move
-     */
-    uintv_t m_moving_iblocks;
-    /**
-     * indices of lazy ranks for which each moving block is destined
-     */
-    uintv_t m_dst_iranks;
-
-    RankReallocator(const uintv_t& block_iranks, const v_t<double>& block_work_figs, uint_t nrank);
-};
 
 
 struct LoadBalancerBase {
@@ -83,7 +25,6 @@ struct LoadBalancerBase {
     void accumulate_work_fig(uint_t iblock, double cost){
         m_block_work_figs[iblock]+=cost;
     }
-
 };
 
 /*
@@ -98,6 +39,12 @@ struct LoadBalancer {
     m_lb(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
 
 };
+ */
+
+
+/*
+ * a load balancing exchange involves an all-to-all communication
+ *
  */
 
 
@@ -376,12 +323,12 @@ namespace lb {
 
         typedef typename KeyField<store_row_t>::type key_field_t;
         typedef BufferedTable<store_row_t, true> store_t;
-        typedef CommunicatingPair<comm_row_t, mapped_send> comm_t;
+        typedef CommunicatingPair<comm_row_t, mapped_send> comm_pair_t;
         typedef typename store_t::table_t store_table_t;
-        typedef typename comm_t::send_t::table_t send_table_t;
+        typedef typename comm_pair_t::send_t::table_t send_table_t;
 
         store_t m_store;
-        comm_t m_comm;
+        comm_pair_t m_comm;
         LoadBalancer m_lb;
         str_t m_name;
 
@@ -786,11 +733,11 @@ namespace lb {
             return m_ra.get_rank(key);
         }
 
-        typename comm_t::send_t &send() {
+        typename comm_pair_t::send_t &send() {
             return m_comm.send();
         }
 
-        const typename comm_t::send_t &send() const {
+        const typename comm_pair_t::send_t &send() const {
             return m_comm.send();
         }
 
@@ -819,4 +766,4 @@ namespace lb {
 }
 
 
-#endif //M7_LOADBALANCER_H
+#endif //M7_REDISTRIBUTOR_H

@@ -55,10 +55,6 @@ bool Row::is_h5_write_exempt() const {
     return false;
 }
 
-bool Row::is_protected() const {
-    return m_table->is_protected(m_i);
-}
-
 Row::Row(const Row &other) {
     m_table = other.m_table;
     m_begin = other.m_begin;
@@ -67,3 +63,19 @@ Row::Row(const Row &other) {
 }
 
 Row::~Row() {}
+
+void Row::protect() {
+    m_table->protect(index());
+}
+
+uint_t Row::protection_level() const {
+    return m_table->protection_level(index());
+}
+
+bool Row::is_protected() const {
+    return m_table->is_protected(index());
+}
+
+void Row::release() {
+    m_table->release(index());
+}

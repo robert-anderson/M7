@@ -195,7 +195,7 @@ struct Communicator {
     /**
      * A set of rows which responds correctly to rank reallocation and is protected from erasure
      */
-    struct DynamicRowSet : RankDynamic, RowProtector {
+    struct DynamicRowSet : RankDynamic {
         typedef RankAllocator<store_row_t> ra_t;
         /**
          * the communicator whose m_store member stores the definitive row values
@@ -228,7 +228,6 @@ struct Communicator {
     public:
         DynamicRowSet(const Communicator &comm, str_t name) :
                 RankDynamic(comm.m_ra),
-                RowProtector(comm.m_store),
                 m_source(comm),
                 m_counts(mpi::nrank(), 0ul),
                 m_displs(mpi::nrank(), 0ul),
@@ -253,12 +252,12 @@ struct Communicator {
         }
 
         void clear() {
-            for (const auto &irow: m_irows) RowProtector::release(irow);
+            for (const auto &irow: m_irows) static_cast<const TableBase&>(m_source.m_store).release(irow);
             m_irows.clear();
         }
 
         void add_(uint_t irow) {
-            RowProtector::protect(irow);
+            static_cast<const TableBase&>(m_source.m_store).protect(irow);
             m_irows.insert(irow);
         }
 
@@ -281,6 +280,7 @@ struct Communicator {
         }
 
         void before_block_transfer(const uintv_t &irows_send, uint_t irank_send, uint_t irank_recv) override {
+            auto& src_base = static_cast<const TableBase&>(m_source.m_store);
             uint_t nrow_transfer;
             if (mpi::i_am(irank_send)) {
                 m_idrows.clear();
@@ -293,7 +293,7 @@ struct Communicator {
                          * which of the incoming transferred rows it is now responsible for tracking!
                          */
                         m_idrows.push_back(itrow);
-                        if (is_protected(irow)) release(irow);
+                        if (src_base.is_protected(irow)) src_base.release(irow);
                         m_irows.erase(irow);
                     }
                     ++itrow;
@@ -331,6 +331,7 @@ struct Communicator {
         }
 
         void on_row_recv_(uint_t irow) override {
+            auto& src_base = static_cast<const TableBase&>(m_source.m_store);
             // check if there's any more rows we may need to track
             if (m_ndrow_found < m_idrows.size()) {
                 ASSERT(m_ndrow_found < m_idrows.size());
@@ -340,7 +341,7 @@ struct Communicator {
                     DEBUG_ASSERT_TRUE(m_irows.find(irow) == m_irows.end(),
                                       "Transferred dynamic row shouldn't already be here!");
                     m_irows.insert(irow);
-                    protect(irow);
+                    src_base.protect(irow);
                     ++m_ndrow_found;
                 }
             }

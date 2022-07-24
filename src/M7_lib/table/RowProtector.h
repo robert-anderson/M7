@@ -5,6 +5,7 @@
 #ifndef M7_ROWPROTECTOR_H
 #define M7_ROWPROTECTOR_H
 
+#if 0
 #include <M7_lib/parallel/RankAllocator.h>
 
 /**
@@ -63,4 +64,5 @@ struct RowProtector {
 };
 
 
+#endif //M7_ROWPROTECTOR_H
 #endif //M7_ROWPROTECTOR_H
