@@ -24,8 +24,8 @@ mpi::count_t mpi::evenly_shared_count(uint_t nitem_global) {
     return evenly_shared_count(nitem_global, mpi::irank());
 }
 
-mpi::counts_t mpi::evenly_shared_counts(uint_t nitem_global) {
-    mpi::counts_t tmp;
+mpi::countv_t mpi::evenly_shared_counts(uint_t nitem_global) {
+    mpi::countv_t tmp;
     tmp.reserve(nrank());
     for (uint_t irank=0ul; irank<nrank(); ++irank) tmp.push_back(evenly_shared_count(nitem_global, irank));
     return tmp;
@@ -40,8 +40,8 @@ uint_t mpi::evenly_shared_displ(uint_t nitem_global) {
     return evenly_shared_displ(nitem_global, mpi::irank());
 }
 
-mpi::counts_t mpi::evenly_shared_displs(uint_t nitem_global) {
-    mpi::counts_t tmp;
+mpi::countv_t mpi::evenly_shared_displs(uint_t nitem_global) {
+    mpi::countv_t tmp;
     tmp.reserve(nrank());
     for (uint_t irank=0ul; irank<nrank(); ++irank) tmp.push_back(evenly_shared_displ(nitem_global, irank));
     return tmp;

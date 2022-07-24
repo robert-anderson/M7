@@ -43,17 +43,19 @@ TEST(CommunicatorNew, Redistribution) {
     typedef CommunicatorNew<TestRow, TestRow> comm_t;
     const Sizing store_sizing = {20, 0.0};
     const Sizing comm_sizing = {20, 0.0};
-    comm_t comm("test communicator", {{}, 10}, store_sizing, {{}}, comm_sizing, 14ul);
-    const uint_t nrow_per_rank_expect = 20;
+    comm_t comm("test communicator", {{}, 10}, store_sizing, {{}}, comm_sizing, 4ul);
+    const uint_t nrow_per_rank_expect = 7;
     auto &row = comm.m_store.m_row;
     v_t<double> work_figures(comm.m_dist.nblock());
     for (uint_t i = 0; i<nrow_per_rank_expect*mpi::nrank(); ++i){
         BufferedField<field::Number<uint_t>> key;
         key = 123+i*5;
         if (!mpi::i_am(comm.irank(key))) continue;
-        row.push_back_jump();
+        comm.m_store.insert(key);
         row.m_key = key;
         row.m_value = 2.8*i;
+        if (!(i%4)) row.protect();
+        if (!(i%2)) row.protect();
         /*
          * make up an amount of work done
          */
@@ -65,6 +67,19 @@ TEST(CommunicatorNew, Redistribution) {
     //Redistributor redist_chk(orig_dist.block_iranks(), work_figures, mpi::nrank());
 
     comm.redistribute();
+
+    for (uint_t i = 0; i<nrow_per_rank_expect*mpi::nrank(); ++i){
+        BufferedField<field::Number<uint_t>> key;
+        key = 123+i*5;
+        if (!mpi::i_am(comm.irank(key))) continue;
+        row.jump(*comm.m_store[key]);
+        if (!(i%4)) {
+            ASSERT_EQ(row.protection_level(), 2ul);
+        }
+        else if (!(i%2)) {
+            ASSERT_EQ(row.protection_level(), 1ul);
+        }
+    }
 
 //    comm_t::SharedRow shared_row(comm, {0, 0}, "test shared row");
 }

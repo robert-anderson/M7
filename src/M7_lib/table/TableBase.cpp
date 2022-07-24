@@ -66,7 +66,8 @@ void TableBase::clear() {
 }
 
 void TableBase::clear(uint_t irow) {
-    ASSERT(!is_protected(irow));
+    DEBUG_ASSERT_LT(irow, m_hwm, "row index OOB");
+    DEBUG_ASSERT_FALSE(is_protected(irow), "cannot clear a protected row");
     std::memset(begin(irow), 0, row_size());
     m_free_rows.push(irow);
 }
