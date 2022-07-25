@@ -33,8 +33,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift):
 
         const auto helem_diag = h.get_element(src_mbf) + shift;
         DEBUG_ASSERT_TRUE(sparse_ham[irow].empty(), "sparse row should be empty");
-        if (ham::is_significant(helem_diag))
-            sparse_ham.insert(irow, {row.index(), helem_diag});
+        if (ham::is_significant(helem_diag)) sparse_ham.insert(irow, {row.index(), helem_diag});
         auto filling_fn = [&](){
             const auto helem = h.get_element(src_mbf, conn);
             if (!ham::is_significant(helem)) return;
@@ -51,7 +50,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift):
     ArnoldiProblemNonSym<double> solver(nroot);
     dist_mv_prod::Sparse<double> dist(sparse_ham);
     solver.solve(dist);
-    if (mpi::i_am_root()) m_eval = solver.real_eigenvalue(nroot-1);
+    if (mpi::i_am_root()) m_eval = solver.real_eigenvalue(0);
     mpi::bcast(m_eval);
     logging::info("Non-symmetric Arnoldi eigenvalue: {}", m_eval);
 }
