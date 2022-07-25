@@ -5,6 +5,7 @@
 #include "DeterministicSubspace.h"
 #include "M7_lib/util/SmartPtr.h"
 
+#if 0
 field::Mbf &DeterministicDataRow::key_field() {
     return m_mbf;
 }
@@ -17,6 +18,7 @@ void DeterministicDataRow::load_fn(const WalkerTableRow &source, DeterministicDa
     local.m_mbf = source.m_mbf;
     local.m_weight = source.m_weight;
 }
+#endif
 
 uintv_t DeterministicSubspace::make_iparts() {
     if (m_wf.nreplica() == 1) return {m_iroot};
@@ -25,26 +27,22 @@ uintv_t DeterministicSubspace::make_iparts() {
 }
 
 void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const Mbf &ref, const sparse::Element& elem) {
-    auto &row_local = m_local.m_row;
-    auto &row_global = m_global.m_row;
-
-    row_global.jump(elem);
-    if (row_global.m_mbf == ref) return;
+    m_all.m_row.jump(elem);
+    if (m_all.m_row.m_mbf == ref) return;
     if (m_wf.nreplica() == 2) {
-        rdms.make_contribs(row_local.m_mbf, row_global.m_mbf,
-                           row_local.m_weight[0] * row_global.m_weight[1]);
-        rdms.make_contribs(row_local.m_mbf, row_global.m_mbf,
-                           row_local.m_weight[1] * row_global.m_weight[0]);
+        rdms.make_contribs(m_local_row.m_mbf, m_all.m_row.m_mbf,
+                           m_local_row.m_weight[0] * m_all.m_row.m_weight[1]);
+        rdms.make_contribs(m_local_row.m_mbf, m_all.m_row.m_mbf,
+                           m_local_row.m_weight[1] * m_all.m_row.m_weight[0]);
     } else {
-        rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, row_local.m_weight[0] * row_global.m_weight[0]);
+        rdms.make_contribs(m_local_row.m_mbf, m_all.m_row.m_mbf, m_local_row.m_weight[0] * m_all.m_row.m_weight[0]);
     }
 }
 
 DeterministicSubspace::DeterministicSubspace(
         const conf::Semistochastic &opts, Wavefunction &wf, uint_t iroot) :
-        Wavefunction::PartSharedRowSet<DeterministicDataRow>(
-                wf, "semistochastic", {wf}, DeterministicDataRow::load_fn),
-        m_opts(opts), m_wf(wf), m_iroot(iroot), m_iparts(make_iparts()) {}
+        shared_rows::Set<WalkerTableRow>("semistochastic", wf),
+        m_opts(opts), m_wf(wf), m_iroot(iroot), m_local_row(wf.m_store.m_row), m_iparts(make_iparts()){}
 
 void DeterministicSubspace::add_(WalkerTableRow &row) {
     base_t::add_(row.index());
@@ -63,30 +61,32 @@ void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, con
 }
 
 void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
-    update();
-    logging::info("Forming a deterministic subspace with {} ONVs", m_global.m_hwm);
+    full_update();
+    logging::info("Forming a deterministic subspace with {} ONVs", m_all.m_hwm);
     suite::Conns conns_work(m_wf.m_sector.size());
-    auto &row_local = m_local.m_row;
-    auto &conn_work = conns_work[row_local.m_mbf];
+    auto &conn_work = conns_work[m_local_row.m_mbf];
     uint_t n_hconn = 0ul;
     uint_t n_rdm_conn = 0ul;
-    m_ham_matrix.resize(m_local.m_hwm);
-    m_rdm_network.resize(m_local.m_hwm);
-    for (row_local.restart(); row_local.in_range(); row_local.step()) {
+    m_ham_matrix.resize(nrow_());
+    m_rdm_network.resize(nrow_());
+    uint_t iirow = ~0ul;
+    for (auto irow: m_irows) {
+        ++iirow;
+        m_local_row.jump(irow);
         // loop over local subspace (H rows)
-        auto &row_global = m_global.m_row;
-        for (row_global.restart(); row_global.in_range(); row_global.step()) {
+        auto& all_row = m_all.m_row;
+        for (all_row.restart(); all_row.in_range(); all_row.step()) {
             // loop over full subspace (H columns)
             // only add to sparse H if dets are connected
-            conn_work.connect(row_local.m_mbf, row_global.m_mbf);
+            conn_work.connect(m_local_row.m_mbf, all_row.m_mbf);
             const auto exsig = conn_work.exsig();
             if (!exsig || exsig > exsig::c_ndistinct) continue; // diagonal
-            auto helem = ham.get_element(row_local.m_mbf, conn_work);
+            auto helem = ham.get_element(m_local_row.m_mbf, conn_work);
             if (ham::is_significant(helem)) {
-                m_ham_matrix.add(row_local.index(), {row_global.index(), helem});
+                m_ham_matrix.add(m_local_row.index(), {all_row.index(), helem});
                 ++n_hconn;
             } else if (bilinears.m_rdms.takes_contribs_from(conn_work.exsig())) {
-                m_rdm_network.add(row_local.index(), row_global.index());
+                m_rdm_network.add(m_local_row.index(), all_row.index());
                 ++n_rdm_conn;
             }
         }
@@ -98,39 +98,41 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
 
 void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref) {
     if (!rdms || !rdms.m_accum_epoch) return;
-    auto &row_local = m_local.m_row;
-    for (row_local.restart(); row_local.in_range(); row_local.step()) {
-        if (row_local.m_mbf == ref) continue;
+    uint_t iirow = ~0ul;
+    for (auto irow: m_irows) {
+        ++iirow;
+        m_local_row.jump(irow);
+        if (m_local_row.m_mbf == ref) continue;
         /*
          * make contributions due to hamiltonian connections
          */
-        for (auto& elem : m_ham_matrix[row_local.index()]){
+        for (auto& elem : m_ham_matrix[iirow]){
             make_rdm_contrib(rdms, ref, elem);
         }
         /*
          * make contributions due to RDM-only connections
          */
-        for (auto& elem : m_rdm_network[row_local.index()]){
+        for (auto& elem : m_rdm_network[iirow]){
             make_rdm_contrib(rdms, ref, elem);
         }
     }
 }
 
 void DeterministicSubspace::project(double tau) {
-    auto &row_local = m_local.m_row;
-    auto &row_global = m_global.m_row;
+    auto &all_row = m_all.m_row;
     auto &row_wf = m_wf.m_store.m_row;
-    auto irow_wf_it = m_irows.cbegin();
-    for (row_local.restart(); row_local.in_range(); row_local.step()) {
-        row_wf.jump(*irow_wf_it);
-        const auto& elems = m_ham_matrix[row_local.index()];
+    uint_t iirow = ~0ul;
+    for (auto irow: m_irows) {
+        ++iirow;
+        row_wf.jump(irow);
+        const auto& elems = m_ham_matrix[iirow];
+        v_t<wf_t> delta(m_wf.npart(), 0.0);
         for (auto& elem: elems){
-            row_global.jump(elem.m_i);
+            all_row.jump(elem.m_i);
             // one replica or two
-            for (const auto &ipart: m_iparts)
-                m_wf.change_weight(ipart, -elem.m_v * tau * row_global.m_weight[ipart]);
+            for (const auto &ipart: m_iparts) delta[ipart] = -elem.m_v * tau * all_row.m_weight[ipart];
         }
-        ++irow_wf_it;
+        for (const auto &ipart: m_iparts) m_wf.change_weight(ipart, delta[ipart]);
     }
 }
 

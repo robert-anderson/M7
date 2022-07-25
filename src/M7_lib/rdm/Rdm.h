@@ -6,7 +6,7 @@
 #define M7_RDM_H
 
 #include <M7_lib/io/Archivable.h>
-#include <M7_lib/table/Communicator.h>
+#include <M7_lib/table/CommunicatorOld.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/bilinear/FermionPromoter.h>
 

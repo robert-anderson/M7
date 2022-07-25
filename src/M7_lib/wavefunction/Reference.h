@@ -14,7 +14,7 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
-class Reference : public Wavefunction::SharedRow {
+class Reference : public shared_rows::Single<WalkerTableRow> {
     const Hamiltonian &m_ham;
     const Wavefunction &m_wf;
     /**
@@ -52,7 +52,7 @@ public:
     const field::Mbf& get_mbf() const;
 
     uint_t occupied_ncycle(const uint_t& icycle) const {
-        return m_global.m_row.occupied_ncycle(icycle);
+        return m_all.m_row.occupied_ncycle(icycle);
     }
 
     /**
@@ -121,7 +121,7 @@ public:
     wf_t norm_average_weight(const uint_t& icycle, const uint_t& ipart) const;
 
     const WalkerTableRow& row() const {
-        return m_global.m_row;
+        return m_all.m_row;
     }
 };
 

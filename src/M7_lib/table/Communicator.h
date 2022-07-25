@@ -1,4 +1,7 @@
 //
+// Created by rja on 24/07/22.
+//
+//
 // Created by Robert J. Anderson on 09/11/2020.
 //
 
@@ -17,6 +20,7 @@
 #include "BufferedTable.h"
 #include "BufferedTableArray.h"
 #include "RowProtector.h"
+#include "M7_lib/parallel/Redistributor.h"
 
 /**
  * A container for the send table array and recv table. Each element of the
@@ -51,23 +55,21 @@ public:
     /**
      * @param name
      *  base name for the buffers to be created for the send and recv tables
-     * @param comm_nrow_est
-     *  estimate of the number of rows per rank that will ultimately be required in the send buffer
-     * @param exp_fac
-     *  fractional over-allocation to make when resizing both tables
      * @param send
      *  send table instance, this is passed rather than a row, since this class allows for the definition of the send
      *  table as a MappedTable, whose ctor takes additional args
+     * @param sizing
+     *  buffer (re)sizing behaviour for both send and recv tables
      */
-    CommunicatingPair(str_t name, uint_t comm_nrow_est, double exp_fac, const send_table_t &send) :
+    CommunicatingPair(str_t name, const send_table_t &send, Sizing sizing) :
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
         logging::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
-                  string::memsize(mpi::nrank() * comm_nrow_est*m_recv.row_size()), name);
-        m_send.resize(comm_nrow_est, 0.0);
-        m_recv.resize(mpi::nrank() * comm_nrow_est, 0.0);
-        m_send.set_expansion_factor(exp_fac);
-        m_recv.set_expansion_factor(exp_fac);
+                      string::memsize(mpi::nrank() * sizing.m_nrow_est*m_recv.row_size()), name);
+        m_send.resize(sizing.m_nrow_est, 0.0);
+        m_recv.resize(mpi::nrank() * sizing.m_nrow_est, 0.0);
+        m_send.set_expansion_factor(sizing.m_exp_fac);
+        m_recv.set_expansion_factor(sizing.m_exp_fac);
     }
 
     uint_t row_size() const {
@@ -104,8 +106,8 @@ public:
     }
 
     void expand(uint_t nrow, double factor = -1.0) {
-        m_send.expand(nrow);
-        m_recv.expand(nrow * mpi::nrank());
+        m_send.expand(nrow, factor);
+        m_recv.expand(nrow * mpi::nrank(), factor);
     }
 
     /**
@@ -119,10 +121,10 @@ public:
         uintv_t recvcounts(mpi::nrank(), 0ul);
 
         auto all_sends_empty = !std::accumulate(sendcounts.cbegin(), sendcounts.cend(), 0ul);
-        DEBUG_ONLY(all_sends_empty);
         if (all_sends_empty && m_last_recv_count) {
             logging::debug_("this rank is sending no data at all, but it received data in the previous communication");
         }
+        m_recv.clear();
 
         mpi::all_to_all(sendcounts, recvcounts);
 
@@ -152,7 +154,7 @@ public:
         /*
          * check that the data addressed to this rank from this rank has been copied correctly
          */
-        ASSERT(!send(mpi::irank()).begin() or
+        ASSERT(!send(mpi::irank()).begin() ||
                std::memcmp(send(mpi::irank()).begin(),
                            recv().begin() + recvdispls[mpi::irank()], recvcounts[mpi::irank()]) == 0);
 
@@ -168,388 +170,300 @@ public:
 };
 
 /**
- * Combines the CommunicatingPair with a persistent storage table and a RankAllocator
+ * decide which block transfers to make in order to equalize load across all ranks
+ */
+class Redistributor {
+    /**
+     * map from block index to rank index
+     */
+    const uintv_t& m_block_iranks;
+    /**
+     * workload figure for each block
+     */
+    const v_t<double>& m_block_work_figs;
+    /**
+     * map from rank index to block indices
+     */
+    v_t<std::set<uint_t>> m_rank_iblocks;
+    /**
+     * total workload figure for each rank
+     */
+    v_t<double> m_total_work_figs;
+    /**
+     * total workload figure per rank with perfect load balancing
+     */
+    const double m_perfect_work_fig;
+    /**
+     * flag set to true if the rank is busier than or equal to the average load (for checks)
+     */
+    const v_t<bool> m_busier_or_avg;
+
+    v_t<bool> make_busier_or_avg() const {
+        v_t<bool> flags;
+        flags.reserve(m_total_work_figs.size());
+        for (auto v: m_total_work_figs) flags.push_back(v>=m_perfect_work_fig);
+        return flags;
+    }
+
+    /**
+     * @param irank_busiest
+     *  index of busiest rank (after already decided transfers)
+     * @param limit
+     *  maximum value of workload figure
+     * @return
+     *  index of block with the largest workload figure less than limit
+     */
+    uint_t iblock_max_lt(uint_t irank_busiest, double limit) {
+        uint_t iblock_best = ~0ul;
+        for (auto iblock: m_rank_iblocks[irank_busiest]) {
+            if ((m_block_work_figs[iblock] < limit) && (iblock_best==~0ul ||
+                (m_block_work_figs[iblock] > m_block_work_figs[iblock_best]))) iblock_best = iblock;
+        }
+        return iblock_best;
+    }
+
+    /**
+     * do one iteration of the reallocation algorithm
+     * @param iblock
+     *  index of the block to transfer
+     * @param irank_dst
+     *  index of MPI rank to which block iblock is destined
+     * @return
+     *  false if no further transfers could be found
+     */
+    bool update(uint_t& iblock, uint_t& irank_dst) {
+        auto it_src = std::max_element(m_total_work_figs.begin(), m_total_work_figs.end());
+        const uint_t irank_src = std::distance(m_total_work_figs.begin(), it_src);
+        auto it_dst = std::min_element(m_total_work_figs.begin(), m_total_work_figs.end());
+        irank_dst = std::distance(m_total_work_figs.begin(), it_dst);
+        DEBUG_ASSERT_NE(irank_src, irank_dst, "rank should never transfer to itself");
+
+        // edge case where one of the extreme ranks has exactly the perfect load
+        if (*it_src == m_perfect_work_fig || *it_dst == m_perfect_work_fig) {
+            DEBUG_ASSERT_TRUE(*it_src == m_perfect_work_fig || *it_dst == m_perfect_work_fig,
+                              "both should be perfectly distributed");
+            return false;
+        }
+
+        DEBUG_ASSERT_GT(*it_src, m_perfect_work_fig,
+                        "lazier than average rank should never be identified as busiest");
+        DEBUG_ASSERT_LT(*it_dst, m_perfect_work_fig,
+                        "busier than average rank should never be identified as laziest");
+
+        /*
+         * find the index of the block with the largest weight less than half the difference between the work figures of
+         * the current busiest and laziest ranks. this will be the most efficient move. if the work figure is greater
+         * than this limit, the lazy rank will become busier than average
+         */
+        iblock = iblock_max_lt(irank_src, (*it_src - *it_dst) / 2.0);
+        if (iblock<m_block_iranks.size()) {
+            DEBUG_ASSERT_FALSE(m_rank_iblocks[irank_src].empty(), "source rank should have at least one block");
+            const auto diff = m_block_work_figs[iblock];
+            *it_src -= diff;
+            *it_dst += diff;
+            m_rank_iblocks[irank_src].erase(iblock);
+            m_rank_iblocks[irank_dst].insert(iblock);
+            return true;
+        }
+        return false;
+    }
+
+public:
+
+    struct Move {
+        uint_t m_iblock, m_dst_irank;
+        bool operator==(const Move& other) const {
+            return m_iblock==other.m_iblock && m_dst_irank==other.m_dst_irank;
+        }
+    };
+    v_t<Move> m_moves;
+
+    Redistributor(const uintv_t& block_iranks, const v_t<double>& block_work_figs, uint_t nrank):
+        m_block_iranks(block_iranks), m_block_work_figs(block_work_figs), m_rank_iblocks(nrank),
+        m_perfect_work_fig(std::accumulate(m_block_work_figs.cbegin(), m_block_work_figs.cend(), 0.0)/nrank),
+        m_busier_or_avg(make_busier_or_avg()){
+
+        {
+            /*
+             * construct the inverse one-to-many map from ranks to blocks
+             */
+            uint_t iblock = 0ul;
+            for (auto& irank: block_iranks) m_rank_iblocks[irank].insert(iblock++);
+        }
+
+        m_total_work_figs.resize(nrank);
+        for (uint_t iblock=0ul; iblock<m_block_iranks.size(); ++iblock) {
+            m_total_work_figs[m_block_iranks[iblock]] += m_block_work_figs[iblock];
+            DEBUG_ASSERT_GE(m_block_work_figs[iblock], 0.0, "block work figure should be non-negative");
+        }
+        if (mpi::nrank()==1ul) return;
+        uint_t iblock, irank_dst;
+        while (update(iblock, irank_dst)) m_moves.push_back({iblock, irank_dst});
+    }
+};
+
+
+
+class Distribution {
+
+    uintv_t m_block_iranks;
+
+    /**
+     * number of blocks stored on this MPI rank
+     */
+    uint_t m_nblock_local = 0ul;
+
+public:
+    uint_t nblock() const {
+        return m_block_iranks.size();
+    }
+
+    uint_t nblock_() const {
+        return m_nblock_local;
+    }
+
+    const uintv_t& block_iranks() const {
+        return m_block_iranks;
+    }
+
+    Distribution(size_t nblock) {
+        REQUIRE_GE(nblock, mpi::nrank(), "number of blocks may not be less than the number of ranks");
+        m_block_iranks.reserve(nblock);
+        /*
+         * initialize distribution evenly
+         */
+        for (uint_t irank=0ul; irank < mpi::nrank(); ++irank){
+            m_nblock_local = mpi::evenly_shared_count(nblock);
+            for (uint_t iblock = 0ul; iblock < m_nblock_local; ++iblock) {
+                m_block_iranks.push_back(irank);
+            }
+        }
+        DEBUG_ASSERT_EQ(m_block_iranks.size(), nblock, "error in initial block allocation");
+    }
+
+    void update(const Redistributor& redist) {
+        for (auto move: redist.m_moves) {
+            auto& irank = m_block_iranks[move.m_iblock];
+            if (mpi::i_am(irank)) --m_nblock_local;
+            irank = move.m_dst_irank;
+            if (mpi::i_am(irank)) ++m_nblock_local;
+        }
+    }
+
+    template<typename field_t>
+    uint_t iblock(const field_t& field) const {
+        return field.hash()%m_block_iranks.size();
+    }
+
+    template<typename field_t>
+    uint_t irank(const field_t& field) const {
+        return m_block_iranks[iblock(field)];
+    }
+};
+
+class DistribDependentBase {
+    virtual void on_redistribution() = 0;
+};
+
+struct CommunicatorBase {
+    mutable std::set<DistribDependentBase*> m_dependents;
+    ~CommunicatorBase() {
+        REQUIRE_TRUE_ALL(m_dependents.empty(), "Communicator should never be outlived by its dependents");
+    }
+};
+
+class DistribDependent : DistribDependentBase {
+    const CommunicatorBase& m_comm_base;
+public:
+    DistribDependent(const CommunicatorBase& comm_base): m_comm_base(comm_base){
+        m_comm_base.m_dependents.insert(this);
+    }
+    ~DistribDependent(){
+        m_comm_base.m_dependents.erase(this);
+    }
+};
+
+
+/**
+ * Combines the CommunicatingPair with a persistent storage table
  * @tparam store_row_t
  *  The Row class-derived data layout of the storage table
  * @tparam comm_row_t
  *  The Row class-derived data layout of the tables within the CommunicatingPair
  * @tparam mapped_comm
- *  optional mapping of CommunicatingPair
+ *  optional mapping of send table in CommunicatingPair
  */
 template<typename store_row_t, typename comm_row_t, bool mapped_comm = false>
-struct Communicator {
+struct Communicator : CommunicatorBase {
     static_assert(std::is_base_of<Row, store_row_t>::value, "Template arg must be derived from Row");
     static_assert(std::is_base_of<Row, comm_row_t>::value, "Template arg must be derived from Row");
-
-    typedef typename KeyField<store_row_t>::type key_field_t;
+    /**
+     * the store table is a MappedTable which forms the persistent storage of the distributed object
+     */
     typedef BufferedTable<store_row_t, true> store_t;
-    typedef CommunicatingPair<comm_row_t, mapped_comm> comm_t;
     typedef typename store_t::table_t store_table_t;
-    typedef typename comm_t::send_t::table_t send_table_t;
-
     store_t m_store;
-    comm_t m_comm;
-    mutable RankAllocator<store_row_t> m_ra;
+    /**
+     * the key field of the store table determines the block, and therefore MPI rank index, to which the row belongs
+     */
+    typedef typename KeyField<store_row_t>::type key_field_t;
+    /**
+     * the communication is done by a pair of tables, send and recv. The Row type is not necessarily the same as that
+     * used by the store table.
+     */
+    typedef CommunicatingPair<comm_row_t, mapped_comm> comm_pair_t;
+    typedef typename comm_pair_t::send_t::table_t send_table_t;
+    comm_pair_t m_comm;
+    /**
+     * identifier for the purposes of detailed logging (reallocations and remappings)
+     */
     str_t m_name;
-
     /**
-     * A set of rows which responds correctly to rank reallocation and is protected from erasure
+     * current allocation of load balancing blocks to MPI rank indices
      */
-    struct DynamicRowSet : RankDynamic {
-        typedef RankAllocator<store_row_t> ra_t;
-        /**
-         * the communicator whose m_store member stores the definitive row values
-         */
-        const Communicator &m_source;
-        /**
-         * set of dynamic row indices stored on this rank
-         */
-        std::set<uint_t> m_irows;
-        /**
-         * the counts and displs determine a global index for a local dynamic row. The ith element of m_irows on MPI
-         * rank j has global index m_displs[j]+i
-         */
-        uintv_t m_counts;
-        uintv_t m_displs;
-        uintv_t m_ranks_with_any_rows;
-
-        str_t m_name;
-        /*
-         * row = row in mapped table
-         * trow = row among transferred rows
-         * drow = dynamic row index among transferred rows
-         */
-        const int m_ntrow_to_track_p2p_tag;
-        const int m_itrows_to_track_p2p_tag;
-        uintv_t m_idrows;
-        uint_t m_itrow;
-        uint_t m_ndrow_found;
-
-    public:
-        DynamicRowSet(const Communicator &comm, str_t name) :
-                RankDynamic(comm.m_ra),
-                m_source(comm),
-                m_counts(mpi::nrank(), 0ul),
-                m_displs(mpi::nrank(), 0ul),
-                m_name(name),
-                m_ntrow_to_track_p2p_tag(mpi::new_p2p_tag()),
-                m_itrows_to_track_p2p_tag(mpi::new_p2p_tag()) {
-            logging::debug("P2P tag for number of dynamic row indices to transfer for \"{}\": {}", m_name,
-                       m_ntrow_to_track_p2p_tag);
-            logging::debug("P2P tag for array of dynamic row indices to transfer for \"{}\": {}", m_name,
-                       m_itrows_to_track_p2p_tag);
-            m_ranks_with_any_rows.reserve(mpi::nrank());
-        }
-
-        virtual ~DynamicRowSet() {}
-
-        uint_t nrow_() const {
-            return m_irows.size();
-        }
-
-        uint_t nrow() const {
-            return mpi::all_sum(nrow_());
-        }
-
-        void clear() {
-            for (const auto &irow: m_irows) static_cast<const TableBase&>(m_source.m_store).release(irow);
-            m_irows.clear();
-        }
-
-        void add_(uint_t irow) {
-            static_cast<const TableBase&>(m_source.m_store).protect(irow);
-            m_irows.insert(irow);
-        }
-
-        void add_(const store_row_t &row) {
-            add_(row.index());
-        }
-
-    public:
-        virtual void update() {
-            mpi::all_gather(nrow_(), m_counts);
-            mpi::counts_to_displs_consec(m_counts, m_displs);
-            m_ranks_with_any_rows.clear();
-            for (uint_t irank = 0; irank < mpi::nrank(); ++irank) {
-                if (m_counts[irank]) m_ranks_with_any_rows.push_back(irank);
-            }
-        }
-
-        bool has_row(uint_t irow) override {
-            return m_irows.find(irow) != m_irows.end();
-        }
-
-        void before_block_transfer(const uintv_t &irows_send, uint_t irank_send, uint_t irank_recv) override {
-            auto& src_base = static_cast<const TableBase&>(m_source.m_store);
-            uint_t nrow_transfer;
-            if (mpi::i_am(irank_send)) {
-                m_idrows.clear();
-                // look for Dynamic rows among those being transferred
-                uint_t itrow = 0ul;
-                for (const auto &irow: irows_send) {
-                    if (m_irows.find(irow) != m_irows.end()) {
-                        /*
-                         * this row is tracked by this DynamicRowSet, so the recving rank needs to know
-                         * which of the incoming transferred rows it is now responsible for tracking!
-                         */
-                        m_idrows.push_back(itrow);
-                        if (src_base.is_protected(irow)) src_base.release(irow);
-                        m_irows.erase(irow);
-                    }
-                    ++itrow;
-                }
-                nrow_transfer = m_idrows.size();
-                mpi::send(&nrow_transfer, 1, irank_recv, m_ntrow_to_track_p2p_tag);
-                // only bother with vector send if there's anything to transfer
-                if (!nrow_transfer) {
-                    logging::debug_("No dynamic rows to transfer for \"{}\"", m_name);
-                    return;
-                }
-                logging::debug_("Sending {} dynamic rows for \"{}\" from rank {} to {}",
-                            nrow_transfer, m_name, irank_send, irank_recv);
-                mpi::send(m_idrows.data(), nrow_transfer, irank_recv, m_itrows_to_track_p2p_tag);
-            }
-
-            if (mpi::i_am(irank_recv)) {
-                // rezero this counter, it will be incremented in every call to on_row_recv_
-                m_itrow = 0ul;
-                // rezero this counter, it will be incremented whenever on_row_recv_ finds a dynamic row
-                m_ndrow_found = 0ul;
-
-                m_idrows.clear();
-                mpi::recv(&nrow_transfer, 1, irank_send, m_ntrow_to_track_p2p_tag);
-                if (!nrow_transfer) {
-                    logging::debug_("No dynamic rows to transfer for \"{}\"", m_name);
-                    return;
-                }
-                logging::debug_("Recving {} dynamic rows for \"{}\" to rank {} from {}",
-                            nrow_transfer, m_name, irank_recv, irank_send);
-                m_idrows.resize(nrow_transfer, ~0ul);
-                mpi::recv(m_idrows.data(), nrow_transfer, irank_send, m_itrows_to_track_p2p_tag);
-                logging::debug_("idrows: {}", convert::to_string(m_idrows));
-            }
-        }
-
-        void on_row_recv_(uint_t irow) override {
-            auto& src_base = static_cast<const TableBase&>(m_source.m_store);
-            // check if there's any more rows we may need to track
-            if (m_ndrow_found < m_idrows.size()) {
-                ASSERT(m_ndrow_found < m_idrows.size());
-                const auto next_itrow = m_idrows[m_ndrow_found];
-                if (m_itrow == next_itrow) {
-                    // this transferred row is dynamic
-                    DEBUG_ASSERT_TRUE(m_irows.find(irow) == m_irows.end(),
-                                      "Transferred dynamic row shouldn't already be here!");
-                    m_irows.insert(irow);
-                    src_base.protect(irow);
-                    ++m_ndrow_found;
-                }
-            }
-            ++m_itrow;
-        }
-
-        void after_block_transfer() override {
-            update();
-        }
-    };
-
+    Distribution m_dist;
     /**
-     * A set of dynamic rows from which a subset of fields can be loaded into a contiguous local table and communicated to a
-     * contiguous global table. That is to say: only partially shared
+     * redistribution of rows is crucial to achieve load balancing. this pair must always have the same Row type as the
+     * store table though
      */
-    template<typename contig_row_t>
-    struct PartSharedRowSet : public DynamicRowSet {
-        using DynamicRowSet::m_source;
-        using DynamicRowSet::nrow;
-        using DynamicRowSet::m_displs;
-        using DynamicRowSet::m_counts;
-        using DynamicRowSet::m_irows;
-        using DynamicRowSet::m_name;
-        /**
-         * the (mapped) table which loads data from rows of m_source.m_store (arbitrary order, non-contiguous) into m_global
-         * (contiguous).
-         */
-        BufferedTable<contig_row_t> m_local;
-        /**
-         * the table which holds data extracted from all tracked rows in the dynamic set. these rows copies are refreshed
-         * with a call to update method. This table is intended for reading data from all MPI ranks, as such there is no
-         * mechanism for committing changes to m_source.m_store from m_global. It is to be treated as a read-only view of data
-         * stored across all ranks.
-         */
-        BufferedTable<contig_row_t> m_global;
-        store_row_t m_source_row;
-
-        typedef std::function<void(const store_row_t &, contig_row_t &)> loading_fn_t;
-        const loading_fn_t m_loading_fn;
-
-        PartSharedRowSet(const Communicator &comm, str_t name, contig_row_t contig_row, loading_fn_t loading_fn) :
-                DynamicRowSet(comm, name),
-                m_local("Dynamic shared row set \"" + name + "\" (local)", contig_row),
-                m_global("Dynamic shared set \"" + name + "\" (global)", contig_row),
-                m_source_row(comm.m_store.m_row), m_loading_fn(loading_fn) {
-            m_local.push_back(1);
-            m_global.push_back(1);
-        }
-
-        void update_data() {
-            /*
-             * assumes that m_counts and m_displs have already been filled.
-             *
-             * The elements of m_irows determine the indices of the dynamic rows stored on this rank.
-             * First, we use these indices to randomly access the source MappedTable, and copy rows
-             * into the local contiguous table (m_local)
-             */
-            DEBUG_ASSERT_TRUE_ALL(nrow(),
-                                  logging::format("Total number of rows across all ranks should be non-zero (\"{}\").",
-                                              m_name));
-            m_local.clear();
-            auto nrow = m_displs.back() + m_counts.back();
-            m_local.push_back(m_counts[mpi::irank()]);
-            auto &local_row = m_local.m_row;
-            local_row.restart();
-            for (auto &irow : m_irows) {
-                m_source_row.jump(irow);
-                m_loading_fn(m_source_row, local_row);
-                local_row.step();
-            }
-            DEBUG_ASSERT_EQ(local_row.index(), m_counts[mpi::irank()], "not all local rows filled");
-
-            m_global.clear();
-            m_global.push_back(nrow);
-            /*
-             * convert from units of rows to datawords...
-             */
-            for (auto &i : m_counts) i *= m_local.row_size();
-            for (auto &i : m_displs) i *= m_local.row_size();
-            mpi::all_gatherv(m_local.begin(), m_counts[mpi::irank()], m_global.begin(), m_counts, m_displs);
-            /*
-             * ... and back again
-             */
-            for (auto &i : m_counts) i /= m_local.row_size();
-            for (auto &i : m_displs) i /= m_local.row_size();
-        }
-
-        void update() override {
-            DynamicRowSet::update();
-            update_data();
-        }
-    };
-
+    typedef CommunicatingPair<store_row_t, false> redist_pair_t;
+    redist_pair_t m_redist;
     /**
-     * A special case of PartSharedRowSet where all row data is copied, not just a subset
+     * row protection information must also be shared
      */
-    struct SharedRowSet : public PartSharedRowSet<store_row_t> {
-
-        typedef typename PartSharedRowSet<store_row_t>::loading_fn_t loading_fn_t;
-
-        static loading_fn_t make_copy_row_fn() {
-            return [](const store_row_t &source, store_row_t &local) { local.copy_in(source); };
-        }
-
-        SharedRowSet(const Communicator &comm, str_t name) :
-                PartSharedRowSet<store_row_t>(comm, name, comm.m_store.m_row, make_copy_row_fn()) {}
-    };
-
-    struct SharedRow : public SharedRowSet {
-        using DynamicRowSet::m_ra;
-        using DynamicRowSet::m_source;
-        using DynamicRowSet::m_irows;
-        using DynamicRowSet::clear;
-        using DynamicRowSet::add_;
-        using DynamicRowSet::nrow_;
-        using DynamicRowSet::nrow;
-        using DynamicRowSet::update;
-        using DynamicRowSet::m_name;
-        using DynamicRowSet::m_ranks_with_any_rows;
-        using SharedRowSet::m_global;
-
-        uint_t m_iblock_ra;
-
-        SharedRow(const Communicator &comm, TableBase::Loc loc, str_t name) :
-                SharedRowSet(comm, name) {
-            redefine(loc);
-            DEBUG_ASSERT_EQ(loc.is_mine(), comm.m_store.is_protected(),
-                            "the SharedRow's table should be protected");
-        }
-
-        void redefine(TableBase::Loc newloc) {
-            clear();
-            m_global.m_row.restart();
-            auto row = m_source.m_store.m_row;
-            if (newloc.is_mine()) {
-                add_(newloc.m_irow);
-                row.jump(newloc.m_irow);
-                m_iblock_ra = m_source.m_ra.get_block(row);
-            }
-            mpi::bcast(m_iblock_ra, newloc.m_irank);
-            update();
-            logging::debug("Shared row \"{}\" is now in block {} on rank {}", m_name, m_iblock_ra, newloc.m_irank);
-        }
-
-        uint_t irank() const {
-            return m_ranks_with_any_rows.size() ? m_ranks_with_any_rows[0] : ~0ul;
-        }
-
-        void update() override {
-            auto irank_initial = irank();
-            SharedRowSet::update();
-            DEBUG_ASSERT_EQ(nrow(), 1ul, "Total number of rows across all ranks should be 1.");
-            REQUIRE_EQ_ALL(m_ranks_with_any_rows.size(), 1ul, "Only one rank should have a row");
-            auto irank_final = irank();
-            if (irank_initial == ~0ul)
-                logging::info("Dynamic row \"{}\" is in block {} of {}, which is initially stored on rank {}",
-                          m_name, m_iblock_ra, this->m_ra.m_nblock, irank_final);
-            else if (irank_initial != irank_final)
-                logging::info("Dynamic row \"{}\" moved from rank {} to rank {}",
-                          m_name, irank_initial, irank_final);
-        }
-
-        bool is_mine() const {
-            ASSERT(m_ranks_with_any_rows.size() == 1);
-            ASSERT(m_ranks_with_any_rows[0] == mpi::irank());
-            return DynamicRowSet::nrow_();
-        }
-
-        bool is_same(const store_row_t &row) const {
-            return is_mine() ? row.index() == *m_irows.cbegin() : false;
-        }
-    };
+    typedef SingleFieldRow<field::Number<uint_t>> prot_level_row_t;
+    typedef CommunicatingPair<prot_level_row_t> prot_level_pair_t;
+    prot_level_pair_t m_prot_level;
+    /**
+     * redistribution requires information about the amount of work done (by an arbitrary measure) by each block.
+     */
+    v_t<double> m_block_work_figures;
 
     /**
      * @param name
      *  base name for all buffers created here
-     * @param store_nrow_est
-     *  estimate of the number of rows that will ultimately be required in the store table
-     * @param store_exp_fac
-     *  fractional over-allocation to make when store buffer is resized
-     * @param comm_nrow_est
-     *  estimate of the number of rows per rank that will ultimately be required in the send table of the CommunicatingPair
-     * @param comm_exp_fac
-     *  fractional over-allocation to make when CommunicatingPair buffers are resized
      * @param store
      *  store table instance
+     * @param store_sizing
+     *  buffer (re)sizing behaviour for the store table
      * @param send
      *  send table instance
-     * @param nblock_ra
-     *  number of RankAllocator blocks per rank
-     * @param period_ra
-     *  number of cycles between rank reallocation attempts
-     * @param acceptable_imbalance
-     *  fractional imbalance of work between busiest and laziest ranks acceptable to the rank allocator
-     * @param nnull_updates_deactivate
-     *  number of consecutive acceptably-imbalanced periods required for dynamic load balancing to be deactivated
+     * @param comm_sizing
+     *  buffer (re)sizing behaviour for the communicating pair
+     * @param nblock_per_rank
+     *  number of distribution blocks per rank
      */
-    Communicator(str_t name, uint_t store_nrow_est, double store_exp_fac, uint_t comm_nrow_est,
-                 double comm_exp_fac, const store_table_t &store, const send_table_t &send, uint_t nblock_ra,
-                 uint_t period_ra, double acceptable_imbalance, uint_t nnull_updates_deactivate) :
-            m_store(name + " store", store),
-            m_comm(name, comm_nrow_est, comm_exp_fac, send),
-            m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
-            m_name(name) {
+    Communicator(str_t name, const store_table_t &store, Sizing store_sizing,
+                 const send_table_t &send, Sizing comm_sizing, uint_t nblock_per_rank):
+            m_store(name + " store", store), m_comm(name, send, comm_sizing),
+            m_name(name), m_dist(nblock_per_rank*mpi::nrank()),
+            m_redist(name+" redistributor", store, comm_sizing),
+            m_prot_level(name+" protection level", {{}}, comm_sizing),
+            m_block_work_figures(m_dist.nblock()) {
         logging::info("Initially allocating {} per rank for store buffer of \"{}\" ",
-                  string::memsize(store_nrow_est*m_store.row_size()), name);
-        m_store.resize(store_nrow_est, 0.0);
-        m_store.set_expansion_factor(store_exp_fac);
+                      string::memsize(store_sizing.m_nrow_est*m_store.row_size()), name);
+        m_store.resize(store_sizing.m_nrow_est, 0.0);
+        m_store.set_expansion_factor(store_sizing.m_exp_fac);
     }
     /**
      * ctor which uses configuration records
@@ -570,14 +484,18 @@ struct Communicator {
      * @param send
      *  send table instance
      */
-    Communicator(str_t name, uint_t store_nrow_crude_est, uint_t comm_nrow_crude_est,
-                 const conf::Buffers &buf_opts, const conf::LoadBalancing &ra_opts,
-                 const store_table_t &store, const send_table_t &send) :
-            Communicator(name, std::max(1ul, store_nrow_crude_est) * buf_opts.m_store_fac_init, buf_opts.m_store_exp_fac,
-                         std::max(1ul, comm_nrow_crude_est) * buf_opts.m_comm_fac_init, buf_opts.m_comm_exp_fac,
-                         store, send,
-                         ra_opts.m_nblock_per_rank * mpi::nrank(), ra_opts.m_period, ra_opts.m_acceptable_imbalance,
-                         ra_opts.m_nnull_updates_deactivate) {}
+
+    uint_t nrow_estimate(uint_t crude, double fac) {
+        return std::max(1ul, crude) * fac;
+    }
+
+    Communicator(str_t name, const store_table_t &store, uint_t store_nrow_crude_est,
+                 const send_table_t &send, uint_t comm_nrow_crude_est,
+                 const conf::Buffers &buf_opts, const conf::LoadBalancing &ra_opts) :
+        Communicator(name,
+                store, {nrow_estimate(store_nrow_crude_est, buf_opts.m_store_fac_init), buf_opts.m_store_exp_fac},
+                send, {nrow_estimate(comm_nrow_crude_est, buf_opts.m_comm_fac_init), buf_opts.m_comm_exp_fac},
+                ra_opts.m_nblock_per_rank * mpi::nrank()) {}
 
     virtual ~Communicator() {}
 
@@ -587,15 +505,75 @@ struct Communicator {
      * @return
      *  rank index assigned to the key specified
      */
-    uint_t get_rank(const key_field_t &key) const {
-        return m_ra.get_rank(key);
+    uint_t irank(const key_field_t& key) const {
+        return m_dist.irank(key);
     }
 
-    typename comm_t::send_t &send() {
+    void accumulate_work_figure(const key_field_t& key, double work_done) {
+        m_block_work_figures[m_dist.iblock(key)]+=work_done;
+    }
+
+    void clear_work_figures() {
+        m_block_work_figures.assign(m_block_work_figures.size(), 0.0);
+    }
+
+    void redistribute() {
+        {
+            /*
+             * sum so that all ranks have access to the same work figure information
+             */
+            auto local = m_block_work_figures;
+            mpi::all_sum(local.data(), m_block_work_figures.data(), local.size());
+        }
+        /*
+         * compute the best possible redistribution of blocks
+         */
+        Redistributor redist(m_dist.block_iranks(), m_block_work_figures, mpi::nrank());
+        m_dist.update(redist);
+        {
+            /*
+             * loop over all rows,
+             *  write those which no longer belong here into the communicating send table,
+             *  clear them from the store
+             */
+            auto& row = m_store.m_row;
+            for (row.restart(); row.in_range(); row.step()) {
+                if (row.key_field().is_zero()) continue;
+                auto irank_owner = irank(row.key_field());
+                if (!mpi::i_am(irank_owner)) {
+                    m_redist.send(irank_owner).m_row.push_back_jump();
+                    m_redist.send(irank_owner).m_row = row;
+                    m_prot_level.send(irank_owner).m_row.push_back_jump();
+                    m_prot_level.send(irank_owner).m_row.m_field = row.protection_level();
+                    while (row.is_protected()) row.release();
+                    m_store.clear_row(row);
+                }
+            }
+            DEBUG_ASSERT_FALSE(m_redist.send(mpi::irank()).m_hwm, "rank should not be sending to itself");
+        }
+        m_redist.communicate();
+        m_prot_level.communicate();
+        {
+            auto& recv_row = m_redist.recv().m_row;
+            auto& prot_level_row = m_prot_level.recv().m_row;
+            prot_level_row.restart();
+            for (recv_row.restart(); recv_row.in_range(); recv_row.step()) {
+                auto irank_owner = irank(recv_row.key_field());
+                DEBUG_ASSERT_TRUE(mpi::i_am(irank_owner), "recv_row sent to wrong rank!");
+                m_store.insert(recv_row.key_field());
+                m_store.m_row = recv_row;
+                for (uint_t ilevel=0ul; ilevel < uint_t(prot_level_row.m_field); ++ilevel) m_store.m_row.protect();
+                prot_level_row.step();
+            }
+        }
+        clear_work_figures();
+    }
+
+    typename comm_pair_t::send_t &send() {
         return m_comm.send();
     }
 
-    const typename comm_t::send_t &send() const {
+    const typename comm_pair_t::send_t &send() const {
         return m_comm.send();
     }
 
@@ -618,7 +596,134 @@ struct Communicator {
     void communicate() {
         m_comm.communicate();
     }
-
 };
+
+namespace shared_rows {
+    /**
+     * A set of rows which is copied to all ranks, responds correctly to rank reallocation and is protected from erasure
+     */
+    template<typename store_row_t>
+    struct Set : public DistribDependent {
+        /**
+         * the communicator whose m_store member stores the definitive row values
+         */
+        typedef MappedTable<store_row_t> store_t;
+        const store_t& m_src_store;
+        /**
+         * set of row indices stored on this rank
+         */
+        std::set<uint_t> m_irows;
+        /**
+         * name to use for this row set in detailed logging
+         */
+        str_t m_name;
+        /**
+         * all rows gathered
+         */
+        store_t m_all;
+        Table<store_row_t> m_gather_send;
+        Table<store_row_t> m_gather_recv;
+
+    public:
+        template<typename comm_row_t, bool mapped_comm = false>
+        Set(str_t name, const Communicator<store_row_t, comm_row_t, mapped_comm>& src_comm, uintv_t irows = {}) :
+                DistribDependent(src_comm), m_src_store(src_comm.m_store),
+                m_name(name), m_all({src_comm.m_store.m_row}),
+                m_gather_send({src_comm.m_store.m_row}), m_gather_recv({src_comm.m_store.m_row}) {
+            for (auto irow: irows) add_(irow);
+            full_update();
+        }
+
+        virtual ~Set() {}
+
+        /**
+         * bring all rows into m_gather_recv
+         */
+        void all_gatherv() {
+            m_gather_send.clear();
+            auto& send_row = m_gather_send.m_row;
+            auto& src_row = m_src_store.m_row;
+            for (auto irow: m_irows) {
+                src_row.jump(irow);
+                send_row.push_back_jump();
+                send_row.copy_in(src_row);
+            }
+            static_cast<TableBase&>(m_gather_recv).all_gatherv(m_gather_send);
+        }
+
+        /**
+         * direct buffer copy, no rows have changed locations
+         */
+        void update() {
+            all_gatherv();
+            m_all.m_bw = m_gather_recv.m_bw;
+        }
+
+        void row_index_update() {
+            REQUIRE_EQ_ALL(m_all.m_hwm, m_irows.size(),
+                           "this kind of refresh is only possible when all rows have already been gathered");
+            m_irows = {};
+            for (m_all.m_row.restart(); m_all.m_row.in_range(); m_all.m_row.step()) {
+                //auto& row = m_src_store.m_row;
+                const auto result = m_src_store[m_all.m_row.key_field()];
+                if (result) m_irows.insert(*result);
+            }
+        }
+
+        void full_update() {
+            all_gatherv();
+            m_all.clear();
+            auto& recv_row = m_gather_recv.m_row;
+            for (recv_row.restart(); recv_row.in_range(); recv_row.step()) m_all.insert(recv_row);
+        }
+
+        uint_t nrow_() const {
+            return m_irows.size();
+        }
+
+//        uint_t nrow() const {
+//            return mpi::all_sum(nrow_());
+//        }
+
+        void clear() {
+            for (const auto& irow: m_irows) static_cast<const TableBase&>(m_src_store).release(irow);
+            m_irows.clear();
+        }
+
+        void add_(uint_t irow) {
+            static_cast<const TableBase&>(m_src_store).protect(irow);
+            m_irows.insert(irow);
+        }
+
+        void add_(const store_row_t& row) {
+            add_(row.index());
+        }
+
+    private:
+        void on_redistribution() override {
+            row_index_update();
+            full_update();
+        }
+    };
+
+    template<typename store_row_t>
+    struct Single : Set<store_row_t> {
+        using Set<store_row_t>::m_all;
+        using Set<store_row_t>::clear;
+        using Set<store_row_t>::add_;
+
+        template<typename comm_row_t, bool mapped_comm = false>
+        Single(str_t name, const Communicator<store_row_t, comm_row_t, mapped_comm>& src_comm, TableBase::Loc loc):
+            Set<store_row_t>(name, src_comm, loc) {
+            m_all.m_row.restart();
+        }
+
+        void redefine(TableBase::Loc loc) {
+            clear();
+            if (loc.is_mine()) add_(loc.m_irow);
+        }
+    };
+}
+
 
 #endif //M7_COMMUNICATOR_H

@@ -70,7 +70,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
                           "initiator rules are turned off, every initiating annihilation should be allowed");
     }
     DEBUG_ASSERT_FALSE(dst_mbf.is_zero(), "recv table is contiguous, shouldn't have any cleared rows");
-    DEBUG_ASSERT_EQ(m_wf.m_ra.get_rank(dst_mbf), mpi::irank(),
+    DEBUG_ASSERT_EQ(m_wf.irank(dst_mbf), mpi::irank(),
                     "the received ONV has not been sent to the right MPI rank!")
     // zero magnitude weights should not have been communicated
     if (fptol::numeric_zero(delta_weight)) return;

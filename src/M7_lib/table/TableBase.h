@@ -373,6 +373,11 @@ public:
          */
         operator bool() const;
 
+        operator uintv_t() const {
+            if (is_mine()) return {m_irow};
+            return {};
+        }
+
         /**
          * @return
          *  true if MPI rank index matches bcast-shared rank of identified row

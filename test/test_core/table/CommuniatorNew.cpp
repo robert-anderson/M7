@@ -3,7 +3,7 @@
 //
 
 #include <M7_lib/table/BufferedFields.h>
-#include "M7_lib/table/CommunicatorNew.h"
+#include "M7_lib/table/Communicator.h"
 #include "gtest/gtest.h"
 
 namespace communicator_new_test {
@@ -19,7 +19,7 @@ namespace communicator_new_test {
 
 TEST(CommunicatorNew, SharedRow) {
     using namespace communicator_new_test;
-    typedef CommunicatorNew<TestRow, TestRow> comm_t;
+    typedef Communicator<TestRow, TestRow> comm_t;
     const Sizing store_sizing = {20, 0.0};
     const Sizing comm_sizing = {20, 0.0};
     comm_t comm("test communicator", {{}, 10}, store_sizing, {{}}, comm_sizing, 4ul);
@@ -40,7 +40,7 @@ TEST(CommunicatorNew, SharedRow) {
 
 TEST(CommunicatorNew, Redistribution) {
     using namespace communicator_new_test;
-    typedef CommunicatorNew<TestRow, TestRow> comm_t;
+    typedef Communicator<TestRow, TestRow> comm_t;
     const Sizing store_sizing = {20, 0.0};
     const Sizing comm_sizing = {20, 0.0};
     comm_t comm("test communicator", {{}, 10}, store_sizing, {{}}, comm_sizing, 4ul);

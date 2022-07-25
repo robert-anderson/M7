@@ -53,7 +53,8 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
      */
     m_archive.load();
 
-    m_wf.m_ra.activate(m_icycle);
+    // TODO: activate load balancing
+    //    m_wf.m_ra.activate(m_icycle);
 }
 
 void Solver::execute(uint_t ncycle) {
@@ -121,7 +122,9 @@ void Solver::begin_cycle() {
 
     m_wf.begin_cycle();
     ASSERT(m_wf.m_nwalker.m_local[0] == 0);
-    m_wf.m_ra.update(m_icycle);
+
+    // TODO: update load balancing
+    //    m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
     if (m_wf.nroot() > 1 && m_prop.m_shift.m_variable_mode) {
         m_wf.orthogonalize();
@@ -202,7 +205,7 @@ void Solver::loop_over_occupied_mbfs() {
 
             DEBUG_ASSERT_TRUE(!m_wf.m_store.m_row.m_mbf.is_zero(),
                               "Stored MBF should not be zeroed");
-            DEBUG_ASSERT_TRUE(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_row.m_mbf)),
+            DEBUG_ASSERT_TRUE(mpi::i_am(m_wf.irank(m_wf.m_store.m_row.m_mbf)),
                               "Stored MBF should be on its allocated rank");
 
             const auto &weight = row.m_weight[ipart];
@@ -214,15 +217,16 @@ void Solver::loop_over_occupied_mbfs() {
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
-            if (m_wf.m_ra.is_active()) {
-                m_spawning_timer.reset();
-                m_spawning_timer.unpause();
-            }
+            // TODO: load balancing work logging
+//            if (m_wf.m_ra.is_active()) {
+//                m_spawning_timer.reset();
+//                m_spawning_timer.unpause();
+//            }
             propagate_row(ipart);
-            if (m_wf.m_ra.is_active()) {
-                m_spawning_timer.pause();
-                m_wf.m_ra.record_work_time(row, m_spawning_timer);
-            }
+//            if (m_wf.m_ra.is_active()) {
+//                m_spawning_timer.pause();
+//                m_wf.m_ra.record_work_time(row, m_spawning_timer);
+//            }
         }
     }
     m_synchronization_timer.reset();
@@ -325,7 +329,7 @@ void Solver::output_stats() {
         auto &stats = m_parallel_stats->m_row;
         stats.m_icycle = m_icycle;
         stats.m_synchronization_overhead = m_synchronization_timer;
-        stats.m_nblock_wf_ra = m_wf.m_ra.nblock_local();
+        stats.m_nblock_wf_ra = m_wf.m_dist.nblock_();
         stats.m_nwalker_total = m_wf.m_nwalker.m_reduced.sum();
         stats.m_nwalker_lookup_skip = m_wf.m_store.m_nskip_total;
         stats.m_nwalker_lookup = m_wf.m_store.m_nlookup_total;

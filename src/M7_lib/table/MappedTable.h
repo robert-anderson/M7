@@ -162,6 +162,11 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         return lookup(key, m_buckets);
     }
 
+    // TODO: work on const correctness
+    LookupResult operator[](const key_field_t &key) const {
+        return const_cast<MappedTable&>(*this)[key];
+    }
+
 private:
     /**
      * same as the above function, but does not affect hash table statistics - useful for testing and ASSERTs
@@ -227,8 +232,9 @@ public:
         return irow;
     }
     uint_t insert(const row_t& row){
-        auto irow = insert(row.key_field());
-        m_row = row;
+        auto& key = KeyField<row_t>::get(row);
+        auto irow = insert(key);
+        m_row.copy_in(row);
         return irow;
     }
 

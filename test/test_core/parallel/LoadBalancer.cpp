@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "M7_lib/table/CommunicatorNew.h"
+#include "M7_lib/table/Communicator.h"
 #include "M7_lib/util/Hash.h"
 
 TEST(LoadBalancer, Redistributor) {

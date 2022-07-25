@@ -6,16 +6,16 @@
 
 Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
                      const Wavefunction &wf, uint_t ipart, TableBase::Loc loc) :
-        Wavefunction::SharedRow(wf, loc, "reference"),
+        shared_rows::Single<WalkerTableRow>("reference", wf, loc),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
     logging::info("Initial reference ONV for WF part {} is {} with energy {}",
-              m_ipart, get_mbf(), m_global.m_row.m_hdiag);
+              m_ipart, get_mbf(), m_all.m_row.m_hdiag);
 }
 
 const field::Mbf &Reference::get_mbf() const {
-    return m_global.m_row.m_mbf;
+    return m_all.m_row.m_mbf;
 }
 
 void Reference::update_ref_conn_flags() {
@@ -93,12 +93,12 @@ const ham_t& Reference::proj_energy_num() const {
 
 
 const wf_t &Reference::weight() const {
-    return m_global.m_row.m_weight[m_ipart];
+    return m_all.m_row.m_weight[m_ipart];
 }
 
 wf_t Reference::norm_average_weight(const uint_t& icycle, const uint_t& ipart) const {
-    auto unnorm = m_global.m_row.m_average_weight[ipart]+m_global.m_row.m_weight[ipart];
-    return unnorm/static_cast<wf_comp_t>(m_global.m_row.occupied_ncycle(icycle));
+    auto unnorm = m_all.m_row.m_average_weight[ipart]+m_all.m_row.m_weight[ipart];
+    return unnorm/static_cast<wf_comp_t>(m_all.m_row.occupied_ncycle(icycle));
 }
 
 References::References(const conf::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf,

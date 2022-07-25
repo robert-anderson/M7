@@ -6,23 +6,31 @@
 #include "Wavefunction.h"
 #include "M7_lib/linalg/FciIters.h"
 
+/*
+MappedTableBase::nbucket_guess(
+        opts.m_propagator.m_nw_target / mpi::nrank(),
+        opts.m_wavefunction.m_hash_mapping.m_remap_ratio),
+opts.m_wavefunction.m_hash_mapping.m_remap_nlookup,
+opts.m_wavefunction.m_hash_mapping.m_remap_ratio
+ */
+
+
 Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector) :
         Communicator<WalkerTableRow, SpawnTableRow, false>(
-                "wavefunction",
-                opts.m_propagator.m_nw_target,
-                uint_t(opts.m_propagator.m_nw_target * opts.m_propagator.m_tau_init),
-                opts.m_wavefunction.m_buffers,
-                opts.m_wavefunction.m_load_balancing,
+            "wavefunction",
+            {
                 {
-                        {sector.basis(), opts.m_wavefunction.m_nroot,
-                         opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)},
-                        MappedTableBase::nbucket_guess(
-                                opts.m_propagator.m_nw_target / mpi::nrank(),
-                                opts.m_wavefunction.m_hash_mapping.m_remap_ratio),
-                        opts.m_wavefunction.m_hash_mapping.m_remap_nlookup,
-                        opts.m_wavefunction.m_hash_mapping.m_remap_ratio
+                    sector.basis(),
+                    opts.m_wavefunction.m_nroot,
+                    opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)
                 },
-                {{sector.basis(), need_send_parents(opts)}}),
+
+            },
+            opts.m_propagator.m_nw_target,
+            {{sector.basis(), need_send_parents(opts)}},
+            uint_t(opts.m_propagator.m_nw_target * opts.m_propagator.m_tau_init),
+            opts.m_wavefunction.m_buffers,
+            opts.m_wavefunction.m_load_balancing),
         Archivable("wavefunction", opts.m_wavefunction.m_archivable),
         m_opts(opts),
         m_sector(sector),
@@ -170,7 +178,7 @@ void Wavefunction::remove_row() {
 uint_t Wavefunction::create_row_(const uint_t& icycle, const Mbf& mbf, const ham_comp_t& hdiag,
                                  const v_t<bool>& refconns) {
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
-    DEBUG_ASSERT_TRUE(mpi::i_am(m_ra.get_rank(mbf)),
+    DEBUG_ASSERT_TRUE(mpi::i_am(irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
     auto irow = m_store.insert(mbf);
     m_delta_nocc_mbf.m_local++;
@@ -195,7 +203,7 @@ uint_t Wavefunction::create_row_(const uint_t& icycle, const Mbf& mbf, const ham
 
 TableBase::Loc Wavefunction::create_row(const uint_t& icycle, const Mbf& mbf, const ham_comp_t& hdiag,
                                         const v_t<bool>& refconns) {
-    uint_t irank = m_ra.get_rank(mbf);
+    const uint_t irank = this->irank(mbf);
     uint_t irow;
     if (mpi::i_am(irank)) {
         irow = create_row_(icycle, mbf, hdiag, refconns);
@@ -206,8 +214,7 @@ TableBase::Loc Wavefunction::create_row(const uint_t& icycle, const Mbf& mbf, co
 
 uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta,
                                bool initiator, bool deterministic, uint_t dst_ipart) {
-    auto irank = m_ra.get_rank(dst_mbf);
-    auto& dst_table = send(irank);
+    auto& dst_table = send(irank(dst_mbf));
 
     auto& row = dst_table.m_row;
     row.push_back_jump();
@@ -222,9 +229,8 @@ uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta,
 
 uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta, bool initiator, bool deterministic,
                                uint_t dst_ipart, const field::Mbf& src_mbf, const wf_t& src_weight) {
-    auto irow = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
-    auto irank = m_ra.get_rank(dst_mbf);
-    auto& row = send(irank).m_row;
+    const auto irow = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
+    auto& row = send(irank(dst_mbf)).m_row;
     if (row.m_send_parents) {
         row.m_src_mbf = src_mbf;
         row.m_src_weight = src_weight;
@@ -237,7 +243,7 @@ void Wavefunction::fci_init(const Hamiltonian& h) {
     auto iters = FciIters::make(h);
     buffered::Mbf mbf(m_sector);
     auto fn = [this, &mbf, &h]() {
-        uint_t irank = m_ra.get_rank(mbf);
+        const auto irank = this->irank(mbf);
         if (mpi::i_am(irank)) {
             create_row_(0, mbf, h.get_element(mbf), {});
         }
