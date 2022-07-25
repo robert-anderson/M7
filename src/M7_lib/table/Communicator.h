@@ -619,16 +619,21 @@ namespace shared_rows {
         /**
          * all rows gathered
          */
-        store_t m_all;
-        Table<store_row_t> m_gather_send;
-        Table<store_row_t> m_gather_recv;
+        BufferedTable<store_row_t, true> m_all;
+        /**
+         * send / recv tables for gathering into m_all
+         */
+        BufferedTable<store_row_t> m_gather_send;
+        BufferedTable<store_row_t> m_gather_recv;
 
     public:
         template<typename comm_row_t, bool mapped_comm = false>
         Set(str_t name, const Communicator<store_row_t, comm_row_t, mapped_comm>& src_comm, uintv_t irows = {}) :
                 DistribDependent(src_comm), m_src_store(src_comm.m_store),
-                m_name(name), m_all({src_comm.m_store.m_row}),
-                m_gather_send({src_comm.m_store.m_row}), m_gather_recv({src_comm.m_store.m_row}) {
+                m_name(name),
+                m_all(name+" all rows", {src_comm.m_store.m_row}),
+                m_gather_send(name+" gather send", {src_comm.m_store.m_row}),
+                m_gather_recv(name+" gather recv", {src_comm.m_store.m_row}) {
             for (auto irow: irows) add_(irow);
             full_update();
         }
