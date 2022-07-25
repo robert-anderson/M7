@@ -20,7 +20,6 @@
 #include "BufferedTable.h"
 #include "BufferedTableArray.h"
 #include "RowProtector.h"
-#include "M7_lib/parallel/Redistributor.h"
 
 /**
  * A container for the send table array and recv table. Each element of the
