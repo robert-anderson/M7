@@ -715,6 +715,7 @@ namespace shared_rows {
         using Set<store_row_t>::m_all;
         using Set<store_row_t>::clear;
         using Set<store_row_t>::add_;
+        using Set<store_row_t>::full_update;
 
         template<typename comm_row_t, bool mapped_comm = false>
         Single(str_t name, const Communicator<store_row_t, comm_row_t, mapped_comm>& src_comm, TableBase::Loc loc):
@@ -725,6 +726,7 @@ namespace shared_rows {
         void redefine(TableBase::Loc loc) {
             clear();
             if (loc.is_mine()) add_(loc.m_irow);
+            full_update();
         }
     };
 }
