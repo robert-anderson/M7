@@ -20,7 +20,7 @@ struct FciInitializer {
     };
 
     BufferedTable<MbfOrderRow, true> m_mbf_order_table;
-    explicit FciInitializer(const Hamiltonian& h, ham_comp_t shift);
+    explicit FciInitializer(const Hamiltonian& h, ham_comp_t shift=0.0);
 };
 
 

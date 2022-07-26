@@ -132,7 +132,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     AssetSymlink fcidump("TC_Be_CCPVDZ/FCIDUMP", "FCIDUMP");
     // TC Fermion Hamiltonian to be tested
     TcFrmHam ham({"FCIDUMP"}, false);
-    buffered::FrmOnv onv(ham.default_nelec());
+    buffered::FrmOnv onv(ham.m_basis);
     onv = {{0, 1}, {0, 1}};
     conn::FrmOnv conn(onv);
     // spin-orbital indices to annihilate
