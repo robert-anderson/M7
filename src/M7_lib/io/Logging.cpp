@@ -197,7 +197,7 @@ void logging::defs() {
     v_t<strv_t> rows = {
             {"git revision", get_version()},
             {"build mode", c_enable_debug ? "DEBUG" : "RELEASE"},
-            {"compilation timestamp", c_timestamp},
+            {"compilation timestamp", get_compilation_timestamp()},
             {"many-body basis function", mbf_name<c_mbf_type_ind>()},
             {"walker arithmetic", c_enable_complex_wf ? "complex" : "real"},
             {"Hamiltonian arithmetic", c_enable_complex_ham ? "complex" : "real"},

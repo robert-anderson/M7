@@ -9,4 +9,6 @@
 
 std::string get_version();
 
+std::string get_compilation_timestamp();
+
 #endif //M7_VERSION_H

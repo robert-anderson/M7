@@ -6,11 +6,9 @@
 
 std::string get_version() {
     std::string str(VERSION);
-    auto begin = str.cbegin();
-    // strip off initial quote mark if present
-    if (str.front()=='\'') ++begin;
-    auto end = str.cend();
-    // strip off final quote mark if present
-    if (str.back()=='\'') --end;
-    return "#"+std::string(begin, end);
+    return "#"+str;
+}
+
+std::string get_compilation_timestamp() {
+    return {COMPILATION_TIMESTAMP};
 }
