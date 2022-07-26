@@ -23,3 +23,4 @@ target_compile_definitions(M7_version PRIVATE COMPILATION_TIMESTAMP="${COMPILATI
 target_sources(M7_version PRIVATE version.cpp version.h)
 
 set_target_properties(M7_version PROPERTIES LINKER_LANGUAGE C)
+add_custom_command(TARGET M7_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt)
