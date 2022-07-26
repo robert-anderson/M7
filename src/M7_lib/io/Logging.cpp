@@ -3,6 +3,7 @@
 //
 
 #include "Logging.h"
+#include "M7_lib/version/version.h"
 
 std::shared_ptr<spdlog::logger> g_reduced_stdout_logger = nullptr;
 std::shared_ptr<spdlog::logger> g_reduced_file_logger = nullptr;
@@ -194,6 +195,7 @@ str_t logging::quoted(const str_t &str) {
 
 void logging::defs() {
     v_t<strv_t> rows = {
+            {"git revision", get_version()},
             {"build mode", c_enable_debug ? "DEBUG" : "RELEASE"},
             {"compilation timestamp", c_timestamp},
             {"many-body basis function", mbf_name<c_mbf_type_ind>()},

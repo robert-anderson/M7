@@ -33,7 +33,10 @@ add_subdirectory(sort)
 add_subdirectory(subspace)
 add_subdirectory(table)
 add_subdirectory(util)
+add_subdirectory(version)
 add_subdirectory(wavefunction)
+
+target_link_libraries(M7_lib M7_version)
 
 add_subdirectory(
     "${CMAKE_SOURCE_DIR}/external/yaml-cpp"
@@ -62,7 +65,6 @@ target_compile_definitions(M7_lib PUBLIC ENABLE_MPI)
 target_link_libraries(M7_lib MPI::MPI_C)
 
 target_compile_definitions(M7_lib PUBLIC PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
-
 
 #
 # Command line args for M7
