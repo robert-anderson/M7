@@ -13,6 +13,5 @@ TEST(FciInitializer, N2) {
     DenseHamiltonian hmat(ham);
     v_t<ham_t> evals;
     dense::diag(hmat, evals);
-    std::cout << evals << std::endl;
     ASSERT_NEARLY_EQ(init.m_eval, evals[0]);
 }
