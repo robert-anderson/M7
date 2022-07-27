@@ -10,10 +10,6 @@ int main(int argc, char **argv) {
     mpi::initialize(&argc, &argv);
 
     logging::title();
-    /*
-     * log compile-time defintions
-     */
-    logging::defs();
 
     if (argc == 1) {
         // input file not provided, print out help string
@@ -23,6 +19,10 @@ int main(int argc, char **argv) {
     }
 
     logging::initialize();
+    /*
+     * log compile-time defintions
+     */
+    logging::defs();
 
     conf::Document opts(argv[1]);
     opts.validate();

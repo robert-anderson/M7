@@ -22,6 +22,9 @@ void logging::initialize() {
 
     spdlog::set_level(c_enable_debug ? spdlog::level::debug : spdlog::level::info);
     if (c_enable_local_logging) g_local_file_logger->flush_on(spdlog::level::debug);
+
+    info("Number of MPI ranks in world communicator: {}", g_nrank);
+    info("Number of MPI ranks per node: {}", g_nrank_on_node);
 }
 
 void logging::flush() {
@@ -179,6 +182,7 @@ void logging::info_table_(const str_t &title, const v_t<strv_t> &rows, bool head
 }
 
 void logging::title() {
+    if (!mpi::i_am_root()) return;
     std::cout << R"(   ____    ____   _________              )" << '\n';
     std::cout << R"(  |****\  /****| |********/  M any-body  )" << '\n';
     std::cout << R"(  |**|\*\/*/|**|      /**/   S tochastic )" << '\n';
@@ -204,6 +208,5 @@ void logging::defs() {
             {"TCHINT interface", c_enable_tchint ? "enabled" : "disabled"},
             {"rank-resolved logging", c_enable_local_logging ? "enabled" : "disabled"},
     };
-    const auto table = make_table("compile definitions", rows);
-    for (const auto& line: table) std::cout << "  " << line << '\n';
+    info_table("compile definitions", rows);
 }
