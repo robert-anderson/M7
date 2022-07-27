@@ -25,7 +25,10 @@ ham_t HubbardBosHam::get_coeff_0022(uint_t a, uint_t b, uint_t i, uint_t j) cons
 
 ham_t HubbardBosHam::get_element_0000(const field::BosOnv &onv) const {
     ham_t h = 0.0;
-    for (uint_t imode = 0ul; imode < m_basis.m_nmode; ++imode) h += onv[imode]*ham_t(onv[imode])*m_u;
+    for (uint_t imode = 0ul; imode < m_basis.m_nmode; ++imode) {
+        const auto occ = ham_t(onv[imode]);
+        h += occ*(occ-1)*m_u;
+    }
     return h;
 }
 
@@ -40,6 +43,10 @@ ham_t HubbardBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosO
 
 void HubbardBosHam::log_data() const {
     BosHam::log_data();
+}
+
+uint_t HubbardBosHam::default_nboson() const {
+    return m_basis.m_nmode;
 }
 
 HamOpTerm::excit_gen_list_t HubbardBosHam::make_excit_gens(PRNG& /*prng*/, const conf::Propagator& /*opts*/) const {

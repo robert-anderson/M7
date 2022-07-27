@@ -46,4 +46,6 @@ namespace test_defs {
 #define ASSERT_NEARLY_ZERO(b, atol) ASSERT_NEARLY_EQ_TOL(0.0, b, 0.0, atol);
 #define ASSERT_NUM_ZERO(b) ASSERT_NEARLY_ZERO(b, fptol::default_atol_num(b));
 
+// TODO: make these work for vectors
+
 #endif //M7_TEST_DEFS_H

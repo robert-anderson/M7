@@ -18,6 +18,7 @@
 #include "M7_lib/hamiltonian/frmbos/HolsteinLadderHam.h"
 #include "M7_lib/hamiltonian/bos/NumOpBosHam.h"
 #include "M7_lib/hamiltonian/bos/GeneralBosHam.h"
+#include "M7_lib/hamiltonian/bos/HubbardBosHam.h"
 #include "M7_lib/hamiltonian/frm/HeisenbergFrmHam.h"
 #include "M7_lib/hamiltonian/frm/SumFrmHam.h"
 #include "M7_lib/hamiltonian/frm/SpinSquareFrmHam.h"
