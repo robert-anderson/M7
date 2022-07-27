@@ -58,7 +58,6 @@ HamOpTerm::excit_gen_list_t HubbardBosHam::make_excit_gens(PRNG& /*prng*/, const
 
 HamOpTerm::conn_foreach_list_t HubbardBosHam::make_foreach_iters() const {
     conn_foreach_list_t list;
-    // TODO
-    list.emplace_front(new conn_foreach::frm::Hubbard);
+    list.emplace_front(new conn_foreach::bos::Hubbard);
     return list;
 }
