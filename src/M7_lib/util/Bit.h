@@ -88,26 +88,35 @@ namespace bit {
      * TODO: generalize for the absence of x86 instruction set with the BMI, SSE4.2, ABM etc (the exact set to which
      *  these instructions are taken to belong is vendor specific) extension e.g. ARM
      */
-    inline uint_t next_setbit(unsigned long long &work) {
+    static inline uint_t next_setbit(unsigned long long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         uint_t result = __tzcnt_u64(work);
         bit::clr(work, result);
         return result;
     }
 
-    inline uint_t next_setbit(unsigned long &work) {
+    static inline uint_t next_setbit(unsigned long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         uint_t result = __tzcnt_u64(work);
         bit::clr(work, result);
         return result;
     }
 
-    inline uint_t next_setbit(unsigned &work) {
+    static inline uint_t next_setbit(unsigned &work) {
         static_assert(sizeof(work) == 4, "Data length not supported");
         uint_t result = __tzcnt_u32(work);
         bit::clr(work, result);
         return result;
     }
+
+    template<typename T>
+    uint_t next_setbyte(T &work) {
+        static_assert(std::is_integral<T>::value && std::is_unsigned<T>::value, "invalid type for bit operations");
+        const uint_t ibyte = next_setbit(work) / CHAR_BIT;
+        reinterpret_cast<char*>(&work)[ibyte] = 0;
+        return ibyte;
+    }
+
     /**
      * use architecture dependent intrinsic to count the number of set bits in the word
      * TODO: see next_setbit
