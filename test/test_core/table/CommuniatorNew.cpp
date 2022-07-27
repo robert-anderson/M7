@@ -3,7 +3,7 @@
 //
 
 #include <M7_lib/table/BufferedFields.h>
-#include "M7_lib/table/Communicator.h"
+#include "M7_lib/communication/Communicator.h"
 #include "gtest/gtest.h"
 
 namespace communicator_new_test {

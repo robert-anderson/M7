@@ -10,6 +10,7 @@
 #include <M7_lib/parallel/RankAllocator.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/nd/NdArray.h>
+#include <M7_lib/communication/SharedRows.h>
 
 #include "WalkerTable.h"
 #include "Wavefunction.h"

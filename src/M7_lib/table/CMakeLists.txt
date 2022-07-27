@@ -7,7 +7,7 @@ target_sources(M7_lib
         BufferedTable.h
         BufferedTableArray.h
         CommunicatorOld.h
-        Communicator.h
+        ../communication/Communicator.h
         MappedTable.cpp
         MappedTable.h
         RowProtector.cpp

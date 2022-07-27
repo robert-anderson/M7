@@ -2,6 +2,7 @@
 // Created by Robert J. Anderson on 02/02/2021.
 //
 
+#if 0
 #include <numeric>
 #include "RankAllocator.h"
 
@@ -191,3 +192,4 @@ void RankAllocatorBase::update(uint_t icycle) {
     for (auto dep : m_rank_dynamic_objects) dep->after_block_transfer();
     DEBUG_ASSERT_TRUE_ALL(is_consistent(), "block->rank map should be consistent with rank->block map");
 }
+#endif

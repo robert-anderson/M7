@@ -1,0 +1,9 @@
+target_sources(M7_lib
+    PRIVATE
+        Communicator.h
+        Distribution.cpp
+        Distribution.h
+        Redistributor.cpp
+        Redistributor.h
+        SharedRows.h
+        )

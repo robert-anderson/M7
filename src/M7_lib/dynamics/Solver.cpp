@@ -54,7 +54,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
     m_archive.load();
 
     // TODO: activate load balancing
-    //    m_wf.m_ra.activate(m_icycle);
+    //m_wf.m_dist.activate(m_icycle);
 }
 
 void Solver::execute(uint_t ncycle) {
