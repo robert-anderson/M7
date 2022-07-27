@@ -67,7 +67,7 @@ public:
      * @param redefinition_thresh
      *  scale factor by which the candidate weight must exceed that of the current ref
      */
-    void accept_candidate(double redefinition_thresh = 0.0);
+    void accept_candidate(uint_t icycle, double redefinition_thresh = 0.0);
 
     /**
      * add contributions from the current m_wf.m_store.m_row
@@ -77,9 +77,9 @@ public:
     /**
      * reset variables to begin a fresh MC cycle
      */
-    void begin_cycle();
+    void begin_cycle(uint_t icycle);
 
-    void end_cycle();
+    void end_cycle(uint_t /*icycle*/);
 
     /**
      * @param mbf
@@ -138,9 +138,9 @@ struct References {
 
     const Reference& operator[](const uint_t& ipart) const;
 
-    void begin_cycle();
+    void begin_cycle(uint_t icycle);
 
-    void end_cycle();
+    void end_cycle(uint_t icycle);
 
     void contrib_row();
 

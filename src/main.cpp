@@ -24,6 +24,9 @@ int main(int argc, char **argv) {
      */
     logging::defs();
 
+    logging::info("Number of MPI ranks in world communicator: {}", g_nrank);
+    logging::info("Number of MPI ranks per node: {}", g_nrank_on_node);
+
     conf::Document opts(argv[1]);
     opts.validate();
     opts.log();

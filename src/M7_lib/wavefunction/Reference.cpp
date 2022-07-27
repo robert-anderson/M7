@@ -26,7 +26,7 @@ void Reference::update_ref_conn_flags() {
     }
 }
 
-void Reference::accept_candidate(double redefinition_thresh) {
+void Reference::accept_candidate(uint_t icycle, double redefinition_thresh) {
     v_t<wf_comp_t> gather(mpi::nrank());
     mpi::all_gather(m_candidate_weight, gather);
     DEBUG_ASSERT_EQ(m_candidate_weight, gather[mpi::irank()], "Gather error");
@@ -38,7 +38,7 @@ void Reference::accept_candidate(double redefinition_thresh) {
     auto candidate_weight = *it_best;
     auto current_weight = weight();
     if (std::abs(candidate_weight) > std::abs(current_weight * redefinition_thresh)){
-        logging::info("Changing reference for WF part {}", m_ipart);
+        logging::info("Changing reference for WF part {} on cycle {}", m_ipart, icycle);
         logging::info("Current: {}, weight: {: .6e}, MPI rank: {}",
                       get_mbf().to_string(), current_weight, m_wf.m_dist.irank(get_mbf()));
         redefine({irank_with_candidate, m_irow_candidate});
@@ -61,14 +61,14 @@ void Reference::contrib_row() {
     }
 }
 
-void Reference::begin_cycle() {
-    accept_candidate(m_redefinition_thresh);
+void Reference::begin_cycle(uint_t icycle) {
+    accept_candidate(icycle, m_redefinition_thresh);
     m_candidate_weight = 0.0;
     m_summables.zero_all_local();
     update();
 }
 
-void Reference::end_cycle() {
+void Reference::end_cycle(uint_t /*icycle*/) {
     m_summables.all_sum();
 }
 
@@ -120,12 +120,12 @@ const Reference &References::operator[](const uint_t &ipart) const {
     return m_refs[ipart];
 }
 
-void References::begin_cycle() {
-    for (auto& ref: m_refs) ref.begin_cycle();
+void References::begin_cycle(uint_t icycle) {
+    for (auto& ref: m_refs) ref.begin_cycle(icycle);
 }
 
-void References::end_cycle() {
-    for (auto& ref: m_refs) ref.end_cycle();
+void References::end_cycle(uint_t icycle) {
+    for (auto& ref: m_refs) ref.end_cycle(icycle);
 }
 
 void References::contrib_row() {

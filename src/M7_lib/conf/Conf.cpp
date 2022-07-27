@@ -88,7 +88,7 @@ conf::LoadBalancing::LoadBalancing(Group *parent) :
 conf::Reference::Reference(Group *parent) :
         Section(parent, "reference", "options relating to the reference MBF"),
         m_mbf_init(this, "mbf_init"),
-        m_redef_thresh(this, "redef_thresh", 10.0,
+        m_redef_thresh(this, "redef_thresh", 2.0,
 "when the highest-weighted non-reference MBF (the candidate) reaches this multiple of the weight on the reference, the candidate will be adopted as the new reference") {}
 
 conf::Wavefunction::Wavefunction(Group *parent) :

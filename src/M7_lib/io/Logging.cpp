@@ -22,9 +22,6 @@ void logging::initialize() {
 
     spdlog::set_level(c_enable_debug ? spdlog::level::debug : spdlog::level::info);
     if (c_enable_local_logging) g_local_file_logger->flush_on(spdlog::level::debug);
-
-    info("Number of MPI ranks in world communicator: {}", g_nrank);
-    info("Number of MPI ranks per node: {}", g_nrank_on_node);
 }
 
 void logging::flush() {

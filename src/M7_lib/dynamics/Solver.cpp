@@ -129,7 +129,7 @@ void Solver::begin_cycle() {
     if (m_wf.nroot() > 1 && m_prop.m_shift.m_variable_mode) {
         m_wf.orthogonalize();
     }
-    m_refs.begin_cycle();
+    m_refs.begin_cycle(m_icycle);
 
     auto update_epoch = [&](const uint_t &ncycle_wait) {
         const auto &epochs = m_prop.m_shift.m_variable_mode;
@@ -287,7 +287,7 @@ void Solver::end_cycle() {
     }
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator MBFs have occurred");
-    m_refs.end_cycle();
+    m_refs.end_cycle(m_icycle);
     m_wf.end_cycle();
     m_maes.end_cycle();
 }
