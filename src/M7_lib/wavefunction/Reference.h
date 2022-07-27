@@ -32,9 +32,9 @@ class Reference : public shared_rows::Single<WalkerTableRow> {
      */
     uint_t m_irow_candidate;
     /**
-     * candidate weights are averaged over replicas so that replicas on the same root will redefine to the same row
+     * weight of current best candidate on which to redefine the reference row
      */
-    wf_comp_t m_candidate_abs_weight = 0.0;
+    wf_comp_t m_candidate_weight = 0.0;
     /**
      * default scale factor defining when the candidate weight has grown to the magnitude at which it must be made the
      * new reference for this WF part
