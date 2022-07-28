@@ -122,6 +122,8 @@ struct HamiltonianTerms {
         }
         else if (opts.m_ham.m_interacting_bose_gas.m_enabled)
             return make_poly_unique<BosHam, InteractingBoseGasBosHam>(opts);
+        else if (opts.m_ham.m_hubbard.m_enabled)
+            return make_poly_unique<BosHam, HubbardBosHam>(opts);
         else if (opts.m_ham.m_bosdump.m_enabled)
             return make_poly_unique<BosHam, GeneralBosHam>(opts);
         return make_poly_unique<BosHam, NullBosHam>();

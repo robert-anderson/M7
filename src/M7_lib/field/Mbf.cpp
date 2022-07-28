@@ -26,7 +26,7 @@ void mbf::set_aufbau_mbf(field::BosOnv &onv, sys::Particles particles) {
 }
 
 void mbf::set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
-    REQUIRE_EQ(size_t(elecs), onv.m_basis.m_nsite, "Neel state requires one electron per size");
+    REQUIRE_EQ(size_t(elecs), onv.m_basis.m_nsite, "Neel state requires one electron per site");
     REQUIRE_TRUE(elecs.m_ms2.conserve(), "Neel state requires conserved 2*Ms");
     REQUIRE_LE(std::abs(elecs.m_ms2), 1,
                "Neel state requires overall spin of -1, 0, or 1");
