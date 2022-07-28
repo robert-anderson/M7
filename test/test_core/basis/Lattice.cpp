@@ -108,7 +108,7 @@ TEST(Lattice, NullNextNearest) {
     using namespace lattice_test;
     auto lattice = lattice::make();
     rows_t chk_rows;
-    ASSERT_TRUE(verify_rows(lattice->m_next_nearest, chk_rows));
+    ASSERT_TRUE(verify_rows(*lattice->m_next_nearest, chk_rows));
 }
 
 TEST(Lattice, OrthoObc1dNextNearest) {
@@ -122,5 +122,5 @@ TEST(Lattice, OrthoObc1dNextNearest) {
             {{2ul, 1}},
             {{3ul, 1}}
     };
-    ASSERT_TRUE(verify_rows(lattice->m_next_nearest, chk_rows));
+    ASSERT_TRUE(verify_rows(*lattice->m_next_nearest, chk_rows));
 }

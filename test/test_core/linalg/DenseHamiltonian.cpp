@@ -2,6 +2,7 @@
 // Created by Robert John Anderson on 2020-01-24.
 //
 
+#include <M7_lib/hamiltonian/frm/J1J2FrmHam.h>
 #include "test_core/defs.h"
 #include "M7_lib/linalg/DenseHamiltonian.h"
 
@@ -32,11 +33,27 @@ TEST(DenseHamiltonian, HeisenbergFrmHam) {
      * https://doi.org/10.1016/0378-4363(78)90115-8
      */
     uintv_t nsites = {4, 6, 8, 10, 12};
-    v_t<ham_comp_t> energies = {-2.0, -2.8027756375, -3.6510934085, -4.515446354, -5.387390917};
+    const v_t<ham_comp_t> energies = {-2.0, -2.8027756375, -3.6510934085, -4.515446354, -5.387390917};
     for (uint_t i=0ul; i<nsites.size(); ++i){
         auto nsite = nsites[i];
         auto energy = energies[i];
         HeisenbergFrmHam frm_ham(1.0, lattice::make("ortho", {nsite}, {1}));
+        Hamiltonian ham(&frm_ham);
+        v_t<double> evals;
+        auto particles = ham.default_particles();
+        DenseHamiltonian hmat(ham, particles);
+        dense::diag(hmat, evals);
+        ASSERT_NEARLY_EQ(evals[0], energy);
+    }
+}
+
+TEST(DenseHamiltonian, J1J2FrmHam) {
+    uintv_t nsites = {4, 6, 8, 10, 12};
+    const v_t<ham_comp_t> energies = {-1.875, -2.5052, -3.28078, -4.06657, -4.85751};
+    for (uint_t i=0ul; i<nsites.size(); ++i){
+        auto nsite = nsites[i];
+        auto energy = energies[i];
+        J1J2FrmHam frm_ham(0.25, lattice::make("ortho", {nsite}, {1}));
         Hamiltonian ham(&frm_ham);
         v_t<double> evals;
         auto particles = ham.default_particles();

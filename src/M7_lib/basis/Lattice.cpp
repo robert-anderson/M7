@@ -17,7 +17,7 @@ lattice::SubLattice::SubLattice(const sparse::dynamic::Matrix<int>& adj, uint_t 
 
 lattice::SubLattice::SubLattice(const lattice::Topology &topo) : SubLattice(topo.make_adj(), topo.m_nsite, topo.m_info){}
 
-lattice::SubLattice lattice::SubLattice::make_next_nearest() const {
+std::shared_ptr<lattice::SubLattice> lattice::SubLattice::make_next_nearest() const {
     /*
      * first obtain the maximum number of mutual connections
      */
@@ -61,7 +61,7 @@ lattice::SubLattice lattice::SubLattice::make_next_nearest() const {
             if (nmutual == nmutual_max) sparse.insert(isite, {jsite, phase});
         }
     }
-    return {sparse, m_nsite, m_info + " next nearest neighbors"};
+    return smart_ptr::make_shared<SubLattice>(SubLattice(sparse, m_nsite, m_info + " next nearest neighbors"));
 }
 
 lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs) :

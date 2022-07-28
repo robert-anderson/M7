@@ -2,6 +2,7 @@
 // Created by rja on 14/07/22.
 //
 
+#include <M7_lib/hamiltonian/frm/J1J2FrmHam.h>
 #include "FciIters.h"
 
 
@@ -19,7 +20,7 @@ FciIters FciIters::make(const Hamiltonian& h, sys::Particles particles, bool for
         /*
          * hamiltonian is boson operator-free, so can work in determinants: a.k.a. FrmOnvs
          */
-        if (h.m_frm.is<SpinModelFrmHam>()) return {frm::Spins(sector.m_frm)};
+        if (h.m_frm.is<SpinModelFrmHam>() || h.m_frm.is<J1J2FrmHam>()) return {frm::Spins(sector.m_frm)};
         else if (h.m_frm.m_kramers_attrs.conserving()) return {frm::Ms2Conserve(sector.m_frm)};
         return {frm::General(sector.m_frm)};
     } else if (!sector.m_frm) {

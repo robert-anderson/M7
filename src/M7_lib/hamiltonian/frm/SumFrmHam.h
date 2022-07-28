@@ -5,7 +5,7 @@
 #ifndef M7_SUMFRMHAM_H
 #define M7_SUMFRMHAM_H
 
-#include "M7_lib/hamiltonian/frm/FrmHam.h"
+#include "M7_lib/hamiltonian/frm/GeneralFrmHam.h"
 
 /**
  * Implementation of h1 + J*h2 where h1 and h2 are arbitrary subclasses of FrmHam
@@ -63,7 +63,7 @@ public:
 
 private:
     template<typename T>
-    static bool any_component_general(const T& h) {
+    static bool any_component_general(const T&) {
         return false;
     }
     /**
@@ -83,7 +83,7 @@ private:
         return any_component_general(h.m_h1) || any_component_general(h.m_h2);
     }
 
-    static bool any_component_general(const GeneralFrmHam& h) {
+    static bool any_component_general(const GeneralFrmHam&) {
         return true;
     }
 

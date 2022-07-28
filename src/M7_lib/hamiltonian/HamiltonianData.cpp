@@ -38,7 +38,7 @@ ham::TermContribs::TermContribs(const ham::TermContribs &contribs_1, const ham::
      * loop over all exsigs which may or may not contribute to the terms
      */
     for (uint_t nfrm=0ul; nfrm < m_nexsig_contrib_frm; ++nfrm) {
-        for (uint_t nbos=0ul; nbos < m_nexsig_contrib_frm; ++nbos) {
+        for (uint_t nbos=0ul; nbos < m_nexsig_contrib_bos; ++nbos) {
             auto exsig = encode(base_nfrm_cre + nfrm, base_nfrm_ann + nfrm,
                                 base_nbos_cre + nbos, base_nbos_ann + nbos);
             /*

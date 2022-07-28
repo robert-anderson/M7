@@ -81,7 +81,7 @@ namespace lattice {
          * of mutually adjacent sites with i
          * @return
          */
-        SubLattice make_next_nearest() const;
+        std::shared_ptr<SubLattice> make_next_nearest() const;
 
         explicit SubLattice(const Topology& topo);
     };
@@ -90,7 +90,7 @@ namespace lattice {
         /**
          * lattice of next-nearest neighbors
          */
-        const SubLattice m_next_nearest;
+        const std::shared_ptr<SubLattice> m_next_nearest;
 
         explicit Lattice(const Topology& topo): SubLattice(topo), m_next_nearest(make_next_nearest()){}
     };
