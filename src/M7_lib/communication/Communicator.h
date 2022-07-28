@@ -364,7 +364,8 @@ struct Communicator : CommunicatorBase {
             auto& prot_level_row = m_prot_level.recv().m_row;
             prot_level_row.restart();
             for (recv_row.restart(); recv_row.in_range(); recv_row.step()) {
-                auto irank_owner = irank(recv_row.key_field());
+                const auto irank_owner = irank(recv_row.key_field());
+                DEBUG_ONLY(irank_owner);
                 DEBUG_ASSERT_TRUE(mpi::i_am(irank_owner), "recv_row sent to wrong rank!");
                 m_store.insert(recv_row.key_field());
                 m_store.m_row = recv_row;
