@@ -5,7 +5,7 @@
 #include "Lattice.h"
 #include "M7_lib/util/SmartPtr.h"
 
-lattice::Lattice::Lattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str) :
+lattice::SubLattice::SubLattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str) :
         m_nsite(nsite), m_info(std::move(info_str)), m_sparse_adj(adj), m_nadj_max(m_sparse_adj.m_max_nentry),
         m_sparse_inv(m_sparse_adj), m_lcm_le_nadj_max(integer::lcm_le(m_nadj_max)){
     REQUIRE_LE(adj.nrow(), m_nsite, "highest site index in adjacency map is OOB");
@@ -15,7 +15,54 @@ lattice::Lattice::Lattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite,
     }
 }
 
-lattice::Lattice::Lattice(const lattice::Topology &topo) : Lattice(topo.make_adj(), topo.m_nsite, topo.m_info){}
+lattice::SubLattice::SubLattice(const lattice::Topology &topo) : SubLattice(topo.make_adj(), topo.m_nsite, topo.m_info){}
+
+lattice::SubLattice lattice::SubLattice::make_next_nearest() const {
+    /*
+     * first obtain the maximum number of mutual connections
+     */
+    uint_t nmutual_max = 0ul;
+    for (uint_t isite = 0ul; isite < m_nsite; ++isite){
+        for (uint_t jsite = 0ul; jsite < isite; ++jsite){
+            if (m_sparse_inv.get(isite, jsite)) {
+                // these are neighbors
+                continue;
+            }
+            uint_t nmutual = 0ul;
+            for (auto it = m_sparse_adj.cbegin(isite); it!=m_sparse_adj.cend(isite); ++it) {
+                if (m_sparse_inv.get(it->m_i, jsite)) {
+                    // jsite is a neighbor of one of isite's neighbors
+                    ++nmutual;
+                }
+            }
+            if (nmutual > nmutual_max) nmutual_max = nmutual;
+        }
+    }
+    /*
+     * now that nmutual_max has been found, redo the loop (both sides of the diagonal this time) only adding to sparse
+     * those with the correct nmutual
+     */
+    sparse::dynamic::Matrix<int> sparse(m_nsite);
+    for (uint_t isite = 0ul; isite < m_nsite; ++isite){
+        for (uint_t jsite = 0ul; jsite < m_nsite; ++jsite){
+            if (m_sparse_inv.get(isite, jsite) || isite==jsite) continue;
+            uint_t nmutual = 0ul;
+            int phase = 0;
+            for (auto it = m_sparse_adj.cbegin(isite); it!=m_sparse_adj.cend(isite); ++it) {
+                if (!m_sparse_inv.get(it->m_i, jsite)) continue;
+                ++nmutual;
+                auto phase_prod = m_sparse_inv.get(isite, it->m_i)*m_sparse_inv.get(it->m_i, jsite);
+                DEBUG_ASSERT_TRUE(phase_prod, "phase product should never be zero");
+                DEBUG_ASSERT_TRUE(!phase || phase_prod==phase, "inconsistent next-nearest phases");
+                phase = phase_prod;
+            }
+            if (!nmutual) continue;
+            DEBUG_ASSERT_TRUE(phase, "phase should have been set non-zero");
+            if (nmutual == nmutual_max) sparse.insert(isite, {jsite, phase});
+        }
+    }
+    return {sparse, m_nsite, m_info + " next nearest neighbors"};
+}
 
 lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs) :
         Topology(NdFormatD(shape).m_nelement,

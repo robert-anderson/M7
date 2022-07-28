@@ -198,7 +198,7 @@ struct NullFrmHam : FrmHam, NullOpTerm {
  * fermion sites may not be doubly occupied or unoccupied in spin systems
  */
 struct SpinModelFrmHam : FrmHam {
-    SpinModelFrmHam(const std::shared_ptr<lattice::Lattice>& lattice): FrmHam(lattice){}
+    SpinModelFrmHam(const std::shared_ptr<lattice::SubLattice>& lattice): FrmHam(lattice){}
 };
 
 #endif //M7_FRMHAM_H

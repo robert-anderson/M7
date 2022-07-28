@@ -13,7 +13,7 @@ namespace lattice_test {
     row_t make_row(row_t::const_iterator cbegin, row_t::const_iterator cend) {
         return {cbegin, cend};
     }
-    bool verify_rows(const lattice::Lattice& lattice, const rows_t& rows){
+    bool verify_rows(const lattice::SubLattice& lattice, const rows_t& rows){
         const auto& adj = lattice.m_sparse_adj;
         if (lattice.m_nsite != rows.size()) return false;
         for (uint_t isite=0ul; isite < lattice.m_nsite; ++isite){
@@ -24,7 +24,7 @@ namespace lattice_test {
     }
 }
 
-TEST(Lattice, OrthoObc1d) {
+TEST(SubLattice, OrthoObc1d) {
     using namespace lattice_test;
     auto lattice = lattice::make("ortho", {6}, {0});
     rows_t chk_rows = {
@@ -38,7 +38,7 @@ TEST(Lattice, OrthoObc1d) {
     ASSERT_TRUE(verify_rows(*lattice, chk_rows));
 }
 
-TEST(Lattice, OrthoApbc1d) {
+TEST(SubLattice, OrthoApbc1d) {
     using namespace lattice_test;
     auto lattice = lattice::make("ortho", {6}, {-1});
     rows_t chk_rows = {
@@ -53,7 +53,7 @@ TEST(Lattice, OrthoApbc1d) {
 }
 
 
-TEST(Lattice, OrthoObc2d) {
+TEST(SubLattice, OrthoObc2d) {
     /*
      *  0  1  2  3
      *  4  5  6  7
@@ -78,7 +78,6 @@ TEST(Lattice, OrthoObc2d) {
     ASSERT_TRUE(verify_rows(*lattice, chk_rows));
 }
 
-
 TEST(Lattice, OrthoPbc2d) {
     /*
      *      +
@@ -102,4 +101,26 @@ TEST(Lattice, OrthoPbc2d) {
 
     };
     ASSERT_TRUE(verify_rows(*lattice, chk_rows));
+}
+
+
+TEST(Lattice, NullNextNearest) {
+    using namespace lattice_test;
+    auto lattice = lattice::make();
+    rows_t chk_rows;
+    ASSERT_TRUE(verify_rows(lattice->m_next_nearest, chk_rows));
+}
+
+TEST(Lattice, OrthoObc1dNextNearest) {
+    using namespace lattice_test;
+    auto lattice = lattice::make("ortho", {6}, {0});
+    rows_t chk_rows = {
+            {{2ul, 1}},
+            {{3ul, 1}},
+            {{0ul, 1}, {4ul, 1}},
+            {{1ul, 1}, {5ul, 1}},
+            {{2ul, 1}},
+            {{3ul, 1}}
+    };
+    ASSERT_TRUE(verify_rows(lattice->m_next_nearest, chk_rows));
 }
