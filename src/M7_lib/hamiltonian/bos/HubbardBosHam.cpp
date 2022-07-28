@@ -3,6 +3,7 @@
 //
 
 #include "HubbardBosHam.h"
+#include "M7_lib/excitgen/bos/BosHubbardUniform.h"
 
 HubbardBosHam::HubbardBosHam(ham_t u, const std::shared_ptr<lattice::SubLattice> &lattice) :
         BosHam(lattice), m_u(u){
@@ -49,10 +50,9 @@ uint_t HubbardBosHam::default_nboson() const {
     return m_basis.m_nmode;
 }
 
-HamOpTerm::excit_gen_list_t HubbardBosHam::make_excit_gens(PRNG& /*prng*/, const conf::Propagator& /*opts*/) const {
+HamOpTerm::excit_gen_list_t HubbardBosHam::make_excit_gens(PRNG& prng, const conf::Propagator& /*opts*/) const {
     excit_gen_list_t list;
-    // TODO
-//    list.emplace_front(new exgen::HubbardUniform(*this, prng));
+    list.emplace_front(new exgen::BosHubbardUniform(*this, prng));
     return list;
 }
 
