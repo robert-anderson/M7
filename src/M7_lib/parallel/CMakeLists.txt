@@ -5,8 +5,6 @@ target_sources(M7_lib
         Epoch.cpp
         Epoch.h
         Gatherable.h
-        LoadBalancer.cpp
-        LoadBalancer.h
         MPIAssert.h
         MPIWrapper.cpp
         MPIWrapper.h

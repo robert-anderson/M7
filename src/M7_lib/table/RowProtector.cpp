@@ -4,6 +4,7 @@
 
 #include "RowProtector.h"
 
+#if 0
 RowProtector::RowProtector(const TableBase &table) : m_table(table), m_it(m_table.add_protector(this)) {
     on_resize(table.nrow());
 }
@@ -37,3 +38,5 @@ bool RowProtector::is_protected(const uint_t &irow) const {
 bool RowProtector::is_protected() const {
     return m_nprotected;
 }
+
+#endif

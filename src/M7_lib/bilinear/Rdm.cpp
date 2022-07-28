@@ -23,9 +23,8 @@ uint_t Rdm::nrow_estimate(uint_t exsig, sys::Size extents) {
 
 Rdm::Rdm(const conf::Rdms& opts, uint_t ranksig, sys::Size basis_size, uint_t nelec, uint_t nvalue) :
         Communicator<MaeRow, MaeRow, true>(
-                "rdm_" + to_string(ranksig), nrow_estimate(ranksig, basis_size),
-                nrow_estimate(ranksig, basis_size), opts.m_buffers, opts.m_load_balancing,
-                {{ranksig, nvalue}}, {{ranksig, nvalue}}
+                "rdm_" + to_string(ranksig), {{ranksig, nvalue}}, nrow_estimate(ranksig, basis_size),
+                {{ranksig, nvalue}}, nrow_estimate(ranksig, basis_size), opts.m_buffers, opts.m_load_balancing
         ),
         m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
         m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
@@ -62,7 +61,7 @@ void Rdm::make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
     for (uint_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
         auto phase = promoter.apply(icomb, conn, com, m_lookup_inds.m_frm);
 
-        auto irank_send = m_ra.get_rank(m_lookup_inds);
+        auto irank_send = irank(m_lookup_inds);
         DEBUG_ASSERT_TRUE(m_lookup_inds.is_ordered(),
             "operators of each kind should be stored in ascending order of their orbital (or mode) index");
         auto& send_table = send(irank_send);

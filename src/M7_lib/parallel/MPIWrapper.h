@@ -32,13 +32,13 @@
  * usage, such an overflow is fairly unlikely. But we do not leave it to chance that such a
  * large number of words will never be communicated in practice.
  *
- * count_t and counts_t are the scalar and vector typedefs for the MPI integer
+ * count_t and countv_t are the scalar and vector typedefs for the MPI integer
  *
  * The cleanest way to achieve this aim is to expose only the overloads that use uint_t and
  * v_t<uint_t> (uintv_t) to define counts and displs. if sizeof(count_t)
  * is less than sizeof(uint_t), a narrowing conversion is required, but since this is at the
  * level of communication, and not inside a main loop, this minor overhead will more than
- * pay for itself in code clarity. Hence, **count_t and counts_t should never
+ * pay for itself in code clarity. Hence, **count_t and countv_t should never
  * be seen outside this module**.
  *
  * It is worth pointing out that the MPI shared memory windows employed in SharedArray.h and
@@ -168,7 +168,7 @@ extern int g_p2p_tag;
 namespace mpi {
 
     typedef int count_t;
-    typedef v_t<count_t> counts_t;
+    typedef v_t<count_t> countv_t;
 
     void setup_mpi_globals();
 
@@ -204,7 +204,7 @@ namespace mpi {
         return convert::safe_narrow<count_t>(i);
     }
 
-    static counts_t snrw(const uintv_t &v) {
+    static countv_t snrw(const uintv_t &v) {
         return convert::safe_narrow<count_t>(v);
     }
 
@@ -230,11 +230,11 @@ namespace mpi {
      */
     count_t evenly_shared_count(uint_t nitem_global, uint_t irank);
     count_t evenly_shared_count(uint_t nitem_global);
-    counts_t evenly_shared_counts(uint_t nitem_global);
+    countv_t evenly_shared_counts(uint_t nitem_global);
 
     uint_t evenly_shared_displ(uint_t nitem_global, uint_t irank);
     uint_t evenly_shared_displ(uint_t nitem_global);
-    counts_t evenly_shared_displs(uint_t nitem_global);
+    countv_t evenly_shared_displs(uint_t nitem_global);
 
     template<typename T>
     static void counts_to_displs_consec(const v_t<T> &counts, v_t<T> &displs) {

@@ -13,7 +13,7 @@ struct HubbardFrmHam : FrmHam {
      */
     const ham_t m_u;
 
-    HubbardFrmHam(ham_t u, const std::shared_ptr<lattice::Lattice>& lattice);
+    HubbardFrmHam(ham_t u, const std::shared_ptr<lattice::SubLattice>& lattice);
 
     HubbardFrmHam(opt_pair_t opts);
 

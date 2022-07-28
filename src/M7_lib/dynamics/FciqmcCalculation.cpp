@@ -17,7 +17,7 @@ FciqmcCalculation::FciqmcCalculation(const conf::Document &opts) :
     mbf::set(ref_mbf, m_wf.m_sector.particles(), opts.m_reference.m_mbf_init, 0ul);
 
     auto ref_energy = m_ham.get_energy(ref_mbf);
-    TableBase::Loc ref_loc = {m_wf.get_rank(ref_mbf), 0ul};
+    TableBase::Loc ref_loc = {m_wf.irank(ref_mbf), 0ul};
     m_wf.create_row(0, ref_mbf, ref_energy, v_t<bool>(m_wf.npart(), true));
     if (ref_loc.is_mine()){
         for (uint_t ipart=0ul; ipart<m_wf.npart(); ++ipart)

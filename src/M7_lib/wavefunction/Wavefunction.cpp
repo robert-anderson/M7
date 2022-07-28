@@ -5,24 +5,33 @@
 #include <M7_lib/basis/Suites.h>
 #include "Wavefunction.h"
 #include "M7_lib/linalg/FciIters.h"
+#include "M7_lib/sort/QuickSorter.h"
+
+/*
+MappedTableBase::nbucket_guess(
+        opts.m_propagator.m_nw_target / mpi::nrank(),
+        opts.m_wavefunction.m_hash_mapping.m_remap_ratio),
+opts.m_wavefunction.m_hash_mapping.m_remap_nlookup,
+opts.m_wavefunction.m_hash_mapping.m_remap_ratio
+ */
+
 
 Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector) :
         Communicator<WalkerTableRow, SpawnTableRow, false>(
-                "wavefunction",
-                opts.m_propagator.m_nw_target,
-                uint_t(opts.m_propagator.m_nw_target * opts.m_propagator.m_tau_init),
-                opts.m_wavefunction.m_buffers,
-                opts.m_wavefunction.m_load_balancing,
+            "wavefunction",
+            {
                 {
-                        {sector.basis(), opts.m_wavefunction.m_nroot,
-                         opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)},
-                        MappedTableBase::nbucket_guess(
-                                opts.m_propagator.m_nw_target / mpi::nrank(),
-                                opts.m_wavefunction.m_hash_mapping.m_remap_ratio),
-                        opts.m_wavefunction.m_hash_mapping.m_remap_nlookup,
-                        opts.m_wavefunction.m_hash_mapping.m_remap_ratio
+                    sector.basis(),
+                    opts.m_wavefunction.m_nroot,
+                    opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)
                 },
-                {{sector.basis(), need_send_parents(opts)}}),
+
+            },
+            opts.m_propagator.m_nw_target,
+            {{sector.basis(), need_send_parents(opts)}},
+            uint_t(opts.m_propagator.m_nw_target * opts.m_propagator.m_tau_init),
+            opts.m_wavefunction.m_buffers,
+            opts.m_wavefunction.m_load_balancing),
         Archivable("wavefunction", opts.m_wavefunction.m_archivable),
         m_opts(opts),
         m_sector(sector),
@@ -46,11 +55,36 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
     gxr.find(nrow);
     BufferedTable<WalkerTableRow> xr_gathered("global top weighted", {m_store.m_row});
     gxr.gatherv(xr_gathered);
+
+    if (!mpi::i_am_root()) return;
+    /*
+     * the gathered rows (walkers) are globally maximal in occupation for component ipart, but they are simply laid
+     * together by the gathering operation, and are not sorted internally. Here, that sorting operation is done
+     */
+    auto row1 = xr_gathered.m_row;
+    auto row2 = xr_gathered.m_row;
+    auto cmp_fn = [&](const uint_t &irow1, const uint_t &irow2){
+        row1.jump(irow1);
+        row2.jump(irow2);
+        return std::abs(row1.m_weight[ipart]) > std::abs(row2.m_weight[ipart]);
+    };
+
+    LambdaQuickSorter2 qs(cmp_fn);
+    qs.reorder_sort(xr_gathered);
+
     auto& row = xr_gathered.m_row;
-    logging::info("Top-weighted WF elements for part {}:", ipart);
+    v_t<strv_t> rows;
+    rows.push_back({"", "many-body basis function", "walker number", "initiator", "MPI rank"});
     for (row.restart(); row.in_range(); row.step()) {
-        logging::info("{:<4} {}  {: .8e}  {}", row.index(), row.m_mbf, row.m_weight[ipart], row.m_initiator[ipart]);
+        rows.push_back({
+            std::to_string(row.index()),
+            row.m_mbf.to_string(),
+            logging::format("{: .6e}", row.m_weight[ipart]),
+            convert::to_string(bool(row.m_initiator[ipart])),
+            convert::to_string(m_dist.irank(row.m_mbf))
+        });
     }
+    logging::info_table("Top-weighted WF elements for part "+std::to_string(ipart), rows, true, false, 1ul);
 }
 
 Wavefunction::~Wavefunction() {
@@ -170,7 +204,7 @@ void Wavefunction::remove_row() {
 uint_t Wavefunction::create_row_(const uint_t& icycle, const Mbf& mbf, const ham_comp_t& hdiag,
                                  const v_t<bool>& refconns) {
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
-    DEBUG_ASSERT_TRUE(mpi::i_am(m_ra.get_rank(mbf)),
+    DEBUG_ASSERT_TRUE(mpi::i_am(irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
     auto irow = m_store.insert(mbf);
     m_delta_nocc_mbf.m_local++;
@@ -195,7 +229,7 @@ uint_t Wavefunction::create_row_(const uint_t& icycle, const Mbf& mbf, const ham
 
 TableBase::Loc Wavefunction::create_row(const uint_t& icycle, const Mbf& mbf, const ham_comp_t& hdiag,
                                         const v_t<bool>& refconns) {
-    uint_t irank = m_ra.get_rank(mbf);
+    const uint_t irank = this->irank(mbf);
     uint_t irow;
     if (mpi::i_am(irank)) {
         irow = create_row_(icycle, mbf, hdiag, refconns);
@@ -206,8 +240,7 @@ TableBase::Loc Wavefunction::create_row(const uint_t& icycle, const Mbf& mbf, co
 
 uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta,
                                bool initiator, bool deterministic, uint_t dst_ipart) {
-    auto irank = m_ra.get_rank(dst_mbf);
-    auto& dst_table = send(irank);
+    auto& dst_table = send(irank(dst_mbf));
 
     auto& row = dst_table.m_row;
     row.push_back_jump();
@@ -222,9 +255,8 @@ uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta,
 
 uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta, bool initiator, bool deterministic,
                                uint_t dst_ipart, const field::Mbf& src_mbf, const wf_t& src_weight) {
-    auto irow = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
-    auto irank = m_ra.get_rank(dst_mbf);
-    auto& row = send(irank).m_row;
+    const auto irow = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
+    auto& row = send(irank(dst_mbf)).m_row;
     if (row.m_send_parents) {
         row.m_src_mbf = src_mbf;
         row.m_src_weight = src_weight;
@@ -237,7 +269,7 @@ void Wavefunction::fci_init(const Hamiltonian& h) {
     auto iters = FciIters::make(h);
     buffered::Mbf mbf(m_sector);
     auto fn = [this, &mbf, &h]() {
-        uint_t irank = m_ra.get_rank(mbf);
+        const auto irank = this->irank(mbf);
         if (mpi::i_am(irank)) {
             create_row_(0, mbf, h.get_element(mbf), {});
         }

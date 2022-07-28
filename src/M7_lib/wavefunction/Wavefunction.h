@@ -9,7 +9,7 @@
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/parallel/Reduction.h>
 #include <M7_lib/io/Archivable.h>
-#include <M7_lib/table/Communicator.h>
+#include <M7_lib/communication/Communicator.h>
 #include <M7_lib/parallel/RankAllocator.h>
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/sort/LambdaQuickSorter.h>

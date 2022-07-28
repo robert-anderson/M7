@@ -10,10 +10,6 @@ int main(int argc, char **argv) {
     mpi::initialize(&argc, &argv);
 
     logging::title();
-    /*
-     * log compile-time defintions
-     */
-    logging::defs();
 
     if (argc == 1) {
         // input file not provided, print out help string
@@ -23,6 +19,13 @@ int main(int argc, char **argv) {
     }
 
     logging::initialize();
+    /*
+     * log compile-time defintions
+     */
+    logging::defs();
+
+    logging::info("Number of MPI ranks in world communicator: {}", g_nrank);
+    logging::info("Number of MPI ranks per node: {}", g_nrank_on_node);
 
     conf::Document opts(argv[1]);
     opts.validate();

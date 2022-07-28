@@ -13,6 +13,7 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
+#if 0
 /**
  * captures only the data from WalkerTableRow relevant to semistochastic propagation
  */
@@ -26,12 +27,13 @@ struct DeterministicDataRow : Row {
 
     static void load_fn(const WalkerTableRow &source, DeterministicDataRow &local);
 };
+#endif
 
 /**
  * the implementation of the semistochastic adaptation calls for a subspace of many-body basis functions to be
  * designated as a deterministic subspace within which the exact propagator is applied to update the CI coefficients
  */
-struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataRow> {
+struct DeterministicSubspace : shared_rows::Set<WalkerTableRow> {
     /**
      * options from the configuration object
      */
@@ -39,7 +41,7 @@ struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataR
     /**
      * the deterministic subspace is just a selection of rows from an MPI-distributed wavefunction object
      */
-    typedef Wavefunction::PartSharedRowSet<DeterministicDataRow> base_t;
+    typedef shared_rows::Set<WalkerTableRow> base_t;
     /**
      * need to maintain a reference to the wavefunction so the affected coefficients can be gathered and updated
      */
@@ -59,6 +61,9 @@ struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataR
      * associated WF root index
      */
     const uint_t m_iroot;
+
+    WalkerTableRow m_local_row;
+
 private:
     /**
      * the part indices associated with this subspace, will contain two entries if WF uses replication, else one

@@ -162,6 +162,11 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         return lookup(key, m_buckets);
     }
 
+    // TODO: work on const correctness
+    LookupResult operator[](const key_field_t &key) const {
+        return const_cast<MappedTable&>(*this)[key];
+    }
+
 private:
     /**
      * same as the above function, but does not affect hash table statistics - useful for testing and ASSERTs
@@ -183,10 +188,16 @@ public:
         clear_map();
     }
 
+    void clear_row(const row_t& row) {
+        DEBUG_ASSERT_EQ(static_cast<const Row&>(row).m_table, this, "row does not belong to this table");
+        auto lookup = (*this)[KeyField<row_t>::get(row)];
+        DEBUG_ASSERT_TRUE(lookup, "cannot erase: row not found in hash table");
+        erase(lookup);
+    }
+
     void clear(uint_t irow) override {
         m_row.jump(irow);
-        auto lookup = (*this)[KeyField<row_t>::get(m_row)];
-        erase(lookup);
+        clear_row(m_row);
     }
 
     /**
@@ -198,6 +209,7 @@ public:
      *  points to the bucket element to be deleted
      */
     void erase(LookupResult &lookup) {
+        DEBUG_ASSERT_TRUE(lookup, "cannot erase from failed lookup");
         TableBase::clear(*lookup);
         lookup.m_bucket.erase_after(lookup.m_prev);
         // put into "not found" state:
@@ -219,6 +231,13 @@ public:
         m_row.key_field() = key;
         return irow;
     }
+    uint_t insert(const row_t& row){
+        auto& key = KeyField<row_t>::get(row);
+        auto irow = insert(key);
+        m_row.copy_in(row);
+        return irow;
+    }
+
     /**
      * for an already-inserted row, map it to the hash table defined by the buckets arg
      * @param irow

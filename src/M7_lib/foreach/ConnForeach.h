@@ -287,6 +287,36 @@ namespace conn_foreach {
                 loop_fn(conn, src, fn);
             }
         };
+
+
+        struct Hubbard : Base {
+            Hubbard() : Base(exsig::ex_0011) {}
+
+            template<typename fn_t>
+            void loop_fn(conn::BosOnv& conn, const field::BosOnv& src, const fn_t& fn) {
+                functor::assert_prototype<void()>(fn);
+                const auto lattice = src.m_basis.m_lattice;
+                REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
+                const auto &occs = src.m_decoded.m_occ_modes.get();
+                for (const auto &imode_occ: occs) {
+                    DEBUG_ASSERT_TRUE(src[imode_occ], "mode should be occupied");
+                    conn.m_ann.clear();
+                    conn.m_ann.add(imode_occ, 1ul);
+
+                    const auto& adj=lattice->m_sparse_adj;
+                    for (auto it=adj.cbegin(imode_occ); it != adj.cend(imode_occ); ++it){
+                        conn.m_cre.clear();
+                        conn.m_cre.add(it->m_i, 1ul);
+                        fn();
+                    }
+                }
+            }
+
+        protected:
+            void bos_loop(conn::BosOnv& conn, const field::BosOnv& src, const function_t& fn) override {
+                loop_fn(conn, src, fn);
+            }
+        };
     }
 
     namespace frmbos {

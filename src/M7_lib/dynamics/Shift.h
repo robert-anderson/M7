@@ -10,6 +10,7 @@
 #include <M7_lib/io/InteractiveVariable.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/wavefunction/Wavefunction.h>
+#include <M7_lib/parallel/Epoch.h>
 
 #include "MagnitudeLogger.h"
 

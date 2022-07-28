@@ -7,6 +7,7 @@
 
 #include <M7_lib/wavefunction/Wavefunction.h>
 
+#if 0
 /**
  * Set of MappedTable keys distributed over all MPI ranks.
  * @tparam row_t
@@ -64,4 +65,5 @@ struct Subspace : Wavefunction::DynamicRowSet {
 
 
 
+#endif //M7_SUBSPACE_H
 #endif //M7_SUBSPACE_H

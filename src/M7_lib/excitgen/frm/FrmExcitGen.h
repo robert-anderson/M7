@@ -34,7 +34,7 @@ struct FrmExcitGen : ExcitGen {
 
 struct FrmLatticeExcitGen : FrmExcitGen {
 private:
-    typedef v_t<const lattice::Lattice::adj_t*> valid_adj_t;
+    typedef v_t<const lattice::SubLattice::adj_t*> valid_adj_t;
     mutable valid_adj_t m_work_valid_adj;
 protected:
     /**
@@ -73,7 +73,7 @@ protected:
 public:
     FrmLatticeExcitGen(const FrmHam& h, PRNG& prng, uintv_t exsigs, str_t description):
         FrmExcitGen(h, prng, exsigs, description){
-        REQUIRE_TRUE(m_h.m_basis.m_lattice.get(), "Lattice excitation generator requires lattice definition in basis");
+        REQUIRE_TRUE(m_h.m_basis.m_lattice.get(), "SubLattice excitation generator requires lattice definition in basis");
         const auto nadj_max = m_h.m_basis.m_lattice->m_nadj_max;
         m_work_valid_adj.reserve(nadj_max);
     }

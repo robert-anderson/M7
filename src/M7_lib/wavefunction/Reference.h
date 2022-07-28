@@ -10,11 +10,12 @@
 #include <M7_lib/parallel/RankAllocator.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/nd/NdArray.h>
+#include <M7_lib/communication/SharedRows.h>
 
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
-class Reference : public Wavefunction::SharedRow {
+class Reference : public shared_rows::Single<WalkerTableRow> {
     const Hamiltonian &m_ham;
     const Wavefunction &m_wf;
     /**
@@ -32,9 +33,9 @@ class Reference : public Wavefunction::SharedRow {
      */
     uint_t m_irow_candidate;
     /**
-     * candidate weights are averaged over replicas so that replicas on the same root will redefine to the same row
+     * weight of current best candidate on which to redefine the reference row
      */
-    wf_comp_t m_candidate_abs_weight = 0.0;
+    wf_comp_t m_candidate_weight = 0.0;
     /**
      * default scale factor defining when the candidate weight has grown to the magnitude at which it must be made the
      * new reference for this WF part
@@ -52,7 +53,7 @@ public:
     const field::Mbf& get_mbf() const;
 
     uint_t occupied_ncycle(const uint_t& icycle) const {
-        return m_global.m_row.occupied_ncycle(icycle);
+        return m_all.m_row.occupied_ncycle(icycle);
     }
 
     /**
@@ -67,7 +68,7 @@ public:
      * @param redefinition_thresh
      *  scale factor by which the candidate weight must exceed that of the current ref
      */
-    void accept_candidate(double redefinition_thresh = 0.0);
+    void accept_candidate(uint_t icycle, double redefinition_thresh = 0.0);
 
     /**
      * add contributions from the current m_wf.m_store.m_row
@@ -77,9 +78,9 @@ public:
     /**
      * reset variables to begin a fresh MC cycle
      */
-    void begin_cycle();
+    void begin_cycle(uint_t icycle);
 
-    void end_cycle();
+    void end_cycle(uint_t /*icycle*/);
 
     /**
      * @param mbf
@@ -121,7 +122,7 @@ public:
     wf_t norm_average_weight(const uint_t& icycle, const uint_t& ipart) const;
 
     const WalkerTableRow& row() const {
-        return m_global.m_row;
+        return m_all.m_row;
     }
 };
 
@@ -138,9 +139,9 @@ struct References {
 
     const Reference& operator[](const uint_t& ipart) const;
 
-    void begin_cycle();
+    void begin_cycle(uint_t icycle);
 
-    void end_cycle();
+    void end_cycle(uint_t icycle);
 
     void contrib_row();
 
