@@ -223,7 +223,7 @@ TEST(ConnForeach, FrmHeisenbergEx2200) {
         ASSERT_EQ(conn.m_ann, result->m_ann);
         ++result;
     };
-    conn_foreach::frm::Heisenberg foreach;
+    conn_foreach::frm::Heisenberg foreach(basis.m_lattice);
     ASSERT_EQ(foreach.m_exsig, exsig::ex_double);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);

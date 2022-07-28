@@ -81,6 +81,6 @@ HamOpTerm::excit_gen_list_t HeisenbergFrmHam::make_excit_gens(PRNG& prng, const 
 
 conn_foreach::base_list_t HeisenbergFrmHam::make_foreach_iters() const {
     conn_foreach_list_t list;
-    list.emplace_front(new conn_foreach::frm::Heisenberg);
+    list.emplace_front(new conn_foreach::frm::Heisenberg(m_basis.m_lattice));
     return list;
 }

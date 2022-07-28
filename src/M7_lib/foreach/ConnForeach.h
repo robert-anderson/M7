@@ -199,17 +199,16 @@ namespace conn_foreach {
 
 
         struct Heisenberg : Base {
-            Heisenberg() : Base(exsig::ex_double) {}
+            const std::shared_ptr<lattice::SubLattice> m_lattice;
+            Heisenberg(std::shared_ptr<lattice::SubLattice> lattice) : Base(exsig::ex_double), m_lattice(lattice) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn) {
                 functor::assert_prototype<void()>(fn);
                 // TODO: rewrite with m_decoded.m_alpha_only_occs when implemented
-                const auto lattice = src.m_basis.m_lattice;
-                REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
                 const auto &occs = src.m_decoded.m_simple_occs.get();
 
-                const auto& adj=lattice->m_sparse_adj;
+                const auto& adj=m_lattice->m_sparse_adj;
                 for (const auto &occ: occs) {
                     auto ispin_occ = src.m_basis.ispin(occ);
                     if (ispin_occ) return; // all alpha bits have been dealt with

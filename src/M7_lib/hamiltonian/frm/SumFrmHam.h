@@ -101,15 +101,15 @@ public:
          * otherwise, simply concatenate the two lists
          */
         excit_gen_list_t list;
-        list.splice_after(list.begin(), static_cast<const FrmHam&>(m_h1).make_excit_gens(prng, opts));
-        list.splice_after(list.end(), static_cast<const FrmHam&>(m_h2).make_excit_gens(prng, opts));
+        list.merge(static_cast<const FrmHam&>(m_h1).make_excit_gens(prng, opts));
+        list.merge(static_cast<const FrmHam&>(m_h2).make_excit_gens(prng, opts));
         return list;
     }
 
     conn_foreach::base_list_t make_foreach_iters() const override {
         conn_foreach::base_list_t list;
-        list.splice_after(list.cbegin(), static_cast<const FrmHam&>(m_h2).make_foreach_iters());
-        list.splice_after(list.cend(), static_cast<const FrmHam&>(m_h1).make_foreach_iters());
+        list.merge(static_cast<const FrmHam&>(m_h1).make_foreach_iters());
+        list.merge(static_cast<const FrmHam&>(m_h2).make_foreach_iters());
         return list;
     }
 };
