@@ -3,8 +3,9 @@
 //
 
 #include "HubbardBosHam.h"
+#include "M7_lib/excitgen/bos/BosHubbardUniform.h"
 
-HubbardBosHam::HubbardBosHam(ham_t u, const std::shared_ptr<lattice::Lattice> &lattice) :
+HubbardBosHam::HubbardBosHam(ham_t u, const std::shared_ptr<lattice::SubLattice> &lattice) :
         BosHam(lattice), m_u(u){
     m_contribs_0011.set_nonzero(exsig::ex_0011);
     m_contribs_0022.set_nonzero(0ul);
@@ -25,7 +26,10 @@ ham_t HubbardBosHam::get_coeff_0022(uint_t a, uint_t b, uint_t i, uint_t j) cons
 
 ham_t HubbardBosHam::get_element_0000(const field::BosOnv &onv) const {
     ham_t h = 0.0;
-    for (uint_t imode = 0ul; imode < m_basis.m_nmode; ++imode) h += onv[imode]*ham_t(onv[imode])*m_u;
+    for (uint_t imode = 0ul; imode < m_basis.m_nmode; ++imode) {
+        const auto occ = ham_t(onv[imode]);
+        h += occ*(occ-1)*m_u;
+    }
     return h;
 }
 
@@ -42,16 +46,18 @@ void HubbardBosHam::log_data() const {
     BosHam::log_data();
 }
 
-HamOpTerm::excit_gen_list_t HubbardBosHam::make_excit_gens(PRNG& /*prng*/, const conf::Propagator& /*opts*/) const {
+uint_t HubbardBosHam::default_nboson() const {
+    return m_basis.m_nmode;
+}
+
+HamOpTerm::excit_gen_list_t HubbardBosHam::make_excit_gens(PRNG& prng, const conf::Propagator& /*opts*/) const {
     excit_gen_list_t list;
-    // TODO
-//    list.emplace_front(new exgen::HubbardUniform(*this, prng));
+    list.emplace_front(new exgen::BosHubbardUniform(*this, prng));
     return list;
 }
 
 HamOpTerm::conn_foreach_list_t HubbardBosHam::make_foreach_iters() const {
     conn_foreach_list_t list;
-    // TODO
-    list.emplace_front(new conn_foreach::frm::Hubbard);
+    list.emplace_front(new conn_foreach::bos::Hubbard);
     return list;
 }

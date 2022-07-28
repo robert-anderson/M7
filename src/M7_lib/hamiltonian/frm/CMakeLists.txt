@@ -8,6 +8,8 @@ target_sources(M7_lib
         HeisenbergFrmHam.h
         HubbardFrmHam.cpp
         HubbardFrmHam.h
+        J1J2FrmHam.cpp
+        J1J2FrmHam.h
         SpinSquareFrmHam.cpp
         SpinSquareFrmHam.h
         SumFrmHam.h

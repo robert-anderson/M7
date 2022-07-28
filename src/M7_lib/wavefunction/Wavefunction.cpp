@@ -5,6 +5,7 @@
 #include <M7_lib/basis/Suites.h>
 #include "Wavefunction.h"
 #include "M7_lib/linalg/FciIters.h"
+#include "M7_lib/sort/QuickSorter.h"
 
 /*
 MappedTableBase::nbucket_guess(
@@ -54,11 +55,36 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
     gxr.find(nrow);
     BufferedTable<WalkerTableRow> xr_gathered("global top weighted", {m_store.m_row});
     gxr.gatherv(xr_gathered);
+
+    if (!mpi::i_am_root()) return;
+    /*
+     * the gathered rows (walkers) are globally maximal in occupation for component ipart, but they are simply laid
+     * together by the gathering operation, and are not sorted internally. Here, that sorting operation is done
+     */
+    auto row1 = xr_gathered.m_row;
+    auto row2 = xr_gathered.m_row;
+    auto cmp_fn = [&](const uint_t &irow1, const uint_t &irow2){
+        row1.jump(irow1);
+        row2.jump(irow2);
+        return std::abs(row1.m_weight[ipart]) > std::abs(row2.m_weight[ipart]);
+    };
+
+    LambdaQuickSorter2 qs(cmp_fn);
+    qs.reorder_sort(xr_gathered);
+
     auto& row = xr_gathered.m_row;
-    logging::info("Top-weighted WF elements for part {}:", ipart);
+    v_t<strv_t> rows;
+    rows.push_back({"", "many-body basis function", "walker number", "initiator", "MPI rank"});
     for (row.restart(); row.in_range(); row.step()) {
-        logging::info("{:<4} {}  {: .8e}  {}", row.index(), row.m_mbf, row.m_weight[ipart], row.m_initiator[ipart]);
+        rows.push_back({
+            std::to_string(row.index()),
+            row.m_mbf.to_string(),
+            logging::format("{: .6e}", row.m_weight[ipart]),
+            convert::to_string(bool(row.m_initiator[ipart])),
+            convert::to_string(m_dist.irank(row.m_mbf))
+        });
     }
+    logging::info_table("Top-weighted WF elements for part "+std::to_string(ipart), rows, true, false, 1ul);
 }
 
 Wavefunction::~Wavefunction() {

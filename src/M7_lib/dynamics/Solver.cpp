@@ -54,7 +54,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
     m_archive.load();
 
     // TODO: activate load balancing
-    //    m_wf.m_ra.activate(m_icycle);
+    //m_wf.m_dist.activate(m_icycle);
 }
 
 void Solver::execute(uint_t ncycle) {
@@ -129,7 +129,7 @@ void Solver::begin_cycle() {
     if (m_wf.nroot() > 1 && m_prop.m_shift.m_variable_mode) {
         m_wf.orthogonalize();
     }
-    m_refs.begin_cycle();
+    m_refs.begin_cycle(m_icycle);
 
     auto update_epoch = [&](const uint_t &ncycle_wait) {
         const auto &epochs = m_prop.m_shift.m_variable_mode;
@@ -249,7 +249,7 @@ void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
 void Solver::loop_over_spawned() {
     mpi::barrier();
     if (!m_wf.recv().m_hwm) {
-        logging::debug_("no rows received, omitting loop over spawned");
+        //logging::debug_("no rows received, omitting loop over spawned");
         return;
     }
     auto hwm_before = m_wf.m_store.m_hwm;
@@ -287,7 +287,7 @@ void Solver::end_cycle() {
     }
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator MBFs have occurred");
-    m_refs.end_cycle();
+    m_refs.end_cycle(m_icycle);
     m_wf.end_cycle();
     m_maes.end_cycle();
 }

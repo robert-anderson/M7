@@ -33,7 +33,7 @@ bool Buffer::Window::allocated() const {
 
 void Buffer::Window::move(buf_t *begin, uint_t new_size) {
     DEBUG_ASSERT_FALSE(begin==nullptr, "moving to invalid buffer pointer");
-    if (m_begin) std::memmove(begin, m_begin, m_size);
+    if (m_begin) std::memmove(begin, m_begin, std::min(new_size, m_size));
     m_begin = begin;
     m_size = new_size;
     m_nrow = m_size/m_row_size;
@@ -91,6 +91,8 @@ void Buffer::resize(uint_t size, double factor) {
     size*=1.0+factor;
     // always allocate an integral number of words
     size = integer::divceil(size, Buffer::c_nbyte_word)*Buffer::c_nbyte_word;
+    // quit if the new buffer size is the same as the old buffer size
+    if (size == this->size()) return;
     DEBUG_ASSERT_TRUE(size, "New size must be non-zero");
     if (!m_name.empty()) {
         logging::info_("Reallocating buffer \"{}\" {} -> {}",
@@ -107,7 +109,7 @@ void Buffer::resize(uint_t size, double factor) {
 
     for (uint_t iwindow = 0ul; iwindow < m_windows.size(); ++iwindow) {
         // work forwards for shrinking, backwards for enlargement
-        auto jwindow = size < this->size() ? iwindow : m_windows.size() - iwindow - 1;
+        auto jwindow = size < this->size() ? iwindow : (m_windows.size() - iwindow - 1);
         auto window = m_windows[jwindow];
         DEBUG_ASSERT_FALSE(window->m_buffer==nullptr, "window is not associated with any buffer");
         DEBUG_ASSERT_TRUE(window->m_buffer==this, "window is not associated with this buffer");
@@ -117,6 +119,7 @@ void Buffer::resize(uint_t size, double factor) {
     auto tmp_ptr = tmp.data();
     DEBUG_ONLY(tmp_ptr);
     m_data = std::move(tmp);
+    DEBUG_ASSERT_FALSE(m_data.empty(), "new data buffer should be non-empty");
     DEBUG_ASSERT_EQ(m_data.data(), tmp_ptr, "new base ptr was not preserved in move");
     DEBUG_ASSERT_EQ(m_data.size(), this->size(), "new size is incorrect");
     DEBUG_ASSERT_EQ(m_data.data(), m_windows[0]->m_begin, "first window not pointing at begin of buffer");

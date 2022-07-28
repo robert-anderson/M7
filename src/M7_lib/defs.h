@@ -143,10 +143,4 @@ constexpr bool c_enable_local_logging = true;
 constexpr bool c_enable_local_logging = false;
 #endif
 
-/**
- * this only gets updated whenever a change is made to this header file. i.e. changes that do not affect the compile-
- * time constants of the build will not result in an updated timestamp
- */
-constexpr char c_timestamp[] = __DATE__" " __TIME__;
-
 #endif //M7_DEFS_H

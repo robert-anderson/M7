@@ -2,6 +2,7 @@
 // Created by Robert John Anderson on 2020-01-24.
 //
 
+#include <M7_lib/hamiltonian/frm/J1J2FrmHam.h>
 #include "test_core/defs.h"
 #include "M7_lib/linalg/DenseHamiltonian.h"
 
@@ -32,11 +33,27 @@ TEST(DenseHamiltonian, HeisenbergFrmHam) {
      * https://doi.org/10.1016/0378-4363(78)90115-8
      */
     uintv_t nsites = {4, 6, 8, 10, 12};
-    v_t<ham_comp_t> energies = {-2.0, -2.8027756375, -3.6510934085, -4.515446354, -5.387390917};
+    const v_t<ham_comp_t> energies = {-2.0, -2.8027756375, -3.6510934085, -4.515446354, -5.387390917};
     for (uint_t i=0ul; i<nsites.size(); ++i){
         auto nsite = nsites[i];
         auto energy = energies[i];
         HeisenbergFrmHam frm_ham(1.0, lattice::make("ortho", {nsite}, {1}));
+        Hamiltonian ham(&frm_ham);
+        v_t<double> evals;
+        auto particles = ham.default_particles();
+        DenseHamiltonian hmat(ham, particles);
+        dense::diag(hmat, evals);
+        ASSERT_NEARLY_EQ(evals[0], energy);
+    }
+}
+
+TEST(DenseHamiltonian, J1J2FrmHam) {
+    uintv_t nsites = {4, 6, 8, 10, 12};
+    const v_t<ham_comp_t> energies = {-1.875, -2.5052, -3.28078, -4.06657, -4.85751};
+    for (uint_t i=0ul; i<nsites.size(); ++i){
+        auto nsite = nsites[i];
+        auto energy = energies[i];
+        J1J2FrmHam frm_ham(0.25, lattice::make("ortho", {nsite}, {1}));
         Hamiltonian ham(&frm_ham);
         v_t<double> evals;
         auto particles = ham.default_particles();
@@ -259,4 +276,64 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3) {
     v_t<double> evals;
     dense::diag(ham, evals);
     ASSERT_NEARLY_EQ(evals[0], -0.9998830020871416);
+}
+
+TEST(DenseHamiltonian, BoseHubbard2site) {
+    const double u = 1.7;
+    HubbardBosHam bos_ham(u, lattice::make("ortho", {2}, {0}));
+    Hamiltonian ham_src(&bos_ham);
+    DenseHamiltonian ham(ham_src, bos_ham.default_nboson());
+    ASSERT_EQ(ham.nrow(), 3ul);
+    v_t<double> evals;
+    const auto radical = std::sqrt(16.0+4*u*u)/2.0;
+    const v_t<double> evals_chk = {u-radical, 2*u, u+radical};
+    dense::diag(ham, evals);
+    for (uint_t i=0ul; i<evals.size(); ++i) ASSERT_NEARLY_EQ(evals[i], evals_chk[i]);
+}
+
+TEST(DenseHamiltonian, BoseHubbard3site) {
+    /*
+     * benchmark using Mathematica code from the authors of J M Zhang and R X Dong 2010 Eur. J. Phys. 31 591
+     * https://github.com/stone-zeng/toys/blob/main/exact-diagonalization/bose-hubbard.wl
+     * n.b. our U is half theirs
+     */
+    const double u = 1.7;
+    HubbardBosHam bos_ham(u, lattice::make("ortho", {3}, {1}));
+    Hamiltonian ham_src(&bos_ham);
+    DenseHamiltonian ham(ham_src, bos_ham.default_nboson());
+    auto iters = FciIters::make(ham_src);
+    buffered::BosOnv onv(bos_ham.m_basis);
+    ASSERT_EQ(ham.nrow(), 10ul);
+    v_t<double> evals;
+    dense::diag(ham, evals);
+    const v_t<double> evals_chk = {
+            -3.48339005,  1.29844597,  1.29844597,  3.24071331,  4.67236331,
+            4.67236331,  6.4       , 10.84267674, 11.02919072, 11.02919072};
+    for (uint_t i=0ul; i<evals.size(); ++i) ASSERT_NEARLY_EQ(evals[i], evals_chk[i]);
+}
+
+TEST(DenseHamiltonian, BoseHubbard4site) {
+    /*
+     * benchmark using Mathematica code from the authors of J M Zhang and R X Dong 2010 Eur. J. Phys. 31 591
+     * https://github.com/stone-zeng/toys/blob/main/exact-diagonalization/bose-hubbard.wl
+     * n.b. our U is half theirs
+     */
+    const double u = 1.7;
+    HubbardBosHam bos_ham(u, lattice::make("ortho", {4}, {1}));
+    Hamiltonian ham_src(&bos_ham);
+    DenseHamiltonian ham(ham_src, bos_ham.default_nboson());
+    auto iters = FciIters::make(ham_src);
+    buffered::BosOnv onv(bos_ham.m_basis);
+    ASSERT_EQ(ham.nrow(), 35ul);
+    v_t<double> evals;
+    dense::diag(ham, evals);
+    const v_t<double> evals_chk = {
+            -4.40663255, -0.68548041, -0.68548041,  0.63485629,  0.98360081,
+             2.13907593,  2.66419821,  2.66419821,  3.03851066,  3.4       ,
+             5.01933134,  5.01933134,  5.136583  ,  5.42876233,  5.77385326,
+             6.01702985,  6.01702985,  7.75225552,  8.82505558,  9.53555317,
+             9.53555317,  9.8878064 , 10.15219989, 10.2       , 11.16603393,
+            11.16603393, 11.92064932, 12.48707081, 13.08252964, 13.08252964,
+            13.8435421 , 21.16592182, 21.20080428, 21.20080428, 21.23688884};
+    for (uint_t i=0ul; i<evals.size(); ++i) ASSERT_NEARLY_EQ(evals[i], evals_chk[i]);
 }

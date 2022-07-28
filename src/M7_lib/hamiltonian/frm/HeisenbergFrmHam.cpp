@@ -5,8 +5,8 @@
 #include "HeisenbergFrmHam.h"
 
 
-HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::Lattice>& lattice) :
-    SpinModelFrmHam(lattice), m_j(j){
+HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::SubLattice>& lattice) :
+        SpinModelFrmHam(lattice), m_j(j){
     m_contribs_2200.set_nonzero(exsig::ex_double);
     m_contribs_2200.set_nonzero(0);
     logging::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_basis.m_lattice->m_info);
@@ -45,7 +45,7 @@ ham_t HeisenbergFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) c
 ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv& onv) const {
     /*
      * loop over all sites i and accumulate sum of neighboring spins multiplied by the lattice phase factors (in
-     * case of periodic BCs - all handled by Lattice class)
+     * case of periodic BCs - all handled by SubLattice class)
      * for each such sum, accumulate its product with the spin of site i into the total energy of the determinant
      * finally, return the accumulation scaled by J
      */
@@ -81,6 +81,6 @@ HamOpTerm::excit_gen_list_t HeisenbergFrmHam::make_excit_gens(PRNG& prng, const 
 
 conn_foreach::base_list_t HeisenbergFrmHam::make_foreach_iters() const {
     conn_foreach_list_t list;
-    list.emplace_front(new conn_foreach::frm::Heisenberg);
+    list.emplace_front(new conn_foreach::frm::Heisenberg(m_basis.m_lattice));
     return list;
 }

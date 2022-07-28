@@ -26,20 +26,25 @@ void Reference::update_ref_conn_flags() {
     }
 }
 
-void Reference::accept_candidate(double redefinition_thresh) {
+void Reference::accept_candidate(uint_t icycle, double redefinition_thresh) {
     v_t<wf_comp_t> gather(mpi::nrank());
-    mpi::all_gather(m_candidate_abs_weight, gather);
-    DEBUG_ASSERT_EQ(m_candidate_abs_weight, gather[mpi::irank()], "Gather error");
-    uint_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
-    mpi::bcast(m_irow_candidate, irank);
+    mpi::all_gather(m_candidate_weight, gather);
+    DEBUG_ASSERT_EQ(m_candidate_weight, gather[mpi::irank()], "Gather error");
+    auto cmp_fn = [](const wf_t& w1, const wf_t& w2){return std::abs(w1) > std::abs(w2);};
+    auto it_best = std::max_element(gather.cbegin(), gather.cend(), cmp_fn);
+    DEBUG_ASSERT_FALSE(it_best==gather.cend(), "max element not found");
+    uint_t irank_with_candidate = std::distance(gather.cbegin(), it_best);
+    mpi::bcast(m_irow_candidate, irank_with_candidate);
+    auto candidate_weight = *it_best;
     auto current_weight = weight();
-    if (std::abs(gather[irank]) > std::abs(current_weight*redefinition_thresh)){
-        logging::info("Changing the reference ONV for WF part {}. current ONV: {}, weight: {}",
-                  m_ipart, get_mbf().to_string(), current_weight);
-        redefine({irank, m_irow_candidate});
-        logging::info("Changed the reference ONV for WF part {}. new ONV: {}, weight: {}",
-                  m_ipart, get_mbf().to_string(), gather[irank]);
-        m_candidate_abs_weight = 0.0;
+    if (std::abs(candidate_weight) > std::abs(current_weight * redefinition_thresh)){
+        logging::info("Changing reference for WF part {} on cycle {}", m_ipart, icycle);
+        logging::info("Current: {}, weight: {: .6e}, MPI rank: {}",
+                      get_mbf().to_string(), current_weight, m_wf.m_dist.irank(get_mbf()));
+        redefine({irank_with_candidate, m_irow_candidate});
+        logging::info("New    : {}, weight: {: .6e}, MPI rank: {}",
+                      get_mbf().to_string(), candidate_weight, m_wf.m_dist.irank(get_mbf()));
+        m_candidate_weight = 0.0;
         update_ref_conn_flags();
     }
 }
@@ -47,8 +52,8 @@ void Reference::accept_candidate(double redefinition_thresh) {
 void Reference::contrib_row() {
     auto &row = m_wf.m_store.m_row;
     auto weight = 0.5*(row.m_weight[m_ipart]+row.m_weight[m_wf.ipart_replica(m_ipart)]);
-    if (std::abs(weight) > m_candidate_abs_weight) {
-        m_candidate_abs_weight = std::abs(weight);
+    if (std::abs(weight) > std::abs(m_candidate_weight)) {
+        m_candidate_weight = weight;
         m_irow_candidate = row.index();
     }
     if (row.m_ref_conn.get(m_ipart)) {
@@ -56,14 +61,14 @@ void Reference::contrib_row() {
     }
 }
 
-void Reference::begin_cycle() {
-    accept_candidate(m_redefinition_thresh);
-    m_candidate_abs_weight = 0.0;
+void Reference::begin_cycle(uint_t icycle) {
+    accept_candidate(icycle, m_redefinition_thresh);
+    m_candidate_weight = 0.0;
     m_summables.zero_all_local();
     update();
 }
 
-void Reference::end_cycle() {
+void Reference::end_cycle(uint_t /*icycle*/) {
     m_summables.all_sum();
 }
 
@@ -115,12 +120,12 @@ const Reference &References::operator[](const uint_t &ipart) const {
     return m_refs[ipart];
 }
 
-void References::begin_cycle() {
-    for (auto& ref: m_refs) ref.begin_cycle();
+void References::begin_cycle(uint_t icycle) {
+    for (auto& ref: m_refs) ref.begin_cycle(icycle);
 }
 
-void References::end_cycle() {
-    for (auto& ref: m_refs) ref.end_cycle();
+void References::end_cycle(uint_t icycle) {
+    for (auto& ref: m_refs) ref.end_cycle(icycle);
 }
 
 void References::contrib_row() {

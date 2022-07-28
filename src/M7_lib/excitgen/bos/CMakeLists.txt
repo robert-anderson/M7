@@ -2,6 +2,8 @@ target_sources(M7_lib
     PRIVATE
         BosExcitGen.cpp
         BosExcitGen.h
+        BosHubbardUniform.cpp
+        BosHubbardUniform.h
         BosonSumConservingDoubles.cpp
         BosonSumConservingDoubles.h
         InteractingBoseGasDoubles.cpp

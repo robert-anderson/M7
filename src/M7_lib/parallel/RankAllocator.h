@@ -27,6 +27,7 @@
 #ifndef M7_RANKALLOCATOR_H
 #define M7_RANKALLOCATOR_H
 
+#if 0
 #include <forward_list>
 #include <algorithm>
 
@@ -401,4 +402,5 @@ public:
 };
 
 
+#endif //M7_RANKALLOCATOR_H
 #endif //M7_RANKALLOCATOR_H

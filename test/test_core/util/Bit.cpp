@@ -150,3 +150,29 @@ TEST(UtilBit, BitRangeMasks) {
         }
     }
 }
+
+TEST(UtilBit, NextSetByte) {
+    unsigned char set_bytes = 0;
+    /*
+     * a loop over all chars will generate all byte positions in an 8-byte word
+     */
+    do {
+        uint64_t u64 = 0;
+        for (uint i=0ul; i<CHAR_BIT; ++i) {
+            // set the byte to an arbitrary value if it's corresponding bit in the counter is set
+            if (bit::get(set_bytes, i)) reinterpret_cast<char*>(&u64)[i] = 'M';
+        }
+        const auto nsetbit_chk = bit::nsetbit(uint_t(set_bytes));
+        uint_t nsetbit=0ul;
+        while (u64){
+            const auto ibyte = bit::next_setbyte(u64);
+            // make sure all bytes are found
+            ASSERT_TRUE(bit::get(set_bytes, ibyte));
+            ++nsetbit;
+        }
+        // make sure all bytes were found only once
+        ASSERT_EQ(nsetbit, nsetbit_chk);
+        ++set_bytes;
+    }
+    while (set_bytes!=0);
+}

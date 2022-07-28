@@ -3,6 +3,7 @@
 //
 
 #include "Logging.h"
+#include "M7_lib/version/version.h"
 
 std::shared_ptr<spdlog::logger> g_reduced_stdout_logger = nullptr;
 std::shared_ptr<spdlog::logger> g_reduced_file_logger = nullptr;
@@ -92,7 +93,7 @@ void logging::error_backtrace_(uint_t depth) {
     for (const auto& line: tmp) if (!line.empty()) error_(line);
 }
 
-strv_t logging::make_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
+strv_t logging::make_table(const v_t<strv_t> &rows, bool header, bool hlines, uint_t padding) {
     if (rows.empty()) return {};
     auto fn = [](const strv_t& row1, const strv_t& row2){
         return row1.size() < row2.size();
@@ -129,15 +130,18 @@ strv_t logging::make_table(const v_t<strv_t> &rows, bool header, uint_t padding)
             row_str.append(1, '|');
         }
         row_strs.push_back(row_str);
-        row_strs.push_back((row_strs.size()==2 && header) ? header_hline : hline);
+        if (row_strs.size()==2 && header) row_strs.push_back(header_hline);
+        else if (hlines) row_strs.push_back(hline);
     }
+    // even if there are no hlines between rows, place one at the end
+    if (!hlines) row_strs.push_back(hline);
     return row_strs;
 }
 
-strv_t logging::make_table(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
+strv_t logging::make_table(const str_t &title, const v_t<strv_t> &rows, bool header, bool hlines, uint_t padding) {
     if (rows.empty()) return {};
     strv_t table;
-    auto body = make_table(rows, header, padding);
+    auto body = make_table(rows, header, hlines, padding);
     table.push_back(body.front());
     str_t title_str = "|";
     const uint_t titlebar_size = body.front().size()-2;
@@ -161,23 +165,24 @@ void logging::info_lines_(const strv_t &lines) {
     for (const auto& line: lines) info_(line);
 }
 
-void logging::info_table(const v_t<strv_t> &rows, bool header, uint_t padding) {
-    info_lines(make_table(rows, header, padding));
+void logging::info_table(const v_t<strv_t> &rows, bool header, bool hlines, uint_t padding) {
+    info_lines(make_table(rows, header, hlines, padding));
 }
 
-void logging::info_table(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
-    info_lines(make_table(title, rows, header, padding));
+void logging::info_table(const str_t &title, const v_t<strv_t> &rows, bool header, bool hlines, uint_t padding) {
+    info_lines(make_table(title, rows, header, hlines, padding));
 }
 
-void logging::info_table_(const v_t<strv_t> &rows, bool header, uint_t padding) {
-    info_lines_(make_table(rows, header, padding));
+void logging::info_table_(const v_t<strv_t> &rows, bool header, bool hlines, uint_t padding) {
+    info_lines_(make_table(rows, header, hlines, padding));
 }
 
-void logging::info_table_(const str_t &title, const v_t<strv_t> &rows, bool header, uint_t padding) {
-    info_lines_(make_table(title, rows, header, padding));
+void logging::info_table_(const str_t &title, const v_t<strv_t> &rows, bool header, bool hlines, uint_t padding) {
+    info_lines_(make_table(title, rows, header, hlines, padding));
 }
 
 void logging::title() {
+    if (!mpi::i_am_root()) return;
     std::cout << R"(   ____    ____   _________              )" << '\n';
     std::cout << R"(  |****\  /****| |********/  M any-body  )" << '\n';
     std::cout << R"(  |**|\*\/*/|**|      /**/   S tochastic )" << '\n';
@@ -194,14 +199,14 @@ str_t logging::quoted(const str_t &str) {
 
 void logging::defs() {
     v_t<strv_t> rows = {
+            {"git revision", get_version()},
             {"build mode", c_enable_debug ? "DEBUG" : "RELEASE"},
-            {"compilation timestamp", c_timestamp},
+            {"compilation timestamp", get_compilation_timestamp()},
             {"many-body basis function", mbf_name<c_mbf_type_ind>()},
             {"walker arithmetic", c_enable_complex_wf ? "complex" : "real"},
             {"Hamiltonian arithmetic", c_enable_complex_ham ? "complex" : "real"},
             {"TCHINT interface", c_enable_tchint ? "enabled" : "disabled"},
             {"rank-resolved logging", c_enable_local_logging ? "enabled" : "disabled"},
     };
-    const auto table = make_table("compile definitions", rows);
-    for (const auto& line: table) std::cout << "  " << line << '\n';
+    info_table("compile definitions", rows);
 }

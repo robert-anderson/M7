@@ -199,17 +199,16 @@ namespace conn_foreach {
 
 
         struct Heisenberg : Base {
-            Heisenberg() : Base(exsig::ex_double) {}
+            const std::shared_ptr<lattice::SubLattice> m_lattice;
+            Heisenberg(std::shared_ptr<lattice::SubLattice> lattice) : Base(exsig::ex_double), m_lattice(lattice) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn) {
                 functor::assert_prototype<void()>(fn);
                 // TODO: rewrite with m_decoded.m_alpha_only_occs when implemented
-                const auto lattice = src.m_basis.m_lattice;
-                REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
                 const auto &occs = src.m_decoded.m_simple_occs.get();
 
-                const auto& adj=lattice->m_sparse_adj;
+                const auto& adj=m_lattice->m_sparse_adj;
                 for (const auto &occ: occs) {
                     auto ispin_occ = src.m_basis.ispin(occ);
                     if (ispin_occ) return; // all alpha bits have been dealt with
@@ -279,6 +278,36 @@ namespace conn_foreach {
                     if (uint_t(src[imode] + 1) > src.m_basis.m_occ_cutoff) continue;
                     conn.m_cre.set(imode);
                     fn();
+                }
+            }
+
+        protected:
+            void bos_loop(conn::BosOnv& conn, const field::BosOnv& src, const function_t& fn) override {
+                loop_fn(conn, src, fn);
+            }
+        };
+
+
+        struct Hubbard : Base {
+            Hubbard() : Base(exsig::ex_0011) {}
+
+            template<typename fn_t>
+            void loop_fn(conn::BosOnv& conn, const field::BosOnv& src, const fn_t& fn) {
+                functor::assert_prototype<void()>(fn);
+                const auto lattice = src.m_basis.m_lattice;
+                REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
+                const auto &occs = src.m_decoded.m_occ_modes.get();
+                for (const auto &imode_occ: occs) {
+                    DEBUG_ASSERT_TRUE(src[imode_occ], "mode should be occupied");
+                    conn.m_ann.clear();
+                    conn.m_ann.add(imode_occ, 1ul);
+
+                    const auto& adj=lattice->m_sparse_adj;
+                    for (auto it=adj.cbegin(imode_occ); it != adj.cend(imode_occ); ++it){
+                        conn.m_cre.clear();
+                        conn.m_cre.add(it->m_i, 1ul);
+                        fn();
+                    }
                 }
             }
 

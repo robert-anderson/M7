@@ -20,6 +20,7 @@
  * There is an additional unary pair of macros to test for the truth of a boolean, in this case the values of
  * and individual operands cannot be reported in the error log
  *
+ * TODO: this comment is out of date
  * Macros with the COLLECTIVE_ prefix are called on all ranks, and if the expression evaluates to false on any rank,
  * MPI finalization will be called on all ranks. Macros with the INDEPENDENT_ prefix do not require any synchronization
  * and any rank which evaluates the expression to false will abort. COLLECTIVE_ macros are favoured where applicable.

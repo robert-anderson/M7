@@ -7,13 +7,14 @@
 
 #include "BosHam.h"
 
-class HubbardBosHam : BosHam {
+class HubbardBosHam : public BosHam {
     /**
      * on-site repulsion scalar in units of the hopping
      */
     const ham_t m_u;
 
-    HubbardBosHam(ham_t u, const std::shared_ptr<lattice::Lattice>& lattice);
+public:
+    HubbardBosHam(ham_t u, const std::shared_ptr<lattice::SubLattice>& lattice);
 
     HubbardBosHam(opt_pair_t opts);
 
@@ -30,6 +31,8 @@ class HubbardBosHam : BosHam {
     }
 
     void log_data() const override;
+
+    uint_t default_nboson() const override;
 
     excit_gen_list_t make_excit_gens(PRNG& prng, const conf::Propagator& opts) const override;
 

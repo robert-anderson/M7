@@ -85,22 +85,24 @@ namespace logging {
      *  vectors of string vectors, each string being a cell in the table. Rows do not have to be the same length
      * @param header
      *  if true, the initial row of the table is treated as a header and a special underline is applied
+     * @param hlines
+     *  if true, place horizontal dividers between rows
      * @param padding
      *  minimum whitespace between the text of a cell and the vertical divider character '|'
      * @return
      *  a vector of strings which when printed will display a table in which the rows are vertically aligned
      */
-    strv_t make_table(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    strv_t make_table(const v_t<strv_t>& rows, bool header=false, bool hlines=true, uint_t padding=2);
 
-    strv_t make_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    strv_t make_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, bool hlines=true, uint_t padding=2);
 
-    void info_table(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    void info_table(const v_t<strv_t>& rows, bool header=false, bool hlines=true, uint_t padding=2);
 
-    void info_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    void info_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, bool hlines=true, uint_t padding=2);
 
-    void info_table_(const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    void info_table_(const v_t<strv_t>& rows, bool header=false, bool hlines=true, uint_t padding=2);
 
-    void info_table_(const str_t& title, const v_t<strv_t>& rows, bool header=false, uint_t padding=2);
+    void info_table_(const str_t& title, const v_t<strv_t>& rows, bool header=false, bool hlines=true, uint_t padding=2);
 
     template<typename ...Args>
     static void warn(const str_t& fmt_string, Args&&... args){

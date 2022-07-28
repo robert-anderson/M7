@@ -31,7 +31,7 @@ namespace lattice {
         virtual ~Topology() = default;
     };
 
-    struct Lattice {
+    struct SubLattice {
         /**
          * number of sites in the basis
          */
@@ -69,15 +69,30 @@ namespace lattice {
          */
         const uint_t m_lcm_le_nadj_max;
 
-    private:
-        Lattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str);
-
-    public:
-        explicit Lattice(const Topology& topo);
-
         operator bool() const {
             return m_nsite;
         }
+
+    protected:
+        SubLattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str);
+
+        /**
+         * a next-nearest neighbor of a lattice site i is a site j which is unconnected to i but has the maximum number
+         * of mutually adjacent sites with i
+         * @return
+         */
+        std::shared_ptr<SubLattice> make_next_nearest() const;
+
+        explicit SubLattice(const Topology& topo);
+    };
+
+    struct Lattice : SubLattice {
+        /**
+         * lattice of next-nearest neighbors
+         */
+        const std::shared_ptr<SubLattice> m_next_nearest;
+
+        explicit Lattice(const Topology& topo): SubLattice(topo), m_next_nearest(make_next_nearest()){}
     };
 
     struct OrthoTopology : Topology {
