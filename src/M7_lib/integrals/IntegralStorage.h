@@ -40,7 +40,7 @@ private:
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
         if (!is_significant(elem)) return true;
         auto& ref = data[iflat];
-        if (ref!=T(0) && !fptol::numeric_equal(elem, ref)) return false;
+        if (ref!=T(0) && is_significant(elem-ref)) return false;
         ref = elem;
         return true;
     }
@@ -48,7 +48,7 @@ private:
     bool set_data(SharedArray<T>& data, uint_t iflat, T elem){
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
         if (!is_significant(elem)) return true;
-        if (data[iflat]!=T(0) && !fptol::numeric_equal(elem, data[iflat])) return false;
+        if (data[iflat]!=T(0) && is_significant(elem-data[iflat])) return false;
         data.set(iflat, elem);
         return true;
     }
