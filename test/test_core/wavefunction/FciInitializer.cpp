@@ -8,7 +8,7 @@
 #include "test_core/defs.h"
 
 TEST(FciInitializer, N2) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", true});
     Hamiltonian ham(&frm_ham);
     FciInitializer init(ham);
     DenseHamiltonian hmat(ham);

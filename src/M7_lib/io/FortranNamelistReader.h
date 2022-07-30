@@ -36,7 +36,6 @@ public:
         auto tokens = read(label);
         if (tokens.empty()) return;
         NumericCsvFileReader::parse(tokens.cbegin(), tokens.cend(), v);
-        //for (auto &i: v) i+=offset;
     }
 
     void read(v_t<bool>& v, const str_t &label, v_t<bool> default_ = {}) const;

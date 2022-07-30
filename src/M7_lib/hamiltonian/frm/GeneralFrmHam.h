@@ -51,7 +51,7 @@ public:
 
     const Integrals m_ints;
 
-    GeneralFrmHam(const FcidumpInfo& info, bool spin_major);
+    explicit GeneralFrmHam(const FcidumpInfo& info);
 
     explicit GeneralFrmHam(opt_pair_t opts);
 

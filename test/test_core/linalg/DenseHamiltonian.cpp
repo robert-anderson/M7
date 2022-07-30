@@ -20,7 +20,7 @@ TEST(DenseHamiltonian, FciEnergyCheck4c) {
 }
 #endif
 TEST(DenseHamiltonian, N2Rhf) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", true});
     Hamiltonian ham(&frm_ham);
     DenseHamiltonian hmat(ham);
     v_t<ham_t> evals;
@@ -64,7 +64,7 @@ TEST(DenseHamiltonian, J1J2FrmHam) {
 }
 
 TEST(DenseHamiltonian, HF) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/HF_RDMs/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/HF_RDMs/FCIDUMP", true});
     Hamiltonian ham(&frm_ham);
     auto particles = ham.default_particles();
     ASSERT_EQ(uint_t(particles.m_frm), 6ul);
@@ -80,7 +80,7 @@ TEST(DenseHamiltonian, N2Molcas) {
      * HF:      -108.9540866268
      * CASCI:   -109.02180323
      */
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5", true});
     Hamiltonian ham(&frm_ham);
     auto particles = ham.default_particles();
     ASSERT_EQ(uint_t(particles.m_frm), 6ul);
@@ -91,7 +91,7 @@ TEST(DenseHamiltonian, N2Molcas) {
 }
 
 TEST(DenseHamiltonian, PyscfX2cCheck) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/H2O_X2C/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/H2O_X2C/FCIDUMP", true});
     Hamiltonian ham(&frm_ham);
     DenseHamiltonian hmat(ham);
     v_t<double> evals;
@@ -244,7 +244,7 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff3) {
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP", true});
     GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 1);
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
@@ -256,7 +256,7 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP", true});
     GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 2);
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
@@ -268,7 +268,7 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP", true});
     GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 3);
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);

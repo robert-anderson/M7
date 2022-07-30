@@ -11,7 +11,7 @@
 
 struct TcFrmHam : TcHam, GeneralFrmHam {
 
-    TcFrmHam(const FcidumpInfo& info, bool spin_major): TcHam(), GeneralFrmHam(info, spin_major) {};
+    explicit TcFrmHam(const FcidumpInfo& info): TcHam(), GeneralFrmHam(info) {};
 
     explicit TcFrmHam(opt_pair_t opts): TcHam(), GeneralFrmHam(opts) {}
 
