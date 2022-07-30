@@ -207,11 +207,11 @@ TEST(DecodedMbf, Bosons) {
 }
 
 TEST(DecodedMbf, Holstein) {
-    const uint_t nsite = 8;
+    const uint_t nsite = 15;
     buffered::FrmBosOnv mbf(nsite, nsite);
-    mbf.m_frm = {{0, 1, 5, 7}, {0, 3, 6, 7}};
-    mbf.m_bos = {0, 1, 2, 3, 1, 0, 1, 2};
+    mbf.m_frm = {{0, 1, 5, 7, 10, 11, 14}, {0, 3, 6, 7, 11, 12, 14}};
+    mbf.m_bos = {0, 1, 2, 3, 1, 0, 1, 2, 0, 1, 3, 0, 0, 1, 2};
 
-    uintv_t chk_inds = {1, 3, 6, 7};
+    uintv_t chk_inds = {1, 3, 6, 7, 10, 14};
     ASSERT_EQ(mbf.m_decoded.m_occ_sites_nonzero_bosons.get(), chk_inds);
 }
