@@ -9,6 +9,7 @@
 #include <M7_lib/caches/DecodedBosOnv.h>
 
 #include "NumberField.h"
+#include "M7_lib/foreach/SetByteForeach.h"
 
 /*
  * forward declarations to support occupation factor methods
@@ -59,6 +60,16 @@ struct BosOnvField : NdNumberField<bos_occ_t, 1> {
     void set_ops(const uintv_t &iops);
 
     uint_t nboson() const;
+
+    template<typename fn_t>
+    void foreach_setmode(const fn_t& fn) const {
+        static_assert(std::is_same<bos_occ_t, buf_t>::value,
+                "this approach uses aliasing, so the boson occupation must have the same type as the buffer");
+        auto get_work_fn = [this](uint_t idataword){
+            return reinterpret_cast<uint_t*>(begin())[idataword];
+        };
+        setbyte_foreach::single<uint_t>(integer::divceil(m_size, sizeof(uint_t)), fn, get_work_fn);
+    }
 
     /**
      * compute the "occupation factor" required to keep the boson ONV basis orthonormal.

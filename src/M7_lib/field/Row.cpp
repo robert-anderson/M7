@@ -25,8 +25,9 @@ uint_t Row::add_field(FieldBase *field) {
     // returns the offset in bytes for the column being added
     auto offset = 0ul;
     if (!m_fields.empty()) {
-        offset = m_fields.back()->m_row_offset + m_fields.back()->m_size;
-        if (!(m_fields.back()->m_type_info == field->m_type_info)) {
+        const auto prev = m_fields.back();
+        offset = prev->m_row_offset + prev->m_size;
+        if (field->m_force_own_words || prev->m_force_own_words || (prev->m_type_info != field->m_type_info)) {
             // go to next whole system word
             offset = integer::divceil(offset, Buffer::c_nbyte_word) * Buffer::c_nbyte_word;
         }

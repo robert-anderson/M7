@@ -10,8 +10,8 @@ TEST(Hashing, Determinism){
 
     hash::digest_t benchmark;
     uint_t key = 99ul;
-    benchmark = hash::fnv((char*)&key, sizeof(key));
+    benchmark = hash::fnv((buf_t *)&key, sizeof(key));
     for (uint_t i=0ul; i<nattempt; ++i){
-        ASSERT_EQ(hash::fnv((char*)&key, sizeof(key)), benchmark);
+        ASSERT_EQ(hash::fnv((buf_t *)&key, sizeof(key)), benchmark);
     }
 }

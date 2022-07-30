@@ -3,12 +3,14 @@
 //
 
 #include <M7_lib/parallel/MPIAssert.h>
+
+#include <utility>
 #include "FieldBase.h"
 
 
-FieldBase::FieldBase(Row *row, uint_t size, const std::type_info &type_info, str_t name) :
-        m_type_info(type_info), m_size(size),
-        m_name(name), m_null_string(std::max(1ul, m_size), 0) {
+FieldBase::FieldBase(Row *row, uint_t size, const std::type_info &type_info, str_t name, bool force_own_words) :
+        m_type_info(type_info), m_size(size), m_name(std::move(name)),
+        m_force_own_words(force_own_words), m_null_string(std::max(1ul, m_size), 0) {
     if (!row) return;
     REQUIRE_FALSE(belongs_to_row(), "Field must not be already associated with a row");
     m_row_offset = row->add_field(this);
@@ -17,7 +19,7 @@ FieldBase::FieldBase(Row *row, uint_t size, const std::type_info &type_info, str
 }
 
 FieldBase::FieldBase(const FieldBase &other) :
-        FieldBase(other.row_of_copy(), other.m_size, other.m_type_info, other.m_name) {}
+        FieldBase(other.row_of_copy(), other.m_size, other.m_type_info, other.m_name, other.m_force_own_words) {}
 
 bool FieldBase::is_comparable(const FieldBase &other) const {
     return m_type_info == other.m_type_info && m_size == other.m_size;
@@ -35,12 +37,12 @@ bool FieldBase::belongs_to_row(const Row& row) const {
     return belongs_to_row(&row);
 }
 
-char *FieldBase::begin() const {
+buf_t *FieldBase::begin() const {
     DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
     return m_row->begin() + m_row_offset;
 }
 
-char *FieldBase::end() const {
+buf_t *FieldBase::end() const {
     return begin() + m_size;
 }
 

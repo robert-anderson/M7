@@ -13,7 +13,7 @@ struct NumberFieldBase : FieldBase {
     const bool m_is_complex;
 
     NumberFieldBase(Row *row, uint_t element_size, uint_t nelement, bool is_complex,
-                    const std::type_info &type_info, str_t name = "");
+                    const std::type_info &type_info, str_t name = "", bool force_own_words=false);
 
     NumberFieldBase(const NumberFieldBase& other);
 
@@ -51,9 +51,9 @@ struct NdNumberField : NumberFieldBase {
         return reinterpret_cast<const T*>(dend());
     }
 
-    NdNumberField(Row *row, NdFormat<nind> format, str_t name = "") :
-            NumberFieldBase(row, sizeof(T), format.m_nelement,
-                            dtype::is_complex<T>(), typeid(T), name), m_format(format) {}
+    NdNumberField(Row *row, NdFormat<nind> format, str_t name = "", bool force_own_words=false) :
+            NumberFieldBase(row, sizeof(T), format.m_nelement, dtype::is_complex<T>(),
+                    typeid(T), name, force_own_words), m_format(format) {}
 
     NdNumberField(const NdNumberField &other) : NumberFieldBase(other), m_format(other.m_format){}
 
@@ -303,7 +303,7 @@ public:
  */
 struct StringField : NdNumberField<char, 1ul> {
     typedef NdNumberField<char, 1ul> base_t;
-    StringField(Row *row, uint_t length, str_t name = "");
+    StringField(Row *row, uint_t length, const str_t& name = "", bool force_own_words=false);
 
     StringField(const StringField& other);
 
@@ -326,7 +326,8 @@ struct NumberField : NdNumberField<T, 0ul> {
     typedef NdNumberField<T, 0ul> base_t;
     using base_t::operator=;
 
-    NumberField(Row *row, str_t name = "") : base_t(row, {}, name) {}
+    NumberField(Row *row, str_t name = "", bool force_own_words=false) :
+        base_t(row, {}, name, force_own_words) {}
 
     NumberField(const NumberField& other): base_t(other){}
 
