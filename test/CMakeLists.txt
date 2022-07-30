@@ -42,6 +42,25 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         message(FATAL_ERROR "Specified CMAKE_BUILD_TYPE is invalid")
     endif()
 
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    target_compile_options(unittest
+        PUBLIC
+            -g
+        PRIVATE
+            -Wall -Wextra
+            -Wno-unused-function -Wno-cast-function-type
+            -rdynamic
+    )
+    if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+        target_compile_options(unittest
+            PRIVATE
+                -Werror
+        )
+    else ()
+        message(FATAL_ERROR "Specified CMAKE_BUILD_TYPE is invalid")
+    endif()
+
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_options(M7_lib
         PUBLIC
