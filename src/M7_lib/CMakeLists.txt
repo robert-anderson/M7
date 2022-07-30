@@ -134,9 +134,9 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
-             -mbmi -g
+             -march=core-avx2 -g
         PRIVATE
-            -Wno-unused-function -Wno-cast-function-type
+            -Wno-unused-function
             -Wall -Wextra
     )
     if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
