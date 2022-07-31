@@ -68,7 +68,7 @@ public:
      * @param redefinition_thresh
      *  scale factor by which the candidate weight must exceed that of the current ref
      */
-    void accept_candidate(uint_t icycle, double redefinition_thresh = 0.0);
+    void accept_candidate(uint_t icycle);
 
     /**
      * add contributions from the current m_wf.m_store.m_row

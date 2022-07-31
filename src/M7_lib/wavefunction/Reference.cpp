@@ -9,6 +9,10 @@ Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
         shared_rows::Single<WalkerTableRow>("reference", wf, loc),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
+    if (m_redefinition_thresh==0.0)
+        logging::info("Reference redefinition is deactivated");
+    else
+        REQUIRE_GE_ALL(m_redefinition_thresh, 1.0, "invalid redefinition threshold");
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
     logging::info("Initial reference ONV for WF part {} is {} with energy {}",
               m_ipart, get_mbf(), m_all.m_row.m_hdiag);
@@ -26,7 +30,11 @@ void Reference::update_ref_conn_flags() {
     }
 }
 
-void Reference::accept_candidate(uint_t icycle, double redefinition_thresh) {
+void Reference::accept_candidate(uint_t icycle) {
+    /*
+     * only continue if the redefinition threshold is non-zero
+     */
+    if (m_redefinition_thresh==0.0) return;
     v_t<wf_comp_t> gather(mpi::nrank());
     mpi::all_gather(m_candidate_weight, gather);
     DEBUG_ASSERT_EQ(m_candidate_weight, gather[mpi::irank()], "Gather error");
@@ -37,7 +45,7 @@ void Reference::accept_candidate(uint_t icycle, double redefinition_thresh) {
     mpi::bcast(m_irow_candidate, irank_with_candidate);
     auto candidate_weight = *it_best;
     auto current_weight = weight();
-    if (std::abs(candidate_weight) > std::abs(current_weight * redefinition_thresh)){
+    if (std::abs(candidate_weight) > std::abs(current_weight * m_redefinition_thresh)){
         logging::info("Changing reference for WF part {} on cycle {}", m_ipart, icycle);
         logging::info("Current: {}, weight: {: .6e}, MPI rank: {}",
                       get_mbf().to_string(), current_weight, m_wf.m_dist.irank(get_mbf()));
@@ -62,7 +70,7 @@ void Reference::contrib_row() {
 }
 
 void Reference::begin_cycle(uint_t icycle) {
-    accept_candidate(icycle, m_redefinition_thresh);
+    accept_candidate(icycle);
     m_candidate_weight = 0.0;
     m_summables.zero_all_local();
     update();
