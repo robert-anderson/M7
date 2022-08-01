@@ -7,4 +7,6 @@ target_sources(M7_lib
         ConnForeachGroup.h
         MbfForeach.cpp
         MbfForeach.h
+        SetbitForeach.h
+        SetByteForeach.h
 )

@@ -5,7 +5,7 @@
 #include "FrmOnvField.h"
 
 FrmOnvField::FrmOnvField(Row *row, const sys::frm::Basis& basis, str_t name) :
-        base_t(row, {{2, basis.m_nsite},{"spin channel", "site"}}, name),
+        base_t(row, {{2, basis.m_nsite},{"spin channel", "site"}}, name, true),
         m_basis(basis), m_decoded(*this),
         m_dsize_spin_channel(integer::divceil(uint_t(m_basis.m_nsite), Buffer::c_nbit_word)){}
 

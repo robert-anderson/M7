@@ -23,11 +23,12 @@ decoded_mbf::bos::Expanded::Expanded(const BosOnvField &mbf) : SimpleBase(mbf){}
 
 const uintv_t &decoded_mbf::bos::Expanded::get() {
     if (!empty()) return validated();
-    for (uint_t imode = 0ul; imode < m_mbf.m_nelement; ++imode) {
+    auto fn = [&](uint_t imode){
         for (uint_t iop = 0ul; iop < m_mbf[imode]; ++iop) {
             m_inds.push_back(imode);
         }
-    }
+    };
+    m_mbf.foreach_setmode(fn);
     m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
@@ -36,9 +37,8 @@ decoded_mbf::bos::OccModes::OccModes(const BosOnvField &mbf) : SimpleBase(mbf){}
 
 const uintv_t &decoded_mbf::bos::OccModes::get() {
     if (!empty()) return validated();
-    for (uint_t imode = 0ul; imode < m_mbf.m_nelement; ++imode) {
-        if (m_mbf[imode]) m_inds.push_back(imode);
-    }
+    auto fn = [&](uint_t imode){m_inds.push_back(imode);};
+    m_mbf.foreach_setmode(fn);
     m_last_update_hash = m_mbf.hash();
     return m_inds;
 }

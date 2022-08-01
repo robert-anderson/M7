@@ -8,7 +8,7 @@
 #include <utility>
 
 BosOnvField::BosOnvField(Row *row, const sys::bos::Basis& basis, str_t name) :
-        base_t(row, {{basis.m_nmode}, {"boson mode occupations"}}, std::move(name)),
+        base_t(row, {{basis.m_nmode}, {"boson mode occupations"}}, std::move(name), true),
         m_basis(basis), m_decoded(*this) {
 }
 

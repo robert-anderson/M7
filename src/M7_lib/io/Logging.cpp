@@ -148,8 +148,7 @@ strv_t logging::make_table(const str_t &title, const v_t<strv_t> &rows, bool hea
     const uint_t nspace_left = titlebar_size < title.size() ? 0ul : (titlebar_size - title.size()) / 2;
     const uint_t nspace_right = titlebar_size < title.size() ? 0ul : titlebar_size - (title.size() + nspace_left);
     title_str.append(nspace_left, ' ');
-    title_str.insert(title_str.cend(), title.cbegin(),
-                     nspace_right ? title.cend() : title.cbegin() + titlebar_size);
+    title_str.insert(title_str.end(), title.cbegin(), nspace_right ? title.cend() : title.cbegin() + titlebar_size);
     title_str.append(nspace_right, ' ');
     title_str.append(1, '|');
     table.push_back(title_str);

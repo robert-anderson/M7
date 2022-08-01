@@ -39,7 +39,7 @@ namespace hash {
         }
     }
 
-    static digest_t fnv(const char *begin, const uint_t &size) {
+    static digest_t fnv(const buf_t *begin, const uint_t &size) {
         const auto prime = fnv_prime<digest_t>();
         auto result = fnv_offset_basis<digest_t>();
         for (uint_t ibyte = 0ul; ibyte < size; ++ibyte) {
@@ -50,7 +50,7 @@ namespace hash {
     }
 
     static digest_t fnv(digest_t v) {
-        return fnv(reinterpret_cast<char *>(&v), sizeof(digest_t));
+        return fnv(reinterpret_cast<buf_t *>(&v), sizeof(digest_t));
     }
 
     /**

@@ -47,7 +47,7 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 
 TEST(GeneralFrmHam, Elements) {
     const auto benchmark = 0.01759459248922075;
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", true});
     ASSERT_EQ(frm_ham.m_ints.m_2e->sym(), integrals_2e::syms::DHR);
     Hamiltonian h(&frm_ham);
     {
@@ -70,7 +70,7 @@ TEST(GeneralFrmHam, Elements) {
 
 TEST(GeneralFrmHam, RhfEnergy) {
     const auto benchmark = -108.76171800006861;
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", true});
     Hamiltonian ham(&frm_ham);
     uintv_t chk_orbsyms = {0, 2, 1, 5, 6, 4};
     ASSERT_EQ(ham.m_basis.m_frm.m_abgrp_map.m_site_irreps, chk_orbsyms);
@@ -88,7 +88,7 @@ TEST(GeneralFrmHam, RhfEnergyMolcas) {
      * CASCI:   -109.02180323
      */
     const auto benchmark = -108.9540866268;
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5", true});
     Hamiltonian ham(&frm_ham);
     uintv_t chk_orbsyms = {0, 0, 0, 0, 0, 0};
     ASSERT_EQ(ham.m_basis.m_frm.m_abgrp_map.m_site_irreps, chk_orbsyms);
@@ -101,7 +101,7 @@ TEST(GeneralFrmHam, RhfEnergyMolcas) {
 }
 
 TEST(GeneralFrmHam, RhfBrillouinTheorem) {
-    GeneralFrmHam ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"}, true);
+    GeneralFrmHam ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", true});
     ASSERT_TRUE(ham.m_kramers_attrs.conserving());
     buffered::FrmOnv onv(ham.m_basis);
     mbf::set_aufbau_mbf(onv, ham.default_nelec());
@@ -123,10 +123,10 @@ TEST(GeneralFrmHam, RhfBrillouinTheorem) {
 
 
 TEST(GeneralFrmHam, NonHermitian) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/TC_Be_6-31G/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/TC_Be_6-31G/FCIDUMP", true});
     ASSERT_EQ(frm_ham.m_ints.m_2e->sym(), integrals_2e::syms::D);
 }
 
 TEST(GeneralFrmHam, FromMolcasHdf5Archive) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5"}, true);
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5", true});
 }

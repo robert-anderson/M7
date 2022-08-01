@@ -194,24 +194,24 @@ TEST(DecodedMbf, Labelled){
 }
 
 TEST(DecodedMbf, Bosons) {
-    const uint_t nmode = 8;
+    const uint_t nmode = 20;
     buffered::BosOnv mbf(nmode);
-    mbf = {0, 1, 0, 3, 1, 0, 1, 2};
+    mbf = {0, 1, 0, 3, 1, 0, 1, 2, 0, 0, 1, 3, 0, 0, 0, 4, 1, 0, 2, 1};
     uintv_t chk_inds;
 
-    chk_inds = {1, 3, 3, 3, 4, 6, 7, 7};
+    chk_inds = {1, 3, 3, 3, 4, 6, 7, 7, 10, 11, 11, 11, 15, 15, 15, 15, 16, 18, 18, 19};
     ASSERT_EQ(mbf.m_decoded.m_expanded.get(), chk_inds);
 
-    chk_inds = {1, 3, 4, 6, 7};
+    chk_inds = {1, 3, 4, 6, 7, 10, 11, 15, 16, 18, 19};
     ASSERT_EQ(mbf.m_decoded.m_occ_modes.get(), chk_inds);
 }
 
 TEST(DecodedMbf, Holstein) {
-    const uint_t nsite = 8;
+    const uint_t nsite = 15;
     buffered::FrmBosOnv mbf(nsite, nsite);
-    mbf.m_frm = {{0, 1, 5, 7}, {0, 3, 6, 7}};
-    mbf.m_bos = {0, 1, 2, 3, 1, 0, 1, 2};
+    mbf.m_frm = {{0, 1, 5, 7, 10, 11, 14}, {0, 3, 6, 7, 11, 12, 14}};
+    mbf.m_bos = {0, 1, 2, 3, 1, 0, 1, 2, 0, 1, 3, 0, 0, 1, 2};
 
-    uintv_t chk_inds = {1, 3, 6, 7};
+    uintv_t chk_inds = {1, 3, 6, 7, 10, 14};
     ASSERT_EQ(mbf.m_decoded.m_occ_sites_nonzero_bosons.get(), chk_inds);
 }

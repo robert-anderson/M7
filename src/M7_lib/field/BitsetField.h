@@ -41,8 +41,8 @@ struct BitsetField : FieldBase {
     using FieldBase::zero;
     using FieldBase::begin;
 
-    BitsetField(Row *row, NdFormat<nind> format, str_t name="") :
-        FieldBase(row, integer::divceil(format.m_nelement, nbit_dword()) * sizeof(T), typeid(T), name),
+    BitsetField(Row *row, NdFormat<nind> format, str_t name="", bool force_own_words=false) :
+        FieldBase(row, integer::divceil(format.m_nelement, nbit_dword()) * sizeof(T), typeid(T), name, force_own_words),
         m_format(format), m_dsize(m_size / sizeof(T)), m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {}
 
     BitsetField(const BitsetField &other) : FieldBase(other),

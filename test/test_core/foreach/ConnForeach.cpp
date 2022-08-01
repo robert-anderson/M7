@@ -522,3 +522,54 @@ TEST(ConnForeach, FrmBosEx1101) {
     foreach.loop(conn, mbf, fn);
     ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());
 }
+
+TEST(ConnForeach, BosHubbardEx1100) {
+    /*
+     * 2d hubbard model example perm     site indices (irow*4+icol)
+     *  0 2 0 3                          0 1 2 3
+     *  0 0 2 0                          4 5 6 7
+     *  0 4 0 1                          8 ...
+     *  periodic BCs top to bottom (major dimension: "row")
+     *  open BCs left to right (minor dimension: "col")
+     */
+    const uint_t nrow = 3, ncol = 4;
+    const sys::bos::Basis basis(lattice::make("ortho", {nrow, ncol}, {1, 0}));
+
+    buffered::BosOnv mbf(basis);
+    mbf = {0, 2, 0, 3, 0, 0, 2, 0, 0, 4, 0, 1};
+
+    conn_foreach_test::results_t results = {
+            {1, 0},
+            {1, 2},
+            {1, 5},
+            {1, 9},
+            {3, 2},
+            {3, 7},
+            {3, 11},
+            {6, 2},
+            {6, 5},
+            {6, 7},
+            {6, 10},
+            {9, 1},
+            {9, 5},
+            {9, 8},
+            {9, 10},
+            {11, 3},
+            {11, 7},
+            {11, 10}};
+    conn::BosOnv conn(mbf);
+    auto result = results.cbegin();
+    auto fn = [&]() {
+        ASSERT_EQ(conn.m_cre[0].m_imode, result->m_cre[0]);
+        ASSERT_EQ(conn.m_ann[0].m_imode, result->m_ann[0]);
+        ++result;
+    };
+    conn_foreach::bos::Hubbard foreach;
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(result, results.cend());
+    // then, the run time polymorphic loop:
+    result = results.cbegin();
+    foreach.loop(conn, mbf, fn);
+    ASSERT_EQ(result, results.cend());
+}

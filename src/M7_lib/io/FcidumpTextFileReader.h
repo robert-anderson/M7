@@ -32,7 +32,6 @@ struct FcidumpTextFileReader : public HamTextFileReader {
      * NECI, m_spin_major should be false.
      */
     const FcidumpInfo m_info;
-    const bool m_spin_major;
 
     bool m_spin_conserving_1e = true;
     bool m_spin_conserving_2e = true;

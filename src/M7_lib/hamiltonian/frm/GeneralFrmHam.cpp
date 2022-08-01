@@ -89,14 +89,13 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader& reader) {
 
 
 
-GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
+GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info):
         FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}, info.m_spin_resolved}),
-        m_info(info), m_ints(make_ints(m_info, spin_major)){
+        m_info(info), m_ints(make_ints(m_info, info.m_spin_major)){
 }
 
 GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
-        GeneralFrmHam({FortranNamelistReader(opts.m_ham.m_fcidump.m_path)},
-                      opts.m_ham.m_fcidump.m_spin_major) {}
+        GeneralFrmHam({opts.m_ham.m_fcidump.m_path, opts.m_ham.m_fcidump.m_spin_major}) {}
 
 ham_t GeneralFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
     if (m_basis.m_spin_resolved) return m_ints.m_1e->get(a, i);

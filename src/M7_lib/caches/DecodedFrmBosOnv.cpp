@@ -25,8 +25,10 @@ const uintv_t &decoded_mbf::frmbos::OccSitesNonzeroBosons::get() {
     DEBUG_ASSERT_EQ(m_mbf.m_frm.m_basis.m_nsite, m_mbf.m_bos.m_basis.m_nmode,
                     "this cache only makes sense with a 1-to-1 correspondence between modes and sites");
     if (!empty()) return validated();
-    const auto& occ = m_mbf.m_frm.m_decoded.m_occ_sites.get();
-    for (auto& imode: occ) if (m_mbf.m_bos[imode]) m_inds.push_back(imode);
+    auto fn = [&](uint_t imode){
+        if (m_mbf.m_frm.site_nocc(imode)) m_inds.push_back(imode);
+    };
+    m_mbf.m_bos.foreach_setmode(fn);
     m_last_update_hash = m_mbf.hash();
     return m_inds;
 }

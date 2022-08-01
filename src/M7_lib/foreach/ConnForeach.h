@@ -110,13 +110,13 @@ namespace conn_foreach {
                 auto ann_alpha_fn = [&](const ctnd::inds_t<nalpha> &ann_alpha_ops) {
                     auto ann_beta_fn = [&](const ctnd::inds_t<nbeta> &ann_beta_ops) {
                         conn.m_ann.clear();
-                        for (uint_t iop = 0ul; iop < nalpha; ++iop) conn.m_ann.add(occs[0][ann_alpha_ops[iop]]);
-                        for (uint_t iop = 0ul; iop < nbeta; ++iop) conn.m_ann.add(occs[1][ann_beta_ops[iop]]);
+                        for (uint_t iop = 0ul; iop != nalpha; ++iop) conn.m_ann.add(occs[0][ann_alpha_ops[iop]]);
+                        for (uint_t iop = 0ul; iop != nbeta; ++iop) conn.m_ann.add(occs[1][ann_beta_ops[iop]]);
                         auto cre_alpha_fn = [&](const ctnd::inds_t<nalpha> &cre_alpha_ops) {
                             auto cre_beta_fn = [&](const ctnd::inds_t<nbeta> &cre_beta_ops) {
                                 conn.m_cre.clear();
-                                for (uint_t iop = 0ul; iop < nalpha; ++iop) conn.m_cre.add(vacs[0][cre_alpha_ops[iop]]);
-                                for (uint_t iop = 0ul; iop < nbeta; ++iop) conn.m_cre.add(vacs[1][cre_beta_ops[iop]]);
+                                for (uint_t iop = 0ul; iop != nalpha; ++iop) conn.m_cre.add(vacs[0][cre_alpha_ops[iop]]);
+                                for (uint_t iop = 0ul; iop != nbeta; ++iop) conn.m_cre.add(vacs[1][cre_beta_ops[iop]]);
                                 fn();
                             };
                             ctnd::Ordered<nbeta, true, true> cre_beta_foreach(vacs.size(1));

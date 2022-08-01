@@ -130,6 +130,33 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         message(FATAL_ERROR "Specified CMAKE_BUILD_TYPE is invalid")
     endif()
 
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    target_link_libraries(M7_lib -lgfortran)
+    target_compile_options(M7_lib
+        PUBLIC
+             -march=core-avx2 -g
+        PRIVATE
+            -Wno-unused-function
+            -Wall -Wextra
+    )
+    if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+        target_compile_options(M7_lib
+            PUBLIC
+                -O3
+        )
+        target_compile_definitions(M7_lib
+            PRIVATE
+                NDEBUG
+        )
+    elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+        target_compile_options(M7_lib
+            PRIVATE
+                -Werror
+        )
+    else ()
+        message(FATAL_ERROR "Specified CMAKE_BUILD_TYPE is invalid")
+    endif()
+
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib

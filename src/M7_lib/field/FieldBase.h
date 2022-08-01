@@ -54,12 +54,17 @@ struct FieldBase {
      * string identifier for logging purposes
      */
     const str_t m_name;
-
+    /**
+     * even if the next field added to a Row after this one is of the same type, it always begins at the system word
+     * boundary in the buffer. this is to aid bytewise operations on this field without the need to be concerned with
+     * encountering data corresponding to the next field in the Row
+     */
+    const bool m_force_own_words;
 private:
     /**
      * a zero-valued string so that memory can be cleared by copy
      */
-    v_t<char> m_null_string;
+    v_t<buf_t> m_null_string;
     /**
      * number of bytes by which Field is offset from the beginning of the Row (first Field to be added has offset 0)
      */
@@ -82,7 +87,7 @@ public:
      * @param name
      *  name of the field i.e. "column heading"
      */
-    FieldBase(Row *row, uint_t size, const std::type_info &type_info, str_t name);
+    FieldBase(Row *row, uint_t size, const std::type_info &type_info, str_t name, bool force_own_words);
 
     FieldBase(const FieldBase &other);
 
@@ -101,9 +106,9 @@ public:
 
     bool belongs_to_row(const Row& row) const;
 
-    char *begin() const;
+    buf_t *begin() const;
 
-    char *end() const;
+    buf_t *end() const;
 
     const Row *row() const;
 

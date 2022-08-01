@@ -87,9 +87,9 @@ typedef ham_comp_t wf_comp_t;
 typedef std::conditional<c_enable_complex_wf, std::complex<wf_comp_t>, wf_comp_t>::type wf_t;
 
 typedef double prob_t;
-typedef char buf_t;
+typedef unsigned char buf_t;
 typedef unsigned char mev_ind_t;
-typedef unsigned char bos_occ_t;
+typedef buf_t bos_occ_t;
 
 enum MbfTypeInd {Frm, FrmBos, Bos};
 /**
