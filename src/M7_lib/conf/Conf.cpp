@@ -247,7 +247,7 @@ void conf::Propagator::validate_node_contents() {
         logging::warn("{} was zero, defaulting to the specified value of {}",
                   m_max_bloom.m_path.m_string, m_nadd.m_path.m_string);
     }
-    REQUIRE_GE(m_imp_samp_exp.m_value, 0.0, "importance sampling exponent must be non-negative");
+    if (m_imp_samp_exp.m_value < 0.0) logging::warn("importance sampling exponent is negative");
 }
 
 conf::Document::Document(const str_t& fname) :
