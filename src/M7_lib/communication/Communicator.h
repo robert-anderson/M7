@@ -56,15 +56,17 @@ public:
      *  send table instance, this is passed rather than a row, since this class allows for the definition of the send
      *  table as a MappedTable, whose ctor takes additional args
      * @param sizing
-     *  buffer (re)sizing behaviour for both send and recv tables
+     *  buffer (re)sizing behaviour for both send and recv tables. estimated number of rows is taken to be in total
+     *  across all nrank processes, and since there are nrank send tables, this estimate is divided by nrank to arrive
+     *  at the estimated number of rows required in the send table
      */
     CommunicatingPair(str_t name, const send_table_t &send, Sizing sizing) :
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
         logging::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
                       string::memsize(mpi::nrank() * sizing.m_nrow_est*m_recv.row_size()), name);
-        m_send.resize(sizing.m_nrow_est, 0.0);
-        m_recv.resize(mpi::nrank() * sizing.m_nrow_est, 0.0);
+        m_send.resize(integer::divceil(sizing.m_nrow_est, mpi::nrank()), 0.0);
+        m_recv.resize(sizing.m_nrow_est, 0.0);
         m_send.set_expansion_factor(sizing.m_exp_fac);
         m_recv.set_expansion_factor(sizing.m_exp_fac);
     }
