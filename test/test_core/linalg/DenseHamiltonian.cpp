@@ -244,9 +244,10 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff3) {
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP", true});
-    GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 1);
-    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
+    const uint_t occ_cutoff = 1;
+    GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, occ_cutoff);
+    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
     auto particles = ham_src.default_particles(4);
     DenseHamiltonian ham(ham_src, particles);
@@ -257,8 +258,9 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP", true});
-    GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 2);
-    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
+    const uint_t occ_cutoff = 2;
+    GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, occ_cutoff);
+    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
     auto particles = ham_src.default_particles(4);
     DenseHamiltonian ham(ham_src, particles);
@@ -269,8 +271,9 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP", true});
-    GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 3);
-    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
+    const uint_t occ_cutoff = 3;
+    GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, occ_cutoff);
+    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
     DenseHamiltonian ham(ham_src);
     v_t<double> evals;

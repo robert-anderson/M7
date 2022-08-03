@@ -61,8 +61,7 @@ ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
 }
 
 ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    DEBUG_ASSERT_EQ(conn.m_ann.size(), conn.m_cre.size(), "this Hamiltonian conserves boson number");
-    DEBUG_ASSERT_EQ(conn.size(), 2ul, "incorrectly sized connection passed to get_element_0011");
+    DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_0011, "passed connection has incorrect exsig");
     // get mode indices
     auto a = conn.m_cre[0].m_imode;
     auto i = conn.m_ann[0].m_imode;
@@ -76,10 +75,7 @@ ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosO
 }
 
 ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    DEBUG_ASSERT_NE(conn.m_ann.size(), conn.m_cre.size(), "this Hamiltonian conserves boson number");
-    DEBUG_ASSERT_NE(conn.size(), uint_t(2), "single number-conserving boson operator passed to get_element_0022");
-    DEBUG_ASSERT_NE(conn.size(), uint_t(0), "empty connection passed to get_element_0022");
-    DEBUG_ASSERT_EQ(conn.size(), uint_t(4), "incorrectly sized connection passed to get_element_0022");
+    DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_0022, "passed connection has incorrect exsig");
     // get mode indices
     auto i = conn.m_cre[0].m_imode;
     auto j = conn.m_cre[0].m_nop == 2 ? i : conn.m_cre[1].m_imode;

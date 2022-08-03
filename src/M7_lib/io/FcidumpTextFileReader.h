@@ -12,19 +12,6 @@
 #include "FortranNamelistReader.h"
 #include "FcidumpInfo.h"
 
-static constexpr std::array<uinta_t<4>, 8> orderings{
-        {
-                {0, 1, 2, 3},
-                {1, 0, 2, 3},
-                {0, 1, 3, 2},
-                {1, 0, 3, 2},
-                {2, 3, 0, 1},
-                {2, 3, 1, 0},
-                {3, 2, 0, 1},
-                {3, 2, 1, 0}
-        }
-};
-
 struct FcidumpTextFileReader : public HamTextFileReader {
     /**
      * spin-resolved FCIDUMPs index in spinorbs, which may not or may not be spin-major, depending on the program they
