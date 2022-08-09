@@ -21,13 +21,48 @@ void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
     logging::info("this storage scheme assumes that {} integrals are equivalent", convert::to_string(equivs));
 }
 
-GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader& reader) {
+
+uint_t GeneralFrmHam::make_ints_(IntegralReader *reader, GeneralFrmHam::ints_1e_t *ints_1e, GeneralFrmHam::ints_2e_t *ints_2e) {
+    using namespace exsig;
+    REQUIRE_TRUE(reader, "this method should not be called on a non-reading rank");
+    IntegralReader::IterData d;
+
+    while (reader->next(d)){
+        if (d.m_ranksig == 0ul) {
+            m_e_core = d.m_value;
+            continue;
+        }
+
+        auto& rank_contrib = d.m_ranksig == ex_single ? m_contribs_1100 : m_contribs_2200;
+        rank_contrib.set_nonzero(d.m_exsig);
+
+        if (d.m_ranksig == ex_single) {
+            if (!ints_1e->set(d.m_inds[0], d.m_inds[1], d.m_value)) return 1ul;
+        } else if (d.m_ranksig == ex_double) {
+            // FCIDUMP integral indices are in chemists' ordering
+            auto success = ints_2e->set(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3], d.m_value);
+            if (!success) {
+                logging::info_("integral value {} is at odds with stored value {}", d.m_value,
+                               ints_2e->get(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3]));
+                return 2ul;
+            }
+        } else MPI_ABORT("File reader error");
+    }
+    return 0ul;
+}
+
+GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader* reader) {
     if (!m_basis.m_nsite) return {nullptr, nullptr};
 
     REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),
                m_basis.ncoeff_ind(m_info.m_spin_resolved), "site map size incorrect");
 
-    m_complex_valued = reader.complex_valued();
+    m_complex_valued = false;
+    if (reader) m_complex_valued = reader->complex_valued();
+    // get a vector of all reading ranks
+    const auto reading_iranks = mpi::ranks_with_nonzero(bool(reader));
+    // use the first one for the definitive value of the complex valued flag
+    mpi::bcast(m_complex_valued, reading_iranks.front());
 
     using namespace ham;
     /*
@@ -46,54 +81,56 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader& reader) {
     log_ints_sym(ints_2e->sym(), true);
     REQUIRE_TRUE(ints_2e.get(), "2e integral array object unallocated");
 
-    IntegralReader::IterData d;
-    m_e_core = reader.ecore();
+    if (reader) m_e_core = reader->ecore();
 
-    while (reader.next(d)){
-        if (d.m_ranksig == 0ul) {
-            m_e_core = d.m_value;
-            continue;
+    uint_t iex_next = ~0ul;
+    while (iex_next) {
+        if (reader) iex_next = make_ints_(reader, ints_1e.get(), ints_2e.get());
+        mpi::bcast(iex_next, reading_iranks.front());
+        if (iex_next==1ul) {
+            integrals_1e::next_sym_attempt(ints_1e);
+            log_ints_sym(ints_1e->sym(), false);
+            if (reader) reader->goto_first_1e();
         }
-
-        auto& rank_contrib = d.m_ranksig == ex_single ? m_contribs_1100 : m_contribs_2200;
-        rank_contrib.set_nonzero(d.m_exsig);
-
-        if (d.m_ranksig == ex_single) {
-            bool success = false;
-            while (!success) {
-                success = ints_1e->set(d.m_inds[0], d.m_inds[1], d.m_value);
-                if (!success) {
-                    integrals_1e::next_sym_attempt(ints_1e);
-                    reader.goto_first_1e();
-                    log_ints_sym(ints_1e->sym(), false);
-                }
-            }
-        } else if (d.m_ranksig == ex_double) {
-            bool success = false;
-            while (!success) {
-                // FCIDUMP integral indices are in chemists' ordering
-                success = ints_2e->set(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3], d.m_value);
-                if (!success) {
-                    logging::info("integral value {} is at odds with stored value {}", d.m_value,
-                                  ints_2e->get(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3]));
-                    integrals_2e::next_sym_attempt(ints_2e);
-                    reader.goto_first_2e();
-                    log_ints_sym(ints_2e->sym(), false);
-                }
-            }
-        } else MPI_ABORT("File reader error");
+        else if (iex_next==2ul) {
+            integrals_2e::next_sym_attempt(ints_2e);
+            log_ints_sym(ints_2e->sym(), false);
+            if (reader) reader->goto_first_2e();
+        }
     }
+
+    mpi::bcast(m_e_core, reading_iranks.front());
     mpi::barrier();
     logging::info("FCIDUMP loading complete.");
     log_data();
     return {std::move(ints_1e), std::move(ints_2e)};
 }
 
+GeneralFrmHam::Integrals GeneralFrmHam::make_ints() {
+    const str_t fmt = "Reading fermion Hamiltonian coefficients from {} file \"" + m_info.m_fname + "\"...";
+    if (m_info.m_impl==FcidumpInfo::CSV) {
+        logging::info(fmt, "plain text CSV");
+        if (mpi::on_node_i_am_root()) {
+            CsvIntegralReader reader(m_info);
+            return make_ints(&reader);
+        }
+        else return make_ints(nullptr);
+    }
+    else if (m_info.m_impl==FcidumpInfo::MolcasHDF5) {
+        logging::info(fmt, "Molcas HDF5 binary");
+        if (mpi::on_node_i_am_root()) {
+            MolcasHdf5IntegralReader reader(m_info);
+            return make_ints(&reader);
+        }
+        else return make_ints(nullptr);
+    }
+    return {nullptr, nullptr};
+}
 
 
 GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info):
         FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}}),
-        m_info(info), m_ints(make_ints(m_info, info.m_spin_major)){
+        m_info(info), m_ints(make_ints()){
 }
 
 GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):

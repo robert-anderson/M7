@@ -13,9 +13,9 @@
 struct IntegralReader {
     struct IterData {
         uintv_t m_inds = uintv_t(4ul, ~0ul);
-        ham_t m_value{};
-        uint_t m_ranksig{};
-        uint_t m_exsig{};
+        ham_t m_value {};
+        uint_t m_ranksig {};
+        uint_t m_exsig {};
 
         /**
          * after setting m_inds, call this method to update the rank and excitation signatures
@@ -51,7 +51,7 @@ struct CsvIntegralReader : IntegralReader {
     uint_t m_iline = 0ul;
     uint_t m_iline_first_1e = ~0ul;
     uint_t m_iline_first_2e = ~0ul;
-    CsvIntegralReader(const FcidumpInfo& info, bool spin_major);
+    CsvIntegralReader(const FcidumpInfo& info);
     bool next(IterData& data) override;
 
     void goto_first_1e() override;
@@ -88,7 +88,7 @@ private:
     v_t<ham_t> m_values_1e;
     uint_t m_iline = 0ul;
 public:
-    Hdf5IntegralReader(const FcidumpInfo& info, KeyNames names, bool /*spin_major*/);
+    Hdf5IntegralReader(const FcidumpInfo& info, KeyNames names);
     bool next(IterData& data) override;
 
     void goto_first_1e() override;
@@ -107,7 +107,7 @@ public:
  * datasets is actually the 1-electron hamiltonian
  */
 struct MolcasHdf5IntegralReader : Hdf5IntegralReader {
-    MolcasHdf5IntegralReader(const FcidumpInfo& info, bool spin_major);
+    MolcasHdf5IntegralReader(const FcidumpInfo& info);
 };
 
 #endif //M7_INTEGRALREADER_H

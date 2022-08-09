@@ -636,6 +636,20 @@ namespace mpi {
         return out;
     }
 
+    template<typename T>
+    static uintv_t ranks_with_nonzero(T v) {
+        /*
+         * use v_t<unsigned char> as container, since if T is bool, we can't use the std::vector<bool> due to bitfield
+         * optimisation
+         */
+        v_t<unsigned char> gathered;
+        const unsigned char c = v;
+        mpi::all_gather(c, gathered);
+        uintv_t iranks;
+        for (uint_t i=0ul; i< gathered.size(); ++i) if (gathered[i]) iranks.push_back(i);
+        return iranks;
+    }
+
     /*
      * SCATTER
      */

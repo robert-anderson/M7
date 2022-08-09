@@ -30,22 +30,25 @@ private:
 
     static void log_ints_sym(integrals_2e::syms::Sym sym, bool initial);
 
-    Integrals make_ints(IntegralReader& reader);
+    /**
+     * attempt to fill the integrals based on the current symmetry schemes.
+     * only to be called on the root rank of each node
+     * @param reader
+     *  non-null reader object
+     * @param ints_1e
+     *  pointer to one-body integrals
+     * @param ints_2e
+     *  pointer to two-body integrals
+     * @return
+     *  0 if all entries in the file were found to be consistent with the current symmetry scheme
+     *  1 if a 1-electron integral was found which defies the current symmetry scheme
+     *  2 if a 2-electron integral was found which defies the current symmetry scheme
+     */
+    uint_t make_ints_(IntegralReader* reader, ints_1e_t* ints_1e, ints_2e_t* ints_2e);
 
-    Integrals make_ints(const FcidumpInfo& info, bool spin_major) {
-        const str_t fmt = "Reading fermion Hamiltonian coefficients from {} file \"" + info.m_fname + "\"...";
-        if (info.m_impl==FcidumpInfo::CSV) {
-            logging::info(fmt, "plain text CSV");
-            CsvIntegralReader reader(info, spin_major);
-            return make_ints(reader);
-        }
-        else if (info.m_impl==FcidumpInfo::MolcasHDF5) {
-            logging::info(fmt, "Molcas HDF5 binary");
-            MolcasHdf5IntegralReader reader(info, spin_major);
-            return make_ints(reader);
-        }
-        return {nullptr, nullptr};
-    }
+    Integrals make_ints(IntegralReader* reader);
+
+    Integrals make_ints();
 
 public:
 

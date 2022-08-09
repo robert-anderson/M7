@@ -11,7 +11,9 @@
 #include "M7_lib/hdf5/File.h"
 #include "FortranNamelistReader.h"
 
-
+/**
+ * this only involves reading the header of the FCIDUMP file, so it can be done on all ranks - no need for comms
+ */
 struct FcidumpInfo {
     enum Implementation {
         CSV, MolcasHDF5
@@ -33,11 +35,13 @@ private:
 public:
 
     FcidumpInfo(str_t fname, bool spin_major=false);
+
 };
 
 struct EbdumpInfo : FcidumpInfo {
     uint_t m_nmode;
     EbdumpInfo(str_t fname, bool spin_major=false);
+
 };
 
 #endif //M7_FCIDUMPINFO_H

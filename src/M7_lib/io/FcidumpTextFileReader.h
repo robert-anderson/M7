@@ -23,7 +23,7 @@ struct FcidumpTextFileReader : public HamTextFileReader {
     bool m_spin_conserving_1e = true;
     bool m_spin_conserving_2e = true;
 
-    FcidumpTextFileReader(const str_t &fname, bool spin_major);
+    FcidumpTextFileReader(const FcidumpInfo& info);
 
     bool spin_conserving() const;
 

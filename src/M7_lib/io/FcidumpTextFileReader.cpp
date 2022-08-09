@@ -6,8 +6,8 @@
 #include "M7_lib/util/Exsig.h"
 #include "M7_lib/basis/BasisData.h"
 
-FcidumpTextFileReader::FcidumpTextFileReader(const str_t &fname, bool spin_major) :
-        HamTextFileReader(fname, 4), m_info(fname, spin_major) {
+FcidumpTextFileReader::FcidumpTextFileReader(const FcidumpInfo& info) :
+        HamTextFileReader(info.m_fname, 4), m_info(info){
     auto nsite = m_info.m_nsite;
     if (m_info.m_spin_resolved) {
         uintv_t inds(4);

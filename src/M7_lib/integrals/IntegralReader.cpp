@@ -28,7 +28,7 @@ void IntegralReader::IterData::update_ranksig_exsig() {
     }
 }
 
-CsvIntegralReader::CsvIntegralReader(const FcidumpInfo& info, bool spin_major) : m_reader(info.m_fname, spin_major){}
+CsvIntegralReader::CsvIntegralReader(const FcidumpInfo& info) : m_reader(info){}
 
 bool CsvIntegralReader::next(IntegralReader::IterData& data) {
     auto out = m_reader.next(data.m_inds, data.m_value);
@@ -60,7 +60,7 @@ bool CsvIntegralReader::complex_valued() const {
     return m_reader.m_complex_valued;
 }
 
-Hdf5IntegralReader::Hdf5IntegralReader(const FcidumpInfo& info, Hdf5IntegralReader::KeyNames names, bool) :
+Hdf5IntegralReader::Hdf5IntegralReader(const FcidumpInfo& info, Hdf5IntegralReader::KeyNames names) :
         m_reader(info.m_fname), m_names(std::move(names)),
         m_indices_2e(m_reader, m_names.m_2e_inds),
         m_values_2e(m_reader.read_data<v_t<ham_t>>(m_names.m_2e_values)),
@@ -109,10 +109,5 @@ bool Hdf5IntegralReader::complex_valued() const {
     return false;
 }
 
-MolcasHdf5IntegralReader::MolcasHdf5IntegralReader(const FcidumpInfo& info, bool spin_major) :
-        Hdf5IntegralReader(info,
-                           {"CORE_ENERGY",
-                            "FOCK_INDEX",
-                            "FOCK_VALUES",
-                            "TWO_EL_INT_INDEX",
-                            "TWO_EL_INT_VALUES"}, spin_major){}
+MolcasHdf5IntegralReader::MolcasHdf5IntegralReader(const FcidumpInfo& info) : Hdf5IntegralReader(info,
+     {"CORE_ENERGY", "FOCK_INDEX", "FOCK_VALUES", "TWO_EL_INT_INDEX", "TWO_EL_INT_VALUES"}){}
