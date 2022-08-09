@@ -19,11 +19,11 @@ struct GeneralLadderHam : FrmBosHam {
      */
     FrmBosCoupledCoeffs m_v;
 
-    GeneralLadderHam(const EbdumpInfo& info, bool spin_major, uint_t bos_occ_cutoff=sys::bos::c_max_occ);
+    GeneralLadderHam(sys::Basis basis, const EbdumpInfo& info);
 
-    GeneralLadderHam(opt_pair_t opts):
-        GeneralLadderHam(EbdumpInfo(opts.m_ham.m_ebdump.m_path),
-                opts.m_ham.m_ebdump.m_spin_major, opts.m_basis.m_bos_occ_cutoff){}
+    GeneralLadderHam(sys::Basis basis, opt_pair_t opts):
+        GeneralLadderHam(std::move(basis),
+                         EbdumpInfo(opts.m_ham.m_ebdump.m_path, opts.m_ham.m_ebdump.m_spin_major)){}
 
     ham_t get_coeff_1110(uint_t imode, uint_t i, uint_t j) const override;
 

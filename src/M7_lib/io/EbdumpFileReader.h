@@ -10,9 +10,8 @@
 struct EbdumpFileReader : HamTextFileReader {
     const EbdumpInfo m_info;
     const uint_t m_norb_distinct;
-    const bool m_spin_major;
 
-    EbdumpFileReader(const str_t &fname, bool spin_major=false);
+    EbdumpFileReader(const EbdumpInfo& info);
 
     uint_t ranksig(const uintv_t &inds) const override;
 

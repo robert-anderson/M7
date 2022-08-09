@@ -100,18 +100,6 @@ struct HamiltonianTerms {
         return make_poly_unique<FrmHam, NullFrmHam>();
     }
 
-    std::unique_ptr<FrmBosHam> make_frmbos(FrmBosHam::opt_pair_t opts) {
-        using namespace smart_ptr;
-        if (opts.m_ham.m_holstein_coupling) {
-            const auto g = opts.m_ham.m_holstein_coupling.m_value;
-            return make_poly_unique<FrmBosHam, HolsteinLadderHam>(m_frm->m_basis, g, opts.m_basis.m_bos_occ_cutoff);
-        }
-        else if (opts.m_ham.m_ebdump.m_enabled) {
-            return make_poly_unique<FrmBosHam, GeneralLadderHam>(opts);
-        }
-        return make_poly_unique<FrmBosHam, NullFrmBosHam>();
-    }
-
     std::unique_ptr<BosHam> make_bos(BosHam::opt_pair_t opts){
         using namespace smart_ptr;
         if (opts.m_ham.m_num_op_weight) {
@@ -127,6 +115,22 @@ struct HamiltonianTerms {
         else if (opts.m_ham.m_bosdump.m_enabled)
             return make_poly_unique<BosHam, GeneralBosHam>(opts);
         return make_poly_unique<BosHam, NullBosHam>();
+    }
+
+    std::unique_ptr<FrmBosHam> make_frmbos(FrmBosHam::opt_pair_t opts) {
+        REQUIRE_TRUE(m_frm.get(), "fermion Hamiltonian unallocated");
+        REQUIRE_TRUE(m_bos.get(), "boson Hamiltonian unallocated");
+        const sys::Basis basis(m_frm->m_basis, m_bos->m_basis);
+
+        using namespace smart_ptr;
+        if (opts.m_ham.m_holstein_coupling) {
+            const auto g = opts.m_ham.m_holstein_coupling.m_value;
+            return make_poly_unique<FrmBosHam, HolsteinLadderHam>(basis, g);
+        }
+        else if (opts.m_ham.m_ebdump.m_enabled) {
+            return make_poly_unique<FrmBosHam, GeneralLadderHam>(basis, opts);
+        }
+        return make_poly_unique<FrmBosHam, NullFrmBosHam>();
     }
 
     HamiltonianTerms(opt_pair_t opts):
@@ -191,11 +195,8 @@ private:
      *  nullptr if m_terms.m_frmbos is to be dereferenced, else this points to an externally allocated FrmBosHam
      */
     explicit Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosHam* bos, const FrmBosHam* frmbos):
-            m_terms(std::move(terms)),
-            m_frm(frm ? *frm : *m_terms.m_frm),
-            m_bos(bos ? *bos : *m_terms.m_bos),
-            m_frmbos(frmbos ? *frmbos : *m_terms.m_frmbos),
-            m_basis(m_frmbos ? m_frmbos.m_basis : sys::Basis(m_frm.m_basis, m_bos.m_basis)),
+            m_terms(std::move(terms)), m_frm(frm ? *frm : *m_terms.m_frm), m_bos(bos ? *bos : *m_terms.m_bos),
+            m_frmbos(frmbos ? *frmbos : *m_terms.m_frmbos), m_basis(sys::Basis(m_frm.m_basis, m_bos.m_basis)),
             m_boson_number_conserve(boson_number_conserve()), m_work_conn(m_basis.size()){
         REQUIRE_TRUE(m_basis, "No system defined");
         if (!m_frm) logging::info("Fermion Hamiltonian is disabled");

@@ -9,8 +9,10 @@
 
 TEST(HolsteinUniform, Creation) {
     PRNG prng(14, 1000000);
-    uint_t nsite = 8;
-    HolsteinLadderHam frmbos_ham({nsite}, 1.0, 4);
+    const uint_t nsite = 8;
+    sys::frm::Basis frm_basis(lattice::make("ortho", {nsite}, {0}));
+    sys::bos::Basis bos_basis(frm_basis.m_nsite, 4);
+    HolsteinLadderHam frmbos_ham({frm_basis, bos_basis}, 1.0);
     Hamiltonian h(&frmbos_ham);
     exgen::HolsteinUniform0010 excit_gen(h.m_frmbos, prng);
     buffered::FrmBosOnv src_mbf(h.m_basis);
@@ -23,8 +25,10 @@ TEST(HolsteinUniform, Creation) {
 
 TEST(HolsteinUniform, Annihilation) {
     PRNG prng(14, 1000000);
-    uint_t nsite = 8;
-    HolsteinLadderHam frmbos_ham({nsite}, 1.0, 4);
+    const uint_t nsite = 8;
+    sys::frm::Basis frm_basis(lattice::make("ortho", {nsite}, {0}));
+    sys::bos::Basis bos_basis(frm_basis.m_nsite, 4);
+    HolsteinLadderHam frmbos_ham({frm_basis, bos_basis}, 1.0);
     Hamiltonian h(&frmbos_ham);
     exgen::HolsteinUniform0001 excit_gen(h.m_frmbos, prng);
     buffered::FrmBosOnv src_mbf(h.m_basis);

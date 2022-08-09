@@ -354,6 +354,9 @@ namespace sys {
         Size(uint_t nsite, uint_t nmode);
         void require_pure_frm() const;
         void require_pure_bos() const;
+        operator bool () const {
+            return !m_frm && !m_bos;
+        }
     };
 
     struct Basis {

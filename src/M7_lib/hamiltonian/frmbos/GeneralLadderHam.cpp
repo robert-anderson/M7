@@ -5,9 +5,8 @@
 #include "GeneralLadderHam.h"
 
 
-GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, uint_t bos_occ_cutoff) :
-        FrmBosHam({{info.m_nsite, {PointGroup(), info.m_orbsym}, info.m_spin_resolved}, {info.m_nmode, bos_occ_cutoff}}),
-        m_v(m_basis.size(), info.m_uhf) {
+GeneralLadderHam::GeneralLadderHam(sys::Basis basis, const EbdumpInfo& info):
+        FrmBosHam(std::move(basis)), m_v(m_basis.size(), info.m_uhf) {
     if (!m_basis) return;
     REQUIRE_EQ(bool(m_basis.m_frm), bool(m_basis.m_bos),
                "if the number of sites is non-zero, so also must be the number of boson modes. "
@@ -15,7 +14,7 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, uint
 
     uintv_t inds(3);
     ham_t value;
-    EbdumpFileReader file_reader(info.m_fname, spin_major);
+    EbdumpFileReader file_reader(info);
 
     logging::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {

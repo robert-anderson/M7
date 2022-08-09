@@ -11,7 +11,8 @@
 #include "M7_lib/field/Fields.h"
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
-#include "M7_lib/hamiltonian/HamOpTerm.h"
+#include "M7_lib/hamiltonian/frm/FrmHam.h"
+#include "M7_lib/hamiltonian/bos/BosHam.h"
 
 /**
  * base class for all Hamiltonians expressed in terms of products of fermionic and bosonic second-quantised operators
@@ -32,11 +33,7 @@ struct FrmBosHam : HamOpTerm {
     ham::TermContribs m_contribs_1110;
     ham::TermContribs m_contribs_1101;
 
-    /**
-     * @param basis
-     *  Single-particle basis specification determined by the information available to the derived class ctors.
-     */
-    FrmBosHam(const sys::Basis& basis);
+    FrmBosHam(sys::Basis basis);
 
     virtual ~FrmBosHam(){}
 

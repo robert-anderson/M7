@@ -10,7 +10,10 @@
 
 TEST(Pchb1101hc, Test){
     PRNG prng(14, 1000000);
-    GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/SpinResolvedEbdump/EBDUMP"}, false);
+    const uint_t nsite = 8;
+    sys::frm::Basis frm_basis(lattice::make("ortho", {nsite}, {0}));
+    sys::bos::Basis bos_basis(frm_basis.m_nsite, 4);
+    GeneralLadderHam frmbos_ham({frm_basis, bos_basis}, {PROJECT_ROOT"/assets/SpinResolvedEbdump/EBDUMP", false});
     Hamiltonian h(&frmbos_ham);
     auto particles = h.default_particles(6);
     ASSERT_TRUE(frmbos_ham.m_basis.m_frm.m_abgrp_map);

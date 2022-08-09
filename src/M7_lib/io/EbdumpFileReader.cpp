@@ -6,9 +6,9 @@
 #include "M7_lib/util/Exsig.h"
 
 
-EbdumpFileReader::EbdumpFileReader(const str_t& fname, bool spin_major) :
-        HamTextFileReader(fname, 3), m_info(fname, spin_major),
-        m_norb_distinct((m_info.m_uhf ? 2 : 1)*m_info.m_nsite), m_spin_major(spin_major){}
+EbdumpFileReader::EbdumpFileReader(const EbdumpInfo& info) :
+        HamTextFileReader(info.m_fname, 3), m_info(info),
+        m_norb_distinct((m_info.m_uhf ? 2 : 1)*m_info.m_nsite) {}
 
 uint_t EbdumpFileReader::ranksig(const uintv_t& inds) const {
     DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
@@ -34,7 +34,7 @@ bool EbdumpFileReader::inds_in_range(const uintv_t& inds) const {
 }
 
 void EbdumpFileReader::convert_inds(uintv_t& inds) {
-    if (!m_info.m_spin_resolved || m_spin_major) return;
+    if (!m_info.m_spin_resolved || m_info.m_spin_major) return;
     auto fn = [&inds, this](uint_t i){
         auto& ind = inds[i];
         ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_info.m_nsite : 0));

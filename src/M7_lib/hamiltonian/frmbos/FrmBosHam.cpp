@@ -6,9 +6,8 @@
 
 #include <utility>
 
-FrmBosHam::FrmBosHam(const sys::Basis &basis) :
-        m_basis(basis),
-        m_contribs_1110(exsig::ex_1110), m_contribs_1101(exsig::ex_1101) {}
+FrmBosHam::FrmBosHam(sys::Basis basis):
+        m_basis(std::move(basis)), m_contribs_1110(exsig::ex_1110), m_contribs_1101(exsig::ex_1101) {}
 
 void FrmBosHam::log_data() const {
     if (!*this) return;

@@ -160,6 +160,7 @@ TEST(DenseHamiltonian, Hubbard3x2SiteApbc) {
 TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
     HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     ASSERT_EQ(frm_ham.m_basis.m_nsite, 3ul);
+    const sys::bos::Basis bos_basis(frm_ham.m_basis.m_nsite, 0);
     HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 0.0, 0);
     NumOpBosHam bos_ham(frmbos_ham.m_basis.m_bos, 0.0);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
@@ -246,8 +247,9 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff3) {
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
     HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     const uint_t occ_cutoff = 1;
-    GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, occ_cutoff);
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, occ_cutoff);
+    GeneralLadderHam frmbos_ham({frm_ham.m_basis, bos_ham.m_basis},
+                                {PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL", true});
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
     auto particles = ham_src.default_particles(4);
     DenseHamiltonian ham(ham_src, particles);
@@ -257,10 +259,11 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP", true});
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     const uint_t occ_cutoff = 2;
-    GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, occ_cutoff);
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, occ_cutoff);
+    GeneralLadderHam frmbos_ham({frm_ham.m_basis, bos_ham.m_basis},
+                                {PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL", true});
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
     auto particles = ham_src.default_particles(4);
     DenseHamiltonian ham(ham_src, particles);
@@ -270,10 +273,11 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/FCIDUMP", true});
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     const uint_t occ_cutoff = 3;
-    GeneralLadderHam frmbos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, occ_cutoff);
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/Hubbard_U4_3site/BOSDUMP_GENERAL"}, occ_cutoff);
+    GeneralLadderHam frmbos_ham({frm_ham.m_basis, bos_ham.m_basis},
+                                {PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL", true});
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
     DenseHamiltonian ham(ham_src);
     v_t<double> evals;

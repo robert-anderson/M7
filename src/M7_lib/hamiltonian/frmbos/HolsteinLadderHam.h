@@ -12,11 +12,14 @@ struct HolsteinLadderHam : FrmBosHam {
 
     const ham_t m_g;
 
-    HolsteinLadderHam(const sys::frm::Basis& frm_basis, ham_t g, uint_t bos_occ_cutoff=sys::bos::c_max_occ) :
-        FrmBosHam({frm_basis, {frm_basis.m_nsite, bos_occ_cutoff}}), m_g(g) {
+    HolsteinLadderHam(sys::Basis basis, ham_t g) :
+            FrmBosHam(std::move(basis)), m_g(g) {
         m_contribs_1101.set_nonzero(exsig::ex_0001);
         m_contribs_1110.set_nonzero(exsig::ex_0010);
     }
+
+    HolsteinLadderHam(sys::frm::Basis basis, ham_t g, uint_t bos_occ_cutoff=sys::bos::c_max_occ) :
+            HolsteinLadderHam({basis, {basis.m_nsite, bos_occ_cutoff}}, g){}
 
     ham_t get_coeff_1110(uint_t imode, uint_t a, uint_t i) const override;
 
