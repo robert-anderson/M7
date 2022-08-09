@@ -171,16 +171,12 @@ namespace sys {
              */
             const AbelianGroupMap m_abgrp_map;
             /**
-             * true if the two spin orbitals corresponding to the same site have identical functional form e.g. in UHF basis
-             */
-            const bool m_spin_resolved;
-            /**
              * set to non-null if the basis has lattice structure
              */
             const std::shared_ptr<lattice::SubLattice> m_lattice;
 
         private:
-            using Size::operator unsigned long;
+            using Size::operator uint_t;
 
         public:
 
@@ -188,19 +184,17 @@ namespace sys {
                 return m_nsite;
             }
 
-            Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, std::shared_ptr<lattice::SubLattice> lattice);
+            Basis(uint_t nsite, AbelianGroupMap abgrp_map, std::shared_ptr<lattice::SubLattice> lattice);
 
             Basis(const std::shared_ptr<lattice::SubLattice>& lattice);
 
-            Basis(uint_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved);
+            Basis(uint_t nsite, AbelianGroupMap abgrp_map);
             /*
-             * non-resolved spin, C1 point group (no spatial symmetry)
+             * C1 point group (no spatial symmetry)
              */
-            Basis(uint_t nsite): Basis(nsite, {nsite}, false) {}
+            Basis(uint_t nsite): Basis(nsite, {nsite}) {}
 
             bool operator==(const Basis& other) const;
-
-            uint_t ncoeff_ind() const;
 
             strmap_t info() const;
 

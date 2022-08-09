@@ -7,7 +7,7 @@
 #include "M7_lib/basis/Suites.h"
 
 TEST(Suites, Copy){
-    const sys::frm::Basis frm_basis(6, 7, 2);
+    const sys::frm::Basis frm_basis(6);
     const sys::bos::Basis bos_basis(4, 8);
     suite::Mbfs mbfs({frm_basis, bos_basis});
     ASSERT_EQ(mbfs.nrow(), 1ul);

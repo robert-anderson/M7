@@ -24,7 +24,8 @@ void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
 GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader& reader) {
     if (!m_basis.m_nsite) return {nullptr, nullptr};
 
-    REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(), m_basis.ncoeff_ind(), "site map size incorrect");
+    REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),
+               m_basis.ncoeff_ind(m_info.m_spin_resolved), "site map size incorrect");
 
     m_complex_valued = reader.complex_valued();
 
@@ -32,14 +33,15 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader& reader) {
     /*
      * initialize permutational symmetries.
      */
-    auto ints_1e = integrals_1e::make<ham_t>(m_basis.ncoeff_ind(), integrals_1e::syms::H);
+    auto ints_1e = integrals_1e::make<ham_t>(
+            m_basis.ncoeff_ind(m_info.m_spin_resolved), integrals_1e::syms::H);
     log_ints_sym(ints_1e->sym(), true);
     REQUIRE_TRUE(ints_1e.get(), "1e integral array object unallocated");
     /*
      *
      * if the source is complex-valued, then it cannot have DHR symmetry (and still represent a physical Hamiltonian)
      */
-    auto ints_2e = integrals_2e::make<ham_t>(m_basis.ncoeff_ind(),
+    auto ints_2e = integrals_2e::make<ham_t>(m_basis.ncoeff_ind(m_info.m_spin_resolved),
                                              m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR);
     log_ints_sym(ints_2e->sym(), true);
     REQUIRE_TRUE(ints_2e.get(), "2e integral array object unallocated");
@@ -90,7 +92,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader& reader) {
 
 
 GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info):
-        FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}, info.m_spin_resolved}),
+        FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}}),
         m_info(info), m_ints(make_ints(m_info, info.m_spin_major)){
 }
 
@@ -98,13 +100,13 @@ GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
         GeneralFrmHam({opts.m_ham.m_fcidump.m_path, opts.m_ham.m_fcidump.m_spin_major}) {}
 
 ham_t GeneralFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
-    if (m_basis.m_spin_resolved) return m_ints.m_1e->get(a, i);
+    if (m_info.m_spin_resolved) return m_ints.m_1e->get(a, i);
     if (m_basis.ispin(i)!=m_basis.ispin(a)) return 0.0;
     return m_ints.m_1e->get(m_basis.isite(a), m_basis.isite(i));
 }
 
 ham_t GeneralFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const {
-    if (m_basis.m_spin_resolved) return m_ints.m_2e->get(a, b, i, j)-m_ints.m_2e->get(a, b, j, i);
+    if (m_info.m_spin_resolved) return m_ints.m_2e->get(a, b, i, j)-m_ints.m_2e->get(a, b, j, i);
     const auto aspin = m_basis.ispin(a);
     const auto bspin = m_basis.ispin(b);
     const auto ispin = m_basis.ispin(i);

@@ -100,7 +100,7 @@ TEST(DecodedMbf, Labelled){
      *  4("Wb"): 2, 5("Xb"): 1, 6("Yb"): 0, 7("Zb"): 1
      */
 
-    buffered::FrmOnv mbf({10, grp_map, false});
+    buffered::FrmOnv mbf({10, grp_map});
     mbf = {alpha_occ, beta_occ};
     ASSERT_EQ(mbf.nsetbit(), alpha_occ.size() + beta_occ.size());
 
