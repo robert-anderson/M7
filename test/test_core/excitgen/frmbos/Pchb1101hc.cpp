@@ -10,7 +10,7 @@
 
 TEST(Pchb1101hc, Test){
     PRNG prng(14, 1000000);
-    const uint_t nsite = 8;
+    const uint_t nsite = 6;
     sys::frm::Basis frm_basis(lattice::make("ortho", {nsite}, {0}));
     sys::bos::Basis bos_basis(frm_basis.m_nsite, 4);
     GeneralLadderHam frmbos_ham({frm_basis, bos_basis}, {PROJECT_ROOT"/assets/SpinResolvedEbdump/EBDUMP", false});

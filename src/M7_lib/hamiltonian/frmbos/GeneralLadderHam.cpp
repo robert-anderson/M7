@@ -15,6 +15,8 @@ GeneralLadderHam::GeneralLadderHam(sys::Basis basis, const EbdumpInfo& info):
     uintv_t inds(3);
     ham_t value;
     EbdumpFileReader file_reader(info);
+    REQUIRE_EQ(file_reader.m_info.m_nsite, m_basis.m_frm.m_nsite, "EBDUMP has incorrect number of sites");
+    REQUIRE_EQ(file_reader.m_info.m_nmode, m_basis.m_bos.m_nmode, "EBDUMP has incorrect number of modes");
 
     logging::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {

@@ -196,7 +196,8 @@ private:
      */
     explicit Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosHam* bos, const FrmBosHam* frmbos):
             m_terms(std::move(terms)), m_frm(frm ? *frm : *m_terms.m_frm), m_bos(bos ? *bos : *m_terms.m_bos),
-            m_frmbos(frmbos ? *frmbos : *m_terms.m_frmbos), m_basis(sys::Basis(m_frm.m_basis, m_bos.m_basis)),
+            m_frmbos(frmbos ? *frmbos : *m_terms.m_frmbos),
+            m_basis(frmbos ? m_frmbos.m_basis : sys::Basis(m_frm.m_basis, m_bos.m_basis)),
             m_boson_number_conserve(boson_number_conserve()), m_work_conn(m_basis.size()){
         REQUIRE_TRUE(m_basis, "No system defined");
         if (!m_frm) logging::info("Fermion Hamiltonian is disabled");
