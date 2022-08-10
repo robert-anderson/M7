@@ -81,7 +81,7 @@ uint_t integer::combinatorial(uint_t n, uint_t r) {
      * compute numerator and denominator simultaneously whenever an
      * exact quotient can be computed to avoid premature overflow
      */
-    DEBUG_ASSERT_GE(n, r, "selection must be smaller than number of items in combinatorial");
+    if (r > n) return 0ul;
     if (r == 0) return 1ul;
     if (n == 1) return 1ul;
     if (r == n) return 1ul;

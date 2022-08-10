@@ -3,6 +3,7 @@
 //
 
 #include "gtest/gtest.h"
+#include <M7_lib/util/Math.h>
 #include "M7_lib/foreach/ConnForeach.h"
 
 namespace conn_foreach_test {
@@ -281,6 +282,34 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
     ASSERT_EQ(iiter, nalpha_pair + nbeta_pair);
 }
 
+
+TEST(ConnForeach, FrmMs2ConserveEx1100AlphaTooSmall) {
+    /*
+     * edge case when the number of electrons in a spin channel is less than the number being annihilated in the
+     * connection
+     */
+    const uint_t nsite = 8;
+    uintv_t alpha_setbits = {};
+    uintv_t beta_setbits = {3, 4, 7};
+    buffered::FrmOnv mbf(nsite);
+    mbf = {alpha_setbits, beta_setbits};
+
+    uint_t iiter = 0ul;
+    conn::FrmOnv conn(mbf);
+    auto fn = [&]() {
+        ++iiter;
+    };
+    conn_foreach::frm::Ms2Conserve<1> foreach;
+    ASSERT_EQ(foreach.m_exsig, exsig::ex_single);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(iiter, beta_setbits.size()*(nsite-beta_setbits.size()));
+    // then, the run time polymorphic loop:
+    iiter = 0;
+    foreach.loop(conn, mbf, fn);
+    ASSERT_EQ(iiter, beta_setbits.size()*(nsite-beta_setbits.size()));
+}
+
 TEST(ConnForeach, FrmMs2ConserveEx2200) {
     const uint_t nsite = 8;
     uintv_t alpha_setbits = {1, 2, 5};
@@ -298,12 +327,11 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
     const auto nbeta_clrbit = nsite - nbeta_setbit;
     const auto npair_beta_clrbit = integer::nspair(nbeta_clrbit);
 
-    uint_t iiter = 0ul;
-
     const uint_t naaaa = npair_alpha_clrbit * npair_alpha_setbit;
     const uint_t nabab = nalpha_setbit * nalpha_clrbit * nbeta_setbit * nbeta_clrbit;
     const uint_t nbbbb = npair_beta_clrbit * npair_beta_setbit;
 
+    uint_t iiter = 0ul;
     conn::FrmOnv conn(mbf);
     auto fn = [&]() {
         if (iiter < naaaa) {
@@ -330,6 +358,99 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
     iiter = 0ul;
     foreach.loop(conn, mbf, fn);
     ASSERT_EQ(iiter, naaaa + nabab + nbbbb);
+}
+
+TEST(ConnForeach, FrmMs2ConserveEx2200AlphaTooSmall) {
+    /*
+     * edge case when the number of electrons in a spin channel is less than the number being annihilated in the
+     * connection
+     */
+    const uint_t nsite = 8;
+    uintv_t alpha_setbits = {3};
+    uintv_t beta_setbits = {0, 3, 6};
+    buffered::FrmOnv mbf(nsite);
+    mbf = {alpha_setbits, beta_setbits};
+
+    const auto nalpha_setbit = alpha_setbits.size();
+    const auto npair_alpha_setbit = integer::nspair(nalpha_setbit);
+    ASSERT_EQ(npair_alpha_setbit, 0ul);
+    const auto nalpha_clrbit = nsite - nalpha_setbit;
+    const auto npair_alpha_clrbit = integer::nspair(nalpha_clrbit);
+
+    const auto nbeta_setbit = beta_setbits.size();
+    const auto npair_beta_setbit = integer::nspair(nbeta_setbit);
+    const auto nbeta_clrbit = nsite - nbeta_setbit;
+    const auto npair_beta_clrbit = integer::nspair(nbeta_clrbit);
+
+    const uint_t naaaa = npair_alpha_clrbit * npair_alpha_setbit;
+    ASSERT_EQ(naaaa, 0ul);
+    const uint_t nabab = nalpha_setbit * nalpha_clrbit * nbeta_setbit * nbeta_clrbit;
+    const uint_t nbbbb = npair_beta_clrbit * npair_beta_setbit;
+
+    conn::FrmOnv conn(mbf);
+
+    uint_t iiter = 0ul;
+    auto fn = [&]() {
+        ++iiter;
+    };
+
+    conn_foreach::frm::Ms2Conserve<2> foreach;
+    ASSERT_EQ(foreach.m_exsig, exsig::ex_double);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(iiter, nabab+nbbbb);
+    // then, the run time polymorphic loop:
+    iiter = 0ul;
+    foreach.loop(conn, mbf, fn);
+    ASSERT_EQ(iiter, nabab+nbbbb);
+}
+
+TEST(ConnForeach, FrmMs2ConserveEx2200BothTooSmall) {
+    /*
+     * edge case when the number of electrons in both spin channels is less than the number being annihilated in the
+     * connection
+     */
+    const uint_t nsite = 8;
+    uintv_t alpha_setbits = {3};
+    uintv_t beta_setbits = {5};
+    buffered::FrmOnv mbf(nsite);
+    mbf = {alpha_setbits, beta_setbits};
+
+    const auto nalpha_setbit = alpha_setbits.size();
+    const auto npair_alpha_setbit = integer::nspair(nalpha_setbit);
+    ASSERT_EQ(npair_alpha_setbit, 0ul);
+    const auto nalpha_clrbit = nsite - nalpha_setbit;
+    const auto npair_alpha_clrbit = integer::nspair(nalpha_clrbit);
+
+    const auto nbeta_setbit = beta_setbits.size();
+    const auto npair_beta_setbit = integer::nspair(nbeta_setbit);
+    ASSERT_EQ(npair_beta_setbit, 0ul);
+    const auto nbeta_clrbit = nsite - nbeta_setbit;
+    const auto npair_beta_clrbit = integer::nspair(nbeta_clrbit);
+
+    const uint_t naaaa = npair_alpha_clrbit * npair_alpha_setbit;
+    ASSERT_EQ(naaaa, 0ul);
+    const uint_t nabab = nalpha_setbit * nalpha_clrbit * nbeta_setbit * nbeta_clrbit;
+    ASSERT_EQ(nabab, math::pow<2>(nsite-1));
+    const uint_t nbbbb = npair_beta_clrbit * npair_beta_setbit;
+    ASSERT_EQ(nbbbb, 0ul);
+
+    conn::FrmOnv conn(mbf);
+
+    uint_t iiter = 0ul;
+    auto fn = [&]() {
+        ++iiter;
+    };
+
+    conn_foreach::frm::Ms2Conserve<2> foreach;
+    ASSERT_EQ(foreach.m_exsig, exsig::ex_double);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(iiter, nabab);
+    // then, the run time polymorphic loop:
+    iiter = 0ul;
+    foreach.loop(conn, mbf, fn);
+    ASSERT_EQ(iiter, nabab);
 }
 
 TEST(ConnForeach, BosEx0001) {
