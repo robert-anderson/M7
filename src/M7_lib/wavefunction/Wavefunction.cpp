@@ -27,7 +27,7 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
                 },
 
             },
-            opts.m_propagator.m_nw_target,
+            opts.m_propagator.m_nw_target/mpi::nrank(),
             {{sector.basis(), need_send_parents(opts)}},
             uint_t(opts.m_propagator.m_nw_target * opts.m_propagator.m_tau_init),
             opts.m_wavefunction.m_buffers,
