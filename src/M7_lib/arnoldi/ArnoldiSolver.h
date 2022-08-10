@@ -14,12 +14,34 @@
 #include <arrsnsym.h>
 #include <arrscomp.h>
 
+
+/**
+ * options to pass to the ARPACK solver
+ */
+struct ArnoldiOptions {
+    /**
+     * number of eigenpairs be computed
+     */
+    uint_t m_nroot = 2ul;
+    /**
+     * number of arnoldi vectors to be generated at each iteration
+     */
+    uint_t m_narnoldi_vector = 0ul;
+    /**
+     * maximum iteration number
+     */
+    uint_t m_niter_max = 0ul;
+    /**
+     * ritz vector tolerance determining convergence criterion
+     */
+    double m_ritz_tol = 0.0;
+};
+
 /**
  * put all type-independent operations in this un-templated base class
  */
 struct ArnoldiProblemBase {
-    const uint_t m_nroot;
-    ArnoldiProblemBase(uint_t nroot): m_nroot(nroot){}
+
     /**
      * @return
      *  true if the obtained Krylov basis is sufficiently complete
@@ -45,7 +67,7 @@ struct ArnoldiProblemBase {
     /**
      * after the Arnoldi iteration procedure has converged, prepare the eigenvalues and the Ritz vectors
      */
-    virtual void find_eigenvectors() = 0;
+    virtual bool find_eigenvectors() = 0;
 
 protected:
     bool solve_base(const std::function<void()> &product_fn, bool dist);
@@ -54,13 +76,11 @@ protected:
 template<typename T>
 struct ArnoldiProblemWithProduct : ArnoldiProblemBase {
 
-    ArnoldiProblemWithProduct(uint_t nroot): ArnoldiProblemBase(nroot){}
+    virtual void setup(uint_t nrow, ArnoldiOptions opts, bool parallel) = 0;
 
-    virtual void setup(uint_t nrow, bool parallel) = 0;
+    virtual bool solve(dist_mv_prod::Base<T> &mv_prod, ArnoldiOptions opts) = 0;
 
-    virtual bool solve(dist_mv_prod::Base<T> &mv_prod) = 0;
-
-    virtual bool solve(sparse::dynamic::Matrix<T> &sparse_mat) = 0;
+    virtual bool solve(sparse::dynamic::Matrix<T> &sparse_mat, ArnoldiOptions opts) = 0;
 
     virtual T real_eigenvalue(uint_t i) = 0;
 
@@ -90,14 +110,9 @@ protected:
  */
 template<typename T>
 struct ArnoldiProblemSym : ArnoldiProblemWithProduct<T> {
-    using ArnoldiProblemBase::m_nroot;
     using ArnoldiProblemBase::solve_base;
 
     std::unique_ptr<ARrcSymStdEig<T>> m_solver;
-
-    ArnoldiProblemSym(uint_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){
-        dtype::unused(sigma);
-    }
 
 private:
     bool basis_found() override { return m_solver->ArnoldiBasisFound(); }
@@ -110,12 +125,16 @@ private:
 
     void find_eigenvalues() override { m_solver->FindEigenvalues(); }
 
-    void find_eigenvectors() override { m_solver->FindEigenvectors(); }
+    bool find_eigenvectors() override {
+        m_solver->FindEigenvectors();
+        return m_solver->EigenvectorsFound();
+    }
 
 private:
 
-    void setup(uint_t nrow, bool dist) override {
-        if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcSymStdEig<T>>(nrow, m_nroot);
+    void setup(uint_t nrow, ArnoldiOptions opts, bool dist) override {
+        if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcSymStdEig<T>>(
+                nrow, opts.m_nroot, "LM", opts.m_narnoldi_vector, opts.m_ritz_tol, opts.m_niter_max);
     }
 
     void product(dist_mv_prod::Base<T> &mv_prod) override {
@@ -135,16 +154,16 @@ private:
     }
 
 public:
-    bool solve(dist_mv_prod::Base<T> &mv_prod) override {
-        setup(mv_prod.m_nrow, true);
+    bool solve(dist_mv_prod::Base<T> &mv_prod, ArnoldiOptions opts) override {
+        setup(mv_prod.m_nrow, opts, true);
         auto prod_fn = [&]() {
             mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector());
         };
         return solve_base(prod_fn, true);
     }
 
-    bool solve(sparse::dynamic::Matrix<T> &sparse_mat) override {
-        setup(sparse_mat.nrow(), false);
+    bool solve(sparse::dynamic::Matrix<T> &sparse_mat, ArnoldiOptions opts) override {
+        setup(sparse_mat.nrow(), opts, false);
         auto prod_fn = [&]() { sparse_mat.multiply(m_solver->GetVector(), m_solver->PutVector(), sparse_mat.nrow()); };
         return solve_base(prod_fn, false);
     }
@@ -165,14 +184,9 @@ public:
  */
 template<typename T>
 struct ArnoldiProblemNonSym : ArnoldiProblemWithProduct<T> {
-    using ArnoldiProblemBase::m_nroot;
     using ArnoldiProblemBase::solve_base;
 
     std::unique_ptr<ARrcNonSymStdEig<T>> m_solver;
-
-    ArnoldiProblemNonSym(uint_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){
-        dtype::unused(sigma);
-    }
 
 private:
     bool basis_found() override { return m_solver->ArnoldiBasisFound(); }
@@ -185,10 +199,14 @@ private:
 
     void find_eigenvalues() override { m_solver->FindEigenvalues(); }
 
-    void find_eigenvectors() override { m_solver->FindEigenvectors(); }
+    bool find_eigenvectors() override {
+        m_solver->FindEigenvectors();
+        return m_solver->EigenvectorsFound();
+    }
 
-    void setup(uint_t nrow, bool dist) override {
-        if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcNonSymStdEig<T>>(nrow, m_nroot);
+    void setup(uint_t nrow, ArnoldiOptions opts, bool dist) override {
+        if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcNonSymStdEig<T>>(
+                    nrow, opts.m_nroot, "LM", opts.m_narnoldi_vector, opts.m_ritz_tol, opts.m_niter_max);
     }
 
     void product(dist_mv_prod::Base<T> &mv_prod) override {
@@ -208,16 +226,16 @@ private:
     }
 
 public:
-    bool solve(dist_mv_prod::Base<T> &mv_prod) override {
-        setup(mv_prod.m_nrow, true);
+    bool solve(dist_mv_prod::Base<T> &mv_prod, ArnoldiOptions opts) override {
+        setup(mv_prod.m_nrow, opts, true);
         auto prod_fn = [&]() {
             mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector());
         };
         return solve_base(prod_fn, true);
     }
 
-    bool solve(sparse::dynamic::Matrix<T> &sparse_mat) override {
-        setup(sparse_mat.nrow(), false);
+    bool solve(sparse::dynamic::Matrix<T> &sparse_mat, ArnoldiOptions opts) override {
+        setup(sparse_mat.nrow(), opts, false);
         auto prod_fn = [&]() { sparse_mat.multiply(m_solver->GetVector(), m_solver->PutVector(), sparse_mat.nrow()); };
         return solve_base(prod_fn, false);
     }

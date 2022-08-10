@@ -10,12 +10,13 @@
 
 TEST(ArnoldiSolver, SymNonDist) {
     const uint_t nrow = 20;
-    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
     auto sym = mat.symmetrized(false);
 
-    ArnoldiProblemSym<double> arnoldi_problem(nroot);
-    arnoldi_problem.solve(sym);
+    ArnoldiProblemSym<double> arnoldi_problem;
+    ArnoldiOptions opts;
+    opts.m_nroot = 3ul;
+    arnoldi_problem.solve(sym, opts);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
@@ -25,21 +26,22 @@ TEST(ArnoldiSolver, SymNonDist) {
     dense::diag(dense, evals);
     // Arnoldi finds the extremal eigenvalue. in this case, the most positive
     auto dense_eval_it = evals.cbegin();
-    std::advance(dense_eval_it, nrow-nroot);
-    for (uint_t iroot=0ul; iroot<nroot; ++iroot){
+    std::advance(dense_eval_it, nrow-opts.m_nroot);
+    for (uint_t iroot=0ul; iroot<opts.m_nroot; ++iroot){
         ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
     }
 }
 
 TEST(ArnoldiSolver, SymDist) {
     const uint_t nrow = 20;
-    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
     auto sym = mat.symmetrized(false);
     dist_mv_prod::Sparse<double> prod(sym);
 
-    ArnoldiProblemSym<double> arnoldi_problem(nroot);
-    arnoldi_problem.solve(prod);
+    ArnoldiProblemSym<double> arnoldi_problem;
+    ArnoldiOptions opts;
+    opts.m_nroot = 3ul;
+    arnoldi_problem.solve(sym, opts);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
@@ -48,8 +50,8 @@ TEST(ArnoldiSolver, SymDist) {
         dense::SquareMatrix<double> dense(sym);
         v_t<double> evals;
         dense::diag(dense, evals);
-        auto dense_eval_it = evals.cbegin() + (nrow - nroot);
-        for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
+        auto dense_eval_it = evals.cbegin() + (nrow - opts.m_nroot);
+        for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
             ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
         }
     }
@@ -57,11 +59,12 @@ TEST(ArnoldiSolver, SymDist) {
 
 TEST(ArnoldiSolver, NonSymNonDist) {
     const uint_t nrow = 20;
-    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
 
-    ArnoldiProblemNonSym<double> arnoldi_problem(nroot);
-    arnoldi_problem.solve(mat);
+    ArnoldiProblemNonSym<double> arnoldi_problem;
+    ArnoldiOptions opts;
+    opts.m_nroot = 3ul;
+    arnoldi_problem.solve(mat, opts);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
@@ -72,20 +75,21 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     ASSERT_TRUE(dense::diag(dense, evals));
     // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
     sort::inplace(evals, false, true);
-    auto dense_eval_it = evals.cbegin() + (nrow - nroot);
-    for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
+    auto dense_eval_it = evals.cbegin() + (nrow - opts.m_nroot);
+    for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
         ASSERT_NEARLY_EQ(arnoldi_problem.complex_eigenvalue(iroot), dense_eval_it[iroot]);
     }
 }
 
 TEST(ArnoldiSolver, NonSymDist) {
     const uint_t nrow = 20;
-    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
     dist_mv_prod::Sparse<double> prod(mat);
 
-    ArnoldiProblemNonSym<double> arnoldi_problem(nroot);
-    arnoldi_problem.solve(prod);
+    ArnoldiProblemNonSym<double> arnoldi_problem;
+    ArnoldiOptions opts;
+    opts.m_nroot = 3ul;
+    arnoldi_problem.solve(prod, opts);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
@@ -96,8 +100,8 @@ TEST(ArnoldiSolver, NonSymDist) {
         dense::diag(dense, evals);
         // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
         sort::inplace(evals, false, true);
-        auto dense_eval_it = evals.cbegin() + (nrow - nroot);
-        for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
+        auto dense_eval_it = evals.cbegin() + (nrow - opts.m_nroot);
+        for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
             ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), arith::real(dense_eval_it[iroot]));
         }
     }

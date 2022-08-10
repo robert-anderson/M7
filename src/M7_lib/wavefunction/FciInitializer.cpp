@@ -6,7 +6,7 @@
 #include "FciInitializer.h"
 #include "M7_lib/foreach/ConnForeachGroup.h"
 
-FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift):
+FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift, ArnoldiOptions opts):
         m_mbf_order_table("MBF order table", {{h.m_basis}}){
     auto iters = FciIters::make(h);
     const auto count = iters.niter_single();
@@ -46,10 +46,10 @@ FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift):
         pm.next();
     }
 
-    const uint_t nroot = 3;
-    ArnoldiProblemNonSym<double> solver(nroot);
+    ArnoldiProblemNonSym<double> solver;
+    //std::cout << solver.m_solver->tol << std::endl;
     dist_mv_prod::Sparse<double> dist(sparse_ham);
-    solver.solve(dist);
+    solver.solve(dist, opts);
     if (mpi::i_am_root()) m_eval = solver.real_eigenvalue(0);
     mpi::bcast(m_eval);
     logging::info("Non-symmetric Arnoldi eigenvalue: {}", m_eval);

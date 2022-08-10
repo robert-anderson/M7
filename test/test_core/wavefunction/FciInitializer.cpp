@@ -10,7 +10,9 @@
 TEST(FciInitializer, N2) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", true});
     Hamiltonian ham(&frm_ham);
-    FciInitializer init(ham);
+    ArnoldiOptions opt;
+    opt.m_ritz_tol = 1e-7;
+    FciInitializer init(ham, 0.0, opt);
     DenseHamiltonian hmat(ham);
     v_t<ham_t> evals;
     dense::diag(hmat, evals);
