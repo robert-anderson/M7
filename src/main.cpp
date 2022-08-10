@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
     }
 
     {
+        mpi::barrier();
         FciqmcCalculation calc(opts);
     }
 

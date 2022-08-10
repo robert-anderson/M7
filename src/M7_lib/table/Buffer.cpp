@@ -103,6 +103,7 @@ void Buffer::resize(uint_t size, double factor) {
         tmp.resize(size, 0);
     }
     catch (const std::bad_alloc& e){
+        logging::error_("bad allocation");
         ABORT(logging::format("could not allocate sufficient memory to resize buffer \"{}\"", m_name));
     }
     auto new_window_size = tmp.size() / m_nwindow_max;
