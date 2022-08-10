@@ -125,6 +125,8 @@ TEST(GeneralFrmHam, RhfBrillouinTheorem) {
 TEST(GeneralFrmHam, NonHermitian) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/TC_Be_6-31G/FCIDUMP", true});
     ASSERT_EQ(frm_ham.m_ints.m_2e->sym(), integrals_2e::syms::D);
+    ASSERT_EQ(frm_ham.m_ints.m_2e->get(5, 2, 1, 6), 0.28747909401816499E-001);
+    ASSERT_EQ(frm_ham.m_ints.m_2e->get(2, 5, 6, 1), 0.28747909401816499E-001);
 }
 
 TEST(GeneralFrmHam, FromMolcasHdf5Archive) {
