@@ -64,8 +64,11 @@ public:
     }
 };
 
-template<typename T>
-using PrivateIntegralStorage = IntegralStorage<T, v_t<T>>;
+/*
+ * private storage is unused, all integral data structures are shared over the node (machine or NUMA region)
+ */
+//template<typename T>
+//using PrivateIntegralStorage = IntegralStorage<T, v_t<T>>;
 template<typename T>
 using SharedIntegralStorage = IntegralStorage<T, SharedArray<T>>;
 

@@ -71,7 +71,7 @@ namespace integrals_1e {
         using Array<T>::set;
         using Array<T>::get;
         indexer_t m_indexer;
-        PrivateIntegralStorage<T> m_data;
+        SharedIntegralStorage<T> m_data;
 
         IndexedArray(uint_t norb) : Array<T>(norb), m_indexer(norb),
             m_data(static_cast<const Indexer&>(m_indexer).m_size) {}
