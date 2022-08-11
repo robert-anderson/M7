@@ -24,11 +24,10 @@ TEST(ArnoldiSolver, SymNonDist) {
     dense::SquareMatrix<double> dense(sym);
     v_t<double> evals;
     dense::diag(dense, evals);
-    // Arnoldi finds the extremal eigenvalue. in this case, the most positive
-    auto dense_eval_it = evals.cbegin();
-    std::advance(dense_eval_it, nrow-opts.m_nroot);
+    // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
+    sort::inplace(evals, false, true);
     for (uint_t iroot=0ul; iroot<opts.m_nroot; ++iroot){
-        ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
+        ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), evals[iroot]);
     }
 }
 
@@ -50,7 +49,9 @@ TEST(ArnoldiSolver, SymDist) {
         dense::SquareMatrix<double> dense(sym);
         v_t<double> evals;
         dense::diag(dense, evals);
-        auto dense_eval_it = evals.cbegin() + (nrow - opts.m_nroot);
+        // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
+        sort::inplace(evals, false, true);
+        auto dense_eval_it = evals.cbegin();
         for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
             ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
         }
@@ -63,7 +64,7 @@ TEST(ArnoldiSolver, NonSymNonDist) {
 
     ArnoldiProblemNonSym<double> arnoldi_problem;
     ArnoldiOptions opts;
-    opts.m_nroot = 3ul;
+    opts.m_nroot = 2ul;
     arnoldi_problem.solve(mat, opts);
 
     /*
@@ -75,9 +76,10 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     ASSERT_TRUE(dense::diag(dense, evals));
     // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
     sort::inplace(evals, false, true);
-    auto dense_eval_it = evals.cbegin() + (nrow - opts.m_nroot);
+    auto dense_eval_it = evals.cbegin();
     for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
-        ASSERT_NEARLY_EQ(arnoldi_problem.complex_eigenvalue(iroot), dense_eval_it[iroot]);
+        const auto eval = arnoldi_problem.complex_eigenvalue(iroot);
+        ASSERT_NEARLY_EQ(eval, dense_eval_it[iroot]);
     }
 }
 
@@ -100,7 +102,7 @@ TEST(ArnoldiSolver, NonSymDist) {
         dense::diag(dense, evals);
         // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
         sort::inplace(evals, false, true);
-        auto dense_eval_it = evals.cbegin() + (nrow - opts.m_nroot);
+        auto dense_eval_it = evals.cbegin();
         for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
             ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), arith::real(dense_eval_it[iroot]));
         }

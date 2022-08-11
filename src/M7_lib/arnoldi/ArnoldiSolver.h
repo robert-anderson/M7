@@ -169,6 +169,7 @@ public:
     }
 
     T real_eigenvalue(uint_t i) override {
+        i = (m_solver->GetNev()-i)-1;
         return m_solver->Eigenvalue(i);
     }
 
@@ -248,6 +249,10 @@ public:
     }
 
     std::complex<T> complex_eigenvalue(uint_t i) override {
+        /*
+         * nonsym state ordering seems to be opposite to that of sym
+         */
+        //i = (m_solver->GetNev()-i)-1;
         return m_solver->Eigenvalue(i);
     }
 };

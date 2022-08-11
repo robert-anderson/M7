@@ -90,20 +90,20 @@ namespace sort {
         if (asc) {
             if (abs_val)
                 std::stable_sort(v.begin(), v.end(), [](cr_t v1, cr_t v2) {
-                    return std::abs(v1) > std::abs(v2);
-                });
-            else
-                std::stable_sort(v.begin(), v.end(), [](cr_t v1, cr_t v2) {
-                    return arith::real(v1) > arith::real(v2);
-                });
-        } else {
-            if (abs_val)
-                std::stable_sort(v.begin(), v.end(), [](cr_t v1, cr_t v2) {
                     return std::abs(v1) < std::abs(v2);
                 });
             else
                 std::stable_sort(v.begin(), v.end(), [](cr_t v1, cr_t v2) {
                     return arith::real(v1) < arith::real(v2);
+                });
+        } else {
+            if (abs_val)
+                std::stable_sort(v.begin(), v.end(), [](cr_t v1, cr_t v2) {
+                    return std::abs(v1) > std::abs(v2);
+                });
+            else
+                std::stable_sort(v.begin(), v.end(), [](cr_t v1, cr_t v2) {
+                    return arith::real(v1) > arith::real(v2);
                 });
         }
     }
