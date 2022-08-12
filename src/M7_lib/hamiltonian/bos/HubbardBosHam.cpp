@@ -5,7 +5,7 @@
 #include "HubbardBosHam.h"
 #include "M7_lib/excitgen/bos/BosHubbardUniform.h"
 
-HubbardBosHam::HubbardBosHam(ham_t u, const std::shared_ptr<lattice::SubLattice> &lattice) :
+HubbardBosHam::HubbardBosHam(ham_t u, const std::shared_ptr<lattice::Lattice> &lattice) :
         BosHam(lattice), m_u(u){
     m_contribs_0011.set_nonzero(exsig::ex_0011);
     m_contribs_0022.set_nonzero(0ul);

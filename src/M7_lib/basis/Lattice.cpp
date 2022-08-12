@@ -5,7 +5,7 @@
 #include "Lattice.h"
 #include "M7_lib/util/SmartPtr.h"
 
-lattice::SubLattice::SubLattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str) :
+lattice::Lattice::Lattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str) :
         m_nsite(nsite), m_info(std::move(info_str)), m_sparse_adj(adj), m_nadj_max(m_sparse_adj.m_max_nentry),
         m_sparse_inv(m_sparse_adj), m_lcm_le_nadj_max(integer::lcm_le(m_nadj_max)){
     REQUIRE_LE(adj.nrow(), m_nsite, "highest site index in adjacency map is OOB");
@@ -15,9 +15,9 @@ lattice::SubLattice::SubLattice(const sparse::dynamic::Matrix<int>& adj, uint_t 
     }
 }
 
-lattice::SubLattice::SubLattice(const lattice::Topology &topo) : SubLattice(topo.make_adj(), topo.m_nsite, topo.m_info){}
+lattice::Lattice::Lattice(const lattice::Topology &topo) : Lattice(topo.make_adj(), topo.m_nsite, topo.m_info){}
 
-std::shared_ptr<lattice::SubLattice> lattice::SubLattice::make_next_nearest() const {
+std::shared_ptr<lattice::Lattice> lattice::Lattice::make_next_nearest() const {
     /*
      * first obtain the maximum number of mutual connections
      */
@@ -61,7 +61,7 @@ std::shared_ptr<lattice::SubLattice> lattice::SubLattice::make_next_nearest() co
             if (nmutual == nmutual_max) sparse.insert(isite, {jsite, phase});
         }
     }
-    return smart_ptr::make_shared<SubLattice>(SubLattice(sparse, m_nsite, m_info + " next nearest neighbors"));
+    return smart_ptr::make_shared<Lattice>(Lattice(sparse, m_nsite, m_info + " next nearest neighbors"));
 }
 
 lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs) :
@@ -145,16 +145,16 @@ lattice::Topology::adj_t lattice::OrthoTopology::make_adj() const {
 }
 
 
-std::shared_ptr<lattice::SubLattice> lattice::make() {
-    return smart_ptr::make_shared<SubLattice>(NullTopology());
+std::shared_ptr<lattice::Lattice> lattice::make() {
+    return smart_ptr::make_shared<Lattice>(NullTopology());
 }
 
-std::shared_ptr<lattice::SubLattice> lattice::make(str_t topo, uintv_t site_shape, v_t<int> bcs) {
+std::shared_ptr<lattice::Lattice> lattice::make(str_t topo, uintv_t site_shape, v_t<int> bcs) {
     if (topo == "ortho" || topo == "orthogonal")
-        return smart_ptr::make_shared<SubLattice>(OrthoTopology(site_shape, bcs));
+        return smart_ptr::make_shared<Lattice>(OrthoTopology(site_shape, bcs));
     return make();
 }
 
-std::shared_ptr<lattice::SubLattice> lattice::make(const conf::LatticeModel &opts) {
+std::shared_ptr<lattice::Lattice> lattice::make(const conf::LatticeModel &opts) {
     return make(opts.m_topology, opts.m_site_shape, opts.m_boundary_conds);
 }

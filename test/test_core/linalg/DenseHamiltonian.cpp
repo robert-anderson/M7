@@ -279,11 +279,29 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3) {
     GeneralLadderHam frmbos_ham({frm_ham.m_basis, bos_ham.m_basis},
                                 {PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL", true});
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
-    DenseHamiltonian ham(ham_src);
+    auto particles = ham_src.default_particles(4);
+    DenseHamiltonian ham(ham_src, particles);
     v_t<double> evals;
     dense::diag(ham, evals);
     ASSERT_NEARLY_EQ(evals[0], -0.9998830020871416);
 }
+TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3BosNumOp) {
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
+    const uint_t occ_cutoff = 3;
+    /*
+     * using number operator instead of BOSDUMP file
+     */
+    NumOpBosHam bos_ham({3, occ_cutoff}, 0.3);
+    GeneralLadderHam frmbos_ham({frm_ham.m_basis, bos_ham.m_basis},
+                                {PROJECT_ROOT"/assets/Hubbard_U4_3site/EBDUMP_GENERAL", true});
+    Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
+    auto particles = ham_src.default_particles(4);
+    DenseHamiltonian ham(ham_src, particles);
+    v_t<double> evals;
+    dense::diag(ham, evals);
+    ASSERT_NEARLY_EQ(evals[0], -0.9998830020871416);
+}
+
 
 TEST(DenseHamiltonian, BoseHubbard2site) {
     const double u = 1.7;

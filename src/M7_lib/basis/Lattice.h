@@ -31,7 +31,7 @@ namespace lattice {
         virtual ~Topology() = default;
     };
 
-    struct SubLattice {
+    struct Lattice {
         /**
          * number of sites in the basis
          */
@@ -74,7 +74,7 @@ namespace lattice {
         }
 
     protected:
-        SubLattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str);
+        Lattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str);
 
     public:
         /**
@@ -82,19 +82,10 @@ namespace lattice {
          * of mutually adjacent sites with i
          * @return
          */
-        std::shared_ptr<SubLattice> make_next_nearest() const;
+        std::shared_ptr<Lattice> make_next_nearest() const;
 
-        explicit SubLattice(const Topology& topo);
+        explicit Lattice(const Topology& topo);
     };
-
-//    struct Lattice : SubLattice {
-//        /**
-//         * lattice of next-nearest neighbors
-//         */
-//        const std::shared_ptr<SubLattice> m_next_nearest;
-//
-//        explicit Lattice(const Topology& topo): SubLattice(topo), m_next_nearest(make_next_nearest()){}
-//    };
 
     struct OrthoTopology : Topology {
         const NdEnumerationD m_inds;
@@ -126,9 +117,9 @@ namespace lattice {
      * @return
      *  shared pointer to a null lattice
      */
-    std::shared_ptr<SubLattice> make();
-    std::shared_ptr<SubLattice> make(str_t topo, uintv_t site_shape, v_t<int> bcs);
-    std::shared_ptr<SubLattice> make(const conf::LatticeModel& opts);
+    std::shared_ptr<Lattice> make();
+    std::shared_ptr<Lattice> make(str_t topo, uintv_t site_shape, v_t<int> bcs);
+    std::shared_ptr<Lattice> make(const conf::LatticeModel& opts);
 }
 
 #endif //M7_LATTICE_H

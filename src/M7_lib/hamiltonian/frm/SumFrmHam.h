@@ -25,10 +25,6 @@ struct SumFrmHam : FrmHam {
      */
     ham_t m_weight;
 
-private:
-
-public:
-
     SumFrmHam(ham_t1&& h1, ham_t2&& h2, ham_t weight):
             FrmHam(static_cast<const FrmHam&>(h1).m_basis), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){
         /*

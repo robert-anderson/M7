@@ -63,15 +63,10 @@ ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
 ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
     DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_0011, "passed connection has incorrect exsig");
     // get mode indices
-    auto a = conn.m_cre[0].m_imode;
-    auto i = conn.m_ann[0].m_imode;
-    // get occupation at each index
-    auto na = onv[a];
-    auto ni = onv[i];
-
-    // I think we cannot have i==a otherwise we are in a diagonal
+    const auto a = conn.m_cre[0].m_imode;
+    const auto i = conn.m_ann[0].m_imode;
     DEBUG_ASSERT_NE(i, a, "a <- i case implies a diagonal element, not a single excitation");
-    return std::sqrt((na+1)*ni);
+    return onv.occ_fac(conn)*m_coeffs_1.get(a, i);
 }
 
 ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {

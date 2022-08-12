@@ -147,14 +147,14 @@ uint_t sys::frm::Size::ncoeff_ind(bool spin_resolved, uint_t nsite) {
     return spin_resolved ? 2*nsite : nsite;
 }
 
-sys::frm::Basis::Basis(uint_t nsite, AbelianGroupMap abgrp_map, std::shared_ptr<lattice::SubLattice> lattice) :
+sys::frm::Basis::Basis(uint_t nsite, AbelianGroupMap abgrp_map, std::shared_ptr<lattice::Lattice> lattice) :
         Size(nsite), m_abgrp_map(std::move(abgrp_map)), m_lattice(lattice){
     if (*m_lattice) {
         REQUIRE_EQ(m_nsite, m_lattice->m_nsite, "incompatible lattice and site number");
     }
 }
 
-sys::frm::Basis::Basis(const std::shared_ptr<lattice::SubLattice>& lattice) :
+sys::frm::Basis::Basis(const std::shared_ptr<lattice::Lattice>& lattice) :
     Basis(lattice->m_nsite, {lattice->m_nsite}, lattice){
     REQUIRE_TRUE(*m_lattice, "cannot build a basis from a null lattice");
 }
@@ -243,10 +243,10 @@ bool sys::bos::Basis::operator==(const sys::bos::Basis &other) const {
     return (m_occ_cutoff == other.m_occ_cutoff) && (m_nmode == other.m_nmode);
 }
 
-sys::bos::Basis::Basis(uint_t nmode, const std::shared_ptr<lattice::SubLattice>& lattice, uint_t occ_cutoff) :
+sys::bos::Basis::Basis(uint_t nmode, const std::shared_ptr<lattice::Lattice>& lattice, uint_t occ_cutoff) :
         Size(nmode), m_lattice(lattice), m_occ_cutoff(occ_cutoff){}
 
-sys::bos::Basis::Basis(const std::shared_ptr<lattice::SubLattice>& lattice, uint_t occ_cutoff) :
+sys::bos::Basis::Basis(const std::shared_ptr<lattice::Lattice>& lattice, uint_t occ_cutoff) :
         Basis(lattice->m_nsite, lattice, occ_cutoff){}
 
 sys::bos::Basis::Basis(uint_t nmode, uint_t occ_cutoff) : Basis(nmode, lattice::make(), occ_cutoff){}

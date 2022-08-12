@@ -199,8 +199,8 @@ namespace conn_foreach {
 
 
         struct Heisenberg : Base {
-            const std::shared_ptr<lattice::SubLattice> m_lattice;
-            Heisenberg(std::shared_ptr<lattice::SubLattice> lattice) : Base(exsig::ex_double), m_lattice(lattice) {}
+            const std::shared_ptr<lattice::Lattice> m_lattice;
+            Heisenberg(std::shared_ptr<lattice::Lattice> lattice) : Base(exsig::ex_double), m_lattice(lattice) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn) {

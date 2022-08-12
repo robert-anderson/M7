@@ -13,7 +13,7 @@ namespace lattice_test {
     row_t make_row(row_t::const_iterator cbegin, row_t::const_iterator cend) {
         return {cbegin, cend};
     }
-    bool verify_rows(const lattice::SubLattice& lattice, const rows_t& rows){
+    bool verify_rows(const lattice::Lattice& lattice, const rows_t& rows){
         const auto& adj = lattice.m_sparse_adj;
         if (lattice.m_nsite != rows.size()) return false;
         for (uint_t isite=0ul; isite < lattice.m_nsite; ++isite){

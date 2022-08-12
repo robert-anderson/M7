@@ -5,15 +5,15 @@
 #include "HeisenbergFrmHam.h"
 
 
-HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::SubLattice>& basis_lattice,
-                                   const std::shared_ptr<lattice::SubLattice>& h_lattice) :
+HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::Lattice>& basis_lattice,
+                                   const std::shared_ptr<lattice::Lattice>& h_lattice) :
         SpinModelFrmHam(basis_lattice, h_lattice), m_j(j){
     m_contribs_2200.set_nonzero(exsig::ex_double);
     m_contribs_2200.set_nonzero(0);
     logging::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_lattice->m_info);
 }
 
-HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::SubLattice>& lattice) :
+HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::Lattice>& lattice) :
         HeisenbergFrmHam(j, lattice, lattice){}
 
 
@@ -41,7 +41,7 @@ ham_t HeisenbergFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) c
     else {
         return 0.0;
     }
-    const auto phase = m_basis.m_lattice->m_sparse_inv.get(asite, bsite);
+    const auto phase = m_lattice->m_sparse_inv.get(asite, bsite);
     // fermi phase not included here, minus sign is due to product of opposite spins
     return -m_j * phase / 2.0;
 }
@@ -49,7 +49,7 @@ ham_t HeisenbergFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) c
 ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv& onv) const {
     /*
      * loop over all sites i and accumulate sum of neighboring spins multiplied by the lattice phase factors (in
-     * case of periodic BCs - all handled by SubLattice class)
+     * case of periodic BCs - all handled by Lattice class)
      * for each such sum, accumulate its product with the spin of site i into the total energy of the determinant
      * finally, return the accumulation scaled by J
      */
@@ -57,7 +57,7 @@ ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv& onv) const {
     for (uint_t isite=0ul; isite<m_basis.m_nsite; ++isite){
         DEBUG_ASSERT_EQ(onv.site_nocc(isite), 1ul,
                         "spin system is assumed, must not have unoccupied or doubly occupied sites");
-        const auto& adj = m_basis.m_lattice->m_sparse_adj;
+        const auto& adj = m_lattice->m_sparse_adj;
         int sj_tot = 0;
         for (auto it=adj.cbegin(isite); it!=adj.cend(isite); ++it){
             auto jsite = it->m_i;
@@ -85,6 +85,6 @@ HamOpTerm::excit_gen_list_t HeisenbergFrmHam::make_excit_gens(PRNG& prng, const 
 
 conn_foreach::base_list_t HeisenbergFrmHam::make_foreach_iters() const {
     conn_foreach_list_t list;
-    list.emplace_front(new conn_foreach::frm::Heisenberg(m_basis.m_lattice));
+    list.emplace_front(new conn_foreach::frm::Heisenberg(m_lattice));
     return list;
 }

@@ -173,7 +173,7 @@ namespace sys {
             /**
              * set to non-null if the basis has lattice structure
              */
-            const std::shared_ptr<lattice::SubLattice> m_lattice;
+            const std::shared_ptr<lattice::Lattice> m_lattice;
 
         private:
             using Size::operator uint_t;
@@ -184,9 +184,9 @@ namespace sys {
                 return m_nsite;
             }
 
-            Basis(uint_t nsite, AbelianGroupMap abgrp_map, std::shared_ptr<lattice::SubLattice> lattice);
+            Basis(uint_t nsite, AbelianGroupMap abgrp_map, std::shared_ptr<lattice::Lattice> lattice);
 
-            Basis(const std::shared_ptr<lattice::SubLattice>& lattice);
+            Basis(const std::shared_ptr<lattice::Lattice>& lattice);
 
             Basis(uint_t nsite, AbelianGroupMap abgrp_map);
             /*
@@ -300,7 +300,7 @@ namespace sys {
             /**
              * set to non-null if the basis has lattice structure
              */
-            const std::shared_ptr<lattice::SubLattice> m_lattice;
+            const std::shared_ptr<lattice::Lattice> m_lattice;
             /**
              * occupation cutoff for each mode
              */
@@ -311,8 +311,8 @@ namespace sys {
             explicit operator bool() const {
                 return m_nmode;
             }
-            Basis(uint_t nmode, const std::shared_ptr<lattice::SubLattice>& lattice, uint_t occ_cutoff);
-            Basis(const std::shared_ptr<lattice::SubLattice>& lattice, uint_t occ_cutoff=c_max_occ);
+            Basis(uint_t nmode, const std::shared_ptr<lattice::Lattice>& lattice, uint_t occ_cutoff);
+            Basis(const std::shared_ptr<lattice::Lattice>& lattice, uint_t occ_cutoff=c_max_occ);
             Basis(uint_t nmode, uint_t occ_cutoff=c_max_occ);
 
             bool operator==(const Basis& other) const;

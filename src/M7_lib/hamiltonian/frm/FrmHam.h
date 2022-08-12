@@ -202,11 +202,11 @@ struct SpinModelFrmHam : FrmHam {
      * the lattice on which this Hamiltonian's connections are defined, need not be the same as the basis lattice, e.g.
      * could be the nearest neighbor lattice based on the basis lattice
      */
-    std::shared_ptr<lattice::SubLattice> m_lattice;
-    SpinModelFrmHam(const std::shared_ptr<lattice::SubLattice>& basis_lattice,
-                    const std::shared_ptr<lattice::SubLattice>& h_lattice):
+    std::shared_ptr<lattice::Lattice> m_lattice;
+    SpinModelFrmHam(const std::shared_ptr<lattice::Lattice>& basis_lattice,
+                    const std::shared_ptr<lattice::Lattice>& h_lattice):
                     FrmHam(basis_lattice), m_lattice(h_lattice){}
-    SpinModelFrmHam(const std::shared_ptr<lattice::SubLattice>& lattice): SpinModelFrmHam(lattice, lattice){}
+    SpinModelFrmHam(const std::shared_ptr<lattice::Lattice>& lattice): SpinModelFrmHam(lattice, lattice){}
 };
 
 #endif //M7_FRMHAM_H

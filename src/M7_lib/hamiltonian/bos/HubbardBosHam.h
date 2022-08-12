@@ -14,7 +14,7 @@ class HubbardBosHam : public BosHam {
     const ham_t m_u;
 
 public:
-    HubbardBosHam(ham_t u, const std::shared_ptr<lattice::SubLattice>& lattice);
+    HubbardBosHam(ham_t u, const std::shared_ptr<lattice::Lattice>& lattice);
 
     HubbardBosHam(opt_pair_t opts);
 
