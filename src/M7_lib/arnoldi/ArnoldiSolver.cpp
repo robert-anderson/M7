@@ -22,18 +22,12 @@ bool ArnoldiProblemBase::solve_base(const std::function<void()> &product_fn, boo
         if (dist) mpi::bcast(stop);
     }
     // Finding eigenvalues and eigenvectors.
+    bool success = false;
     if (i_am_solver_rank) {
-        const auto success = find_eigenvectors();
-        if (success) {
-            logging::info("Arnoldi converged after {} {}distributed matrix-vector multiplication{}",
-                          nmv_call, dist ? "" : "non-",
-                          string::plural(nmv_call));
-        }
-        else {
-            logging::warn("Arnoldi failed to converge after {} {}distributed matrix-vector multiplication{}",
-                          nmv_call, dist ? "" : "non-",
-                          string::plural(nmv_call));
-        }
+        success = find_eigenvectors();
+        logging::info("ARPACK called {}distributed matrix-vector multiplication {} time{}",
+                      (dist ? "" : "non-"), nmv_call, string::plural(nmv_call));
     }
-    return true;
+    if (dist) mpi::bcast(success);
+    return success;
 }

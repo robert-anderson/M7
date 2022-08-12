@@ -71,15 +71,54 @@ struct ArnoldiProblemBase {
 
 protected:
     bool solve_base(const std::function<void()> &product_fn, bool dist);
+
+    template<class arfloat_t, class ar_t>
+    void begin_log(ARrcStdEig<arfloat_t, ar_t>* solver, bool sym) {
+        REQUIRE_TRUE(solver, "solver object must be allocated");
+        logging::info("Finding extremal eigenpairs with {}symmetric Arnoldi method...", sym ? "" : "non-");
+        logging::info("Total eigenproblem dimension: {}", solver->GetN());
+        logging::info("Number of eigenpairs to converge: {}", solver->GetNev());
+        logging::info("Ritz vector convergence threshold: {}", solver->GetTol());
+        logging::info("Maximum number of Arnoldi iterations: {}", solver->GetMaxit());
+        logging::info("Number of Arnoldi vectors generated at each iteration: {}", solver->GetNcv());
+    }
+
+    template<class arfloat_t, class ar_t>
+    void end_log(ARrcStdEig<arfloat_t, ar_t>* solver, bool success) {
+        REQUIRE_TRUE(solver, "solver object must be allocated");
+        const uint_t niter = solver->GetIter();
+        logging::info("Arnoldi {} after {} iteration{}",
+                      success ? "converged" : "failed to converge",
+                      niter, string::plural(niter));
+    }
 };
 
 template<typename T>
 struct ArnoldiProblemWithProduct : ArnoldiProblemBase {
 
+
     virtual void setup(uint_t nrow, ArnoldiOptions opts, bool parallel) = 0;
 
+    /**
+     * distributed MV product version of the Arnoldi solver
+     * @param mv_prod
+     *  object providing access to the MV product distributed over all processes
+     * @param opts
+     *  configuring options of the ARPACK interface
+     * @return
+     *  true if all eigenpairs converged
+     */
     virtual bool solve(dist_mv_prod::Base<T> &mv_prod, ArnoldiOptions opts) = 0;
 
+    /**
+     * non-distributed MV product version of the Arnoldi solver
+     * @param sparse_mat
+     *  sparse matrix object held only on this MPI rank
+     * @param opts
+     *  configuring options of the ARPACK interface
+     * @return
+     *  true if all eigenpairs converged
+     */
     virtual bool solve(sparse::dynamic::Matrix<T> &sparse_mat, ArnoldiOptions opts) = 0;
 
     virtual T real_eigenvalue(uint_t i) = 0;
@@ -133,8 +172,11 @@ private:
 private:
 
     void setup(uint_t nrow, ArnoldiOptions opts, bool dist) override {
-        if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcSymStdEig<T>>(
-                nrow, opts.m_nroot, "LM", opts.m_narnoldi_vector, opts.m_ritz_tol, opts.m_niter_max);
+        if (mpi::i_am_root() || !dist) {
+            m_solver = smart_ptr::make_unique<ARrcSymStdEig<T>>(
+                    nrow, opts.m_nroot, "LM", opts.m_narnoldi_vector, opts.m_ritz_tol, opts.m_niter_max);
+            ArnoldiProblemBase::begin_log(m_solver.get(), true);
+        }
     }
 
     void product(dist_mv_prod::Base<T> &mv_prod) override {
@@ -159,7 +201,9 @@ public:
         auto prod_fn = [&]() {
             mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector());
         };
-        return solve_base(prod_fn, true);
+        const auto success = solve_base(prod_fn, true);
+        if (mpi::i_am_root()) ArnoldiProblemBase::end_log(m_solver.get(), success);
+        return success;
     }
 
     bool solve(sparse::dynamic::Matrix<T> &sparse_mat, ArnoldiOptions opts) override {
@@ -206,8 +250,11 @@ private:
     }
 
     void setup(uint_t nrow, ArnoldiOptions opts, bool dist) override {
-        if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcNonSymStdEig<T>>(
+        if (mpi::i_am_root() || !dist) {
+            m_solver = smart_ptr::make_unique<ARrcNonSymStdEig<T>>(
                     nrow, opts.m_nroot, "LM", opts.m_narnoldi_vector, opts.m_ritz_tol, opts.m_niter_max);
+            ArnoldiProblemBase::begin_log(m_solver.get(), false);
+        }
     }
 
     void product(dist_mv_prod::Base<T> &mv_prod) override {
@@ -232,7 +279,9 @@ public:
         auto prod_fn = [&]() {
             mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector());
         };
-        return solve_base(prod_fn, true);
+        const auto success = solve_base(prod_fn, true);
+        if (mpi::i_am_root()) ArnoldiProblemBase::end_log(m_solver.get(), success);
+        return success;
     }
 
     bool solve(sparse::dynamic::Matrix<T> &sparse_mat, ArnoldiOptions opts) override {
