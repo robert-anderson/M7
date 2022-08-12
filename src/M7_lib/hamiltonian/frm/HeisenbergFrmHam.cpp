@@ -5,12 +5,16 @@
 #include "HeisenbergFrmHam.h"
 
 
-HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::SubLattice>& lattice) :
-        SpinModelFrmHam(lattice), m_j(j){
+HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::SubLattice>& basis_lattice,
+                                   const std::shared_ptr<lattice::SubLattice>& h_lattice) :
+        SpinModelFrmHam(basis_lattice, h_lattice), m_j(j){
     m_contribs_2200.set_nonzero(exsig::ex_double);
     m_contribs_2200.set_nonzero(0);
-    logging::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_basis.m_lattice->m_info);
+    logging::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_lattice->m_info);
 }
+
+HeisenbergFrmHam::HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::SubLattice>& lattice) :
+        HeisenbergFrmHam(j, lattice, lattice){}
 
 
 HeisenbergFrmHam::HeisenbergFrmHam(FrmHam::opt_pair_t opts) :

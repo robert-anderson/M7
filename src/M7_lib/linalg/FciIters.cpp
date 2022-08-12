@@ -35,7 +35,7 @@ FciIters FciIters::make(const Hamiltonian& h, sys::Particles particles, bool for
             // closed system in the boson sector
         } else {
             // open system in the boson sector
-            if (h.m_frm.is<SpinModelFrmHam>())
+            if (h.m_frm.is<SpinModelFrmHam>() || h.m_frm.is<J1J2FrmHam>())
                 return {frm_bos::OpenProduct<frm::Spins>(sector)};
             else if (sector.m_frm.m_elecs.m_ms2.conserve())
                 return {frm_bos::OpenProduct<frm::Ms2Conserve>(sector)};

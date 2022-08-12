@@ -34,6 +34,9 @@ struct HeisenbergFrmHam : SpinModelFrmHam {
      */
     const ham_t m_j;
 
+    HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::SubLattice>& basis_lattice,
+                     const std::shared_ptr<lattice::SubLattice>& h_lattice);
+
     HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::SubLattice>& lattice);
 
     explicit HeisenbergFrmHam(FrmHam::opt_pair_t opts);

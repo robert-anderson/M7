@@ -145,16 +145,16 @@ lattice::Topology::adj_t lattice::OrthoTopology::make_adj() const {
 }
 
 
-std::shared_ptr<lattice::Lattice> lattice::make() {
-    return smart_ptr::make_shared<Lattice>(NullTopology());
+std::shared_ptr<lattice::SubLattice> lattice::make() {
+    return smart_ptr::make_shared<SubLattice>(NullTopology());
 }
 
-std::shared_ptr<lattice::Lattice> lattice::make(str_t topo, uintv_t site_shape, v_t<int> bcs) {
+std::shared_ptr<lattice::SubLattice> lattice::make(str_t topo, uintv_t site_shape, v_t<int> bcs) {
     if (topo == "ortho" || topo == "orthogonal")
-        return smart_ptr::make_shared<Lattice>(OrthoTopology(site_shape, bcs));
+        return smart_ptr::make_shared<SubLattice>(OrthoTopology(site_shape, bcs));
     return make();
 }
 
-std::shared_ptr<lattice::Lattice> lattice::make(const conf::LatticeModel &opts) {
+std::shared_ptr<lattice::SubLattice> lattice::make(const conf::LatticeModel &opts) {
     return make(opts.m_topology, opts.m_site_shape, opts.m_boundary_conds);
 }

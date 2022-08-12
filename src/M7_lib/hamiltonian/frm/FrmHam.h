@@ -198,7 +198,15 @@ struct NullFrmHam : FrmHam, NullOpTerm {
  * fermion sites may not be doubly occupied or unoccupied in spin systems
  */
 struct SpinModelFrmHam : FrmHam {
-    SpinModelFrmHam(const std::shared_ptr<lattice::SubLattice>& lattice): FrmHam(lattice){}
+    /**
+     * the lattice on which this Hamiltonian's connections are defined, need not be the same as the basis lattice, e.g.
+     * could be the nearest neighbor lattice based on the basis lattice
+     */
+    std::shared_ptr<lattice::SubLattice> m_lattice;
+    SpinModelFrmHam(const std::shared_ptr<lattice::SubLattice>& basis_lattice,
+                    const std::shared_ptr<lattice::SubLattice>& h_lattice):
+                    FrmHam(basis_lattice), m_lattice(h_lattice){}
+    SpinModelFrmHam(const std::shared_ptr<lattice::SubLattice>& lattice): SpinModelFrmHam(lattice, lattice){}
 };
 
 #endif //M7_FRMHAM_H
