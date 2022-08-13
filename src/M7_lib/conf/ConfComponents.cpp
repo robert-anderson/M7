@@ -174,6 +174,49 @@ void conf_components::Section::log() const {
     if (m_enabled) Node::log();
 }
 
+conf_components::Selection::Selection(
+        conf_components::Group* parent, const str_t& name, str_t desc,
+        conf_components::Selection::Kind kind, uint_t n,
+        conf_components::EnablePolicy enable_policy) : Group(parent, name, desc, enable_policy), m_kind(kind), m_n(n) {}
+
+void conf_components::Selection::validate_node_contents() {
+    uint_t nenabled = 0ul;
+    for (const auto child: m_children) {
+        auto cast = dynamic_cast<const Section*>(child);
+        REQUIRE_TRUE(cast, logging::format("selections may only contain sections. Node \"{}\" is not a section",
+                                           child->m_path.m_string));
+        REQUIRE_EQ(cast->m_enable_policy, EnablePolicy::Required,
+                   "sections within a selection must not be required to be enabled");
+        nenabled += cast->m_enabled;
+    }
+    switch (m_kind) {
+        case(AtLeast): REQUIRE_GE(nenabled, m_n, logging::format(
+                    "must enable at least {} section{} within \"{}\"", m_n, string::plural(m_n)));
+        case(NoMoreThan): REQUIRE_GE(nenabled, m_n, logging::format(
+                    "must not enable more than {} section{} within \"{}\"", m_n, string::plural(m_n)));
+        case(Exactly): REQUIRE_GE(nenabled, m_n, logging::format(
+                    "must enable {} section{} within \"{}\"", m_n, string::plural(m_n)));
+    }
+}
+
+str_t conf_components::Selection::kind_string(conf_components::Selection::Kind kind) {
+    switch (kind) {
+        case AtLeast: return "at least";
+        case NoMoreThan: return "no more than";
+        case Exactly: return "exactly";
+    }
+    return {};
+}
+
+v_t<std::pair<str_t, str_t>> conf_components::Selection::help_pairs() const {
+    return {
+            {"Selection",   m_path.m_string},
+            {"Enabled",     enable_policy_string(m_enable_policy)},
+            {"Sections",    logging::format("{} {} of {}", kind_string(m_kind), m_n, m_children.size())},
+            {"Description", m_desc}
+    };
+}
+
 bool conf_components::Document::contains_tabs(const str_t& contents) {
     std::regex r("(\\t)");
     auto begin = std::sregex_iterator(contents.cbegin(), contents.cend(), r);

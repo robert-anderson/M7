@@ -206,6 +206,30 @@ conf::AvEsts::AvEsts(Group *parent) :
         m_spec_mom(this, "spec_mom", "options relating to the accumulation and sampling of spectral moments"),
         m_ref_excits(this) {}
 
+
+conf::GuideWavefunction::ExpFac::ExpFac(conf::GuideWavefunction* parent, str_t name, str_t description) :
+        Section(parent, name, description),
+        m_fac(this, "fac", 0.0, "exponential scaling factor"){}
+
+void conf::GuideWavefunction::ExpFac::validate_node_contents() {
+    if (m_fac.m_value < 0.0) logging::warn("importance sampling exponent factor is negative");
+}
+
+conf::GuideWavefunction::GutzwillerLike::GutzwillerLike(conf::GuideWavefunction* parent) :
+        ExpFac(parent, "gutzwiller_like",
+               "amplitudes are given by the exponential of the basis function energy"){}
+
+conf::GuideWavefunction::SuppressMultiOcc::SuppressMultiOcc(conf::GuideWavefunction* parent) :
+        ExpFac(parent, "supress_multi_occ",
+               "amplitudes are given by the exponential of the number of double occupancies (for fermions) or the "
+               "sum of the pair number operator values (for bosons)"){}
+
+conf::GuideWavefunction::GuideWavefunction(Group* parent, const str_t& name) :
+    Selection(parent, name, "options relating to a wavefunction used in guiding propagation",
+        Exactly, 1ul, conf_components::Explicit),
+        m_gutzwiller_like(this), m_suppress_multi_occ(this){}
+
+
 conf::Propagator::Propagator(Group *parent) :
         Section(parent, "propagator",
                         "options relating to the propagation of the wavefunction from one MC cycle to the next"),
@@ -233,9 +257,7 @@ conf::Propagator::Propagator(Group *parent) :
                                 "number of spawns logged for excitation type magnitudes to be used in tau and probability update"),
         m_period(this, "period", 10ul,
                  "number of MC cycles between updates of tau and probabilities if requested"),
-        m_imp_samp_exp(this, "imp_samp_exp", 0.0,
-               "exponential factor in the Gutzwiller-like guiding wavefunction"),
-        m_semistochastic(this) {}
+        m_imp_samp_guide(this, "imp_samp_guide"), m_semistochastic(this) {}
 
 void conf::Propagator::validate_node_contents() {
     if (m_min_death_mag.m_value==0.0) {
@@ -248,7 +270,6 @@ void conf::Propagator::validate_node_contents() {
         logging::warn("{} was zero, defaulting to the specified value of {}",
                   m_max_bloom.m_path.m_string, m_nadd.m_path.m_string);
     }
-    if (m_imp_samp_exp.m_value < 0.0) logging::warn("importance sampling exponent is negative");
 }
 
 conf::Document::Document(const str_t& fname) :

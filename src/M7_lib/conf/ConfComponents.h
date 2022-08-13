@@ -186,6 +186,28 @@ namespace conf_components {
         void log() const override;
     };
 
+
+    /**
+     * Group that only has Section children, and if enabled, only allows a certain number of those children to be
+     * enabled
+     */
+    struct Selection : Group {
+        enum Kind {AtLeast, NoMoreThan, Exactly};
+        const Kind m_kind;
+        const uint_t m_n;
+
+        Selection(Group* parent, const str_t& name, str_t desc, Kind kind=Exactly,
+                  uint_t n=1ul, EnablePolicy enable_policy=Required);
+
+
+    protected:
+        void validate_node_contents() override;
+
+        static str_t kind_string(Kind kind);
+
+        v_t<std::pair<str_t, str_t>> help_pairs() const override;
+    };
+
     struct Document : Group {
     private:
         static bool contains_tabs(const str_t& contents);

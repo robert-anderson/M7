@@ -2,6 +2,8 @@ target_sources(M7_lib
     PRIVATE
         ExactLinear.cpp
         ExactLinear.h
+        Guide.cpp
+        Guide.h
         StochLinear.cpp
         StochLinear.h
         Propagator.cpp

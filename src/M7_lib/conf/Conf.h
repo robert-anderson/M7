@@ -266,6 +266,28 @@ namespace conf {
 //        m_frm_doubles(){}
 //    };
 
+    struct GuideWavefunction : Selection {
+        struct ExpFac : Section {
+            Param<double> m_fac;
+            ExpFac(GuideWavefunction* parent, str_t name, str_t description);
+
+        protected:
+            void validate_node_contents() override;
+        };
+
+        struct GutzwillerLike : ExpFac {
+            GutzwillerLike(GuideWavefunction* parent);
+        };
+        struct SuppressMultiOcc : ExpFac {
+            SuppressMultiOcc(GuideWavefunction* parent);
+        };
+
+        GutzwillerLike m_gutzwiller_like;
+        SuppressMultiOcc m_suppress_multi_occ;
+        GuideWavefunction(Group *parent, const str_t& name);
+    };
+
+
     struct Propagator : Section {
         Param<uint_t> m_ncycle;
         Param<bool> m_stochastic;
@@ -284,7 +306,7 @@ namespace conf {
         Param<v_t<double>> m_exlvl_probs_init;
         Param<uint_t> m_ndraw_min_for_dynamic;
         Param<uint_t> m_period;
-        Param<double> m_imp_samp_exp;
+        GuideWavefunction m_imp_samp_guide;
         Semistochastic m_semistochastic;
 
         explicit Propagator(Group *parent);
