@@ -24,6 +24,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift, ArnoldiOp
     sparse::dynamic::Matrix<double> sparse_ham;
     sparse_ham.resize(count_local);
 
+    logging::info("Building sparse H matrix ({} rows)", iters.niter_single());
     ProgressMonitor pm(true, "building sparse H", "basis functions", count_local);
     auto& row = m_mbf_order_table.m_row;
     for (row.jump(displ_local); row.in_range(displ_local+count_local); row.step()) {

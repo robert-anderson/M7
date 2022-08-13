@@ -190,12 +190,18 @@ void conf_components::Selection::validate_node_contents() {
         nenabled += cast->m_enabled;
     }
     switch (m_kind) {
-        case(AtLeast): REQUIRE_GE(nenabled, m_n, logging::format(
-                    "must enable at least {} section{} within \"{}\"", m_n, string::plural(m_n)));
-        case(NoMoreThan): REQUIRE_GE(nenabled, m_n, logging::format(
-                    "must not enable more than {} section{} within \"{}\"", m_n, string::plural(m_n)));
-        case(Exactly): REQUIRE_GE(nenabled, m_n, logging::format(
-                    "must enable {} section{} within \"{}\"", m_n, string::plural(m_n)));
+        case(AtLeast):
+            REQUIRE_GE(nenabled, m_n, logging::format(
+                    "must enable at least {} section{} within \"{}\"", m_n, string::plural(m_n), m_path.m_string));
+            break;
+        case(NoMoreThan):
+            REQUIRE_GE(nenabled, m_n, logging::format(
+                    "must not enable more than {} section{} within \"{}\"", m_n, string::plural(m_n), m_path.m_string));
+            break;
+        case(Exactly):
+            REQUIRE_GE(nenabled, m_n, logging::format(
+                    "must enable {} section{} within \"{}\"", m_n, string::plural(m_n), m_path.m_string));
+            break;
     }
 }
 
