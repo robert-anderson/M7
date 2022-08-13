@@ -141,6 +141,7 @@ namespace conf {
     struct Shift : Section {
         Param<double> m_init;
         Param<double> m_damp;
+        Param<double> m_critical_damp;
         Param<uint_t> m_period;
         Param<uint_t> m_ncycle_av;
         Param<bool> m_jump;
