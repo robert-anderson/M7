@@ -41,8 +41,8 @@ void Propagator::save_fn(const hdf5::NodeWriter& parent) {
 
 void Propagator::imp_samp_delta(wf_t& delta, ham_t src_ovlp, const Mbf& dst_mbf) const {
     if (m_imp_samp_guide) {
-        delta*=src_ovlp;
-        delta/=m_imp_samp_guide->overlap(dst_mbf);
+        delta/=src_ovlp;
+        delta*=m_imp_samp_guide->overlap(dst_mbf);
     }
 }
 
