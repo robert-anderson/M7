@@ -10,6 +10,7 @@
 #include <M7_lib/basis/Suites.h>
 
 #include "M7_lib/dynamics/Shift.h"
+#include "Guide.h"
 
 /**
  * This class is not optionally archivable,
@@ -26,14 +27,16 @@ public:
     Shift m_shift;
     const sys::Sector m_sector;
     /**
-     * exponent in the Gutzwiller-like importance sampling
+     * guiding wavefunction used in the importance sampling
      */
-    const double m_imp_samp_exp;
+    std::unique_ptr<guide::Wavefunction> m_imp_samp_guide;
     /*
      * working objects
      */
     mutable suite::Mbfs m_dst;
     mutable suite::Conns m_conn;
+
+    std::unique_ptr<guide::Wavefunction> make_imp_samp_guide(const conf::GuideWavefunction& opts) const;
 
     Propagator(const conf::Document &opts, const Hamiltonian &ham, const Wavefunction &wf) :
             Archivable("propagator", opts.m_archive),
@@ -42,9 +45,12 @@ public:
             m_ham(ham),
             m_shift(opts, wf.m_format),
             m_sector(wf.m_sector),
-            m_imp_samp_exp(opts.m_propagator.m_imp_samp_exp),
+            m_imp_samp_guide(make_imp_samp_guide(opts.m_propagator.m_imp_samp_guide)),
             m_dst(m_sector),
-            m_conn(ham.m_basis.size()) {}
+            m_conn(ham.m_basis.size()) {
+
+
+    }
 
     virtual ~Propagator() {}
 
