@@ -127,3 +127,12 @@ uint_t BosOnvField::occ_fac_square(const BosOps &com) const {
 double BosOnvField::occ_fac(const BosOps &com) const {
     return std::sqrt(double(occ_fac_square(com)));
 }
+
+uint_t BosOnvField::occ_npair() const {
+    uint_t n = 0ul;
+    for (uint_t imode = 0ul; imode < m_basis.m_nmode; ++imode) {
+        const uint_t occ = (*this)[imode];
+        n += occ*(occ-1);
+    }
+    return n;
+}

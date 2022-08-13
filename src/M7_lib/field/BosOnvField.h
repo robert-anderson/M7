@@ -144,6 +144,11 @@ public:
     uint_t occ_fac_square(const BosOps &com) const;
 
     double occ_fac(const BosOps &com) const;
+
+    /**
+     * matrix element of sum_i n_i(n_i-1)
+     */
+    uint_t occ_npair() const;
 };
 
 

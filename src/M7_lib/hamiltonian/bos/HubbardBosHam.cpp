@@ -25,12 +25,7 @@ ham_t HubbardBosHam::get_coeff_0022(uint_t a, uint_t b, uint_t i, uint_t j) cons
 }
 
 ham_t HubbardBosHam::get_element_0000(const field::BosOnv &onv) const {
-    ham_t h = 0.0;
-    for (uint_t imode = 0ul; imode < m_basis.m_nmode; ++imode) {
-        const auto occ = ham_t(onv[imode]);
-        h += occ*(occ-1)*m_u;
-    }
-    return h;
+    return onv.occ_npair()*m_u;
 }
 
 ham_t HubbardBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
