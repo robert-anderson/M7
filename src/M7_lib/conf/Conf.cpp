@@ -208,7 +208,7 @@ conf::AvEsts::AvEsts(Group *parent) :
 
 
 conf::GuideWavefunction::ExpFac::ExpFac(conf::GuideWavefunction* parent, str_t name, str_t description) :
-        Section(parent, name, description),
+        Section(parent, name, description, conf_components::Explicit),
         m_fac(this, "fac", 0.0, "exponential scaling factor"){}
 
 void conf::GuideWavefunction::ExpFac::validate_node_contents() {

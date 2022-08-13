@@ -185,7 +185,7 @@ void conf_components::Selection::validate_node_contents() {
         auto cast = dynamic_cast<const Section*>(child);
         REQUIRE_TRUE(cast, logging::format("selections may only contain sections. Node \"{}\" is not a section",
                                            child->m_path.m_string));
-        REQUIRE_EQ(cast->m_enable_policy, EnablePolicy::Required,
+        REQUIRE_NE(cast->m_enable_policy, EnablePolicy::Required,
                    "sections within a selection must not be required to be enabled");
         nenabled += cast->m_enabled;
     }
