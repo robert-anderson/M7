@@ -77,15 +77,15 @@ public:
     }
 
     /**
-     * do Gutzwiller-like importance sampling (if enabled) of the spawning probability "delta"
+     * use a guiding wavefunction to perform importance sampling
      * @param delta
-     *  reference to the normal spawning probability
+     *  generated spawn contribution
+     * @param src_ovlp
+     *  pre-computed overlap between the guiding WF and the source basis function
      * @param dst_mbf
-     *  destination MBF
-     * @param src_energy
-     *  energy of the source MBF is in practice cached in the wavefunction table, so no need to recompute
+     *  generated destination basis function
      */
-    void imp_samp_delta(wf_t &delta, const field::Mbf &dst_mbf, ham_comp_t src_energy) const;
+    void imp_samp_delta(wf_t &delta, ham_t src_ovlp, const field::Mbf &dst_mbf) const;
 
     void imp_samp_delta(wf_t &delta, const field::Mbf &src_mbf, const field::Mbf &dst_mbf) const;
 

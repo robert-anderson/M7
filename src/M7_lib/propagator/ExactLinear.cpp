@@ -30,7 +30,7 @@ void ExactLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
         conn.apply(src_mbf, dst_mbf);
         m_mag_log.log(0, helement, 1.0);
         auto delta = -weight * tau() * helement;
-        imp_samp_delta(delta, dst_mbf, row.m_hdiag);
+        imp_samp_delta(delta, src_mbf, dst_mbf);
         wf.add_spawn(dst_mbf, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
     };
     m_conn_iters.loop(conn, src_mbf, body);

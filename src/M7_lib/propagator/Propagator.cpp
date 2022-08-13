@@ -39,14 +39,13 @@ void Propagator::save_fn(const hdf5::NodeWriter& parent) {
     //gw.save("psingle", m_magnitude_logger.m_psingle);
 }
 
-void Propagator::imp_samp_delta(wf_t& delta, const Mbf& dst_mbf, ham_comp_t src_energy) const {
-    // check that importance sampling is in use at all before evaluating energies
-    // if (m_imp_samp_guide) delta*=std::exp(m_imp_samp_exp*(src_energy-m_ham.get_energy(dst_mbf)));
+void Propagator::imp_samp_delta(wf_t& delta, ham_t src_ovlp, const Mbf& dst_mbf) const {
+    if (m_imp_samp_guide) {
+        delta*=src_ovlp;
+        delta/=m_imp_samp_guide->overlap(dst_mbf);
+    }
 }
 
 void Propagator::imp_samp_delta(wf_t& delta, const Mbf& src_mbf, const Mbf& dst_mbf) const {
-    if (m_imp_samp_guide) {
-        delta*=m_imp_samp_guide->overlap(src_mbf);
-        delta/=m_imp_samp_guide->overlap(dst_mbf);
-    }
+    imp_samp_delta(delta, m_imp_samp_guide->overlap(src_mbf), dst_mbf);
 }

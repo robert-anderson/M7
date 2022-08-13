@@ -72,7 +72,7 @@ void StochLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
         conn.apply(src_mbf, dst_mbf);
         auto delta = -tau() * phase(weight) * helem / prob_gen;
         if (fptol::numeric_zero(delta)) continue;
-        imp_samp_delta(delta, dst_mbf, row.m_hdiag);
+        imp_samp_delta(delta, src_mbf, dst_mbf);
         /*
          * the stochastically-realized spawned contribution is equal to delta if delta is not lower in magnitude than
          * the minimum magnitude, otherwise it is stochastically rounded with respect to that magnitude
