@@ -12,8 +12,8 @@ Shift::Shift(const conf::Document &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         m_avg_values(wf_fmt.m_shape, opts.m_shift.m_init),
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
         m_nwalker_target("nwalker_target", opts.m_propagator.m_nw_target){
-    if (m_opts.m_shift.m_critical_damp)
-        logging::info("Using critical shift damping term (growth relative to target population)");
+    if (m_opts.m_shift.m_target_damp)
+        logging::info("Using targeted shift damping term (growth relative to target population)");
     m_nwalker_last_period.zero();
     DEBUG_ASSERT_FALSE(m_variable_mode, "Shift should not initially be in variable mode");
 }
@@ -48,9 +48,9 @@ void Shift::update(const Wavefunction &wf, const uint_t &icycle, const double &t
         if (variable_mode && a) {
             auto rate =  nw / m_nwalker_last_period[ipart];
             m_values[ipart] -= m_opts.m_shift.m_damp * std::log(std::abs(rate)) / (tau * a);
-            if (m_opts.m_shift.m_critical_damp) {
+            if (m_opts.m_shift.m_target_damp) {
                 rate =  nw / m_nwalker_target;
-                m_values[ipart] -= m_opts.m_shift.m_critical_damp * std::log(std::abs(rate)) / (tau * a);
+                m_values[ipart] -= m_opts.m_shift.m_target_damp * std::log(std::abs(rate)) / (tau * a);
             }
         }
         add_to_average();

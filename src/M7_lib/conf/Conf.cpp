@@ -105,7 +105,7 @@ conf::Shift::Shift(Group *parent) :
                         "options relating to the diagonal shift parameter and the manner in which it is varied"),
         m_init(this, "init", 0.0, "initial shift relative to the energy of the initial reference MBF"),
         m_damp(this, "damp", 0.05, "walker growth-related damping factor in shift update"),
-        m_critical_damp(this, "critical_damp", 0.0, "damping factor in shift update related to growth relative to the target walker population"),
+        m_target_damp(this, "target_damp", 0.0, "damping factor in shift update related to growth relative to the target walker population"),
         m_period(this, "period", 5, "number of MC cycles between shift updates"),
         m_ncycle_av(this, "ncycle_av", 100ul, "number of cycles over which to maintain a rolling average"),
         m_jump(this, "jump", false,
@@ -220,7 +220,7 @@ conf::GuideWavefunction::GutzwillerLike::GutzwillerLike(conf::GuideWavefunction*
                "amplitudes are given by the exponential of the basis function energy"){}
 
 conf::GuideWavefunction::SuppressMultiOcc::SuppressMultiOcc(conf::GuideWavefunction* parent) :
-        ExpFac(parent, "supress_multi_occ",
+        ExpFac(parent, "suppress_multi_occ",
                "amplitudes are given by the exponential of the number of double occupancies (for fermions) or the "
                "sum of the pair number operator values (for bosons)"){}
 
