@@ -199,7 +199,7 @@ void conf_components::Selection::validate_node_contents() {
                     "must not enable more than {} section{} within \"{}\"", m_n, string::plural(m_n), m_path.m_string));
             break;
         case(Exactly):
-            REQUIRE_GE(nenabled, m_n, logging::format(
+            REQUIRE_EQ(nenabled, m_n, logging::format(
                     "must enable {} section{} within \"{}\"", m_n, string::plural(m_n), m_path.m_string));
             break;
     }
