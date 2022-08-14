@@ -47,5 +47,5 @@ void Propagator::imp_samp_delta(wf_t& delta, ham_t src_ovlp, const Mbf& dst_mbf)
 }
 
 void Propagator::imp_samp_delta(wf_t& delta, const Mbf& src_mbf, const Mbf& dst_mbf) const {
-    imp_samp_delta(delta, m_imp_samp_guide->overlap(src_mbf), dst_mbf);
+    if (m_imp_samp_guide) imp_samp_delta(delta, m_imp_samp_guide->overlap(src_mbf), dst_mbf);
 }
