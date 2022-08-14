@@ -196,7 +196,7 @@ namespace conf_components {
         const Kind m_kind;
         const uint_t m_n;
 
-        Selection(Group* parent, const str_t& name, str_t desc, Kind kind=Exactly,
+        Selection(Group* parent, const str_t& name, str_t desc, Kind kind=NoMoreThan,
                   uint_t n=1ul, EnablePolicy enable_policy=Required);
 
 
