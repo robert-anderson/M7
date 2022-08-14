@@ -226,7 +226,7 @@ conf::GuideWavefunction::SuppressMultiOcc::SuppressMultiOcc(conf::GuideWavefunct
 
 conf::GuideWavefunction::GuideWavefunction(Group* parent, const str_t& name) :
     Selection(parent, name, "options relating to a wavefunction used in guiding propagation",
-        Exactly, 1ul, conf_components::Explicit),
+        NoMoreThan, 1ul, conf_components::Explicit),
         m_gutzwiller_like(this), m_suppress_multi_occ(this){}
 
 
