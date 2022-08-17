@@ -196,16 +196,15 @@ str_t logging::quoted(const str_t &str) {
     return "\""+str+"\"";
 }
 
-void logging::defs() {
-    v_t<strv_t> rows = {
-            {"git revision", get_version()},
-            {"build mode", c_enable_debug ? "DEBUG" : "RELEASE"},
-            {"compilation timestamp", get_compilation_timestamp()},
-            {"many-body basis function", mbf_name<c_mbf_type_ind>()},
-            {"walker arithmetic", c_enable_complex_wf ? "complex" : "real"},
-            {"Hamiltonian arithmetic", c_enable_complex_ham ? "complex" : "real"},
-            {"TCHINT interface", c_enable_tchint ? "enabled" : "disabled"},
-            {"rank-resolved logging", c_enable_local_logging ? "enabled" : "disabled"},
-    };
-    info_table("compile definitions", rows);
+strv_t logging::make_defs_table() {
+    return make_table("compile definitions",{
+        {"git revision", get_version()},
+        {"build mode", c_enable_debug ? "DEBUG" : "RELEASE"},
+        {"compilation timestamp", get_compilation_timestamp()},
+        {"many-body basis function", mbf_name<c_mbf_type_ind>()},
+        {"walker arithmetic", c_enable_complex_wf ? "complex" : "real"},
+        {"Hamiltonian arithmetic", c_enable_complex_ham ? "complex" : "real"},
+        {"TCHINT interface", c_enable_tchint ? "enabled" : "disabled"},
+        {"rank-resolved logging", c_enable_local_logging ? "enabled" : "disabled"},
+    });
 }

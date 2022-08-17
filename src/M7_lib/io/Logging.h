@@ -187,9 +187,9 @@ namespace logging {
     void title();
 
     /**
-     * print the compile-time definitions to standard output
+     * build the table of compile-time definitions
      */
-    void defs();
+    strv_t make_defs_table();
 }
 
 #endif
