@@ -121,7 +121,7 @@ conf::Semistochastic::Semistochastic(Group *parent) :
                 "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space") {}
 
 void conf::Semistochastic::validate_node_contents() {
-    REQUIRE_NE(bool(m_size), m_l1_fraction_cutoff == 1.0, "incompatible methods of subspace selection specified");
+    REQUIRE_NE(bool(m_size), m_l1_fraction_cutoff != 1.0, "incompatible methods of subspace selection specified");
     REQUIRE_LE(m_l1_fraction_cutoff, 1.0, "cutoff must not exceed 1.0");
 }
 

@@ -196,6 +196,18 @@ namespace mpi {
         return &g_node_comm;
     }
 
+    /*
+     * NODE INDEXING
+     */
+
+    bool i_am(const uint_t &i);
+
+    bool on_node_i_am(const uint_t &i);
+
+    bool i_am_root();
+
+    bool on_node_i_am_root();
+
     void barrier();
 
     void barrier_on_node();
@@ -494,11 +506,12 @@ namespace mpi {
     }
 
     template<typename T>
-    static bool bcast(v_t<T> &data, uint_t ndata = 0, uint_t iroot = 0) {
+    static bool bcast(v_t<T> &data, uint_t iroot = 0) {
+        uint_t size = data.size();
+        mpi::bcast(size, iroot);
+        if (!i_am(iroot)) data.resize(size);
         auto data_ptr = reinterpret_cast<void *>(data.data());
-        if (!ndata) ndata = data.size();
-        data.resize(ndata);
-        return MPI_Bcast(data_ptr, snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Bcast(data_ptr, snrw(size), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     static bool bcast(str_t &data, uint_t iroot = 0) {
@@ -722,18 +735,6 @@ namespace mpi {
         return all_to_allv(send, tmp_sendcounts.data(), tmp_senddispls.data(), recv,
                            tmp_recvcounts.data(), tmp_recvdispls.data());
     }
-
-    /*
-     * NODE INDEXING
-     */
-
-    bool i_am(const uint_t &i);
-
-    bool on_node_i_am(const uint_t &i);
-
-    bool i_am_root();
-
-    bool on_node_i_am_root();
 
     bool initialized();
 

@@ -85,7 +85,7 @@ private:
         mpi::bcast(invalid, 0);
         if (invalid) return false;
         v = tmp;
-        mpi::bcast(v, nelement, 0);
+        mpi::bcast(v.data(), nelement, 0);
         return true;
     }
 

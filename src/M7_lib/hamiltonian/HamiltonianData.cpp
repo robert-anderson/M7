@@ -66,6 +66,10 @@ bool ham::TermContribs::any_nonzero() const {
     return std::any_of(m_exsig_nonzero.cbegin(), m_exsig_nonzero.cend(), [](bool b){return b;});
 }
 
+void ham::TermContribs::bcast(uint_t iroot) {
+    mpi::bcast(m_exsig_nonzero, iroot);
+}
+
 bool ham::KramersAttributes::conserving() const {
     return m_conserving_singles && m_conserving_doubles;
 }

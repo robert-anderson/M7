@@ -131,6 +131,12 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints() {
 GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info):
         FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}}),
         m_info(info), m_ints(make_ints()){
+    /*
+     * since reading only happens on a subset of ranks, the excitation signatures contributing to each rank were only
+     * set on these reading ranks. here they must be synchronized
+     */
+    m_contribs_1100.bcast();
+    m_contribs_2200.bcast();
 }
 
 GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
