@@ -5,10 +5,12 @@ stats:
     period: 5
 propagator:
     tau_init: 0.001
-    stochastic: no
-    nw_target: 1000
+    stochastic: yes
+    nw_target: 10000
     nadd: 0.0
     ncycle: 40000
+    imp_samp_exp: 0.4
+    static_probs: no
 basis:
     bos_occ_cutoff: 3
 particles:
@@ -23,3 +25,7 @@ hamiltonian:
         num_op_weight: 0.3
     ladder:
         holstein_coupling: 1.4
+reference:
+    redef_thresh: 10.0
+    #mbf_init:
+    #    neel: yes
