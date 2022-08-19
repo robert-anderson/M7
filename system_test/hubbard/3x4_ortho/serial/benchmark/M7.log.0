@@ -1,0 +1,74 @@
+[1660767598] [info] Reallocating buffer "wavefunction send" 0B -> 240B
+[1660767598] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
+[1660767598] [info] Reallocating buffer "wavefunction redistributor send" 0B -> 320B
+[1660767598] [info] Reallocating buffer "wavefunction redistributor recv" 0B -> 320B
+[1660767598] [info] Reallocating buffer "wavefunction protection level send" 0B -> 80B
+[1660767598] [info] Reallocating buffer "wavefunction protection level recv" 0B -> 80B
+[1660767598] [info] Reallocating buffer "wavefunction store" 0B -> 320.000000KB
+[1660767598] [info] Reallocating buffer "Work space for MBFs" 0B -> 16B
+[1660767598] [info] Reallocating buffer "reference gather send" 0B -> 32B
+[1660767598] [info] Reallocating buffer "reference gather recv" 0B -> 32B
+[1660767598] [info] Reallocating buffer "reference all rows" 0B -> 32B
+[1660767598] [info] Reallocating buffer "M7.stats" 0B -> 120B
+[1660767598] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1660767598] [info] Reallocating buffer "wavefunction send" 240B -> 400B
+[1660767598] [info] Reallocating buffer "wavefunction recv" 240B -> 400B
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.0162224797219004) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 100 with a new one of size 150
+[1660767598] [info] Reallocating buffer "wavefunction send" 400B -> 616B
+[1660767598] [info] Reallocating buffer "wavefunction recv" 400B -> 688B
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.8452380952380953) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 150 with a new one of size 319
+[1660767598] [info] Reallocating buffer "wavefunction send" 616B -> 936B
+[1660767598] [info] Reallocating buffer "wavefunction recv" 688B -> 1.264000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.0301441677588468) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 319 with a new one of size 484
+[1660767598] [info] Reallocating buffer "wavefunction send" 936B -> 1.440000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.066790352504638) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 484 with a new one of size 750
+[1660767598] [info] Reallocating buffer "wavefunction recv" 1.264000KB -> 1.912000KB
+[1660767598] [info] Reallocating buffer "wavefunction send" 1.440000KB -> 2.200000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.0288637194008037) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 750 with a new one of size 1140
+[1660767598] [info] Reallocating buffer "wavefunction recv" 1.912000KB -> 2.992000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.068259385665529) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 1140 with a new one of size 1767
+[1660767598] [info] Reallocating buffer "wavefunction send" 2.200000KB -> 3.312000KB
+[1660767598] [info] Reallocating buffer "wavefunction recv" 2.992000KB -> 4.648000KB
+[1660767598] [info] Reallocating buffer "wavefunction send" 3.312000KB -> 5.008000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.000831255195345) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 1767 with a new one of size 2650
+[1660767598] [info] Reallocating buffer "wavefunction recv" 4.648000KB -> 7.240000KB
+[1660767598] [info] Reallocating buffer "wavefunction send" 5.008000KB -> 7.528000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.0088586030664395) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 2650 with a new one of size 3991
+[1660767598] [info] Reallocating buffer "wavefunction send" 7.528000KB -> 11.304000KB
+[1660767598] [info] Reallocating buffer "wavefunction recv" 7.240000KB -> 11.416000KB
+[1660767598] [info] Reallocating buffer "wavefunction store" 320.000000KB -> 480.048000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.007608286252354) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 3991 with a new one of size 6009
+[1660767598] [info] Reallocating buffer "wavefunction store" 480.048000KB -> 720.096000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.0110220440881763) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 6009 with a new one of size 9063
+[1660767598] [info] Reallocating buffer "wavefunction send" 11.304000KB -> 16.992000KB
+[1660767598] [info] Reallocating buffer "wavefunction recv" 11.416000KB -> 18.000000KB
+[1660767598] [info] Reallocating buffer "wavefunction store" 720.096000KB -> 1.080192MB
+[1660767598] [info] Reallocating buffer "wavefunction send" 16.992000KB -> 25.528000KB
+[1660767598] [info] Reallocating buffer "wavefunction recv" 18.000000KB -> 27.184000KB
+[1660767600] [info] remapping hash table for "wavefunction store"
+[1660767600] [info] current ratio of skips to total lookups (2.000034983872435) exceeds set limit (2)
+[1660767600] [info] replacing current bucket vector of size 9063 with a new one of size 13594
+[1660767607] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1660767607] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1660767607] [info] Reallocating buffer "locally included globally extreme rows" 0B -> 640B
+[1660767607] [info] Reallocating buffer "global top weighted" 0B -> 640B

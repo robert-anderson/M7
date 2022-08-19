@@ -1,0 +1,354 @@
+[1660767598] [info] +----------------------------+-------------------------+
+[1660767598] [info] |                 compile definitions                  |
+[1660767598] [info] +----------------------------+-------------------------+
+[1660767598] [info] |  git revision              |  #63ea58f7              |
+[1660767598] [info] +----------------------------+-------------------------+
+[1660767598] [info] |  build mode                |  RELEASE                |
+[1660767598] [info] +----------------------------+-------------------------+
+[1660767598] [info] |  compilation timestamp     |  2022-08-17 22:08:03    |
+[1660767598] [info] +----------------------------+-------------------------+
+[1660767598] [info] |  many-body basis function  |  fermion (determinant)  |
+[1660767598] [info] +----------------------------+-------------------------+
+[1660767598] [info] |  walker arithmetic         |  real                   |
+[1660767598] [info] +----------------------------+-------------------------+
+[1660767598] [info] |  Hamiltonian arithmetic    |  real                   |
+[1660767598] [info] +----------------------------+-------------------------+
+[1660767598] [info] |  TCHINT interface          |  disabled               |
+[1660767598] [info] +----------------------------+-------------------------+
+[1660767598] [info] |  rank-resolved logging     |  enabled                |
+[1660767598] [info] +----------------------------+-------------------------+
+[1660767598] [info] Number of MPI ranks in world communicator: 1
+[1660767598] [info] Number of MPI ranks per node: 1
+[1660767598] [info] formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run
+[1660767598] [warning] propagator.min_death_mag was zero, defaulting to the specified value of propagator.min_spawn_mag
+[1660767598] [warning] propagator.max_bloom was zero, defaulting to the specified value of propagator.nadd
+[1660767598] [info] prng (enabled)
+[1660767598] [info] prng.seed                                         | 123
+[1660767598] [info] prng.ngen_block                                   | 10000
+[1660767598] [info] archive (enabled)
+[1660767598] [info] archive.load_path                                 | ""
+[1660767598] [info] archive.save_path                                 | ""
+[1660767598] [info] archive.chkpt_path                                | ""
+[1660767598] [info] archive.period                                    | 0
+[1660767598] [info] archive.period_mins                               | 0
+[1660767598] [info] basis (enabled)
+[1660767598] [info] basis.bos_occ_cutoff                              | 255
+[1660767598] [info] particles (enabled)
+[1660767598] [info] particles.nelec                                   | 0
+[1660767598] [info] particles.ms2                                     | inf
+[1660767598] [info] particles.nboson                                  | 0
+[1660767598] [info] wavefunction (enabled)
+[1660767598] [info] wavefunction.nw_init                              | 1.000000e+00
+[1660767598] [info] wavefunction.nroot                                | 1
+[1660767598] [info] wavefunction.fci_init                             | false
+[1660767598] [info] wavefunction.buffers (enabled)
+[1660767598] [info] wavefunction.buffers.store_fac_init               | 1.000000e+00
+[1660767598] [info] wavefunction.buffers.store_expand_fac             | 5.000000e-01
+[1660767598] [info] wavefunction.buffers.comm_fac_init                | 1.000000e+00
+[1660767598] [info] wavefunction.buffers.comm_expand_fac              | 5.000000e-01
+[1660767598] [info] wavefunction.hash_mapping (enabled)
+[1660767598] [info] wavefunction.hash_mapping.remap_ratio             | 2.000000e+00
+[1660767598] [info] wavefunction.hash_mapping.remap_nlookup           | 500
+[1660767598] [info] wavefunction.archive (enabled)
+[1660767598] [info] wavefunction.archive.load                         | false
+[1660767598] [info] wavefunction.archive.save                         | false
+[1660767598] [info] wavefunction.archive.chkpt                        | false
+[1660767598] [info] wavefunction.load_balancing (enabled)
+[1660767598] [info] wavefunction.load_balancing.nblock_per_rank       | 6
+[1660767598] [info] wavefunction.load_balancing.period                | 10
+[1660767598] [info] wavefunction.load_balancing.acceptable_imbalance  | 5.000000e-02
+[1660767598] [info] wavefunction.load_balancing.nnull_updates_deactivate| 20
+[1660767598] [info] reference (enabled)
+[1660767598] [info] reference.mbf_init (enabled)
+[1660767598] [info] reference.mbf_init.fermion                        | []
+[1660767598] [info] reference.mbf_init.boson                          | []
+[1660767598] [info] reference.mbf_init.neel                           | true
+[1660767598] [info] reference.redef_thresh                            | 2.000000e+00
+[1660767598] [info] shift (enabled)
+[1660767598] [info] shift.init                                        | 0.000000e+00
+[1660767598] [info] shift.damp                                        | 5.000000e-01
+[1660767598] [info] shift.target_damp                                 | 0.000000e+00
+[1660767598] [info] shift.period                                      | 5
+[1660767598] [info] shift.ncycle_av                                   | 100
+[1660767598] [info] shift.jump                                        | false
+[1660767598] [info] propagator (enabled)
+[1660767598] [info] propagator.ncycle                                 | 2000
+[1660767598] [info] propagator.stochastic                             | true
+[1660767598] [info] propagator.excit_gen (enabled)
+[1660767598] [info] propagator.excit_gen.hubbard_prefer_double_occ (disabled)
+[1660767598] [info] propagator.nw_target                              | 1.000000e+04
+[1660767598] [info] propagator.max_bloom                              | 0.000000e+00
+[1660767598] [info] propagator.nadd                                   | 0.000000e+00
+[1660767598] [info] propagator.tau_init                               | 1.000000e-03
+[1660767598] [info] propagator.tau_min                                | 1.000000e-05
+[1660767598] [info] propagator.tau_max                                | 1.000000e-02
+[1660767598] [info] propagator.static_tau                             | true
+[1660767598] [info] propagator.static_probs                           | true
+[1660767598] [info] propagator.min_spawn_mag                          | 4.000000e-01
+[1660767598] [info] propagator.min_death_mag                          | 4.000000e-01
+[1660767598] [info] propagator.min_exlvl_prob                         | 1.000000e-03
+[1660767598] [info] propagator.exlvl_probs_init                       | []
+[1660767598] [info] propagator.ndraw_min_for_dynamic                  | 1000
+[1660767598] [info] propagator.period                                 | 10
+[1660767598] [info] propagator.imp_samp_guide.gutzwiller_like (disabled)
+[1660767598] [info] propagator.imp_samp_guide.suppress_multi_occ (disabled)
+[1660767598] [info] propagator.semistochastic (disabled)
+[1660767598] [info] hamiltonian (enabled)
+[1660767598] [info] hamiltonian.fermion (enabled)
+[1660767598] [info] hamiltonian.fermion.fcidump (disabled)
+[1660767598] [info] hamiltonian.fermion.hubbard (enabled)
+[1660767598] [info] hamiltonian.fermion.hubbard.topology              | "ortho"
+[1660767598] [info] hamiltonian.fermion.hubbard.site_shape            | [3, 4]
+[1660767598] [info] hamiltonian.fermion.hubbard.boundary_conds        | [1, 1]
+[1660767598] [info] hamiltonian.fermion.hubbard.repulsion             | 4.000000e+00
+[1660767598] [info] hamiltonian.fermion.heisenberg (disabled)
+[1660767598] [info] hamiltonian.fermion.spin_penalty_j                | 0.000000e+00
+[1660767598] [info] hamiltonian.ladder (disabled)
+[1660767598] [info] hamiltonian.boson (disabled)
+[1660767598] [info] stats (enabled)
+[1660767598] [info] stats.path                                        | "M7.stats"
+[1660767598] [info] stats.period                                      | 5
+[1660767598] [info] stats.parallel                                    | false
+[1660767598] [info] inst_ests (disabled)
+[1660767598] [info] av_ests (disabled)
+[1660767598] [info] Fermi-Hubbard Hamiltonian initialized with U=4; orthogonal lattice with shape [3, 4] and boundary conds [1, 1]
+[1660767598] [info] 2*Ms value not defined by configuration document or Hamiltonian, defaulting to lowest valid positive value
+[1660767598] [info] Initially allocating 240B per rank for each communicating buffer of "wavefunction" (send and recv)
+[1660767598] [info] Reallocating buffer "wavefunction send" 0B -> 240B
+[1660767598] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
+[1660767598] [info] Initially allocating 320B per rank for each communicating buffer of "wavefunction redistributor" (send and recv)
+[1660767598] [info] Reallocating buffer "wavefunction redistributor send" 0B -> 320B
+[1660767598] [info] Reallocating buffer "wavefunction redistributor recv" 0B -> 320B
+[1660767598] [info] Initially allocating 80B per rank for each communicating buffer of "wavefunction protection level" (send and recv)
+[1660767598] [info] Reallocating buffer "wavefunction protection level send" 0B -> 80B
+[1660767598] [info] Reallocating buffer "wavefunction protection level recv" 0B -> 80B
+[1660767598] [info] Initially allocating 320.000000KB per rank for store buffer of "wavefunction" 
+[1660767598] [info] Reallocating buffer "wavefunction store" 0B -> 320.000000KB
+[1660767598] [info] Listening for changes to interactive variable "nwalker_target" in file "nwalker_target.var"
+[1660767598] [info] Reallocating buffer "Work space for MBFs" 0B -> 16B
+[1660767598] [info] +------------------------+---------------------------+----------------+
+[1660767598] [info] |                   Excitation generation breakdown                   |
+[1660767598] [info] +------------------------+---------------------------+----------------+
+[1660767598] [info] |  Excitation Signature  |  Description              |  Probability   |
+[1660767598] [info] +========================+===========================+================+
+[1660767598] [info] |  1100                  |  uniform hubbard hopping  |  1.000000e+00  |
+[1660767598] [info] +------------------------+---------------------------+----------------+
+[1660767598] [info] Initializing magnitude logger with max_bloom 0 for 1 excitation levels
+[1660767598] [info] Dynamic tau optimization: false
+[1660767598] [info] Dynamic excitation level probability optimization: false
+[1660767598] [info] Reallocating buffer "reference gather send" 0B -> 32B
+[1660767598] [info] Reallocating buffer "reference gather recv" 0B -> 32B
+[1660767598] [info] Reallocating buffer "reference all rows" 0B -> 32B
+[1660767598] [info] Initial reference ONV for WF part 0 is (101010101010,010101010101) with energy 0.000000e+00 
+[1660767598] [info] Listening for changes to interactive variable "exit" in file "exit.var"
+[1660767598] [info] not reading archive from file
+[1660767598] [info] not saving archive to file
+[1660767598] [info] not dumping checkpoint archives
+[1660767598] [info] Replicating walker populations: false
+[1660767598] [info] Reallocating buffer "M7.stats" 0B -> 120B
+[1660767598] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1660767598] [info] Beginning solver loop...
+[1660767598] [info] Reallocating buffer "wavefunction send" 240B -> 400B
+[1660767598] [info] Reallocating buffer "wavefunction recv" 240B -> 400B
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.0162224797219004) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 100 with a new one of size 150
+[1660767598] [info] Reallocating buffer "wavefunction send" 400B -> 616B
+[1660767598] [info] Reallocating buffer "wavefunction recv" 400B -> 688B
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.8452380952380953) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 150 with a new one of size 319
+[1660767598] [info] Reallocating buffer "wavefunction send" 616B -> 936B
+[1660767598] [info] Reallocating buffer "wavefunction recv" 688B -> 1.264000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.0301441677588468) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 319 with a new one of size 484
+[1660767598] [info] Reallocating buffer "wavefunction send" 936B -> 1.440000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.066790352504638) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 484 with a new one of size 750
+[1660767598] [info] Reallocating buffer "wavefunction recv" 1.264000KB -> 1.912000KB
+[1660767598] [info] Reallocating buffer "wavefunction send" 1.440000KB -> 2.200000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.0288637194008037) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 750 with a new one of size 1140
+[1660767598] [info] Reallocating buffer "wavefunction recv" 1.912000KB -> 2.992000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.068259385665529) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 1140 with a new one of size 1767
+[1660767598] [info] Reallocating buffer "wavefunction send" 2.200000KB -> 3.312000KB
+[1660767598] [info] Reallocating buffer "wavefunction recv" 2.992000KB -> 4.648000KB
+[1660767598] [info] Reallocating buffer "wavefunction send" 3.312000KB -> 5.008000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.000831255195345) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 1767 with a new one of size 2650
+[1660767598] [info] Reallocating buffer "wavefunction recv" 4.648000KB -> 7.240000KB
+[1660767598] [info] Reallocating buffer "wavefunction send" 5.008000KB -> 7.528000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.0088586030664395) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 2650 with a new one of size 3991
+[1660767598] [info] Reallocating buffer "wavefunction send" 7.528000KB -> 11.304000KB
+[1660767598] [info] Reallocating buffer "wavefunction recv" 7.240000KB -> 11.416000KB
+[1660767598] [info] Reallocating buffer "wavefunction store" 320.000000KB -> 480.048000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.007608286252354) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 3991 with a new one of size 6009
+[1660767598] [info] Reallocating buffer "wavefunction store" 480.048000KB -> 720.096000KB
+[1660767598] [info] remapping hash table for "wavefunction store"
+[1660767598] [info] current ratio of skips to total lookups (2.0110220440881763) exceeds set limit (2)
+[1660767598] [info] replacing current bucket vector of size 6009 with a new one of size 9063
+[1660767598] [info] Reallocating buffer "wavefunction send" 11.304000KB -> 16.992000KB
+[1660767598] [info] Reallocating buffer "wavefunction recv" 11.416000KB -> 18.000000KB
+[1660767598] [info] Reallocating buffer "wavefunction store" 720.096000KB -> 1.080192MB
+[1660767598] [info] Reallocating buffer "wavefunction send" 16.992000KB -> 25.528000KB
+[1660767598] [info] Entering "variable shift mode (WF part 0)" epoch on cycle 514 
+[1660767598] [info] Variable shift triggered for WF part 0. Cycle 513 nw: 9864.599999995746, cycle 514 nw: 10018.599999995746
+[1660767598] [info] Reallocating buffer "wavefunction recv" 18.000000KB -> 27.184000KB
+[1660767599] [info] Changing reference for WF part 0 on cycle 627
+[1660767599] [info] Current: (101010101010,010101010101), weight:  4.000000e-01, MPI rank: 0
+[1660767599] [info] New    : (100011001011,001110011100), weight: -1.600000e+00, MPI rank: 0
+[1660767599] [info] Changing reference for WF part 0 on cycle 639
+[1660767599] [info] Current: (100011001011,001110011100), weight: -8.000000e-01, MPI rank: 0
+[1660767599] [info] New    : (101001001110,110111000001), weight: -2.000000e+00, MPI rank: 0
+[1660767599] [info] Changing reference for WF part 0 on cycle 680
+[1660767599] [info] Current: (101001001110,110111000001), weight: -8.000000e-01, MPI rank: 0
+[1660767599] [info] New    : (010001101110,001110011001), weight: -2.000000e+00, MPI rank: 0
+[1660767600] [info] Changing reference for WF part 0 on cycle 715
+[1660767600] [info] Current: (010001101110,001110011001), weight: -4.000000e-01, MPI rank: 0
+[1660767600] [info] New    : (001001111010,100011000111), weight:  1.200000e+00, MPI rank: 0
+[1660767600] [info] remapping hash table for "wavefunction store"
+[1660767600] [info] current ratio of skips to total lookups (2.000034983872435) exceeds set limit (2)
+[1660767600] [info] replacing current bucket vector of size 9063 with a new one of size 13594
+[1660767600] [info] Changing reference for WF part 0 on cycle 732
+[1660767600] [info] Current: (001001111010,100011000111), weight:  4.000000e-01, MPI rank: 0
+[1660767600] [info] New    : (001110001101,110101010010), weight: -1.600000e+00, MPI rank: 0
+[1660767600] [info] Changing reference for WF part 0 on cycle 782
+[1660767600] [info] Current: (001110001101,110101010010), weight: -4.000000e-01, MPI rank: 0
+[1660767600] [info] New    : (011000101101,100100111010), weight:  1.600000e+00, MPI rank: 0
+[1660767600] [info] Changing reference for WF part 0 on cycle 800
+[1660767600] [info] Current: (011000101101,100100111010), weight:  4.000000e-01, MPI rank: 0
+[1660767600] [info] New    : (000111110010,110100011001), weight: -1.600000e+00, MPI rank: 0
+[1660767600] [info] Changing reference for WF part 0 on cycle 816
+[1660767600] [info] Current: (000111110010,110100011001), weight: -4.000000e-01, MPI rank: 0
+[1660767600] [info] New    : (100000111110,110101000101), weight: -1.600000e+00, MPI rank: 0
+[1660767600] [info] Changing reference for WF part 0 on cycle 865
+[1660767600] [info] Current: (100000111110,110101000101), weight: -4.000000e-01, MPI rank: 0
+[1660767600] [info] New    : (001001101110,110111000001), weight: -1.600000e+00, MPI rank: 0
+[1660767601] [info] Changing reference for WF part 0 on cycle 898
+[1660767601] [info] Current: (001001101110,110111000001), weight: -4.000000e-01, MPI rank: 0
+[1660767601] [info] New    : (000101111010,110000101101), weight:  1.200000e+00, MPI rank: 0
+[1660767601] [info] Changing reference for WF part 0 on cycle 933
+[1660767601] [info] Current: (000101111010,110000101101), weight:  4.000000e-01, MPI rank: 0
+[1660767601] [info] New    : (001111110000,001111000101), weight: -1.200000e+00, MPI rank: 0
+[1660767601] [info] Changing reference for WF part 0 on cycle 1003
+[1660767601] [info] Current: (001111110000,001111000101), weight: -4.000000e-01, MPI rank: 0
+[1660767601] [info] New    : (000101111100,110000110011), weight:  1.200000e+00, MPI rank: 0
+[1660767601] [info] Changing reference for WF part 0 on cycle 1049
+[1660767601] [info] Current: (000101111100,110000110011), weight:  4.000000e-01, MPI rank: 0
+[1660767601] [info] New    : (100010110101,000110100111), weight: -1.200000e+00, MPI rank: 0
+[1660767601] [info] Changing reference for WF part 0 on cycle 1065
+[1660767601] [info] Current: (100010110101,000110100111), weight: -4.000000e-01, MPI rank: 0
+[1660767601] [info] New    : (101110110000,011001011100), weight:  1.200000e+00, MPI rank: 0
+[1660767602] [info] Changing reference for WF part 0 on cycle 1077
+[1660767602] [info] Current: (101110110000,011001011100), weight:  4.000000e-01, MPI rank: 0
+[1660767602] [info] New    : (011010100101,100101011010), weight: -1.600000e+00, MPI rank: 0
+[1660767602] [info] Changing reference for WF part 0 on cycle 1141
+[1660767602] [info] Current: (011010100101,100101011010), weight: -4.000000e-01, MPI rank: 0
+[1660767602] [info] New    : (011001110100,110010010011), weight: -1.200000e+00, MPI rank: 0
+[1660767602] [info] Changing reference for WF part 0 on cycle 1201
+[1660767602] [info] Current: (011001110100,110010010011), weight: -4.000000e-01, MPI rank: 0
+[1660767602] [info] New    : (011000011101,110101101000), weight:  1.600000e+00, MPI rank: 0
+[1660767602] [info] Changing reference for WF part 0 on cycle 1226
+[1660767602] [info] Current: (011000011101,110101101000), weight:  4.000000e-01, MPI rank: 0
+[1660767602] [info] New    : (000101111010,010110101001), weight:  1.200000e+00, MPI rank: 0
+[1660767602] [info] Changing reference for WF part 0 on cycle 1234
+[1660767602] [info] Current: (000101111010,010110101001), weight:  4.000000e-01, MPI rank: 0
+[1660767602] [info] New    : (100101110010,110110100100), weight:  1.200000e+00, MPI rank: 0
+[1660767603] [info] Changing reference for WF part 0 on cycle 1250
+[1660767603] [info] Current: (100101110010,110110100100), weight:  4.000000e-01, MPI rank: 0
+[1660767603] [info] New    : (001011111000,111110000001), weight: -1.200000e+00, MPI rank: 0
+[1660767603] [info] Changing reference for WF part 0 on cycle 1324
+[1660767603] [info] Current: (001011111000,111110000001), weight: -4.000000e-01, MPI rank: 0
+[1660767603] [info] New    : (111000100101,100011000111), weight: -1.600000e+00, MPI rank: 0
+[1660767603] [info] Changing reference for WF part 0 on cycle 1364
+[1660767603] [info] Current: (111000100101,100011000111), weight: -4.000000e-01, MPI rank: 0
+[1660767603] [info] New    : (101001011100,010101011010), weight: -1.600000e+00, MPI rank: 0
+[1660767603] [info] Changing reference for WF part 0 on cycle 1389
+[1660767603] [info] Current: (101001011100,010101011010), weight: -4.000000e-01, MPI rank: 0
+[1660767603] [info] New    : (001111110000,110001010110), weight:  1.200000e+00, MPI rank: 0
+[1660767603] [info] Changing reference for WF part 0 on cycle 1398
+[1660767603] [info] Current: (001111110000,110001010110), weight:  4.000000e-01, MPI rank: 0
+[1660767603] [info] New    : (100001111010,010110110001), weight: -1.200000e+00, MPI rank: 0
+[1660767604] [info] Changing reference for WF part 0 on cycle 1426
+[1660767604] [info] Current: (100001111010,010110110001), weight: -4.000000e-01, MPI rank: 0
+[1660767604] [info] New    : (010100101101,101111000010), weight: -1.600000e+00, MPI rank: 0
+[1660767604] [info] Changing reference for WF part 0 on cycle 1487
+[1660767604] [info] Current: (010100101101,101111000010), weight: -4.000000e-01, MPI rank: 0
+[1660767604] [info] New    : (001110110100,010010011101), weight:  1.600000e+00, MPI rank: 0
+[1660767604] [info] Changing reference for WF part 0 on cycle 1508
+[1660767604] [info] Current: (001110110100,010010011101), weight:  8.000000e-01, MPI rank: 0
+[1660767604] [info] New    : (010011100011,101100110100), weight:  2.000000e+00, MPI rank: 0
+[1660767605] [info] Changing reference for WF part 0 on cycle 1603
+[1660767605] [info] Current: (010011100011,101100110100), weight:  4.000000e-01, MPI rank: 0
+[1660767605] [info] New    : (010001111010,001110001101), weight:  1.600000e+00, MPI rank: 0
+[1660767605] [info] Changing reference for WF part 0 on cycle 1666
+[1660767605] [info] Current: (010001111010,001110001101), weight:  4.000000e-01, MPI rank: 0
+[1660767605] [info] New    : (100001110110,101101001100), weight: -1.200000e+00, MPI rank: 0
+[1660767605] [info] Changing reference for WF part 0 on cycle 1680
+[1660767605] [info] Current: (100001110110,101101001100), weight: -4.000000e-01, MPI rank: 0
+[1660767605] [info] New    : (101001110100,101110010100), weight:  1.200000e+00, MPI rank: 0
+[1660767605] [info] Changing reference for WF part 0 on cycle 1747
+[1660767605] [info] Current: (101001110100,101110010100), weight:  4.000000e-01, MPI rank: 0
+[1660767605] [info] New    : (011011000101,100010011011), weight: -1.600000e+00, MPI rank: 0
+[1660767606] [info] Changing reference for WF part 0 on cycle 1782
+[1660767606] [info] Current: (011011000101,100010011011), weight: -4.000000e-01, MPI rank: 0
+[1660767606] [info] New    : (101011001010,100100011110), weight: -1.600000e+00, MPI rank: 0
+[1660767606] [info] Changing reference for WF part 0 on cycle 1822
+[1660767606] [info] Current: (101011001010,100100011110), weight: -4.000000e-01, MPI rank: 0
+[1660767606] [info] New    : (010110100110,100001011011), weight:  1.600000e+00, MPI rank: 0
+[1660767606] [info] Changing reference for WF part 0 on cycle 1847
+[1660767606] [info] Current: (010110100110,100001011011), weight:  4.000000e-01, MPI rank: 0
+[1660767606] [info] New    : (010101110010,111000001101), weight: -1.200000e+00, MPI rank: 0
+[1660767606] [info] Changing reference for WF part 0 on cycle 1872
+[1660767606] [info] Current: (010101110010,111000001101), weight: -4.000000e-01, MPI rank: 0
+[1660767606] [info] New    : (010100111010,100011100101), weight: -1.200000e+00, MPI rank: 0
+[1660767606] [info] Changing reference for WF part 0 on cycle 1899
+[1660767606] [info] Current: (010100111010,100011100101), weight: -4.000000e-01, MPI rank: 0
+[1660767606] [info] New    : (010001111010,010011000111), weight: -1.200000e+00, MPI rank: 0
+[1660767606] [info] Changing reference for WF part 0 on cycle 1932
+[1660767606] [info] Current: (010001111010,010011000111), weight: -4.000000e-01, MPI rank: 0
+[1660767606] [info] New    : (011010111000,110100101100), weight: -1.200000e+00, MPI rank: 0
+[1660767607] [info] Changing reference for WF part 0 on cycle 1981
+[1660767607] [info] Current: (011010111000,110100101100), weight: -4.000000e-01, MPI rank: 0
+[1660767607] [info] New    : (100101001110,010110000111), weight:  1.600000e+00, MPI rank: 0
+[1660767607] [info] maximum cycle number (2000) reached
+[1660767607] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1660767607] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1660767607] [info] Reallocating buffer "locally included globally extreme rows" 0B -> 640B
+[1660767607] [info] Reallocating buffer "global top weighted" 0B -> 640B
+[1660767607] [info] +----+-----------------------------+---------------+-----------+----------+
+[1660767607] [info] |                   Top-weighted WF elements for part 0                   |
+[1660767607] [info] +----+-----------------------------+---------------+-----------+----------+
+[1660767607] [info] |    | many-body basis function    | walker number | initiator | MPI rank |
+[1660767607] [info] +====+=============================+===============+===========+==========+
+[1660767607] [info] | 0  | (010101110010,111100001010) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 1  | (000111011010,010000111101) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 2  | (101011010010,010011100011) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 3  | (111001010001,010110101001) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 4  | (111000010101,010011010011) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 5  | (101000111010,011111000100) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 6  | (011010010101,101111000001) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 7  | (010011011010,100001011101) |  1.200000e+00 | true      | 0        |
+[1660767607] [info] | 8  | (100000011111,010011100110) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 9  | (101000110101,010111001100) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 10 | (100010111010,101000110110) |  1.200000e+00 | true      | 0        |
+[1660767607] [info] | 11 | (011000011110,101110000110) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 12 | (100001111100,101101000101) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 13 | (010111101000,101010010110) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 14 | (100001011101,001111010100) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 15 | (101101100001,010101011010) |  1.200000e+00 | true      | 0        |
+[1660767607] [info] | 16 | (101101010100,011000111001) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 17 | (111101100000,110000110101) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 18 | (110101010010,100101001110) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] | 19 | (010010111100,111000010110) | -1.200000e+00 | true      | 0        |
+[1660767607] [info] +----+-----------------------------+---------------+-----------+----------+
