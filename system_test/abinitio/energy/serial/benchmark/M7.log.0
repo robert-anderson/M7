@@ -1,0 +1,23 @@
+[1660855961] [info] Reallocating buffer "wavefunction send" 0B -> 24B
+[1660855961] [info] Reallocating buffer "wavefunction recv" 0B -> 24B
+[1660855961] [info] Reallocating buffer "wavefunction redistributor send" 0B -> 32B
+[1660855961] [info] Reallocating buffer "wavefunction redistributor recv" 0B -> 32B
+[1660855961] [info] Reallocating buffer "wavefunction protection level send" 0B -> 8B
+[1660855961] [info] Reallocating buffer "wavefunction protection level recv" 0B -> 8B
+[1660855961] [info] Reallocating buffer "wavefunction store" 0B -> 32.000000KB
+[1660855961] [info] Reallocating buffer "Work space for MBFs" 0B -> 16B
+[1660855961] [info] Reallocating buffer "reference gather send" 0B -> 32B
+[1660855961] [info] Reallocating buffer "reference gather recv" 0B -> 32B
+[1660855961] [info] Reallocating buffer "reference all rows" 0B -> 32B
+[1660855961] [info] Reallocating buffer "M7.stats" 0B -> 128B
+[1660855961] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1660855961] [info] Reallocating buffer "wavefunction send" 24B -> 72B
+[1660855961] [info] Reallocating buffer "wavefunction recv" 24B -> 72B
+[1660855961] [info] Reallocating buffer "wavefunction send" 72B -> 144B
+[1660855961] [info] Reallocating buffer "wavefunction recv" 72B -> 144B
+[1660855964] [info] Reallocating buffer "wavefunction send" 144B -> 256B
+[1660855964] [info] Reallocating buffer "wavefunction recv" 144B -> 288B
+[1660855971] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1660855971] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1660855971] [info] Reallocating buffer "locally included globally extreme rows" 0B -> 640B
+[1660855971] [info] Reallocating buffer "global top weighted" 0B -> 640B
