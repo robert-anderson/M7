@@ -6,7 +6,7 @@
 
 
 bool hdf5::FileBase::is_hdf5(const str_t &fname) {
-    return H5Fis_hdf5(fname.c_str());
+    return H5Fis_hdf5(fname.c_str()) > 0;
 }
 
 void hdf5::FileBase::require_is_hdf5(const str_t &fname) {
