@@ -47,6 +47,7 @@ DeterministicSubspace::DeterministicSubspace(
 void DeterministicSubspace::add_(WalkerTableRow &row) {
     base_t::add_(row.index());
     row.m_deterministic.set(m_iroot);
+    logging::debug_("adding MBF {} to the deterministic subspace", row.m_mbf.to_string());
 }
 
 void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears) {
@@ -83,10 +84,10 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
             if (!exsig || exsig > exsig::c_ndistinct) continue; // diagonal
             auto helem = ham.get_element(m_local_row.m_mbf, conn_work);
             if (ham::is_significant(helem)) {
-                m_ham_matrix.add(m_local_row.index(), {all_row.index(), helem});
+                m_ham_matrix.add(iirow, {all_row.index(), helem});
                 ++n_hconn;
             } else if (bilinears.m_rdms.takes_contribs_from(conn_work.exsig())) {
-                m_rdm_network.add(m_local_row.index(), all_row.index());
+                m_rdm_network.add(iirow, all_row.index());
                 ++n_rdm_conn;
             }
         }
@@ -120,17 +121,20 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref)
 
 void DeterministicSubspace::project(double tau) {
     auto &all_row = m_all.m_row;
-    auto &row_wf = m_wf.m_store.m_row;
     uint_t iirow = ~0ul;
+    // loop over row indices in the portion of the wavefunction stored on this rank
     for (auto irow: m_irows) {
         ++iirow;
-        row_wf.jump(irow);
-        const auto& elems = m_ham_matrix[iirow];
+        m_wf.m_store.m_row.jump(irow);
         v_t<wf_t> delta(m_wf.npart(), 0.0);
-        for (auto& elem: elems){
+        for (const auto& elem: m_ham_matrix[iirow]){
             all_row.jump(elem.m_i);
             // one replica or two
-            for (const auto &ipart: m_iparts) delta[ipart] = -elem.m_v * tau * all_row.m_weight[ipart];
+            for (const auto &ipart: m_iparts) {
+                // update the walker population locally due to coeffs from all connected deterministic ONVs
+                const auto coeff = all_row.m_weight[ipart];
+                delta[ipart] -= tau * elem.m_v * coeff;
+            }
         }
         for (const auto &ipart: m_iparts) m_wf.change_weight(ipart, delta[ipart]);
     }

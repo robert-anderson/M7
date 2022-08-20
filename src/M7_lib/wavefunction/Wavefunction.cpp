@@ -74,13 +74,14 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
 
     auto& row = xr_gathered.m_row;
     v_t<strv_t> rows;
-    rows.push_back({"", "many-body basis function", "walker number", "initiator", "MPI rank"});
+    rows.push_back({"", "many-body basis function", "walker number", "initiator", "semistoch", "MPI rank"});
     for (row.restart(); row.in_range(); row.step()) {
         rows.push_back({
             std::to_string(row.index()),
             row.m_mbf.to_string(),
             logging::format("{: .6e}", row.m_weight[ipart]),
             convert::to_string(bool(row.m_initiator[ipart])),
+            convert::to_string(bool(row.m_deterministic[ipart])),
             convert::to_string(m_dist.irank(row.m_mbf))
         });
     }
