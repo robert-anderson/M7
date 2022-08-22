@@ -115,7 +115,11 @@ def stats_columns(col_name, fname='M7.stats'):
 def is_vector(obj):
     return isinstance(obj, tuple) or isinstance(obj, list)
 
-def resolve_src_path(path):
+def resolve_src_path(asset):
+    if is_vector(asset):
+        path = asset[0]
+    else:
+        path = asset
     # first, attempt to resolve path locally
     src = Path()/path
     # if this fails, look relative to the asset directory
@@ -164,7 +168,8 @@ def run(config='config.yaml', nrank=1, assets=[]):
             time.sleep(request_delay)
 
     instance.irun+=1
-    shell(cmd, run_dir)
+    out, err = shell(cmd, run_dir)
+    if len(err): instance.redefine_benchmark = False
 
     # let the queue know that this process is done
     if args.queue_dir is not None: done_path.touch()
