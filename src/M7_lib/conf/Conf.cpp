@@ -31,7 +31,7 @@ conf::Archive::Archive(Group *parent) :
                         "options relating to archives: HDF5 binary storage of calculation data"),
         m_load_path(this, "load_path", "",
                     "path to the HDF5 file from which the calculation is to be restarted"),
-        m_save_path(this, "save_path", "",
+        m_save_path(this, "save_path", "M7.h5",
                     "path to the HDF5 file into which calculation data is to be dumped at the end of the calculation"),
         m_chkpt_path(this, "chkpt_path", "",
                      "path to the HDF5 file (or file name format) into which calculation data is to be dumped periodically during the calculation"),
@@ -167,8 +167,13 @@ void conf::Bilinears::validate_node_contents() {
 conf::Rdms::Rdms(Group *parent, str_t name, str_t description) :
         Bilinears(parent, name, description),
         m_explicit_ref_conns(this, "explicit_ref_conns", true,
-                             "if true, take contributions from reference connections into account exactly") {}
+                    "if true, take contributions from reference connections into account exactly"), m_fock_4rdm(this){}
 
+conf::Fock4rdm::Fock4rdm(Group* parent) :
+        Section(parent, "fock_4rdm",
+                "options related to the contraction of the 4RDM with the generalized Fock matrix",
+                conf_components::Explicit), m_fock_path(this, "fock_path", "fock.h5",
+                                                        "path to the file containing the fock matrix"){}
 conf::SpecMoms::SpecMoms(Group *parent, str_t name, str_t description) :
         Bilinears(parent, name, description),
         m_stochastic(this, "stochastic", true,
@@ -191,17 +196,17 @@ conf::RefExcits::RefExcits(Group *parent) :
                     "maximum excitation level from the reference for which to accumulate average amplitudes"),
         m_buffers(this), m_archivable(this) {}
 
-conf::AvEsts::AvEsts(Group *parent) :
-        Section(parent, "av_ests",
-                        "options related to quantities estimated from the many-body wavefunction(s) and averaged "
-                        "on-the-fly over a number of MC cycles", Explicit),
+conf::Mae::Mae(Group *parent) :
+        Section(parent, "mae",
+                        "options related to MAEs (multidimensional averaging estimators): quantities estimated from the "
+                        "many-body wavefunction(s) and averaged on-the-fly over a number of MC cycles", Explicit),
         m_delay(this, "delay", 1000ul,
                 "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate MEVs"),
         m_ncycle(this, "ncycle", ~0ul,
-                 "number of MC cycles for which to accumulate MEVs before terminating the calculation"),
+                 "number of MC cycles for which to accumulate MAEs before terminating the calculation"),
         m_stats_period(this, "stats_period", 100ul,
                        "number of MC cycles between computation and output of all contracted values computed from the averaged estimators"),
-        m_stats_path(this, "stats_path", "M7.av_ests.stats", "output path for contracted value statistics"),
+        m_stats_path(this, "stats_path", "M7.mae.stats", "output path for contracted value statistics"),
         m_rdm(this, "rdm", "options relating to the accumulation and sampling of RDM elements"),
         m_spec_mom(this, "spec_mom", "options relating to the accumulation and sampling of spectral moments"),
         m_ref_excits(this) {}

@@ -107,12 +107,12 @@ public:
         return m_rdms;
     }
 
-    Bilinears(const conf::AvEsts &opts, uintv_t rdm_ranksigs, uintv_t /*specmom_exsigs*/,
+    Bilinears(const conf::Mae &opts, uintv_t rdm_ranksigs, uintv_t /*specmom_exsigs*/,
               sys::Size extents, uint_t nelec, const Epoch &epoch) :
             m_rdms(opts.m_rdm, rdm_ranksigs, extents, nelec, epoch),
             m_spec_moms(opts.m_spec_mom), m_total_norm({1}) {}
 
-    Bilinears(const conf::AvEsts &opts, sys::Size extents, uint_t nelec, const Epoch &epoch) :
+    Bilinears(const conf::Mae &opts, sys::Size extents, uint_t nelec, const Epoch &epoch) :
             Bilinears(opts, parse_exsigs(opts.m_rdm.m_ranks),
                       parse_exsigs(opts.m_spec_mom.m_ranks), extents, nelec, epoch) {}
 

@@ -88,7 +88,12 @@ struct FrmBosHam : HamOpTerm {
  * coefficients
  */
 struct NullFrmBosHam : FrmBosHam, NullOpTerm {
-    NullFrmBosHam() : FrmBosHam({0ul, 0ul}){}
+    NullFrmBosHam() : FrmBosHam({0ul, 0ul}){
+        DEBUG_ASSERT_FALSE(m_contribs_1101.is_nonzero(exsig::ex_0001) || m_contribs_1101.is_nonzero(exsig::ex_1101),
+                           "No exsigs should contribute to null FrmBosHam");
+        DEBUG_ASSERT_FALSE(m_contribs_1110.is_nonzero(exsig::ex_0010) || m_contribs_1110.is_nonzero(exsig::ex_1110),
+                           "No exsigs should contribute to null FrmBosHam");
+    }
 };
 
 #endif //M7_FRMBOSHAM_H

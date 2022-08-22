@@ -195,8 +195,14 @@ namespace conf {
         void validate_node_contents() override;
     };
 
+    struct Fock4rdm : Section {
+        Param<str_t> m_fock_path;
+        explicit Fock4rdm(Group* parent);
+    };
+
     struct Rdms : Bilinears {
         Param<bool> m_explicit_ref_conns;
+        Fock4rdm m_fock_4rdm;
 
         explicit Rdms(Group *parent, str_t name, str_t description);
     };
@@ -223,7 +229,7 @@ namespace conf {
         explicit RefExcits(Group *parent);
     };
 
-    struct AvEsts : Section {
+    struct Mae : Section {
         Param<uint_t> m_delay;
         Param<uint_t> m_ncycle;
         Param<uint_t> m_stats_period;
@@ -232,7 +238,7 @@ namespace conf {
         SpecMoms m_spec_mom;
         RefExcits m_ref_excits;
 
-        explicit AvEsts(Group *parent);
+        explicit Mae(Group *parent);
 
         bool any_bilinears() const {
             return !(m_rdm.m_ranks.m_value.empty() && m_spec_mom.m_ranks.m_value.empty());
@@ -327,7 +333,7 @@ namespace conf {
         Hamiltonian m_hamiltonian;
         Stats m_stats;
         InstEsts m_inst_ests;
-        AvEsts m_av_ests;
+        Mae m_av_ests;
 
         explicit Document(const str_t& fname="");
 

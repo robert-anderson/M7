@@ -81,7 +81,7 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
             row.m_mbf.to_string(),
             logging::format("{: .6e}", row.m_weight[ipart]),
             convert::to_string(bool(row.m_initiator[ipart])),
-            convert::to_string(bool(row.m_deterministic[ipart])),
+            convert::to_string(bool(row.m_deterministic[iroot_part(ipart)])),
             convert::to_string(m_dist.irank(row.m_mbf))
         });
     }

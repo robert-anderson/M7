@@ -60,7 +60,7 @@ Archive::~Archive() {
 
 void Archive::save_metadata(const hdf5::FileWriter& fw) {
     hdf5::GroupWriter gw(fw, "metadata");
-    gw.save("timestamp", std::round(std::chrono::steady_clock::now().time_since_epoch().count()));
+    gw.write_data("timestamp", std::round(std::chrono::steady_clock::now().time_since_epoch().count()));
 }
 
 void Archive::verify_metadata(const hdf5::FileReader& /*fr*/) {

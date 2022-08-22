@@ -4,12 +4,12 @@
 
 #include "Maes.h"
 
-Maes::Maes(const conf::AvEsts &opts, sys::Size extents, uint_t nelec, uint_t nroot) :
+Maes::Maes(const conf::Mae &opts, sys::Size extents, uint_t nelec, uint_t nroot) :
         m_accum_epoch("MAE accumulation"), m_bilinears(opts, extents, nelec, m_accum_epoch),
         m_ref_excits(opts.m_ref_excits, extents, nroot), m_period(opts.m_stats_period) {
     if (*this) {
         m_stats = smart_ptr::make_unique<MaeStats>(
-                "M7.maes.stats", "FCIQMC Multidimensional Averaged Estimators",
+                opts.m_stats_path, "FCIQMC Multidimensional Averaged Estimators",
                 MaeStatsRow(m_bilinears.m_rdms, m_bilinears.m_spec_moms), 1ul);
     }
 }

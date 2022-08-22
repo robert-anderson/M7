@@ -6,9 +6,9 @@
 
 uint_t ham::TermContribs::ind(uint_t exsig) const {
     if (!contribs_to(exsig, m_ranksig)) return ~0ul;
-    uint_t ifrm = decode_nfrm_cre(exsig);
+    uint_t ifrm = std::min(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig));
     DEBUG_ASSERT_LE(ifrm, m_nexsig_contrib_frm, "invalid number of like-indexed fermion operators");
-    uint_t ibos = decode_nbos_cre(exsig);
+    uint_t ibos = std::min(decode_nbos_cre(exsig), decode_nbos_ann(exsig));
     DEBUG_ASSERT_LE(ibos, m_nexsig_contrib_bos, "invalid number of like-indexed boson operators");
     return ifrm * m_nexsig_contrib_bos + ibos;
 }
@@ -16,7 +16,7 @@ uint_t ham::TermContribs::ind(uint_t exsig) const {
 ham::TermContribs::TermContribs(uint_t ranksig) :
         m_ranksig(ranksig), m_basesig(base_exsig(ranksig)),
         m_nexsig_contrib_frm(ncontrib_frm(ranksig)), m_nexsig_contrib_bos(ncontrib_bos(ranksig)),
-        m_exsig_nonzero(m_nexsig_contrib_frm * m_nexsig_contrib_bos, false) {}
+        m_exsig_nonzero(m_nexsig_contrib_frm * m_nexsig_contrib_bos, 0) {}
 
 ham::TermContribs::TermContribs(const ham::TermContribs &other) : TermContribs(other.m_ranksig){}
 
@@ -27,8 +27,8 @@ ham::TermContribs &ham::TermContribs::operator=(const ham::TermContribs &other) 
     return *this;
 }
 
-ham::TermContribs::TermContribs(const ham::TermContribs &contribs_1, const ham::TermContribs &contribs_2)
-        : TermContribs(contribs_1.m_ranksig){
+ham::TermContribs::TermContribs(const ham::TermContribs &contribs_1, const ham::TermContribs &contribs_2):
+    TermContribs(contribs_1.m_ranksig){
     REQUIRE_EQ(contribs_1.m_ranksig, contribs_2.m_ranksig, "incompatible ranks");
     auto base_nfrm_cre = decode_nfrm_cre(m_basesig);
     auto base_nfrm_ann = decode_nfrm_ann(m_basesig);
@@ -53,12 +53,13 @@ ham::TermContribs::TermContribs(const ham::TermContribs &contribs_1, const ham::
 void ham::TermContribs::set_nonzero(uint_t exsig) {
     auto i = ind(exsig);
     REQUIRE_NE(i, ~0ul, "exsig doesn't contribute to this ranksig");
-    m_exsig_nonzero[i] = true;
+    m_exsig_nonzero[i] = 1;
 }
 
 bool ham::TermContribs::is_nonzero(uint_t exsig) const {
     auto i = ind(exsig);
     REQUIRE_NE(i, ~0ul, "exsig doesn't contribute to this ranksig");
+    DEBUG_ASSERT_LT(i, m_exsig_nonzero.size(), "contrib index OOB");
     return m_exsig_nonzero[i];
 }
 

@@ -32,11 +32,9 @@ void Propagator::load_fn(const hdf5::NodeReader& parent) {
 
 void Propagator::save_fn(const hdf5::NodeWriter& parent) {
     hdf5::GroupWriter gw(parent, "propagator");
-    gw.save("nsite", uint_t(m_ham.m_frm.m_basis.m_nsite));
-    gw.save("nmode", m_ham.m_bos.m_basis.m_nmode);
-    //gw.save("shift", m_shift.m_values);
-    gw.save("tau", m_tau);
-    //gw.save("psingle", m_magnitude_logger.m_psingle);
+    gw.write_data("nsite", uint_t(m_ham.m_frm.m_basis.m_nsite));
+    gw.write_data("nmode", m_ham.m_bos.m_basis.m_nmode);
+    gw.write_data("tau", m_tau);
 }
 
 void Propagator::imp_samp_delta(wf_t& delta, ham_t src_ovlp, const Mbf& dst_mbf) const {

@@ -99,9 +99,9 @@ void Solver::execute(uint_t ncycle) {
         }
         if (m_maes.m_accum_epoch) {
             if (i == m_maes.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) {
-                if (m_icycle == ncycle)
-                    logging::info("maximum number of MEV accumulating cycles ({}) "
-                              "reached at MC cycle {}", m_opts.m_av_ests.m_ncycle, i);
+                logging::info("Maximum number of MAE accumulating cycles ({}) reached at MC cycle {}. "
+                              "Terminating solver loop.",
+                              m_opts.m_av_ests.m_ncycle, i);
                 break;
             }
         }
