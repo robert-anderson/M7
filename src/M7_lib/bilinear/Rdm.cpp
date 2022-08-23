@@ -16,30 +16,33 @@ uint_t Rdm::nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uin
     return nrow;
 }
 
-uint_t Rdm::nrow_estimate(uint_t exsig, sys::Size extents) {
+uint_t Rdm::nrow_estimate(uint_t exsig, sys::Size basis_size) {
     return nrow_estimate(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig),
-                         decode_nbos_cre(exsig), decode_nbos_ann(exsig), extents);
+                         decode_nbos_cre(exsig), decode_nbos_ann(exsig), basis_size);
 }
 
-Rdm::Rdm(const conf::Rdms& opts, uint_t ranksig, sys::Size basis_size, uint_t nelec, uint_t nvalue) :
+Rdm::Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_size,
+         uint_t nelec, uint_t nvalue, str_t name) :
         Communicator<MaeRow, MaeRow, true>(
-                "rdm_" + to_string(ranksig), {{ranksig, nvalue}}, nrow_estimate(ranksig, basis_size),
-                {{ranksig, nvalue}}, nrow_estimate(ranksig, basis_size), opts.m_buffers, opts.m_load_balancing
+                "rdm_" + this->name(name, ranksig), {{indsig, nvalue}}, nrow_estimate(indsig, basis_size),
+                {{indsig, nvalue}}, nrow_estimate(indsig, basis_size), opts.m_buffers, opts.m_load_balancing
         ),
         m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
         m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
         m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)),
-        m_lookup_inds(ranksig), m_basis_size(basis_size), m_nelec(nelec) {
+        m_indsig(indsig), m_rank_ind(decode_nfrm_cre(m_indsig)),
+        m_nfrm_cre_ind(decode_nfrm_cre(m_indsig)), m_nfrm_ann_ind(decode_nfrm_ann(m_indsig)),
+        m_nbos_cre_ind(decode_nbos_cre(m_indsig)), m_nbos_ann_ind(decode_nbos_ann(m_indsig)),
+        m_lookup_inds(indsig), m_name(name), m_nelec(nelec) {
 
     /*
      * if contributing exsig != ranksig, there is promotion to do
      * the promoter to use is given by the difference between either fermion element of the ranksig and that of the
      * contributing exsig
      */
-    const auto rank = decode_nfrm_cre(m_ranksig);
-    m_frm_promoters.reserve(rank + 1);
-    for (uint_t nins = 0ul; nins <= rank; ++nins)
-        m_frm_promoters.emplace_back(nelec + nins - rank, nins);
+    m_frm_promoters.reserve(m_rank + 1);
+    for (uint_t nins = 0ul; nins <= m_rank; ++nins)
+        m_frm_promoters.emplace_back(nelec + nins - m_rank, nins);
 }
 
 void Rdm::make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
@@ -63,7 +66,7 @@ void Rdm::make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
 
         auto irank_send = irank(m_lookup_inds);
         DEBUG_ASSERT_TRUE(m_lookup_inds.is_ordered(),
-            "operators of each kind should be stored in ascending order of their orbital (or mode) index");
+                          "operators of each kind should be stored in ascending order of their orbital (or mode) index");
         auto& send_table = send(irank_send);
         uint_t irow = *send_table[m_lookup_inds];
         if (irow == ~0ul) irow = send_table.insert(m_lookup_inds);
@@ -152,10 +155,10 @@ std::array<uintv_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
 }
 
 Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs,
-           sys::Size extents, uint_t nelec, const Epoch& accum_epoch) :
+           sys::Size basis_size, uint_t nelec, const Epoch& accum_epoch) :
         Archivable("rdms", opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
-        m_work_conns(extents), m_work_com_ops(extents), m_explicit_ref_conns(opts.m_explicit_ref_conns),
+        m_work_conns(basis_size), m_work_com_ops(basis_size), m_explicit_ref_conns(opts.m_explicit_ref_conns),
         m_accum_epoch(accum_epoch), m_nelec(nelec) {
     for (const auto& ranksig: m_active_ranksigs) {
         REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
@@ -165,7 +168,7 @@ Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs,
         REQUIRE_LE(decode_nbos_ann(ranksig), 1ul,
                    "RDMs with more than one boson annihilation operator are not yet supported");
         REQUIRE_TRUE(m_rdms[ranksig] == nullptr, "No RDM rank should appear more than once in the specification");
-        m_rdms[ranksig] = smart_ptr::make_unique<Rdm>(opts, ranksig, extents, nelec, 1ul);
+        m_rdms[ranksig] = smart_ptr::make_unique<Rdm>(opts, ranksig, ranksig, basis_size, nelec, 1ul);
     }
     m_total_norm.m_local = 0.0;
 }

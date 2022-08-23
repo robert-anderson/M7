@@ -18,19 +18,60 @@
 using namespace exsig;
 
 class Rdm : public Communicator<MaeRow, MaeRow, true> {
+    /**
+     * rank signature of the RDM, along with convenient decoded
+     */
     const uint_t m_ranksig;
     const uint_t m_rank, m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
+    /**
+     * index signature (different to ranksig if RDM is stored as an on-the-fly contraction)
+     */
+    const uint_t m_indsig;
+    const uint_t m_rank_ind, m_nfrm_cre_ind, m_nfrm_ann_ind, m_nbos_cre_ind, m_nbos_ann_ind;
+    /**
+     * enumerators of the promotions of contributing excitation signatures to the ranksig of the RDM
+     */
     v_t<FermionPromoter> m_frm_promoters;
+    /**
+     * indices of the full second quantised string
+     */
     buffered::MaeInds m_lookup_inds;
+    const str_t m_name;
+
     static uint_t nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size);
 
-    static uint_t nrow_estimate(uint_t exsig, sys::Size extents);
+    static uint_t nrow_estimate(uint_t exsig, sys::Size basis_size);
+
+    str_t name(str_t str, uint_t ranksig) const {
+        return str.empty() ? exsig::to_string(ranksig) : str;
+    }
 
 public:
-    const sys::Size m_basis_size;
+
+    str_t name() const {
+        return name(m_name, m_ranksig);
+    }
+
     const uint_t m_nelec;
 
-    Rdm(const conf::Rdms& opts, uint_t ranksig, sys::Size basis_size, uint_t nelec, uint_t nvalue);
+    /**
+     * @param opts
+     *  RDM section of the config document
+     * @param ranksig
+     *  rank of the SQ operators in each contribution
+     * @param basis_size
+     *  dimensions of the stored basis
+     * @param nelec
+     *  number of electrons to use in enforcing probability-conserving trace
+     *  TODO: generalize to use sys::Particles
+     * @param nvalue
+     *  number of values to encode in each RDM element
+     * @param name
+     *  string identifier for logging and archive output. if empty, this is generated from the ranksig
+     * @param indsig
+     *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
+     */
+    Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nelec, uint_t nvalue, str_t name="");
 
     void make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
                        const com_ops::Frm& com, const wf_t& contrib);
@@ -64,7 +105,7 @@ public:
     Reduction<wf_t> m_total_norm;
     const uint_t m_nelec;
 
-    Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Size extents, uint_t nelec, const Epoch& accum_epoch);
+    Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Size basis_size, uint_t nelec, const Epoch& accum_epoch);
 
     operator bool() const;
 
