@@ -1,10 +1,9 @@
 from subprocess import Popen, PIPE
 from pathlib import Path
 from sys import argv
-import tempfile, os, shutil
+import tempfile, os, shutil, h5py, time, argparse
 import numpy as np
 from uuid import uuid4 as uuid
-import time, argparse
 
 
 parser = argparse.ArgumentParser(description='Run this M7 system test')
@@ -70,9 +69,16 @@ class StatsFile:
 class TestInstance:
     error_msg = ""
     irun = 0
+
     irun_last_stats_update = 0
     run_stats = None
     bench_stats = None
+
+    irun_last_rdms_update = 0
+    run_rdms = None
+    bench_rdms = None
+
+
     redefine_benchmark = True
 
     def stats(self, fname='M7.stats'):
@@ -85,6 +91,15 @@ class TestInstance:
                 if self.run_stats.columns != self.bench_stats.columns:
                     self.error_msg = "incompatible column names"
         return self.run_stats, self.bench_stats
+
+    def rdms(self, fname='M7.h5'):
+        if len(self.error_msg): return
+        if self.irun_last_rdms_update != self.irun:
+            self.irun_last_rdms_update = self.irun
+            self.run_rdms = h5py.File(run_dir/fname, 'r')
+            if not benchmarking: 
+                self.bench_rdms = h5py.File(bench_dir/fname, 'r')
+        return self.run_rdms, self.bench_rdms
 
     def __del__(self):
         print(self.error_msg)
@@ -193,6 +208,19 @@ def check_nw(fname='M7.stats'):
     if benchmarking: return
     run, bench = stats_columns('WF L1 norm', fname)
     if not np.allclose(run, bench): fail('walker trajectories do not agree')
+
+def check_rdms(fname='M7.h5'):
+    if benchmarking: return
+    run, bench = instance.rdms(fname)
+    run = run['archive']['rdms']
+    bench = bench['archive']['rdms']
+    keys = tuple(map(str, bench.keys()))
+    for key in keys:
+        if key=='norm': continue
+        if not all(np.array(run[key]['indices']).flatten()==np.array(bench[key]['indices']).flatten()):
+            fail(f'index array of RDM {key} does not agree with benchmark')
+        if not np.allclose(np.array(run[key]['values']), np.array(bench[key]['values'])): 
+            fail(f'value array of RDM {key} does not agree with benchmark')
 
 '''
 perform crude removal of serial correlation

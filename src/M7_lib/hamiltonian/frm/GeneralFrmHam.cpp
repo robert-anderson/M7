@@ -26,6 +26,7 @@ uint_t GeneralFrmHam::make_ints_(IntegralReader *reader, GeneralFrmHam::ints_1e_
     using namespace exsig;
     REQUIRE_TRUE(reader, "this method should not be called on a non-reading rank");
     IntegralReader::IterData d;
+    logging::debug_("{}: {}", __FILE__, __LINE__);
 
     while (reader->next(d)){
         if (d.m_ranksig == 0ul) {
@@ -118,11 +119,9 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints() {
     }
     else if (m_info.m_impl==FcidumpInfo::MolcasHDF5) {
         logging::info(fmt, "Molcas HDF5 binary");
-        if (mpi::on_node_i_am_root()) {
-            MolcasHdf5IntegralReader reader(m_info);
-            return make_ints(&reader);
-        }
-        else return make_ints(nullptr);
+        // HDF5 reader needs to be initialized on every rank
+        MolcasHdf5IntegralReader reader(m_info);
+        return make_ints(&reader);
     }
     return {nullptr, nullptr};
 }

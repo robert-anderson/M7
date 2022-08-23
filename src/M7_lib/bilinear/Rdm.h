@@ -64,8 +64,7 @@ public:
     Reduction<wf_t> m_total_norm;
     const uint_t m_nelec;
 
-    Rdms(const conf::Rdms& opts, uintv_t ranksigs,
-         sys::Size extents, uint_t nelec, const Epoch& accum_epoch);
+    Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Size extents, uint_t nelec, const Epoch& accum_epoch);
 
     operator bool() const;
 
@@ -89,7 +88,7 @@ public:
      *
      * The death-step behaviour of the exact (and stochastic on average) propagator is to scale the WF:
      * Ci -> Ci*(1 - tau (Hii-shift)).
-     * By the time MEV contributions are being made, the death step has already been applied, and so the pre-
+     * By the time MAE contributions are being made, the death step has already been applied, and so the pre-
      * death value of the weight must be reconstituted by undoing the scaling, thus, the pre-death value of Cdst
      * is just Cdst/(1 - tau (Hii-shift))
      *
@@ -180,7 +179,7 @@ private:
             return;
         }
         hdf5::GroupWriter gw(parent, "rdms");
-        gw.save("norm", m_total_norm.m_reduced);
+        gw.write_data("norm", m_total_norm.m_reduced);
         for (const auto& i: m_active_ranksigs) {
             DEBUG_ASSERT_TRUE(m_rdms[i].get(), "active ranksig was not allocated!");
             m_rdms[i]->save(gw);

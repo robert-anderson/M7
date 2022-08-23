@@ -58,8 +58,7 @@ void conf::Archive::validate_node_contents() {
 }
 
 conf::Archivable::Archivable(Group *parent) :
-        Section(parent, "archive",
-                        "options relating to archiving behavior"),
+        Section(parent, "archive", "options relating to archiving behavior", conf_components::Explicit),
         m_load(this, "load", false,
                "attempt to load the object from the archive at the beginning of the calculation"),
         m_save(this, "save", false,
