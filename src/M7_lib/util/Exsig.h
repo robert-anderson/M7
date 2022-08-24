@@ -227,9 +227,11 @@ namespace exsig {
     static constexpr uint_t ex_single = encode(1, 1, 0, 0);
     static constexpr uint_t ex_double = encode(2, 2, 0, 0);
     static constexpr uint_t ex_triple = encode(3, 3, 0, 0);
+    static constexpr uint_t ex_quadruple = encode(4, 4, 0, 0);
     static constexpr uint_t ex_1100 = ex_single;
     static constexpr uint_t ex_2200 = ex_double;
     static constexpr uint_t ex_3300 = ex_triple;
+    static constexpr uint_t ex_4400 = ex_quadruple;
     static constexpr uint_t ex_1101 = encode(1, 1, 0, 1);
     static constexpr uint_t ex_1110 = encode(1, 1, 1, 0);
     static constexpr uint_t ex_0001 = encode(0, 0, 0, 1);

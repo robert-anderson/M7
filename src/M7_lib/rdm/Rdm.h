@@ -19,7 +19,7 @@ struct FermionRdm : Communicator<MaeRow<wf_t>, MaeRow<wf_t>, true>, Archivable {
     /**
      * working indices for building promotions and looking up the MEV tables
      */
-    buffered::FermionMevInds m_lookup_inds;
+    buffered::FermionMevInds m_full_inds;
     /**
      * all promoters required for an RDM of this rank. Index refers to the number of SQ ops
      * being inserted

@@ -18,6 +18,7 @@
 using namespace exsig;
 
 class Rdm : public Communicator<MaeRow, MaeRow, true> {
+protected:
     /**
      * rank signature of the RDM, along with convenient decoded
      */
@@ -35,7 +36,7 @@ class Rdm : public Communicator<MaeRow, MaeRow, true> {
     /**
      * indices of the full second quantised string
      */
-    buffered::MaeInds m_lookup_inds;
+    buffered::MaeInds m_full_inds;
     const str_t m_name;
 
     static uint_t nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size);
@@ -89,9 +90,97 @@ public:
     void save(hdf5::NodeWriter& gw) const;
 };
 
+class FockRdm4 : public Rdm {
+
+    /**
+     * indices of the intermediate, not the full second quantised string
+     */
+    buffered::MaeInds m_uncontracted_inds;
+    dense::SquareMatrix<ham_t> m_fock;
+
+public:
+    FockRdm4(const conf::Rdms& opts, sys::Size basis_size, uint_t nelec, uint_t nvalue):
+        Rdm(opts, exsig::ex_4400, exsig::ex_3300, basis_size, nelec, nvalue, "4400f"),
+        m_uncontracted_inds(ex_3300), m_fock(basis_size.m_frm.m_nsite){
+        logging::info("loading generalized Fock matrix for CASPT2 contracted 4RDM accumulation");
+        //opts.m_fock_4rdm.m_fock_path;
+        hdf5::FileReader reader(opts.m_fock_4rdm.m_fock_path);
+        REQUIRE_TRUE(reader.child_exists("ACT_FOCK_INDEX"), "invalid fock matrix file contents");
+        REQUIRE_TRUE(reader.child_exists("ACT_FOCK_VALUES"), "invalid fock matrix file contents");
+        v_t<int64_t> inds;
+        reader.read_data("ACT_FOCK_INDEX", inds);
+        v_t<double> values;
+        reader.read_data("ACT_FOCK_VALUES", values);
+        REQUIRE_EQ(inds.size(), values.size()*2, "incorrect number of indices");
+        for (uint_t i = 0ul; i<values.size(); ++i) {
+            m_fock(inds[2*i], inds[2*i+1]) = values[i];
+        }
+    }
+
+    void make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn, const FrmOps& com, const wf_t& contrib) {
+        // TODO: use virtual method to abstract the promotion process away from the individual contributions
+        const auto exlvl = conn.m_cre.size();
+        DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
+                          "this method should not have been delegated given the exsig of the contribution");
+        /*
+         * number of "inserted" fermion creation/annihilation operator pairs
+         */
+        const auto nins = m_rank - exlvl;
+        /*
+         * this determines the precomputed promoter required
+         */
+        const auto& promoter = m_frm_promoters[nins];
+        /*
+         * apply each combination of the promoter deterministically
+         */
+        for (uint_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
+            auto phase = promoter.apply(icomb, conn, com, m_full_inds.m_frm);
+            /*
+             * include the Fermi phase of the excitation
+             */
+            phase = phase ^ conn.phase(src_onv);
+            bool contract_phase = true;
+            // TODO: diagonal Fock optimisation
+            for (uint_t icre_contract = 0ul; icre_contract < 4ul; ++icre_contract){
+                const auto isite_cre = src_onv.m_basis.isite(m_full_inds.m_frm.m_cre[icre_contract]);
+                for (uint_t iann_contract = 0ul; iann_contract < 4ul; ++iann_contract) {
+                    const auto isite_ann = src_onv.m_basis.isite(m_full_inds.m_frm.m_ann[iann_contract]);
+
+                    const auto fock_element = m_fock(isite_cre, isite_ann);
+
+                    contract_phase = !contract_phase;
+                    /*
+                     * fill the uncontracted indices (those identifying the elements of the intermediate)
+                     */
+                    for (uint_t iuncontract = 0ul; iuncontract < 4ul; ++iuncontract) {
+                        uint_t i;
+                        i = iuncontract + (iuncontract < icre_contract ? 0 : 1);
+                        m_uncontracted_inds.m_frm.m_cre[i] = m_full_inds.m_frm.m_cre[iuncontract];
+                        i = iuncontract + (iuncontract < iann_contract ? 0 : 1);
+                        m_uncontracted_inds.m_frm.m_ann[i] = m_full_inds.m_frm.m_ann[iuncontract];
+                    }
+
+                    auto irank_send = irank(m_uncontracted_inds);
+                    DEBUG_ASSERT_TRUE(m_full_inds.is_ordered(),
+                                      "operators of each kind should be stored in ascending order of their orbital (or mode) index");
+                    auto& send_table = send(irank_send);
+                    uint_t irow = *send_table[m_uncontracted_inds];
+                    if (irow == ~0ul) irow = send_table.insert(m_uncontracted_inds);
+                    send_table.m_row.jump(irow);
+                    /*
+                     * include the Fermi phase of the rearrangement
+                     */
+                    send_table.m_row.m_values[0] += ((phase ^ contract_phase) ? -contrib : contrib)*fock_element;
+                }
+            }
+        }
+    }
+};
+
 class Rdms : public Archivable {
     std::array<std::unique_ptr<Rdm>, exsig::c_ndistinct> m_rdms;
-    const uintv_t m_active_ranksigs;
+    std::unique_ptr<FockRdm4> m_fock_rdm4;
+    const uintv_t m_rdm_ranksigs;
     const std::array<uintv_t, exsig::c_ndistinct> m_exsig_ranks;
 
     suite::Conns m_work_conns;
@@ -221,10 +310,11 @@ private:
         }
         hdf5::GroupWriter gw(parent, "rdms");
         gw.write_data("norm", m_total_norm.m_reduced);
-        for (const auto& i: m_active_ranksigs) {
+        for (const auto& i: m_rdm_ranksigs) {
             DEBUG_ASSERT_TRUE(m_rdms[i].get(), "active ranksig was not allocated!");
             m_rdms[i]->save(gw);
         }
+        if (m_fock_rdm4) m_fock_rdm4->save(gw);
     }
 };
 

@@ -33,7 +33,7 @@ Rdm::Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_
         m_indsig(indsig), m_rank_ind(decode_nfrm_cre(m_indsig)),
         m_nfrm_cre_ind(decode_nfrm_cre(m_indsig)), m_nfrm_ann_ind(decode_nfrm_ann(m_indsig)),
         m_nbos_cre_ind(decode_nbos_cre(m_indsig)), m_nbos_ann_ind(decode_nbos_ann(m_indsig)),
-        m_lookup_inds(indsig), m_name(name), m_nelec(nelec) {
+        m_full_inds(indsig), m_name(name), m_nelec(nelec) {
 
     /*
      * if contributing exsig != ranksig, there is promotion to do
@@ -62,14 +62,14 @@ void Rdm::make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
      * apply each combination of the promoter deterministically
      */
     for (uint_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
-        auto phase = promoter.apply(icomb, conn, com, m_lookup_inds.m_frm);
+        auto phase = promoter.apply(icomb, conn, com, m_full_inds.m_frm);
 
-        auto irank_send = irank(m_lookup_inds);
-        DEBUG_ASSERT_TRUE(m_lookup_inds.is_ordered(),
+        auto irank_send = irank(m_full_inds);
+        DEBUG_ASSERT_TRUE(m_full_inds.is_ordered(),
                           "operators of each kind should be stored in ascending order of their orbital (or mode) index");
         auto& send_table = send(irank_send);
-        uint_t irow = *send_table[m_lookup_inds];
-        if (irow == ~0ul) irow = send_table.insert(m_lookup_inds);
+        uint_t irow = *send_table[m_full_inds];
+        if (irow == ~0ul) irow = send_table.insert(m_full_inds);
         send_table.m_row.jump(irow);
         /*
          * include the Fermi phase of the excitation
@@ -82,7 +82,7 @@ void Rdm::make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
 void Rdm::make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
                         const com_ops::FrmBos& com, const wf_t& contrib) {
     auto exsig = conn.exsig();
-    m_lookup_inds.zero();
+    m_full_inds.zero();
     if (is_pure_frm(exsig) && is_pure_frm(m_ranksig))
         make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib);
     /*
@@ -92,12 +92,12 @@ void Rdm::make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& 
      */
     if (decode_nbos(exsig)==1) {
         // "ladder" contribution
-        m_lookup_inds = conn.m_bos;
+        m_full_inds = conn.m_bos;
         auto occ_fac = src_onv.m_bos.occ_fac(conn.m_bos);
         make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib * occ_fac);
     }
 
-    m_lookup_inds.m_frm.zero();
+    m_full_inds.m_frm.zero();
     if (m_nbos_cre == 1ul && m_nbos_ann == 1ul && is_pure_frm(exsig)) {
         /*
          * this is the only currently supported situation in which boson promotion is required: a purely fermionic
@@ -107,8 +107,8 @@ void Rdm::make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& 
         for (uint_t imode = 0ul; imode < src_onv.m_bos.nelement(); ++imode) {
             const auto ncom = src_onv.m_bos[imode];
             if (!ncom) continue;
-            m_lookup_inds.m_bos.m_cre[0] = imode;
-            m_lookup_inds.m_bos.m_ann[0] = imode;
+            m_full_inds.m_bos.m_cre[0] = imode;
+            m_full_inds.m_bos.m_ann[0] = imode;
             make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, double(ncom) * contrib);
         }
     }
@@ -129,12 +129,12 @@ void Rdm::end_cycle() {
 }
 
 void Rdm::save(hdf5::NodeWriter& gw) const {
-    m_store.save(gw, to_string(m_ranksig));
+    m_store.save(gw, this->name());
 }
 
 std::array<uintv_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
     std::array<uintv_t, exsig::c_ndistinct> exsig_ranks;
-    for (const auto& ranksig: m_active_ranksigs) {
+    for (const auto& ranksig: m_rdm_ranksigs) {
         auto nfrm_cre = decode_nfrm_cre(ranksig);
         auto nfrm_ann = decode_nfrm_cre(ranksig);
         while (nfrm_cre != ~0ul && nfrm_ann != ~0ul) {
@@ -154,13 +154,12 @@ std::array<uintv_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
     return exsig_ranks;
 }
 
-Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs,
-           sys::Size basis_size, uint_t nelec, const Epoch& accum_epoch) :
+Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Size basis_size, uint_t nelec, const Epoch& accum_epoch) :
         Archivable("rdms", opts.m_archivable),
-        m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
+        m_rdm_ranksigs(ranksigs), m_exsig_ranks(make_exsig_ranks()),
         m_work_conns(basis_size), m_work_com_ops(basis_size), m_explicit_ref_conns(opts.m_explicit_ref_conns),
         m_accum_epoch(accum_epoch), m_nelec(nelec) {
-    for (const auto& ranksig: m_active_ranksigs) {
+    for (const auto& ranksig: ranksigs) {
         REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
         REQUIRE_TRUE(conserves_nfrm(ranksig), "fermion non-conserving RDMs are not yet supported");
         REQUIRE_LE(decode_nbos_cre(ranksig), 1ul,
@@ -170,11 +169,12 @@ Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs,
         REQUIRE_TRUE(m_rdms[ranksig] == nullptr, "No RDM rank should appear more than once in the specification");
         m_rdms[ranksig] = smart_ptr::make_unique<Rdm>(opts, ranksig, ranksig, basis_size, nelec, 1ul);
     }
+    if (opts.m_fock_4rdm.m_enabled) m_fock_rdm4 = smart_ptr::make_unique<FockRdm4>(opts, basis_size, nelec, 1ul);
     m_total_norm.m_local = 0.0;
 }
 
 Rdms::operator bool() const {
-    return !m_active_ranksigs.empty();
+    return !m_rdm_ranksigs.empty() || m_fock_rdm4;
 }
 
 bool Rdms::takes_contribs_from(uint_t exsig) const {
@@ -185,7 +185,13 @@ bool Rdms::takes_contribs_from(uint_t exsig) const {
 void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_ops::Mbf& com, const wf_t& contrib) {
     auto exsig = conn.exsig();
     if (!exsig) m_total_norm.m_local+=contrib;
-    for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
+    for (auto ranksig: m_exsig_ranks[exsig]) {
+        if (m_rdms[ranksig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
+    }
+    if (m_fock_rdm4) {
+        if (is_pure_frm(exsig) && decode_nfrm_cre(exsig) <= 4ul && decode_nfrm_ann(exsig) <= 4ul)
+            m_fock_rdm4->make_contribs(src_onv, conn, com, contrib);
+    }
 }
 
 void Rdms::make_contribs(const Mbf& src_onv, const Mbf& dst_onv, const wf_t& contrib) {
@@ -205,14 +211,16 @@ void Rdms::make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& ds
 }
 
 bool Rdms::all_stores_empty() const {
-    for (auto& ranksig: m_active_ranksigs)
+    for (auto& ranksig: m_rdm_ranksigs)
         if (!m_rdms[ranksig]->m_store.is_cleared())
             return false;
+    if (m_fock_rdm4) return m_fock_rdm4->m_store.is_cleared();
     return true;
 }
 
 void Rdms::end_cycle() {
-    for (auto& ranksig: m_active_ranksigs) m_rdms[ranksig]->end_cycle();
+    for (auto& ranksig: m_rdm_ranksigs) m_rdms[ranksig]->end_cycle();
+    if (m_fock_rdm4) m_fock_rdm4->end_cycle();
     m_total_norm.all_sum();
 }
 

@@ -38,7 +38,7 @@ base_t(
                     opts.m_hash_mapping.m_remap_ratio
                     }),
                     Archivable("rdm", opts.m_archivable),
-                    m_nann(opts.m_rank), m_ncre(opts.m_rank), m_nelec(nelec), m_lookup_inds(opts.m_rank),
+                    m_nann(opts.m_rank), m_ncre(opts.m_rank), m_nelec(nelec), m_full_inds(opts.m_rank),
                     m_conn(nsite), m_mixed_estimator(opts.m_mixed_estimator), m_com(nsite) {
     m_promoters.reserve(opts.m_rank + 1);
     for (uint_t nins = 0ul; nins <= opts.m_rank; ++nins) m_promoters.emplace_back(nelec + nins - opts.m_rank, nins);
@@ -53,19 +53,19 @@ void FermionRdm::make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv
 
     const auto &promoter = m_promoters[nins];
     for (uint_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
-        auto phase = promoter.apply(icomb, conn, com, m_lookup_inds);
+        auto phase = promoter.apply(icomb, conn, com, m_full_inds);
         if (!exlvl || !nins) {ASSERT(!phase); }
         else {
-            if (m_lookup_inds.m_ann[0] == m_lookup_inds.m_cre[0]) ASSERT(!phase);
-            if (m_lookup_inds.m_ann[0] == m_lookup_inds.m_cre[1]) ASSERT(phase);
-            if (m_lookup_inds.m_ann[1] == m_lookup_inds.m_cre[0]) ASSERT(phase);
-            if (m_lookup_inds.m_ann[1] == m_lookup_inds.m_cre[1]) ASSERT(!phase);
+            if (m_full_inds.m_ann[0] == m_full_inds.m_cre[0]) ASSERT(!phase);
+            if (m_full_inds.m_ann[0] == m_full_inds.m_cre[1]) ASSERT(phase);
+            if (m_full_inds.m_ann[1] == m_full_inds.m_cre[0]) ASSERT(phase);
+            if (m_full_inds.m_ann[1] == m_full_inds.m_cre[1]) ASSERT(!phase);
         }
-        auto irank_send = m_ra.get_rank(m_lookup_inds);
-        ASSERT(m_lookup_inds.is_ordered());
+        auto irank_send = m_ra.get_rank(m_full_inds);
+        ASSERT(m_full_inds.is_ordered());
         auto &send_table = send(irank_send);
-        uint_t irow = *send_table[m_lookup_inds];
-        if (irow == ~0ul) irow = send_table.insert(m_lookup_inds);
+        uint_t irow = *send_table[m_full_inds];
+        if (irow == ~0ul) irow = send_table.insert(m_full_inds);
 
         send_table.m_row.jump(irow);
         /*
