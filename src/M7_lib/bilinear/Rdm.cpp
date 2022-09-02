@@ -33,7 +33,7 @@ Rdm::Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_
         m_indsig(indsig), m_rank_ind(decode_nfrm_cre(m_indsig)),
         m_nfrm_cre_ind(decode_nfrm_cre(m_indsig)), m_nfrm_ann_ind(decode_nfrm_ann(m_indsig)),
         m_nbos_cre_ind(decode_nbos_cre(m_indsig)), m_nbos_ann_ind(decode_nbos_ann(m_indsig)),
-        m_full_inds(indsig), m_name(name), m_nelec(nelec) {
+        m_full_inds(ranksig), m_name(name), m_nelec(nelec) {
 
     /*
      * if contributing exsig != ranksig, there is promotion to do

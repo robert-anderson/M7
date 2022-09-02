@@ -113,7 +113,7 @@ public:
         reader.read_data("ACT_FOCK_VALUES", values);
         REQUIRE_EQ(inds.size(), values.size()*2, "incorrect number of indices");
         for (uint_t i = 0ul; i<values.size(); ++i) {
-            m_fock(inds[2*i], inds[2*i+1]) = values[i];
+            m_fock(inds[2*i]-1, inds[2*i+1]-1) = values[i];
         }
     }
 
@@ -154,10 +154,14 @@ public:
                      */
                     for (uint_t iuncontract = 0ul; iuncontract < 4ul; ++iuncontract) {
                         uint_t i;
-                        i = iuncontract + (iuncontract < icre_contract ? 0 : 1);
-                        m_uncontracted_inds.m_frm.m_cre[i] = m_full_inds.m_frm.m_cre[iuncontract];
-                        i = iuncontract + (iuncontract < iann_contract ? 0 : 1);
-                        m_uncontracted_inds.m_frm.m_ann[i] = m_full_inds.m_frm.m_ann[iuncontract];
+                        if (iuncontract!=icre_contract) {
+                            i = iuncontract - (iuncontract > icre_contract ? 1 : 0);
+                            m_uncontracted_inds.m_frm.m_cre[i] = m_full_inds.m_frm.m_cre[iuncontract];
+                        }
+                        if (iuncontract!=iann_contract) {
+                            i = iuncontract - (iuncontract > iann_contract ? 1 : 0);
+                            m_uncontracted_inds.m_frm.m_ann[i] = m_full_inds.m_frm.m_ann[iuncontract];
+                        }
                     }
 
                     auto irank_send = irank(m_uncontracted_inds);
