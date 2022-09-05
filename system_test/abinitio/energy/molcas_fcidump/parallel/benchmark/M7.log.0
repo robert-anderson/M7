@@ -1,0 +1,23 @@
+[1661165165] [info] Reallocating buffer "wavefunction send" 0B x 2 tables = 0B -> 24B x 2 tables = 48B
+[1661165165] [info] Reallocating buffer "wavefunction recv" 0B -> 24B
+[1661165165] [info] Reallocating buffer "wavefunction redistributor send" 0B x 2 tables = 0B -> 32B x 2 tables = 64B
+[1661165165] [info] Reallocating buffer "wavefunction redistributor recv" 0B -> 32B
+[1661165165] [info] Reallocating buffer "wavefunction protection level send" 0B x 2 tables = 0B -> 8B x 2 tables = 16B
+[1661165165] [info] Reallocating buffer "wavefunction protection level recv" 0B -> 8B
+[1661165165] [info] Reallocating buffer "wavefunction store" 0B -> 16.000000KB
+[1661165165] [info] Reallocating buffer "Work space for MBFs" 0B -> 16B
+[1661165165] [info] Reallocating buffer "reference gather send" 0B -> 32B
+[1661165165] [info] Reallocating buffer "reference gather recv" 0B -> 32B
+[1661165165] [info] Reallocating buffer "reference all rows" 0B -> 32B
+[1661165165] [info] Reallocating buffer "M7.stats" 0B -> 128B
+[1661165165] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1661165165] [info] Reallocating buffer "wavefunction send" 24B x 2 tables = 48B -> 72B x 2 tables = 144B
+[1661165165] [info] Reallocating buffer "wavefunction recv" 24B -> 72B
+[1661165165] [info] Reallocating buffer "wavefunction send" 72B x 2 tables = 144B -> 144B x 2 tables = 288B
+[1661165165] [info] Reallocating buffer "wavefunction recv" 72B -> 144B
+[1661165166] [info] Reallocating buffer "wavefunction recv" 144B -> 256B
+[1661165167] [info] Reallocating buffer "wavefunction send" 144B x 2 tables = 288B -> 252B x 2 tables = 504B
+[1661165177] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 144B
+[1661165177] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1661165177] [info] Reallocating buffer "locally included globally extreme rows" 0B -> 288B
+[1661165177] [info] Reallocating buffer "global top weighted" 0B -> 640B
