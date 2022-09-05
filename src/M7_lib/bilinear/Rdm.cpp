@@ -21,32 +21,24 @@ uint_t Rdm::nrow_estimate(uint_t exsig, sys::Size basis_size) {
                          decode_nbos_cre(exsig), decode_nbos_ann(exsig), basis_size);
 }
 
-Rdm::Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_size,
-         uint_t nelec, uint_t nvalue, str_t name) :
-        Communicator<MaeRow, MaeRow, true>(
-                "rdm_" + this->name(name, ranksig), {{indsig, nvalue}}, nrow_estimate(indsig, basis_size),
-                {{indsig, nvalue}}, nrow_estimate(indsig, basis_size), opts.m_buffers, opts.m_load_balancing
-        ),
-        m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
-        m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
-        m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)),
-        m_indsig(indsig), m_rank_ind(decode_nfrm_cre(m_indsig)),
-        m_nfrm_cre_ind(decode_nfrm_cre(m_indsig)), m_nfrm_ann_ind(decode_nfrm_ann(m_indsig)),
-        m_nbos_cre_ind(decode_nbos_cre(m_indsig)), m_nbos_ann_ind(decode_nbos_ann(m_indsig)),
-        m_full_inds(ranksig), m_name(name), m_nelec(nelec) {
-
-    /*
-     * if contributing exsig != ranksig, there is promotion to do
-     * the promoter to use is given by the difference between either fermion element of the ranksig and that of the
-     * contributing exsig
-     */
-    m_frm_promoters.reserve(m_rank + 1);
-    for (uint_t nins = 0ul; nins <= m_rank; ++nins)
-        m_frm_promoters.emplace_back(nelec + nins - m_rank, nins);
+str_t Rdm::name(str_t str, uint_t ranksig) const {
+    return str.empty() ? exsig::to_string(ranksig) : str;
 }
 
-void Rdm::make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
-                        const FrmOps& com, const wf_t& contrib) {
+void Rdm::add_to_send_table(const MaeInds &inds, wf_t contrib) {
+    DEBUG_ASSERT_EQ(inds.m_exsig, m_indsig, "incorrect number of operators in MAE indices");
+    const auto irank_send = irank(inds);
+    DEBUG_ASSERT_TRUE(inds.is_ordered(),
+                      "operators of each kind should be stored in ascending order of their orbital (or mode) index");
+    auto &send_table = send(irank_send);
+    uint_t irow = *send_table[inds];
+    if (irow == ~0ul) irow = send_table.insert(inds);
+    send_table.m_row.jump(irow);
+    send_table.m_row.m_values[0] += contrib;
+}
+
+void Rdm::frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
+                            const FrmOps& com, const wf_t& contrib) {
     const auto exlvl = conn.m_cre.size();
     DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
                       "this method should not have been delegated given the exsig of the contribution");
@@ -63,24 +55,16 @@ void Rdm::make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
      */
     for (uint_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
         auto phase = promoter.apply(icomb, conn, com, m_full_inds.m_frm);
-
-        auto irank_send = irank(m_full_inds);
-        DEBUG_ASSERT_TRUE(m_full_inds.is_ordered(),
-                          "operators of each kind should be stored in ascending order of their orbital (or mode) index");
-        auto& send_table = send(irank_send);
-        uint_t irow = *send_table[m_full_inds];
-        if (irow == ~0ul) irow = send_table.insert(m_full_inds);
-        send_table.m_row.jump(irow);
         /*
          * include the Fermi phase of the excitation
          */
-        phase = phase ^ conn.phase(src_onv);
-        send_table.m_row.m_values[0] += phase ? -contrib : contrib;
+        phase ^= conn.phase(src_onv);
+        add_to_send_table(m_full_inds, phase ? -contrib : contrib);
     }
 }
 
-void Rdm::make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
-                        const com_ops::FrmBos& com, const wf_t& contrib) {
+void Rdm::frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
+                               const com_ops::FrmBos& com, const wf_t& contrib) {
     auto exsig = conn.exsig();
     m_full_inds.zero();
     if (is_pure_frm(exsig) && is_pure_frm(m_ranksig))
@@ -114,6 +98,30 @@ void Rdm::make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& 
     }
 }
 
+Rdm::Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_size,
+         uint_t nelec, uint_t nvalue, str_t name) :
+        Communicator<MaeRow, MaeRow, true>(
+                "rdm_" + this->name(name, ranksig), {{indsig, nvalue}}, nrow_estimate(indsig, basis_size),
+                {{indsig, nvalue}}, nrow_estimate(indsig, basis_size), opts.m_buffers, opts.m_load_balancing
+        ),
+        m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
+        m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
+        m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)),
+        m_indsig(indsig), m_rank_ind(decode_nfrm_cre(m_indsig)),
+        m_nfrm_cre_ind(decode_nfrm_cre(m_indsig)), m_nfrm_ann_ind(decode_nfrm_ann(m_indsig)),
+        m_nbos_cre_ind(decode_nbos_cre(m_indsig)), m_nbos_ann_ind(decode_nbos_ann(m_indsig)),
+        m_full_inds(ranksig), m_name(name), m_nelec(nelec) {
+
+    /*
+     * if contributing exsig != ranksig, there is promotion to do
+     * the promoter to use is given by the difference between either fermion element of the ranksig and that of the
+     * contributing exsig
+     */
+    m_frm_promoters.reserve(m_rank + 1);
+    for (uint_t nins = 0ul; nins <= m_rank; ++nins)
+        m_frm_promoters.emplace_back(nelec + nins - m_rank, nins);
+}
+
 void Rdm::end_cycle() {
     if (!send().buffer_size()) return;
     communicate();
@@ -131,6 +139,83 @@ void Rdm::end_cycle() {
 void Rdm::save(hdf5::NodeWriter& gw) const {
     m_store.save(gw, this->name());
 }
+
+FockRdm4::FockRdm4(const conf::Rdms &opts, sys::Size basis_size, uint_t nelec, uint_t nvalue) :
+        Rdm(opts, exsig::ex_4400, exsig::ex_3300, basis_size, nelec, nvalue, "4400f"),
+        m_uncontracted_inds(ex_3300), m_fock(basis_size.m_frm.m_nsite){
+    logging::info("loading generalized Fock matrix for CASPT2 contracted 4RDM accumulation");
+    hdf5::FileReader reader(opts.m_fock_4rdm.m_fock_path);
+    REQUIRE_TRUE(reader.child_exists("ACT_FOCK_INDEX"), "invalid fock matrix file contents");
+    REQUIRE_TRUE(reader.child_exists("ACT_FOCK_VALUES"), "invalid fock matrix file contents");
+    v_t<int64_t> inds;
+    reader.read_data("ACT_FOCK_INDEX", inds);
+    v_t<double> values;
+    reader.read_data("ACT_FOCK_VALUES", values);
+    REQUIRE_EQ(inds.size(), values.size()*2, "incorrect number of indices");
+    for (uint_t i = 0ul; i<values.size(); ++i) {
+        // offset by one to account for the Fortran indices in the HDF5 format
+        m_fock(inds[2*i]-1, inds[2*i+1]-1) = values[i];
+    }
+}
+
+void FockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn,
+                                 const FrmOps &com, const wf_t &contrib) {
+    const auto exlvl = conn.m_cre.size();
+    DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
+                      "this method should not have been delegated given the exsig of the contribution");
+    /*
+     * number of "inserted" fermion creation/annihilation operator pairs
+     */
+    const auto nins = m_rank - exlvl;
+    /*
+     * this determines the precomputed promoter required
+     */
+    const auto& promoter = m_frm_promoters[nins];
+    /*
+     * apply each combination of the promoter deterministically
+     */
+    for (uint_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
+        auto phase = promoter.apply(icomb, conn, com, m_full_inds.m_frm);
+        /*
+         * include the Fermi phase of the excitation
+         */
+        phase = phase ^ conn.phase(src_onv);
+        bool contract_phase = true;
+        // TODO: diagonal Fock optimisation
+        for (uint_t icre_contract = 0ul; icre_contract < 4ul; ++icre_contract){
+            const auto isite_cre = src_onv.m_basis.isite(m_full_inds.m_frm.m_cre[icre_contract]);
+            for (uint_t iann_contract = 0ul; iann_contract < 4ul; ++iann_contract) {
+                const auto isite_ann = src_onv.m_basis.isite(m_full_inds.m_frm.m_ann[iann_contract]);
+
+                const auto fock_element = m_fock(isite_cre, isite_ann);
+
+                contract_phase = !contract_phase;
+                /*
+                 * fill the uncontracted indices (those identifying the elements of the intermediate)
+                 */
+                for (uint_t iuncontract = 0ul; iuncontract < 4ul; ++iuncontract) {
+                    // the next position in the uncontracted indices to fill
+                    uint_t i;
+                    if (iuncontract!=icre_contract) {
+                        i = iuncontract - (iuncontract > icre_contract ? 1 : 0);
+                        m_uncontracted_inds.m_frm.m_cre[i] = m_full_inds.m_frm.m_cre[iuncontract];
+                    }
+                    if (iuncontract!=iann_contract) {
+                        i = iuncontract - (iuncontract > iann_contract ? 1 : 0);
+                        m_uncontracted_inds.m_frm.m_ann[i] = m_full_inds.m_frm.m_ann[iuncontract];
+                    }
+                }
+
+                /*
+                 * include the Fermi phase of the contraction and the promotion when computing the overall sign
+                 */
+                add_to_send_table(m_uncontracted_inds,
+                                  ((phase ^ contract_phase) ? -contrib : contrib) * fock_element);
+            }
+        }
+    }
+}
+
 
 std::array<uintv_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
     std::array<uintv_t, exsig::c_ndistinct> exsig_ranks;
