@@ -4,3 +4,4 @@
 *.swp
 /build*/
 __pycache__
+system_test/**/tmp
