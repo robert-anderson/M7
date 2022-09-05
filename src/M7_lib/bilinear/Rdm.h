@@ -18,7 +18,7 @@
 using namespace exsig;
 
 class Rdm : public Communicator<MaeRow, MaeRow, true> {
-protected:
+public:
     /**
      * rank signature of the RDM, along with convenient decoded
      */
@@ -29,6 +29,7 @@ protected:
      */
     const uint_t m_indsig;
     const uint_t m_rank_ind, m_nfrm_cre_ind, m_nfrm_ann_ind, m_nbos_cre_ind, m_nbos_ann_ind;
+protected:
     /**
      * enumerators of the promotions of contributing excitation signatures to the ranksig of the RDM
      */
@@ -66,6 +67,15 @@ public:
 
     const uint_t m_nelec;
 
+    Rdm(uint_t ranksig, uint_t indsig, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue,
+        Sizing store_sizing, Sizing comm_sizing, str_t name="");
+
+    Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue,
+        double store_exp_fac=1.0, double comm_exp_fac=1.0, str_t name=""):
+        Rdm(ranksig, indsig, nblock_per_rank, nelec, nvalue,
+    {nrow_estimate(indsig, basis_size), store_exp_fac},
+    {nrow_estimate(indsig, basis_size), comm_exp_fac}, name){}
+
     /**
      * @param opts
      *  RDM section of the config document
@@ -83,7 +93,9 @@ public:
      * @param indsig
      *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
      */
-    Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nelec, uint_t nvalue, str_t name="");
+    Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nelec, uint_t nvalue, str_t name=""):
+        Rdm(ranksig, indsig, basis_size, opts.m_load_balancing.m_nblock_per_rank, nelec, nvalue,
+            opts.m_buffers.m_store_exp_fac, opts.m_buffers.m_comm_exp_fac, name){}
 
     void end_cycle();
 
@@ -123,6 +135,17 @@ public:
                            const FrmOps& com, const wf_t& contrib) override;
 };
 
+class SpinFreeRdm : public Rdm {
+    SpinFreeRdm(const Rdm& spin_resolved):
+        Rdm(spin_resolved.m_ranksig, spin_resolved.m_indsig, spin_resolved.m_dist.nblock(), spin_resolved.m_nelec,
+            spin_resolved.m_store.m_row.m_values.nelement(),
+            {spin_resolved.m_store.m_hwm, spin_resolved.m_store.m_bw.get_expansion_factor()},
+            {spin_resolved.m_comm.send(0).m_hwm, spin_resolved.m_comm.send(0).m_bw.get_expansion_factor()},
+            "sf_"+spin_resolved.name()){
+
+    }
+};
+
 class Rdms : public Archivable {
     std::array<std::unique_ptr<Rdm>, exsig::c_ndistinct> m_rdms;
     std::unique_ptr<FockRdm4> m_fock_rdm4;
@@ -152,41 +175,6 @@ public:
     void make_contribs(const field::Mbf& src_onv, const field::Mbf& dst_onv, const wf_t& contrib);
 
     void make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& dst_row, const Propagator& prop);
-
-    /**
-     * TODO: remove. this is now done in the Annihilator class
-     * We need to be careful of the intermediate state of the walker weights.
-     * if src_weight is taken from the wavefunction at cycle i, dst_weight is at an intermediate value equal to
-     * the wavefunction at cycle i with the diagonal part of the propagator already applied. We don't want to
-     * introduce a second post-annihilation loop over occupied MBFs to apply the diagonal part of the
-     * propagator, so for MEVs, the solution is to reconstitute the value of the walker weight before the
-     * diagonal death/cloning.
-     *
-     * The death-step behaviour of the exact (and stochastic on average) propagator is to scale the WF:
-     * Ci -> Ci*(1 - tau (Hii-shift)).
-     * By the time MAE contributions are being made, the death step has already been applied, and so the pre-
-     * death value of the weight must be reconstituted by undoing the scaling, thus, the pre-death value of Cdst
-     * is just Cdst/(1 - tau (Hii-shift))
-     *
-     * @param src_mbf
-     * @param dst_row
-     * @param prop
-     * @param refs
-     * @param ipart_dst
-     */
-//    void make_contribs(const field::Mbf& src_mbf, const wf_t& src_weight, const WalkerTableRow& dst_row,
-//                       const Propagator& prop, const References& refs, const uint_t& ipart_dst) {
-//        if (!*this) return;
-//        if (!m_accum_epoch) return;
-//
-//        auto ipart_dst_replica = dst_row.ipart_replica(ipart_dst);
-//        double dupl_fac = 1.0 / dst_row.nreplica();
-//
-//        auto dst_weight_before_death = dst_row.m_weight[ipart_dst_replica];
-//        dst_weight_before_death /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[ipart_dst_replica]);
-//        make_contribs(src_mbf, dst_row.m_mbf, dupl_fac * src_weight * dst_weight_before_death);
-//    }
-
 
     bool all_stores_empty() const;
 

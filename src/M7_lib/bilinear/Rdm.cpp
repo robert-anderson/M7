@@ -98,12 +98,11 @@ void Rdm::frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmB
     }
 }
 
-Rdm::Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_size,
-         uint_t nelec, uint_t nvalue, str_t name) :
+Rdm::Rdm(uint_t ranksig, uint_t indsig, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue, Sizing store_sizing,
+         Sizing comm_sizing, str_t name) :
         Communicator<MaeRow, MaeRow, true>(
-                "rdm_" + this->name(name, ranksig), {{indsig, nvalue}}, nrow_estimate(indsig, basis_size),
-                {{indsig, nvalue}}, nrow_estimate(indsig, basis_size), opts.m_buffers, opts.m_load_balancing
-        ),
+                "rdm_" + (name.empty() ? this->name(name, ranksig) : name),
+                {{indsig, nvalue}}, store_sizing, {{indsig, nvalue}}, comm_sizing, nblock_per_rank),
         m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
         m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
         m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)),
@@ -111,7 +110,6 @@ Rdm::Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_
         m_nfrm_cre_ind(decode_nfrm_cre(m_indsig)), m_nfrm_ann_ind(decode_nfrm_ann(m_indsig)),
         m_nbos_cre_ind(decode_nbos_cre(m_indsig)), m_nbos_ann_ind(decode_nbos_ann(m_indsig)),
         m_full_inds(ranksig), m_name(name), m_nelec(nelec) {
-
     /*
      * if contributing exsig != ranksig, there is promotion to do
      * the promoter to use is given by the difference between either fermion element of the ranksig and that of the
