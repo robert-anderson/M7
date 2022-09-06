@@ -8,4 +8,8 @@ target_sources(M7_lib
         Rdm.h
         SpectralMoment.cpp
         SpectralMoment.h
+        SpinfreeRdm.cpp
+        SpinfreeRdm.h
+        SpinFreeRdmArrays.h
+        SpinsigMap.h
 )

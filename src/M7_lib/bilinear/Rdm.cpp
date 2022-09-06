@@ -98,18 +98,18 @@ void Rdm::frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmB
     }
 }
 
-Rdm::Rdm(uint_t ranksig, uint_t indsig, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue, Sizing store_sizing,
-         Sizing comm_sizing, str_t name) :
+Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue,
+         Sizing store_sizing, Sizing comm_sizing, str_t name) :
         Communicator<MaeRow, MaeRow, true>(
                 "rdm_" + (name.empty() ? this->name(name, ranksig) : name),
                 {{indsig, nvalue}}, store_sizing, {{indsig, nvalue}}, comm_sizing, nblock_per_rank),
-        m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
+        m_basis_size(basis_size), m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
         m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
         m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)),
         m_indsig(indsig), m_rank_ind(decode_nfrm_cre(m_indsig)),
         m_nfrm_cre_ind(decode_nfrm_cre(m_indsig)), m_nfrm_ann_ind(decode_nfrm_ann(m_indsig)),
         m_nbos_cre_ind(decode_nbos_cre(m_indsig)), m_nbos_ann_ind(decode_nbos_ann(m_indsig)),
-        m_full_inds(ranksig), m_name(name), m_nelec(nelec) {
+        m_full_inds(ranksig), m_uncontracted_inds(indsig), m_name(name), m_nelec(nelec) {
     /*
      * if contributing exsig != ranksig, there is promotion to do
      * the promoter to use is given by the difference between either fermion element of the ranksig and that of the
@@ -119,6 +119,7 @@ Rdm::Rdm(uint_t ranksig, uint_t indsig, uint_t nblock_per_rank, uint_t nelec, ui
     for (uint_t nins = 0ul; nins <= m_rank; ++nins)
         m_frm_promoters.emplace_back(nelec + nins - m_rank, nins);
 }
+
 
 void Rdm::end_cycle() {
     if (!send().buffer_size()) return;
@@ -140,7 +141,7 @@ void Rdm::save(hdf5::NodeWriter& gw) const {
 
 FockRdm4::FockRdm4(const conf::Rdms &opts, sys::Size basis_size, uint_t nelec, uint_t nvalue) :
         Rdm(opts, exsig::ex_4400, exsig::ex_3300, basis_size, nelec, nvalue, "4400f"),
-        m_uncontracted_inds(ex_3300), m_fock(basis_size.m_frm.m_nsite){
+        m_fock(basis_size.m_frm.m_nsite){
     logging::info("loading generalized Fock matrix for CASPT2 contracted 4RDM accumulation");
     hdf5::FileReader reader(opts.m_fock_4rdm.m_fock_path);
     REQUIRE_TRUE(reader.child_exists("ACT_FOCK_INDEX"), "invalid fock matrix file contents");

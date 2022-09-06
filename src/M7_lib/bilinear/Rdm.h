@@ -19,6 +19,7 @@ using namespace exsig;
 
 class Rdm : public Communicator<MaeRow, MaeRow, true> {
 public:
+    const sys::Size m_basis_size;
     /**
      * rank signature of the RDM, along with convenient decoded
      */
@@ -38,6 +39,10 @@ protected:
      * indices of the full second quantised string
      */
     buffered::MaeInds m_full_inds;
+    /**
+     * indices of any contracted intermediate, not the full second quantised string
+     */
+    buffered::MaeInds m_uncontracted_inds;
     const str_t m_name;
 
     static uint_t nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size);
@@ -67,12 +72,12 @@ public:
 
     const uint_t m_nelec;
 
-    Rdm(uint_t ranksig, uint_t indsig, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue,
+    Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue,
         Sizing store_sizing, Sizing comm_sizing, str_t name="");
 
     Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue,
         double store_exp_fac=1.0, double comm_exp_fac=1.0, str_t name=""):
-        Rdm(ranksig, indsig, nblock_per_rank, nelec, nvalue,
+        Rdm(ranksig, indsig, basis_size, nblock_per_rank, nelec, nvalue,
     {nrow_estimate(indsig, basis_size), store_exp_fac},
     {nrow_estimate(indsig, basis_size), comm_exp_fac}, name){}
 
@@ -119,10 +124,6 @@ public:
 
 class FockRdm4 : public Rdm {
 
-    /**
-     * indices of the intermediate, not the full second quantised string
-     */
-    buffered::MaeInds m_uncontracted_inds;
     dense::SquareMatrix<ham_t> m_fock;
 
 public:
@@ -133,44 +134,6 @@ public:
      */
     void frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
                            const FrmOps& com, const wf_t& contrib) override;
-};
-
-class SpinFreeRdm : public Rdm {
-
-    void make_contribs_from_one_row(const MaeRow& row) {
-        switch (m_nfrm_cre_ind) {
-            case 0ul: break;
-            case 1ul:
-                const auto i = row.m_inds.m_frm.m_cre[0];
-                const auto j = row.m_inds.m_frm.m_ann[0];
-                break;
-            case 2ul:
-                break;
-            case 3ul:
-                break;
-            default:
-                ABORT("rank is out of range for implemented spin tracers");
-        }
-
-    }
-public:
-    /**
-     * @param spin_resolved
-     *  source RDM from which the spin free version is to be computed
-     * @param nelem_per_comm
-     *  number of elements of spin_resolved to process before performing an all-to-allv
-     */
-    SpinFreeRdm(const Rdm& spin_resolved, uint_t nelem_per_comm=5000ul):
-        Rdm(spin_resolved.m_ranksig, spin_resolved.m_indsig, spin_resolved.m_dist.nblock(), spin_resolved.m_nelec,
-            spin_resolved.m_store.m_row.m_values.nelement(),
-            {spin_resolved.m_store.m_hwm, spin_resolved.m_store.m_bw.get_expansion_factor()},
-            {nelem_per_comm, 1.0}, "sf_"+spin_resolved.name()){
-        REQUIRE_EQ_ALL(m_nfrm_cre, m_nfrm_ann, "spin tracing requires fermion number conservation");
-        auto row = spin_resolved.m_store.m_row;
-        for (row.restart(); row.in_range(); row.step()) {
-
-        }
-    }
 };
 
 class Rdms : public Archivable {
