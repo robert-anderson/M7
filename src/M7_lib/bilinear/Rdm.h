@@ -136,13 +136,40 @@ public:
 };
 
 class SpinFreeRdm : public Rdm {
-    SpinFreeRdm(const Rdm& spin_resolved):
+
+    void make_contribs_from_one_row(const MaeRow& row) {
+        switch (m_nfrm_cre_ind) {
+            case 0ul: break;
+            case 1ul:
+                const auto i = row.m_inds.m_frm.m_cre[0];
+                const auto j = row.m_inds.m_frm.m_ann[0];
+                break;
+            case 2ul:
+                break;
+            case 3ul:
+                break;
+            default:
+                ABORT("rank is out of range for implemented spin tracers");
+        }
+
+    }
+public:
+    /**
+     * @param spin_resolved
+     *  source RDM from which the spin free version is to be computed
+     * @param nelem_per_comm
+     *  number of elements of spin_resolved to process before performing an all-to-allv
+     */
+    SpinFreeRdm(const Rdm& spin_resolved, uint_t nelem_per_comm=5000ul):
         Rdm(spin_resolved.m_ranksig, spin_resolved.m_indsig, spin_resolved.m_dist.nblock(), spin_resolved.m_nelec,
             spin_resolved.m_store.m_row.m_values.nelement(),
             {spin_resolved.m_store.m_hwm, spin_resolved.m_store.m_bw.get_expansion_factor()},
-            {spin_resolved.m_comm.send(0).m_hwm, spin_resolved.m_comm.send(0).m_bw.get_expansion_factor()},
-            "sf_"+spin_resolved.name()){
+            {nelem_per_comm, 1.0}, "sf_"+spin_resolved.name()){
+        REQUIRE_EQ_ALL(m_nfrm_cre, m_nfrm_ann, "spin tracing requires fermion number conservation");
+        auto row = spin_resolved.m_store.m_row;
+        for (row.restart(); row.in_range(); row.step()) {
 
+        }
     }
 };
 
