@@ -42,7 +42,7 @@ class SpinFreeRdm : public Rdm {
      *  0: all spatial indices are distinct
      *  1: first two are the same, last one distinct
      *  2: last two are the same, first one distinct
-     * there is no spatial signature 3 for the 3-RDM since there would have to be two electrons in the same spinorbital
+     * there is no spatial signature 3 for the 3-RDM since there would have to be two electrons in the same spin-orbital
      * @param spat_inds
      *  spatial indices as single cre/ann string
      * @return

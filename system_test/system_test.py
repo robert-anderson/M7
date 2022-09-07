@@ -218,7 +218,7 @@ def check_rdms(fname='M7.h5'):
     assert set(run.keys())==set(bench.keys()), 'different ranks of RDM accumulated than in benchmark'
     for key in keys:
         if key=='norm': continue
-        if not all(np.array(run[key]['indices']).flatten()==np.array(bench[key]['indices']).flatten()):
+        if not np.array_equal(run[key]['indices'], bench[key]['indices']):
             fail(f'index array of RDM {key} does not agree with benchmark')
         if not np.allclose(np.array(run[key]['values']), np.array(bench[key]['values'])): 
             fail(f'value array of RDM {key} does not agree with benchmark')

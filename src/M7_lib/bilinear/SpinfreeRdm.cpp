@@ -35,6 +35,7 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
     const auto elem = row.m_values[0] / norm;
     auto& given_inds = m_uncontracted_inds;
     const auto orbs = m_basis_size.m_frm;
+    const bool is_diagonal = (row.m_inds.m_frm.m_cre==row.m_inds.m_frm.m_ann);
     if (m_nfrm_cre_ind==1ul) {
         /*
          * 1-body case is trivial
@@ -49,9 +50,14 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
         const auto p0 = orbs.isite(i0);
         const auto q0 = orbs.isite(j0);
         DEBUG_ASSERT_EQ(orbs.ispin(i0), orbs.ispin(j0), "spin-tracing of Ms non-conserving RDMs is not valid");
-        add(p0, q0, elem);
-        // enforce hermiticity symmetry
-        add(q0, p0, elem);
+        if (is_diagonal) {
+            add(p0, q0, elem);
+        }
+        else {
+            // enforce hermiticity symmetry
+            add(p0, q0, 0.5*elem);
+            add(q0, p0, 0.5*elem);
+        }
     }
     else {
         using namespace spin_free_rdm_arrays;
@@ -105,7 +111,7 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
                 m_insert_inds.m_frm.m_cre[i] = given_inds.m_frm.m_cre[cre_perm[i]];
                 m_insert_inds.m_frm.m_ann[i] = given_inds.m_frm.m_ann[ann_perm[i]];
             }
-            if (m_insert_inds.m_frm.m_cre==m_insert_inds.m_frm.m_ann) {
+            if (is_diagonal) {
                 // diagonal element
                 add_to_send_table(m_insert_inds, elem*factor);
             }

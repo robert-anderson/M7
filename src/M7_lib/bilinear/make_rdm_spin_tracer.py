@@ -284,8 +284,8 @@ for rank in (2, 3):
 
     perm_end_offsets = np.array(perm_end_offsets)
     factors = np.array(factors)
-    hole_perms = np.array(hole_perms).reshape((rank, nperm))
-    elec_perms = np.array(elec_perms).reshape((rank, nperm))
+    hole_perms = np.array(hole_perms).reshape((nperm, rank))
+    elec_perms = np.array(elec_perms).reshape((nperm, rank))
 
     items.append({
         'name': f'c_case_map_{rank}', 
@@ -310,14 +310,14 @@ for rank in (2, 3):
 
     items.append({
         'name': f'c_cre_perms_{rank}', 
-        'data': hole_perms.T,
+        'data': hole_perms,
         'signed': False, 
         'comment': f'reordering of the creation indices for the given permutation',
         'dimnames': [f'c_nperm_{rank}', f'c_rank_{rank}']})
 
     items.append({
         'name': f'c_ann_perms_{rank}', 
-        'data': elec_perms.T,
+        'data': elec_perms,
         'signed': False, 
         'comment': f'reordering of the annihilation indices for the given permutation',
         'dimnames': [f'c_nperm_{rank}', f'c_rank_{rank}']})
