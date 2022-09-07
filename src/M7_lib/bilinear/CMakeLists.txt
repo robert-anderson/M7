@@ -11,5 +11,4 @@ target_sources(M7_lib
         SpinfreeRdm.cpp
         SpinfreeRdm.h
         SpinFreeRdmArrays.h
-        SpinsigMap.h
 )

@@ -5,7 +5,30 @@
 #ifndef M7_SPINFREERDMARRAYS_H
 #define M7_SPINFREERDMARRAYS_H
 #include "M7_lib/defs.h"
-constexpr uint_t case_map_2rdm[6][2][2] = 
+namespace spin_free_rdm_arrays {
+    constexpr uint_t c_nspinsig_3 = 8;
+    constexpr uint_t c_npair_spinsig_2 = 6;
+    constexpr uint_t c_nspatsig_2 = 2;
+    constexpr uint_t c_ncase_2 = 18;
+    constexpr uint_t c_nperm_2 = 36;
+    constexpr uint_t c_rank_2 = 2;
+    constexpr uint_t c_npair_spinsig_3 = 20;
+    constexpr uint_t c_nspatsig_3 = 3;
+    constexpr uint_t c_ncase_3 = 136;
+    constexpr uint_t c_nperm_3 = 1416;
+    constexpr uint_t c_rank_3 = 3;
+
+    constexpr uint_t c_spinsig_pairs[c_nspinsig_3][c_nspinsig_3] = 
+      {{0, ~0ul, ~0ul, ~0ul, ~0ul, ~0ul, ~0ul, ~0ul},
+       {~0ul, 1, 3, ~0ul, 7, ~0ul, ~0ul, ~0ul},
+       {~0ul, 2, 4, ~0ul, 9, ~0ul, ~0ul, ~0ul},
+       {~0ul, ~0ul, ~0ul, 5, ~0ul, 12, 15, ~0ul},
+       {~0ul, 6, 8, ~0ul, 10, ~0ul, ~0ul, ~0ul},
+       {~0ul, ~0ul, ~0ul, 11, ~0ul, 13, 17, ~0ul},
+       {~0ul, ~0ul, ~0ul, 14, ~0ul, 16, 18, ~0ul},
+       {~0ul, ~0ul, ~0ul, ~0ul, ~0ul, ~0ul, ~0ul, 19}};
+
+    constexpr uint_t c_case_map_2[c_npair_spinsig_2][c_nspatsig_2][c_nspatsig_2] = 
       {{{0, ~0ul},
         {~0ul, ~0ul}},
 
@@ -24,14 +47,14 @@ constexpr uint_t case_map_2rdm[6][2][2] =
        {{5, ~0ul},
         {~0ul, ~0ul}}};
 
-constexpr uint_t perm_end_offsets_2rdm[18] = 
+    constexpr uint_t c_perm_end_offsets_2[c_ncase_2] = 
       {4, 6, 8, 10, 12, 16, 18, 20, 22, 24, 26, 28, 30, 32, 33, 34, 35, 36};
 
-constexpr int factors_2rdm[36] = 
+    constexpr int c_factors_2[c_nperm_2] = 
       {1, -1, -1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, -1, -1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1,
        2, -2, -2, 2};
 
-constexpr uint_t hole_perms_2rdm[36][2] = 
+    constexpr uint_t c_cre_perms_2[c_nperm_2][c_rank_2] = 
       {{0, 0},
        {1, 1},
        {0, 1},
@@ -69,7 +92,7 @@ constexpr uint_t hole_perms_2rdm[36][2] =
        {1, 0},
        {0, 1}};
 
-constexpr uint_t elec_perms_2rdm[36][2] = 
+    constexpr uint_t c_ann_perms_2[c_nperm_2][c_rank_2] = 
       {{0, 1},
        {1, 0},
        {1, 0},
@@ -107,7 +130,7 @@ constexpr uint_t elec_perms_2rdm[36][2] =
        {1, 0},
        {0, 1}};
 
-constexpr uint_t case_map_3rdm[20][3][3] = 
+    constexpr uint_t c_case_map_3[c_npair_spinsig_3][c_nspatsig_3][c_nspatsig_3] = 
       {{{0, ~0ul, 84},
         {~0ul, ~0ul, ~0ul},
         {32, ~0ul, 116}},
@@ -188,7 +211,7 @@ constexpr uint_t case_map_3rdm[20][3][3] =
         {~0ul, ~0ul, ~0ul},
         {51, ~0ul, 135}}};
 
-constexpr uint_t perm_end_offsets_3rdm[136] = 
+    constexpr uint_t c_perm_end_offsets_3[c_ncase_3] = 
       {36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156, 168, 180, 192, 204, 216, 228, 240, 252, 288, 300, 312, 324,
        336, 348, 360, 372, 384, 396, 408, 420, 432, 450, 456, 462, 474, 486, 498, 504, 516, 528, 540, 552, 564, 576,
        588, 600, 606, 618, 624, 630, 648, 660, 672, 684, 696, 708, 720, 732, 744, 756, 768, 780, 792, 801, 810, 819,
@@ -197,7 +220,7 @@ constexpr uint_t perm_end_offsets_3rdm[136] =
        1206, 1215, 1224, 1233, 1242, 1251, 1257, 1266, 1272, 1281, 1284, 1290, 1296, 1305, 1314, 1320, 1326, 1335,
        1344, 1353, 1362, 1371, 1380, 1386, 1392, 1398, 1404, 1407, 1416};
 
-constexpr int factors_3rdm[1416] = 
+    constexpr int c_factors_3[c_nperm_3] = 
       {1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1, 1, -1, -1, 1, 1, -1, -1, 1,
        1, -1, -1, 1, 1, -1, -1, 1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, 1, -1, 1, -1, 1, -1, -1, 1, 1, -1,
        -1, 1, -1, 1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, 1, -1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1,
@@ -243,7 +266,7 @@ constexpr int factors_3rdm[1416] =
        -1, -1, 2, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
        0, 0, 0, 0, 0};
 
-constexpr uint_t hole_perms_3rdm[1416][3] = 
+    constexpr uint_t c_cre_perms_3[c_nperm_3][c_rank_3] = 
       {{0, 2, 1},
        {1, 1, 2},
        {2, 0, 0},
@@ -1661,7 +1684,7 @@ constexpr uint_t hole_perms_3rdm[1416][3] =
        {0, 0, 2},
        {1, 2, 0}};
 
-constexpr uint_t elec_perms_3rdm[1416][3] = 
+    constexpr uint_t c_ann_perms_3[c_nperm_3][c_rank_3] = 
       {{0, 0, 0},
        {1, 2, 2},
        {2, 1, 1},
@@ -3079,4 +3102,6 @@ constexpr uint_t elec_perms_3rdm[1416][3] =
        {1, 1, 2},
        {0, 2, 0}};
 
+
+} // namespace spin_free_rdm_arrays
 #endif //M7_SPINFREERDMARRAYS_H

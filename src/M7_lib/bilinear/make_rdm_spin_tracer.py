@@ -1,6 +1,100 @@
-import numpy as np
 import itertools
-from make_spinsig_map import SpinSigPairs, int_to_tup, to_file
+import math, sys
+import numpy as np
+
+'''
+the spin signature (spinsig) is given by a bitstring created from the spins of each string (creation / annihilation)
+the spincases are a series of contiguous labels given to the valid (spin conserving) pairs of spinsigs
+'''
+
+
+'''
+an item shall be a dict with the following keys:
+    name, data, signed, comment, dimnames
+'''
+
+def to_file(namespace, items, header_lines, fname, guard_var=None):
+    consts = {}
+    for item in items:
+        assert len(item['dimnames'])==len(item['data'].shape)
+        for symbol, val in zip(item['dimnames'], item['data'].shape):
+            if symbol not in consts: consts[symbol] = val
+            else: assert val==consts[symbol], f'incompatible values given for "{symbol}"'
+
+    header_lines.insert(0, '')
+    header_lines.insert(0, 'this file was generated programmatically and should not be modified by hand.')
+    header_lines = ['\n * '+line for line in header_lines]
+    if guard_var is None: guard_var = 'M7_'+fname.split('.')[0].upper()+'_'+fname.split('.')[-1].upper()
+
+    basic_fmt_fn = lambda i: str(i)
+
+
+    with open(fname, 'w') as f:
+        f.write('/*'+(''.join(header_lines))+'\n */\n')
+        f.write(f'#ifndef {guard_var}\n')
+        f.write(f'#define {guard_var}\n')
+        f.write('#include "M7_lib/defs.h"\n')
+
+        f.write(f'namespace {namespace} {{\n')
+        for symbol, val in consts.items():
+            f.write(f'    constexpr uint_t {symbol} = {val};\n')
+
+        f.write('\n')
+        for item in items:
+            name = item['name']
+            data = item['data']
+            signed = item['signed']
+            comment = item['comment']
+            dimnames = item['dimnames']
+            fmt_fn = basic_fmt_fn
+            if not signed: fmt_fn = lambda i: basic_fmt_fn(i) if i>=0 else '~0ul'
+            np.set_printoptions(threshold=sys.maxsize, formatter={'int': fmt_fn}, linewidth=120)
+            content = data.__repr__()[6:-1].replace('[', '{').replace(']', '}')
+            dims_str = ''.join(f'[{dimname}]' for dimname in dimnames)
+            f.write(f'    constexpr {"uint_t" if not signed else "int"} {name}{dims_str} = \n      {content};\n\n')
+        f.write(f'\n}} // namespace {namespace}\n')
+        f.write(f'#endif //{guard_var}\n')
+
+def n_set_bits(n):
+    if n<1: return 0
+    tot = 0
+    for i in range(int(math.log(n, 2.0))+1):
+        if (n>>i)&1: tot+=1
+    return tot
+
+def int_to_tup(n, rank):
+    return tuple((n>>i)&1 for i in range(rank))
+
+class SpinSigPairs(list):
+    def __init__(self, maxrank):
+        self.maxrank = maxrank
+        list.__init__(self)
+        for i in range(2**self.maxrank):
+            for j in range(i):
+                if n_set_bits(i)-n_set_bits(j): continue
+                self.append([i, j])
+                self.append([j, i])
+            self.append([i, i])
+
+maxrank = 3
+arr = np.zeros((2**maxrank,)*2, dtype=int)
+arr[:,:] = -1
+for icase, (ihole, ielec) in enumerate(SpinSigPairs(maxrank)):
+    arr[ihole, ielec] = icase
+
+
+#header_lines = [
+#    'only a subset of spin signature pairs are valid for RDM processing, so the',
+#    'array in this file maps the creation and annihilation spin signature to a spin',
+#    'signature "case_id" for subsequent processing']
+
+items = []
+items.append({
+    'name': 'c_spinsig_pairs', 
+    'data': arr, 
+    'signed': False, 
+    'comment': f'maps the creation and annihilation spinsigs to a pair-spinsig id upto rank {maxrank}',
+    'dimnames': ['c_nspinsig_3',]*2})
 
 '''
 a "case" is identified by:
@@ -155,8 +249,6 @@ def is_valid(hole_uniques, elec_uniques, hole_spinsig, elec_spinsig):
     if not is_valid_spinned_element(elec_uniques, elec_spinsig): return False
     return True
 
-name_data_signeds = []
-
 for rank in (2, 3):
     cases = []
     spatsigints = generate_spatsigints(rank)
@@ -195,14 +287,43 @@ for rank in (2, 3):
     hole_perms = np.array(hole_perms).reshape((rank, nperm))
     elec_perms = np.array(elec_perms).reshape((rank, nperm))
 
-    name_data_signeds.append(('case_map_{}rdm'.format(rank), case_map.transpose((2, 1, 0)), False))
-    name_data_signeds.append(('perm_end_offsets_{}rdm'.format(rank), perm_end_offsets.T, False))
-    name_data_signeds.append(('factors_{}rdm'.format(rank), factors, True))
-    name_data_signeds.append(('hole_perms_{}rdm'.format(rank), hole_perms.T, False))
-    name_data_signeds.append(('elec_perms_{}rdm'.format(rank), elec_perms.T, False))
+    items.append({
+        'name': f'c_case_map_{rank}', 
+        'data': case_map.transpose((2, 1, 0)), 
+        'signed': False, 
+        'comment': 'maps the pair-spinsig, the annihilation and creation spatsigs to a spin tracing case id',
+        'dimnames': [f'c_npair_spinsig_{rank}', f'c_nspatsig_{rank}', f'c_nspatsig_{rank}']})
+    
+    items.append({
+        'name': f'c_perm_end_offsets_{rank}', 
+        'data': perm_end_offsets,
+        'signed': False, 
+        'comment': f'the end-points on the c_nperm_{rank} dimension for each spin tracing case id',
+        'dimnames': [f'c_ncase_{rank}']})
+
+    items.append({
+        'name': f'c_factors_{rank}', 
+        'data': factors,
+        'signed': True, 
+        'comment': f'the scalar factors associated with each permutation',
+        'dimnames': [f'c_nperm_{rank}']})
+
+    items.append({
+        'name': f'c_cre_perms_{rank}', 
+        'data': hole_perms.T,
+        'signed': False, 
+        'comment': f'reordering of the creation indices for the given permutation',
+        'dimnames': [f'c_nperm_{rank}', f'c_rank_{rank}']})
+
+    items.append({
+        'name': f'c_ann_perms_{rank}', 
+        'data': elec_perms.T,
+        'signed': False, 
+        'comment': f'reordering of the annihilation indices for the given permutation',
+        'dimnames': [f'c_nperm_{rank}', f'c_rank_{rank}']})
 
 fname = 'SpinFreeRdmArrays.h'
-to_file(name_data_signeds, [], fname)
+to_file('spin_free_rdm_arrays', items, [], fname)
 assert 0
 
 
