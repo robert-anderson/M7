@@ -166,7 +166,10 @@ void conf::Bilinears::validate_node_contents() {
 conf::Rdms::Rdms(Group *parent, str_t name, str_t description) :
         Bilinears(parent, name, description),
         m_explicit_ref_conns(this, "explicit_ref_conns", true,
-                    "if true, take contributions from reference connections into account exactly"), m_fock_4rdm(this){}
+             "if true, take contributions from reference connections into account exactly"),
+        m_spinfree(this, "spinfree", false,
+             "if true, output the spinfree RDMs along with the spin-resolved versions"),
+        m_fock_4rdm(this){}
 
 conf::Fock4rdm::Fock4rdm(Group* parent) :
         Section(parent, "fock_4rdm",

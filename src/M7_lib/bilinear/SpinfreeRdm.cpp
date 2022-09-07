@@ -97,9 +97,9 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
              * get pointers to the current arrays of permutations
              */
             const uint_t* cre_perm = rank==2 ? c_cre_perms_2[iperm] : c_cre_perms_3[iperm];
-            const uint_t* ann_perm = rank==2 ? c_cre_perms_2[iperm] : c_cre_perms_3[iperm];
+            const uint_t* ann_perm = rank==2 ? c_ann_perms_2[iperm] : c_ann_perms_3[iperm];
             /*
-             * perform the permutations in the insertion object
+             * execute the permutation of given_inds, storing the result in the insertion object
              */
             for (uint_t i=0ul; i<rank; ++i) {
                 m_insert_inds.m_frm.m_cre[i] = given_inds.m_frm.m_cre[cre_perm[i]];
@@ -117,7 +117,6 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
             }
         }
     }
-
 }
 
 SpinFreeRdm::SpinFreeRdm(const Rdm& src, wf_t norm, uint_t nelem_per_comm) :
@@ -135,4 +134,5 @@ SpinFreeRdm::SpinFreeRdm(const Rdm& src, wf_t norm, uint_t nelem_per_comm) :
             Rdm::end_cycle();
         }
     }
+    Rdm::end_cycle();
 }

@@ -202,6 +202,7 @@ namespace conf {
 
     struct Rdms : Bilinears {
         Param<bool> m_explicit_ref_conns;
+        Param<bool> m_spinfree;
         Fock4rdm m_fock_4rdm;
 
         explicit Rdms(Group *parent, str_t name, str_t description);

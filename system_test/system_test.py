@@ -215,6 +215,7 @@ def check_rdms(fname='M7.h5'):
     run = run['archive']['rdms']
     bench = bench['archive']['rdms']
     keys = tuple(map(str, bench.keys()))
+    assert set(run.keys())==set(bench.keys()), 'different ranks of RDM accumulated than in benchmark'
     for key in keys:
         if key=='norm': continue
         if not all(np.array(run[key]['indices']).flatten()==np.array(bench[key]['indices']).flatten()):

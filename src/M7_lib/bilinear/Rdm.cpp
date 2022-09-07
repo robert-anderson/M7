@@ -4,6 +4,7 @@
 
 #include "Rdm.h"
 #include "M7_lib/util/SmartPtr.h"
+#include "SpinfreeRdm.h"
 
 uint_t Rdm::nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size) {
     double nrow = 1.0;
@@ -240,7 +241,7 @@ std::array<uintv_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
 
 Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Size basis_size, uint_t nelec, const Epoch& accum_epoch) :
         Archivable("rdms", opts.m_archivable),
-        m_rdm_ranksigs(ranksigs), m_exsig_ranks(make_exsig_ranks()),
+        m_spinfree(opts.m_spinfree), m_rdm_ranksigs(ranksigs), m_exsig_ranks(make_exsig_ranks()),
         m_work_conns(basis_size), m_work_com_ops(basis_size), m_explicit_ref_conns(opts.m_explicit_ref_conns),
         m_accum_epoch(accum_epoch), m_nelec(nelec) {
     for (const auto& ranksig: ranksigs) {
@@ -418,4 +419,29 @@ ham_comp_t Rdms::get_energy(const BosHam& ham) const {
     e = mpi::all_sum(e) / m_total_norm.m_reduced;
     REQUIRE_TRUE(fptol::numeric_real(e), "energy should be purely real")
     return arith::real(e);
+}
+
+void Rdms::save_fn(const hdf5::NodeWriter& parent) {
+    if (!m_accum_epoch) {
+        logging::warn("MAE accumulation epoch was not reached in this calculation: omitting RDM save");
+        return;
+    }
+    hdf5::GroupWriter gw(parent, "rdms");
+    gw.write_data("norm", m_total_norm.m_reduced);
+    for (const auto& i: m_rdm_ranksigs) {
+        DEBUG_ASSERT_TRUE(m_rdms[i].get(), "active ranksig was not allocated!");
+        m_rdms[i]->save(gw);
+    }
+    if (m_fock_rdm4) m_fock_rdm4->save(gw);
+
+    if (m_spinfree) {
+        /*
+         * create and save the spinfree versions of all RDMs and intermediates
+         */
+        for (const auto& i: m_rdm_ranksigs) {
+            DEBUG_ASSERT_TRUE(m_rdms[i].get(), "active ranksig was not allocated!");
+            SpinFreeRdm(*m_rdms[i], m_total_norm.m_reduced).save(gw);
+        }
+        if (m_fock_rdm4) SpinFreeRdm(*m_fock_rdm4, m_total_norm.m_reduced).save(gw);
+    }
 }

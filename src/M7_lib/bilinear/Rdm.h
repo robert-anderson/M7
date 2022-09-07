@@ -137,7 +137,18 @@ public:
 };
 
 class Rdms : public Archivable {
+    /**
+     * RDM objects managed by this instance
+     */
     std::array<std::unique_ptr<Rdm>, exsig::c_ndistinct> m_rdms;
+    /**
+     * if true, the spinfree versions of the full RDMs are all computed and output to the HDF5 archive (note that this
+     * is only a finalization procedure, NOT done on the fly)
+     */
+    const bool m_spinfree;
+    /**
+     * optionally-allocatable contraction of the 4RDM with the active space generalize Fock matrix for use in CASPT2
+     */
     std::unique_ptr<FockRdm4> m_fock_rdm4;
     const uintv_t m_rdm_ranksigs;
     const std::array<uintv_t, exsig::c_ndistinct> m_exsig_ranks;
@@ -227,19 +238,7 @@ private:
 
     }
 
-    void save_fn(const hdf5::NodeWriter& parent) override {
-        if (!m_accum_epoch) {
-            logging::warn("MAE accumulation epoch was not reached in this calculation: omitting RDM save");
-            return;
-        }
-        hdf5::GroupWriter gw(parent, "rdms");
-        gw.write_data("norm", m_total_norm.m_reduced);
-        for (const auto& i: m_rdm_ranksigs) {
-            DEBUG_ASSERT_TRUE(m_rdms[i].get(), "active ranksig was not allocated!");
-            m_rdms[i]->save(gw);
-        }
-        if (m_fock_rdm4) m_fock_rdm4->save(gw);
-    }
+    void save_fn(const hdf5::NodeWriter& parent) override;
 };
 
 #endif //M7_RDM_H
