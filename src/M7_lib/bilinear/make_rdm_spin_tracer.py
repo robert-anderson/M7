@@ -76,25 +76,25 @@ class SpinSigPairs(list):
                 self.append([j, i])
             self.append([i, i])
 
-maxrank = 3
-arr = np.zeros((2**maxrank,)*2, dtype=int)
-arr[:,:] = -1
-for icase, (ihole, ielec) in enumerate(SpinSigPairs(maxrank)):
-    arr[ihole, ielec] = icase
-
-
-#header_lines = [
-#    'only a subset of spin signature pairs are valid for RDM processing, so the',
-#    'array in this file maps the creation and annihilation spin signature to a spin',
-#    'signature "case_id" for subsequent processing']
-
 items = []
-items.append({
-    'name': 'c_spinsig_pairs', 
-    'data': arr, 
-    'signed': False, 
-    'comment': f'maps the creation and annihilation spinsigs to a pair-spinsig id upto rank {maxrank}',
-    'dimnames': ['c_nspinsig_3',]*2})
+for rank in (2, 3):
+    arr = np.zeros((2**rank,)*2, dtype=int)
+    arr[:,:] = -1
+    for icase, (ihole, ielec) in enumerate(SpinSigPairs(rank)):
+        arr[ihole, ielec] = icase
+
+
+    #header_lines = [
+    #    'only a subset of spin signature pairs are valid for RDM processing, so the',
+    #    'array in this file maps the creation and annihilation spin signature to a spin',
+    #    'signature "case_id" for subsequent processing']
+
+    items.append({
+        'name': f'c_spinsig_pairs_{rank}', 
+        'data': arr, 
+        'signed': False, 
+        'comment': f'maps the creation and annihilation spinsigs to a pair-spinsig id',
+        'dimnames': [f'c_nspinsig_{rank}',]*2})
 
 '''
 a "case" is identified by:

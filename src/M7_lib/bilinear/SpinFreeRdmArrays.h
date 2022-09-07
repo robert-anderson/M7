@@ -6,6 +6,7 @@
 #define M7_SPINFREERDMARRAYS_H
 #include "M7_lib/defs.h"
 namespace spin_free_rdm_arrays {
+    constexpr uint_t c_nspinsig_2 = 4;
     constexpr uint_t c_nspinsig_3 = 8;
     constexpr uint_t c_npair_spinsig_2 = 6;
     constexpr uint_t c_nspatsig_2 = 2;
@@ -18,7 +19,13 @@ namespace spin_free_rdm_arrays {
     constexpr uint_t c_nperm_3 = 1416;
     constexpr uint_t c_rank_3 = 3;
 
-    constexpr uint_t c_spinsig_pairs[c_nspinsig_3][c_nspinsig_3] = 
+    constexpr uint_t c_spinsig_pairs_2[c_nspinsig_2][c_nspinsig_2] = 
+      {{0, ~0ul, ~0ul, ~0ul},
+       {~0ul, 1, 3, ~0ul},
+       {~0ul, 2, 4, ~0ul},
+       {~0ul, ~0ul, ~0ul, 5}};
+
+    constexpr uint_t c_spinsig_pairs_3[c_nspinsig_3][c_nspinsig_3] = 
       {{0, ~0ul, ~0ul, ~0ul, ~0ul, ~0ul, ~0ul, ~0ul},
        {~0ul, 1, 3, ~0ul, 7, ~0ul, ~0ul, ~0ul},
        {~0ul, 2, 4, ~0ul, 9, ~0ul, ~0ul, ~0ul},

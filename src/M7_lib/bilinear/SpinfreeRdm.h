@@ -6,12 +6,7 @@
 #define M7_SPINFREERDM_H
 
 #include "Rdm.h"
-#include "SpinsigMap.h"
 #include "SpinFreeRdmArrays.h"
-
-
-struct SpinSigCaseIdentifier {
-};
 
 
 class SpinFreeRdm : public Rdm {
@@ -21,6 +16,10 @@ class SpinFreeRdm : public Rdm {
      */
     buffered::MaeInds m_insert_inds;
 
+    static uint_t nspinsig(uint_t rank){
+        using namespace spin_free_rdm_arrays;
+        return rank==2 ? c_nspinsig_2 : c_nspinsig_3;
+    }
     static uint_t spinsig(const MaeIndsPartition& inds, const sys::frm::Size& size) {
         uint_t out = 0ul;
         for (uint_t i = 0ul; i<inds.size(); ++i)
@@ -28,19 +27,42 @@ class SpinFreeRdm : public Rdm {
         return out;
     }
 
-    static uint_t spincase(const MaeIndsPair& inds, const sys::frm::Size& size) {
-        return spinsig_map[spinsig(inds.m_cre, size)][spinsig(inds.m_ann, size)];
+    static uint_t pair_spinsig(const MaeIndsPair& inds, const sys::frm::Size& size) {
+        using namespace spin_free_rdm_arrays;
+        const auto spinsig_cre = spinsig(inds.m_cre, size);
+        DEBUG_ASSERT_LT(spinsig_cre, nspinsig(inds.m_cre.size()), "spinsig OOB");
+        const auto spinsig_ann = spinsig(inds.m_ann, size);
+        DEBUG_ASSERT_LT(spinsig_ann, nspinsig(inds.m_ann.size()), "spinsig OOB");
+        switch (inds.m_cre.size()) {
+            case 2: return c_spinsig_pairs_2[spinsig_cre][spinsig_ann];
+            case 3: return c_spinsig_pairs_3[spinsig_cre][spinsig_ann];
+        }
+        return ~0ul;
     }
 
-    static uint_t spinorbs_to_spat(const MaeIndsPartition& in, MaeIndsPartition& out, const sys::frm::Size& size) {
+    static void spinorbs_to_spat(const MaeIndsPartition& in, MaeIndsPartition& out, const sys::frm::Size& size) {
         for (uint_t i = 0ul; i<in.size(); ++i) out[i] = size.isite(in[i]);
     }
 
-    static uint_t spinorbs_to_spat(const MaeIndsPair& in, MaeIndsPair& out, const sys::frm::Size& size) {
+    static void spinorbs_to_spat(const MaeIndsPair& in, MaeIndsPair& out, const sys::frm::Size& size) {
         spinorbs_to_spat(in.m_cre, out.m_cre, size);
         spinorbs_to_spat(in.m_ann, out.m_ann, size);
     }
 
+    /**
+     * there are 2 possible distinct spatial signatures for the cre/ann strings of the 2-RDM:
+     *  0: spatial indices are distinct
+     *  1: spatial indices are the same
+     * and for the 3-RDM, there are 3:
+     *  0: all spatial indices are distinct
+     *  1: first two are the same, last one distinct
+     *  2: last two are the same, first one distinct
+     * there is no spatial signature 3 for the 3-RDM since there would have to be two electrons in the same spinorbital
+     * @param spat_inds
+     *  spatial indices as single cre/ann string
+     * @return
+     *  the spatial signature
+     */
     static uint_t spatsig(const MaeIndsPartition& spat_inds) {
         uint_t out = 0ul;
         for (uint_t i=1ul; i<spat_inds.size(); ++i)
@@ -53,6 +75,9 @@ class SpinFreeRdm : public Rdm {
         auto& given_inds = m_uncontracted_inds;
         const auto orbs = m_basis_size.m_frm;
         if (m_nfrm_cre_ind==1ul) {
+            /*
+             * 1-body case is trivial
+             */
             auto add = [&](uint_t p0, uint_t q0, wf_t v) {
                 m_uncontracted_inds.m_frm.m_cre[0] = p0;
                 m_uncontracted_inds.m_frm.m_ann[0] = q0;
@@ -62,53 +87,74 @@ class SpinFreeRdm : public Rdm {
             const uint_t j0 = row.m_inds.m_frm.m_ann[0];
             const auto p0 = orbs.isite(i0);
             const auto q0 = orbs.isite(j0);
-            const auto s0 = orbs.ispin(i0);
-            const auto t0 = orbs.ispin(j0);
-            DEBUG_ASSERT_EQ(s0, t0, "spin-tracing of Ms non-conserving RDMs is not valid");
+            DEBUG_ASSERT_EQ(orbs.ispin(i0), orbs.ispin(j0), "spin-tracing of Ms non-conserving RDMs is not valid");
             add(p0, q0, elem);
             // enforce hermiticity symmetry
             add(q0, p0, elem);
         }
         else {
+            using namespace spin_free_rdm_arrays;
+            /*
+             * higher-body RDMs are more complicated to spin-trace: make use of precomputed arrays
+             */
             DEBUG_ASSERT_TRUE(m_nfrm_cre_ind==2 || m_nfrm_cre_ind==3, "unsupported RDM rank");
-            const auto ispatsig = spatsig();
-            const auto iperm = case_map_3rdm[][][]
-            const auto& perm_end_offsets = m_nfrm_cre_ind==2 ? perm_end_offsets_2rdm : perm_end_offsets_3rdm;
-            case 2ul: {
-                auto add = [&](uint_t p0, uint_t p1, uint_t q0, uint_t q1, wf_t v) {
-                    m_uncontracted_inds.m_frm.m_cre[0] = p0;
-                    m_uncontracted_inds.m_frm.m_cre[1] = p1;
-                    m_uncontracted_inds.m_frm.m_ann[0] = q0;
-                    m_uncontracted_inds.m_frm.m_ann[1] = q1;
-                    add_to_send_table(m_uncontracted_inds, v);
-                };
-
-                const uint_t i0 = row.m_inds.m_frm.m_cre[0];
-                const uint_t i1 = row.m_inds.m_frm.m_cre[1];
-                const uint_t j0 = row.m_inds.m_frm.m_ann[0];
-                const uint_t j1 = row.m_inds.m_frm.m_ann[1];
-                const auto p0 = orbs.isite(i0);
-                const auto p1 = orbs.isite(i1);
-                const auto q0 = orbs.isite(j0);
-                const auto q1 = orbs.isite(j1);
-                const auto s0 = orbs.ispin(i0);
-                const auto s1 = orbs.ispin(i1);
-                const auto t0 = orbs.ispin(j0);
-                const auto t1 = orbs.ispin(j1);
-                DEBUG_ASSERT_EQ(s0 + s1, t0 + t1, "spin-tracing of Ms non-conserving RDMs is not valid");
-                if (s0 == t0) {
-                    if (s1 == s0) {
-                        // aaaa or bbbb
-                        add(p0, p1, q0, q1, elem);
-                    }
+            const uint_t rank = m_nfrm_cre_ind;
+            /*
+             * first, convert to spatial indices
+             */
+            spinorbs_to_spat(row.m_inds.m_frm, given_inds.m_frm, m_basis_size.m_frm);
+            /*
+             * from these, the spatial signatures can be obtained
+             */
+            const auto spatsig_cre = spatsig(given_inds.m_frm.m_cre);
+            const auto spatsig_ann = spatsig(given_inds.m_frm.m_ann);
+            /*
+             * also required is the pair spin signature, this is available from the original indices
+             */
+            const auto pair_spinsig = SpinFreeRdm::pair_spinsig(row.m_inds.m_frm, m_basis_size.m_frm);
+            /*
+             * from the information extracted so far, we can obtain the spin-tracing case index
+             */
+            const auto icase = rank==2 ?
+                c_case_map_2[pair_spinsig][spatsig_ann][spatsig_cre]:
+                c_case_map_3[pair_spinsig][spatsig_ann][spatsig_cre];
+            /*
+             * each case has an associated slice of permutations it must handle, this slice is specified by the
+             * permutation offset array
+             */
+            const auto iperm_end = rank==2 ? c_perm_end_offsets_2[icase]: c_perm_end_offsets_3[icase];
+            const auto iperm_begin = icase ? 0ul : (rank==2 ? c_perm_end_offsets_2[icase-1]: c_perm_end_offsets_3[icase-1]);
+            /*
+             * then all that must be done is to loop over all required permutations of the spatial indices
+             */
+            for (uint_t iperm=iperm_begin; iperm<iperm_end; ++iperm){
+                /*
+                 * get the factor by which the contribution must be multiplied
+                 */
+                const auto factor = rank==2 ? c_factors_2[iperm] : c_factors_3[iperm];
+                /*
+                 * get pointers to the current arrays of permutations
+                 */
+                const uint_t* cre_perm = rank==2 ? c_cre_perms_2[iperm] : c_cre_perms_3[iperm];
+                const uint_t* ann_perm = rank==2 ? c_cre_perms_2[iperm] : c_cre_perms_3[iperm];
+                /*
+                 * perform the permutations in the insertion object
+                 */
+                for (uint_t i=0ul; i<rank; ++i) {
+                    m_insert_inds.m_frm.m_cre[i] = given_inds.m_frm.m_cre[cre_perm[i]];
+                    m_insert_inds.m_frm.m_ann[i] = given_inds.m_frm.m_ann[ann_perm[i]];
                 }
-                add_to_send_table(inds, elem);
-                break;
+                if (m_insert_inds.m_frm.m_cre==m_insert_inds.m_frm.m_ann) {
+                    // diagonal element
+                    add_to_send_table(m_insert_inds, elem*factor);
+                }
+                else {
+                    // off-diagonal element: enforce hermiticity symmetry by averaging
+                    add_to_send_table(m_insert_inds, 0.5*elem*factor);
+                    m_insert_inds.m_frm.conjugate();
+                    add_to_send_table(m_insert_inds, 0.5*elem*factor);
+                }
             }
-            case 3ul:
-                break;
-            default:
-                ABORT("rank is out of range for implemented spin tracers");
         }
 
     }

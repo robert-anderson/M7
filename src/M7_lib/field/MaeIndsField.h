@@ -29,6 +29,11 @@ public:
         return m_field[m_offset + iind];
     };
 
+    bool operator==(const MaeIndsPartition& other) const {
+        DEBUG_ASSERT_EQ(m_size, other.m_size, "comparing incompatible partitions");
+        return std::memcmp(m_field.dbegin()+m_offset, other.m_field.dbegin()+m_offset, m_size)==0;
+    }
+
     const uint_t &size() const {
         return m_size;
     }
@@ -73,6 +78,11 @@ struct MaeIndsPair {
     void zero() {
         m_cre.zero();
         m_ann.zero();
+    }
+
+    void conjugate() {
+        DEBUG_ASSERT_EQ(m_ann.size(), m_cre.size(), "can't conjugate unless numbers of cre and ann ops are the same");
+        for (uint_t i=0ul; i<m_cre.size(); ++i) std::swap(m_cre[i], m_ann[i]);
     }
 };
 
