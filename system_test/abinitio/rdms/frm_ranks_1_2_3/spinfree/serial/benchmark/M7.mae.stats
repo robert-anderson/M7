@@ -1,0 +1,15 @@
+################################################################
+#    FCIQMC Multidimensional Averaged Estimators Stats File    #
+################################################################
+# Number of statistics output: 3
+# Number of columns: 3
+# Distinct multidimensional formats: 1
+#
+# Format list (major index first):
+# A: scalar
+#
+#  1.  Cycle number (A)
+#  2.  Total WF norm estimate (A)
+#  3.  Energy estimate from RDMs (A)
+#
+74451  3.379683e+08  -9.994254e+01  
