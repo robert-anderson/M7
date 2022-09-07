@@ -110,7 +110,7 @@ Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nblock_per_
         m_indsig(indsig), m_rank_ind(decode_nfrm_cre(m_indsig)),
         m_nfrm_cre_ind(decode_nfrm_cre(m_indsig)), m_nfrm_ann_ind(decode_nfrm_ann(m_indsig)),
         m_nbos_cre_ind(decode_nbos_cre(m_indsig)), m_nbos_ann_ind(decode_nbos_ann(m_indsig)),
-        m_full_inds(ranksig), m_uncontracted_inds(indsig), m_name(name), m_nelec(nelec) {
+        m_full_inds(ranksig), m_uncontracted_inds(m_indsig), m_name(name), m_nelec(nelec) {
     /*
      * if contributing exsig != ranksig, there is promotion to do
      * the promoter to use is given by the difference between either fermion element of the ranksig and that of the
@@ -183,9 +183,15 @@ void FockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn
         bool contract_phase = true;
         // TODO: diagonal Fock optimisation
         for (uint_t icre_contract = 0ul; icre_contract < 4ul; ++icre_contract){
-            const auto isite_cre = src_onv.m_basis.isite(m_full_inds.m_frm.m_cre[icre_contract]);
+            const uint_t icre = m_full_inds.m_frm.m_cre[icre_contract];
+            const auto isite_cre = src_onv.m_basis.isite(icre);
+            const auto ispin_cre = src_onv.m_basis.ispin(icre);
             for (uint_t iann_contract = 0ul; iann_contract < 4ul; ++iann_contract) {
-                const auto isite_ann = src_onv.m_basis.isite(m_full_inds.m_frm.m_ann[iann_contract]);
+                const uint_t iann = m_full_inds.m_frm.m_ann[iann_contract];
+                const auto isite_ann = src_onv.m_basis.isite(iann);
+                const auto ispin_ann = src_onv.m_basis.ispin(iann);
+
+                if (ispin_ann != ispin_cre) continue;
 
                 const auto fock_element = m_fock(isite_cre, isite_ann);
 
