@@ -107,6 +107,25 @@ namespace sort {
                 });
         }
     }
+
+    /**
+     * apply a naive (copying) reorder operation on a vector determined by the indices in the order vector
+     * @tparam T
+     *  type of data held by vector being reordered
+     * @param in
+     *  input vector to be out-of-place reordered
+     * @param order
+     *  order of the indices of the in vector to appear in the out vector
+     * @result
+     *  reordered vector
+     */
+    template<typename T>
+    v_t<T> reorder(const v_t<T>& in, const uintv_t& order) {
+        v_t<T> out;
+        out.reserve(in.size());
+        for (auto& i: order) out.push_back(in[i]);
+        return out;
+    }
 }
 
 #endif //M7_SORT_H

@@ -19,9 +19,11 @@
 #include "M7_lib/hamiltonian/bos/NumOpBosHam.h"
 #include "M7_lib/hamiltonian/bos/GeneralBosHam.h"
 #include "M7_lib/hamiltonian/bos/HubbardBosHam.h"
+#include "M7_lib/hamiltonian/bos/TcBosHam.h"
 #include "M7_lib/hamiltonian/frm/HeisenbergFrmHam.h"
 #include "M7_lib/hamiltonian/frm/SumFrmHam.h"
 #include "M7_lib/hamiltonian/frm/SpinSquareFrmHam.h"
+#include "M7_lib/hamiltonian/frm/TcFrmHam.h"
 #include "M7_lib/hamiltonian/bos/InteractingBoseGasBosHam.h"
 #include "M7_lib/hamiltonian/frmbos/GeneralLadderHam.h"
 #include "M7_lib/util/SmartPtr.h"
@@ -301,7 +303,7 @@ public:
     bool complex_valued() const;
 
     /**
-     * due the FCIDUMP format and default definitions of model Hamiltoniansm, the number of particles in the system and
+     * due the FCIDUMP format and default definitions of model Hamiltonians, the number of particles in the system and
      * their constraints are determined partly by this class, and partly by the user in the configuration document, this
      * function decides those parameters and raises errors when faced with any inconsistencies.
      * @param opts
@@ -343,6 +345,10 @@ public:
 
     sys::Particles default_particles(const conf::Particles &opts) const {
         return default_particles(opts.m_nelec, opts.m_ms2, opts.m_nboson);
+    }
+
+    bool is_hermitian() const {
+        return m_frm.is<TcFrmHam>() || m_bos.is<TcBosHam>();
     }
 
 };

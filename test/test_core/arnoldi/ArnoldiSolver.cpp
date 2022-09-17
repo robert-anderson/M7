@@ -26,8 +26,11 @@ TEST(ArnoldiSolver, SymNonDist) {
     dense::diag(dense, evals);
     // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
     sort::inplace(evals, false, true);
+    auto results = arnoldi_problem.get_results();
+    double eval;
     for (uint_t iroot=0ul; iroot<opts.m_nroot; ++iroot){
-        ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), evals[iroot]);
+        results.get_eval(iroot, eval);
+        ASSERT_NEARLY_EQ(eval, evals[iroot]);
     }
 }
 
@@ -52,8 +55,11 @@ TEST(ArnoldiSolver, SymDist) {
         // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
         sort::inplace(evals, false, true);
         auto dense_eval_it = evals.cbegin();
+        auto results = arnoldi_problem.get_results();
+        double eval;
         for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
-            ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
+            results.get_eval(iroot, eval);
+            ASSERT_NEARLY_EQ(eval, dense_eval_it[iroot]);
         }
     }
 }
@@ -77,8 +83,10 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
     sort::inplace(evals, false, true);
     auto dense_eval_it = evals.cbegin();
+    auto results = arnoldi_problem.get_results();
+    std::complex<double> eval;
     for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
-        const auto eval = arnoldi_problem.complex_eigenvalue(iroot);
+        results.get_eval(iroot, eval);
         ASSERT_NEARLY_EQ(eval, dense_eval_it[iroot]);
     }
 }
@@ -103,8 +111,12 @@ TEST(ArnoldiSolver, NonSymDist) {
         // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
         sort::inplace(evals, false, true);
         auto dense_eval_it = evals.cbegin();
+        auto results = arnoldi_problem.get_results();
+        std::complex<double> eval;
+
         for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
-            ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), arith::real(dense_eval_it[iroot]));
+            results.get_eval(iroot, eval);
+            ASSERT_NEARLY_EQ(eval, arith::real(dense_eval_it[iroot]));
         }
     }
 }

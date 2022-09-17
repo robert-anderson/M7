@@ -13,6 +13,8 @@
 #include <arlnsmat.h>
 #include <arrsnsym.h>
 #include <arrscomp.h>
+#include <numeric>
+#include <M7_lib/util/Sort.h>
 
 
 /**
@@ -94,6 +96,60 @@ protected:
 };
 
 template<typename T>
+struct ArnoldiResults {
+    v_t<T> m_real_evals;
+    v_t<T> m_imag_evals;
+    v_t<const T*> m_evecs;
+    /**
+     * number of elements in each evec
+     */
+    const uint_t m_nelement_evec;
+    /**
+     * true if the eigenvectors are complex-valued (vector is in the real_0, imag_0, real_1, imag_1, ... pattern)
+     */
+    const bool m_complex_evecs;
+    ArnoldiResults(uint_t nroot, uint_t nelement_evec, const T* real_evals, const T* imag_evals,
+                   const T* raw_evecs, bool complex_evecs):
+        m_nelement_evec(nelement_evec), m_complex_evecs(complex_evecs) {
+        m_real_evals = v_t<T>(real_evals, real_evals+nroot);
+        if (imag_evals) m_imag_evals = v_t<T>(imag_evals, imag_evals+nroot);
+        else m_imag_evals.assign(nroot, 0.0);
+        for (uint_t i=0; i < nroot; ++i)
+            m_evecs.push_back(raw_evecs+i*m_nelement_evec*(m_complex_evecs ? 2 : 1));
+        uintv_t ordering(nroot);
+        std::iota(ordering.begin(), ordering.end(), 0);
+        // sort with largest magnitude eval first
+        std::sort(ordering.begin(), ordering.end(), [&](uint_t i, uint_t j){
+            std::complex<T> zi = {m_real_evals[i], m_imag_evals[i]};
+            std::complex<T> zj = {m_real_evals[j], m_imag_evals[j]};
+            return std::abs(zi) > std::abs(zj);
+        });
+        m_real_evals = sort::reorder(m_real_evals, ordering);
+        m_imag_evals = sort::reorder(m_imag_evals, ordering);
+        m_evecs = sort::reorder(m_evecs, ordering);
+    }
+
+    void get_eval(uint_t iroot, T& eval) const {
+        REQUIRE_FALSE(m_imag_evals[iroot], "non-zero imaginary part");
+        eval = m_real_evals[iroot];
+    }
+
+    void get_eval(uint_t iroot, std::complex<T>& eval) const {
+        eval = {m_real_evals[iroot], m_imag_evals[iroot]};
+    }
+
+    void get_evec(uint_t iroot, T*& evec) const {
+        REQUIRE_FALSE(m_complex_evecs, "cannot dereference complex eigenvector as a real vector");
+        evec = m_evecs+iroot*m_nelement_evec;
+    }
+
+    void get_evec(uint_t iroot, std::complex<T>*& evec) const {
+        REQUIRE_TRUE(m_complex_evecs, "cannot dereference real eigenvector as a complex vector");
+        evec = reinterpret_cast<std::complex<T>*>(m_evecs)+iroot*m_nelement_evec;
+    }
+};
+
+template<typename T>
 struct ArnoldiProblemWithProduct : ArnoldiProblemBase {
 
 
@@ -121,9 +177,7 @@ struct ArnoldiProblemWithProduct : ArnoldiProblemBase {
      */
     virtual bool solve(sparse::dynamic::Matrix<T> &sparse_mat, ArnoldiOptions opts) = 0;
 
-    virtual T real_eigenvalue(uint_t i) = 0;
-
-    virtual std::complex<T> complex_eigenvalue(uint_t i) = 0;
+    virtual ArnoldiResults<arith::comp_t<T>> get_results() = 0;
 
 protected:
     /**
@@ -212,13 +266,9 @@ public:
         return solve_base(prod_fn, false);
     }
 
-    T real_eigenvalue(uint_t i) override {
-        i = (m_solver->GetNev()-i)-1;
-        return m_solver->Eigenvalue(i);
-    }
-
-    std::complex<T> complex_eigenvalue(uint_t i) override {
-        return {real_eigenvalue(i), 0.0};
+    ArnoldiResults<arith::comp_t<T>> get_results() override {
+        return {uint_t(m_solver->GetNev()), uint_t(m_solver->GetN()),
+                m_solver->RawEigenvalues(), nullptr, m_solver->RawEigenvectors(), false};
     }
 };
 
@@ -290,19 +340,9 @@ public:
         return solve_base(prod_fn, false);
     }
 
-    T real_eigenvalue(uint_t i) override {
-        auto z = complex_eigenvalue(i);
-        if (!fptol::numeric_zero(z.imag()))
-            logging::warn("taking real part of eigenvalue with non-zero imaginary part");
-        return arith::real(complex_eigenvalue(i));
-    }
-
-    std::complex<T> complex_eigenvalue(uint_t i) override {
-        /*
-         * nonsym state ordering seems to be opposite to that of sym
-         */
-        //i = (m_solver->GetNev()-i)-1;
-        return m_solver->Eigenvalue(i);
+    ArnoldiResults<arith::comp_t<T>> get_results() override {
+        return {uint_t(m_solver->GetNev()), uint_t(m_solver->GetN()),
+                m_solver->RawEigenvalues(), m_solver->RawEigenvaluesImag(), m_solver->RawEigenvectors(), false};
     }
 };
 
