@@ -6,9 +6,15 @@
 
 void IntegralReader::IterData::update_ranksig_exsig() {
     if (dtype::all_null(m_inds[0], m_inds[1], m_inds[2], m_inds[3])) m_ranksig = 0ul;
+    else if (!dtype::is_null(m_inds[0]) && dtype::is_null(m_inds[1])) {
+        // this is an orbital energy, not a Hamiltonian coefficient, so discard
+        m_ranksig = ~0ul;
+        m_exsig = ~0ul;
+        return;
+    }
     else {
-        REQUIRE_FALSE(dtype::any_null(m_inds[0], m_inds[1]),
-                      "if not core energy entry, first two inds must be defined");
+        REQUIRE_FALSE(dtype::is_null(m_inds[0]),
+                      "if not core energy entry, at least the first index must be validly defined");
         m_ranksig = dtype::all_null(m_inds[2], m_inds[3]) ? exsig::ex_single : exsig::ex_double;
     }
     switch (m_ranksig) {

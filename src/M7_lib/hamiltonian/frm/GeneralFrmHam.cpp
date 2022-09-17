@@ -29,6 +29,10 @@ uint_t GeneralFrmHam::make_ints_(IntegralReader *reader, GeneralFrmHam::ints_1e_
     logging::debug_("{}: {}", __FILE__, __LINE__);
 
     while (reader->next(d)){
+        if (dtype::is_null(d.m_ranksig)){
+            // non-coefficient entry
+            continue;
+        }
         if (d.m_ranksig == 0ul) {
             m_e_core = d.m_value;
             continue;
