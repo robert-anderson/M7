@@ -19,6 +19,7 @@ TEST(FciInitializer, N2) {
     dense::diag(hmat, dense_evals);
     ham_comp_t eval;
     auto results = init.get_results();
+    results.bcast();
     results.get_eval(0, eval);
     ASSERT_NEARLY_EQ(eval, dense_evals[0]);
 }
@@ -29,6 +30,7 @@ TEST(FciInitializer, J1J2) {
     FciInitializer init(ham, 0.0);
     ham_comp_t eval;
     auto results = init.get_results();
+    results.bcast();
     results.get_eval(0, eval);
     ASSERT_NEARLY_EQ(eval, -6.44708);
 }

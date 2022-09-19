@@ -97,29 +97,36 @@ protected:
 
 template<typename T>
 struct ArnoldiResults {
+protected:
     v_t<T> m_real_evals;
     v_t<T> m_imag_evals;
+    /**
+     * vector of pointers to the real part of the first element of each eigenvector
+     */
     v_t<const T*> m_evecs;
     /**
      * number of elements in each evec
      */
-    const uint_t m_nelement_evec;
+    uint_t m_nelement_evec = 0ul;
     /**
      * true if the eigenvectors are complex-valued (vector is in the real_0, imag_0, real_1, imag_1, ... pattern)
      */
-    const bool m_complex_evecs;
+    bool m_complex_evecs = false;
+public:
     ArnoldiResults(uint_t nroot, uint_t nelement_evec, const T* real_evals, const T* imag_evals,
                    const T* raw_evecs, bool complex_evecs):
         m_nelement_evec(nelement_evec), m_complex_evecs(complex_evecs) {
-        m_real_evals = v_t<T>(real_evals, real_evals+nroot);
-        if (imag_evals) m_imag_evals = v_t<T>(imag_evals, imag_evals+nroot);
+        if (!real_evals) return;
+
+        m_real_evals = v_t<T>(real_evals, real_evals + nroot);
+        if (imag_evals) m_imag_evals = v_t<T>(imag_evals, imag_evals + nroot);
         else m_imag_evals.assign(nroot, 0.0);
-        for (uint_t i=0; i < nroot; ++i)
-            m_evecs.push_back(raw_evecs+i*m_nelement_evec*(m_complex_evecs ? 2 : 1));
+        for (uint_t i = 0; i < nroot; ++i)
+            m_evecs.push_back(raw_evecs + i * m_nelement_evec * (m_complex_evecs ? 2 : 1));
         uintv_t ordering(nroot);
         std::iota(ordering.begin(), ordering.end(), 0);
-        // sort with largest magnitude eval first
-        std::sort(ordering.begin(), ordering.end(), [&](uint_t i, uint_t j){
+        // sort with largest-magnitude eval first
+        std::sort(ordering.begin(), ordering.end(), [&](uint_t i, uint_t j) {
             std::complex<T> zi = {m_real_evals[i], m_imag_evals[i]};
             std::complex<T> zj = {m_real_evals[j], m_imag_evals[j]};
             return std::abs(zi) > std::abs(zj);
@@ -128,6 +135,8 @@ struct ArnoldiResults {
         m_imag_evals = sort::reorder(m_imag_evals, ordering);
         m_evecs = sort::reorder(m_evecs, ordering);
     }
+
+    ArnoldiResults(){}
 
     void get_eval(uint_t iroot, T& eval) const {
         REQUIRE_FALSE(m_imag_evals[iroot], "non-zero imaginary part");
@@ -145,7 +154,21 @@ struct ArnoldiResults {
 
     void get_evec(uint_t iroot, std::complex<T>*& evec) const {
         REQUIRE_TRUE(m_complex_evecs, "cannot dereference real eigenvector as a complex vector");
-        evec = reinterpret_cast<std::complex<T>*>(m_evecs)+iroot*m_nelement_evec;
+        evec = reinterpret_cast<std::complex<T>*>(m_evecs) + iroot * m_nelement_evec;
+    }
+
+    /**
+     * send the eigenvalues to each process
+     */
+    void bcast(uint_t irank=0ul) {
+        mpi::bcast(m_real_evals, irank);
+        mpi::bcast(m_imag_evals, irank);
+        mpi::bcast(m_nelement_evec, irank);
+        mpi::bcast(m_complex_evecs, irank);
+    }
+
+    bool i_have_evecs() const {
+        return !m_evecs.empty();
     }
 };
 
@@ -267,6 +290,7 @@ public:
     }
 
     ArnoldiResults<arith::comp_t<T>> get_results() override {
+        if (!m_solver) return {};
         return {uint_t(m_solver->GetNev()), uint_t(m_solver->GetN()),
                 m_solver->RawEigenvalues(), nullptr, m_solver->RawEigenvectors(), false};
     }
@@ -341,6 +365,7 @@ public:
     }
 
     ArnoldiResults<arith::comp_t<T>> get_results() override {
+        if (!m_solver) return {};
         return {uint_t(m_solver->GetNev()), uint_t(m_solver->GetN()),
                 m_solver->RawEigenvalues(), m_solver->RawEigenvaluesImag(), m_solver->RawEigenvectors(), false};
     }

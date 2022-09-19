@@ -26,7 +26,6 @@ uint_t GeneralFrmHam::make_ints_(IntegralReader *reader, GeneralFrmHam::ints_1e_
     using namespace exsig;
     REQUIRE_TRUE(reader, "this method should not be called on a non-reading rank");
     IntegralReader::IterData d;
-    logging::debug_("{}: {}", __FILE__, __LINE__);
 
     while (reader->next(d)){
         if (dtype::is_null(d.m_ranksig)){

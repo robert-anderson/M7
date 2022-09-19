@@ -50,13 +50,9 @@ FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift, ArnoldiOp
     //std::cout << solver.m_solver->tol << std::endl;
     dist_mv_prod::Sparse<double> dist(sparse_ham);
     if (h.is_hermitian()) {
-        m_arpack_nonsym.solve(dist, opts);
-    }
-    else {
         m_arpack_sym.solve(dist, opts);
     }
-//    solver.solve(dist, opts);
-//    if (mpi::i_am_root()) m_eval = solver.real_eigenvalue(0);
-//    mpi::bcast(m_eval);
-//    logging::info("Non-symmetric Arnoldi eigenvalue: {}", m_eval);
+    else {
+        m_arpack_nonsym.solve(dist, opts);
+    }
 }
