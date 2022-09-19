@@ -18,7 +18,6 @@ struct WalkerTableRow : public Row {
     field::Mbf m_mbf;
     field::Numbers<wf_t, c_ndim_wf> m_weight;
     field::Number<ham_comp_t> m_hdiag;
-    field::Flags<c_ndim_wf> m_initiator;
     field::Flags<c_ndim_root> m_deterministic;
     field::Flags<c_ndim_wf> m_ref_conn;
     field::Numbers<wf_t, c_ndim_wf> m_average_weight;
@@ -38,13 +37,15 @@ struct WalkerTableRow : public Row {
      * @return
      *  correct normalization for the average weight
      */
-    uint_t occupied_ncycle(const uint_t& icycle_current) const;
+    uint_t occupied_ncycle(uint_t icycle_current) const;
 
-    const uint_t& nroot() const;
+    uint_t nroot() const;
 
-    const uint_t& nreplica() const;
+    uint_t nreplica() const;
 
-    uint_t ipart_replica(const uint_t& ipart) const;
+    uint_t ipart_replica(uint_t ipart) const;
+
+    bool is_initiator(uint_t ipart, wf_comp_t thresh) const;
 };
 
 struct UniqueOnvRow : public Row {

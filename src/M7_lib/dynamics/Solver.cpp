@@ -116,7 +116,6 @@ void Solver::execute(uint_t ncycle) {
 
 void Solver::begin_cycle() {
     m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
-    m_chk_ninitiator_local = m_wf.m_ninitiator.m_local[{0, 0}] + m_wf.m_delta_ninitiator.m_local[{0, 0}];
 
     m_prop.update(m_icycle, m_wf);
 
@@ -211,8 +210,7 @@ void Solver::loop_over_occupied_mbfs() {
             const auto &weight = row.m_weight[ipart];
 
             m_wf.m_nocc_mbf.m_local++;
-            if (row.m_initiator.get(ipart))
-                m_wf.m_ninitiator.m_local[ipart]++;
+            if (row.is_initiator(ipart, m_opts.m_propagator.m_nadd)) m_wf.m_ninitiator.m_local[ipart]++;
 
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);

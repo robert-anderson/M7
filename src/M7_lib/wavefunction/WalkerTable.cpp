@@ -14,7 +14,6 @@ WalkerTableRow::WalkerTableRow(const sys::Basis& basis, uint_t nroot, uint_t nre
         m_mbf(this, basis, "many-body basis function"),
         m_weight(this, m_wf_format, "weight"),
         m_hdiag(this, "diagonal H element"),
-        m_initiator(this, m_wf_format, "initiator status flag"),
         m_deterministic(this, m_root_format, "deterministic subspace flag"),
         m_ref_conn(this, m_wf_format, "reference connection flag"),
         m_average_weight(average_weights ? this : nullptr, m_wf_format, "unnormalized average weight"),
@@ -25,18 +24,22 @@ bool WalkerTableRow::is_h5_write_exempt() const {
     return m_mbf.is_zero();
 }
 
-uint_t WalkerTableRow::occupied_ncycle(const uint_t &icycle_current) const {
+uint_t WalkerTableRow::occupied_ncycle(uint_t icycle_current) const {
     return (1+icycle_current)-m_icycle_occ;
 }
 
-const uint_t &WalkerTableRow::nroot() const {
+uint_t WalkerTableRow::nroot() const {
     return m_wf_format.m_shape[0];
 }
 
-const uint_t &WalkerTableRow::nreplica() const {
+uint_t WalkerTableRow::nreplica() const {
     return m_wf_format.m_shape[1];
 }
 
-uint_t WalkerTableRow::ipart_replica(const uint_t &ipart) const {
+uint_t WalkerTableRow::ipart_replica(uint_t ipart) const {
     return nreplica()==1 ? ipart : (ipart/2)*2+!(ipart&1ul);
+}
+
+bool WalkerTableRow::is_initiator(uint_t ipart, wf_comp_t thresh) const {
+    return std::abs(m_weight[ipart]) >= thresh;
 }

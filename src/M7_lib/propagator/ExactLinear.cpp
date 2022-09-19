@@ -16,7 +16,7 @@ void ExactLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     const auto& row = wf.m_store.m_row;
     auto& src_mbf = row.m_mbf;
     const wf_t& weight = row.m_weight[ipart];
-    bool src_initiator = row.m_initiator.get(ipart);
+    bool src_initiator = row.is_initiator(ipart, m_nadd_initiator);
     bool src_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
     src_mbf.m_decoded.clear();
 

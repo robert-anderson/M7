@@ -38,7 +38,6 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
         m_sector(sector),
         m_format(m_store.m_row.m_weight.m_format),
         m_ninitiator(m_format),
-        m_delta_ninitiator(m_format),
         m_nwalker(m_format),
         m_delta_nwalker(m_format),
         m_l2_norm_square(m_format),
@@ -46,7 +45,7 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
         m_nspawned(m_format),
         m_nannihilated(m_format) {
     ASSERT(m_comm.recv().m_row.m_dst_mbf.belongs_to_row());
-    m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
+    m_summables.add_members(m_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
 }
@@ -81,7 +80,7 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
             std::to_string(row.index()),
             row.m_mbf.to_string(),
             logging::format("{: .6e}", row.m_weight[ipart]),
-            convert::to_string(bool(row.m_initiator[ipart])),
+            convert::to_string(row.is_initiator(ipart, m_opts.m_propagator.m_nadd)),
             convert::to_string(bool(row.m_deterministic[iroot_part(ipart)])),
             convert::to_string(m_dist.irank(row.m_mbf))
         });
@@ -132,7 +131,7 @@ void Wavefunction::end_cycle() {
     m_summables.all_sum();
 }
 
-wf_comp_t Wavefunction::square_norm(const uint_t& ipart) const {
+wf_comp_t Wavefunction::square_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto& row = m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
@@ -142,7 +141,7 @@ wf_comp_t Wavefunction::square_norm(const uint_t& ipart) const {
     return mpi::all_sum(res);
 }
 
-wf_comp_t Wavefunction::l1_norm(const uint_t& ipart) const {
+wf_comp_t Wavefunction::l1_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto& row = m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
@@ -152,21 +151,7 @@ wf_comp_t Wavefunction::l1_norm(const uint_t& ipart) const {
     return mpi::all_sum(res);
 }
 
-void Wavefunction::grant_initiator_status(const uint_t& ipart) {
-    auto& row = m_store.m_row;
-    if (row.m_initiator.get(ipart)) return;
-    row.m_initiator.set(ipart);
-    m_delta_ninitiator.m_local[ipart]++;
-}
-
-void Wavefunction::revoke_initiator_status(const uint_t& ipart) {
-    auto& row = m_store.m_row;
-    if (!row.m_initiator.get(ipart)) return;
-    row.m_initiator.clr(ipart);
-    m_delta_ninitiator.m_local[ipart]--;
-}
-
-void Wavefunction::set_weight(const uint_t& ipart, const wf_t& new_weight) {
+void Wavefunction::set_weight(uint_t ipart, const wf_t& new_weight) {
     auto& row = m_store.m_row;
     wf_t& weight = row.m_weight[ipart];
     m_delta_nwalker.m_local[ipart] += std::abs(new_weight);
@@ -174,20 +159,17 @@ void Wavefunction::set_weight(const uint_t& ipart, const wf_t& new_weight) {
     m_delta_l2_norm_square.m_local[ipart] += std::pow(std::abs(new_weight), 2.0);
     m_delta_l2_norm_square.m_local[ipart] -= std::pow(std::abs(weight), 2.0);
     weight = new_weight;
-
-    if (std::abs(new_weight) >= m_opts.m_propagator.m_nadd) grant_initiator_status(ipart);
-    else revoke_initiator_status(ipart);
 }
 
-void Wavefunction::change_weight(const uint_t& ipart, const wf_t& delta) {
+void Wavefunction::change_weight(uint_t ipart, const wf_t& delta) {
     set_weight(ipart, m_store.m_row.m_weight[ipart] + delta);
 }
 
-void Wavefunction::scale_weight(const uint_t& ipart, const double& factor) {
+void Wavefunction::scale_weight(uint_t ipart, const double& factor) {
     set_weight(ipart, factor * m_store.m_row.m_weight[ipart]);
 }
 
-void Wavefunction::zero_weight(const uint_t& ipart) {
+void Wavefunction::zero_weight(uint_t ipart) {
     set_weight(ipart, 0.0);
 }
 
@@ -197,13 +179,12 @@ void Wavefunction::remove_row() {
     for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
         zero_weight(ipart);
         // in the case that nadd==0.0, the set_weight method won't revoke:
-        revoke_initiator_status(ipart);
         m_delta_nocc_mbf.m_local--;
     }
     m_store.erase(lookup);
 }
 
-uint_t Wavefunction::create_row_(const uint_t& icycle, const Mbf& mbf, const ham_comp_t& hdiag,
+uint_t Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, const ham_comp_t& hdiag,
                                  const v_t<bool>& refconns) {
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
     DEBUG_ASSERT_TRUE(mpi::i_am(irank(mbf)),
@@ -229,7 +210,7 @@ uint_t Wavefunction::create_row_(const uint_t& icycle, const Mbf& mbf, const ham
     return irow;
 }
 
-TableBase::Loc Wavefunction::create_row(const uint_t& icycle, const Mbf& mbf, const ham_comp_t& hdiag,
+TableBase::Loc Wavefunction::create_row(uint_t icycle, const Mbf& mbf, const ham_comp_t& hdiag,
                                         const v_t<bool>& refconns) {
     const uint_t irank = this->irank(mbf);
     uint_t irow;

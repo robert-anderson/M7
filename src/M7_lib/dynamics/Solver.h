@@ -84,7 +84,6 @@ class Solver {
      * Sanity checking variables
      */
     wf_t m_chk_nwalker_local = 0.0;
-    uint_t m_chk_ninitiator_local = 0ul;
 
     InteractiveVariable<bool> m_exit;
 public:

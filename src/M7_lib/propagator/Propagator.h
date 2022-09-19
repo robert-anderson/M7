@@ -22,6 +22,7 @@ class Propagator : public Archivable {
 protected:
     double m_tau;
 public:
+    const wf_comp_t m_nadd_initiator;
     const NdFormat<c_ndim_wf> m_wf_fmt;
     const Hamiltonian &m_ham;
     Shift m_shift;
@@ -41,6 +42,7 @@ public:
     Propagator(const conf::Document &opts, const Hamiltonian &ham, const Wavefunction &wf) :
             Archivable("propagator", opts.m_archive),
             m_tau(opts.m_propagator.m_tau_init),
+            m_nadd_initiator(opts.m_propagator.m_nadd),
             m_wf_fmt(wf.m_format),
             m_ham(ham),
             m_shift(opts, wf.m_format),

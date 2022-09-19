@@ -50,10 +50,6 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      */
     NdReduction<uint_t, c_ndim_wf> m_ninitiator;
     /**
-     * change over the last cycle in the number of initiator ONVs
-     */
-    NdReduction<int, c_ndim_wf> m_delta_ninitiator;
-    /**
      * number of ONVs with any associated weight in any part
      */
     Reduction<uint_t> m_nocc_mbf;
@@ -116,41 +112,25 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
     void end_cycle();
 
-    const uint_t& nroot() const {
+    uint_t nroot() const {
         return m_store.m_row.nroot();
     }
 
-    const uint_t& nreplica() const {
+    uint_t nreplica() const {
         return m_store.m_row.nreplica();
     }
 
-    uint_t ipart_replica(const uint_t& ipart) const {
+    uint_t ipart_replica(uint_t ipart) const {
         return m_store.m_row.ipart_replica(ipart);
     }
 
-    uint_t iroot_part(const uint_t& ipart) const {
+    uint_t iroot_part(uint_t ipart) const {
         return ipart/2;
     }
 
-    wf_comp_t square_norm(const uint_t& ipart) const;
+    wf_comp_t square_norm(uint_t ipart) const;
 
-    wf_comp_t l1_norm(const uint_t& ipart) const;
-
-    /**
-     * allow the current ONV in m_store.m_row to change the weight on ONVs to which it generates
-     * spawned contributions, and update initiator statistics accordingly
-     * @param ipart
-     *  flat index of the initiator flag to be set in the selected row
-     */
-    void grant_initiator_status(const uint_t &ipart);
-
-    /**
-     * prohibit the current ONV in m_store.m_row to change the weight on ONVs to which it generates
-     * spawned contributions, and update initiator statistics accordingly
-     * @param ipart
-     *  flat index of the initiator flag to be cleared in the selected row
-     */
-    void revoke_initiator_status(const uint_t &ipart);
+    wf_comp_t l1_norm(uint_t ipart) const;
 
     /**
      * all changes in the m_weight member of any row associated with m_store should occur through
@@ -160,7 +140,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param new_weight
      *  value to which this part weight is to be set
      */
-    void set_weight(const uint_t &ipart, const wf_t &new_weight);
+    void set_weight(uint_t ipart, const wf_t &new_weight);
 
     void set_weight(const wf_t &new_weight) {
         for (uint_t ipart=0ul; ipart<m_format.m_nelement; ++ipart) set_weight(ipart, new_weight);
@@ -178,7 +158,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param delta
      *  change in the weight
      */
-    void change_weight(const uint_t &ipart, const wf_t &delta);
+    void change_weight(uint_t ipart, const wf_t &delta);
 
     /**
      * convenience method to set_weight based on a scalar factor relative to current weight
@@ -187,7 +167,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param factor
      *  fractional change in the weight
      */
-    void scale_weight(const uint_t &ipart, const double &factor);
+    void scale_weight(uint_t ipart, const double &factor);
 
     /**
      * convenience method to set the weight of a part of the WF to zero on the currently
@@ -195,7 +175,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @param ipart
      *  part index
      */
-    void zero_weight(const uint_t &ipart);
+    void zero_weight(uint_t ipart);
 
     void remove_row();
 
@@ -214,11 +194,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      *  i.e. the connection to the reference has a non-zero H matrix element
      * @return
      */
-    uint_t create_row_(const uint_t &icycle, const field::Mbf &mbf,
+    uint_t create_row_(uint_t icycle, const field::Mbf &mbf,
                        const ham_comp_t &hdiag, const v_t<bool>& refconns);
 
 
-    uint_t create_row_(const uint_t &icycle, const field::Mbf &mbf,
+    uint_t create_row_(uint_t icycle, const field::Mbf &mbf,
                        const ham_comp_t &hdiag, bool refconn) {
         return create_row_(icycle, mbf, hdiag, v_t<bool>(npart(), refconn));
     }
@@ -226,11 +206,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * Called on all ranks, dispatching create_row_ on the assigned rank only
      */
-    TableBase::Loc create_row(const uint_t& icycle, const field::Mbf &mbf,
+    TableBase::Loc create_row(uint_t icycle, const field::Mbf &mbf,
                               const ham_comp_t &hdiag, const v_t<bool>& refconns);
 
 
-    TableBase::Loc create_row(const uint_t& icycle, const field::Mbf &mbf,
+    TableBase::Loc create_row(uint_t icycle, const field::Mbf &mbf,
                               const ham_comp_t &hdiag, bool refconn) {
         return create_row(icycle, mbf, hdiag, v_t<bool>(npart(), refconn));
     }
@@ -242,7 +222,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
                      bool initiator, bool deterministic, uint_t dst_ipart,
                      const field::Mbf &src_mbf, const wf_t &src_weight);
 
-    const uint_t& npart() const {
+    uint_t npart() const {
         return m_format.m_nelement;
     }
 
@@ -251,7 +231,7 @@ private:
     void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm=1000ul);
 
     void orthogonalize(NdReduction<wf_t, 3>& overlaps,
-                       const uint_t& iroot, const uint_t& jroot, const uint_t& ireplica) {
+                       uint_t iroot, uint_t jroot, uint_t ireplica) {
         ASSERT(iroot<=jroot);
         auto& row = m_store.m_row;
         const auto ipart_src = m_format.flatten({iroot, ireplica});

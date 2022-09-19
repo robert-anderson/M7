@@ -34,7 +34,7 @@ void StochLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     DEBUG_ASSERT_TRUE(m_ham.complex_valued() || fptol::numeric_real(weight),
                       "real-valued hamiltonian should never result in non-zero imaginary walker component")
     const auto& src_mbf = row.m_mbf;
-    bool flag_initiator = row.m_initiator.get(ipart);
+    bool is_initiator = row.is_initiator(ipart, m_nadd_initiator);
     bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
 
     const wf_comp_t abs_weight = std::abs(weight);
@@ -112,7 +112,7 @@ void StochLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
 
             p_succeed_at_least_once = 1.0 - p_fail_all_attempts;
         }
-        wf.add_spawn(dst_mbf, thresh_delta, flag_initiator, flag_deterministic,
+        wf.add_spawn(dst_mbf, thresh_delta, is_initiator, flag_deterministic,
                      ipart, src_mbf, weight / p_succeed_at_least_once);
     }
 }

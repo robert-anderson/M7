@@ -25,7 +25,7 @@ TEST(WalkerTable, Fields){
 
     v_t<const FieldBase*> fields;
     Appender::append(fields, row.m_mbf);
-    fields.insert(fields.end(), {&row.m_weight, &row.m_hdiag, &row.m_initiator, &row.m_deterministic, &row.m_ref_conn});
+    fields.insert(fields.end(), {&row.m_weight, &row.m_hdiag, &row.m_deterministic, &row.m_ref_conn});
     uint_t i = 0ul;
     for (auto field: fields) {
         ASSERT_EQ(field->m_row, &row);
