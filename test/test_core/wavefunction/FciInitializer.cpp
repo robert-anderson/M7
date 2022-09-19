@@ -11,9 +11,9 @@
 TEST(FciInitializer, N2) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", true});
     Hamiltonian ham(&frm_ham);
-    ArnoldiOptions opt;
+    FciInitOptions opt;
     opt.m_ritz_tol = 1e-7;
-    FciInitializer init(ham, 0.0, opt);
+    FciInitializer init(ham, opt);
     DenseHamiltonian hmat(ham);
     v_t<ham_t> dense_evals;
     dense::diag(hmat, dense_evals);
@@ -27,7 +27,7 @@ TEST(FciInitializer, N2) {
 TEST(FciInitializer, J1J2) {
     J1J2FrmHam frm_ham(0.25, lattice::make("ortho", {16}, {1}));
     Hamiltonian ham(&frm_ham);
-    FciInitializer init(ham, 0.0);
+    FciInitializer init(ham);
     ham_comp_t eval;
     auto results = init.get_results();
     results.bcast();

@@ -6,7 +6,7 @@
 #include "FciInitializer.h"
 #include "M7_lib/foreach/ConnForeachGroup.h"
 
-FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift, ArnoldiOptions opts):
+FciInitializer::FciInitializer(const Hamiltonian &h, FciInitOptions opts):
         m_mbf_order_table("MBF order table", {{h.m_basis}}){
     auto iters = FciIters::make(h);
     const auto count = iters.niter_single();
@@ -32,7 +32,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift, ArnoldiOp
         auto& dst_mbf = mbf;
         const auto irow = row.index()-displ_local;
 
-        const auto helem_diag = h.get_element(src_mbf) + shift;
+        const auto helem_diag = h.get_element(src_mbf) + opts.m_diag_shift;
         DEBUG_ASSERT_TRUE(sparse_ham[irow].empty(), "sparse row should be empty");
         if (ham::is_significant(helem_diag)) sparse_ham.insert(irow, {row.index(), helem_diag});
         auto filling_fn = [&](){
@@ -47,12 +47,22 @@ FciInitializer::FciInitializer(const Hamiltonian &h, ham_comp_t shift, ArnoldiOp
         pm.next();
     }
 
-    //std::cout << solver.m_solver->tol << std::endl;
+    /*
+     * once the ARPACK procedure is complete, the eigenvalues must be adjusted to undo the diagonal shift
+     */
+    auto undo_shift = [&opts](ARrcStdEig<ham_t, ham_t>* arpack) {
+        if (!arpack) return;
+        for (auto ptr = arpack->RawEigenvalues(); ptr!=arpack->RawEigenvalues()+arpack->GetNev(); ++ptr)
+            *ptr-=opts.m_diag_shift;
+    };
+
     dist_mv_prod::Sparse<double> dist(sparse_ham);
     if (h.is_hermitian()) {
         m_arpack_sym.solve(dist, opts);
+        undo_shift(m_arpack_sym.m_solver.get());
     }
     else {
         m_arpack_nonsym.solve(dist, opts);
+        undo_shift(m_arpack_nonsym.m_solver.get());
     }
 }

@@ -9,6 +9,14 @@
 #include <M7_lib/arnoldi/ArnoldiSolver.h>
 #include "Wavefunction.h"
 
+
+struct FciInitOptions : ArnoldiOptions {
+    /**
+     * shift to add to the diagonal elements of the sparse subspace Hamiltonian
+     */
+    ham_comp_t m_diag_shift = 0.0;
+};
+
 struct FciInitializer {
     struct MbfOrderRow : Row {
         field::Mbf m_mbf;
@@ -28,7 +36,7 @@ struct FciInitializer {
      * instance of the ARPACK wrapper which is only used if H is non-hermitian
      */
     ArnoldiProblemNonSym<ham_t> m_arpack_nonsym;
-    explicit FciInitializer(const Hamiltonian& h, ham_comp_t shift=0.0, ArnoldiOptions opts={});
+    explicit FciInitializer(const Hamiltonian& h, FciInitOptions opts={});
 
     ArnoldiResults<ham_comp_t> get_results() {
         return m_arpack_sym.m_solver ? m_arpack_sym.get_results() : m_arpack_nonsym.get_results();
