@@ -6,6 +6,7 @@
 #include "Wavefunction.h"
 #include "M7_lib/linalg/FciIters.h"
 #include "M7_lib/sort/QuickSorter.h"
+#include "FciInitializer.h"
 
 /*
 MappedTableBase::nbucket_guess(
@@ -266,16 +267,45 @@ uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta, boo
     return irow;
 }
 
-void Wavefunction::fci_init(const Hamiltonian& h) {
-    auto iters = FciIters::make(h);
-    buffered::Mbf mbf(m_sector);
-    auto fn = [this, &mbf, &h]() {
-        const auto irank = this->irank(mbf);
-        if (mpi::i_am(irank)) {
-            create_row_(0, mbf, h.get_element(mbf), {});
+void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm) {
+    /*
+     * perform the eigensolver procedure for the required number of states
+     */
+    FciInitializer init(h, opts);
+    uint_t irow = 0ul;
+    /*
+     * continue to distribute the eigenvectors in blocks until there are no remaining elements
+     */
+    char done = false;
+    while (!mpi::all_land(done)) {
+        if (mpi::i_am_root()) {
+            auto results = init.get_results();
+            auto& row = init.m_mbf_order_table.m_row;
+            const auto irow_end = std::min(init.m_mbf_order_table.m_hwm, irow + max_ncomm);
+            wf_t const* evec_ptr = nullptr;
+            for (row.jump(irow); row.in_range(irow_end); row.step()) {
+                for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
+                    results.get_evec(iroot, evec_ptr);
+                    for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
+                        auto ipart = m_format.flatten({iroot, ireplica});
+                        add_spawn(row.m_mbf, evec_ptr[row.index()], true, false, ipart);
+                    }
+                }
+            }
+            irow = irow_end;
+            done = irow == init.m_mbf_order_table.m_hwm;
+        } else {
+            done = true;
         }
-    };
-    iters.m_single->loop(mbf, fn);
+        /*
+         * use the spawning send/recv tables to send distribute the wavefunction from the root rank to the correct ranks
+         */
+        m_comm.communicate();
+        auto& recv_row = m_comm.recv().m_row;
+        for (recv_row.restart(); recv_row.in_range(); recv_row.step()){
+            create_row(0ul, recv_row.m_dst_mbf, h.get_energy(recv_row.m_dst_mbf), 0);
+        }
+    }
 }
 
 void Wavefunction::load_fn(const hdf5::NodeReader& /*parent*/) {

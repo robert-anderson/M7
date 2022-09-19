@@ -7,8 +7,6 @@
 
 #include <M7_lib/linalg/FciIters.h>
 #include <M7_lib/arnoldi/ArnoldiSolver.h>
-#include "Wavefunction.h"
-
 
 struct FciInitOptions : ArnoldiOptions {
     /**

@@ -147,12 +147,18 @@ public:
         eval = {m_real_evals[iroot], m_imag_evals[iroot]};
     }
 
-    void get_evec(uint_t iroot, T*& evec) const {
+    /**
+     * @param iroot
+     *  root index
+     * @param evec
+     *  reference to pointer to constant data (initial element of the iroot-th eigenvector)
+     */
+    void get_evec(uint_t iroot, T const * &evec) const {
         REQUIRE_FALSE(m_complex_evecs, "cannot dereference complex eigenvector as a real vector");
-        evec = m_evecs+iroot*m_nelement_evec;
+        evec = m_evecs[iroot] + m_nelement_evec;
     }
 
-    void get_evec(uint_t iroot, std::complex<T>*& evec) const {
+    void get_evec(uint_t iroot, std::complex<T> const * &evec) const {
         REQUIRE_TRUE(m_complex_evecs, "cannot dereference real eigenvector as a complex vector");
         evec = reinterpret_cast<std::complex<T>*>(m_evecs) + iroot * m_nelement_evec;
     }

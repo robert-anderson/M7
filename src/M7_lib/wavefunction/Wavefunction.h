@@ -17,6 +17,7 @@
 
 #include "WalkerTable.h"
 #include "SpawnTable.h"
+#include "FciInitializer.h"
 
 /**
  * A communicator whose m_store is the list of occupation number vectors currently
@@ -247,7 +248,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
 private:
 
-    void fci_init(const Hamiltonian& h);
+    void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm=1000ul);
 
     void orthogonalize(NdReduction<wf_t, 3>& overlaps,
                        const uint_t& iroot, const uint_t& jroot, const uint_t& ireplica) {
