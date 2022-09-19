@@ -209,6 +209,11 @@ def check_nw(fname='M7.stats'):
     run, bench = stats_columns('WF L1 norm', fname)
     if not np.allclose(run, bench): fail('walker trajectories do not agree')
 
+def check_ninit(fname='M7.stats'):
+    if benchmarking: return
+    run, bench = stats_columns('Initiator', fname)
+    if not np.allclose(run, bench): fail('initiator number trajectories do not agree')
+
 def check_rdms(fname='M7.h5'):
     if benchmarking: return
     run, bench = instance.rdms(fname)
