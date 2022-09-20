@@ -19,10 +19,10 @@ exgen::Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
                 uint_t ab = 0ul;
                 for (uint_t a = 0ul; a < nspinorb; ++a) {
                     for (uint_t b = 0ul; b < a; ++b) {
-                        //if (a!=i && a!=j && b!=i && b!=j) { !TODO why does this restriction fail?
-                        auto element = m_h.get_coeff_2200(i, j, a, b);
-                        weights[ab] = std::abs(element);
-                        //}
+                        if (a!=i && a!=j && b!=i && b!=j) {
+                            auto element = m_h.get_coeff_2200(i, j, a, b);
+                            weights[ab] = std::abs(element);
+                        }
                         ++ab;
                     }
                 }

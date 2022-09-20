@@ -179,7 +179,6 @@ namespace excit_gen_tester {
         std::string run(const mbf_t &src_mbf, uint_t ndraw, double cutoff = 1e-2, prob_t atol = 1e-2) {
             Status status;
             run(src_mbf, ndraw, status, cutoff, atol);
-            std::cout << m_results.to_string() << std::endl;
             return status_error_msg(status);
         }
     };
