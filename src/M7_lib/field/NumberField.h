@@ -48,7 +48,7 @@ struct NdNumberField : NumberFieldBase {
     }
 
     const T* dend() const {
-        return reinterpret_cast<const T*>(dend());
+        return reinterpret_cast<const T*>(end());
     }
 
     NdNumberField(Row *row, NdFormat<nind> format, str_t name = "", bool force_own_words=false) :
@@ -233,6 +233,28 @@ public:
         T tmp = 0;
         for (uint_t ielement = 0ul; ielement < m_nelement; ++ielement) tmp += (*this)[ielement];
         return tmp;
+    }
+
+    /**
+     * to prevent overflow, we may elect to accumulate the sum in a larger type
+     */
+    template<typename U>
+    void sum(U& v) const {
+        v = 0;
+        for (uint_t ielement = 0ul; ielement < m_nelement; ++ielement) v += U((*this)[ielement]);
+    }
+
+    uint_t imax() const {
+        return std::distance(dbegin(), std::max_element(dbegin(), dend()));
+    }
+    T max() const {
+        return (*this)[imax()];
+    }
+    uint_t imin() const {
+        return std::distance(dbegin(), std::min_element(dbegin(), dend()));
+    }
+    T min() const {
+        return (*this)[imin()];
     }
 
     /*
