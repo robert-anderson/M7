@@ -1,6 +1,6 @@
 from system_test import *
 
-skip_unless('many-body basis function', 'fermion (determinant)')
+skip_if('many-body basis function', 'boson (permanent)')
 run(assets=['HF_RDMs/FCIDUMP'])
 exact_e0 =-99.9421389039332
 check_nw()
