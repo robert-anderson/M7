@@ -5,8 +5,8 @@
 #ifndef M7_TABLEBASE_H
 #define M7_TABLEBASE_H
 
+#include <set>
 #include <M7_lib/io/Logging.h>
-
 #include "Buffer.h"
 
 struct RowTransfer {
@@ -355,6 +355,11 @@ public:
         --it->second;
     }
 
+    /**
+     * @return
+     *  the stack of free row indices as a set
+     */
+    std::set<uint_t> free_rows_set() const;
 
     /**
      * "Location" class which describes the location of a row in a distributed table i.e. by a row index and a rank index

@@ -223,6 +223,16 @@ uint_t TableBase::nrow_nonzero() const {
     return m_hwm-m_free_rows.size();
 }
 
+std::set<uint_t> TableBase::free_rows_set() const {
+    std::set<uint_t> set;
+    auto stack = m_free_rows;
+    while (!stack.empty()) {
+        set.insert(stack.top());
+        stack.pop();
+    }
+    return set;
+}
+
 TableBase::Loc::Loc(uint_t irank, uint_t irow) : m_irank(irank), m_irow(irow){
 #ifndef NDEBUG
     mpi::bcast(irank);

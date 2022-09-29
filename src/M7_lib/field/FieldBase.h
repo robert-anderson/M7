@@ -134,6 +134,8 @@ public:
 
     virtual str_t to_string() const = 0;
 
+    uint_t to_buffer(buf_t* buf, uint_t irow_begin, uint_t nitem_max, std::set<uint_t> irows_empty) const;
+
     virtual void h5_write_attrs(const hdf5::NodeWriter& /*node*/) const {}
 
     virtual void save(hdf5::NdDistListWriter &h5list, const uint_t &iitem) const {

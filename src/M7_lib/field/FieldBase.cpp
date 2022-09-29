@@ -96,3 +96,17 @@ bool FieldBase::operator>=(const FieldBase &other) const {
 hash::digest_t FieldBase::hash() const {
     return hash::fnv(begin(), m_size);
 }
+
+uint_t FieldBase::to_buffer(buf_t* buf, uint_t irow_begin, uint_t nitem_max, std::set<uint_t> irows_empty) const {
+    DEBUG_ASSERT_LT(irow_begin, irow_end, "invalid row range");
+    DEBUG_ASSERT_LT(irow_begin, m_row->m_table->m_hwm, "row index OOB");
+    uint_t nitem = 0ul;
+    for (uint_t irow = irow_begin; irow<m_row->m_table->m_hwm; ++irow){
+        if (nitem==nitem_max) return nitem;
+        if (irows_empty.find(irow)!=irows_empty.end()) continue;
+        auto dst = buf + irow*m_size;
+        auto src = m_row->m_table->begin()+m_row->m_size*irow+m_row_offset;
+        std::memcpy(dst, src, m_size);
+    }
+    return nitem;
+}
