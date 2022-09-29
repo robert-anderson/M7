@@ -10,7 +10,7 @@ propagator:
   stochastic: yes
   nw_target: 1000
   nadd: 3.0
-  ncycle: 100000
+  ncycle: 400000
 hamiltonian:
   fermion:
     fcidump: yes
