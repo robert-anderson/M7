@@ -33,7 +33,7 @@ struct FieldBase;
  */
 struct Row {
     /**
-     * the row needs access to the buffer window and high water mark of the table with which it is asscociated
+     * the row needs access to the buffer window and high water mark of the table with which it is associated
      */
     TableBase *m_table;
     /**
@@ -78,7 +78,7 @@ public:
      * @return
      *  true if stored row index is within the range [0, irow_end)
      */
-    bool in_range(const uint_t &irow_end) const {
+    bool in_range(uint_t irow_end) const {
         return m_i < irow_end;
     }
 
@@ -116,7 +116,7 @@ public:
      * @return
      *  row position within Table
      */
-    const uint_t& index() const {
+    uint_t index() const {
         DEBUG_ASSERT_LE(m_i, m_table->m_hwm, "the row index is not in the permitted range");
         return m_i;
     }
@@ -124,7 +124,7 @@ public:
     /*
      * the 3 "cursor" methods
      */
-    void restart(const uint_t &irow_begin) const {
+    void restart(uint_t irow_begin) const {
         DEBUG_ASSERT_LE(irow_begin, m_table->m_hwm, "Cannot restart to an out-of-range row index");
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         if (!m_table->m_hwm && !irow_begin){
@@ -148,7 +148,7 @@ public:
         m_i++;
     }
 
-    void jump(const uint_t &i) const {
+    void jump(uint_t i) const {
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
         m_begin = m_table->begin() + m_size * i;
