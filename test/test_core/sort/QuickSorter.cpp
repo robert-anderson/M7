@@ -11,7 +11,7 @@
 namespace quick_sorter_test {
 
     typedef SingleFieldRow<field::String> row_t;
-    typedef BufferedTable<row_t> bt_t;
+    typedef buffered::Table<row_t> bt_t;
     static void setup_table(Table<row_t>& table){
         const strv_t words = {
                 "alpha", "beetle", "catapult", "alpaca", "alpha", "catapult",
@@ -59,7 +59,7 @@ TEST(QuickSorter, FunctorSort){
     using namespace quick_sorter_test;
     const uint_t nchar = 9;
 
-    bt_t table("test", {{nchar}});
+    bt_t table("test", {nchar});
     setup_table(table);
 
     AscOrderFn comp_fn(table.m_row);
@@ -116,7 +116,7 @@ TEST(QuickSorter, LambdaSort){
     using namespace quick_sorter_test;
     const uint_t nchar = 9;
 
-    bt_t table("test", {{nchar}});
+    bt_t table("test", {nchar});
     setup_table(table);
 
     auto row1 = table.m_row;

@@ -239,7 +239,7 @@ public:
      * @param nrec
      *  minimum number of records in the new buffer.
      */
-    void resize(uint_t nrec, double factor=-1.0);
+    virtual void resize(uint_t nrec, double factor=-1.0);
 
     /**
      * resize based on the number of additional records required beyond those currently allocated
@@ -461,7 +461,7 @@ public:
         return m_bw.name();
     }
 
-    virtual void rename(str_t name) const {
+    void rename(str_t name) const {
         m_bw.rename(name);
     }
 };

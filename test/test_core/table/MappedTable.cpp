@@ -17,7 +17,7 @@ namespace mapped_table_test {
         }
     };
 
-    typedef BufferedTable<KeyOnlyRow, true> key_only_table_t;
+    typedef buffered::MappedTable<KeyOnlyRow> key_only_table_t;
 
     struct ExtendedRow : KeyOnlyRow {
         field::String m_text;
@@ -28,7 +28,7 @@ namespace mapped_table_test {
             m_numbers(this, {6}, "some numbers") {}
     };
 
-    typedef BufferedTable<ExtendedRow, true> extended_table_t;
+    typedef buffered::MappedTable<ExtendedRow> extended_table_t;
 
     uint_t nitem_in_bucket(const MappedTableBase &table, uint_t ibucket) {
         const auto &bucket = table.m_buckets[ibucket];
@@ -38,21 +38,19 @@ namespace mapped_table_test {
 
 TEST(MappedTable, Empty) {
     using namespace mapped_table_test;
-    key_only_table_t table("test", {{}});
+    key_only_table_t table("test", {});
     buffered::Number<uint_t> key;
     key = 100;
-    auto lookup = table[key];
-    ASSERT_FALSE(lookup);
+    ASSERT_FALSE(table.lookup(key));
 }
 
 TEST(MappedTable, Remap) {
     using namespace mapped_table_test;
     const uint_t nbucket_init = 3ul;
-    const uint_t nlookup_remap = 10ul;
-    const double remap_ratio = 0.5;
-    key_only_table_t table("test", {{}, nbucket_init, nlookup_remap, remap_ratio});
+    key_only_table_t table("test", {});
+    table.m_mapping_opts.m_remap_ratio = 0.5;
+    table.m_mapping_opts.m_remap_nlookup = 10ul;
     table.set_expansion_factor(1);
-    ASSERT_EQ(remap_ratio, table.m_remap_ratio);
     buffered::Number<uint_t> key;
     key = 100;
     while ((key++) < 120) table.insert(key);
@@ -71,26 +69,26 @@ TEST(MappedTable, Remap) {
      * 120  118  115  109  108  106  105  103
      */
     key = 120;
-    table[key];
+    table.lookup(key);
     ASSERT_EQ(table.m_nlookup_total, 1);
     // 120 was the last item to be added, so no skips were required to access it
     ASSERT_EQ(table.m_nskip_total, 0);
 
     key = 118;
-    table[key];
+    table.lookup(key);
     ASSERT_EQ(table.m_nlookup_total, 2);
     // 118 is item 6 in bucket 2, so it should have taken 8-6-1 = 1 skip to access it
     ASSERT_EQ(table.m_nskip_total, 1);
 
     key = 106;
-    table[key];
+    table.lookup(key);
     ASSERT_EQ(table.m_nlookup_total, 3);
     // 106 is item 2 in bucket 2, so it should have taken 8-2-1 = 5 skips to access it
     // and we have 1 skip already so 6 in total
     ASSERT_EQ(table.m_nskip_total, 6);
 
     key = 110;
-    table[key];
+    table.lookup(key);
     ASSERT_EQ(table.m_nlookup_total, 4);
     // 110 is item 2 in bucket 1, so it should have taken 6-2-1 = 3 skips to access it
     // and we have 6 skips already so 9 in total
@@ -99,8 +97,8 @@ TEST(MappedTable, Remap) {
     // remap is not yet due since there have only been 4 accesses
     ASSERT_FALSE(table.remap_due());
     key = 120;
-    while (table.m_nlookup_total < nlookup_remap) table[key];
-    ASSERT_EQ(table.m_nlookup_total, nlookup_remap);
+    while (table.m_nlookup_total < table.m_mapping_opts.m_remap_nlookup) table.lookup(key);
+    ASSERT_EQ(table.m_nlookup_total, table.m_mapping_opts.m_remap_nlookup);
     // remap is now due since there have been enough total lookups and skips/lookups ratio exceeds thresh
     ASSERT_TRUE(table.remap_due());
     // do the remap
@@ -116,23 +114,24 @@ TEST(MappedTable, Remap) {
 
     // make the required number of (non-skipping) lookups for remapping to be due
     key = 120;
-    for (uint_t i=0ul; i<nlookup_remap; ++i) table[key];
+    for (uint_t i=0ul; i<table.m_mapping_opts.m_remap_nlookup; ++i) table.lookup(key);
     // remap still shouldn't be due since there were no skips
     ASSERT_FALSE(table.remap_due());
 
     const auto nitem = table.nrecord_nonempty();
     ASSERT_EQ(nitem, 20);
-    const uint_t nbucket = nbucket_init * (ratio / remap_ratio) * (1.0 + table.get_expansion_factor());
+    const uint_t nbucket = nbucket_init *
+            (ratio / table.m_mapping_opts.m_remap_ratio) * (1.0 + table.get_expansion_factor());
     ASSERT_EQ(nbucket, table.nbucket());
 
     // check that all elements are still mapped and present after remap operation
     key = 100;
-    while ((key++) < 120) ASSERT_TRUE(table[key]);
+    while ((key++) < 120) ASSERT_TRUE(table.lookup(key));
 }
 
 TEST(MappedTable, Copy) {
     using namespace mapped_table_test;
-    extended_table_t table("test", {{}});
+    extended_table_t table("test", {});
     table.set_expansion_factor(1);
     const uint_t ibegin = 16;
     const uint_t nstep = 7;
@@ -158,7 +157,7 @@ TEST(MappedTable, Copy) {
     auto cpy = table;
     ASSERT_EQ(cpy, table);
 
-    extended_table_t other("other", {{}});
+    extended_table_t other("other", {});
     /*
      * copy assigment
      */

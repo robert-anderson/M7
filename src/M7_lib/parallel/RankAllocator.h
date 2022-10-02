@@ -134,7 +134,7 @@ struct RankAllocatorBase {
      * If the fractional difference in work done by the busiest and laziest ranks is less
      * than this number, then do a null update.
      */
-    const double m_acceptable_imbalance;
+    const double m_imbalance_thresh;
     /**
      * If the load balancing algorithm is stable, a situation should be reached in which
      * the update method finds no reason to reallocate blocks. If this happens for a

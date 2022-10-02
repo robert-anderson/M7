@@ -10,14 +10,20 @@
 
 #include <M7_lib/hdf5/Node.h>
 #include <M7_lib/field/Fields.h>
+#include <M7_lib/conf/Conf.h>
 
 #include "Table.h"
 
 
 struct MappedTableOptions {
-    uint_t m_nbucket_init = 100;
-    double m_remap_ratio = 2.0;
-    uint_t m_remap_nlookup = 500;
+    double m_remap_ratio = conf::HashMapping::c_default_remap_ratio;
+    uint_t m_remap_nlookup = conf::HashMapping::c_default_remap_nlookup;
+    MappedTableOptions() = default;
+    MappedTableOptions(const conf::HashMapping& opts) {
+        m_remap_ratio = opts.c_default_remap_ratio;
+        m_remap_nlookup = opts.m_remap_nlookup;
+    }
+    static constexpr uint_t c_nbucket_min = 100ul;
 };
 
 struct MappedTableBase {
@@ -29,7 +35,7 @@ struct MappedTableBase {
 
     v_t<std::forward_list<uint_t>> m_buckets;
 
-    MappedTableOptions m_opts;
+    MappedTableOptions m_mapping_opts;
 
     MappedTableBase(MappedTableOptions opts);
 
@@ -41,20 +47,6 @@ struct MappedTableBase {
 
     bool operator!=(const MappedTableBase& other) const;
 
-    /**
-     * Assuming uniform frequency of access, the average number of skips per lookup in a bucket containing n items is
-     *  (0 + 1 + ... + n-1) / n = (n-1)/2
-     * So assuming uniform distribution of items in buckets, the expected number of skips per lookup is
-     *  (nitem/nbucket - 1) / 2
-     * this is the remap ratio, so invert this estimate to obtain the required number of buckets
-     * @param nitem
-     *  number of items (nonzero table records) on which to base the capacity estimation
-     * @param ratio
-     *  the maximum acceptable ratio of skips to lookups
-     * @return
-     *  estimated number of buckets required to support the mapping of nitem items with the given skip ratio
-     */
-    static uint_t nbucket_guess(uint_t nitem, double ratio);
     /**
      * @return
      *  size of the m_buckets vector
@@ -120,8 +112,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
     using TableBase::m_hwm;
     using TableBase::m_bw;
 
-    MappedTable(const row_t &row, uint_t nbucket = 0ul, uint_t remap_nlookup = 0ul, double remap_ratio = 0.0) :
-            Table<row_t>(row), MappedTableBase(nbucket, remap_nlookup, remap_ratio){}
+    MappedTable(const row_t &row) : Table<row_t>(row), MappedTableBase({}){}
 
     MappedTable& operator=(const MappedTable& other) {
         MappedTableBase::operator=(other);
@@ -129,8 +120,9 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         return *this;
     }
 
-    MappedTable(const MappedTable<row_t> &other) :
-        MappedTable(other.m_row, other.m_buckets.size(), other.m_remap_nlookup, other.m_remap_ratio) {}
+    MappedTable(const MappedTable<row_t> &other) : MappedTable(other.m_row) {
+        m_mapping_opts = other.m_mapping_opts;
+    }
 
     bool operator==(const MappedTable<row_t> &other) const {
         if (!MappedTableBase::operator==(other)) return false;
@@ -182,13 +174,17 @@ private:
      * @param key
      *  key to lookup
      */
-    Lookup uncounted_lookup(const key_field_t &key, const row_t& row) {
+    Lookup uncounted_lookup(const key_field_t &key, const v_t<std::forward_list<uint_t>>& buckets, const row_t& row) {
         const auto nlookup_total = m_nlookup_total;
         const auto nskip_total = m_nskip_total;
-        const auto res = lookup(key, row);
+        const auto res = lookup(key, buckets, row);
         m_nlookup_total = nlookup_total;
         m_nskip_total = nskip_total;
         return res;
+    }
+
+    Lookup uncounted_lookup(const key_field_t &key, const row_t& row) {
+        return uncounted_lookup(key, m_buckets, row);
     }
 
 public:
@@ -197,8 +193,8 @@ public:
         clear_map();
     }
 
-    void clear(row_t& row) {
-        DEBUG_ASSERT_TRUE(associated(row), "row object not associated with this table");
+    void clear_row(row_t& row) {
+        DEBUG_ASSERT_TRUE(Table<row_t>::associated(row), "row object not associated with this table");
         auto lookup = this->lookup(KeyField<row_t>::get(row), row);
         erase(lookup);
     }
@@ -223,6 +219,11 @@ public:
         auto& bucket = const_cast<std::forward_list<uint_t>&>(lookup.m_bucket);
         bucket.erase_after(lookup.m_prev);
     }
+
+    void erase(const key_field_t &key) {
+        erase(lookup(key, m_row));
+    }
+
     /**
      * insert into the hash table a new mapped element defined by the key arg
      * @param key
@@ -231,7 +232,7 @@ public:
      *  row object which points to the newly inserted record upon return of the method
      */
     void insert(const key_field_t &key, row_t& row) {
-        DEBUG_ASSERT_FALSE(uncounted_lookup(key), "cannot insert when the key already exists in the table");
+        DEBUG_ASSERT_FALSE(uncounted_lookup(key, row), "cannot insert when the key already exists in the table");
         DEBUG_ASSERT_TRUE(Table<row_t>::associated(row), "row object not associated with this table");
         auto irow = TableBase::get_empty_record();
         auto &bucket = m_buckets[key.hash() % nbucket()];
@@ -267,7 +268,7 @@ public:
         DEBUG_ASSERT_FALSE(TableBase::is_cleared(irow), "cannot map to a cleared row");
         m_row.jump(irow);
         // row mustn't have already been added
-        DEBUG_ASSERT_FALSE(lookup(KeyField<row_t>::get(m_insert_row), buckets),
+        DEBUG_ASSERT_FALSE(uncounted_lookup(KeyField<row_t>::get(m_row), buckets, m_row),
                            "cannot map to a row which is already in the hash table");
         auto &bucket = buckets[KeyField<row_t>::get(m_row).hash() % buckets.size()];
         bucket.insert_after(bucket.before_begin(), irow);
@@ -285,13 +286,13 @@ public:
      */
     void remap() {
         DEBUG_ASSERT_TRUE(all_nonzero_records_mapped(*this), "mapping is inconsistent with table row content");
-        uint_t nbucket_new = nbucket() * skip_lookup_ratio()/m_opts.m_remap_ratio;
+        uint_t nbucket_new = nbucket() * skip_lookup_ratio() / m_mapping_opts.m_remap_ratio;
         // use the same expansion factor as for the Table buffer
         nbucket_new *= 1.0 + this->m_bw.get_expansion_factor();
         if (!TableBase::name().empty()) {
             logging::info_("remapping hash table for \"{}\"", TableBase::name());
             logging::info_("current ratio of skips to total lookups ({}) exceeds set limit ({})",
-                       skip_lookup_ratio(), m_opts.m_remap_ratio);
+                           skip_lookup_ratio(), m_mapping_opts.m_remap_ratio);
             logging::info_("replacing current bucket vector of size {} with a new one of size {}",
                        nbucket(), nbucket_new);
         }
@@ -316,6 +317,11 @@ public:
             m_nskip_total = 0ul;
             m_nlookup_total = 0ul;
         }
+    }
+
+    void resize(uint_t nrec, double factor=-1.0) override {
+        TableBase::resize(nrec, factor);
+        attempt_remap();
     }
 
     void load(const hdf5::NodeReader &parent, str_t name) override {

@@ -8,9 +8,9 @@
 
 namespace local_extremal_rows_test {
     typedef SingleFieldRow<field::Number<int>> int_scalar_row_t;
-    typedef BufferedTable<int_scalar_row_t> int_scalar_table_t;
+    typedef buffered::Table<int_scalar_row_t> int_scalar_table_t;
     typedef SingleFieldRow<field::Number<std::complex<float>>> complex_scalar_row_t;
-    typedef BufferedTable<complex_scalar_row_t> complex_scalar_table_t;
+    typedef buffered::Table<complex_scalar_row_t> complex_scalar_table_t;
     static constexpr uint_t c_nfind = 4;
 
     static v_t<std::complex<float>> get_complex_data() {
@@ -47,7 +47,7 @@ namespace local_extremal_rows_test {
 }
 TEST(LocalExtremalRows, EmptyTable) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {{}});
+    int_scalar_table_t table("test", {});
     auto &row = table.m_row;
     LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
     lxv.find(c_nfind);
@@ -56,7 +56,7 @@ TEST(LocalExtremalRows, EmptyTable) {
 
 TEST(LocalExtremalRows, Ascending) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {{}});
+    int_scalar_table_t table("test", {});
     setup(table);
     auto &row = table.m_row;
     LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
@@ -74,7 +74,7 @@ TEST(LocalExtremalRows, Ascending) {
 
 TEST(LocalExtremalRows, AscendingAbs) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {{}});
+    int_scalar_table_t table("test", {});
     setup(table);
     auto &row = table.m_row;
     LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, true, 0);
@@ -92,7 +92,7 @@ TEST(LocalExtremalRows, AscendingAbs) {
 
 TEST(LocalExtremalRows, Descending) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {{}});
+    int_scalar_table_t table("test", {});
     setup(table);
     auto &row = table.m_row;
     LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, true, false, 0);
@@ -110,7 +110,7 @@ TEST(LocalExtremalRows, Descending) {
 
 TEST(LocalExtremalRows, DescendingAbs) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {{}});
+    int_scalar_table_t table("test", {});
     setup(table);
     auto &row = table.m_row;
     LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, true, true, 0);
@@ -128,7 +128,7 @@ TEST(LocalExtremalRows, DescendingAbs) {
 
 TEST(LocalExtremalRows, AscendingComplex) {
     using namespace local_extremal_rows_test;
-    complex_scalar_table_t table("test", {{}});
+    complex_scalar_table_t table("test", {});
     setup(table);
     auto &row = table.m_row;
     LocalExtremalRows<complex_scalar_row_t, std::complex<float>> lxv(row, row.m_field, false, true, 0);
@@ -147,7 +147,7 @@ TEST(LocalExtremalRows, AscendingComplex) {
 
 TEST(LocalExtremalRows, DescendingComplex) {
     using namespace local_extremal_rows_test;
-    complex_scalar_table_t table("test", {{}});
+    complex_scalar_table_t table("test", {});
     setup(table);
     auto &row = table.m_row;
     LocalExtremalRows<complex_scalar_row_t, std::complex<float>> lxv(row, row.m_field, true, true, 0);
@@ -166,7 +166,7 @@ TEST(LocalExtremalRows, DescendingComplex) {
 
 TEST(LocalExtremalRows, WithClearedRows) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {{}});
+    int_scalar_table_t table("test", {});
     setup(table);
     ASSERT_EQ(table.nrecord_nonempty(), 9);
     table.clear(2); // -2

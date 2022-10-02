@@ -72,6 +72,11 @@ protected:
         ABORT("not yet implemented");
     }
 
+    static uint_t nrec_est(sys::Size basis_size, uint_t indsig) {
+        const auto nrec_frm = integer::combinatorial(basis_size.m_frm.m_nspinorb, decode_nfrm_cre(indsig));
+        return nrec_frm * decode_nbos(indsig);
+    }
+
 public:
 
     str_t name() const {
@@ -80,14 +85,8 @@ public:
 
     const uint_t m_nelec;
 
-    Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue,
-        Sizing store_sizing, Sizing comm_sizing, str_t name="");
-
-    Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue,
-        double store_exp_fac=1.0, double comm_exp_fac=1.0, str_t name=""):
-        Rdm(ranksig, indsig, basis_size, nblock_per_rank, nelec, nvalue,
-    {nrow_estimate(indsig, basis_size), store_exp_fac},
-    {nrow_estimate(indsig, basis_size), comm_exp_fac}, name){}
+    Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nelec, uint_t nvalue,
+        DistribOptions dist_opts, Sizing store_sizing, Sizing comm_sizing, str_t name="");
 
     /**
      * @param opts
@@ -106,9 +105,13 @@ public:
      * @param indsig
      *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
      */
-    Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nelec, uint_t nvalue, str_t name=""):
-        Rdm(ranksig, indsig, basis_size, opts.m_load_balancing.m_nblock_per_rank, nelec, nvalue,
-            opts.m_buffers.m_store_exp_fac, opts.m_buffers.m_comm_exp_fac, name){}
+    Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig,
+        sys::Size basis_size, uint_t nelec, uint_t nvalue, str_t name=""):
+        Rdm(ranksig, indsig, basis_size, nelec, nvalue, opts.m_distribution,
+            // store sizing
+            Sizing{nrec_est(basis_size, indsig), opts.m_buffers.m_store_exp_fac},
+            // send/recv sizing
+            Sizing{nrec_est(basis_size, indsig), opts.m_buffers.m_comm_exp_fac}, name){}
 
     void end_cycle();
 

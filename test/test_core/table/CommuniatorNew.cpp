@@ -19,16 +19,17 @@ namespace communicator_new_test {
 
 TEST(CommunicatorNew, SharedRow) {
     using namespace communicator_new_test;
-    typedef Communicator<TestRow, TestRow> comm_t;
+    typedef communicator::BasicSend<TestRow, TestRow> comm_t;
     const Sizing store_sizing = {20, 0.0};
     const Sizing comm_sizing = {20, 0.0};
-    comm_t comm("test communicator", {{}, 10}, store_sizing, {{}}, comm_sizing, 4ul);
+    const DistribOptions dist_opts;
+    comm_t comm("test communicator", {}, dist_opts, store_sizing, {}, comm_sizing);
     const uint_t nrow_per_rank_expect = 6;
     auto &row = comm.m_store.m_row;
     for (uint_t i = 0; i<nrow_per_rank_expect*mpi::nrank(); ++i){
         BufferedField<field::Number<uint_t>> key;
         key = 123+i*5;
-        if (!mpi::i_am(comm.irank(key))) continue;
+        if (!mpi::i_am(comm.m_dist.irank(key))) continue;
         row.push_back_jump();
         row.m_key = key;
         row.m_value = 2.8*i;
@@ -40,17 +41,18 @@ TEST(CommunicatorNew, SharedRow) {
 
 TEST(CommunicatorNew, Redistribution) {
     using namespace communicator_new_test;
-    typedef Communicator<TestRow, TestRow> comm_t;
+    typedef communicator::BasicSend<TestRow, TestRow> comm_t;
     const Sizing store_sizing = {20, 0.0};
     const Sizing comm_sizing = {20, 0.0};
-    comm_t comm("test communicator", {{}, 10}, store_sizing, {{}}, comm_sizing, 4ul);
+    const DistribOptions dist_opts;
+    comm_t comm("test communicator", {}, dist_opts, store_sizing, {}, comm_sizing);
     const uint_t nrow_per_rank_expect = 7;
     auto &row = comm.m_store.m_row;
     v_t<double> work_figures(comm.m_dist.nblock());
     for (uint_t i = 0; i<nrow_per_rank_expect*mpi::nrank(); ++i){
         BufferedField<field::Number<uint_t>> key;
         key = 123+i*5;
-        if (!mpi::i_am(comm.irank(key))) continue;
+        if (!mpi::i_am(comm.m_dist.irank(key))) continue;
         comm.m_store.insert(key);
         row.m_key = key;
         row.m_value = 2.8*i;
@@ -60,19 +62,19 @@ TEST(CommunicatorNew, Redistribution) {
          * make up an amount of work done
          */
         double work_done = hash::in_range(i, 2, 100)/double(100);
-        comm.accumulate_work_figure(key, work_done);
+        comm.m_store.accumulate_work_figure(key, work_done);
         work_figures[comm.m_dist.iblock(key)]+=work_done;
     }
     //Distribution orig_dist(work_figures.size(), mpi::nrank());
     //Redistributor redist_chk(orig_dist.block_iranks(), work_figures, mpi::nrank());
 
-    comm.redistribute();
+    comm.m_store.redistribute();
 
     for (uint_t i = 0; i<nrow_per_rank_expect*mpi::nrank(); ++i){
         BufferedField<field::Number<uint_t>> key;
         key = 123+i*5;
-        if (!mpi::i_am(comm.irank(key))) continue;
-        row.jump(*comm.m_store[key]);
+        if (!mpi::i_am(comm.m_dist.irank(key))) continue;
+        comm.m_store.lookup(key, row);
         if (!(i%4)) {
             ASSERT_EQ(row.protection_level(), 2ul);
         }

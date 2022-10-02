@@ -99,13 +99,16 @@ void Rdm::frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmB
     }
 }
 
-Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue,
-         Sizing store_sizing, Sizing comm_sizing, str_t name) :
+Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nelec, uint_t nvalue,
+         DistribOptions dist_opts, Sizing store_sizing, Sizing comm_sizing, str_t name) :
         communicator::MappedSend<MaeRow, MaeRow>(
                 "rdm_" + (name.empty() ? this->name(name, ranksig) : name),
-                buffered::DistributedTable<MaeRow>(MaeRow(indsig, nvalue), nblock_per_rank),
-                //{{indsig, nvalue}, nblock_per_rank},
-                store_sizing, {{indsig, nvalue}}, comm_sizing),
+                // distributed "store" table row
+                MaeRow(indsig, nvalue),
+                dist_opts, store_sizing,
+                // send/recv table row
+                MaeRow(indsig, nvalue),
+                comm_sizing),
         m_basis_size(basis_size), m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
         m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
         m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)),

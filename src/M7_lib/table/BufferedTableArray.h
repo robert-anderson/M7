@@ -44,10 +44,10 @@ public:
         return (*this)[0].bw_size();
     }
 
-    BufferedTableArray(uint_t ntable, const table_t& table): m_buffer(ntable) {
+    BufferedTableArray(str_t name, uint_t ntable, const row_t& row): m_buffer(name, ntable) {
         m_tables.reserve(ntable);
         for (uint_t itable = 0ul; itable < ntable; ++itable) {
-            m_tables.emplace_back(table);
+            m_tables.emplace_back(table_t(row));
             static_cast<TableBase &>(m_tables.back()).set_buffer(&m_buffer);
         }
     }

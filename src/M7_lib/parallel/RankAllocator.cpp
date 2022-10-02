@@ -36,10 +36,10 @@ RankAllocatorBase::RankAllocatorBase(str_t name, uint_t nblock, uint_t period,
         m_name(name), m_nblock(nblock), m_period(period),
         m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank()),
         m_mean_work_times(nblock, 0.0), m_gathered_total_times(mpi::nrank(), 0.0),
-        m_acceptable_imbalance(acceptable_imbalance), m_nnull_updates_deactivate(nnull_updates_deactivate)
+        m_imbalance_thresh(acceptable_imbalance), m_nnull_updates_deactivate(nnull_updates_deactivate)
 {
-    REQUIRE_GE_ALL(m_acceptable_imbalance, 0.0, "Acceptable imbalance fraction must be non-negative");
-    REQUIRE_LE_ALL(m_acceptable_imbalance, 1.0, "Acceptable imbalance fraction must not exceed 100%");
+    REQUIRE_GE_ALL(m_imbalance_thresh, 0.0, "Acceptable imbalance fraction must be non-negative");
+    REQUIRE_LE_ALL(m_imbalance_thresh, 1.0, "Acceptable imbalance fraction must not exceed 100%");
     uint_t iblock = 0ul;
     for (auto &rank:m_block_to_rank) {
         rank = iblock%mpi::nrank();
@@ -137,13 +137,13 @@ void RankAllocatorBase::update(uint_t icycle) {
     }
 
     if (irank_send==irank_recv) return;
-    auto realloc_ratio = 1-m_acceptable_imbalance;
+    auto realloc_ratio = 1-m_imbalance_thresh;
     if (m_gathered_total_times[irank_recv] > realloc_ratio * m_gathered_total_times[irank_send]) {
         ++m_nnull_updates;
         if(m_nnull_updates>=m_nnull_updates_deactivate) {
             logging::info(
                     "Load imbalance has been below {}% for over {} periods of {} cycles.",
-                    m_acceptable_imbalance * 100, m_nnull_updates, m_period);
+                    m_imbalance_thresh * 100, m_nnull_updates, m_period);
             deactivate();
         }
         m_mean_work_times.assign(m_nblock, 0.0);

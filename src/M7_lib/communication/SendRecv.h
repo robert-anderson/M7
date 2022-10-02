@@ -53,13 +53,13 @@ public:
      *  across all nrank processes, and since there are nrank send tables, this estimate is divided by nrank to arrive
      *  at the estimated number of rows required in the send table
      */
-    SendRecv(str_t name, const send_table_t &send, Sizing sizing) :
-            m_send(name + " send", mpi::nrank(), send),
-            m_recv(name + " recv", send.m_row), m_row(m_recv.m_row) {
+    SendRecv(str_t name, const row_t &row, Sizing sizing) :
+            m_send(name + " send", mpi::nrank(), row),
+            m_recv(name + " recv", row), m_row(m_recv.m_row) {
         logging::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
-                      string::memsize(mpi::nrank() * sizing.m_nrow_est* m_recv.record_size()), name);
-        m_send.resize(integer::divceil(sizing.m_nrow_est, mpi::nrank()), 0.0);
-        m_recv.resize(sizing.m_nrow_est, 0.0);
+                      string::memsize(mpi::nrank() * sizing.m_nrec_est * m_recv.record_size()), name);
+        m_send.resize(integer::divceil(sizing.m_nrec_est, mpi::nrank()), 0.0);
+        m_recv.resize(sizing.m_nrec_est, 0.0);
         m_send.set_expansion_factor(sizing.m_exp_fac);
         m_recv.set_expansion_factor(sizing.m_exp_fac);
     }

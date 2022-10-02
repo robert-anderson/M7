@@ -8,10 +8,11 @@ using namespace conf_components;
 
 conf::HashMapping::HashMapping(Group *parent) :
         Section(parent, "hash_mapping", "options relating to the behavior of hash-mapped tables"),
-        m_remap_ratio(this, "remap_ratio", 2.0,
-                      "ratio of bucket-searching skips to total lookups required to trigger remapping with a larger number of buckets"),
-        m_remap_nlookup(this, "remap_nlookup", 500ul,
-                        "number of lookups required before remapping based on the skips/lookups ratio is considered") {}
+        m_remap_ratio(this, "remap_ratio", c_default_remap_ratio,
+            "ratio of bucket-searching skips to total lookups required to trigger remapping with a larger number of "
+            "buckets"),
+        m_remap_nlookup(this, "remap_nlookup", c_default_remap_nlookup,
+            "number of lookups required before remapping based on the skips/lookups ratio is considered") {}
 
 conf::Buffers::Buffers(Group *parent) :
         Section(parent, "buffers",
@@ -74,15 +75,15 @@ conf::Prng::Prng(Group *parent) :
         m_ngen_block(this, "ngen_block", 10000ul,
                      "size of the block of PRNGs generated each time the buffer is depleted") {}
 
-conf::LoadBalancing::LoadBalancing(Group *parent) :
-        Section(parent, "load_balancing",
-                        "options relating to the allocation of records among MPI ranks so as to share the workload more equally"),
-        m_nblock_per_rank(this, "nblock_per_rank", 6ul, "number of rank allocation blocks to create per MPI rank"),
-        m_period(this, "period", 10ul, "number of MC cycles between load-balancing block transactions"),
-        m_acceptable_imbalance(this, "acceptable_imbalance", 0.05,
-                               "fractional difference in the work figure of the busiest and laziest ranks at which the load balancing is deactivated after a given number of consecutive failed attempts"),
-        m_nnull_updates_deactivate(this, "nnull_updates_deactivate", 20ul,
-                                   "number of consecutive attempted updates which do not exceed the maximum acceptable imbalance required to meet the deactivation criterion") {}
+conf::Distribution::Distribution(Group *parent) :
+        Section(parent, "distribution",
+            "options relating to the allocation of records among MPI ranks so as to share the workload more equally"),
+        m_nblock_per_rank(this, "nblock_per_rank", c_default_nblock_per_rank,
+            "number of rank allocation blocks to create per MPI rank"),
+        m_period(this, "period", c_default_period, "number of MC cycles between load-balancing block transactions"),
+        m_imbalance_thresh(this, "imbalance_thresh", c_default_imbalance_thresh,
+            "fractional difference in the work figure of the busiest and laziest ranks at above which to perform a "
+            "load balancing redistribution"){}
 
 conf::Reference::Reference(Group *parent) :
         Section(parent, "reference", "options relating to the reference MBF"),
@@ -97,7 +98,7 @@ conf::Wavefunction::Wavefunction(Group *parent) :
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
         m_fci_init(this, "fci_init", false, "call the ARPACK interface to initialize the required roots to their exact values"),
-        m_buffers(this), m_hash_mapping(this), m_archivable(this), m_load_balancing(this) {}
+        m_buffers(this), m_hash_mapping(this), m_archivable(this), m_distribution(this) {}
 
 conf::Shift::Shift(Group *parent) :
         Section(parent, "shift",
@@ -156,7 +157,7 @@ void conf::SpfWeightedTwf::validate_node_contents() {
 conf::Bilinears::Bilinears(Group *parent, str_t name, str_t description) :
         Section(parent, name, description, Explicit),
         m_ranks(this, "ranks", {}, "Ranks to accumulate"),
-        m_buffers(this), m_hash_mapping(this), m_load_balancing(this), m_archivable(this) {}
+        m_buffers(this), m_hash_mapping(this), m_distribution(this), m_archivable(this) {}
 
 void conf::Bilinears::validate_node_contents() {
     for (const auto &rank: m_ranks.m_value)

@@ -27,7 +27,7 @@ namespace excit_gen_tester {
         }
     };
 
-    typedef BufferedTable<ResultRow, true> result_table_t;
+    typedef buffered::MappedTable<ResultRow> result_table_t;
 
 
     struct ExcitGenTester {
@@ -76,7 +76,7 @@ namespace excit_gen_tester {
                 if (!ham::is_significant(helem)) return;
                 work_inds = conn;
                 // if this key is already in the table then the iterator is emitting duplicate connections!
-                DEBUG_ASSERT_EQ(*m_results[work_inds], ~0ul, "row should not already be mapped");
+                DEBUG_ASSERT_TRUE(m_results.lookup(work_inds), "row should not already be mapped");
                 auto irow = m_results.insert(work_inds);
                 auto &row = m_results.m_row;
                 row.jump(irow);
@@ -121,9 +121,8 @@ namespace excit_gen_tester {
                 if (!fptol::numeric_equal(prob, chk_prob_given_helem)) return ProbMismatchGivenHElem;
                 if (conn.exsig()!=exsig) return WrongExsig;
                 work_inds = conn;
-                auto irow = *m_results[work_inds];
-                if (irow==~0ul) return Unconnected;
-                row.jump(irow);
+                auto lookup = m_results.lookup(work_inds, row);
+                if (!lookup) return Unconnected;
                 row.m_occur++;
                 row.m_weight += 1 / prob;
                 if (!fptol::numeric_equal(ham_t(row.m_helem), helem)) return WrongHElem;

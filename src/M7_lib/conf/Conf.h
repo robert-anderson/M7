@@ -16,6 +16,8 @@ namespace conf {
     using namespace conf_components;
 
     struct HashMapping : Section {
+        static constexpr double c_default_remap_ratio = 2.0;
+        static constexpr uint_t c_default_remap_nlookup = 500ul;
         Param<double> m_remap_ratio;
         Param<uint_t> m_remap_nlookup;
 
@@ -75,13 +77,15 @@ namespace conf {
         explicit Prng(Group *parent);
     };
 
-    struct LoadBalancing : Section {
+    struct Distribution : Section {
+        static constexpr uint_t c_default_nblock_per_rank = 6ul;
+        static constexpr uint_t c_default_period = 10ul;
+        static constexpr double c_default_imbalance_thresh = 0.05;
         Param<uint_t> m_nblock_per_rank;
         Param<uint_t> m_period;
-        Param<double> m_acceptable_imbalance;
-        Param<uint_t> m_nnull_updates_deactivate;
+        Param<double> m_imbalance_thresh;
 
-        explicit LoadBalancing(Group *parent);
+        explicit Distribution(Group *parent);
     };
 
     struct MbfDef : Section {
@@ -133,7 +137,7 @@ namespace conf {
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Archivable m_archivable;
-        LoadBalancing m_load_balancing;
+        Distribution m_distribution;
 
         explicit Wavefunction(Group *parent);
     };
@@ -186,7 +190,7 @@ namespace conf {
         Param<strv_t> m_ranks;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
-        LoadBalancing m_load_balancing;
+        Distribution m_distribution;
         Archivable m_archivable;
 
         explicit Bilinears(Group *parent, str_t name, str_t description);

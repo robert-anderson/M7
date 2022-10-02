@@ -43,13 +43,13 @@ namespace shared_rows {
         row_t m_send_row;
 
     public:
-        Set(str_t name, const src_t& src, uintv_t irows = {}) :
+        Set(str_t name, const src_t& src, uintv_t irecs = {}) :
                 DistribDependent(src), m_src(src),
-                m_name(name), m_all(name+" all rows", {m_src.row()}),
-                m_gather_send(name+" gather send", {m_src.row()}),
-                m_gather_recv(name+" gather recv", {m_src.row()}),
-                m_src_row(m_src.row()), m_send_row(m_gather_send.row()) {
-            for (auto irow: irows) add_(irow);
+                m_name(name), m_all(name+" all rows", m_src.m_row),
+                m_gather_send(name+" gather send", m_src.m_row),
+                m_gather_recv(name+" gather recv", m_src.m_row),
+                m_src_row(m_src.m_row), m_send_row(m_gather_send.m_row) {
+            for (auto irow: irecs) add_(irow);
             full_update();
         }
 
@@ -135,8 +135,7 @@ namespace shared_rows {
         using Set<row_t>::add_;
         using Set<row_t>::full_update;
 
-        template<typename send_recv_row_t>
-        Single(str_t name, const src_t& src, TableBase::Loc loc): Set<src_t>(name, src, loc) {
+        Single(str_t name, const src_t& src, TableBase::Loc loc): Set<row_t>(name, src, loc) {
             m_all.m_row.restart();
         }
 

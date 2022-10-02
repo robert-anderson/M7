@@ -83,7 +83,7 @@ TEST(CompositeField, DataIntegrity) {
     auto row_copy = row;
     for (uint_t i=0ul; i<row_copy.nfield(); ++i) ASSERT_EQ(row_copy.m_fields[i]->m_row, &row_copy);
 
-    BufferedTable<TestRow> bt("test table", {{nbit, ints_shape}});
+    buffered::Table<TestRow> bt("test table", {nbit, ints_shape});
     bt.resize(10);
     bt.push_back(4);
 

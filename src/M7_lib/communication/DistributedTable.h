@@ -5,6 +5,7 @@
 #ifndef M7_DISTRIBUTEDTABLE_H
 #define M7_DISTRIBUTEDTABLE_H
 
+#include "M7_lib/conf/Conf.h"
 #include "M7_lib/table/MappedTable.h"
 #include "Distribution.h"
 #include "SendRecv.h"
@@ -21,14 +22,27 @@ struct DistribBase {
 };
 
 struct DistribOptions {
-    const uint_t m_nblock_per_rank;
-    const uint_t m_period;
-    const double m_acceptable_imbalance;
-    const uint_t m_nnull_updates_deactivate;
+    uint_t m_nblock_per_rank = conf::Distribution::c_default_nblock_per_rank;
+    uint_t m_period = conf::Distribution::c_default_period;
+    double m_imbalance_thresh = conf::Distribution::c_default_imbalance_thresh;
+    DistribOptions() = default;
+    DistribOptions(const conf::Distribution& opts) {
+        m_nblock_per_rank = opts.m_nblock_per_rank;
+        m_period = opts.m_period;
+        m_imbalance_thresh = opts.m_imbalance_thresh;
+    }
 };
 
 template<typename row_t>
 struct DistributedTable : MappedTable<row_t>, DistribBase {
+    using Table<row_t>::m_row;
+    using MappedTable<row_t>::clear_row;
+    using MappedTable<row_t>::insert;
+
+    /**
+     * options controlling the redistribution behavior
+     */
+    const DistribOptions m_dist_opts;
     /**
      * the key field of the store table determines the block, and therefore MPI rank index, to which the row belongs
      */
@@ -54,8 +68,6 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
      */
     v_t<double> m_block_work_figures;
 
-    static constexpr Sizing c_redist_sizing{1000ul, 1.0};
-
 //    DistributedTable(str_t name, const row_t &row, uint_t nblock_per_rank, uint_t nbucket = 0ul,
 //                     uint_t remap_nlookup = 0ul, double remap_ratio = 0.0) :
 //            MappedTable<row_t>(row, nbucket, remap_nlookup, remap_ratio),
@@ -64,11 +76,10 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
 //            m_prot_level(name+" protection level", {{}}, c_redist_sizing),
 //            m_block_work_figures(m_dist.nblock()) {
 //    }
-    DistributedTable(const row_t &row, uint_t nblock_per_rank, uint_t nbucket = 0ul,
-                     uint_t remap_nlookup = 0ul, double remap_ratio = 0.0) :
-            MappedTable<row_t>(row, nbucket, remap_nlookup, remap_ratio),
-            m_dist(nblock_per_rank*mpi::nrank()),
-            m_redist("", row, c_redist_sizing),
+    DistributedTable(const row_t &row, DistribOptions dist_opts) :
+            MappedTable<row_t>(row), m_dist_opts(dist_opts),
+            m_dist(m_dist_opts.m_nblock_per_rank*mpi::nrank()),
+            m_redist("", row, {1000ul, 1.0}),
 //            m_prot_level("", SingleFieldRow<field::Number<uint_t>>(), c_redist_sizing),
             m_block_work_figures(m_dist.nblock()) {
     }
@@ -108,7 +119,7 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
         /*
          * get a copy of the table<row_t>::m_row for traversal (cheap compared to loop)
          */
-        auto row = this->row();
+        auto& row = m_row;
         {
             /*
              * loop over all rows,
@@ -132,7 +143,7 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
         m_redist.communicate();
 //        m_prot_level.communicate();
         {
-            auto recv_row = m_redist.recv().cursor();
+            auto recv_row = m_redist.recv().m_row;
 //            auto prot_level_row = m_prot_level.recv().cursor();
 //            prot_level_row.restart();
             for (recv_row.restart(); recv_row.in_range(); recv_row.step()) {
@@ -152,10 +163,25 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
 namespace buffered {
     template <typename row_t>
     struct DistributedTable : BufferedTable<row_t, ::DistributedTable<row_t>> {
-        DistributedTable(const row_t &row, uint_t nblock_per_rank, uint_t nbucket = 0ul,
-                         uint_t remap_nlookup = 0ul, double remap_ratio = 0.0):
-            BufferedTable<row_t, ::DistributedTable<row_t>>(
-                    ::DistributedTable<row_t>(row, nblock_per_rank, nbucket, remap_nlookup, remap_ratio)){}
+        DistributedTable(const row_t &row, DistribOptions dist_opts):
+            BufferedTable<row_t, ::DistributedTable<row_t>>(::DistributedTable<row_t>(row, dist_opts)){}
+
+        using TableBase::rename;
+        using TableBase::record_size;
+        using ::MappedTable<row_t>::resize;
+        using BufferedTable<row_t, ::DistributedTable<row_t>>::set_expansion_factor;
+        /**
+         * immediate resizing
+         */
+        DistributedTable(str_t name, const row_t& row, DistribOptions dist_opts, Sizing sizing) :
+                DistributedTable(row, dist_opts){
+            rename(name);
+            const auto nrec_per_rank = sizing.m_nrec_est / mpi::nrank();
+            const auto nbyte_per_rank = nrec_per_rank * record_size();
+            logging::info("Initially allocating {} per rank for \"{}\" buffer", string::memsize(nbyte_per_rank), name);
+            resize(nrec_per_rank, 0.0);
+            set_expansion_factor(sizing.m_exp_fac);
+        }
     };
 }
 

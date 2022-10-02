@@ -8,7 +8,7 @@
 
 TEST(CommunicatingPair, CommunicateSingleElement) {
     typedef SingleFieldRow<field::Number<uint_t>> row_t;
-    SendRecv<row_t> comm_pair("Test pair", {{}}, {mpi::nrank(), 1.0});
+    send_recv::BasicSend<row_t> comm_pair("Test pair", {}, {mpi::nrank(), 1.0});
     // after resize:
     const uint_t bw_size = comm_pair.row_size();
     const uint_t hash_lo = 123, hash_hi = 789;
@@ -45,15 +45,15 @@ TEST(CommunicatingPair, CommunicateVectors){
     typedef SingleFieldRow<field::Numbers<uint_t, 1>> row_t;
     const double expansion_factor = 0.5;
     const uint_t nelement_vector = 13;
-    SendRecv<row_t> comm_pair("Test pair", {{nelement_vector}}, {mpi::nrank(), expansion_factor});
+    send_recv::BasicSend<row_t> send_recv("Test pair", {nelement_vector}, {mpi::nrank(), expansion_factor});
     // after resize:
-    const uint_t bw_size = comm_pair.row_size();// * (1.0+expansion_factor);
+    const uint_t bw_size = send_recv.row_size();// * (1.0+expansion_factor);
     ASSERT_EQ(bw_size, nelement_vector*sizeof(uint_t));
     const uint_t hash_lo = 123, hash_hi = 789;
 
-    comm_pair.resize(1ul);
+    send_recv.resize(1ul);
     for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
-        auto& row = comm_pair.send(irank).m_row;
+        auto& row = send_recv.send(irank).m_row;
         row.push_back_jump();
         for (uint_t ielement=0ul; ielement<nelement_vector; ++ielement)
             row.m_field[ielement] = hash::in_range({irank, mpi::irank(), ielement}, hash_lo, hash_hi);
@@ -62,18 +62,18 @@ TEST(CommunicatingPair, CommunicateVectors){
 
     for (uint_t idst = 1ul; idst < mpi::nrank(); ++idst) {
         // check pointer distance between adjacent send tables
-        ASSERT_EQ(std::distance(comm_pair.send(idst - 1).begin(), comm_pair.send(idst).begin()), bw_size);
+        ASSERT_EQ(std::distance(send_recv.send(idst - 1).begin(), send_recv.send(idst).begin()), bw_size);
         for (uint_t ielement=0ul; ielement<nelement_vector; ++ielement) {
             // check send values by pointer dereference relative to entire send table array
-            auto v_send = reinterpret_cast<uint_t*>(comm_pair.send().begin()+idst * bw_size)[ielement];
+            auto v_send = reinterpret_cast<uint_t*>(send_recv.send().begin() + idst * bw_size)[ielement];
             ASSERT_EQ(v_send,hash::in_range({idst, mpi::irank(), ielement}, hash_lo, hash_hi));
         }
     }
 
-    comm_pair.communicate();
+    send_recv.communicate();
 #if 0
 
-    auto& row = comm_pair.recv().m_row;
+    auto& row = send_recv.recv().m_row;
     for (row.restart(); row.in_range(); row.step()) {
         auto irank_src = row.index();
         for (uint_t ielement=0ul; ielement<nelement_vector; ++ielement)
@@ -89,7 +89,7 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
     const uint_t nelement_vector = 5;
     const uint_t nrow_rank_lo = 6, nrow_rank_hi = 15;
     const uint_t nrow_this_rank = hash::in_range(mpi::irank(), nrow_rank_lo, nrow_rank_hi);
-    SendRecv<row_t> comm_pair("Test pair", {{nelement_vector}}, {nrow_this_rank, expansion_factor});
+    send_recv::BasicSend<row_t> comm_pair("Test pair", {nelement_vector}, {nrow_this_rank, expansion_factor});
     const uint_t hash_lo = 123, hash_hi = 789;
 
     auto nrow_max = mpi::all_max(nrow_this_rank);

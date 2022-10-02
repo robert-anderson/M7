@@ -60,15 +60,10 @@ struct Communicator {
      *  buffer (re)sizing behaviour for the communicating pair
      */
     Communicator(str_t name,
-                 const store_row_t &store_row, Sizing store_sizing,
+                 const store_row_t &store_row, DistribOptions dist_opts, Sizing store_sizing,
                  const send_recv_row_t &send_recv_row, Sizing comm_sizing):
-            m_store(store_row), m_dist(m_store.m_dist), m_send_recv(name, send, comm_sizing), m_name(name) {
-        m_store.rename(name + " store");
-        logging::info("Initially allocating {} per rank for store buffer of \"{}\" ",
-                      string::memsize(store_sizing.m_nrow_est* m_store.record_size()), m_name);
-        m_store.resize(store_sizing.m_nrow_est, 0.0);
-        m_store.set_expansion_factor(store_sizing.m_exp_fac);
-    }
+            m_store(name, store_row, dist_opts, store_sizing), m_dist(m_store.m_dist),
+            m_send_recv(name, send_recv_row, comm_sizing), m_name(name) {}
     /**
      * ctor which uses configuration records
      * @param name
@@ -95,7 +90,7 @@ struct Communicator {
 
 //    Communicator(str_t name, const store_table_t &store, uint_t store_nrow_crude_est,
 //                 const send_table_t &send, uint_t comm_nrow_crude_est,
-//                 const conf::Buffers &buf_opts, const conf::LoadBalancing &ra_opts) :
+//                 const conf::Buffers &buf_opts, const conf::Distribution &ra_opts) :
 //        Communicator(name,
 //                store, {nrow_estimate(store_nrow_crude_est, buf_opts.m_store_fac_init), buf_opts.m_store_exp_fac},
 //                send, {nrow_estimate(comm_nrow_crude_est, buf_opts.m_comm_fac_init), buf_opts.m_comm_exp_fac},

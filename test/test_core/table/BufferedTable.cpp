@@ -8,7 +8,7 @@
 
 TEST(BufferedTable, Empty) {
     typedef SingleFieldRow<field::Number<int>> row_t;
-    BufferedTable<row_t> table("", {{}});
+    buffered::Table<row_t> table({});
     ASSERT_EQ(table.nrecord(), 0);
     ASSERT_EQ(table.m_hwm, 0);
     ASSERT_EQ(table.m_bw.m_size, 0);
@@ -31,8 +31,8 @@ TEST(BufferedTable, Empty) {
 
 TEST(BufferedTable, AllGathervEmpty) {
     typedef SingleFieldRow<field::Number<int>> row_t;
-    BufferedTable<row_t> src_table("src", {{}});
-    BufferedTable<row_t> dst_table("dst", {{}});
+    buffered::Table<row_t> src_table("src", {});
+    buffered::Table<row_t> dst_table("dst", {});
     dst_table.all_gatherv(src_table);
     ASSERT_EQ(dst_table.m_hwm, 0ul);
 }
@@ -51,13 +51,13 @@ TEST(BufferedTable, AllGatherv) {
     ASSERT_EQ(nrow_global,mpi::all_sum(nrow_local));
 
     typedef SingleFieldRow<field::Number<int>> row_t;
-    BufferedTable<row_t> src_table("src", {{}});
+    buffered::Table<row_t> src_table("src", {});
     src_table.resize(nrow_local);
     for (uint_t irow = 0ul; irow<nrow_local; ++irow){
         src_table.m_row.push_back_jump();
         src_table.m_row.m_field = get_value(mpi::irank(), irow);
     }
-    BufferedTable<row_t> dst_table("dst", {{}});
+    buffered::Table<row_t> dst_table("dst", {});
     dst_table.all_gatherv(src_table);
     ASSERT_EQ(dst_table.m_hwm, nrow_global);
     auto& row = dst_table.m_row;
@@ -85,13 +85,13 @@ TEST(BufferedTable, Gatherv) {
     ASSERT_EQ(nrow_global,mpi::all_sum(nrow_local));
 
     typedef SingleFieldRow<field::Number<int>> row_t;
-    BufferedTable<row_t> src_table("src", {{}});
+    buffered::Table<row_t> src_table("src", {});
     src_table.resize(nrow_local);
     for (uint_t irow = 0ul; irow<nrow_local; ++irow){
         src_table.m_row.push_back_jump();
         src_table.m_row.m_field = get_value(mpi::irank(), irow);
     }
-    BufferedTable<row_t> dst_table("dst", {{}});
+    buffered::Table<row_t> dst_table("dst", {});
 
     dst_table.gatherv(src_table);
     if (mpi::i_am_root()) {

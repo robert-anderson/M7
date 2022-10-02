@@ -46,7 +46,7 @@ struct Table : TableBase {
             m_row.jump(irow);
             tmp += std::to_string(irow) + ". " + m_row.to_string() + "\n";
         }
-        DEBUG_ASSERT_TRUE(row.in_range(), "row is out of range");
+        DEBUG_ASSERT_TRUE(m_row.in_range(), "row is out of range");
         return tmp;
     }
 
@@ -58,7 +58,7 @@ struct Table : TableBase {
     }
 
     bool associated(const row_t& row) const {
-        return static_cast<Row&>(row).m_table == this;
+        return static_cast<const Row&>(row).m_table == this;
     }
 
 private:

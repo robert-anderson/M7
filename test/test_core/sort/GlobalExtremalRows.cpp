@@ -8,7 +8,7 @@
 
 namespace global_extremal_rows_test {
     typedef SingleFieldRow<field::Number<int>> scalar_row_t;
-    typedef BufferedTable<scalar_row_t> scalar_table_t;
+    typedef buffered::Table<scalar_row_t> scalar_table_t;
 
     static uint_t nfind() {
         return 6 * mpi::nrank();
@@ -110,7 +110,7 @@ namespace global_extremal_rows_test {
 
 TEST(GlobalExtremalRows, Nrow) {
     using namespace global_extremal_rows_test;
-    scalar_table_t table("test", {{}});
+    scalar_table_t table("test", {});
     setup(table);
     auto nrow = table.m_hwm;
     nrow = mpi::all_sum(nrow);
@@ -119,7 +119,7 @@ TEST(GlobalExtremalRows, Nrow) {
 
 TEST(GlobalExtremalRows, FindAsc) {
     using namespace global_extremal_rows_test;
-    scalar_table_t table("test", {{}});
+    scalar_table_t table("test", {});
     setup(table);
 
     auto &row = table.m_row;
@@ -157,7 +157,7 @@ TEST(GlobalExtremalRows, FindAsc) {
 
 TEST(GlobalExtremalRows, FindDesc) {
     using namespace global_extremal_rows_test;
-    scalar_table_t table("test", {{}});
+    scalar_table_t table("test", {});
     setup(table);
 
     auto &row = table.m_row;

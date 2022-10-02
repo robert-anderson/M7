@@ -143,7 +143,6 @@ public:
     }
 
     void to_buffer(v_t<T>& buf, uint_t irow_begin, uint_t nitem_max, std::set<uint_t> irows_empty) const {
-        DEBUG_ASSERT_LT(irow_begin, irow_end, "invalid row range");
         buf.resize(nitem_max);
         const auto nitem = FieldBase::to_buffer(static_cast<buf_t*>(buf.data()), irow_begin, nitem_max, irows_empty);
         buf.resize(m_nelement*nitem);

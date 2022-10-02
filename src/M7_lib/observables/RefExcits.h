@@ -23,7 +23,7 @@ protected:
     mutable buffered::MaeInds m_working_inds;
 
 public:
-    RefExcitsOneExsig(uint_t exsig, uint_t nroot, uint_t nbucket = 100);
+    RefExcitsOneExsig(uint_t exsig, uint_t nroot);
 
     const MaeRow& lookup(const conn::FrmOnv& key) const;
 

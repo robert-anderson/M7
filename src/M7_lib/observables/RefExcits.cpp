@@ -6,10 +6,10 @@
 #include "M7_lib/util/Exsig.h"
 #include "M7_lib/util/SmartPtr.h"
 
-RefExcitsOneExsig::RefExcitsOneExsig(uint_t exsig, uint_t nroot, uint_t nbucket) :
+RefExcitsOneExsig::RefExcitsOneExsig(uint_t exsig, uint_t nroot) :
         buffered::MappedTable<MaeRow>(
                 logging::format("average {} reference excitation coefficients", exsig::to_string(exsig)),
-                {{exsig, nroot}, nbucket}),
+                MaeRow{exsig, nroot}),
         m_working_inds(exsig) {}
 
 const MaeRow& RefExcitsOneExsig::lookup(const conn::FrmOnv& key) const {

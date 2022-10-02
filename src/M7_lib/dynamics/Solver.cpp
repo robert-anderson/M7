@@ -204,7 +204,7 @@ void Solver::loop_over_occupied_mbfs() {
 
             DEBUG_ASSERT_TRUE(!m_wf.m_store.m_row.m_mbf.is_zero(),
                               "Stored MBF should not be zeroed");
-            DEBUG_ASSERT_TRUE(mpi::i_am(m_wf.irank(m_wf.m_store.m_row.m_mbf)),
+            DEBUG_ASSERT_TRUE(mpi::i_am(m_wf.m_dist.irank(m_wf.m_store.m_row.m_mbf)),
                               "Stored MBF should be on its allocated rank");
 
             const auto &weight = row.m_weight[ipart];

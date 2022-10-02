@@ -59,7 +59,7 @@ struct GlobalExtremalRows {
 
     GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, uintv_t inds_to_cmp) :
             m_lxr(row, field, largest, absval, inds_to_cmp),
-            m_global_sorter("Global extremal rows sorter", {{}}) {
+            m_global_sorter("Global extremal rows sorter", {}) {
         reset();
     }
 
@@ -194,7 +194,7 @@ private:
     void load_values_for_sorting() {
         REQUIRE_NE_ALL(m_ninclude.m_reduced, ~0ul, "required local row reduction hasn't been performed");
         REQUIRE_TRUE_ALL(m_ninclude.m_reduced, "required local rows haven't been found yet");
-        global_sort_table_t local_loader("Local loader for global extremal rows sorter", {{}});
+        global_sort_table_t local_loader("Local loader for global extremal rows sorter", {});
         static_cast<TableBase &>(local_loader).resize(m_ninclude.m_local);
         auto &source_row = m_lxr.m_work_row;
         auto &source_field = m_lxr.m_work_row_field;

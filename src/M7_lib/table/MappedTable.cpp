@@ -4,7 +4,9 @@
 
 #include "MappedTable.h"
 
-MappedTableBase::MappedTableBase(MappedTableOptions opts) : m_opts(opts) {}
+MappedTableBase::MappedTableBase(MappedTableOptions mapped_opts) : m_mapping_opts(mapped_opts) {
+    m_buckets.assign(MappedTableOptions::c_nbucket_min, {});
+}
 
 MappedTableBase &MappedTableBase::operator=(const MappedTableBase &other) {
     if (this==&other) return *this;
@@ -14,25 +16,21 @@ MappedTableBase &MappedTableBase::operator=(const MappedTableBase &other) {
     return *this;
 }
 
-MappedTableBase::MappedTableBase(const MappedTableBase &other) : MappedTableBase(other.m_opts){
+MappedTableBase::MappedTableBase(const MappedTableBase &other) : MappedTableBase(other.m_mapping_opts){
     m_buckets = other.m_buckets;
 }
 
 bool MappedTableBase::operator==(const MappedTableBase &other) const {
     if (this==&other) return true;
     if (nbucket()!=other.nbucket()) return false;
-    if (m_opts.m_remap_ratio!=other.m_opts.m_remap_ratio) return false;
-    if (m_opts.m_remap_nlookup!=other.m_opts.m_remap_nlookup) return false;
+    if (m_mapping_opts.m_remap_ratio != other.m_mapping_opts.m_remap_ratio) return false;
+    if (m_mapping_opts.m_remap_nlookup != other.m_mapping_opts.m_remap_nlookup) return false;
     if (m_buckets!=other.m_buckets) return false;
     return true;
 }
 
 bool MappedTableBase::operator!=(const MappedTableBase &other) const {
     return !(*this==other);
-}
-
-uint_t MappedTableBase::nbucket_guess(uint_t nitem, double ratio) {
-    return nitem / (2*ratio + 1);
 }
 
 uint_t MappedTableBase::nbucket() const {
@@ -44,8 +42,8 @@ void MappedTableBase::clear_map() {
 }
 
 bool MappedTableBase::remap_due() const {
-    return (m_nlookup_total >= m_opts.m_remap_nlookup) &&
-        (double(m_nskip_total) / double(m_nlookup_total)) > m_opts.m_remap_ratio;
+    return (m_nlookup_total >= m_mapping_opts.m_remap_nlookup) &&
+           (double(m_nskip_total) / double(m_nlookup_total)) > m_mapping_opts.m_remap_ratio;
 }
 
 bool MappedTableBase::all_nonzero_records_mapped(const TableBase &source) const {

@@ -48,12 +48,14 @@ public:
 namespace buffered {
     template <typename row_t>
     struct Table : BufferedTable<row_t, ::Table<row_t>> {
-        Table(const row_t &row): BufferedTable<row_t, ::Table<row_t>>(Table<row_t>(row)){}
+        Table(str_t name, const row_t &row): BufferedTable<row_t, ::Table<row_t>>(name, Table<row_t>(row)){}
+        Table(const row_t &row): Table("", row){}
     };
     template <typename row_t>
     struct MappedTable : BufferedTable<row_t, ::MappedTable<row_t>> {
-        MappedTable(const row_t &row, uint_t nbucket = 0ul, uint_t remap_nlookup = 0ul, double remap_ratio = 0.0):
-            BufferedTable<row_t, ::Table<row_t>>(MappedTable<row_t>(row, nbucket, remap_nlookup, remap_ratio)){}
+        MappedTable(str_t name, const row_t &row):
+            BufferedTable<row_t, ::MappedTable<row_t>>(name, MappedTable<row_t>(row)){}
+        MappedTable(const row_t &row): MappedTable("", row){}
     };
 }
 

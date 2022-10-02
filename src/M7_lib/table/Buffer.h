@@ -130,7 +130,7 @@ struct Sizing {
     /**
      * estimate of the number of rows that will ultimately be required in a buffer
      */
-    const uint_t m_nrow_est;
+    const uint_t m_nrec_est;
     /**
      * fractional over-allocation to make when buffer is resized
      */

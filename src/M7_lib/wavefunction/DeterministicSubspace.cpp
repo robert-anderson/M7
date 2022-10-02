@@ -68,12 +68,12 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
     auto &conn_work = conns_work[m_local_row.m_mbf];
     uint_t n_hconn = 0ul;
     uint_t n_rdm_conn = 0ul;
-    m_ham_matrix.resize(nrow_());
-    m_rdm_network.resize(nrow_());
+    m_ham_matrix.resize(nrec_());
+    m_rdm_network.resize(nrec_());
     uint_t iirow = ~0ul;
-    for (auto irow: m_irows) {
+    for (auto irec: m_irecs) {
         ++iirow;
-        m_local_row.jump(irow);
+        m_local_row.jump(irec);
         // loop over local subspace (H rows)
         auto& all_row = m_all.m_row;
         for (all_row.restart(); all_row.in_range(); all_row.step()) {
@@ -99,21 +99,21 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
 
 void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref) {
     if (!rdms || !rdms.m_accum_epoch) return;
-    uint_t iirow = ~0ul;
-    for (auto irow: m_irows) {
-        ++iirow;
-        m_local_row.jump(irow);
+    uint_t iirec = ~0ul;
+    for (auto irec: m_irecs) {
+        ++iirec;
+        m_local_row.jump(irec);
         if (m_local_row.m_mbf == ref) continue;
         /*
          * make contributions due to hamiltonian connections
          */
-        for (auto& elem : m_ham_matrix[iirow]){
+        for (auto& elem : m_ham_matrix[iirec]){
             make_rdm_contrib(rdms, ref, elem);
         }
         /*
          * make contributions due to RDM-only connections
          */
-        for (auto& elem : m_rdm_network[iirow]){
+        for (auto& elem : m_rdm_network[iirec]){
             make_rdm_contrib(rdms, ref, elem);
         }
     }
@@ -121,13 +121,13 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref)
 
 void DeterministicSubspace::project(double tau) {
     auto &all_row = m_all.m_row;
-    uint_t iirow = ~0ul;
+    uint_t iirec = ~0ul;
     // loop over row indices in the portion of the wavefunction stored on this rank
-    for (auto irow: m_irows) {
-        ++iirow;
-        m_wf.m_store.m_row.jump(irow);
+    for (auto irec: m_irecs) {
+        ++iirec;
+        m_wf.m_store.m_row.jump(irec);
         v_t<wf_t> delta(m_wf.npart(), 0.0);
-        for (const auto& elem: m_ham_matrix[iirow]){
+        for (const auto& elem: m_ham_matrix[iirec]){
             all_row.jump(elem.m_i);
             // one replica or two
             for (const auto &ipart: m_iparts) {

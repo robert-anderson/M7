@@ -10,7 +10,7 @@
 TEST(Wavefunction, DynamicRowSet){
     conf::Document opts;
     opts.m_propagator.m_nw_target = 1000;
-    opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 3;
+    opts.m_wavefunction.m_distribution.m_nblock_per_rank = 3;
     opts.verify();
     const uint_t nsite = 6;
     const uint_t nelec = 6;
