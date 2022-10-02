@@ -48,7 +48,7 @@ struct RowProtector {
      * called when the associated m_table is resized
      * @param nrow
      */
-    void on_resize(uint_t nrow);
+    void on_resize(uint_t nrecord);
     /**
      * @param irow
      *  row index

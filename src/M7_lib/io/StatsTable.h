@@ -95,7 +95,7 @@ namespace statistic {
 
 
 template<typename row_t>
-struct StatsTable : BufferedTable<row_t> {
+struct StatsTable : buffered::Table<row_t> {
     static_assert(std::is_base_of<StatsRow, row_t>::value, "Template arg must be derived from StatsRow");
     const str_t m_fname, m_description;
     std::unique_ptr<std::ofstream> m_file;
@@ -103,7 +103,7 @@ struct StatsTable : BufferedTable<row_t> {
     uint_t m_ncommit = 0;
 
     void write_header() const {
-        const auto &row = static_cast<const Row &>(Table<row_t>::m_row);
+        auto& row = this->m_row;
         uint_t ncolumn = 0ul;
         std::map<str_t, uint_t> m_format_strings;
         uint_t nformat = 0ul;
@@ -145,16 +145,14 @@ struct StatsTable : BufferedTable<row_t> {
     }
 
     StatsTable(str_t fname, str_t description, const row_t &row, uint_t period) :
-            BufferedTable<row_t>(fname, {row}), m_fname(fname), m_description(std::move(description)),
+            buffered::Table<row_t>(fname, {row}), m_fname(fname), m_description(std::move(description)),
             m_file(new std::ofstream(fname)), m_period(period) {
         write_header();
-        BufferedTable<row_t>::push_back();
-        BufferedTable<row_t>::m_row.restart();
+        buffered::Table<row_t>::push_back();
     }
 
     void commit() {
-        const auto &row = static_cast<const Row &>(Table<row_t>::m_row);
-        for (FieldBase *field : row.m_fields)
+        for (FieldBase *field : this->m_row.m_fields)
             dynamic_cast<statistic::Base *>(field)->commit();
         if (!(++m_ncommit % m_period)) flush();
     }
@@ -163,7 +161,7 @@ private:
 
     str_t make_line() const {
         str_t res;
-        const auto &row = static_cast<const Row &>(Table<row_t>::m_row);
+        const auto& row = this->m_row;
         for (const FieldBase *field : row.m_fields) {
             auto stats_field = dynamic_cast<const statistic::Base *>(field);
             res += stats_field->stats_string() + " ";
@@ -173,8 +171,7 @@ private:
 
     void flush() {
         *m_file << make_line() << std::endl;
-        auto &row = static_cast<Row &>(Table<row_t>::m_row);
-        for (FieldBase *field : row.m_fields) {
+        for (FieldBase *field : this->m_row.m_fields) {
             auto num_field = dynamic_cast<statistic::Base *>(field);
             num_field->reset();
         }

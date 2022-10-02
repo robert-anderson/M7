@@ -7,21 +7,22 @@ wavefunction:
   nw_init: 100
 propagator:
   tau_init: 0.001
-  stochastic: yes
-  nw_target: 200
-  nadd: 3.0
+  stochastic: no
+  nw_target: 20000
+  nadd: 0.0
   ncycle: 500000
   semistochastic:
-    size: 28
-    delay: 100
+    size: 2000
+    delay: 1000
 hamiltonian:
   fermion:
     fcidump:
       path: FCIDUMP
 mae:
+  delay: 3000
   rdm:
     archive:
       save: yes
     ranks: [1, 2, 3]
-  ncycle: 1000
+  ncycle: 10
 

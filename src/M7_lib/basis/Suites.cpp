@@ -13,7 +13,8 @@ suite::MbfsRow::MbfsRow(const sys::Basis &basis) :
 suite::MbfsRow::MbfsRow(const sys::Sector &sector) : MbfsRow(sector.basis()){}
 
 
-suite::Mbfs::Mbfs(const sys::Basis &basis) : BufferedTable<MbfsRow>("Work space for MBFs", {{basis}}){
+suite::Mbfs::Mbfs(const sys::Basis &basis) :
+    buffered::Table<MbfsRow>(basis) {
     m_row.push_back_jump();
 }
 

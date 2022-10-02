@@ -23,15 +23,15 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
                   "this is biased");
 
     if (mpi::i_am_root()) {
-        m_stats = std::unique_ptr<FciqmcStats>(
-                new FciqmcStats("M7.stats", "FCIQMC", {m_prop}, m_opts.m_stats.m_period));
-        m_timing_stats = std::unique_ptr<TimingStats>(
-                new TimingStats("M7.timing", "FCIQMC Timings", {}, m_opts.m_stats.m_period));
+        m_stats = smart_ptr::make_unique<FciqmcStats>(
+            "M7.stats", "FCIQMC", FciqmcStatsRow(m_prop), m_opts.m_stats.m_period);
+        m_timing_stats = smart_ptr::make_unique<TimingStats>(
+            "M7.timing", "FCIQMC Timings", TimingStatsRow(), m_opts.m_stats.m_period);
     }
-    if (m_opts.m_stats.m_parallel)
-        m_parallel_stats = std::unique_ptr<ParallelStats>(
-                new ParallelStats("M7.stats." + std::to_string(mpi::irank()),
-                                  "FCIQMC Parallelization", {}, m_opts.m_stats.m_period));
+    if (m_opts.m_stats.m_parallel) {
+        m_parallel_stats = smart_ptr::make_unique<ParallelStats>("M7.stats." + std::to_string(mpi::irank()),
+                 "FCIQMC Parallelization", ParallelStatsRow(), m_opts.m_stats.m_period);
+    }
 
     /**
      * setup archive members
@@ -152,7 +152,7 @@ void Solver::begin_cycle() {
 }
 
 void Solver::loop_over_occupied_mbfs() {
-    auto &row = m_wf.m_store.m_row;
+    auto& row = m_wf.m_store.m_row;
 
     for (row.restart(); row.in_range(); row.step()) {
         /*
@@ -235,7 +235,7 @@ void Solver::loop_over_occupied_mbfs() {
 
 void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
     if (!m_maes.m_accum_epoch || m_maes.is_period_cycle(icycle)) return;
-    auto &row = m_wf.m_store.m_row;
+    auto& row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
         if (row.m_mbf.is_zero()) continue;
         m_maes.make_average_contribs(row, m_refs, icycle);
@@ -262,7 +262,7 @@ void Solver::loop_over_spawned() {
 }
 
 void Solver::propagate_row(const uint_t &ipart) {
-    auto &row = m_wf.m_store.m_row;
+    auto& row = m_wf.m_store.m_row;
 
     if (row.is_cleared()) return;
 
@@ -331,7 +331,7 @@ void Solver::output_stats() {
         stats.m_nwalker_total = m_wf.m_nwalker.m_reduced.sum();
         stats.m_nwalker_lookup_skip = m_wf.m_store.m_nskip_total;
         stats.m_nwalker_lookup = m_wf.m_store.m_nlookup_total;
-        stats.m_nrow_recv = m_wf.m_comm.m_last_recv_count;
+        stats.m_nrow_recv = m_wf.m_send_recv.m_last_recv_count;
         m_parallel_stats->commit();
     }
 }

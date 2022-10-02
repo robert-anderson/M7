@@ -13,13 +13,27 @@
 /**
  * we need to be able to lookup the dst in the main table.
  */
-struct DstFinder {
+struct DstLookup {
+    /**
+     * wavefunction object
+     */
     Wavefunction& m_wf;
-    SpawnTableRow &m_block_start_row;
+    /**
+     * true if destination Walker is in the deterministic subspace
+     */
     bool m_deterministic = false;
-    DstFinder(Wavefunction& wf, SpawnTableRow& block_start_row);
+    /**
+     * row object for pointing to the destination Walker record (or null if not found)
+     */
+    WalkerTableRow m_row;
+    DstLookup(Wavefunction& wf);
 
-    bool find();
+    /**
+     * @param m_block_start_row
+     *  row pointing to the first record in the current block in the recv table
+     * @return
+     */
+    Lookup lookup(const SpawnTableRow &recv_row);
 };
 
 
@@ -39,6 +53,7 @@ struct Annihilator {
 private:
     SpawnTableRow m_work_row1;
     SpawnTableRow m_work_row2;
+    WalkerTableRow m_dst_walker;
     /**
      * function that returns the relative order of two rows in the receive buffer
      */
@@ -80,6 +95,17 @@ public:
      * using the comparator implementation, sort the m_recv table of the referenced wavefunction
      */
     void sort_recv();
+
+    /**
+     * lookup the destination walker row in the wavefunction store table and store the result in m_dst_walker
+     * @param recv_row
+     *  row in the spawning recv table
+     * @param deterministic
+     *  return with value true if the dst walker exists and is in the deterministic subspace
+     * @return
+     *  lookup result
+     */
+    Lookup lookup_dst(const SpawnTableRow& recv_row, bool& deterministic);
 
     /**
      * performs coefficient lookup and (if initiator criteria are satisfied) update due to the sum of all spawned

@@ -39,7 +39,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, FciInitOptions opts):
             const auto helem = h.get_element(src_mbf, conn);
             if (!ham::is_significant(helem)) return;
             conn.apply(src_mbf, dst_mbf);
-            const auto icol = *m_mbf_order_table[dst_mbf];
+            const auto icol = m_mbf_order_table.lookup(dst_mbf).index();
             sparse_ham.insert(irow, {icol, helem});
         };
         src_mbf.m_decoded.clear();

@@ -11,17 +11,17 @@ namespace shared_rows {
     /**
      * A set of rows which is copied to all ranks, responds correctly to rank reallocation and is protected from erasure
      */
-    template<typename store_row_t>
+    template<typename row_t>
     struct Set : public DistribDependent {
         /**
-         * the communicator whose m_store member stores the definitive row values
+         * the table with the definitive record values to be copied and sent to all ranks
          */
-        typedef MappedTable<store_row_t> store_t;
-        const store_t& m_src_store;
+        typedef buffered::DistributedTable<row_t> src_t;
+        const src_t& m_src;
         /**
-         * set of row indices stored on this rank
+         * set of record indices stored on this rank
          */
-        std::set<uint_t> m_irows;
+        std::set<uint_t> m_irecs;
         /**
          * name to use for this row set in detailed logging
          */
@@ -29,21 +29,26 @@ namespace shared_rows {
         /**
          * all rows gathered
          */
-        BufferedTable<store_row_t, true> m_all;
+        buffered::MappedTable<row_t> m_all;
         /**
          * send / recv tables for gathering into m_all
          */
-        BufferedTable<store_row_t> m_gather_send;
-        BufferedTable<store_row_t> m_gather_recv;
+        buffered::Table<row_t> m_gather_send;
+        buffered::Table<row_t> m_gather_recv;
+
+        /**
+         * row object for traversing the source storage table
+         */
+        row_t m_src_row;
+        row_t m_send_row;
 
     public:
-        template<typename comm_row_t, bool mapped_comm = false>
-        Set(str_t name, const Communicator<store_row_t, comm_row_t, mapped_comm>& src_comm, uintv_t irows = {}) :
-                DistribDependent(src_comm), m_src_store(src_comm.m_store),
-                m_name(name),
-                m_all(name+" all rows", {src_comm.m_store.m_row}),
-                m_gather_send(name+" gather send", {src_comm.m_store.m_row}),
-                m_gather_recv(name+" gather recv", {src_comm.m_store.m_row}) {
+        Set(str_t name, const src_t& src, uintv_t irows = {}) :
+                DistribDependent(src), m_src(src),
+                m_name(name), m_all(name+" all rows", {m_src.row()}),
+                m_gather_send(name+" gather send", {m_src.row()}),
+                m_gather_recv(name+" gather recv", {m_src.row()}),
+                m_src_row(m_src.row()), m_send_row(m_gather_send.row()) {
             for (auto irow: irows) add_(irow);
             full_update();
         }
@@ -55,12 +60,10 @@ namespace shared_rows {
          */
         void all_gatherv() {
             m_gather_send.clear();
-            auto& send_row = m_gather_send.m_row;
-            auto& src_row = m_src_store.m_row;
-            for (auto irow: m_irows) {
-                src_row.jump(irow);
-                send_row.push_back_jump();
-                send_row.copy_in(src_row);
+            for (auto irec: m_irecs) {
+                m_src_row.jump(irec);
+                m_send_row.push_back_jump();
+                m_send_row.copy_in(m_src_row);
             }
             static_cast<TableBase&>(m_gather_recv).all_gatherv(m_gather_send);
         }
@@ -74,13 +77,16 @@ namespace shared_rows {
         }
 
         void row_index_update() {
-            REQUIRE_EQ_ALL(m_all.m_hwm, m_irows.size(),
+            REQUIRE_EQ_ALL(m_all.m_hwm, m_irecs.size(),
                            "this kind of refresh is only possible when all rows have already been gathered");
-            m_irows = {};
-            for (m_all.m_row.restart(); m_all.m_row.in_range(); m_all.m_row.step()) {
-                //auto& row = m_src_store.m_row;
-                const auto result = m_src_store[m_all.m_row.key_field()];
-                if (result) m_irows.insert(*result);
+            m_irecs = {};
+            auto& row = m_all.m_row;
+            for (row.restart(); row.in_range(); row.step()) {
+                auto result = m_src.lookup(row.key_field(), m_src_row);
+                if (result) {
+                    const auto irec = static_cast<const Row&>(m_src_row).index();
+                    m_irecs.insert(irec);
+                }
             }
         }
 
@@ -88,28 +94,29 @@ namespace shared_rows {
             all_gatherv();
             m_all.clear();
             auto& recv_row = m_gather_recv.m_row;
-            for (recv_row.restart(); recv_row.in_range(); recv_row.step()) m_all.insert(recv_row);
+            auto& all_row = m_all.m_row;
+            for (recv_row.restart(); recv_row.in_range(); recv_row.step()) m_all.insert(recv_row, all_row);
         }
 
-        uint_t nrow_() const {
-            return m_irows.size();
+        uint_t nrec_() const {
+            return m_irecs.size();
         }
 
-//        uint_t nrow() const {
+//        uint_t nrec() const {
 //            return mpi::all_sum(nrow_());
 //        }
 
         void clear() {
-            for (const auto& irow: m_irows) static_cast<const TableBase&>(m_src_store).release(irow);
-            m_irows.clear();
+            for (const auto& irow: m_irecs) static_cast<const TableBase&>(m_src).release(irow);
+            m_irecs.clear();
         }
 
         void add_(uint_t irow) {
-            static_cast<const TableBase&>(m_src_store).protect(irow);
-            m_irows.insert(irow);
+            static_cast<const TableBase&>(m_src).protect(irow);
+            m_irecs.insert(irow);
         }
 
-        void add_(const store_row_t& row) {
+        void add_(const row_t& row) {
             add_(row.index());
         }
 
@@ -120,22 +127,22 @@ namespace shared_rows {
         }
     };
 
-    template<typename store_row_t>
-    struct Single : Set<store_row_t> {
-        using Set<store_row_t>::m_all;
-        using Set<store_row_t>::clear;
-        using Set<store_row_t>::add_;
-        using Set<store_row_t>::full_update;
+    template<typename row_t>
+    struct Single : Set<row_t> {
+        typedef buffered::DistributedTable<row_t> src_t;
+        using Set<row_t>::m_all;
+        using Set<row_t>::clear;
+        using Set<row_t>::add_;
+        using Set<row_t>::full_update;
 
-        template<typename comm_row_t, bool mapped_comm = false>
-        Single(str_t name, const Communicator<store_row_t, comm_row_t, mapped_comm>& src_comm, TableBase::Loc loc):
-                Set<store_row_t>(name, src_comm, loc) {
+        template<typename send_recv_row_t>
+        Single(str_t name, const src_t& src, TableBase::Loc loc): Set<src_t>(name, src, loc) {
             m_all.m_row.restart();
         }
 
         void redefine(TableBase::Loc loc) {
             clear();
-            if (loc.is_mine()) add_(loc.m_irow);
+            if (loc.is_mine()) add_(loc.m_irec);
             full_update();
         }
     };

@@ -34,7 +34,7 @@ template<typename row_t, typename T, uint_t nind = 0>
 struct GlobalExtremalRows {
     typedef LocalExtremalRows<row_t, T, nind> lxr_t;
     typedef GlobalSortingRow<T> global_sort_row_t;
-    typedef BufferedTable<global_sort_row_t, false> global_sort_table_t;
+    typedef buffered::Table<global_sort_row_t> global_sort_table_t;
     /**
      * LocalExtremalRows for determining the best values on each process independently
      */
@@ -248,7 +248,7 @@ public:
      */
     void find(uint_t nrow) {
         update_ninclude();
-        if (!mpi::all_sum(m_lxr.m_table.nrow_nonzero())) return;
+        if (!mpi::all_sum(m_lxr.m_table.nrecord_nonempty())) return;
         find_required_local_rows(nrow);
         load_values_for_sorting();
         sort(nrow);
@@ -267,10 +267,10 @@ public:
     }
 
     void gatherv(Table<row_t>& dst, uint_t iroot=0ul) const {
-        BufferedTable<row_t> m_local("locally included globally extreme rows", m_lxr.m_work_row);
+        buffered::Table<row_t> m_local("locally included globally extreme rows", m_lxr.m_work_row);
         m_local.push_back(m_ninclude.m_local);
         for (uint_t iinclude=0ul; iinclude<m_ninclude.m_local; ++iinclude){
-            m_local.copy_row_in(m_lxr.m_table, (*this)[iinclude], iinclude);
+            m_local.copy_record_in(m_lxr.m_table, (*this)[iinclude], iinclude);
         }
         dst.gatherv(m_local, iroot);
     }

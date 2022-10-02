@@ -18,7 +18,7 @@ opts.m_wavefunction.m_hash_mapping.m_remap_ratio
 
 
 Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector) :
-        Communicator<WalkerTableRow, SpawnTableRow, false>(
+        communicator::BasicSend<WalkerTableRow, SpawnTableRow>(
             "wavefunction",
             {
                 {
@@ -26,7 +26,6 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
                     opts.m_wavefunction.m_nroot,
                     opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)
                 },
-
             },
             opts.m_propagator.m_nw_target/mpi::nrank(),
             {{sector.basis(), need_send_parents(opts)}},

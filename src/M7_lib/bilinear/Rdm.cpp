@@ -28,14 +28,14 @@ str_t Rdm::name(str_t str, uint_t ranksig) const {
 
 void Rdm::add_to_send_table(const MaeInds &inds, wf_t contrib) {
     DEBUG_ASSERT_EQ(inds.m_exsig, m_indsig, "incorrect number of operators in MAE indices");
-    const auto irank_send = irank(inds);
+    const auto irank_send = m_dist.irank(inds);
     DEBUG_ASSERT_TRUE(inds.is_ordered(),
                       "operators of each kind should be stored in ascending order of their orbital (or mode) index");
     auto &send_table = send(irank_send);
-    uint_t irow = *send_table[inds];
-    if (irow == ~0ul) irow = send_table.insert(inds);
-    send_table.m_row.jump(irow);
-    send_table.m_row.m_values[0] += contrib;
+    send_table.associate(m_send_row);
+    auto lookup = send_table.lookup(inds, m_send_row);
+    if (!lookup) send_table.insert(inds, m_send_row);
+    m_send_row.m_values[0] += contrib;
 }
 
 void Rdm::frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
@@ -101,16 +101,19 @@ void Rdm::frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmB
 
 Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nblock_per_rank, uint_t nelec, uint_t nvalue,
          Sizing store_sizing, Sizing comm_sizing, str_t name) :
-        Communicator<MaeRow, MaeRow, true>(
+        communicator::MappedSend<MaeRow, MaeRow>(
                 "rdm_" + (name.empty() ? this->name(name, ranksig) : name),
-                {{indsig, nvalue}}, store_sizing, {{indsig, nvalue}}, comm_sizing, nblock_per_rank),
+                buffered::DistributedTable<MaeRow>(MaeRow(indsig, nvalue), nblock_per_rank),
+                //{{indsig, nvalue}, nblock_per_rank},
+                store_sizing, {{indsig, nvalue}}, comm_sizing),
         m_basis_size(basis_size), m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
         m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
         m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)),
         m_indsig(indsig), m_rank_ind(decode_nfrm_cre(m_indsig)),
         m_nfrm_cre_ind(decode_nfrm_cre(m_indsig)), m_nfrm_ann_ind(decode_nfrm_ann(m_indsig)),
         m_nbos_cre_ind(decode_nbos_cre(m_indsig)), m_nbos_ann_ind(decode_nbos_ann(m_indsig)),
-        m_full_inds(ranksig), m_uncontracted_inds(m_indsig), m_name(name), m_nelec(nelec) {
+        m_full_inds(ranksig), m_uncontracted_inds(m_indsig), m_name(name),
+        m_send_row(m_send_recv.m_row), m_recv_row(m_send_recv.m_row), m_store_row(m_store.m_row), m_nelec(nelec) {
     /*
      * if contributing exsig != ranksig, there is promotion to do
      * the promoter to use is given by the difference between either fermion element of the ranksig and that of the
@@ -125,15 +128,13 @@ Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nblock_per_
 void Rdm::end_cycle() {
     if (!send().buffer_size()) return;
     communicate();
-    auto& row = m_comm.recv().m_row;
-    if (!m_comm.recv().m_hwm) return;
-    for (row.restart(); row.in_range(); row.step()) {
-        auto irow_store = *m_store[row.m_inds];
-        if (irow_store == ~0ul) irow_store = m_store.insert(row.m_inds);
-        m_store.m_row.jump(irow_store);
-        m_store.m_row.m_values += row.m_values;
+    if (!m_send_recv.recv().m_hwm) return;
+    for (m_recv_row.restart(); m_recv_row.in_range(); m_recv_row.step()) {
+        auto lookup = m_store.lookup(m_recv_row.m_inds, m_store_row);
+        if (!lookup) m_store.insert(m_recv_row.m_inds, m_store_row);
+        m_store_row.m_values += m_recv_row.m_values;
     }
-    m_comm.recv().clear();
+    m_send_recv.recv().clear();
 }
 
 void Rdm::save(hdf5::NodeWriter& gw) const {

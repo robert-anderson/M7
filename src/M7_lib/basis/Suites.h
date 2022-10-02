@@ -24,8 +24,7 @@ namespace suite {
         MbfsRow(const sys::Sector& sector);
     };
 
-    struct Mbfs : BufferedTable<MbfsRow>{
-
+    struct Mbfs : buffered::Table<MbfsRow>{
         Mbfs(const sys::Basis& basis);
         Mbfs(const sys::Sector& sector);
 

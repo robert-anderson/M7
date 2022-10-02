@@ -33,17 +33,17 @@ public:
         /**
          * Size of the row in bytes
          */
-        const uint_t m_row_size;
+        const uint_t m_record_size;
         /**
          * Current number of whole rows that can be stored in the window
          */
-        uint_t m_nrow = 0ul;
+        uint_t m_nrecord = 0ul;
         buf_t *m_begin = nullptr;
         uint_t m_size = 0ul;
 
-        Window(uint_t row_size=1): m_row_size(row_size) {}
+        Window(uint_t row_size=1): m_record_size(row_size) {}
 
-        Window(const Window& other): Window(other.m_row_size) {}
+        Window(const Window& other): Window(other.m_record_size) {}
 
         Window& operator=(const Window& other);
 
@@ -54,7 +54,7 @@ public:
          */
         bool allocated() const;
         /**
-         * moves data if there's any in the window currently, and redefines the stored m_size, m_nrow, and m_begin
+         * moves data if there's any in the window currently, and redefines the stored m_size, m_nrecord, and m_begin
          * @param begin
          *  new begin buffer pointer
          * @param new_size
@@ -75,12 +75,20 @@ public:
          */
         str_t name() const;
 
+        void rename(str_t name) const {
+            REQUIRE_TRUE(m_buffer, "only buffers can be named, this buffer window is not associated with one");
+            m_buffer->m_name = std::move(name);
+        }
+
         double get_expansion_factor() const;
 
     };
 
     double m_expansion_factor = 0.0;
-    const str_t m_name;
+    /**
+     * if the buffer is given a name, its resizing events will be appear in the logs
+     */
+    str_t m_name = "";
 private:
     const uint_t m_nwindow_max;
     v_t<buf_t> m_data;
@@ -88,6 +96,8 @@ private:
 
 public:
     Buffer(str_t name, uint_t nwindow_max);
+
+    Buffer(uint_t nwindow_max) : Buffer("", nwindow_max){}
 
     uint_t size() const;
 

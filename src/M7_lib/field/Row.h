@@ -90,6 +90,10 @@ public:
         return m_i < m_table->m_hwm;
     }
 
+    operator bool () const {
+        return m_i < m_table->m_hwm;
+    }
+
     /**
      * @return
      *  true if the m_dbegin pointer is valid with respect to the table object
@@ -246,11 +250,14 @@ template<typename field_t>
 struct SingleFieldRow : Row {
     field_t m_field;
     template<typename ...Args>
-    SingleFieldRow(Args... args): Row(), m_field(this, args...){}
+    SingleFieldRow(Args... args): m_field(this, args...){}
+
+    SingleFieldRow(const SingleFieldRow& other): Row(other), m_field(other.m_field){}
 
     field_t &key_field() {
         return m_field;
     };
 };
+
 
 #endif //M7_ROW_H

@@ -7,17 +7,22 @@
 #include "M7_lib/util/SmartPtr.h"
 
 RefExcitsOneExsig::RefExcitsOneExsig(uint_t exsig, uint_t nroot, uint_t nbucket) :
-        BufferedTable<MaeRow, true>(
+        buffered::MappedTable<MaeRow>(
                 logging::format("average {} reference excitation coefficients", exsig::to_string(exsig)),
                 {{exsig, nroot}, nbucket}),
         m_working_inds(exsig) {}
 
-LookupResult RefExcitsOneExsig::operator[](const conn::FrmOnv& key) {
+const MaeRow& RefExcitsOneExsig::lookup(const conn::FrmOnv& key) const {
     m_working_inds = key;
-    return MappedTable<MaeRow>::operator[](m_working_inds);
+    return MappedTable<MaeRow>::lookup(m_working_inds);
 }
 
-uint_t RefExcitsOneExsig::insert(const conn::FrmOnv& key) {
+MaeRow& RefExcitsOneExsig::lookup(const conn::FrmOnv& key) {
+    m_working_inds = key;
+    return MappedTable<MaeRow>::lookup(m_working_inds);
+}
+
+MaeRow& RefExcitsOneExsig::insert(const conn::FrmOnv& key) {
     m_working_inds = key;
     return MappedTable<MaeRow>::insert(m_working_inds);
 }
@@ -32,9 +37,7 @@ void RefExcitsOneExsig::save(const hdf5::NodeWriter& gw) const {
 
 void RefExcitsOneExsig::make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot) {
     DEBUG_ASSERT_EQ(conn.exsig(), m_working_inds.m_exsig, "incompatible connection");
-    auto irow = *(*this)[conn];
-    if (irow==~0ul) irow = insert(conn);
-    m_row.jump(irow);
+    if (!this->lookup(conn)) this->insert(conn);
     m_row.m_values[iroot]+=contrib;
 }
 

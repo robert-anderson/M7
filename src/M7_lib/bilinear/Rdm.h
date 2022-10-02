@@ -17,7 +17,7 @@
 
 using namespace exsig;
 
-class Rdm : public Communicator<MaeRow, MaeRow, true> {
+class Rdm : public communicator::MappedSend<MaeRow, MaeRow> {
 public:
     const sys::Size m_basis_size;
     /**
@@ -30,6 +30,7 @@ public:
      */
     const uint_t m_indsig;
     const uint_t m_rank_ind, m_nfrm_cre_ind, m_nfrm_ann_ind, m_nbos_cre_ind, m_nbos_ann_ind;
+
 protected:
     /**
      * enumerators of the promotions of contributing excitation signatures to the ranksig of the RDM
@@ -44,6 +45,13 @@ protected:
      */
     buffered::MaeInds m_uncontracted_inds;
     const str_t m_name;
+
+    /**
+     * objects for table traversal
+     */
+    MaeRow m_send_row;
+    MaeRow m_recv_row;
+    MaeRow m_store_row;
 
     static uint_t nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size);
 

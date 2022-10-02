@@ -137,7 +137,7 @@ SpinFreeRdm::SpinFreeRdm(const Rdm& src, wf_t norm, uint_t nelem_per_comm) :
     REQUIRE_EQ_ALL(m_nfrm_cre, m_nfrm_ann, "spin tracing requires fermion number conservation");
     REQUIRE_LE_ALL(m_nfrm_cre_ind, 3ul, "spin tracing is only implemented upto rank 3 fermion operators");
     logging::info("computing the normalized spin-trace of {}", src.name());
-    auto row = src.m_store.m_row;
+    auto& row = src.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
         make_contribs_from_one_row(row, norm);
         if (row.index() && !(row.index()%nelem_per_comm)){

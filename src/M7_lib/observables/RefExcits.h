@@ -15,17 +15,21 @@
 #include <M7_lib/mae/MaeTable.h>
 #include <M7_lib/util/Exsig.h>
 
-struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
+struct RefExcitsOneExsig : buffered::MappedTable<MaeRow> {
+protected:
     /**
      * work space for converting between indexing vector type and the stored key type of the MEV tables
      */
-    buffered::MaeInds m_working_inds;
+    mutable buffered::MaeInds m_working_inds;
 
+public:
     RefExcitsOneExsig(uint_t exsig, uint_t nroot, uint_t nbucket = 100);
 
-    LookupResult operator[](const conn::FrmOnv& key);
+    const MaeRow& lookup(const conn::FrmOnv& key) const;
 
-    uint_t insert(const conn::FrmOnv& key);
+    MaeRow& lookup(const conn::FrmOnv& key);
+
+    MaeRow& insert(const conn::FrmOnv& key);
 
     strv_t h5_field_names() const;
 

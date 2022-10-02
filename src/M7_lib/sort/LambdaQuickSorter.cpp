@@ -78,7 +78,7 @@ void LambdaQuickSorter::qs(uint_t iilo, uint_t iihi) {
 
 
 void LambdaQuickSorter::swap(uint_t ii1, uint_t ii2, TableBase &table) {
-    table.swap_rows(ii1, ii2);
+    table.swap_records(ii1, ii2);
 }
 
 uint_t LambdaQuickSorter::partition(uint_t iilo, uint_t iihi, TableBase &table) {

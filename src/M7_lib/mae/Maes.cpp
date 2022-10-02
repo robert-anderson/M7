@@ -88,7 +88,7 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
 void Maes::output(uint_t icycle, const Hamiltonian &ham, bool final) {
     if (!*this) return;
     if (!is_period_cycle(icycle) && !final) return;
-    auto &stats_row = m_stats->m_row;
+    auto& stats_row = m_stats->m_row;
 
     ham_comp_t rdm_energy = 0.0;
     if (m_bilinears.m_rdms.is_energy_sufficient(ham)) rdm_energy = m_bilinears.m_rdms.get_energy(ham);

@@ -344,7 +344,7 @@ namespace dense {
             uintv_t shape;
             shape.push_back(m_nrow);
             shape.push_back(m_ncol);
-            nw.write_data(name, m_buffer, shape, {"nrow", "ncol"}, irank);
+            nw.write_data(name, m_buffer, shape, {"nrecord", "ncol"}, irank);
         }
     };
 
@@ -383,13 +383,13 @@ namespace dense {
     struct GemmWrapper {
         const char m_transa;
         const char m_transb;
-        // nrow of op(A)
+        // nrecord of op(A)
         const int m_m;
         // ncol of op(B)
         const int m_n;
         // ncol of op(A)
         const int m_k;
-        // nrow of op(B)
+        // nrecord of op(B)
         const int m_nrow_opb;
         // strides of row-contiguous arrays
         const int m_lda, m_ldb, m_ldc;

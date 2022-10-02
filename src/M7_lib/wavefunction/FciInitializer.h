@@ -25,7 +25,7 @@ struct FciInitializer {
     /**
      * mapped list of basis functions to aid in the setup of sparse H, and retain the physical meaning of its rows
      */
-    BufferedTable<MbfOrderRow, true> m_mbf_order_table;
+    buffered::MappedTable<MbfOrderRow> m_mbf_order_table;
     /**
      * instance of the ARPACK wrapper which is only used if H is hermitian (Lanczos)
      */

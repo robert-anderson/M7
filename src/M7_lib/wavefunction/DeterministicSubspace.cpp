@@ -41,7 +41,7 @@ void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const Mbf &ref, const s
 
 DeterministicSubspace::DeterministicSubspace(
         const conf::Semistochastic &opts, Wavefunction &wf, uint_t iroot) :
-        shared_rows::Set<WalkerTableRow>("semistochastic", wf),
+        shared_rows::Set<WalkerTableRow>("semistochastic", wf.m_store),
         m_opts(opts), m_wf(wf), m_iroot(iroot), m_local_row(wf.m_store.m_row), m_iparts(make_iparts()){}
 
 void DeterministicSubspace::add_(WalkerTableRow &row) {

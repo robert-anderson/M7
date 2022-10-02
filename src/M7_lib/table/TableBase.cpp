@@ -11,10 +11,10 @@
 #include "RowProtector.h"
 #include "M7_lib/util/SmartPtr.h"
 
-TableBase::TableBase(uint_t row_size) :
-        m_bw(row_size), m_null_row_string(row_size, 0){}
+TableBase::TableBase(uint_t record_size) :
+        m_bw(record_size), m_null_record_string(record_size, 0){}
 
-TableBase::TableBase(const TableBase &other) : TableBase(other.m_bw.m_row_size){}
+TableBase::TableBase(const TableBase &other) : TableBase(other.m_bw.m_record_size){}
 
 buf_t *TableBase::begin() {
     return m_bw.m_begin;
@@ -24,12 +24,12 @@ const buf_t *TableBase::begin() const {
     return m_bw.m_begin;
 }
 
-buf_t *TableBase::begin(uint_t irow) {
-    return m_bw.m_begin + irow * row_size();
+buf_t *TableBase::begin(uint_t irec) {
+    return m_bw.m_begin + irec * record_size();
 }
 
-const buf_t *TableBase::begin(uint_t irow) const {
-    return m_bw.m_begin + irow * row_size();
+const buf_t *TableBase::begin(uint_t irec) const {
+    return m_bw.m_begin + irec * record_size();
 }
 
 void TableBase::set_buffer(Buffer *buffer) {
@@ -39,140 +39,139 @@ void TableBase::set_buffer(Buffer *buffer) {
 }
 
 bool TableBase::is_full() const {
-    return m_hwm == nrow();
+    return m_hwm == nrecord();
 }
 
-uint_t TableBase::push_back(uint_t nrow) {
-    DEBUG_ASSERT_TRUE(row_size(), "cannot resize a table with zero row size");
-    if (m_hwm + nrow > this->nrow()) expand(nrow);
+uint_t TableBase::push_back(uint_t nrec) {
+    DEBUG_ASSERT_TRUE(record_size(), "cannot resize a table with zero record size");
+    if (m_hwm + nrec > this->nrecord()) expand(nrec);
     auto tmp = m_hwm;
-    m_hwm += nrow;
+    m_hwm += nrec;
     return tmp;
 }
 
-uint_t TableBase::get_free_row() {
-    if (m_free_rows.empty()) return push_back();
-    auto irow = m_free_rows.top();
-    m_free_rows.pop();
-    return irow;
+uint_t TableBase::get_empty_record() {
+    if (m_empty_records.empty()) return push_back();
+    auto irec = m_empty_records.top();
+    m_empty_records.pop();
+    return irec;
 }
 
 void TableBase::clear() {
     ASSERT(!is_protected());
     if (!m_bw.allocated()) return;
-    std::memset(begin(), 0, row_size() * m_hwm);
+    std::memset(begin(), 0, record_size() * m_hwm);
     m_hwm = 0ul;
-    while (!m_free_rows.empty()) m_free_rows.pop();
+    while (!m_empty_records.empty()) m_empty_records.pop();
 }
 
-void TableBase::clear(uint_t irow) {
-    DEBUG_ASSERT_LT(irow, m_hwm, "row index OOB");
-    DEBUG_ASSERT_FALSE(is_protected(irow), "cannot clear a protected row");
-    std::memset(begin(irow), 0, row_size());
-    m_free_rows.push(irow);
+void TableBase::clear(uint_t irec) {
+    DEBUG_ASSERT_LT(irec, m_hwm, "row index OOB");
+    DEBUG_ASSERT_FALSE(is_protected(irec), "cannot clear a protected row");
+    std::memset(begin(irec), 0, record_size());
+    m_empty_records.push(irec);
 }
 
 bool TableBase::is_cleared() const {
-    return std::memcmp(begin(), m_null_row_string.data(), row_size()) == 0;
+    return std::memcmp(begin(), m_null_record_string.data(), record_size()) == 0;
 }
 
-bool TableBase::is_cleared(uint_t irow) const {
-    return std::memcmp(begin(irow), m_null_row_string.data(), row_size()) == 0;
+bool TableBase::is_cleared(uint_t irec) const {
+    return std::memcmp(begin(irec), m_null_record_string.data(), record_size()) == 0;
 }
 
 uint_t TableBase::bw_size() const {
     return m_bw.m_size;
 }
 
-void TableBase::resize(uint_t nrow, double factor) {
-    DEBUG_ASSERT_TRUE(row_size(), "cannot resize, row size is zero");
-    DEBUG_ASSERT_GE(nrow, m_hwm, "resize would discard uncleared data");
-    m_bw.resize(nrow * row_size(), factor);
-    DEBUG_ASSERT_LT(m_hwm, m_bw.m_size/row_size(), "resize has discarded uncleared data");
+void TableBase::resize(uint_t nrec, double factor) {
+    DEBUG_ASSERT_TRUE(record_size(), "cannot resize, row size is zero");
+    DEBUG_ASSERT_GE(nrec, m_hwm, "resize would discard uncleared data");
+    m_bw.resize(nrec * record_size(), factor);
+    DEBUG_ASSERT_LT(m_hwm, m_bw.m_size / record_size(), "resize has discarded uncleared data");
 }
 
-void TableBase::expand(uint_t nrow, double factor) {
-    resize(this->nrow()+nrow, factor);
+void TableBase::expand(uint_t nrec, double factor) {
+    resize(this->nrecord() + nrec, factor);
 }
 
-void TableBase::clear_rows(const uintv_t &irows) {
-    for (auto irow : irows) {
-        clear(irow);
+void TableBase::clear_records(const uintv_t &irecs) {
+    for (auto irec : irecs) clear(irec);
+}
+
+void TableBase::insert_records(const Buffer::Window &recv, uint_t nrec, const std::list<recv_cb_t> &callbacks) {
+    for (uint_t irec_recv = 0; irec_recv < nrec; ++irec_recv) {
+        auto irec = get_empty_record();
+        std::memcpy(begin(irec), recv.m_begin + irec_recv * record_size(), record_size());
+        post_insert(irec);
+        for (auto f: callbacks) f(irec);
     }
 }
-
-void TableBase::insert_rows(const Buffer::Window &recv, uint_t nrow, const std::list<recv_cb_t> &callbacks) {
-    for (uint_t irow_recv = 0; irow_recv < nrow; ++irow_recv) {
-        auto irow = get_free_row();
-        std::memcpy(begin(irow), recv.m_begin + irow_recv * row_size(), row_size());
-        post_insert(irow);
-        for (auto f: callbacks) f(irow);
-    }
-}
-void TableBase::transfer_rows(const uintv_t &irows, uint_t irank_send, uint_t irank_recv, const std::list<recv_cb_t>& callbacks){
+void TableBase::transfer_records(const uintv_t &irecs, uint_t irank_send,
+                                 uint_t irank_recv, const std::list<recv_cb_t>& callbacks){
     DEBUG_ASSERT_NE_ALL(irank_recv, irank_send, "sending and recving ranks should never be the same");
     if (!m_transfer) m_transfer = smart_ptr::make_unique<RowTransfer>(m_bw.name());
-    uint_t nrow = 0;
+    uint_t nrec = 0;
     if (mpi::i_am(irank_send)){
         auto& send_bw = m_transfer->m_send_bw;
-        nrow = irows.size();
-        mpi::send(&nrow, 1, irank_recv, m_transfer->m_nrow_p2p_tag);
-        if (!nrow){
-            logging::debug_("Sending rank notifying recving rank that no rows are transferred");
+        nrec = irecs.size();
+        mpi::send(&nrec, 1, irank_recv, m_transfer->m_nrec_p2p_tag);
+        if (!nrec){
+            logging::debug_("Sending rank notifying recving rank that no records are transferred");
             return;
         }
-        logging::info_("Transferring {} rows outward to rank {}", nrow, irank_recv);
+        logging::info_("Transferring {} records outward to rank {}", nrec, irank_recv);
 
-        auto size_required = nrow*row_size();
+        auto size_required = nrec * record_size();
         if (send_bw.m_size < size_required) send_bw.resize(size_required);
-        for (auto iirow = 0ul; iirow < nrow; ++iirow) {
-            const auto &irow = irows[iirow];
-            std::memcpy(send_bw.m_begin + iirow * row_size(), begin(irow), row_size());
+        for (auto iirec = 0ul; iirec < nrec; ++iirec) {
+            const auto &irec = irecs[iirec];
+            std::memcpy(send_bw.m_begin + iirec * record_size(), begin(irec), record_size());
         }
-        mpi::send(send_bw.m_begin, row_size() * nrow, irank_recv, m_transfer->m_irows_p2p_tag);
+        mpi::send(send_bw.m_begin, record_size() * nrec, irank_recv, m_transfer->m_irecs_p2p_tag);
         /*
-         * sent rows can now be erased
+         * sent records can now be erased
          */
-        clear_rows(irows);
+        clear_records(irecs);
     }
     if (mpi::i_am(irank_recv)){
         auto& recv_bw = m_transfer->m_send_bw;
-        mpi::recv(&nrow, 1, irank_send, m_transfer->m_nrow_p2p_tag);
-        if (!nrow){
-            logging::debug_("Recving rank notified by sending rank that no rows are transferred");
+        mpi::recv(&nrec, 1, irank_send, m_transfer->m_nrec_p2p_tag);
+        if (!nrec){
+            logging::debug_("Recving rank notified by sending rank that no records are transferred");
             return;
         }
-        auto size_required = nrow * row_size();
+        auto size_required = nrec * record_size();
         if (recv_bw.m_size<size_required) recv_bw.resize(size_required);
-        logging::info_("Transferring {} rows inward from rank {}", nrow, irank_send);
-        mpi::recv(recv_bw.m_begin, row_size() * nrow, irank_send, m_transfer->m_irows_p2p_tag);
+        logging::info_("Transferring {} records inward from rank {}", nrec, irank_send);
+        mpi::recv(recv_bw.m_begin, record_size() * nrec, irank_send, m_transfer->m_irecs_p2p_tag);
         /*
-         * now emplace received rows in TableBase buffer window, and call all callbacks for each
+         * now emplace received records in TableBase buffer window, and call all callbacks for each
          */
-        insert_rows(recv_bw, nrow, callbacks);
+        insert_records(recv_bw, nrec, callbacks);
     }
 }
 
-void TableBase::copy_row_in(const TableBase &src, uint_t irow_src, uint_t irow_dst) {
-    ASSERT(irow_dst < m_hwm);
-    std::memcpy(begin(irow_dst), src.begin(irow_src), row_size());
+void TableBase::copy_record_in(const TableBase &src, uint_t irec_src, uint_t irec_dst) {
+    ASSERT(irec_dst < m_hwm);
+    std::memcpy(begin(irec_dst), src.begin(irec_src), record_size());
 }
 
-void TableBase::swap_rows(uint_t irow, uint_t jrow) {
-    if (irow == jrow) return;
-    auto iptr = begin(irow);
-    auto jptr = begin(jrow);
-    std::swap_ranges(iptr, iptr+row_size(), jptr);
+void TableBase::swap_records(uint_t irec, uint_t jrec) {
+    if (irec == jrec) return;
+    auto iptr = begin(irec);
+    auto jptr = begin(jrec);
+    std::swap_ranges(iptr, iptr + record_size(), jptr);
 }
 
 str_t TableBase::to_string(const uintv_t *ordering) const {
     str_t out;
     auto begin_ptr = begin();
     for (uint_t i=0ul; i<m_hwm; ++i){
-        auto irow = ordering ? ordering->at(i) : i;
-        auto row_ptr = begin_ptr+irow*row_size();
-        for (uint_t ibyte=0ul; ibyte < row_size(); ++ibyte){
-            out+= std::to_string(static_cast<int>(row_ptr[ibyte])) + " ";
+        auto irec = ordering ? ordering->at(i) : i;
+        auto rec = begin_ptr + irec * record_size();
+        for (uint_t ibyte=0ul; ibyte < record_size(); ++ibyte){
+            out+= std::to_string(static_cast<int>(rec[ibyte])) + " ";
         }
         out+="\n";
     }
@@ -181,51 +180,51 @@ str_t TableBase::to_string(const uintv_t *ordering) const {
 
 void TableBase::all_gatherv(const TableBase &src) {
     clear();
-    uintv_t nrows(mpi::nrank());
+    uintv_t nrecs(mpi::nrank());
     uintv_t counts(mpi::nrank());
     uintv_t displs(mpi::nrank());
-    DEBUG_ASSERT_EQ(src.row_size(), row_size(),
-                    "the size of rows being gathered does not match that stored in the gathering table");
-    mpi::all_gather(src.m_hwm, nrows);
-    counts = nrows;
-    for (auto &v: counts) v *= row_size();
+    DEBUG_ASSERT_EQ(src.record_size(), record_size(),
+                    "the size of records being gathered does not match that stored in the gathering table");
+    mpi::all_gather(src.m_hwm, nrecs);
+    counts = nrecs;
+    for (auto &v: counts) v *= record_size();
     mpi::counts_to_displs_consec(counts, displs);
-    auto nrow_total = std::accumulate(nrows.cbegin(), nrows.cend(), 0ul);
-    push_back(nrow_total);
-    mpi::all_gatherv(src.begin(), src.m_hwm * row_size(), begin(), counts, displs);
-    post_insert_range(0, nrow_total);
+    auto nrec_total = std::accumulate(nrecs.cbegin(), nrecs.cend(), 0ul);
+    push_back(nrec_total);
+    mpi::all_gatherv(src.begin(), src.m_hwm * record_size(), begin(), counts, displs);
+    post_insert_range(0, nrec_total);
 }
 
 void TableBase::gatherv(const TableBase &src, uint_t irank) {
     if (mpi::i_am(irank)) clear();
-    uintv_t nrows(mpi::nrank());
+    uintv_t nrecs(mpi::nrank());
     uintv_t counts(mpi::nrank());
     uintv_t displs(mpi::nrank());
-    DEBUG_ASSERT_EQ(src.row_size(), row_size(),
-                    "the size of rows being gathered does not match that stored in the gathering table");
-    mpi::all_gather(src.m_hwm, nrows);
-    counts = nrows;
-    for (auto &v: counts) v *= row_size();
+    DEBUG_ASSERT_EQ(src.record_size(), record_size(),
+                    "the size of records being gathered does not match that stored in the gathering table");
+    mpi::all_gather(src.m_hwm, nrecs);
+    counts = nrecs;
+    for (auto &v: counts) v *= record_size();
     mpi::counts_to_displs_consec(counts, displs);
-    auto nrow_total = std::accumulate(nrows.cbegin(), nrows.cend(), 0ul);
+    auto nrec_total = std::accumulate(nrecs.cbegin(), nrecs.cend(), 0ul);
     if (mpi::i_am(irank))
-        push_back(nrow_total);
-    mpi::gatherv(src.begin(), src.m_hwm * row_size(), begin(), counts, displs, irank);
+        push_back(nrec_total);
+    mpi::gatherv(src.begin(), src.m_hwm * record_size(), begin(), counts, displs, irank);
     if (mpi::i_am(irank))
-        post_insert_range(0, nrow_total);
+        post_insert_range(0, nrec_total);
 }
 
 bool TableBase::is_protected() const {
-    return !m_protected_rows.empty();
+    return !m_protected_records.empty();
 }
 
-uint_t TableBase::nrow_nonzero() const {
-    return m_hwm-m_free_rows.size();
+uint_t TableBase::nrecord_nonempty() const {
+    return m_hwm - m_empty_records.size();
 }
 
-std::set<uint_t> TableBase::free_rows_set() const {
+std::set<uint_t> TableBase::empty_records_set() const {
     std::set<uint_t> set;
-    auto stack = m_free_rows;
+    auto stack = m_empty_records;
     while (!stack.empty()) {
         set.insert(stack.top());
         stack.pop();
@@ -233,12 +232,12 @@ std::set<uint_t> TableBase::free_rows_set() const {
     return set;
 }
 
-TableBase::Loc::Loc(uint_t irank, uint_t irow) : m_irank(irank), m_irow(irow){
+TableBase::Loc::Loc(uint_t irank, uint_t irec) : m_irank(irank), m_irec(irec){
 #ifndef NDEBUG
     mpi::bcast(irank);
-    mpi::bcast(irow);
+    mpi::bcast(irec);
     DEBUG_ASSERT_EQ(m_irank, irank, "rank index in TableBase::Loc should be consistent across all ranks");
-    DEBUG_ASSERT_EQ(m_irow, irow, "row index in TableBase::Loc should be consistent across all ranks");
+    DEBUG_ASSERT_EQ(m_irec, irec, "record index in TableBase::Loc should be consistent across all ranks");
 #endif
 }
 
@@ -251,7 +250,7 @@ bool TableBase::Loc::is_mine() const {
 }
 
 bool TableBase::Loc::operator==(const TableBase::Loc &other) {
-    return m_irank==other.m_irank and m_irow==other.m_irow;
+    return m_irank==other.m_irank and m_irec == other.m_irec;
 }
 
 bool TableBase::Loc::operator!=(const TableBase::Loc &other) {

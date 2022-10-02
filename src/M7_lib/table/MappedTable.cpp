@@ -4,10 +4,7 @@
 
 #include "MappedTable.h"
 
-MappedTableBase::MappedTableBase(uint_t nbucket, uint_t remap_nlookup, double remap_ratio) :
-    m_buckets(nbucket?nbucket:c_default_nbucket),
-    m_remap_nlookup(remap_nlookup?remap_nlookup:c_default_remap_nlookup),
-    m_remap_ratio(remap_ratio!=0.0?remap_ratio:c_default_remap_ratio){}
+MappedTableBase::MappedTableBase(MappedTableOptions opts) : m_opts(opts) {}
 
 MappedTableBase &MappedTableBase::operator=(const MappedTableBase &other) {
     if (this==&other) return *this;
@@ -17,16 +14,15 @@ MappedTableBase &MappedTableBase::operator=(const MappedTableBase &other) {
     return *this;
 }
 
-MappedTableBase::MappedTableBase(const MappedTableBase &other) :
-        MappedTableBase(other.nbucket(), other.m_remap_nlookup, other.m_remap_ratio){
+MappedTableBase::MappedTableBase(const MappedTableBase &other) : MappedTableBase(other.m_opts){
     m_buckets = other.m_buckets;
 }
 
 bool MappedTableBase::operator==(const MappedTableBase &other) const {
     if (this==&other) return true;
     if (nbucket()!=other.nbucket()) return false;
-    if (m_remap_nlookup!=other.m_remap_nlookup) return false;
-    if (m_remap_ratio!=other.m_remap_ratio) return false;
+    if (m_opts.m_remap_ratio!=other.m_opts.m_remap_ratio) return false;
+    if (m_opts.m_remap_nlookup!=other.m_opts.m_remap_nlookup) return false;
     if (m_buckets!=other.m_buckets) return false;
     return true;
 }
@@ -48,11 +44,11 @@ void MappedTableBase::clear_map() {
 }
 
 bool MappedTableBase::remap_due() const {
-    return (m_nlookup_total >= m_remap_nlookup) &&
-           (double(m_nskip_total) / double(m_nlookup_total)) > m_remap_ratio;
+    return (m_nlookup_total >= m_opts.m_remap_nlookup) &&
+        (double(m_nskip_total) / double(m_nlookup_total)) > m_opts.m_remap_ratio;
 }
 
-bool MappedTableBase::all_nonzero_rows_mapped(const TableBase &source) const {
+bool MappedTableBase::all_nonzero_records_mapped(const TableBase &source) const {
     // make a set out of all bucketed indices
     std::set<uint_t> set;
     for (const auto& bucket: m_buckets){
@@ -65,8 +61,3 @@ bool MappedTableBase::all_nonzero_rows_mapped(const TableBase &source) const {
     }
     return true;
 }
-
-
-constexpr uint_t MappedTableBase::c_default_nbucket;
-constexpr double MappedTableBase::c_default_remap_ratio;
-constexpr uint_t MappedTableBase::c_default_remap_nlookup;

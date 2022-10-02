@@ -168,11 +168,11 @@ TEST(LocalExtremalRows, WithClearedRows) {
     using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {{}});
     setup(table);
-    ASSERT_EQ(table.nrow_nonzero(), 9);
+    ASSERT_EQ(table.nrecord_nonempty(), 9);
     table.clear(2); // -2
-    ASSERT_EQ(table.nrow_nonzero(), 8);
+    ASSERT_EQ(table.nrecord_nonempty(), 8);
     table.clear(7); // -7
-    ASSERT_EQ(table.nrow_nonzero(), 7);
+    ASSERT_EQ(table.nrecord_nonempty(), 7);
     auto &row = table.m_row;
     LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
     lxv.find(c_nfind);

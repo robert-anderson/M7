@@ -121,9 +121,6 @@ public:
      */
     wf_t norm_average_weight(const uint_t& icycle, const uint_t& ipart) const;
 
-    const WalkerTableRow& row() const {
-        return m_all.m_row;
-    }
 };
 
 /**

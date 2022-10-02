@@ -1,9 +1,11 @@
 target_sources(M7_lib
     PRIVATE
         Communicator.h
+        DistributedTable.h
         Distribution.cpp
         Distribution.h
         Redistributor.cpp
         Redistributor.h
+        SendRecv.h
         SharedRows.h
         )

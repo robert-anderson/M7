@@ -7,16 +7,14 @@
 
 #include "MappedTable.h"
 
-template<typename row_t, bool mapped=0>
+template<typename row_t, typename table_impl_t>
 class BufferedTableArray {
-public:
-    typedef typename std::conditional<mapped, MappedTable<row_t>, Table<row_t>>::type table_t;
-private:
+    static_assert(std::is_base_of<Table<row_t>, table_impl_t>::value, "Template args incompatible");
     Buffer m_buffer;
-    v_t<table_t> m_tables;
+    v_t<table_impl_t> m_tables;
 
     uint_t row_size() const {
-        return static_cast<const TableBase &>(m_tables[0]).row_size();
+        return static_cast<const TableBase&>(m_tables[0]).record_size();
     }
 
     uint_t window_size() const {
@@ -24,9 +22,10 @@ private:
     }
 
 public:
+    typedef table_impl_t table_t;
 
     uint_t nrow_per_table() const {
-        return static_cast<const TableBase &>(m_tables[0]).nrow();
+        return static_cast<const TableBase&>(m_tables[0]).nrecord();
     }
 
     buf_t *begin() {
@@ -45,8 +44,7 @@ public:
         return (*this)[0].bw_size();
     }
 
-    BufferedTableArray(str_t name, uint_t ntable, const table_t& table):
-            m_buffer(name, ntable) {
+    BufferedTableArray(uint_t ntable, const table_t& table): m_buffer(ntable) {
         m_tables.reserve(ntable);
         for (uint_t itable = 0ul; itable < ntable; ++itable) {
             m_tables.emplace_back(table);
@@ -54,8 +52,8 @@ public:
         }
     }
 
-    BufferedTableArray(const BufferedTableArray<table_t> &other) :
-            m_buffer(other.m_buffer.m_name, other.ntable(), 0) {
+    BufferedTableArray(const BufferedTableArray<row_t, table_t> &other) :
+            m_buffer(other.m_buffer.m_name, other.ntable()) {
         m_tables.reserve(other.ntable());
         for (uint_t itable = 0ul; itable < other.ntable(); ++itable) {
             m_tables.emplace_back(other.m_tables[itable]);
@@ -64,13 +62,13 @@ public:
     }
 
 
-    BufferedTableArray& operator=(const BufferedTableArray<row_t, mapped> &other) {
+    BufferedTableArray& operator=(const BufferedTableArray<row_t, table_t> &other) {
         m_buffer.resize(other.m_buffer.size());
         for (uint_t itable = 0ul; itable < other.ntable(); ++itable) {
             auto& this_table = m_tables[itable];
             auto& other_table = other.m_tables[itable];
             this_table.clear();
-            this_table.push_back(other_table.m_nrow);
+            this_table.push_back(other_table.m_nrecord);
             this_table.m_bw = other_table.m_bw;
         }
         return *this;
@@ -127,11 +125,16 @@ public:
         }
         return tmp;
     }
-
-    str_t name() const {
-        if (m_buffer.size()) return m_buffer.m_name;
-        return "";
-    }
+//
+//    str_t name() const {
+//        return m_buffer.m_name;
+//    }
 };
+
+
+namespace buffered {
+    template <typename row_t> using Tables = BufferedTableArray<row_t, ::Table<row_t>>;
+    template <typename row_t> using MappedTables = BufferedTableArray<row_t, ::MappedTable<row_t>>;
+}
 
 #endif //M7_BUFFEREDTABLEARRAY_H

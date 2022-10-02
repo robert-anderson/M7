@@ -41,22 +41,31 @@ struct Table : TableBase {
         str_t tmp = m_row.field_names_string();
         if (!m_hwm) return tmp;
         const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
-        auto row = m_row;
         for (uint_t iirow = 0ul; iirow < n; ++iirow) {
             auto irow = ordering ? (*ordering)[iirow] : iirow;
-            row.jump(irow);
-            tmp += std::to_string(irow) + ". " + row.to_string() + "\n";
+            m_row.jump(irow);
+            tmp += std::to_string(irow) + ". " + m_row.to_string() + "\n";
         }
         DEBUG_ASSERT_TRUE(row.in_range(), "row is out of range");
         return tmp;
     }
 
+    /**
+     * set the table pointer of the given row to this table
+     */
+    void associate(row_t& row) {
+        static_cast<Row&>(row).m_table = this;
+    }
+
+    bool associated(const row_t& row) const {
+        return static_cast<Row&>(row).m_table == this;
+    }
+
 private:
     uint_t nrow_to_write() const {
-        auto row = m_row;
         uint_t n = 0ul;
-        for (row.restart(); row.in_range(); row.step()) {
-            n += !static_cast<const Row&>(row).is_h5_write_exempt();
+        for (m_row.restart(); m_row.in_range(); m_row.step()) {
+            n += !static_cast<const Row&>(m_row).is_h5_write_exempt();
         }
         return n;
     }
@@ -76,10 +85,6 @@ public:
         RowHdf5Reader<row_t>(m_row, parent, name).read();
     }
 
-private:
-    Row &base_row() {
-        return static_cast<Row &>(m_row);
-    }
 };
 
 

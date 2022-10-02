@@ -120,7 +120,7 @@ TEST(MappedTable, Remap) {
     // remap still shouldn't be due since there were no skips
     ASSERT_FALSE(table.remap_due());
 
-    const auto nitem = table.nrow_nonzero();
+    const auto nitem = table.nrecord_nonempty();
     ASSERT_EQ(nitem, 20);
     const uint_t nbucket = nbucket_init * (ratio / remap_ratio) * (1.0 + table.get_expansion_factor());
     ASSERT_EQ(nbucket, table.nbucket());

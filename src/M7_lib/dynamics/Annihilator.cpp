@@ -4,24 +4,6 @@
 
 #include "Annihilator.h"
 
-DstFinder::DstFinder(Wavefunction &wf, SpawnTableRow &block_start_row) :
-        m_wf(wf), m_block_start_row(block_start_row) {}
-
-bool DstFinder::find() {
-    const auto &recv_row = m_block_start_row;
-    const auto &store_row = m_wf.m_store.m_row;
-    auto irow_dst = *m_wf.m_store[recv_row.m_dst_mbf];
-    if (irow_dst != ~0ul) {
-        store_row.jump(irow_dst);
-        m_deterministic = store_row.m_deterministic.get(m_wf.iroot_part(recv_row.m_ipart_dst));
-        return true;
-    } else {
-        store_row.select_null();
-        m_deterministic = false;
-        return false;
-    }
-}
-
 comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
     if (m_rdms) {
         return [&](const uint_t &irow1, const uint_t &irow2) {
@@ -52,15 +34,21 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
 Annihilator::Annihilator(Wavefunction &wf, const Propagator &prop, const References &refs,
                          Rdms &rdms, const uint_t &icycle, wf_comp_t nadd) :
         m_wf(wf), m_prop(prop), m_refs(refs), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
-        m_work_row1(wf.m_comm.recv().m_row), m_work_row2(wf.m_comm.recv().m_row),
-        m_sort_cmp_fn(make_sort_cmp_fn()) {
-    REQUIRE_TRUE_ALL(bool(m_rdms)==wf.m_comm.recv().m_row.m_send_parents,
+        m_work_row1(wf.m_send_recv.m_row), m_work_row2(wf.m_send_recv.m_row),
+        m_dst_walker(m_wf.m_store.m_row), m_sort_cmp_fn(make_sort_cmp_fn()) {
+    REQUIRE_TRUE_ALL(bool(m_rdms)==m_work_row1.m_send_parents,
                      "cannot sample RDMs through annihilation unless parent MBFs are communicated");
 }
 
 void Annihilator::sort_recv() {
     LambdaQuickSorter qs(m_sort_cmp_fn);
     qs.reorder_sort(m_wf.recv());
+}
+
+Lookup Annihilator::lookup_dst(const SpawnTableRow& recv_row, bool& deterministic) {
+    auto res = m_wf.m_store.lookup(recv_row.m_dst_mbf, m_dst_walker);
+    deterministic = res && m_dst_walker.m_deterministic.get(m_wf.iroot_part(recv_row.m_ipart_dst));
+    return res;
 }
 
 void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
@@ -194,13 +182,8 @@ void Annihilator::loop_over_dst_mbfs() {
     auto &block_begin = m_work_row1;
     block_begin.restart();
 
-    /*
-     * we need to be able to lookup the dst in the main table. these variables are for
-     */
-    DstFinder dst_finder(m_wf, block_begin);
-
+    bool dst_deterministic = false;
     wf_t total_delta = 0.0;
-    dst_finder.find();
 
     auto &current = m_work_row2;
     for (current.restart();; current.step()) {
@@ -210,7 +193,7 @@ void Annihilator::loop_over_dst_mbfs() {
              * different (dst_mbf, ipart_dst) pair. In either case, we have reached the end of a block of the major
              * sorting field, so we must handle the block just finished
              */
-            handle_dst_block(block_begin, current, total_delta, m_wf.m_store.m_row);
+            handle_dst_block(block_begin, current, total_delta, m_dst_walker);
             DEBUG_ASSERT_EQ(block_begin.index(), current.index(),
                             "block_begin should have been pointed to the beginning of the next block");
             /*
@@ -226,7 +209,7 @@ void Annihilator::loop_over_dst_mbfs() {
             /*
              * and look it up in the wavefunction store
              */
-            dst_finder.find();
+            lookup_dst(block_begin, dst_deterministic);
         } else {
             if (current.m_send_parents) {
                 DEBUG_ASSERT_NE(current.m_dst_mbf, current.m_src_mbf,
@@ -235,7 +218,7 @@ void Annihilator::loop_over_dst_mbfs() {
             DEBUG_ASSERT_EQ(current.m_dst_mbf, block_begin.m_dst_mbf, "dst MBFs should be the same");
             DEBUG_ASSERT_EQ(current.m_ipart_dst, block_begin.m_ipart_dst, "dst iparts should be the same");
         }
-        if (!dst_finder.m_deterministic || !current.m_src_deterministic) {
+        if (!dst_deterministic || !current.m_src_deterministic) {
             // this is not a determ->determ connection, so include it
             total_delta += current.m_delta_weight;
         }

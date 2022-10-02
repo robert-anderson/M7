@@ -26,10 +26,10 @@
  * The wavefunction row WalkerTableRow contains multidimensional fields whose elements
  * are referred to as "parts".
  *
- * This m_store is often called the "main walker list", and the CommunicatingPair tables
+ * This m_store is often called the "main walker list", and the SendRecv tables
  * are the called the "spawning lists"
  */
-struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
+struct Wavefunction : communicator::BasicSend<WalkerTableRow, SpawnTableRow>, Archivable {
     typedef GlobalExtremalRows<WalkerTableRow, wf_t, c_ndim_wf> weights_gxr_t;
 
     const conf::Document &m_opts;

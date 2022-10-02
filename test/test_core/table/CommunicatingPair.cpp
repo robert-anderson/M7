@@ -8,15 +8,15 @@
 
 TEST(CommunicatingPair, CommunicateSingleElement) {
     typedef SingleFieldRow<field::Number<uint_t>> row_t;
-    CommunicatingPair<row_t> comm_pair("Test pair", {{}}, {mpi::nrank(), 1.0});
+    SendRecv<row_t> comm_pair("Test pair", {{}}, {mpi::nrank(), 1.0});
     // after resize:
     const uint_t bw_size = comm_pair.row_size();
     const uint_t hash_lo = 123, hash_hi = 789;
 
     comm_pair.resize(1ul, 0.0);
 
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) ASSERT_EQ(comm_pair.send(irank).nrow(), 1ul);
-    ASSERT_EQ(comm_pair.recv().nrow(), mpi::nrank());
+    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) ASSERT_EQ(comm_pair.send(irank).nrecord(), 1ul);
+    ASSERT_EQ(comm_pair.recv().nrecord(), mpi::nrank());
 
     for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
         auto& row = comm_pair.send(irank).m_row;
@@ -45,7 +45,7 @@ TEST(CommunicatingPair, CommunicateVectors){
     typedef SingleFieldRow<field::Numbers<uint_t, 1>> row_t;
     const double expansion_factor = 0.5;
     const uint_t nelement_vector = 13;
-    CommunicatingPair<row_t> comm_pair("Test pair", {{nelement_vector}}, {mpi::nrank(), expansion_factor});
+    SendRecv<row_t> comm_pair("Test pair", {{nelement_vector}}, {mpi::nrank(), expansion_factor});
     // after resize:
     const uint_t bw_size = comm_pair.row_size();// * (1.0+expansion_factor);
     ASSERT_EQ(bw_size, nelement_vector*sizeof(uint_t));
@@ -89,7 +89,7 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
     const uint_t nelement_vector = 5;
     const uint_t nrow_rank_lo = 6, nrow_rank_hi = 15;
     const uint_t nrow_this_rank = hash::in_range(mpi::irank(), nrow_rank_lo, nrow_rank_hi);
-    CommunicatingPair<row_t> comm_pair("Test pair", {{nelement_vector}}, {nrow_this_rank, expansion_factor});
+    SendRecv<row_t> comm_pair("Test pair", {{nelement_vector}}, {nrow_this_rank, expansion_factor});
     const uint_t hash_lo = 123, hash_hi = 789;
 
     auto nrow_max = mpi::all_max(nrow_this_rank);

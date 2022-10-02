@@ -17,13 +17,13 @@ Buffer::Window::Window(Buffer *buffer, uint_t row_size): Window(row_size) {
 }
 
 Buffer::Window &Buffer::Window::operator=(const Buffer::Window &other) {
-    DEBUG_ASSERT_EQ(other.m_row_size, m_row_size, "can't assign to incompatible window");
+    DEBUG_ASSERT_EQ(other.m_record_size, m_record_size, "can't assign to incompatible window");
     DEBUG_ASSERT_FALSE(m_begin==nullptr, "this is an unallocated buffer window");
     DEBUG_ASSERT_FALSE(other.m_begin==nullptr, "can't assign to an unallocated buffer window");
     auto nbyte = std::min(other.m_size, m_size);
     std::memcpy(m_begin, other.m_begin, nbyte);
     m_size = nbyte;
-    m_nrow = m_size/m_row_size;
+    m_nrecord = m_size / m_record_size;
     return *this;
 }
 
@@ -36,7 +36,7 @@ void Buffer::Window::move(buf_t *begin, uint_t new_size) {
     if (m_begin) std::memmove(begin, m_begin, std::min(new_size, m_size));
     m_begin = begin;
     m_size = new_size;
-    m_nrow = m_size/m_row_size;
+    m_nrecord = m_size / m_record_size;
 }
 
 void Buffer::Window::resize(uint_t size, double factor) {

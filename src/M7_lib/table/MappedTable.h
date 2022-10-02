@@ -13,39 +13,25 @@
 
 #include "Table.h"
 
-struct LookupResult {
-    std::forward_list<uint_t> &m_bucket;
-    std::forward_list<uint_t>::iterator m_prev;
 
-    LookupResult(std::forward_list<uint_t> &bucket) :
-            m_bucket(bucket), m_prev(bucket.before_begin()) {}
-
-    operator bool() const {
-        return m_prev != m_bucket.end();
-    }
-
-    uint_t operator*() const {
-        if (!*this) return ~0ul;
-        return *std::next(m_prev);
-    }
+struct MappedTableOptions {
+    uint_t m_nbucket_init = 100;
+    double m_remap_ratio = 2.0;
+    uint_t m_remap_nlookup = 500;
 };
 
-
 struct MappedTableBase {
-    static constexpr uint_t c_default_nbucket = 100;
-    static constexpr double c_default_remap_ratio = 2.0;
-    static constexpr uint_t c_default_remap_nlookup = 500;
     /*
      * skips are counted to avoid having to loop over all buckets to count entries
      */
-    uint_t m_nskip_total = 0.0;
-    uint_t m_nlookup_total = 0.0;
+    mutable uint_t m_nskip_total = 0.0;
+    mutable uint_t m_nlookup_total = 0.0;
 
     v_t<std::forward_list<uint_t>> m_buckets;
-    const uint_t m_remap_nlookup;
-    const double m_remap_ratio;
 
-    MappedTableBase(uint_t nbucket = 0ul, uint_t remap_nlookup = 0ul, double remap_ratio = 0.0);
+    MappedTableOptions m_opts;
+
+    MappedTableBase(MappedTableOptions opts);
 
     MappedTableBase& operator=(const MappedTableBase& other);
 
@@ -62,7 +48,7 @@ struct MappedTableBase {
      *  (nitem/nbucket - 1) / 2
      * this is the remap ratio, so invert this estimate to obtain the required number of buckets
      * @param nitem
-     *  number of items (nonzero table rows) on which to base the capacity estimation
+     *  number of items (nonzero table records) on which to base the capacity estimation
      * @param ratio
      *  the maximum acceptable ratio of skips to lookups
      * @return
@@ -79,7 +65,7 @@ struct MappedTableBase {
      */
     void clear_map();
     /**
-     * debugging only - checks that all nonzero rows below the hwm of the source are mapped in the current m_buckets.
+     * debugging only - checks that all nonzero records below the hwm of the source are mapped in the current m_buckets.
      * Defined here to reduce bloat of the templated class MappedTable
      * @param source
      *  base class cast of the mapped table
@@ -95,35 +81,47 @@ struct MappedTableBase {
      */
     bool remap_due() const;
     /**
-     * debugging only - checks that all nonzero rows below the hwm of the source are mapped in the current m_buckets.
+     * debugging only - checks that all nonzero records below the hwm of the source are mapped in the current m_buckets.
      * Defined here to reduce bloat of the templated class MappedTable
      * @param source
      *  base class cast of the mapped table
      * @return
      *  true if table passes verification
      */
-    bool all_nonzero_rows_mapped(const TableBase &source) const;
+    bool all_nonzero_records_mapped(const TableBase &source) const;
 
+};
+
+struct Lookup {
+    const std::forward_list<uint_t>& m_bucket;
+    std::forward_list<uint_t>::const_iterator m_prev;
+    operator bool () const {
+        return m_prev==m_bucket.cend();
+    }
+
+    uint_t irecord() const {
+        if (!*this) return ~0ul;
+        auto it = m_prev;
+        ++it;
+        return *it;
+    }
 };
 
 
 template<typename row_t>
 struct MappedTable : Table<row_t>, MappedTableBase {
-    /*
+    /**
      * won't compile unless the row defines a key_field_t;
      */
     typedef typename KeyField<row_t>::type key_field_t;
-    row_t m_lookup_row;
-    row_t m_insert_row;
 
-    using Table<row_t>::m_row;
     using Table<row_t>::to_string;
+    using Table<row_t>::m_row;
     using TableBase::m_hwm;
     using TableBase::m_bw;
 
     MappedTable(const row_t &row, uint_t nbucket = 0ul, uint_t remap_nlookup = 0ul, double remap_ratio = 0.0) :
-            Table<row_t>(row), MappedTableBase(nbucket, remap_nlookup, remap_ratio),
-            m_lookup_row(m_row), m_insert_row(m_row) {}
+            Table<row_t>(row), MappedTableBase(nbucket, remap_nlookup, remap_ratio){}
 
     MappedTable& operator=(const MappedTable& other) {
         MappedTableBase::operator=(other);
@@ -142,29 +140,40 @@ struct MappedTable : Table<row_t>, MappedTableBase {
      * attempt to find the element identified by key in the hash map.
      * @param key
      *  key to lookup
+     * @return
+     *  result object
      */
-    LookupResult lookup(const key_field_t &key, v_t<std::forward_list<uint_t>>& buckets) {
+    Lookup lookup(const key_field_t &key, const v_t<std::forward_list<uint_t>>& buckets, const row_t& row) const {
         m_nlookup_total++;
-        auto nbucket = buckets.size();
-        LookupResult res(buckets[key.hash() % nbucket]);
-        auto current = res.m_bucket.before_begin();
-        for (auto next = std::next(current); next != res.m_bucket.end(); next++) {
-            m_lookup_row.jump(*next);
-            if (KeyField<row_t>::get(m_lookup_row) == key) return res;
+        const auto nbucket = buckets.size();
+        auto& bucket = buckets[key.hash() % nbucket];
+        Lookup res = {bucket, bucket.cbefore_begin()};
+        for (auto current = std::next(res.m_prev); current != bucket.cend(); current++) {
+            row.jump(*current);
+            if (KeyField<row_t>::get(row) == key) return res;
             res.m_prev++;
             m_nskip_total++;
         }
-        res.m_prev = res.m_bucket.end();
+        /*
+         * key not found in map
+         */
+        static_cast<const Row&>(row).select_null();
+        res.m_prev = bucket.cend();
         return res;
     }
 
-    LookupResult operator[](const key_field_t &key) {
-        return lookup(key, m_buckets);
+    Lookup lookup(const key_field_t& key, const row_t& row) const {
+        return lookup(key, m_buckets, row);
     }
 
-    // TODO: work on const correctness
-    LookupResult operator[](const key_field_t &key) const {
-        return const_cast<MappedTable&>(*this)[key];
+    const row_t& lookup(const key_field_t& key) const {
+        lookup(key, m_row);
+        return m_row;
+    }
+
+    row_t& lookup(const key_field_t& key) {
+        lookup(key, m_row);
+        return m_row;
     }
 
 private:
@@ -173,13 +182,13 @@ private:
      * @param key
      *  key to lookup
      */
-    LookupResult uncounted_lookup(const key_field_t &key) {
-        auto nlookup_total = m_nlookup_total;
-        auto nskip_total = m_nskip_total;
-        auto lookup = (*this)[key];
+    Lookup uncounted_lookup(const key_field_t &key, const row_t& row) {
+        const auto nlookup_total = m_nlookup_total;
+        const auto nskip_total = m_nskip_total;
+        const auto res = lookup(key, row);
         m_nlookup_total = nlookup_total;
         m_nskip_total = nskip_total;
-        return lookup;
+        return res;
     }
 
 public:
@@ -188,54 +197,63 @@ public:
         clear_map();
     }
 
-    void clear_row(const row_t& row) {
-        DEBUG_ASSERT_EQ(static_cast<const Row&>(row).m_table, this, "row does not belong to this table");
-        auto lookup = (*this)[KeyField<row_t>::get(row)];
-        DEBUG_ASSERT_TRUE(lookup, "cannot erase: row not found in hash table");
+    void clear(row_t& row) {
+        DEBUG_ASSERT_TRUE(associated(row), "row object not associated with this table");
+        auto lookup = this->lookup(KeyField<row_t>::get(row), row);
         erase(lookup);
     }
 
-    void clear(uint_t irow) override {
-        m_row.jump(irow);
-        clear_row(m_row);
-    }
-
     /**
-     * remove the row pointed to by lookup by:
-     *  1. physically clearing the row by zeroing its slice of the buffer,
-     *  2. adding its index to the free rows stack
+     * remove the record pointed to by row by:
+     *  1. physically clearing by zeroing its record in the buffer,
+     *  2. adding its index to the empty records stack
      *  3. removing its node in the associated bucket
      * @param lookup
-     *  points to the bucket element to be deleted
+     *  points to the bucket and element within it to be deleted
      */
-    void erase(LookupResult &lookup) {
-        DEBUG_ASSERT_TRUE(lookup, "cannot erase from failed lookup");
-        TableBase::clear(*lookup);
-        lookup.m_bucket.erase_after(lookup.m_prev);
-        // put into "not found" state:
-        lookup.m_prev = lookup.m_bucket.end();
+    void erase(Lookup lookup) {
+        DEBUG_ASSERT_TRUE(lookup, "cannot erase non-existent record");
+        /*
+         * do steps 1 and 2.
+         */
+        TableBase::clear(lookup.irecord());
+        /*
+         * for step 3 we must convert to non-const
+         */
+        auto& bucket = const_cast<std::forward_list<uint_t>&>(lookup.m_bucket);
+        bucket.erase_after(lookup.m_prev);
     }
     /**
      * insert into the hash table a new mapped element defined by the key arg
      * @param key
      *  hash table key object
-     * @return
-     *  row index of the key
+     * @param row
+     *  row object which points to the newly inserted record upon return of the method
      */
-    uint_t insert(const key_field_t &key) {
+    void insert(const key_field_t &key, row_t& row) {
         DEBUG_ASSERT_FALSE(uncounted_lookup(key), "cannot insert when the key already exists in the table");
-        auto irow = TableBase::get_free_row();
+        DEBUG_ASSERT_TRUE(Table<row_t>::associated(row), "row object not associated with this table");
+        auto irow = TableBase::get_empty_record();
         auto &bucket = m_buckets[key.hash() % nbucket()];
         bucket.insert_after(bucket.before_begin(), irow);
-        m_row.jump(irow);
-        m_row.key_field() = key;
-        return irow;
+        row.jump(irow);
+        row.key_field() = key;
     }
-    uint_t insert(const row_t& row){
+
+    row_t& insert(const key_field_t &key) {
+        insert(key, m_row);
+        return m_row;
+    }
+
+    void insert(const row_t& src, row_t& row) {
         auto& key = KeyField<row_t>::get(row);
-        auto irow = insert(key);
-        m_row.copy_in(row);
-        return irow;
+        insert(key, row);
+        row.copy_in(src);
+    }
+
+    row_t& insert(const row_t& src) {
+        insert(src, m_row);
+        return m_row;
     }
 
     /**
@@ -247,11 +265,11 @@ public:
      */
     void post_insert_buckets(uint_t irow, v_t<std::forward_list<uint_t>> &buckets) {
         DEBUG_ASSERT_FALSE(TableBase::is_cleared(irow), "cannot map to a cleared row");
-        m_insert_row.jump(irow);
+        m_row.jump(irow);
         // row mustn't have already been added
         DEBUG_ASSERT_FALSE(lookup(KeyField<row_t>::get(m_insert_row), buckets),
                            "cannot map to a row which is already in the hash table");
-        auto &bucket = buckets[KeyField<row_t>::get(m_insert_row).hash() % buckets.size()];
+        auto &bucket = buckets[KeyField<row_t>::get(m_row).hash() % buckets.size()];
         bucket.insert_after(bucket.before_begin(), irow);
     }
     /**
@@ -266,14 +284,14 @@ public:
      * construct a new vector of buckets with a different size
      */
     void remap() {
-        DEBUG_ASSERT_TRUE(all_nonzero_rows_mapped(*this), "mapping is inconsistent with table row content");
-        uint_t nbucket_new = nbucket() * skip_lookup_ratio()/m_remap_ratio;
+        DEBUG_ASSERT_TRUE(all_nonzero_records_mapped(*this), "mapping is inconsistent with table row content");
+        uint_t nbucket_new = nbucket() * skip_lookup_ratio()/m_opts.m_remap_ratio;
         // use the same expansion factor as for the Table buffer
         nbucket_new *= 1.0 + this->m_bw.get_expansion_factor();
         if (!TableBase::name().empty()) {
             logging::info_("remapping hash table for \"{}\"", TableBase::name());
             logging::info_("current ratio of skips to total lookups ({}) exceeds set limit ({})",
-                       skip_lookup_ratio(), m_remap_ratio);
+                       skip_lookup_ratio(), m_opts.m_remap_ratio);
             logging::info_("replacing current bucket vector of size {} with a new one of size {}",
                        nbucket(), nbucket_new);
         }
@@ -301,7 +319,8 @@ public:
     }
 
     void load(const hdf5::NodeReader &parent, str_t name) override {
-        RowHdf5Reader<row_t> row_reader(m_row, parent, name);
+        auto& row = m_row;
+        RowHdf5Reader<row_t> row_reader(row, parent, name);
         uint_t iitem = 0ul;
         clear();
         TableBase::push_back(row_reader.m_nitem);
