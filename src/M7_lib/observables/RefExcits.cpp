@@ -12,11 +12,6 @@ RefExcitsOneExsig::RefExcitsOneExsig(uint_t exsig, uint_t nroot) :
                 MaeRow{exsig, nroot}),
         m_working_inds(exsig) {}
 
-const MaeRow& RefExcitsOneExsig::lookup(const conn::FrmOnv& key) const {
-    m_working_inds = key;
-    return MappedTable<MaeRow>::lookup(m_working_inds);
-}
-
 MaeRow& RefExcitsOneExsig::lookup(const conn::FrmOnv& key) {
     m_working_inds = key;
     return MappedTable<MaeRow>::lookup(m_working_inds);

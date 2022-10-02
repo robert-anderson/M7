@@ -25,8 +25,6 @@ protected:
 public:
     RefExcitsOneExsig(uint_t exsig, uint_t nroot);
 
-    const MaeRow& lookup(const conn::FrmOnv& key) const;
-
     MaeRow& lookup(const conn::FrmOnv& key);
 
     MaeRow& insert(const conn::FrmOnv& key);

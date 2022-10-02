@@ -15,7 +15,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, FciInitOptions opts):
 
     m_mbf_order_table.resize(iters.niter_single());
     buffered::Mbf mbf(h.m_basis);
-    auto setup_fn = [&](){ m_mbf_order_table.insert(mbf);};
+    auto setup_fn = [&](){m_mbf_order_table.insert(mbf);};
     iters.m_single->loop(mbf, setup_fn);
 
     conn::Mbf conn(mbf);

@@ -88,7 +88,7 @@ struct Lookup {
     const std::forward_list<uint_t>& m_bucket;
     std::forward_list<uint_t>::const_iterator m_prev;
     operator bool () const {
-        return m_prev==m_bucket.cend();
+        return m_prev!=m_bucket.cend();
     }
 
     uint_t irecord() const {
@@ -112,7 +112,13 @@ struct MappedTable : Table<row_t>, MappedTableBase {
     using TableBase::m_hwm;
     using TableBase::m_bw;
 
-    MappedTable(const row_t &row) : Table<row_t>(row), MappedTableBase({}){}
+    row_t m_lookup_row;
+    row_t m_insert_row;
+    row_t m_erase_row;
+
+    MappedTable(const row_t &row) :
+        Table<row_t>(row), MappedTableBase({}),
+        m_lookup_row(m_row), m_insert_row(m_row), m_erase_row(m_row){}
 
     MappedTable& operator=(const MappedTable& other) {
         MappedTableBase::operator=(other);
@@ -128,6 +134,8 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         if (!MappedTableBase::operator==(other)) return false;
         return TableBase::operator==(other);
     }
+
+private:
     /**
      * attempt to find the element identified by key in the hash map.
      * @param key
@@ -154,18 +162,19 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         return res;
     }
 
+public:
     Lookup lookup(const key_field_t& key, const row_t& row) const {
         return lookup(key, m_buckets, row);
     }
 
     const row_t& lookup(const key_field_t& key) const {
-        lookup(key, m_row);
-        return m_row;
+        lookup(key, m_lookup_row);
+        return m_lookup_row;
     }
 
     row_t& lookup(const key_field_t& key) {
-        lookup(key, m_row);
-        return m_row;
+        lookup(key, m_lookup_row);
+        return m_lookup_row;
     }
 
 private:
@@ -221,7 +230,7 @@ public:
     }
 
     void erase(const key_field_t &key) {
-        erase(lookup(key, m_row));
+        erase(lookup(key, m_erase_row));
     }
 
     /**
@@ -242,8 +251,8 @@ public:
     }
 
     row_t& insert(const key_field_t &key) {
-        insert(key, m_row);
-        return m_row;
+        insert(key, m_insert_row);
+        return m_insert_row;
     }
 
     void insert(const row_t& src, row_t& row) {
@@ -253,8 +262,8 @@ public:
     }
 
     row_t& insert(const row_t& src) {
-        insert(src, m_row);
-        return m_row;
+        insert(src, m_insert_row);
+        return m_insert_row;
     }
 
     /**

@@ -194,11 +194,11 @@ struct Wavefunction : communicator::BasicSend<WalkerTableRow, SpawnTableRow>, Ar
      *  i.e. the connection to the reference has a non-zero H matrix element
      * @return
      */
-    uint_t create_row_(uint_t icycle, const field::Mbf &mbf,
+    WalkerTableRow& create_row_(uint_t icycle, const field::Mbf &mbf,
                        const ham_comp_t &hdiag, const v_t<bool>& refconns);
 
 
-    uint_t create_row_(uint_t icycle, const field::Mbf &mbf,
+    WalkerTableRow& create_row_(uint_t icycle, const field::Mbf &mbf,
                        const ham_comp_t &hdiag, bool refconn) {
         return create_row_(icycle, mbf, hdiag, v_t<bool>(npart(), refconn));
     }

@@ -197,14 +197,13 @@ void Wavefunction::remove_row() {
     m_store.erase(m_store.m_row.m_mbf);
 }
 
-uint_t Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, const ham_comp_t& hdiag,
+WalkerTableRow& Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, const ham_comp_t& hdiag,
                                  const v_t<bool>& refconns) {
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
-    auto irow = m_store.insert(mbf);
+    auto& row = m_store.insert(mbf);
     m_delta_nocc_mbf.m_local++;
-    m_store.m_row.jump(irow);
     DEBUG_ASSERT_EQ(m_store.m_row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
     m_store.m_row.m_hdiag = hdiag;
     for (uint_t ipart=0ul; ipart < npart(); ++ipart)
@@ -220,7 +219,7 @@ uint_t Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, const ham_comp_t
         m_store.m_row.m_icycle_occ = icycle+1;
         m_store.m_row.m_average_weight = 0;
     }
-    return irow;
+    return row;
 }
 
 TableBase::Loc Wavefunction::create_row(uint_t icycle, const Mbf& mbf, const ham_comp_t& hdiag,
@@ -228,7 +227,7 @@ TableBase::Loc Wavefunction::create_row(uint_t icycle, const Mbf& mbf, const ham
     const uint_t irank = m_dist.irank(mbf);
     uint_t irow;
     if (mpi::i_am(irank)) {
-        irow = create_row_(icycle, mbf, hdiag, refconns);
+        irow = create_row_(icycle, mbf, hdiag, refconns).index();
     }
     mpi::bcast(irow, irank);
     return {irank, irow};
