@@ -90,7 +90,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
 }
 
 void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
-                                   const wf_t &total_delta, Walker &dst_row) {
+                                   const wf_t &total_delta, Walker &dst_walker) {
     DEBUG_ASSERT_FALSE(in_same_dst_block(block_begin, next_block_begin),
                        "start of block and start of next block should not be in the same block");
     DEBUG_ASSERT_LT(block_begin.index(), next_block_begin.index(),
@@ -99,7 +99,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
     /*
      * only consider RDM contributions if there are any RDMs being accumulated and the destination exists
      */
-    if (m_rdms && m_rdms.m_accum_epoch && dst_row.in_range()) {
+    if (m_rdms && m_rdms.m_accum_epoch && dst_walker.in_range()) {
         DEBUG_ASSERT_TRUE(block_begin.m_send_parents, "RDM sampling requires that parent MBFs are communicated");
         /*
          * store the original positions of the row objects in the recv table
@@ -113,7 +113,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
 
         for (current.jump(block_begin);; current.step()) {
             if (!in_same_src_block(current, block_begin)) {
-                handle_src_block(block_begin, dst_row);
+                handle_src_block(block_begin, dst_walker);
                 block_begin.jump(current);
                 /*
                  * the above call iterates block_begin through the contributions until the row index matches that of current
@@ -145,7 +145,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
         // contributions to unoccupied ONVs are allowed
         allow_initiation = block_begin.m_src_initiator;
     }
-    annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta, allow_initiation, dst_row);
+    annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta, allow_initiation, dst_walker);
     block_begin.jump(next_block_begin);
 }
 
@@ -185,6 +185,10 @@ void Annihilator::loop_over_dst_mbfs() {
     bool dst_deterministic = false;
     wf_t total_delta = 0.0;
 
+    /*
+     * set m_dst_walker to the record corresponding to the child walker if it exists
+     */
+    lookup_dst(block_begin, dst_deterministic);
     auto &current = m_work_row2;
     for (current.restart();; current.step()) {
         if (!in_same_dst_block(current, block_begin)) {

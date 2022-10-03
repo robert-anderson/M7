@@ -177,11 +177,11 @@ void Wavefunction::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
 }
 
 void Wavefunction::change_weight(Walker& walker, uint_t ipart, wf_t delta) {
-    set_weight(walker, ipart, m_store.m_row.m_weight[ipart] + delta);
+    set_weight(walker, ipart, walker.m_weight[ipart] + delta);
 }
 
 void Wavefunction::scale_weight(Walker& walker, uint_t ipart, double factor) {
-    set_weight(walker, ipart, factor * m_store.m_row.m_weight[ipart]);
+    set_weight(walker, ipart, factor * walker.m_weight[ipart]);
 }
 
 void Wavefunction::zero_weight(Walker& walker, uint_t ipart) {

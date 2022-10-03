@@ -30,8 +30,10 @@ ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explicit_hf_
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
     if (ref_loc.is_mine()) {
+        auto walker = wf.m_store.m_row;
+        walker.jump(ref_loc.m_irec);
         for (uint_t ipart = 0ul; ipart < wf.npart(); ++ipart)
-            wf.set_weight(ipart, wf_t(opts.m_wavefunction.m_nw_init));
+            wf.set_weight(walker, ipart, wf_t(opts.m_wavefunction.m_nw_init));
     }
 
     prop.m_shift.m_values = ref_energy+opts.m_shift.m_init;

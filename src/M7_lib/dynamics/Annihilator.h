@@ -134,11 +134,11 @@ public:
      *  first row of the next (dst_mbf, ipart_dst) block or past the end of the recv table
      * @param total_delta
      *  total change in the ipart_dst indexed weight element of dst_mbf due to the sum of all spawns
-     * @param dst_row
+     * @param dst_walker
      *  row in m_wf.m_store which stores the dst_mbf if found
      */
     void handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
-                          const wf_t &total_delta, Walker& dst_row);
+                          const wf_t &total_delta, Walker& dst_walker);
 
     void handle_src_block(Spawn &block_begin, Walker& dst_row);
 

@@ -256,7 +256,7 @@ public:
     }
 
     void insert(const row_t& src, row_t& row) {
-        auto& key = KeyField<row_t>::get(row);
+        auto& key = KeyField<row_t>::get(src);
         insert(key, row);
         row.copy_in(src);
     }

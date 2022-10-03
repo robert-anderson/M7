@@ -149,6 +149,7 @@ struct StatsTable : buffered::Table<row_t> {
             m_file(new std::ofstream(fname)), m_period(period) {
         write_header();
         buffered::Table<row_t>::push_back();
+        Table<row_t>::m_row.restart();
     }
 
     void commit() {

@@ -49,9 +49,9 @@ namespace shared_rows {
                 m_gather_send(name+" gather send", m_src.m_row),
                 m_gather_recv(name+" gather recv", m_src.m_row),
                 m_src_row(m_src.m_row), m_send_row(m_gather_send.m_row) {
-            m_all.m_row.restart();
             for (auto irow: irecs) add_(irow);
             full_update();
+            m_all.m_row.restart();
         }
 
         virtual ~Set() {}
