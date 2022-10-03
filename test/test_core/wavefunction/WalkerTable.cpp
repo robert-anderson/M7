@@ -7,7 +7,7 @@
 
 TEST(WalkerTable, Fields){
     sys::Basis basis(5, 7);
-    WalkerTable table(WalkerTableRow(basis, 1, 1, false));
+    WalkerTable table(WalkerRow(basis, 1, 1, false));
     auto& row = table.m_row;
 
     /**

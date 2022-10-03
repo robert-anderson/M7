@@ -12,7 +12,7 @@
 #include <M7_lib/field/Fields.h>
 
 
-struct WalkerTableRow : public Row {
+struct WalkerRow : public Row {
     const NdFormat<c_ndim_wf> m_wf_format;
     const NdFormat<c_ndim_root> m_root_format;
     field::Mbf m_mbf;
@@ -25,7 +25,7 @@ struct WalkerTableRow : public Row {
 
     field::Mbf &key_field();
 
-    WalkerTableRow(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool average_weights);
+    WalkerRow(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool average_weights);
 
     bool is_h5_write_exempt() const override;
 
@@ -71,6 +71,6 @@ struct OnvRow : public Row {
 };
 
 
-typedef MappedTable<WalkerTableRow> WalkerTable;
+typedef MappedTable<WalkerRow> WalkerTable;
 
 #endif //M7_WALKERTABLE_H

@@ -106,7 +106,7 @@ struct Maes {
      *     be added in a special "finalizing" loop over occupied MBFs. crucially, this is done *before* the
      *     instantaneous weight is summed into the average, since this was already done in the previous iteration.
      */
-    void make_average_contribs(WalkerTableRow &row, const References &refs, const uint_t &icycle);
+    void make_average_contribs(WalkerRow &row, const References &refs, const uint_t &icycle);
 
     void output(uint_t icycle, const Hamiltonian& ham, bool final=false);
 };

@@ -45,14 +45,14 @@ void Annihilator::sort_recv() {
     qs.reorder_sort(m_wf.recv());
 }
 
-Lookup Annihilator::lookup_dst(const SpawnTableRow& recv_row, bool& deterministic) {
+Lookup Annihilator::lookup_dst(const SpawnRow& recv_row, bool& deterministic) {
     auto res = m_wf.m_store.lookup(recv_row.m_dst_mbf, m_dst_walker);
     deterministic = res && m_dst_walker.m_deterministic.get(m_wf.iroot_part(recv_row.m_ipart_dst));
     return res;
 }
 
 void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
-                                 bool allow_initiation, WalkerTableRow &dst_row) {
+                                 bool allow_initiation, WalkerRow &dst_row) {
     if (m_nadd == 0.0) {
         DEBUG_ASSERT_TRUE(allow_initiation,
                           "initiator rules are turned off, every initiating annihilation should be allowed");
@@ -89,8 +89,8 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
     }
 }
 
-void Annihilator::handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &next_block_begin,
-                                   const wf_t &total_delta, WalkerTableRow &dst_row) {
+void Annihilator::handle_dst_block(SpawnRow &block_begin, SpawnRow &next_block_begin,
+                                   const wf_t &total_delta, WalkerRow &dst_row) {
     DEBUG_ASSERT_FALSE(in_same_dst_block(block_begin, next_block_begin),
                        "start of block and start of next block should not be in the same block");
     DEBUG_ASSERT_LT(block_begin.index(), next_block_begin.index(),
@@ -149,7 +149,7 @@ void Annihilator::handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &ne
     block_begin.jump(next_block_begin);
 }
 
-void Annihilator::handle_src_block(SpawnTableRow &block_begin, WalkerTableRow &dst_row) {
+void Annihilator::handle_src_block(SpawnRow &block_begin, WalkerRow &dst_row) {
     DEBUG_ASSERT_TRUE(m_rdms.m_accum_epoch, "shouldn't be sampling RDMs yet");
     DEBUG_ASSERT_EQ(block_begin.m_dst_mbf, dst_row.m_mbf, "wrong dst_row found");
 

@@ -19,13 +19,13 @@ struct DstLookup {
      */
     Wavefunction& m_wf;
     /**
-     * true if destination Walker is in the deterministic subspace
+     * true if destination WalkerRow is in the deterministic subspace
      */
     bool m_deterministic = false;
     /**
-     * row object for pointing to the destination Walker record (or null if not found)
+     * row object for pointing to the destination WalkerRow record (or null if not found)
      */
-    WalkerTableRow m_row;
+    WalkerRow m_row;
     DstLookup(Wavefunction& wf);
 
     /**
@@ -33,7 +33,7 @@ struct DstLookup {
      *  row pointing to the first record in the current block in the recv table
      * @return
      */
-    Lookup lookup(const SpawnTableRow &recv_row);
+    Lookup lookup(const SpawnRow &recv_row);
 };
 
 
@@ -51,9 +51,9 @@ struct Annihilator {
     const uint_t& m_icycle;
 
 private:
-    SpawnTableRow m_work_row1;
-    SpawnTableRow m_work_row2;
-    WalkerTableRow m_dst_walker;
+    SpawnRow m_work_row1;
+    SpawnRow m_work_row2;
+    WalkerRow m_dst_walker;
     /**
      * function that returns the relative order of two rows in the receive buffer
      */
@@ -75,13 +75,13 @@ private:
      * @return
      *  true if row1 and row2 are in distinct (dst_mbf, ipart_dst) blocks
      */
-    static bool in_same_dst_block(const SpawnTableRow& row1, const SpawnTableRow& row2){
+    static bool in_same_dst_block(const SpawnRow& row1, const SpawnRow& row2){
         DEBUG_ASSERT_TRUE(row1.in_range() || row2.in_range(), "rows should not both be out of range");
         if (row1.in_range() != row2.in_range()) return false;
         return (row1.m_dst_mbf == row2.m_dst_mbf) && (row1.m_ipart_dst == row2.m_ipart_dst);
     }
 
-    static bool in_same_src_block(const SpawnTableRow& row1, const SpawnTableRow& row2){
+    static bool in_same_src_block(const SpawnRow& row1, const SpawnRow& row2){
         if (!in_same_dst_block(row1, row2)) return false;
         return row1.m_src_mbf == row2.m_src_mbf;
     }
@@ -105,7 +105,7 @@ public:
      * @return
      *  lookup result
      */
-    Lookup lookup_dst(const SpawnTableRow& recv_row, bool& deterministic);
+    Lookup lookup_dst(const SpawnRow& recv_row, bool& deterministic);
 
     /**
      * performs coefficient lookup and (if initiator criteria are satisfied) update due to the sum of all spawned
@@ -123,7 +123,7 @@ public:
      *  are multiple src_mbfs spawning to the same zero-weighted part in the same cycle
      */
     void annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
-                        bool allow_initiation, WalkerTableRow& dst_row);
+                        bool allow_initiation, WalkerRow& dst_row);
     /**
      * given that all rows between block_start (inclusively) and current (exclusively) correspond the the same (dst_mbf,
      * ipart_dst) pair, make all contributions to that pair in m_wf.m_store only after making all contributions to the
@@ -137,10 +137,10 @@ public:
      * @param dst_row
      *  row in m_wf.m_store which stores the dst_mbf if found
      */
-    void handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &next_block_begin,
-                          const wf_t &total_delta, WalkerTableRow& dst_row);
+    void handle_dst_block(SpawnRow &block_begin, SpawnRow &next_block_begin,
+                          const wf_t &total_delta, WalkerRow& dst_row);
 
-    void handle_src_block(SpawnTableRow &block_begin, WalkerTableRow& dst_row);
+    void handle_src_block(SpawnRow &block_begin, WalkerRow& dst_row);
 
     /**
      * loop through all received spawned rows and group them into blocks using a pair of Row objects. Once a block has

@@ -4,7 +4,7 @@
 
 #include "SpawnTable.h"
 
-SpawnTableRow::SpawnTableRow(const sys::Basis& basis, bool send_parents) :
+SpawnRow::SpawnRow(const sys::Basis& basis, bool send_parents) :
         m_send_parents(send_parents),
         m_src_mbf(send_parents ? this : nullptr, basis, "source MBF"),
         m_dst_mbf(this, basis, "destination MBF"),

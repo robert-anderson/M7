@@ -23,14 +23,14 @@
  * A communicator whose m_store is the list of occupation number vectors currently
  * with a non-zero value in at least one of the elements of the NdNumberField m_weight.
  *
- * The wavefunction row WalkerTableRow contains multidimensional fields whose elements
+ * The wavefunction row WalkerRow contains multidimensional fields whose elements
  * are referred to as "parts".
  *
  * This m_store is often called the "main walker list", and the SendRecv tables
  * are the called the "spawning lists"
  */
-struct Wavefunction : communicator::BasicSend<WalkerTableRow, SpawnTableRow>, Archivable {
-    typedef GlobalExtremalRows<WalkerTableRow, wf_t, c_ndim_wf> weights_gxr_t;
+struct Wavefunction : communicator::BasicSend<WalkerRow, SpawnRow>, Archivable {
+    typedef GlobalExtremalRows<WalkerRow, wf_t, c_ndim_wf> weights_gxr_t;
 
     const conf::Document &m_opts;
     const sys::Sector m_sector;
@@ -194,11 +194,11 @@ struct Wavefunction : communicator::BasicSend<WalkerTableRow, SpawnTableRow>, Ar
      *  i.e. the connection to the reference has a non-zero H matrix element
      * @return
      */
-    WalkerTableRow& create_row_(uint_t icycle, const field::Mbf &mbf, ham_comp_t hdiag, const v_t<bool>& refconns);
+    WalkerRow& create_row_(uint_t icycle, const field::Mbf &mbf, ham_comp_t hdiag, const v_t<bool>& refconns);
 
 
-    WalkerTableRow& create_row_(uint_t icycle, const field::Mbf &mbf,
-                       const ham_comp_t &hdiag, bool refconn) {
+    WalkerRow& create_row_(uint_t icycle, const field::Mbf &mbf,
+                           const ham_comp_t &hdiag, bool refconn) {
         return create_row_(icycle, mbf, hdiag, v_t<bool>(npart(), refconn));
     }
 

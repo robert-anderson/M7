@@ -294,7 +294,7 @@ void Rdms::make_contribs(const Mbf& src_onv, const Mbf& dst_onv, const wf_t& con
     make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops[src_onv], contrib);
 }
 
-void Rdms::make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& dst_row, const Propagator& prop) {
+void Rdms::make_contribs(const SpawnRow& recv_row, const WalkerRow& dst_row, const Propagator& prop) {
     DEBUG_ASSERT_EQ(recv_row.m_dst_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
     auto ipart_replica = dst_row.ipart_replica(recv_row.m_ipart_dst);
     wf_t contrib = dst_row.m_weight[ipart_replica];
