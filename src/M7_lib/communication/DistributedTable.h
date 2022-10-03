@@ -51,6 +51,7 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
      * current allocation of load balancing blocks to MPI rank indices
      */
     Distribution m_dist;
+private:
     /**
      * redistribution of rows is crucial to achieve load balancing. this pair must always have the same Row type as the
      * store table though
@@ -62,25 +63,19 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
      */
     typedef SingleFieldRow<field::Number<uint_t>> prot_level_row_t;
     typedef send_recv::BasicSend<prot_level_row_t> prot_level_pair_t;
-//    prot_level_pair_t m_prot_level;
+    prot_level_pair_t m_prot_level;
+
+public:
     /**
      * redistribution requires information about the amount of work done (by an arbitrary measure) by each block.
      */
     v_t<double> m_block_work_figures;
 
-//    DistributedTable(str_t name, const row_t &row, uint_t nblock_per_rank, uint_t nbucket = 0ul,
-//                     uint_t remap_nlookup = 0ul, double remap_ratio = 0.0) :
-//            MappedTable<row_t>(row, nbucket, remap_nlookup, remap_ratio),
-//            m_dist(nblock_per_rank*mpi::nrank()),
-//            m_redist(name+" redistributor", row, c_redist_sizing),
-//            m_prot_level(name+" protection level", {{}}, c_redist_sizing),
-//            m_block_work_figures(m_dist.nblock()) {
-//    }
     DistributedTable(const row_t &row, DistribOptions dist_opts) :
             MappedTable<row_t>(row), m_dist_opts(dist_opts),
             m_dist(m_dist_opts.m_nblock_per_rank*mpi::nrank()),
             m_redist("", row, {1000ul, 1.0}),
-//            m_prot_level("", SingleFieldRow<field::Number<uint_t>>(), c_redist_sizing),
+            m_prot_level("", {}, {1000ul, 1.0}),
             m_block_work_figures(m_dist.nblock()) {
     }
 
@@ -132,8 +127,8 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
                 if (!mpi::i_am(irank_owner)) {
                     m_redist.send(irank_owner).m_row.push_back_jump();
                     m_redist.send(irank_owner).m_row = row;
-//                    m_prot_level.send(irank_owner).m_row.push_back_jump();
-//                    m_prot_level.send(irank_owner).m_row.m_field = row.protection_level();
+                    m_prot_level.send(irank_owner).m_row.push_back_jump();
+                    m_prot_level.send(irank_owner).m_row.m_field = row.protection_level();
                     while (row.is_protected()) row.release();
                     clear_row(row);
                 }
@@ -141,18 +136,18 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
             DEBUG_ASSERT_FALSE(m_redist.send(mpi::irank()).m_hwm, "rank should not be sending to itself");
         }
         m_redist.communicate();
-//        m_prot_level.communicate();
+        m_prot_level.communicate();
         {
-            auto recv_row = m_redist.recv().m_row;
-//            auto prot_level_row = m_prot_level.recv().cursor();
-//            prot_level_row.restart();
+            auto& recv_row = m_redist.recv().m_row;
+            auto& prot_level_row = m_prot_level.recv().m_row;
+            prot_level_row.restart();
             for (recv_row.restart(); recv_row.in_range(); recv_row.step()) {
                 const auto irank_owner = irank(recv_row.key_field());
                 DEBUG_ONLY(irank_owner);
                 DEBUG_ASSERT_TRUE(mpi::i_am(irank_owner), "recv_row sent to wrong rank!");
                 insert(recv_row, row);
-//                for (uint_t ilevel=0ul; ilevel < uint_t(prot_level_row.m_field); ++ilevel) row.protect();
-//                prot_level_row.step();
+                for (uint_t ilevel=0ul; ilevel < uint_t(prot_level_row.m_field); ++ilevel) row.protect();
+                prot_level_row.step();
             }
         }
         clear_work_figures();
