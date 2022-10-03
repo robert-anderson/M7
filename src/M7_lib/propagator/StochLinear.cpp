@@ -148,3 +148,7 @@ void StochLinear::update(const uint_t& icycle, const Wavefunction& wf) {
     Propagator::update(icycle, wf);
     m_mag_log.update(icycle, m_tau, m_excit_gen_group);
 }
+
+hash::digest_t StochLinear::checksum_() const {
+    return m_prng.checksum();
+}

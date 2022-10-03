@@ -88,6 +88,9 @@ public:
 
     void imp_samp_delta(wf_t &delta, const field::Mbf &src_mbf, const field::Mbf &dst_mbf) const;
 
+    virtual hash::digest_t checksum_() const {return 0;}
+    hash::digest_t checksum() const;
+
 private:
     void load_fn(const hdf5::NodeReader &parent) override;
 

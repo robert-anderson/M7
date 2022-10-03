@@ -52,6 +52,8 @@ public:
 
     void update(const uint_t &icycle, const Wavefunction &wf) override;
 
+    hash::digest_t checksum_() const override;
+
 };
 
 #endif //M7_LINEAR_STOCH_PROPAGATOR_H

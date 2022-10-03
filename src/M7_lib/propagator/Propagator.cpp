@@ -47,3 +47,10 @@ void Propagator::imp_samp_delta(wf_t& delta, ham_t src_ovlp, const Mbf& dst_mbf)
 void Propagator::imp_samp_delta(wf_t& delta, const Mbf& src_mbf, const Mbf& dst_mbf) const {
     if (m_imp_samp_guide) imp_samp_delta(delta, m_imp_samp_guide->overlap(src_mbf), dst_mbf);
 }
+
+hash::digest_t Propagator::checksum() const {
+    v_t<hash::digest_t> all;
+    const auto local = checksum_();
+    mpi::all_gather(local, all);
+    return hash::fnv(reinterpret_cast<const buf_t*>(all.data()), all.size() * sizeof(hash::digest_t));
+}

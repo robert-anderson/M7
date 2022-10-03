@@ -33,6 +33,11 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
                  "FCIQMC Parallelization", ParallelStatsRow(), m_opts.m_stats.m_period);
     }
 
+    if (m_prop.ncase_excit_gen()) {
+        logging::info("Global PRNG state checksum of stochastic propagator: {}", m_prop.checksum());
+        logging::info_("Local PRNG state checksum of stochastic propagator: {}", m_prop.checksum_());
+    }
+
     /**
      * setup archive members
      */
