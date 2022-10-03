@@ -140,9 +140,9 @@ struct Wavefunction : communicator::BasicSend<WalkerTableRow, SpawnTableRow>, Ar
      * @param new_weight
      *  value to which this part weight is to be set
      */
-    void set_weight(uint_t ipart, const wf_t &new_weight);
+    void set_weight(uint_t ipart, wf_t new_weight);
 
-    void set_weight(const wf_t &new_weight) {
+    void set_weight(wf_t new_weight) {
         for (uint_t ipart=0ul; ipart<m_format.m_nelement; ++ipart) set_weight(ipart, new_weight);
     }
 
@@ -158,7 +158,7 @@ struct Wavefunction : communicator::BasicSend<WalkerTableRow, SpawnTableRow>, Ar
      * @param delta
      *  change in the weight
      */
-    void change_weight(uint_t ipart, const wf_t &delta);
+    void change_weight(uint_t ipart, wf_t delta);
 
     /**
      * convenience method to set_weight based on a scalar factor relative to current weight
@@ -167,7 +167,7 @@ struct Wavefunction : communicator::BasicSend<WalkerTableRow, SpawnTableRow>, Ar
      * @param factor
      *  fractional change in the weight
      */
-    void scale_weight(uint_t ipart, const double &factor);
+    void scale_weight(uint_t ipart, double factor);
 
     /**
      * convenience method to set the weight of a part of the WF to zero on the currently
@@ -194,8 +194,7 @@ struct Wavefunction : communicator::BasicSend<WalkerTableRow, SpawnTableRow>, Ar
      *  i.e. the connection to the reference has a non-zero H matrix element
      * @return
      */
-    WalkerTableRow& create_row_(uint_t icycle, const field::Mbf &mbf,
-                       const ham_comp_t &hdiag, const v_t<bool>& refconns);
+    WalkerTableRow& create_row_(uint_t icycle, const field::Mbf &mbf, ham_comp_t hdiag, const v_t<bool>& refconns);
 
 
     WalkerTableRow& create_row_(uint_t icycle, const field::Mbf &mbf,
@@ -206,21 +205,17 @@ struct Wavefunction : communicator::BasicSend<WalkerTableRow, SpawnTableRow>, Ar
     /**
      * Called on all ranks, dispatching create_row_ on the assigned rank only
      */
-    TableBase::Loc create_row(uint_t icycle, const field::Mbf &mbf,
-                              const ham_comp_t &hdiag, const v_t<bool>& refconns);
+    TableBase::Loc create_row(uint_t icycle, const field::Mbf &mbf, ham_comp_t hdiag, const v_t<bool>& refconns);
 
 
-    TableBase::Loc create_row(uint_t icycle, const field::Mbf &mbf,
-                              const ham_comp_t &hdiag, bool refconn) {
+    TableBase::Loc create_row(uint_t icycle, const field::Mbf &mbf, ham_comp_t hdiag, bool refconn) {
         return create_row(icycle, mbf, hdiag, v_t<bool>(npart(), refconn));
     }
 
-    uint_t add_spawn(const field::Mbf &dst_mbf, const wf_t &delta,
-                     bool initiator, bool deterministic, uint_t dst_ipart);
+    uint_t add_spawn(const field::Mbf &dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart);
 
-    uint_t add_spawn(const field::Mbf &dst_mbf, const wf_t &delta,
-                     bool initiator, bool deterministic, uint_t dst_ipart,
-                     const field::Mbf &src_mbf, const wf_t &src_weight);
+    uint_t add_spawn(const field::Mbf &dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart,
+                     const field::Mbf &src_mbf, wf_t src_weight);
 
     uint_t npart() const {
         return m_format.m_nelement;

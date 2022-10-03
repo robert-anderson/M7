@@ -165,7 +165,7 @@ wf_comp_t Wavefunction::l1_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
-void Wavefunction::set_weight(uint_t ipart, const wf_t& new_weight) {
+void Wavefunction::set_weight(uint_t ipart, wf_t new_weight) {
     auto& row = m_store.m_row;
     wf_t& weight = row.m_weight[ipart];
     m_delta_nwalker.m_local[ipart] += std::abs(new_weight);
@@ -175,11 +175,11 @@ void Wavefunction::set_weight(uint_t ipart, const wf_t& new_weight) {
     weight = new_weight;
 }
 
-void Wavefunction::change_weight(uint_t ipart, const wf_t& delta) {
+void Wavefunction::change_weight(uint_t ipart, wf_t delta) {
     set_weight(ipart, m_store.m_row.m_weight[ipart] + delta);
 }
 
-void Wavefunction::scale_weight(uint_t ipart, const double& factor) {
+void Wavefunction::scale_weight(uint_t ipart, double factor) {
     set_weight(ipart, factor * m_store.m_row.m_weight[ipart]);
 }
 
@@ -197,17 +197,16 @@ void Wavefunction::remove_row() {
     m_store.erase(m_store.m_row.m_mbf);
 }
 
-WalkerTableRow& Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, const ham_comp_t& hdiag,
-                                 const v_t<bool>& refconns) {
+WalkerTableRow& Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
     auto& row = m_store.insert(mbf);
     m_delta_nocc_mbf.m_local++;
-    DEBUG_ASSERT_EQ(m_store.m_row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
-    m_store.m_row.m_hdiag = hdiag;
+    DEBUG_ASSERT_EQ(row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
+    row.m_hdiag = hdiag;
     for (uint_t ipart=0ul; ipart < npart(); ++ipart)
-        m_store.m_row.m_ref_conn.put(ipart, refconns[ipart]);
+        row.m_ref_conn.put(ipart, refconns[ipart]);
     /*
      * we need to be very careful here of off-by-one-like mistakes. the initial walker is "created" at the beginning
      * of MC cycle 0, and so the stats line output for cycle 0 will show that the number of walkers is the initial
@@ -216,25 +215,24 @@ WalkerTableRow& Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, const h
      * the annihilating process of MC cycle i, it actually "becomes occupied" on cycle i+1.
      */
     if (storing_av_weights()) {
-        m_store.m_row.m_icycle_occ = icycle+1;
-        m_store.m_row.m_average_weight = 0;
+        row.m_icycle_occ = icycle+1;
+        row.m_average_weight = 0;
     }
     return row;
 }
 
-TableBase::Loc Wavefunction::create_row(uint_t icycle, const Mbf& mbf, const ham_comp_t& hdiag,
-                                        const v_t<bool>& refconns) {
+TableBase::Loc Wavefunction::create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
     const uint_t irank = m_dist.irank(mbf);
-    uint_t irow;
+    uint_t irec;
     if (mpi::i_am(irank)) {
-        irow = create_row_(icycle, mbf, hdiag, refconns).index();
+        irec = create_row_(icycle, mbf, hdiag, refconns).index();
     }
-    mpi::bcast(irow, irank);
-    return {irank, irow};
+    mpi::bcast(irec, irank);
+    return {irank, irec};
 }
 
-uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta,
-                               bool initiator, bool deterministic, uint_t dst_ipart) {
+uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
+                               bool deterministic, uint_t dst_ipart) {
     auto& dst_table = send(m_dist.irank(dst_mbf));
 
     auto& row = dst_table.m_row;
@@ -248,8 +246,8 @@ uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta,
     return row.index();
 }
 
-uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, const wf_t& delta, bool initiator, bool deterministic,
-                               uint_t dst_ipart, const field::Mbf& src_mbf, const wf_t& src_weight) {
+uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
+                               uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight) {
     const auto irow = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
     auto& row = send(m_dist.irank(dst_mbf)).m_row;
     if (row.m_send_parents) {
