@@ -275,7 +275,7 @@ class RankAllocator : public RankAllocatorBase {
     /**
      * the block index is computed from a hash function acting on the key field of the row, it
      * must be defined for RankAllocation to work, and compilation will fail here if the key field
-     * identifying function is not defined in row_t's class definition (see WalkerRow for
+     * identifying function is not defined in row_t's class definition (see Walker for
      * an example)
      */
     typedef typename KeyField<row_t>::type key_field_t;

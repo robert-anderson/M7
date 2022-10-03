@@ -15,7 +15,7 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
-class Reference : public shared_rows::Single<WalkerRow> {
+class Reference : public shared_rows::Single<Walker> {
     const Hamiltonian &m_ham;
     const Wavefunction &m_wf;
     /**

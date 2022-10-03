@@ -15,7 +15,7 @@
 
 #if 0
 /**
- * captures only the data from WalkerRow relevant to semistochastic propagation
+ * captures only the data from Walker relevant to semistochastic propagation
  */
 struct DeterministicDataRow : Row {
     field::Mbf m_mbf;
@@ -25,7 +25,7 @@ struct DeterministicDataRow : Row {
 
     DeterministicDataRow(const Wavefunction &wf);
 
-    static void load_fn(const WalkerRow &source, DeterministicDataRow &local);
+    static void load_fn(const Walker &source, DeterministicDataRow &local);
 };
 #endif
 
@@ -33,7 +33,7 @@ struct DeterministicDataRow : Row {
  * the implementation of the semistochastic adaptation calls for a subspace of many-body basis functions to be
  * designated as a deterministic subspace within which the exact propagator is applied to update the CI coefficients
  */
-struct DeterministicSubspace : shared_rows::Set<WalkerRow> {
+struct DeterministicSubspace : shared_rows::Set<Walker> {
     /**
      * options from the configuration object
      */
@@ -41,7 +41,7 @@ struct DeterministicSubspace : shared_rows::Set<WalkerRow> {
     /**
      * the deterministic subspace is just a selection of rows from an MPI-distributed wavefunction object
      */
-    typedef shared_rows::Set<WalkerRow> base_t;
+    typedef shared_rows::Set<Walker> base_t;
     /**
      * need to maintain a reference to the wavefunction so the affected coefficients can be gathered and updated
      */
@@ -62,7 +62,7 @@ struct DeterministicSubspace : shared_rows::Set<WalkerRow> {
      */
     const uint_t m_iroot;
 
-    WalkerRow m_local_row;
+    Walker m_local_row;
 
 private:
     /**
@@ -86,7 +86,7 @@ public:
      * @param row
      *  row of the wavefunction store which is pointing at the MBF to add into the subspace
      */
-    void add_(WalkerRow &row);
+    void add_(Walker &row);
 
     void build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears);
 

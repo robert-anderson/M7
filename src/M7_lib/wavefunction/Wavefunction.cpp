@@ -25,7 +25,7 @@ opts.m_wavefunction.m_hash_mapping.m_remap_ratio
 
 
 Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector) :
-        communicator::BasicSend<WalkerRow, SpawnRow>(
+        communicator::BasicSend<Walker, Spawn>(
             "wavefunction",
             // walker row:
             {
@@ -67,7 +67,7 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
 void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
     weights_gxr_t gxr(m_store.m_row, m_store.m_row.m_weight, true, true, ipart);
     gxr.find(nrow);
-    buffered::Table<WalkerRow> xr_gathered("global top weighted", m_store.m_row);
+    buffered::Table<Walker> xr_gathered("global top weighted", m_store.m_row);
     gxr.gatherv(xr_gathered);
 
     if (!mpi::i_am_root()) return;
@@ -120,9 +120,9 @@ void Wavefunction::h5_write(const hdf5::NodeWriter& parent, str_t name) {
 void Wavefunction::h5_read(const hdf5::NodeReader& parent, const Hamiltonian& ham, const field::Mbf& ref,
                            str_t name) {
     m_store.clear();
-    buffered::Table<WalkerRow> m_buffer("", {m_store.m_row});
+    buffered::Table<Walker> m_buffer("", {m_store.m_row});
     m_buffer.push_back();
-    RowHdf5Reader<WalkerRow> row_reader(m_buffer.m_row, parent, name, h5_field_names());
+    RowHdf5Reader<Walker> row_reader(m_buffer.m_row, parent, name, h5_field_names());
     suite::Conns conn(m_sector.size());
 
     row_reader.restart();
@@ -197,7 +197,7 @@ void Wavefunction::remove_row() {
     m_store.erase(m_store.m_row.m_mbf);
 }
 
-WalkerRow& Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
+Walker& Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");

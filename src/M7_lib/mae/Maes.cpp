@@ -36,7 +36,7 @@ void Maes::end_cycle() {
     m_bilinears.end_cycle();
 }
 
-void Maes::make_average_contribs(WalkerRow &row, const References &refs, const uint_t &icycle) {
+void Maes::make_average_contribs(Walker &row, const References &refs, const uint_t &icycle) {
     if (!m_accum_epoch) return;
     // the current cycle should be included in the denominator
     if (!row.occupied_ncycle(icycle)) {

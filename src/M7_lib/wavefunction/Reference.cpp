@@ -6,7 +6,7 @@
 
 Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
                      const Wavefunction &wf, uint_t ipart, TableBase::Loc loc) :
-        shared_rows::Single<WalkerRow>("reference", wf.m_store, loc),
+        shared_rows::Single<Walker>("reference", wf.m_store, loc),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
     if (m_redefinition_thresh==0.0)

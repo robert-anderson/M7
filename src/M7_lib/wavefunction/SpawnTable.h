@@ -8,7 +8,7 @@
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/table/MappedTable.h>
 
-struct SpawnRow : public Row {
+struct Spawn : public Row {
     const bool m_send_parents;
     field::Mbf m_src_mbf;
     field::Mbf m_dst_mbf;
@@ -18,7 +18,7 @@ struct SpawnRow : public Row {
     field::Flag m_src_deterministic;
     field::Number<uint8_t> m_ipart_dst;
 
-    SpawnRow(const sys::Basis& basis, bool send_parents);
+    Spawn(const sys::Basis& basis, bool send_parents);
 };
 
 #endif //M7_SPAWNTABLE_H

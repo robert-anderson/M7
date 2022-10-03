@@ -4,11 +4,11 @@
 
 #include "WalkerTable.h"
 
-field::Mbf &WalkerRow::key_field() {
+field::Mbf &Walker::key_field() {
     return m_mbf;
 }
 
-WalkerRow::WalkerRow(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool average_weights) :
+Walker::Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool average_weights) :
         m_wf_format({nroot, nreplica}, {"nroot", "nreplica"}),
         m_root_format({nroot}, {"nroot"}),
         m_mbf(this, basis, "many-body basis function"),
@@ -20,26 +20,26 @@ WalkerRow::WalkerRow(const sys::Basis& basis, uint_t nroot, uint_t nreplica, boo
         m_icycle_occ(average_weights ? this : nullptr, "cycle index at row creation")
 {}
 
-bool WalkerRow::is_h5_write_exempt() const {
+bool Walker::is_h5_write_exempt() const {
     return m_mbf.is_zero();
 }
 
-uint_t WalkerRow::occupied_ncycle(uint_t icycle_current) const {
+uint_t Walker::occupied_ncycle(uint_t icycle_current) const {
     return (1+icycle_current)-m_icycle_occ;
 }
 
-uint_t WalkerRow::nroot() const {
+uint_t Walker::nroot() const {
     return m_wf_format.m_shape[0];
 }
 
-uint_t WalkerRow::nreplica() const {
+uint_t Walker::nreplica() const {
     return m_wf_format.m_shape[1];
 }
 
-uint_t WalkerRow::ipart_replica(uint_t ipart) const {
+uint_t Walker::ipart_replica(uint_t ipart) const {
     return nreplica()==1 ? ipart : (ipart/2)*2+!(ipart&1ul);
 }
 
-bool WalkerRow::is_initiator(uint_t ipart, wf_comp_t thresh) const {
+bool Walker::is_initiator(uint_t ipart, wf_comp_t thresh) const {
     return std::abs(m_weight[ipart]) >= thresh;
 }

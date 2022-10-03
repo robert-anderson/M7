@@ -14,7 +14,7 @@ DeterministicDataRow::DeterministicDataRow(const Wavefunction &wf) :
         m_mbf(this, wf.m_sector, "mbf"),
         m_weight(this, wf.m_store.m_row.m_weight.m_format, "weight") {}
 
-void DeterministicDataRow::load_fn(const WalkerRow &source, DeterministicDataRow &local) {
+void DeterministicDataRow::load_fn(const Walker &source, DeterministicDataRow &local) {
     local.m_mbf = source.m_mbf;
     local.m_weight = source.m_weight;
 }
@@ -41,10 +41,10 @@ void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const Mbf &ref, const s
 
 DeterministicSubspace::DeterministicSubspace(
         const conf::Semistochastic &opts, Wavefunction &wf, uint_t iroot) :
-        shared_rows::Set<WalkerRow>("semistochastic", wf.m_store),
+        shared_rows::Set<Walker>("semistochastic", wf.m_store),
         m_opts(opts), m_wf(wf), m_iroot(iroot), m_local_row(wf.m_store.m_row), m_iparts(make_iparts()){}
 
-void DeterministicSubspace::add_(WalkerRow &row) {
+void DeterministicSubspace::add_(Walker &row) {
     base_t::add_(row.index());
     row.m_deterministic.set(m_iroot);
     logging::debug_("adding MBF {} to the deterministic subspace", row.m_mbf.to_string());
