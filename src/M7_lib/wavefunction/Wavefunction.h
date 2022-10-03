@@ -140,14 +140,14 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn>, Archivable {
      * @param new_weight
      *  value to which this part weight is to be set
      */
-    void set_weight(uint_t ipart, wf_t new_weight);
+    void set_weight(Walker& walker, uint_t ipart, wf_t new_weight);
 
-    void set_weight(wf_t new_weight) {
-        for (uint_t ipart=0ul; ipart<m_format.m_nelement; ++ipart) set_weight(ipart, new_weight);
+    void set_weight(Walker& walker, wf_t new_weight) {
+        for (uint_t ipart=0ul; ipart<m_format.m_nelement; ++ipart) set_weight(walker, ipart, new_weight);
     }
 
-    void set_weight(const field::Numbers<wf_t, c_ndim_wf> &new_weight){
-        for (uint_t i=0ul; i < m_format.m_nelement; ++i) set_weight(i, new_weight[i]);
+    void set_weight(Walker& walker, const field::Numbers<wf_t, c_ndim_wf> &new_weight){
+        for (uint_t i=0ul; i < m_format.m_nelement; ++i) set_weight(walker, i, new_weight[i]);
     }
 
     /**
@@ -158,7 +158,7 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn>, Archivable {
      * @param delta
      *  change in the weight
      */
-    void change_weight(uint_t ipart, wf_t delta);
+    void change_weight(Walker& walker, uint_t ipart, wf_t delta);
 
     /**
      * convenience method to set_weight based on a scalar factor relative to current weight
@@ -167,7 +167,7 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn>, Archivable {
      * @param factor
      *  fractional change in the weight
      */
-    void scale_weight(uint_t ipart, double factor);
+    void scale_weight(Walker& walker, uint_t ipart, double factor);
 
     /**
      * convenience method to set the weight of a part of the WF to zero on the currently
@@ -175,9 +175,9 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn>, Archivable {
      * @param ipart
      *  part index
      */
-    void zero_weight(uint_t ipart);
+    void zero_weight(Walker& walker, uint_t ipart);
 
-    void remove_row();
+    void remove_row(Walker& walker);
 
     /**
      * Only called on the rank assigned to the ONV by the RankAllocator
@@ -212,9 +212,9 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn>, Archivable {
         return create_row(icycle, mbf, hdiag, v_t<bool>(npart(), refconn));
     }
 
-    uint_t add_spawn(const field::Mbf &dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart);
+    Spawn& add_spawn(const field::Mbf &dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart);
 
-    uint_t add_spawn(const field::Mbf &dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart,
+    Spawn& add_spawn(const field::Mbf &dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart,
                      const field::Mbf &src_mbf, wf_t src_weight);
 
     uint_t npart() const {
@@ -244,7 +244,7 @@ private:
             const auto& norm = overlaps.m_reduced[{iroot, iroot, ireplica}];
             ASSERT(std::abs(norm)>1e-12);
             const auto gs_coeff = overlap / norm;
-            change_weight(ipart_dst, -gs_coeff*row.m_weight[ipart_src]);
+            change_weight(row, ipart_dst, -gs_coeff*row.m_weight[ipart_src]);
         }
     }
 public:

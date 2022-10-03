@@ -22,9 +22,28 @@ StochLinear::StochLinear(const Hamiltonian& ham, const conf::Document& opts,
 }
 
 
-void StochLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
-    const auto& row = wf.m_store.m_row;
-    const wf_t& weight = row.m_weight[ipart];
+void StochLinear::diagonal(Wavefunction& wf, Walker& walker, const uint_t& ipart) {
+    bool flag_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
+    const ham_comp_t& hdiag = walker.m_hdiag;
+    if (flag_deterministic) {
+        wf.scale_weight(walker, ipart, 1 - (hdiag - m_shift[ipart]) * tau());
+    } else {
+        // the probability that each unit walker will die
+        auto death_rate = (hdiag - m_shift[ipart]) * tau();
+        if (death_rate == 0.0) return;
+        if (death_rate < 0.0 || death_rate > 1.0 || m_min_death_mag == 0.0) {
+            // clone / create antiwalkers continuously
+            wf.scale_weight(walker, ipart, 1 - death_rate);
+        } else {
+            // kill stochastically
+            auto new_weight = m_prng.stochastic_round(walker.m_weight[ipart] * (1 - death_rate), m_min_death_mag);
+            wf.set_weight(walker, ipart, new_weight);
+        }
+    }
+}
+
+void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uint_t& ipart) {
+    const wf_t& weight = walker.m_weight[ipart];
     /*
      * for bilinear estimators based on the consolidated annihilation of spawned contributions
      */
@@ -33,9 +52,9 @@ void StochLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     DEBUG_ASSERT_NE(weight, 0.0, "should not attempt off-diagonal propagation from zero weight");
     DEBUG_ASSERT_TRUE(m_ham.complex_valued() || fptol::numeric_real(weight),
                       "real-valued hamiltonian should never result in non-zero imaginary walker component")
-    const auto& src_mbf = row.m_mbf;
-    bool is_initiator = row.is_initiator(ipart, m_nadd_initiator);
-    bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
+    const auto& src_mbf = walker.m_mbf;
+    bool is_initiator = walker.is_initiator(ipart, m_nadd_initiator);
+    bool flag_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
 
     const wf_comp_t abs_weight = std::abs(weight);
     prob_t prob_nattempt_floor, prob_gen, prob_thresh_accept;
@@ -114,26 +133,6 @@ void StochLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
         }
         wf.add_spawn(dst_mbf, thresh_delta, is_initiator, flag_deterministic,
                      ipart, src_mbf, weight / p_succeed_at_least_once);
-    }
-}
-
-void StochLinear::diagonal(Wavefunction& wf, const uint_t& ipart) {
-    auto& row = wf.m_store.m_row;
-    bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
-    const ham_comp_t& hdiag = row.m_hdiag;
-    if (flag_deterministic) {
-        wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
-    } else {
-        // the probability that each unit walker will die
-        auto death_rate = (hdiag - m_shift[ipart]) * tau();
-        if (death_rate == 0.0) return;
-        if (death_rate < 0.0 || death_rate > 1.0 || m_min_death_mag == 0.0) {
-            // clone / create antiwalkers continuously
-            wf.scale_weight(ipart, 1 - death_rate);
-        } else {
-            // kill stochastically
-            wf.set_weight(ipart, m_prng.stochastic_round(row.m_weight[ipart] * (1 - death_rate), m_min_death_mag));
-        }
     }
 }
 

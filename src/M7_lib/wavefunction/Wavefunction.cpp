@@ -117,8 +117,9 @@ void Wavefunction::h5_write(const hdf5::NodeWriter& parent, str_t name) {
     m_store.save(parent, name, h5_field_names());
 }
 
-void Wavefunction::h5_read(const hdf5::NodeReader& parent, const Hamiltonian& ham, const field::Mbf& ref,
-                           str_t name) {
+void Wavefunction::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian& /*ham*/, const field::Mbf& /*ref*/,
+                           str_t /*name*/) {
+#if 0
     m_store.clear();
     buffered::Table<Walker> m_buffer("", {m_store.m_row});
     m_buffer.push_back();
@@ -131,9 +132,10 @@ void Wavefunction::h5_read(const hdf5::NodeReader& parent, const Hamiltonian& ha
         row_reader.read(iitem);
         conn[ref].connect(ref, row_reader.m_mbf);
         bool ref_conn = ham::is_significant(ham.get_element(ref, conn[ref]));
-        create_row(0ul, row_reader.m_mbf, ham.get_energy(row_reader.m_mbf), v_t<bool>(npart(), ref_conn));
-        set_weight(row_reader.m_weight);
+        auto& walker = create_row(0ul, row_reader.m_mbf, ham.get_energy(row_reader.m_mbf), v_t<bool>(npart(), ref_conn));
+        set_weight(walker, row_reader.m_weight);
     }
+#endif
 }
 
 void Wavefunction::begin_cycle() {
@@ -165,9 +167,8 @@ wf_comp_t Wavefunction::l1_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
-void Wavefunction::set_weight(uint_t ipart, wf_t new_weight) {
-    auto& row = m_store.m_row;
-    wf_t& weight = row.m_weight[ipart];
+void Wavefunction::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
+    wf_t& weight = walker.m_weight[ipart];
     m_delta_nwalker.m_local[ipart] += std::abs(new_weight);
     m_delta_nwalker.m_local[ipart] -= std::abs(weight);
     m_delta_l2_norm_square.m_local[ipart] += std::pow(std::abs(new_weight), 2.0);
@@ -175,26 +176,26 @@ void Wavefunction::set_weight(uint_t ipart, wf_t new_weight) {
     weight = new_weight;
 }
 
-void Wavefunction::change_weight(uint_t ipart, wf_t delta) {
-    set_weight(ipart, m_store.m_row.m_weight[ipart] + delta);
+void Wavefunction::change_weight(Walker& walker, uint_t ipart, wf_t delta) {
+    set_weight(walker, ipart, m_store.m_row.m_weight[ipart] + delta);
 }
 
-void Wavefunction::scale_weight(uint_t ipart, double factor) {
-    set_weight(ipart, factor * m_store.m_row.m_weight[ipart]);
+void Wavefunction::scale_weight(Walker& walker, uint_t ipart, double factor) {
+    set_weight(walker, ipart, factor * m_store.m_row.m_weight[ipart]);
 }
 
-void Wavefunction::zero_weight(uint_t ipart) {
-    set_weight(ipart, 0.0);
+void Wavefunction::zero_weight(Walker& walker, uint_t ipart) {
+    set_weight(walker, ipart, 0.0);
 }
 
-void Wavefunction::remove_row() {
-    DEBUG_ASSERT_TRUE(m_store.lookup(m_store.m_row.m_mbf), "MBF doesn't exist in table!");
+void Wavefunction::remove_row(Walker& walker) {
+    DEBUG_ASSERT_TRUE(m_store.lookup(walker.m_mbf), "MBF doesn't exist in table!");
     for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
-        zero_weight(ipart);
+        zero_weight(walker, ipart);
         // in the case that nadd==0.0, the set_weight method won't revoke:
         m_delta_nocc_mbf.m_local--;
     }
-    m_store.erase(m_store.m_row.m_mbf);
+    m_store.erase(walker.m_mbf);
 }
 
 Walker& Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
@@ -231,31 +232,30 @@ TableBase::Loc Wavefunction::create_row(uint_t icycle, const Mbf& mbf, ham_comp_
     return {irank, irec};
 }
 
-uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
+Spawn& Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
                                bool deterministic, uint_t dst_ipart) {
     auto& dst_table = send(m_dist.irank(dst_mbf));
 
-    auto& row = dst_table.m_row;
-    row.push_back_jump();
+    auto& spawn = dst_table.m_row;
+    spawn.push_back_jump();
 
-    row.m_dst_mbf = dst_mbf;
-    row.m_delta_weight = delta;
-    row.m_src_initiator = initiator;
-    row.m_src_deterministic = deterministic;
-    row.m_ipart_dst = dst_ipart;
-    return row.index();
+    spawn.m_dst_mbf = dst_mbf;
+    spawn.m_delta_weight = delta;
+    spawn.m_src_initiator = initiator;
+    spawn.m_src_deterministic = deterministic;
+    spawn.m_ipart_dst = dst_ipart;
+    return spawn;
 }
 
-uint_t Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
+Spawn& Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
                                uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight) {
-    const auto irow = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
-    auto& row = send(m_dist.irank(dst_mbf)).m_row;
-    if (row.m_send_parents) {
-        row.m_src_mbf = src_mbf;
-        row.m_src_weight = src_weight;
+    auto& spawn = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
+    if (spawn.m_send_parents) {
+        spawn.m_src_mbf = src_mbf;
+        spawn.m_src_weight = src_weight;
     }
     DEBUG_ASSERT_NE(dst_mbf, src_mbf, "spawning diagonally");
-    return irow;
+    return spawn;
 }
 
 void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm) {

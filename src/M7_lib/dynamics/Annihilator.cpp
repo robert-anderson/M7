@@ -52,7 +52,7 @@ Lookup Annihilator::lookup_dst(const Spawn& recv_row, bool& deterministic) {
 }
 
 void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
-                                 bool allow_initiation, Walker &dst_row) {
+                                 bool allow_initiation, Walker &dst_walker) {
     if (m_nadd == 0.0) {
         DEBUG_ASSERT_TRUE(allow_initiation,
                           "initiator rules are turned off, every initiating annihilation should be allowed");
@@ -64,28 +64,28 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
     if (fptol::numeric_zero(delta_weight)) return;
 
     m_wf.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
-    if (!dst_row.in_range()) {
+    if (!dst_walker.in_range()) {
         /*
-         * the destination MBF row in m_wf.m_store is not currently occupied, so initiator rules
-         * must be applied
+         * the destination MBF row in m_wf.m_store is not currently occupied, so initiator rules must be applied
          */
         if (!allow_initiation) {
             //m_aborted_weight += std::abs(*delta_weight);
             return;
         }
 
-        m_wf.create_row_(m_icycle, dst_mbf, m_prop.m_ham.get_energy(dst_mbf), m_refs.is_connected(dst_mbf));
-        m_wf.set_weight(dst_ipart, delta_weight);
+        auto& new_walker = m_wf.create_row_(
+                m_icycle, dst_mbf, m_prop.m_ham.get_energy(dst_mbf), m_refs.is_connected(dst_mbf));
+        m_wf.set_weight(new_walker, dst_ipart, delta_weight);
 
     } else {
-        wf_t weight_before = dst_row.m_weight[dst_ipart];
+        wf_t weight_before = dst_walker.m_weight[dst_ipart];
         if (fptol::numeric_zero(weight_before) && !allow_initiation) {
             // the row exists, but that does not necessarily mean that each part has non-zero occupation
             //m_aborted_weight += std::abs(*delta_weight);
             return;
         }
         m_wf.m_nannihilated.m_local[dst_ipart] += annihilated_magnitude(weight_before, delta_weight);
-        m_wf.change_weight(dst_ipart, delta_weight);
+        m_wf.change_weight(dst_walker, dst_ipart, delta_weight);
     }
 }
 

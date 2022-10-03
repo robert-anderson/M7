@@ -49,6 +49,7 @@ namespace shared_rows {
                 m_gather_send(name+" gather send", m_src.m_row),
                 m_gather_recv(name+" gather recv", m_src.m_row),
                 m_src_row(m_src.m_row), m_send_row(m_gather_send.m_row) {
+            m_all.m_row.restart();
             for (auto irow: irecs) add_(irow);
             full_update();
         }
@@ -94,8 +95,7 @@ namespace shared_rows {
             all_gatherv();
             m_all.clear();
             auto& recv_row = m_gather_recv.m_row;
-            auto& all_row = m_all.m_row;
-            for (recv_row.restart(); recv_row.in_range(); recv_row.step()) m_all.insert(recv_row, all_row);
+            for (recv_row.restart(); recv_row.in_range(); recv_row.step()) m_all.insert(recv_row);
         }
 
         uint_t nrec_() const {
@@ -135,9 +135,7 @@ namespace shared_rows {
         using Set<row_t>::add_;
         using Set<row_t>::full_update;
 
-        Single(str_t name, const src_t& src, TableBase::Loc loc): Set<row_t>(name, src, loc) {
-            m_all.m_row.restart();
-        }
+        Single(str_t name, const src_t& src, TableBase::Loc loc): Set<row_t>(name, src, loc) {}
 
         void redefine(TableBase::Loc loc) {
             clear();

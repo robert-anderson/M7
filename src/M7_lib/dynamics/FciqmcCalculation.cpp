@@ -20,8 +20,10 @@ FciqmcCalculation::FciqmcCalculation(const conf::Document &opts) :
     TableBase::Loc ref_loc = {m_wf.m_dist.irank(ref_mbf), 0ul};
     m_wf.create_row(0, ref_mbf, ref_energy, v_t<bool>(m_wf.npart(), true));
     if (ref_loc.is_mine()){
+        auto ref_walker = m_wf.m_store.m_row;
+        ref_walker.jump(ref_loc.m_irec);
         for (uint_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
-            m_wf.set_weight(ipart, opts.m_wavefunction.m_nw_init);
+            m_wf.set_weight(ref_walker, ipart, opts.m_wavefunction.m_nw_init);
     }
     m_prop->m_shift.m_values = ref_energy+opts.m_shift.m_init;
     Solver solver(opts, *m_prop, m_wf, ref_loc);

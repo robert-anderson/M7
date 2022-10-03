@@ -12,12 +12,11 @@ ExactLinear::ExactLinear(
         m_mag_log(opts.m_propagator.m_max_bloom, 0, 1, opts.m_propagator.m_static_tau, true,
                   opts.m_propagator.m_tau_min, opts.m_propagator.m_tau_max, 0.0, opts.m_propagator.m_period) {}
 
-void ExactLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
-    const auto& row = wf.m_store.m_row;
-    auto& src_mbf = row.m_mbf;
-    const wf_t& weight = row.m_weight[ipart];
-    bool src_initiator = row.is_initiator(ipart, m_nadd_initiator);
-    bool src_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
+void ExactLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uint_t& ipart) {
+    auto& src_mbf = walker.m_mbf;
+    const wf_t& weight = walker.m_weight[ipart];
+    bool src_initiator = walker.is_initiator(ipart, m_nadd_initiator);
+    bool src_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
     src_mbf.m_decoded.clear();
 
     DEBUG_ASSERT_TRUE(weight,"shouldn't be trying to propagate off-diagonal from zero weight");
@@ -36,11 +35,10 @@ void ExactLinear::off_diagonal(Wavefunction& wf, const uint_t& ipart) {
     m_conn_iters.loop(conn, src_mbf, body);
 }
 
-void ExactLinear::diagonal(Wavefunction& wf, const uint_t& ipart) {
-    auto& row = wf.m_store.m_row;
-    const ham_comp_t& hdiag = row.m_hdiag;
-    DEBUG_ASSERT_NEARLY_EQ(hdiag, m_ham.get_energy(row.m_mbf), "incorrect diagonal H element cached");
-    wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
+void ExactLinear::diagonal(Wavefunction& wf, Walker& walker, const uint_t& ipart) {
+    const ham_comp_t& hdiag = walker.m_hdiag;
+    DEBUG_ASSERT_NEARLY_EQ(hdiag, m_ham.get_energy(walker.m_mbf), "incorrect diagonal H element cached");
+    wf.scale_weight(walker, ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }
 
 void ExactLinear::update(const uint_t& icycle, const Wavefunction &wf) {

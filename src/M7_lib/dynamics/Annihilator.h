@@ -123,7 +123,7 @@ public:
      *  are multiple src_mbfs spawning to the same zero-weighted part in the same cycle
      */
     void annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
-                        bool allow_initiation, Walker& dst_row);
+                        bool allow_initiation, Walker& dst_walker);
     /**
      * given that all rows between block_start (inclusively) and current (exclusively) correspond the the same (dst_mbf,
      * ipart_dst) pair, make all contributions to that pair in m_wf.m_store only after making all contributions to the

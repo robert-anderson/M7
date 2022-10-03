@@ -139,10 +139,12 @@ public:
     /**
      * Perform diagonal and off-diagonal propagation via m_prop for a valid row of m_wf.m_store. The row being
      * propagated from is the one currently pointed to by m_wf.m_store.m_row
+     * @param walker
+     *
      * @param ipart
      *  flat index of m_wf.m_format being propagated
      */
-    void propagate_row(const uint_t &ipart);
+    void propagate_row(Walker& walker, const uint_t &ipart);
 
     /**
      * Loop over all rows in m_wf.m_store which have a non-zero MBF field

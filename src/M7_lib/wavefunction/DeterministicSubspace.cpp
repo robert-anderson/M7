@@ -125,7 +125,8 @@ void DeterministicSubspace::project(double tau) {
     // loop over row indices in the portion of the wavefunction stored on this rank
     for (auto irec: m_irecs) {
         ++iirec;
-        m_wf.m_store.m_row.jump(irec);
+        auto& walker = m_wf.m_store.m_row;
+        walker.jump(irec);
         v_t<wf_t> delta(m_wf.npart(), 0.0);
         for (const auto& elem: m_ham_matrix[iirec]){
             all_row.jump(elem.m_i);
@@ -136,7 +137,7 @@ void DeterministicSubspace::project(double tau) {
                 delta[ipart] -= tau * elem.m_v * coeff;
             }
         }
-        for (const auto &ipart: m_iparts) m_wf.change_weight(ipart, delta[ipart]);
+        for (const auto &ipart: m_iparts) m_wf.change_weight(walker, ipart, delta[ipart]);
     }
 }
 

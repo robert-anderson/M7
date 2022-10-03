@@ -31,7 +31,7 @@ protected:
 public:
     StochLinear(const Hamiltonian &ham, const conf::Document &opts, const Wavefunction& wf);
 
-    void diagonal(Wavefunction &wf, const uint_t& ipart) override;
+    void diagonal(Wavefunction &wf, Walker& walker, const uint_t& ipart) override;
 
     template<typename T>
     uint_t get_nattempt(const T &weight) {
@@ -44,7 +44,7 @@ public:
         return get_nattempt(std::abs(weight));
     }
 
-    void off_diagonal(Wavefunction &wf, const uint_t& ipart) override;
+    void off_diagonal(Wavefunction &wf, const Walker& walker,  const uint_t& ipart) override;
 
     uint_t ncase_excit_gen() const override;
 

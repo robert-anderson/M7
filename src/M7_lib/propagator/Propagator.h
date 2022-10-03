@@ -53,9 +53,9 @@ public:
 
     virtual ~Propagator() {}
 
-    virtual void diagonal(Wavefunction &wf, const uint_t &ipart) = 0;
+    virtual void diagonal(Wavefunction &wf, Walker& walker, const uint_t &ipart) = 0;
 
-    virtual void off_diagonal(Wavefunction &wf, const uint_t &ipart) = 0;
+    virtual void off_diagonal(Wavefunction &wf, const Walker& walker, const uint_t &ipart) = 0;
 
     virtual ham_t round(const ham_t &weight) {
         return weight;

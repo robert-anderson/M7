@@ -241,8 +241,8 @@ public:
      *  row object which points to the newly inserted record upon return of the method
      */
     void insert(const key_field_t &key, row_t& row) {
-        DEBUG_ASSERT_FALSE(uncounted_lookup(key, row), "cannot insert when the key already exists in the table");
         DEBUG_ASSERT_TRUE(Table<row_t>::associated(row), "row object not associated with this table");
+        DEBUG_ASSERT_FALSE(uncounted_lookup(key, row), "cannot insert when the key already exists in the table");
         auto irow = TableBase::get_empty_record();
         auto &bucket = m_buckets[key.hash() % nbucket()];
         bucket.insert_after(bucket.before_begin(), irow);

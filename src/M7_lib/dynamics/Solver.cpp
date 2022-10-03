@@ -152,27 +152,27 @@ void Solver::begin_cycle() {
 }
 
 void Solver::loop_over_occupied_mbfs() {
-    auto& row = m_wf.m_store.m_row;
+    auto& walker = m_wf.m_store.m_row;
 
-    for (row.restart(); row.in_range(); row.step()) {
+    for (walker.restart(); walker.in_range(); walker.step()) {
         /*
          * stats always refer to the state of the wavefunction in the previous iteration
          */
 
-        if (row.m_mbf.is_zero())
+        if (walker.m_mbf.is_zero())
             /*
              * this is a free row, caused by an earlier call to m_wf.remove_row()
              */
             continue;
 
 
-        if (row.m_weight.is_zero() && !row.is_protected()) {
+        if (walker.m_weight.is_zero() && !walker.is_protected()) {
             /*
              * MBF has become unoccupied in all parts and must be removed from mapped list, but it must first make all
              * associated averaged contributions to MEVs
              */
-            m_maes.make_average_contribs(row, m_refs, m_icycle);
-            m_wf.remove_row();
+            m_maes.make_average_contribs(walker, m_refs, m_icycle);
+            m_wf.remove_row(walker);
             continue;
         }
 
@@ -182,12 +182,12 @@ void Solver::loop_over_occupied_mbfs() {
          */
         if (m_maes.m_accum_epoch.started_this_cycle(m_icycle)) {
             DEBUG_ASSERT_TRUE(m_maes.m_accum_epoch, "should be in MAE accumulation epoch");
-            row.m_icycle_occ = m_icycle;
-            row.m_average_weight = 0;
+            walker.m_icycle_occ = m_icycle;
+            walker.m_average_weight = 0;
         }
 
         if (m_maes.m_accum_epoch) {
-            row.m_average_weight += row.m_weight;
+            walker.m_average_weight += walker.m_weight;
         }
 
         if (m_maes.is_period_cycle(m_icycle)) {
@@ -195,7 +195,7 @@ void Solver::loop_over_occupied_mbfs() {
              * this is the end of a planned block-averaging cycle, therefore there may be unaccounted-for contributions
              * which need to be included in the average
              */
-            m_maes.make_average_contribs(row, m_refs, m_icycle);
+            m_maes.make_average_contribs(walker, m_refs, m_icycle);
         }
 
         m_refs.contrib_row();
@@ -207,10 +207,10 @@ void Solver::loop_over_occupied_mbfs() {
             DEBUG_ASSERT_TRUE(mpi::i_am(m_wf.m_dist.irank(m_wf.m_store.m_row.m_mbf)),
                               "Stored MBF should be on its allocated rank");
 
-            const auto &weight = row.m_weight[ipart];
+            const auto &weight = walker.m_weight[ipart];
 
             m_wf.m_nocc_mbf.m_local++;
-            if (row.is_initiator(ipart, m_opts.m_propagator.m_nadd)) m_wf.m_ninitiator.m_local[ipart]++;
+            if (walker.is_initiator(ipart, m_opts.m_propagator.m_nadd)) m_wf.m_ninitiator.m_local[ipart]++;
 
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
@@ -220,7 +220,7 @@ void Solver::loop_over_occupied_mbfs() {
 //                m_spawning_timer.reset();
 //                m_spawning_timer.unpause();
 //            }
-            propagate_row(ipart);
+            propagate_row(walker, ipart);
 //            if (m_wf.m_ra.is_active()) {
 //                m_spawning_timer.pause();
 //                m_wf.m_ra.record_work_time(row, m_spawning_timer);
@@ -235,10 +235,10 @@ void Solver::loop_over_occupied_mbfs() {
 
 void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
     if (!m_maes.m_accum_epoch || m_maes.is_period_cycle(icycle)) return;
-    auto& row = m_wf.m_store.m_row;
-    for (row.restart(); row.in_range(); row.step()) {
-        if (row.m_mbf.is_zero()) continue;
-        m_maes.make_average_contribs(row, m_refs, icycle);
+    auto& walker = m_wf.m_store.m_row;
+    for (walker.restart(); walker.in_range(); walker.step()) {
+        if (walker.m_mbf.is_zero()) continue;
+        m_maes.make_average_contribs(walker, m_refs, icycle);
     }
     m_maes.end_cycle();
     m_maes.output(m_icycle, m_prop.m_ham, true);
@@ -261,15 +261,11 @@ void Solver::loop_over_spawned() {
     m_wf.recv().clear();
 }
 
-void Solver::propagate_row(const uint_t &ipart) {
-    auto& row = m_wf.m_store.m_row;
-
-    if (row.is_cleared()) return;
-
-    if (fptol::numeric_zero(row.m_weight[ipart])) return;
-
-    m_prop.off_diagonal(m_wf, ipart);
-    m_prop.diagonal(m_wf, ipart);
+void Solver::propagate_row(Walker& walker, const uint_t &ipart) {
+    if (walker.is_cleared()) return;
+    if (fptol::numeric_zero(walker.m_weight[ipart])) return;
+    m_prop.off_diagonal(m_wf, walker, ipart);
+    m_prop.diagonal(m_wf, walker, ipart);
 }
 
 void Solver::end_cycle() {
