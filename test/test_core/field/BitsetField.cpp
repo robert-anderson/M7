@@ -57,3 +57,11 @@ TEST(BitsetField, ClrRange) {
         }
     }
 }
+
+TEST(BitsetField, Hash) {
+    const uint_t nbit = 100;
+    // deliberately using non-standard container type
+    buffered::Bitset<uint16_t> field(nbit);
+    field = uintv_t{0, 1, 4, 22, 45, 46, 78, 98};
+    ASSERT_EQ(field.hash(), 4098858180083155202ul);
+}
