@@ -88,14 +88,6 @@ struct Communicator {
         return std::max(1ul, crude) * fac;
     }
 
-//    Communicator(str_t name, const store_table_t &store, uint_t store_nrow_crude_est,
-//                 const send_table_t &send, uint_t comm_nrow_crude_est,
-//                 const conf::Buffers &buf_opts, const conf::Distribution &ra_opts) :
-//        Communicator(name,
-//                store, {nrow_estimate(store_nrow_crude_est, buf_opts.m_store_fac_init), buf_opts.m_store_exp_fac},
-//                send, {nrow_estimate(comm_nrow_crude_est, buf_opts.m_comm_fac_init), buf_opts.m_comm_exp_fac},
-//                ra_opts.m_nblock_per_rank * mpi::nrank()) {}
-
     virtual ~Communicator() {}
 
     typename send_recv_t::send_t &send() {

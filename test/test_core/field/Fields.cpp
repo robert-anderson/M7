@@ -84,6 +84,7 @@ TEST(Fields, Indentification){
     auto row_copy = table.m_row;
     ASSERT_FALSE(row_copy.m_field.belongs_to_row(table.m_row));
     ASSERT_FALSE(table.m_row.m_field.belongs_to_row(row_copy));
-    auto field_of_copy = field::identify(row_copy, table.m_row, table.m_row.m_field);
     ASSERT_TRUE(row_copy.m_field.belongs_to_row(row_copy));
+    auto& field_of_copy = field::identify(row_copy, table.m_row, table.m_row.m_field);
+    ASSERT_TRUE(field_of_copy.belongs_to_row(row_copy));
 }
