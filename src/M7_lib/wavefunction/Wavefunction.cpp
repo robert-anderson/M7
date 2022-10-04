@@ -62,6 +62,9 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
     m_summables.add_members(m_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
+
+    logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
+                  string::plural(m_dist.nblock()));
 }
 
 void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {

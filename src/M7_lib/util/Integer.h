@@ -107,6 +107,14 @@ namespace integer {
         shift(out, increment);
         return out;
     }
+
+    template<typename T>
+    static str_t to_hex_string(T v) {
+        static_assert(std::is_integral<T>::value, "only applicable to integral types");
+        std::stringstream stream;
+        stream << std::hex << v;
+        return stream.str();
+    }
 }
 
 #endif //M7_UTIL_INTEGER_H

@@ -34,8 +34,10 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
     }
 
     if (m_prop.ncase_excit_gen()) {
-        logging::info("Global PRNG state checksum of stochastic propagator: {}", m_prop.checksum());
-        logging::info_("Local PRNG state checksum of stochastic propagator: {}", m_prop.checksum_());
+        logging::info("Global PRNG state checksum of stochastic propagator: {}",
+                   integer::to_hex_string(m_prop.checksum()));
+        logging::info_("Local PRNG state checksum of stochastic propagator: {}",
+                   integer::to_hex_string(m_prop.checksum_()));
     }
 
     /**
