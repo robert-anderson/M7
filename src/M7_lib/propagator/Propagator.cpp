@@ -52,5 +52,7 @@ hash::digest_t Propagator::checksum() const {
     v_t<hash::digest_t> all;
     const auto local = checksum_();
     mpi::all_gather(local, all);
-    return hash::fnv(reinterpret_cast<const buf_t*>(all.data()), all.size() * sizeof(hash::digest_t));
+    hash::digest_t tot = 0;
+    for (auto i: all) tot+=i;
+    return tot;
 }

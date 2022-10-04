@@ -109,11 +109,7 @@ public:
         return stochastic_threshold(v, magnitude, prob);
     }
 
-    hash::digest_t checksum() const {
-        const auto nbyte = m_data.size()*sizeof(U);
-        const auto ptr = reinterpret_cast<const buf_t*>(m_data.data());
-        return hash::fnv(ptr, nbyte);
-    }
+    hash::digest_t checksum() const;
 };
 
 

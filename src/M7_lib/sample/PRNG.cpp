@@ -10,6 +10,7 @@ PRNG::PRNG(const uint_t &seed, const uint_t &block_size) :
         m_data(block_size, 0u), m_seed(seed+mpi::irank()) {
     ASSERT(block_size > 0);
     m_i = m_data.size();
+    refresh();
 }
 
 void PRNG::refresh() {
@@ -40,4 +41,10 @@ double PRNG::draw_float() {
 
 uint32_t PRNG::draw_uint_linear_bias(uint32_t modular_base) {
     return std::floor(modular_base*std::sqrt(draw_float()));
+}
+
+hash::digest_t PRNG::checksum() const {
+    const auto nbyte = m_data.size()*sizeof(uint32_t);
+    const auto ptr = reinterpret_cast<const buf_t*>(m_data.data());
+    return hash::fnv(ptr, nbyte);
 }
