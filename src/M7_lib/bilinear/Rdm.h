@@ -74,7 +74,7 @@ protected:
 
     static uint_t nrec_est(sys::Size basis_size, uint_t indsig) {
         const auto nrec_frm = integer::combinatorial(basis_size.m_frm.m_nspinorb, decode_nfrm_cre(indsig));
-        return nrec_frm * decode_nbos(indsig);
+        return nrec_frm * integer::combinatorial_with_repetition(basis_size.m_bos.m_nmode, decode_nbos(indsig));
     }
 
 public:

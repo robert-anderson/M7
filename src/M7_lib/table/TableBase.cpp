@@ -85,6 +85,7 @@ uint_t TableBase::bw_size() const {
 }
 
 void TableBase::resize(uint_t nrec, double factor) {
+    DEBUG_ASSERT_TRUE(nrec, "new size should be non-zero");
     DEBUG_ASSERT_TRUE(record_size(), "cannot resize, row size is zero");
     DEBUG_ASSERT_GE(nrec, m_hwm, "resize would discard uncleared data");
     m_bw.resize(nrec * record_size(), factor);

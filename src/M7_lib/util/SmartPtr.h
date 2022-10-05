@@ -41,7 +41,7 @@ namespace smart_ptr {
      * @param args
      *  parameter pack of args to be forwarded to a suitable ctor of T
      * @return
-     *  "polymorhic" unique pointer
+     *  "polymorphic" unique pointer
      */
     template<typename base_t, typename alloc_t, typename... Args>
     static std::unique_ptr<base_t> make_poly_unique(Args&&... args) {
