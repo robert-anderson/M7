@@ -161,8 +161,8 @@ def bring(asset):
 def run(config='config.yaml', nrank=1, assets=[]):
     assert nrank
     if not (def_dir/config).exists(): config = ''
-    # assets can be tuple, where item 1 is the local name to given to the link
-    assets.append(config)
+    else: shutil.copy(def_dir/config, run_dir/config)
+
     for asset in assets: bring(asset)
     cmd = f'{args.m7_exe} {config}' 
     if args.mpirun is not None: cmd = f'{args.mpirun} -n {nrank} '+cmd
