@@ -9,20 +9,20 @@ propagator:
   tau_init: 0.001
   stochastic: yes
   nw_target: 200
-  nadd: 0.0
+  nadd: 3.0
   ncycle: 500000
   semistochastic:
-    size: 2000
-    delay: 1000
+    size: 28
+    delay: 100
 hamiltonian:
   fermion:
     fcidump:
       path: FCIDUMP
 mae:
-  delay: 3000
+  delay: 1000
   rdm:
     archive:
       save: yes
     ranks: [1, 2, 3]
-  ncycle: 10
+  ncycle: 1000
 
