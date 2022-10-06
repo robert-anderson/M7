@@ -1,23 +1,18 @@
-[1664895958] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 16.000000KB x 2 tables = 32.000000KB
-[1664895958] [info] Reallocating buffer " recv" 0B -> 32.000000KB
-[1664895958] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
-[1664895958] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1664895958] [info] Reallocating buffer " recv" 0B -> 32.000000KB
-[1664895958] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1664895958] [info] Reallocating buffer "wavefunction" 0B -> 16.000000KB
-[1664895958] [info] Reallocating buffer "wavefunction send" 0B x 2 tables = 0B -> 24B x 2 tables = 48B
-[1664895958] [info] Reallocating buffer "wavefunction recv" 0B -> 24B
-[1664895958] [info] Reallocating buffer "reference gather recv" 0B -> 32B
-[1664895958] [info] Reallocating buffer "reference all rows" 0B -> 32B
-[1664895958] [info] Reallocating buffer "M7.stats" 0B -> 128B
-[1664895958] [info] Reallocating buffer "M7.timing" 0B -> 40B
-[1664895958] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
-[1664895958] [info] Reallocating buffer "wavefunction recv" 24B -> 72B
-[1664895958] [info] Reallocating buffer "wavefunction send" 24B x 2 tables = 48B -> 72B x 2 tables = 144B
-[1664895959] [info] Reallocating buffer "wavefunction recv" 72B -> 144B
-[1664895961] [info] Reallocating buffer "wavefunction send" 72B x 2 tables = 144B -> 144B x 2 tables = 288B
-[1664895963] [info] Reallocating buffer "wavefunction recv" 144B -> 256B
-[1664895993] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 160B
-[1664895993] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
-[1664895993] [info] Reallocating buffer "locally included globally extreme rows" 0B -> 320B
-[1664895993] [info] Reallocating buffer "global top weighted" 0B -> 640B
+[1665070226] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 16.000000KB x 2 tables = 32.000000KB
+[1665070226] [info] Reallocating buffer " recv" 0B -> 32.000000KB
+[1665070226] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
+[1665070226] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1665070226] [info] Reallocating buffer " recv" 0B -> 32.000000KB
+[1665070226] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1665070226] [info] Reallocating buffer "wavefunction" 0B -> 16.000000KB
+[1665070226] [info] Reallocating buffer "wavefunction send" 0B x 2 tables = 0B -> 120B x 2 tables = 240B
+[1665070226] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
+[1665070226] [info] Reallocating buffer "reference gather recv" 0B -> 32B
+[1665070226] [info] Reallocating buffer "reference all rows" 0B -> 32B
+[1665070226] [info] Reallocating buffer "M7.stats" 0B -> 128B
+[1665070226] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1665070226] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
+[1665070266] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 160B
+[1665070266] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1665070266] [info] Reallocating buffer "locally included globally extreme rows" 0B -> 320B
+[1665070266] [info] Reallocating buffer "global top weighted" 0B -> 640B

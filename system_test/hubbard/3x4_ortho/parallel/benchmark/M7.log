@@ -1,262 +1,255 @@
-[1660851450] [info] +----------------------------+-------------------------+
-[1660851450] [info] |                 compile definitions                  |
-[1660851450] [info] +----------------------------+-------------------------+
-[1660851450] [info] |  git revision              |  #068076d0              |
-[1660851450] [info] +----------------------------+-------------------------+
-[1660851450] [info] |  build mode                |  RELEASE                |
-[1660851450] [info] +----------------------------+-------------------------+
-[1660851450] [info] |  compilation timestamp     |  2022-08-18 09:41:31    |
-[1660851450] [info] +----------------------------+-------------------------+
-[1660851450] [info] |  many-body basis function  |  fermion (determinant)  |
-[1660851450] [info] +----------------------------+-------------------------+
-[1660851450] [info] |  walker arithmetic         |  real                   |
-[1660851450] [info] +----------------------------+-------------------------+
-[1660851450] [info] |  Hamiltonian arithmetic    |  real                   |
-[1660851450] [info] +----------------------------+-------------------------+
-[1660851450] [info] |  TCHINT interface          |  disabled               |
-[1660851450] [info] +----------------------------+-------------------------+
-[1660851450] [info] |  rank-resolved logging     |  enabled                |
-[1660851450] [info] +----------------------------+-------------------------+
-[1660851450] [info] Number of MPI ranks in world communicator: 2
-[1660851450] [info] Number of MPI ranks per node: 2
-[1660851450] [info] formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run
-[1660851450] [warning] propagator.min_death_mag was zero, defaulting to the specified value of propagator.min_spawn_mag
-[1660851450] [warning] propagator.max_bloom was zero, defaulting to the specified value of propagator.nadd
-[1660851450] [info] prng (enabled)
-[1660851450] [info] prng.seed                                         | 123
-[1660851450] [info] prng.ngen_block                                   | 10000
-[1660851450] [info] archive (enabled)
-[1660851450] [info] archive.load_path                                 | ""
-[1660851450] [info] archive.save_path                                 | ""
-[1660851450] [info] archive.chkpt_path                                | ""
-[1660851450] [info] archive.period                                    | 0
-[1660851450] [info] archive.period_mins                               | 0
-[1660851450] [info] basis (enabled)
-[1660851450] [info] basis.bos_occ_cutoff                              | 255
-[1660851450] [info] particles (enabled)
-[1660851450] [info] particles.nelec                                   | 0
-[1660851450] [info] particles.ms2                                     | inf
-[1660851450] [info] particles.nboson                                  | 0
-[1660851450] [info] wavefunction (enabled)
-[1660851450] [info] wavefunction.nw_init                              | 1.000000e+00
-[1660851450] [info] wavefunction.nroot                                | 1
-[1660851450] [info] wavefunction.fci_init                             | false
-[1660851450] [info] wavefunction.buffers (enabled)
-[1660851450] [info] wavefunction.buffers.store_fac_init               | 1.000000e+00
-[1660851450] [info] wavefunction.buffers.store_expand_fac             | 5.000000e-01
-[1660851450] [info] wavefunction.buffers.comm_fac_init                | 1.000000e+00
-[1660851450] [info] wavefunction.buffers.comm_expand_fac              | 5.000000e-01
-[1660851450] [info] wavefunction.hash_mapping (enabled)
-[1660851450] [info] wavefunction.hash_mapping.remap_ratio             | 2.000000e+00
-[1660851450] [info] wavefunction.hash_mapping.remap_nlookup           | 500
-[1660851450] [info] wavefunction.archive (enabled)
-[1660851450] [info] wavefunction.archive.load                         | false
-[1660851450] [info] wavefunction.archive.save                         | false
-[1660851450] [info] wavefunction.archive.chkpt                        | false
-[1660851450] [info] wavefunction.load_balancing (enabled)
-[1660851450] [info] wavefunction.load_balancing.nblock_per_rank       | 6
-[1660851450] [info] wavefunction.load_balancing.period                | 10
-[1660851450] [info] wavefunction.load_balancing.acceptable_imbalance  | 5.000000e-02
-[1660851450] [info] wavefunction.load_balancing.nnull_updates_deactivate| 20
-[1660851450] [info] reference (enabled)
-[1660851450] [info] reference.mbf_init (enabled)
-[1660851450] [info] reference.mbf_init.fermion                        | []
-[1660851450] [info] reference.mbf_init.boson                          | []
-[1660851450] [info] reference.mbf_init.neel                           | true
-[1660851450] [info] reference.redef_thresh                            | 2.000000e+00
-[1660851450] [info] shift (enabled)
-[1660851450] [info] shift.init                                        | 0.000000e+00
-[1660851450] [info] shift.damp                                        | 5.000000e-01
-[1660851450] [info] shift.target_damp                                 | 0.000000e+00
-[1660851450] [info] shift.period                                      | 5
-[1660851450] [info] shift.ncycle_av                                   | 100
-[1660851450] [info] shift.jump                                        | false
-[1660851450] [info] propagator (enabled)
-[1660851450] [info] propagator.ncycle                                 | 2000
-[1660851450] [info] propagator.stochastic                             | true
-[1660851450] [info] propagator.excit_gen (enabled)
-[1660851450] [info] propagator.excit_gen.hubbard_prefer_double_occ (disabled)
-[1660851450] [info] propagator.nw_target                              | 1.000000e+04
-[1660851450] [info] propagator.max_bloom                              | 0.000000e+00
-[1660851450] [info] propagator.nadd                                   | 0.000000e+00
-[1660851450] [info] propagator.tau_init                               | 1.000000e-03
-[1660851450] [info] propagator.tau_min                                | 1.000000e-05
-[1660851450] [info] propagator.tau_max                                | 1.000000e-02
-[1660851450] [info] propagator.static_tau                             | true
-[1660851450] [info] propagator.static_probs                           | true
-[1660851450] [info] propagator.min_spawn_mag                          | 4.000000e-01
-[1660851450] [info] propagator.min_death_mag                          | 4.000000e-01
-[1660851450] [info] propagator.min_exlvl_prob                         | 1.000000e-03
-[1660851450] [info] propagator.exlvl_probs_init                       | []
-[1660851450] [info] propagator.ndraw_min_for_dynamic                  | 1000
-[1660851450] [info] propagator.period                                 | 10
-[1660851450] [info] propagator.imp_samp_guide.gutzwiller_like (disabled)
-[1660851450] [info] propagator.imp_samp_guide.suppress_multi_occ (disabled)
-[1660851450] [info] propagator.semistochastic (disabled)
-[1660851450] [info] hamiltonian (enabled)
-[1660851450] [info] hamiltonian.fermion (enabled)
-[1660851450] [info] hamiltonian.fermion.fcidump (disabled)
-[1660851450] [info] hamiltonian.fermion.hubbard (enabled)
-[1660851450] [info] hamiltonian.fermion.hubbard.topology              | "ortho"
-[1660851450] [info] hamiltonian.fermion.hubbard.site_shape            | [3, 4]
-[1660851450] [info] hamiltonian.fermion.hubbard.boundary_conds        | [1, 1]
-[1660851450] [info] hamiltonian.fermion.hubbard.repulsion             | 4.000000e+00
-[1660851450] [info] hamiltonian.fermion.heisenberg (disabled)
-[1660851450] [info] hamiltonian.fermion.spin_penalty_j                | 0.000000e+00
-[1660851450] [info] hamiltonian.ladder (disabled)
-[1660851450] [info] hamiltonian.boson (disabled)
-[1660851450] [info] stats (enabled)
-[1660851450] [info] stats.path                                        | "M7.stats"
-[1660851450] [info] stats.period                                      | 5
-[1660851450] [info] stats.parallel                                    | false
-[1660851450] [info] inst_ests (disabled)
-[1660851450] [info] av_ests (disabled)
-[1660851450] [info] Fermi-Hubbard Hamiltonian initialized with U=4; orthogonal lattice with shape [3, 4] and boundary conds [1, 1]
-[1660851450] [info] 2*Ms value not defined by configuration document or Hamiltonian, defaulting to lowest valid positive value
-[1660851450] [info] Initially allocating 480B per rank for each communicating buffer of "wavefunction" (send and recv)
-[1660851450] [info] Initially allocating 640B per rank for each communicating buffer of "wavefunction redistributor" (send and recv)
-[1660851450] [info] Initially allocating 160B per rank for each communicating buffer of "wavefunction protection level" (send and recv)
-[1660851450] [info] Initially allocating 160.000000KB per rank for store buffer of "wavefunction" 
-[1660851450] [info] Listening for changes to interactive variable "nwalker_target" in file "nwalker_target.var"
-[1660851450] [info] +------------------------+---------------------------+----------------+
-[1660851450] [info] |                   Excitation generation breakdown                   |
-[1660851450] [info] +------------------------+---------------------------+----------------+
-[1660851450] [info] |  Excitation Signature  |  Description              |  Probability   |
-[1660851450] [info] +========================+===========================+================+
-[1660851450] [info] |  1100                  |  uniform hubbard hopping  |  1.000000e+00  |
-[1660851450] [info] +------------------------+---------------------------+----------------+
-[1660851450] [info] Initializing magnitude logger with max_bloom 0 for 1 excitation levels
-[1660851450] [info] Dynamic tau optimization: false
-[1660851450] [info] Dynamic excitation level probability optimization: false
-[1660851450] [info] Initial reference ONV for WF part 0 is (101010101010,010101010101) with energy 0.000000e+00 
-[1660851450] [info] Listening for changes to interactive variable "exit" in file "exit.var"
-[1660851450] [info] not reading archive from file
-[1660851450] [info] not saving archive to file
-[1660851450] [info] not dumping checkpoint archives
-[1660851450] [info] Replicating walker populations: false
-[1660851450] [info] Beginning solver loop...
-[1660851450] [info] Entering "variable shift mode (WF part 0)" epoch on cycle 545 
-[1660851450] [info] Variable shift triggered for WF part 0. Cycle 544 nw: 9892.999999999718, cycle 545 nw: 10056.599999999718
-[1660851452] [info] Changing reference for WF part 0 on cycle 865
-[1660851452] [info] Current: (101010101010,010101010101), weight:  4.000000e-01, MPI rank: 0
-[1660851452] [info] New    : (011001011010,101101000110), weight: -1.600000e+00, MPI rank: 0
-[1660851452] [info] Changing reference for WF part 0 on cycle 900
-[1660851452] [info] Current: (011001011010,101101000110), weight: -4.000000e-01, MPI rank: 0
-[1660851452] [info] New    : (001011010110,011101101000), weight: -1.200000e+00, MPI rank: 0
-[1660851452] [info] Changing reference for WF part 0 on cycle 921
-[1660851452] [info] Current: (001011010110,011101101000), weight: -4.000000e-01, MPI rank: 0
-[1660851452] [info] New    : (001110110100,111011000001), weight:  1.200000e+00, MPI rank: 0
-[1660851452] [info] Changing reference for WF part 0 on cycle 966
-[1660851452] [info] Current: (001110110100,111011000001), weight:  4.000000e-01, MPI rank: 0
-[1660851452] [info] New    : (101110110000,101000110101), weight:  1.200000e+00, MPI rank: 0
-[1660851452] [info] Changing reference for WF part 0 on cycle 982
-[1660851452] [info] Current: (101110110000,101000110101), weight:  4.000000e-01, MPI rank: 0
-[1660851452] [info] New    : (101001111000,100011001011), weight:  1.200000e+00, MPI rank: 0
-[1660851452] [info] Changing reference for WF part 0 on cycle 995
-[1660851452] [info] Current: (101001111000,100011001011), weight:  4.000000e-01, MPI rank: 0
-[1660851452] [info] New    : (010101110010,100101001101), weight: -1.200000e+00, MPI rank: 0
-[1660851452] [info] Changing reference for WF part 0 on cycle 1030
-[1660851452] [info] Current: (010101110010,100101001101), weight: -4.000000e-01, MPI rank: 0
-[1660851452] [info] New    : (010110110100,110011001001), weight: -1.200000e+00, MPI rank: 0
-[1660851452] [info] Changing reference for WF part 0 on cycle 1074
-[1660851452] [info] Current: (010110110100,110011001001), weight: -4.000000e-01, MPI rank: 0
-[1660851452] [info] New    : (010011011001,011110100100), weight: -1.600000e+00, MPI rank: 0
-[1660851453] [info] Changing reference for WF part 0 on cycle 1143
-[1660851453] [info] Current: (010011011001,011110100100), weight: -4.000000e-01, MPI rank: 0
-[1660851453] [info] New    : (110000111001,100111000110), weight:  1.600000e+00, MPI rank: 0
-[1660851453] [info] Changing reference for WF part 0 on cycle 1157
-[1660851453] [info] Current: (110000111001,100111000110), weight:  4.000000e-01, MPI rank: 0
-[1660851453] [info] New    : (101100101010,010001111010), weight: -1.600000e+00, MPI rank: 0
-[1660851453] [info] Changing reference for WF part 0 on cycle 1246
-[1660851453] [info] Current: (101100101010,010001111010), weight: -4.000000e-01, MPI rank: 0
-[1660851453] [info] New    : (110001110001,001110000111), weight:  1.200000e+00, MPI rank: 0
-[1660851453] [info] Changing reference for WF part 0 on cycle 1293
-[1660851453] [info] Current: (110001110001,001110000111), weight:  4.000000e-01, MPI rank: 0
-[1660851453] [info] New    : (101001110100,001101101100), weight: -1.200000e+00, MPI rank: 1
-[1660851453] [info] Changing reference for WF part 0 on cycle 1362
-[1660851453] [info] Current: (101001110100,001101101100), weight: -4.000000e-01, MPI rank: 1
-[1660851453] [info] New    : (100101110100,011010011010), weight: -1.200000e+00, MPI rank: 0
-[1660851454] [info] Changing reference for WF part 0 on cycle 1422
-[1660851454] [info] Current: (100101110100,011010011010), weight: -4.000000e-01, MPI rank: 0
-[1660851454] [info] New    : (101001011100,010101011001), weight: -1.200000e+00, MPI rank: 0
-[1660851454] [info] Changing reference for WF part 0 on cycle 1461
-[1660851454] [info] Current: (101001011100,010101011001), weight: -4.000000e-01, MPI rank: 0
-[1660851454] [info] New    : (101000110101,101011001100), weight: -1.200000e+00, MPI rank: 0
-[1660851454] [info] Changing reference for WF part 0 on cycle 1491
-[1660851454] [info] Current: (101000110101,101011001100), weight: -4.000000e-01, MPI rank: 0
-[1660851454] [info] New    : (010011111000,101001010011), weight:  1.200000e+00, MPI rank: 0
-[1660851454] [info] Changing reference for WF part 0 on cycle 1523
-[1660851454] [info] Current: (010011111000,101001010011), weight:  4.000000e-01, MPI rank: 0
-[1660851454] [info] New    : (100011110010,101100110100), weight: -1.200000e+00, MPI rank: 1
-[1660851454] [info] Changing reference for WF part 0 on cycle 1536
-[1660851454] [info] Current: (100011110010,101100110100), weight: -4.000000e-01, MPI rank: 1
-[1660851454] [info] New    : (000011111010,111100001100), weight:  1.200000e+00, MPI rank: 1
-[1660851454] [info] Changing reference for WF part 0 on cycle 1555
-[1660851454] [info] Current: (000011111010,111100001100), weight:  4.000000e-01, MPI rank: 1
-[1660851454] [info] New    : (010110110001,010010111100), weight:  1.200000e+00, MPI rank: 1
-[1660851454] [info] Changing reference for WF part 0 on cycle 1569
-[1660851454] [info] Current: (010110110001,010010111100), weight:  4.000000e-01, MPI rank: 1
-[1660851454] [info] New    : (111001110000,000110101101), weight:  1.200000e+00, MPI rank: 1
-[1660851454] [info] Changing reference for WF part 0 on cycle 1634
-[1660851454] [info] Current: (111001110000,000110101101), weight:  4.000000e-01, MPI rank: 1
-[1660851454] [info] New    : (100110110010,011010100101), weight: -1.200000e+00, MPI rank: 0
-[1660851454] [info] Changing reference for WF part 0 on cycle 1677
-[1660851454] [info] Current: (100110110010,011010100101), weight: -4.000000e-01, MPI rank: 0
-[1660851454] [info] New    : (000011111010,101101100100), weight: -1.200000e+00, MPI rank: 0
-[1660851455] [info] Changing reference for WF part 0 on cycle 1704
-[1660851455] [info] Current: (000011111010,101101100100), weight: -4.000000e-01, MPI rank: 0
-[1660851455] [info] New    : (000011110101,010101010011), weight:  1.200000e+00, MPI rank: 1
-[1660851455] [info] Changing reference for WF part 0 on cycle 1708
-[1660851455] [info] Current: (000011110101,010101010011), weight:  4.000000e-01, MPI rank: 1
-[1660851455] [info] New    : (011011010001,000100101111), weight:  1.200000e+00, MPI rank: 1
-[1660851455] [info] Changing reference for WF part 0 on cycle 1711
-[1660851455] [info] Current: (011011010001,000100101111), weight:  4.000000e-01, MPI rank: 1
-[1660851455] [info] New    : (001010110011,110101010010), weight:  1.200000e+00, MPI rank: 1
-[1660851455] [info] Changing reference for WF part 0 on cycle 1730
-[1660851455] [info] Current: (001010110011,110101010010), weight:  4.000000e-01, MPI rank: 1
-[1660851455] [info] New    : (101001010011,100110101010), weight: -1.600000e+00, MPI rank: 0
-[1660851455] [info] Changing reference for WF part 0 on cycle 1766
-[1660851455] [info] Current: (101001010011,100110101010), weight: -4.000000e-01, MPI rank: 0
-[1660851455] [info] New    : (000110111100,111001100010), weight:  1.200000e+00, MPI rank: 0
-[1660851455] [info] Changing reference for WF part 0 on cycle 1811
-[1660851455] [info] Current: (000110111100,111001100010), weight:  4.000000e-01, MPI rank: 0
-[1660851455] [info] New    : (001100111010,111011000010), weight:  1.200000e+00, MPI rank: 0
-[1660851455] [info] Changing reference for WF part 0 on cycle 1833
-[1660851455] [info] Current: (001100111010,111011000010), weight:  4.000000e-01, MPI rank: 0
-[1660851455] [info] New    : (010110110001,001111100001), weight: -1.200000e+00, MPI rank: 1
-[1660851455] [info] Changing reference for WF part 0 on cycle 1866
-[1660851455] [info] Current: (010110110001,001111100001), weight: -4.000000e-01, MPI rank: 1
-[1660851455] [info] New    : (110010011010,010101110001), weight:  1.600000e+00, MPI rank: 0
-[1660851455] [info] Changing reference for WF part 0 on cycle 1909
-[1660851455] [info] Current: (110010011010,010101110001), weight:  4.000000e-01, MPI rank: 0
-[1660851455] [info] New    : (001001111001,111110001000), weight:  1.600000e+00, MPI rank: 0
-[1660851456] [info] Changing reference for WF part 0 on cycle 1979
-[1660851456] [info] Current: (001001111001,111110001000), weight:  4.000000e-01, MPI rank: 0
-[1660851456] [info] New    : (011001011001,110010100110), weight: -1.600000e+00, MPI rank: 0
-[1660851456] [info] maximum cycle number (2000) reached
-[1660851456] [info] +----+-----------------------------+---------------+-----------+----------+
-[1660851456] [info] |                   Top-weighted WF elements for part 0                   |
-[1660851456] [info] +----+-----------------------------+---------------+-----------+----------+
-[1660851456] [info] |    | many-body basis function    | walker number | initiator | MPI rank |
-[1660851456] [info] +====+=============================+===============+===========+==========+
-[1660851456] [info] | 0  | (010110110010,011010011100) |  1.200000e+00 | true      | 1        |
-[1660851456] [info] | 1  | (010000111011,101101011000) |  1.200000e+00 | true      | 0        |
-[1660851456] [info] | 2  | (001101111000,110010110100) | -1.200000e+00 | true      | 0        |
-[1660851456] [info] | 3  | (100101010110,111000101001) | -1.200000e+00 | true      | 0        |
-[1660851456] [info] | 4  | (101101010001,110001110100) | -1.200000e+00 | true      | 0        |
-[1660851456] [info] | 5  | (010011110100,001010101011) | -1.200000e+00 | true      | 0        |
-[1660851456] [info] | 6  | (111010010100,000011100111) | -1.200000e+00 | true      | 0        |
-[1660851456] [info] | 7  | (110001011001,010111100100) |  1.200000e+00 | true      | 0        |
-[1660851456] [info] | 8  | (110100010110,010010110011) | -1.200000e+00 | true      | 0        |
-[1660851456] [info] | 9  | (101100111000,000111011001) |  1.200000e+00 | true      | 0        |
-[1660851456] [info] | 10 | (010101110100,001101001011) |  1.200000e+00 | true      | 0        |
-[1660851456] [info] | 11 | (111001010001,110001110010) |  1.200000e+00 | true      | 1        |
-[1660851456] [info] | 12 | (101000111010,101011010001) |  1.200000e+00 | true      | 1        |
-[1660851456] [info] | 13 | (101101010001,101100011100) | -1.200000e+00 | true      | 1        |
-[1660851456] [info] | 14 | (000111101010,001101000111) |  1.200000e+00 | true      | 1        |
-[1660851456] [info] | 15 | (001010111001,110101001010) | -1.200000e+00 | true      | 1        |
-[1660851456] [info] | 16 | (011010100011,010100111100) |  1.200000e+00 | true      | 1        |
-[1660851456] [info] | 17 | (110010100011,001011011010) |  1.200000e+00 | true      | 1        |
-[1660851456] [info] | 18 | (110010101010,001101001011) |  1.200000e+00 | true      | 1        |
-[1660851456] [info] | 19 | (111011010000,101000100111) |  1.200000e+00 | true      | 1        |
-[1660851456] [info] +----+-----------------------------+---------------+-----------+----------+
+[1665070312] [info] +----------------------------+-------------------------+
+[1665070312] [info] |                 compile definitions                  |
+[1665070312] [info] +----------------------------+-------------------------+
+[1665070312] [info] |  git revision              |  #9bbf1cfa              |
+[1665070312] [info] +----------------------------+-------------------------+
+[1665070312] [info] |  build mode                |  RELEASE                |
+[1665070312] [info] +----------------------------+-------------------------+
+[1665070312] [info] |  compilation timestamp     |  2022-10-06 17:03:04    |
+[1665070312] [info] +----------------------------+-------------------------+
+[1665070312] [info] |  many-body basis function  |  fermion (determinant)  |
+[1665070312] [info] +----------------------------+-------------------------+
+[1665070312] [info] |  walker arithmetic         |  real                   |
+[1665070312] [info] +----------------------------+-------------------------+
+[1665070312] [info] |  Hamiltonian arithmetic    |  real                   |
+[1665070312] [info] +----------------------------+-------------------------+
+[1665070312] [info] |  TCHINT interface          |  disabled               |
+[1665070312] [info] +----------------------------+-------------------------+
+[1665070312] [info] |  rank-resolved logging     |  enabled                |
+[1665070312] [info] +----------------------------+-------------------------+
+[1665070312] [info] Number of MPI ranks in world communicator: 2
+[1665070312] [info] Number of MPI ranks per node: 2
+[1665070312] [info] formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run
+[1665070312] [warning] propagator.min_death_mag was zero, defaulting to the specified value of propagator.min_spawn_mag
+[1665070312] [warning] propagator.max_bloom was zero, defaulting to the specified value of propagator.nadd
+[1665070312] [info] prng (enabled)
+[1665070312] [info] prng.seed                                         | 123
+[1665070312] [info] prng.ngen_block                                   | 10000
+[1665070312] [info] archive (enabled)
+[1665070312] [info] archive.load_path                                 | ""
+[1665070312] [info] archive.save_path                                 | "M7.h5"
+[1665070312] [info] archive.chkpt_path                                | ""
+[1665070312] [info] archive.period                                    | 0
+[1665070312] [info] archive.period_mins                               | 0
+[1665070312] [info] basis (enabled)
+[1665070312] [info] basis.bos_occ_cutoff                              | 255
+[1665070312] [info] particles (enabled)
+[1665070312] [info] particles.nelec                                   | 0
+[1665070312] [info] particles.ms2                                     | inf
+[1665070312] [info] particles.nboson                                  | 0
+[1665070312] [info] wavefunction (enabled)
+[1665070312] [info] wavefunction.nw_init                              | 1.000000e+00
+[1665070312] [info] wavefunction.nroot                                | 1
+[1665070312] [info] wavefunction.fci_init                             | false
+[1665070312] [info] wavefunction.buffers (enabled)
+[1665070312] [info] wavefunction.buffers.store_fac_init               | 1.000000e+00
+[1665070312] [info] wavefunction.buffers.store_expand_fac             | 5.000000e-01
+[1665070312] [info] wavefunction.buffers.comm_fac_init                | 1.000000e+00
+[1665070312] [info] wavefunction.buffers.comm_expand_fac              | 5.000000e-01
+[1665070312] [info] wavefunction.hash_mapping (enabled)
+[1665070312] [info] wavefunction.hash_mapping.remap_ratio             | 2.000000e+00
+[1665070312] [info] wavefunction.hash_mapping.remap_nlookup           | 500
+[1665070312] [info] wavefunction.archive (disabled)
+[1665070312] [info] wavefunction.distribution (enabled)
+[1665070312] [info] wavefunction.distribution.nblock_per_rank         | 6
+[1665070312] [info] wavefunction.distribution.period                  | 10
+[1665070312] [info] wavefunction.distribution.imbalance_thresh        | 5.000000e-02
+[1665070312] [info] reference (enabled)
+[1665070312] [info] reference.mbf_init (enabled)
+[1665070312] [info] reference.mbf_init.fermion                        | []
+[1665070312] [info] reference.mbf_init.boson                          | []
+[1665070312] [info] reference.mbf_init.neel                           | true
+[1665070312] [info] reference.redef_thresh                            | 2.000000e+00
+[1665070312] [info] shift (enabled)
+[1665070312] [info] shift.init                                        | 0.000000e+00
+[1665070312] [info] shift.damp                                        | 5.000000e-01
+[1665070312] [info] shift.target_damp                                 | 0.000000e+00
+[1665070312] [info] shift.period                                      | 5
+[1665070312] [info] shift.ncycle_av                                   | 100
+[1665070312] [info] shift.jump                                        | false
+[1665070312] [info] propagator (enabled)
+[1665070312] [info] propagator.ncycle                                 | 2000
+[1665070312] [info] propagator.stochastic                             | true
+[1665070312] [info] propagator.excit_gen (enabled)
+[1665070312] [info] propagator.excit_gen.hubbard_prefer_double_occ (disabled)
+[1665070312] [info] propagator.nw_target                              | 1.000000e+04
+[1665070312] [info] propagator.max_bloom                              | 0.000000e+00
+[1665070312] [info] propagator.nadd                                   | 0.000000e+00
+[1665070312] [info] propagator.tau_init                               | 1.000000e-03
+[1665070312] [info] propagator.tau_min                                | 1.000000e-05
+[1665070312] [info] propagator.tau_max                                | 1.000000e-02
+[1665070312] [info] propagator.static_tau                             | true
+[1665070312] [info] propagator.static_probs                           | true
+[1665070312] [info] propagator.min_spawn_mag                          | 4.000000e-01
+[1665070312] [info] propagator.min_death_mag                          | 4.000000e-01
+[1665070312] [info] propagator.min_exlvl_prob                         | 1.000000e-03
+[1665070312] [info] propagator.exlvl_probs_init                       | []
+[1665070312] [info] propagator.ndraw_min_for_dynamic                  | 1000
+[1665070312] [info] propagator.period                                 | 10
+[1665070312] [info] propagator.imp_samp_guide.gutzwiller_like (disabled)
+[1665070312] [info] propagator.imp_samp_guide.suppress_multi_occ (disabled)
+[1665070312] [info] propagator.semistochastic (disabled)
+[1665070312] [info] hamiltonian (enabled)
+[1665070312] [info] hamiltonian.fermion (enabled)
+[1665070312] [info] hamiltonian.fermion.fcidump (disabled)
+[1665070312] [info] hamiltonian.fermion.hubbard (enabled)
+[1665070312] [info] hamiltonian.fermion.hubbard.topology              | "ortho"
+[1665070312] [info] hamiltonian.fermion.hubbard.site_shape            | [3, 4]
+[1665070312] [info] hamiltonian.fermion.hubbard.boundary_conds        | [1, 1]
+[1665070312] [info] hamiltonian.fermion.hubbard.repulsion             | 4.000000e+00
+[1665070312] [info] hamiltonian.fermion.heisenberg (disabled)
+[1665070312] [info] hamiltonian.fermion.spin_penalty_j                | 0.000000e+00
+[1665070312] [info] hamiltonian.ladder (disabled)
+[1665070312] [info] hamiltonian.boson (disabled)
+[1665070312] [info] stats (enabled)
+[1665070312] [info] stats.path                                        | "M7.stats"
+[1665070312] [info] stats.period                                      | 5
+[1665070312] [info] stats.parallel                                    | false
+[1665070312] [info] inst_ests (disabled)
+[1665070312] [info] mae (disabled)
+[1665070312] [info] Fermi-Hubbard Hamiltonian initialized with U=4; orthogonal lattice with shape [3, 4] and boundary conds [1, 1]
+[1665070312] [info] 2*Ms value not defined by configuration document or Hamiltonian, defaulting to lowest valid positive value
+[1665070312] [info] Initially allocating 64.000000KB per rank for each communicating buffer of "" (send and recv)
+[1665070312] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
+[1665070312] [info] Initially allocating 160.000000KB per rank for "wavefunction" buffer
+[1665070312] [info] Initially allocating 480B per rank for each communicating buffer of "wavefunction" (send and recv)
+[1665070312] [info] Distributing wavefunction rows in 12 blocks
+[1665070312] [info] Listening for changes to interactive variable "nwalker_target" in file "nwalker_target.var"
+[1665070312] [info] +------------------------+---------------------------+----------------+
+[1665070312] [info] |                   Excitation generation breakdown                   |
+[1665070312] [info] +------------------------+---------------------------+----------------+
+[1665070312] [info] |  Excitation Signature  |  Description              |  Probability   |
+[1665070312] [info] +========================+===========================+================+
+[1665070312] [info] |  1100                  |  uniform hubbard hopping  |  1.000000e+00  |
+[1665070312] [info] +------------------------+---------------------------+----------------+
+[1665070312] [info] Initializing magnitude logger with max_bloom 0 for 1 excitation levels
+[1665070312] [info] Dynamic tau optimization: false
+[1665070312] [info] Dynamic excitation level probability optimization: false
+[1665070312] [info] Initial reference ONV for WF part 0 is (101010101010,010101010101) with energy 0.000000e+00 
+[1665070312] [info] Listening for changes to interactive variable "exit" in file "exit.var"
+[1665070312] [info] not reading archive from file
+[1665070312] [info] saving archive to file "M7.h5" upon termination of the solver loop
+[1665070312] [info] not dumping checkpoint archives
+[1665070312] [info] Replicating walker populations: false
+[1665070312] [info] Global PRNG state checksum of stochastic propagator: 3cb10c1fc3537728
+[1665070312] [info] Beginning solver loop...
+[1665070312] [info] Entering "variable shift mode (WF part 0)" epoch on cycle 531 
+[1665070312] [info] Variable shift triggered for WF part 0. Cycle 530 nw: 9859.799999999734, cycle 531 nw: 10026.999999999734
+[1665070313] [info] Changing reference for WF part 0 on cycle 873
+[1665070313] [info] Current: (101010101010,010101010101), weight:  4.000000e-01, MPI rank: 0
+[1665070313] [info] New    : (101101110000,101010010110), weight: -1.200000e+00, MPI rank: 0
+[1665070314] [info] Changing reference for WF part 0 on cycle 930
+[1665070314] [info] Current: (101101110000,101010010110), weight: -4.000000e-01, MPI rank: 0
+[1665070314] [info] New    : (100110111000,011001010101), weight: -1.200000e+00, MPI rank: 0
+[1665070314] [info] Changing reference for WF part 0 on cycle 949
+[1665070314] [info] Current: (100110111000,011001010101), weight: -4.000000e-01, MPI rank: 0
+[1665070314] [info] New    : (010011110001,001100010111), weight: -1.200000e+00, MPI rank: 1
+[1665070314] [info] Changing reference for WF part 0 on cycle 964
+[1665070314] [info] Current: (010011110001,001100010111), weight: -4.000000e-01, MPI rank: 1
+[1665070314] [info] New    : (010111011000,100100100111), weight:  1.200000e+00, MPI rank: 1
+[1665070314] [info] Changing reference for WF part 0 on cycle 991
+[1665070314] [info] Current: (010111011000,100100100111), weight:  4.000000e-01, MPI rank: 1
+[1665070314] [info] New    : (100110010110,110001101001), weight: -1.600000e+00, MPI rank: 0
+[1665070314] [info] Changing reference for WF part 0 on cycle 1044
+[1665070314] [info] Current: (100110010110,110001101001), weight: -4.000000e-01, MPI rank: 0
+[1665070314] [info] New    : (100101110100,011010001011), weight: -1.200000e+00, MPI rank: 1
+[1665070314] [info] Changing reference for WF part 0 on cycle 1099
+[1665070314] [info] Current: (100101110100,011010001011), weight: -4.000000e-01, MPI rank: 1
+[1665070314] [info] New    : (001011011010,110101100100), weight:  1.200000e+00, MPI rank: 0
+[1665070314] [info] Changing reference for WF part 0 on cycle 1162
+[1665070314] [info] Current: (001011011010,110101100100), weight:  4.000000e-01, MPI rank: 0
+[1665070314] [info] New    : (010100111010,011110001001), weight: -1.200000e+00, MPI rank: 0
+[1665070314] [info] Changing reference for WF part 0 on cycle 1188
+[1665070314] [info] Current: (010100111010,011110001001), weight: -4.000000e-01, MPI rank: 0
+[1665070314] [info] New    : (010101110100,101011000101), weight: -1.200000e+00, MPI rank: 1
+[1665070314] [info] Changing reference for WF part 0 on cycle 1209
+[1665070314] [info] Current: (010101110100,101011000101), weight: -4.000000e-01, MPI rank: 1
+[1665070314] [info] New    : (011110000110,000111110100), weight:  1.600000e+00, MPI rank: 0
+[1665070314] [info] Changing reference for WF part 0 on cycle 1222
+[1665070314] [info] Current: (011110000110,000111110100), weight:  4.000000e-01, MPI rank: 0
+[1665070314] [info] New    : (101110010100,001001111010), weight: -1.200000e+00, MPI rank: 0
+[1665070315] [info] Changing reference for WF part 0 on cycle 1225
+[1665070315] [info] Current: (101110010100,001001111010), weight: -4.000000e-01, MPI rank: 0
+[1665070315] [info] New    : (010100111001,100010100111), weight:  1.200000e+00, MPI rank: 0
+[1665070315] [info] Changing reference for WF part 0 on cycle 1246
+[1665070315] [info] Current: (010100111001,100010100111), weight:  4.000000e-01, MPI rank: 0
+[1665070315] [info] New    : (101101110000,110010100101), weight:  1.200000e+00, MPI rank: 0
+[1665070315] [info] Changing reference for WF part 0 on cycle 1272
+[1665070315] [info] Current: (101101110000,110010100101), weight:  4.000000e-01, MPI rank: 0
+[1665070315] [info] New    : (011001111000,010100100111), weight: -1.200000e+00, MPI rank: 0
+[1665070315] [info] Changing reference for WF part 0 on cycle 1295
+[1665070315] [info] Current: (011001111000,010100100111), weight: -4.000000e-01, MPI rank: 0
+[1665070315] [info] New    : (000110111010,100001101101), weight: -1.200000e+00, MPI rank: 0
+[1665070315] [info] Changing reference for WF part 0 on cycle 1298
+[1665070315] [info] Current: (000110111010,100001101101), weight: -4.000000e-01, MPI rank: 0
+[1665070315] [info] New    : (010011111000,110100010110), weight: -1.200000e+00, MPI rank: 0
+[1665070315] [info] Changing reference for WF part 0 on cycle 1311
+[1665070315] [info] Current: (010011111000,110100010110), weight: -4.000000e-01, MPI rank: 0
+[1665070315] [info] New    : (101010110100,010011101010), weight: -1.200000e+00, MPI rank: 0
+[1665070315] [info] Changing reference for WF part 0 on cycle 1472
+[1665070315] [info] Current: (101010110100,010011101010), weight: -4.000000e-01, MPI rank: 0
+[1665070315] [info] New    : (100001111001,011110100100), weight:  1.200000e+00, MPI rank: 0
+[1665070315] [info] Changing reference for WF part 0 on cycle 1479
+[1665070315] [info] Current: (100001111001,011110100100), weight:  4.000000e-01, MPI rank: 0
+[1665070315] [info] New    : (100111010010,000110101101), weight: -1.200000e+00, MPI rank: 0
+[1665070315] [info] Changing reference for WF part 0 on cycle 1493
+[1665070315] [info] Current: (100111010010,000110101101), weight: -4.000000e-01, MPI rank: 0
+[1665070315] [info] New    : (010110111000,010101100011), weight:  1.200000e+00, MPI rank: 1
+[1665070315] [info] Changing reference for WF part 0 on cycle 1513
+[1665070315] [info] Current: (010110111000,010101100011), weight:  4.000000e-01, MPI rank: 1
+[1665070315] [info] New    : (100011110010,011110011000), weight: -1.200000e+00, MPI rank: 1
+[1665070316] [info] Changing reference for WF part 0 on cycle 1613
+[1665070316] [info] Current: (100011110010,011110011000), weight: -4.000000e-01, MPI rank: 1
+[1665070316] [info] New    : (001110111000,010011011001), weight:  1.200000e+00, MPI rank: 1
+[1665070316] [info] Changing reference for WF part 0 on cycle 1635
+[1665070316] [info] Current: (001110111000,010011011001), weight:  4.000000e-01, MPI rank: 1
+[1665070316] [info] New    : (000011110101,001110011010), weight: -1.600000e+00, MPI rank: 0
+[1665070316] [info] Changing reference for WF part 0 on cycle 1684
+[1665070316] [info] Current: (000011110101,001110011010), weight: -4.000000e-01, MPI rank: 0
+[1665070316] [info] New    : (100001111010,001111000011), weight:  1.200000e+00, MPI rank: 0
+[1665070316] [info] Changing reference for WF part 0 on cycle 1740
+[1665070316] [info] Current: (100001111010,001111000011), weight:  4.000000e-01, MPI rank: 0
+[1665070316] [info] New    : (010001111001,111100000011), weight: -1.200000e+00, MPI rank: 0
+[1665070316] [info] Changing reference for WF part 0 on cycle 1833
+[1665070316] [info] Current: (010001111001,111100000011), weight: -4.000000e-01, MPI rank: 0
+[1665070316] [info] New    : (011100110100,101001101001), weight: -1.200000e+00, MPI rank: 0
+[1665070317] [info] Changing reference for WF part 0 on cycle 1856
+[1665070317] [info] Current: (011100110100,101001101001), weight: -4.000000e-01, MPI rank: 0
+[1665070317] [info] New    : (000110110110,111001001001), weight: -1.200000e+00, MPI rank: 1
+[1665070317] [info] Changing reference for WF part 0 on cycle 1878
+[1665070317] [info] Current: (000110110110,111001001001), weight: -4.000000e-01, MPI rank: 1
+[1665070317] [info] New    : (010010111001,101001100011), weight:  1.200000e+00, MPI rank: 1
+[1665070317] [info] Changing reference for WF part 0 on cycle 1899
+[1665070317] [info] Current: (010010111001,101001100011), weight:  4.000000e-01, MPI rank: 1
+[1665070317] [info] New    : (001011110100,111000111000), weight: -1.200000e+00, MPI rank: 1
+[1665070317] [info] Changing reference for WF part 0 on cycle 1919
+[1665070317] [info] Current: (001011110100,111000111000), weight: -4.000000e-01, MPI rank: 1
+[1665070317] [info] New    : (010010110101,101101100100), weight:  1.600000e+00, MPI rank: 0
+[1665070317] [info] maximum cycle number (2000) reached
+[1665070317] [info] saving "propagator" to archive
+[1665070317] [info] +----+-----------------------------+---------------+-----------+-----------+----------+
+[1665070317] [info] |                         Top-weighted WF elements for part 0                         |
+[1665070317] [info] +----+-----------------------------+---------------+-----------+-----------+----------+
+[1665070317] [info] |    | many-body basis function    | walker number | initiator | semistoch | MPI rank |
+[1665070317] [info] +====+=============================+===============+===========+===========+==========+
+[1665070317] [info] | 0  | (111000111000,011110010100) | -1.600000e+00 | true      | false     | 1        |
+[1665070317] [info] | 1  | (100111110000,011001001011) | -1.200000e+00 | true      | false     | 1        |
+[1665070317] [info] | 2  | (100100111001,011101011000) | -1.200000e+00 | true      | false     | 0        |
+[1665070317] [info] | 3  | (101000111001,010110000111) | -1.200000e+00 | true      | false     | 0        |
+[1665070317] [info] | 4  | (110101011000,001110101100) |  1.200000e+00 | true      | false     | 0        |
+[1665070317] [info] | 5  | (000101111010,101110001100) |  1.200000e+00 | true      | false     | 0        |
+[1665070317] [info] | 6  | (010011011010,101010100101) |  1.200000e+00 | true      | false     | 0        |
+[1665070317] [info] | 7  | (101011101000,001011001110) |  1.200000e+00 | true      | false     | 0        |
+[1665070317] [info] | 8  | (110100011100,101011000011) |  1.200000e+00 | true      | false     | 0        |
+[1665070317] [info] | 9  | (100100111010,101011001001) |  1.200000e+00 | true      | false     | 0        |
+[1665070317] [info] | 10 | (000001111110,001100101011) | -1.200000e+00 | true      | false     | 0        |
+[1665070317] [info] | 11 | (010101010011,100101101100) |  1.200000e+00 | true      | false     | 0        |
+[1665070317] [info] | 12 | (000111100110,100100001111) | -1.200000e+00 | true      | false     | 1        |
+[1665070317] [info] | 13 | (010001101101,110100110010) |  1.200000e+00 | true      | false     | 1        |
+[1665070317] [info] | 14 | (100010011110,110101000011) |  1.200000e+00 | true      | false     | 1        |
+[1665070317] [info] | 15 | (101110100100,101010110001) | -1.200000e+00 | true      | false     | 1        |
+[1665070317] [info] | 16 | (110010101001,001100001111) | -1.200000e+00 | true      | false     | 1        |
+[1665070317] [info] | 17 | (101000100111,001011110001) |  1.200000e+00 | true      | false     | 1        |
+[1665070317] [info] | 18 | (101011001010,010110000111) |  1.200000e+00 | true      | false     | 1        |
+[1665070317] [info] | 19 | (000011011110,101101100001) |  1.200000e+00 | true      | false     | 1        |
+[1665070317] [info] +----+-----------------------------+---------------+-----------+-----------+----------+
