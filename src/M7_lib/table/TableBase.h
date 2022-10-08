@@ -7,6 +7,7 @@
 
 #include <set>
 #include <M7_lib/io/Logging.h>
+#include <numeric>
 #include "Buffer.h"
 
 struct RowTransfer {
@@ -36,47 +37,55 @@ struct RowProtector;
 
 /**
  * Base class for all row-contiguous data in the program.
+ *
+ * The data layout of a Table is defined by a class derived from Row, but this templated dependence is not included
+ * here in this base class. While the fine detail of field offsets etc is not needed here, we need to know the basics,
+ * i.e. what amount of memory does a single row require. This is always padded to a whole number of system words.
+ * A system word is sizeof(size_t) bytes in length
+ *
+ * So as to avoid confusion between the Row class (and its subclasses) and the data buffer slice used for writing
+ * and reading the fields of a Row - the latter are termed "slots". Slots can be filled with a "record", that is the
+ * raw data contents managed by a Row-derived object, or they can be empty, in which case they are denoted as "free
+ * slots".
+ *
+ * The contents of the Table are ultimately stored in a Buffer, which is just a wrapper for a dynamically
+ * allocated array of buf_t elements. Buffers can be shared by many Tables though, so a table is instead
+ * given access to a "window" of that Buffer. All tables which have windows on the same buffer have the ability
+ * to resize, and in response to this, the Buffer will ensure that table records are moved to new positions in the
+ * resized buffer, and that each of the other windows are pointed to the beginning of that data.
+ *
+ * The number of slots is determined by the size of the currently-allocated buffer window. This is analogous to the
+ * capacity of a std::vector. The "high water mark" (m_hwm) is the analog of the size() of a std::vector. The number of
+ * records is given by the difference of the high water mark and the number of free slots
+ *
+ * the m_slot_size member of m_bw is the definitive length of the Table's row in bytes, and the Row class ensures
+ * that this is always an integer multiple of the system word length
  */
 struct TableBase {
     /**
-     * The data layout of a Table is defined by a class derived from Row, but this templated dependence is not included
-     * in this base class. While the fine detail of field offsets etc is not needed here, we need to know the basics,
-     * i.e. what amount of memory does a single row require. This is always padded to a whole number of system words.
-     * A system word is sizeof(uint_t) bytes in length
-     *
-     * So as to avoid confusion between the Row class (and its subclasses) and the data buffer slice used for writing
-     * and reading the fields of a Row - the latter are termed "slots". Records are nothing other than regions of a
-     * buf_t vector, and have no direct association with the fields which can be stored within them
-     *
-     * The contents of the Table are ultimately stored in a Buffer, which is just a wrapper for a dynamically
-     * allocated array of buf_t elements. Buffers can be shared by many Tables though, so a table is instead
-     * given access to a "window" of that Buffer. All tables which have windows on the same buffer have the ability
-     * to resize, and in response to this, the Buffer will ensure that table records are moved to new positions in the
-     * resized buffer, and that each of the other windows are pointed to the beginning of that data.
-     *
-     * the m_record_size member of m_bw is the definitive length of the Table's row in bytes, and the Row class ensures
-     * that this is always an integer multiple of the system word length
+     * this Table's portion of the raw data buffer possibly shared by many Tables
      */
     Buffer::Window m_bw;
     /**
-     * "high water mark" is result of the next call to push_back. Think of this as the Table's size by analogy to
-     * v_t
+     * "high water mark" is the number of slots in use (free slots and records)
      */
     uint_t m_hwm = 0ul;
     /**
-     * indices of vacated records below the high water mark should be pushed into this stack to allow reuse
+     * indices of freed slots, i.e. those slots below the high water mark that have been cleared
      */
-    std::stack<uint_t> m_empty_records;
+    std::stack<uint_t> m_freed_slots;
+    /**
+     * a constant-time lookup for whether a given slot is freed i.e. true if it appears in m_freed_slots
+     */
+    std::vector<bool> m_is_freed_slot;
+
+
     /**
      * buffered space for communication in the event of rank reallocation, instantiate on first transfer if required
      */
     std::unique_ptr<RowTransfer> m_transfer = nullptr;
     /**
-     * save a buffer of zeros for fast memcmp to determine whether a record is cleared
-     */
-    const v_t<char> m_null_record_string;
-    /**
-     * if a record is to be protected, its index must appear as a key in the following map.
+     * if a record is to be protected, its slot index must appear as a key in the following map.
      * the value associated with the key is the "protection level" of the record. if one object requires that a record i
      * not be deleted, then {i: 1} appears in the map. If a second object requires that record i not be deleted,
      * then the key-value pair is looked up, then the value is incremented so that {i: 2} appears in the map. If then
@@ -87,8 +96,7 @@ struct TableBase {
      */
     mutable std::map<uint_t, uint_t> m_protected_records;
 
-
-    TableBase(uint_t record_size);
+    TableBase(uint_t slot_size);
 
 protected:
     /**
@@ -100,12 +108,12 @@ protected:
      *  ref to this
      */
     TableBase& operator=(const TableBase& other) {
-        if (other.nrecord()) {
-            resize(other.nrecord(), 0.0);
+        if (other.nslot()) {
+            resize(other.nslot(), 0.0);
             m_bw = other.m_bw;
         }
         m_hwm = other.m_hwm;
-        m_empty_records = other.m_empty_records;
+        m_freed_slots = other.m_freed_slots;
         m_protected_records = other.m_protected_records;
         return *this;
     }
@@ -114,10 +122,10 @@ public:
     TableBase(const TableBase& other);
 
     /**
-     * the number of records in the BufferWindow. Think of this as the Table's capacity by analogy to std::vector
+     * the total number of slots in the BufferWindow. Think of this as the Table's capacity by analogy to std::vector
      */
-    uint_t nrecord() const {
-        return m_bw.m_nrecord;
+    uint_t nslot() const {
+        return m_bw.m_nslot;
     }
 
     /**
@@ -130,9 +138,9 @@ public:
      */
     bool operator==(const TableBase& other) const {
         if (this==&other) return true;
-        if (nrecord() != other.nrecord()) return false;
+        if (nslot() != other.nslot()) return false;
         if (m_hwm!=other.m_hwm) return false;
-        return std::memcmp(begin(), other.begin(), m_hwm * record_size()) == 0;
+        return std::memcmp(begin(), other.begin(), m_hwm * slot_size()) == 0;
     }
 
     bool operator!=(const TableBase& other) const {
@@ -141,8 +149,8 @@ public:
     /**
      * the size requirement of a single row in bytes (always an integer number of system words)
      */
-    uint_t record_size() const {
-        return m_bw.m_record_size;
+    uint_t slot_size() const {
+        return m_bw.m_slot_size;
     }
 
     /**
@@ -158,20 +166,20 @@ public:
     const buf_t *begin() const;
 
     /**
-     * @param irec
-     *  record index
+     * @param islot
+     *  slot index
      * @return
-     *  pointer to the beginning of the indexed record
+     *  pointer to the beginning of the indexed slot
      */
-    buf_t *begin(uint_t irec);
+    buf_t *begin(uint_t islot);
 
     /**
-     * @param irec
-     *  record index
+     * @param islot
+     *  slot index
      * @return
-     *  const pointer to the beginning of the indexed record
+     *  const pointer to the beginning of the indexed slot
      */
-    const buf_t *begin(uint_t irec) const;
+    const buf_t *begin(uint_t islot) const;
 
     /**
      * Associate the table with a buffer by assigning the table an available BufferWindow
@@ -181,26 +189,20 @@ public:
     void set_buffer(Buffer *buffer);
 
     /**
-     * @return
-     *  true if the high water mark can't be increased without first increasing the number of records
-     */
-    bool is_full() const;
-
-    /**
      * increase the high water mark, expand first if necessary
-     * @param nrec
-     *  number of records to make accessible
+     * @param nslot
+     *  number of new slots to create
      * @return
-     *  index of the first newly-accessible record
+     *  index of the newly-accessible record
      */
-    uint_t push_back(uint_t nrec = 1);
+    uint_t push_back(uint_t nslot=1ul);
 
     /**
-     * If there are free records on the m_empty_records stack: pop one and use it, else: push_back
+     * If there are indices on the m_free_slots stack: pop one and use it, else: push_back
      * @return
-     *  index of unused record
+     *  index of free slot
      */
-    uint_t get_empty_record();
+    uint_t get_free_slot();
 
     /**
      * clear the entire table only if it contains no protected records, else fatal error
@@ -208,11 +210,16 @@ public:
     virtual void clear();
 
     /**
-     * clear the indexed record only if it is not protected, else fatal error
-     * @param irec
-     *  index of record to clear
+     * clear the byte string of the indexed slot and designate it "freed". If it is already freed or protected, a fatal
+     * error is thrown
+     * @param islot
+     *  index of slot to free
      */
-    virtual void clear(uint_t irec);
+    virtual void free(uint_t islot);
+
+    bool empty() const;
+
+    bool is_freed(uint_t islot) const;
 
     /**
      * @return
@@ -221,21 +228,7 @@ public:
     uint_t bw_size() const;
 
     /**
-     * @return
-     *  true if entire buffer window is zero (even above m_hwm)
-     */
-    bool is_cleared() const;
-
-    /**
-     * @param irec
-     *  record index to check
-     * @return
-     *  true if entire record buffer is zero
-     */
-    bool is_cleared(uint_t irec) const;
-
-    /**
-     * call the resize method on the buffer window and reflect the reallocation in m_nrecord
+     * call the resize method on the buffer window and reflect the reallocation in m_nslot
      * @param nrec
      *  minimum number of records in the new buffer.
      */
@@ -253,7 +246,7 @@ public:
      * @param irecs
      *  all record indices marked for erasure
      */
-    void clear_records(const uintv_t& irecs);
+    void free_records(const uintv_t& irecs);
 
     /**
      * in some derived classes, there is more to adding new records than simply copying their contents into the hwm. In
@@ -319,12 +312,12 @@ public:
      * @param src
      *  source table which must have the same record size. should also have the same overall data layout but this is not
      *  verified at this level
-     * @param irec_src
+     * @param islot_src
      *  record in the source table to be copied
-     * @param irec_dst
+     * @param islot_dst
      *  record in this table to which the source record is copied
      */
-    void copy_record_in(const TableBase& src, uint_t irec_src, uint_t irec_dst);
+    void copy_record_in(const TableBase& src, uint_t islot_src, uint_t islot_dst);
 
     /**
      * swap record contents via std::swap_ranges
@@ -337,65 +330,70 @@ public:
 
     /**
      * increase protection level of the record. insert key-value pair first if non-existent
-     * @param irec
-     *  record index to protect
+     * @param islot
+     *  slot index of the record to protect
      */
-    void protect(uint_t irec) const {
-        auto it = m_protected_records.find(irec);
-        if (it == m_protected_records.end()) m_protected_records.insert({irec, 1ul});
+    void protect(uint_t islot) const {
+        DEBUG_ASSERT_LT(islot, m_hwm, "slot index OOB");
+        DEBUG_ASSERT_FALSE(m_is_freed_slot[islot], "cannot protect a freed slot");
+        auto it = m_protected_records.find(islot);
+        if (it == m_protected_records.end()) m_protected_records.insert({islot, 1ul});
         else ++it->second;
     }
 
     /**
-     * @param irec
-     *  record index
+     * @param islot
+     *  slot index
      * @return
-     *  number of protect(irec) calls
+     *  number of protect(islot) calls - number of release(islot) calls
      */
-    uint_t protection_level(uint_t irec) const {
-        auto it = m_protected_records.find(irec);
+    uint_t protection_level(uint_t islot) const {
+        DEBUG_ASSERT_LT(islot, m_hwm, "slot index OOB");
+        auto it = m_protected_records.find(islot);
         if (it == m_protected_records.end()) return 0ul;
         else return it->second;
     }
 
     /**
-     * @param irec
-     *  record index
+     * @param islot
+     *  slot index of record
      * @return
      *  true if the protection level is non-zero
      */
-    bool is_protected(uint_t irec) const {
-        return protection_level(irec);
+    bool is_protected(uint_t islot) const {
+        return protection_level(islot);
     }
 
     /**
      * remove protection from the indexed record
-     * @param irec
+     * @param islot
+     *  slot index of protected record
      */
-    void release(uint_t irec) const {
-        DEBUG_ASSERT_TRUE(protection_level(irec), "can't release an unprotected row");
-        auto it = m_protected_records.find(irec);
+    void release(uint_t islot) const {
+        DEBUG_ASSERT_TRUE(protection_level(islot), "can't release an unprotected row");
+        auto it = m_protected_records.find(islot);
         if (it->second==1ul) m_protected_records.erase(it);
         --it->second;
     }
 
     /**
+     * debugging method to ensure consistency of the two structures keeping track of the free status of slots
      * @return
-     *  the stack of empty record indices as a set
+     *  true is m_free_slots member is consistent with m_is_free_slot
      */
-    std::set<uint_t> empty_records_set() const;
+    bool freed_slots_consistent() const;
 
     /**
-     * "Location" class which describes the location of a record in a distributed table i.e. by a local record index and
+     * "Location" class which describes the location of a record in a distributed table i.e. by a local slot index and
      * an MPI rank index
      */
     struct Loc {
         /**
-         * rank and record indices
+         * rank and slot indices
          */
-        const uint_t m_irank, m_irec;
+        const uint_t m_irank, m_islot;
 
-        Loc(uint_t irank, uint_t irec);
+        Loc(uint_t irank, uint_t islot);
 
         /**
          * @return
@@ -404,13 +402,13 @@ public:
         operator bool() const;
 
         operator uintv_t() const {
-            if (is_mine()) return {m_irec};
+            if (is_mine()) return {m_islot};
             return {};
         }
 
         /**
          * @return
-         *  true if MPI rank index matches bcast-shared rank of identified record
+         *  true if MPI rank index matches bcast-shared rank of identified slot
          */
         bool is_mine() const;
 
@@ -421,9 +419,9 @@ public:
 
     /**
      * When Field-based data structure is introduced in the derived classes, this method is capable of displaying
-     * human-readable columns. here though, we don't know the data layout, so return bytes as integers
+     * human-readable columns. here though, we don't know the data layout, so return slot bytes as integers
      * @param ordering
-     *  optional indices to reorder table on the fly as it is printed, without the need to physically reorder records
+     *  optional indices to reorder table on the fly as it is printed, without the need to physically reorder slots
      * @return
      *  string representing table's contents
      */
@@ -432,14 +430,14 @@ public:
     /**
      * gather contents of another table over all MPI ranks into this table on all ranks
      * @param src
-     *  table whose records are to be gathered.
+     *  table whose slots are to be gathered.
      */
     virtual void all_gatherv(const TableBase& src);
 
     /**
      * gather contents of another table over all MPI ranks into this table on the given rank
      * @param src
-     *  table whose records are to be gathered.
+     *  table whose slots are to be gathered.
      * @param irank
      *  index of the only rank in the communicator to receive the data from src
      */
@@ -453,9 +451,9 @@ public:
 
     /**
      * @return
-     *  number of records below the high water mark that aren't free
+     *  number of slots below the high water mark that aren't free
      */
-    uint_t nrecord_nonempty() const;
+    uint_t nrecord() const;
 
     str_t name() const {
         return m_bw.name();

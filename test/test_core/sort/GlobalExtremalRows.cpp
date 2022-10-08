@@ -129,7 +129,7 @@ TEST(GlobalExtremalRows, FindAsc) {
     gxr.find(nrow_to_find);
 
     ASSERT_TRUE(mpi::nrank() > 0 || gxr.m_ninclude.m_reduced == nrow_to_find);
-    ASSERT_EQ(gxr.m_ninclude.m_reduced, std::min(nrow_to_find, mpi::all_sum(table.nrecord_nonempty())));
+    ASSERT_EQ(gxr.m_ninclude.m_reduced, std::min(nrow_to_find, mpi::all_sum(table.nrecord())));
 
     /*
      * the global sort only happens on the root rank
@@ -167,7 +167,7 @@ TEST(GlobalExtremalRows, FindDesc) {
     gxr.find(nrow_to_find);
 
     ASSERT_TRUE(mpi::nrank() > 0 || gxr.m_ninclude.m_reduced == nrow_to_find);
-    ASSERT_EQ(gxr.m_ninclude.m_reduced, std::min(nrow_to_find, mpi::all_sum(table.nrecord_nonempty())));
+    ASSERT_EQ(gxr.m_ninclude.m_reduced, std::min(nrow_to_find, mpi::all_sum(table.nrecord())));
 
     /*
      * the global sort only happens on the root rank

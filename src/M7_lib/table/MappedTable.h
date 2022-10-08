@@ -91,7 +91,7 @@ struct Lookup {
         return m_prev!=m_bucket.cend();
     }
 
-    uint_t irecord() const {
+    uint_t islot() const {
         if (!*this) return ~0ul;
         auto it = m_prev;
         ++it;
@@ -221,7 +221,7 @@ public:
         /*
          * do steps 1 and 2.
          */
-        TableBase::clear(lookup.irecord());
+        TableBase::free(lookup.islot());
         /*
          * for step 3 we must convert to non-const
          */
@@ -243,7 +243,7 @@ public:
     void insert(const key_field_t &key, row_t& row) {
         DEBUG_ASSERT_TRUE(Table<row_t>::associated(row), "row object not associated with this table");
         DEBUG_ASSERT_FALSE(uncounted_lookup(key, row), "cannot insert when the key already exists in the table");
-        auto irow = TableBase::get_empty_record();
+        auto irow = TableBase::get_free_slot();
         auto &bucket = m_buckets[key.hash() % nbucket()];
         bucket.insert_after(bucket.before_begin(), irow);
         row.jump(irow);
@@ -268,19 +268,19 @@ public:
 
     /**
      * for an already-inserted row, map it to the hash table defined by the buckets arg
-     * @param irow
+     * @param islot
      *  index of the row to be mapped
      * @param buckets
      *  vector of buckets into which the row indices are stored
      */
-    void post_insert_buckets(uint_t irow, v_t<std::forward_list<uint_t>> &buckets) {
-        DEBUG_ASSERT_FALSE(TableBase::is_cleared(irow), "cannot map to a cleared row");
-        m_row.jump(irow);
+    void post_insert_buckets(uint_t islot, v_t<std::forward_list<uint_t>> &buckets) {
+        DEBUG_ASSERT_FALSE(TableBase::m_is_freed_slot[islot], "cannot map to a freed slot");
+        m_row.jump(islot);
         // row mustn't have already been added
         DEBUG_ASSERT_FALSE(uncounted_lookup(KeyField<row_t>::get(m_row), buckets, m_row),
                            "cannot map to a row which is already in the hash table");
         auto &bucket = buckets[KeyField<row_t>::get(m_row).hash() % buckets.size()];
-        bucket.insert_after(bucket.before_begin(), irow);
+        bucket.insert_after(bucket.before_begin(), islot);
     }
     /**
      * applies the general case by supplying the current m_buckets vector to the post_insert_buckets method

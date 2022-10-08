@@ -307,9 +307,9 @@ void Rdms::make_contribs(const Spawn& recv_row, const Walker& dst_row, const Pro
 
 bool Rdms::all_stores_empty() const {
     for (auto& ranksig: m_rdm_ranksigs)
-        if (!m_rdms[ranksig]->m_store.is_cleared())
+        if (!m_rdms[ranksig]->m_store.empty())
             return false;
-    if (m_fock_rdm4) return m_fock_rdm4->m_store.is_cleared();
+    if (m_fock_rdm4) return m_fock_rdm4->m_store.empty();
     return true;
 }
 

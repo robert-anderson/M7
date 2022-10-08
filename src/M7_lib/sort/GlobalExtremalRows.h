@@ -248,7 +248,7 @@ public:
      */
     void find(uint_t nrow) {
         update_ninclude();
-        if (!mpi::all_sum(m_lxr.m_table.nrecord_nonempty())) return;
+        if (!mpi::all_sum(m_lxr.m_table.nrecord())) return;
         find_required_local_rows(nrow);
         load_values_for_sorting();
         sort(nrow);

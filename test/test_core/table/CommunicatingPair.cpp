@@ -15,8 +15,8 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
 
     comm_pair.resize(1ul, 0.0);
 
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) ASSERT_EQ(comm_pair.send(irank).nrecord(), 1ul);
-    ASSERT_EQ(comm_pair.recv().nrecord(), mpi::nrank());
+    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) ASSERT_EQ(comm_pair.send(irank).nslot(), 1ul);
+    ASSERT_EQ(comm_pair.recv().nslot(), mpi::nrank());
 
     for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
         auto& row = comm_pair.send(irank).m_row;

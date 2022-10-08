@@ -21,7 +21,7 @@ FciqmcCalculation::FciqmcCalculation(const conf::Document &opts) :
     m_wf.create_row(0, ref_mbf, ref_energy, v_t<bool>(m_wf.npart(), true));
     if (ref_loc.is_mine()){
         auto ref_walker = m_wf.m_store.m_row;
-        ref_walker.jump(ref_loc.m_irec);
+        ref_walker.jump(ref_loc.m_islot);
         for (uint_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
             m_wf.set_weight(ref_walker, ipart, opts.m_wavefunction.m_nw_init);
     }

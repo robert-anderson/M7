@@ -55,7 +55,7 @@ bool MappedTableBase::all_nonzero_records_mapped(const TableBase &source) const 
     // then go through table, if the row is non-zero, its index should be in the set.
     for (uint_t irow=0ul; irow<source.m_hwm; ++irow){
         bool in_set = set.find(irow)!=set.end();
-        if (source.is_cleared(irow)==in_set) return false;
+        if (source.is_freed(irow) == in_set) return false;
     }
     return true;
 }

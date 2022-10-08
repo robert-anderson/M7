@@ -33,7 +33,7 @@ public:
 
     bool all_stores_empty() const {
 //        for (auto& ranksig: m_active_ranksigs)
-//            if (!m_rdms[ranksig]->m_store.is_cleared())
+//            if (!m_rdms[ranksig]->m_store.is_freed())
 //                return false;
             return true;
     }

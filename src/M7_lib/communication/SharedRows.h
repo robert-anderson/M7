@@ -139,7 +139,7 @@ namespace shared_rows {
 
         void redefine(TableBase::Loc loc) {
             clear();
-            if (loc.is_mine()) add_(loc.m_irec);
+            if (loc.is_mine()) add_(loc.m_islot);
             full_update();
         }
     };

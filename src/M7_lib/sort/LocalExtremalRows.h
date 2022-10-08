@@ -102,7 +102,7 @@ struct LocalExtremalRows {
     }
 
     uint_t nrow_nonzero() const {
-        DEBUG_ASSERT_EQ(m_xinds.m_nind, m_table.nrecord_nonempty(), "inconsistent number of indices");
+        DEBUG_ASSERT_EQ(m_xinds.m_nind, m_table.nrecord(), "inconsistent number of indices");
         return m_xinds.m_nind;
     }
 

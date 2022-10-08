@@ -10,11 +10,11 @@ TEST(Suites, Copy){
     const sys::frm::Basis frm_basis(6);
     const sys::bos::Basis bos_basis(4, 8);
     suite::Mbfs mbfs({frm_basis, bos_basis});
-    ASSERT_EQ(mbfs.nrecord(), 1ul);
+    ASSERT_EQ(mbfs.nslot(), 1ul);
     ASSERT_EQ(mbfs.m_hwm, 1ul);
 
     auto copy_mbfs = mbfs;
-    ASSERT_EQ(copy_mbfs.nrecord(), 1ul);
+    ASSERT_EQ(copy_mbfs.nslot(), 1ul);
     ASSERT_EQ(copy_mbfs.m_hwm, 1ul);
 
     ASSERT_NE(mbfs.m_row.m_table, copy_mbfs.m_row.m_table);

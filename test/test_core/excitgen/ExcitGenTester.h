@@ -95,7 +95,7 @@ namespace excit_gen_tester {
             buffered::MaeInds work_inds(m_conn_iter.m_exsig);
             uint_t nnull = 0ul;
 
-            REQUIRE_FALSE(m_results.is_cleared(), "no connections were found by the excitation iterator");
+            REQUIRE_FALSE(m_results.empty(), "no connections were found by the excitation iterator");
             prob_t prob = 0.0;
             ham_t helem = 0.0;
             auto &row = m_results.m_row;

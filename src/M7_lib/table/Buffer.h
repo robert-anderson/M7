@@ -33,17 +33,17 @@ public:
         /**
          * Size of the row in bytes
          */
-        const uint_t m_record_size;
+        const uint_t m_slot_size;
         /**
          * Current number of whole rows that can be stored in the window
          */
-        uint_t m_nrecord = 0ul;
+        uint_t m_nslot = 0ul;
         buf_t *m_begin = nullptr;
         uint_t m_size = 0ul;
 
-        Window(uint_t row_size=1): m_record_size(row_size) {}
+        Window(uint_t row_size=1): m_slot_size(row_size) {}
 
-        Window(const Window& other): Window(other.m_record_size) {}
+        Window(const Window& other): Window(other.m_slot_size) {}
 
         Window& operator=(const Window& other);
 
@@ -54,7 +54,7 @@ public:
          */
         bool allocated() const;
         /**
-         * moves data if there's any in the window currently, and redefines the stored m_size, m_nrecord, and m_begin
+         * moves data if there's any in the window currently, and redefines the stored m_size, m_nslot, and m_begin
          * @param begin
          *  new begin buffer pointer
          * @param new_size

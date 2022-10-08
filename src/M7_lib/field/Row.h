@@ -73,6 +73,18 @@ public:
     mutable Row *m_child = nullptr;
 
     /**
+     * m_i == m_table->m_hwm is not valid for access, but is the state in which the row position data are left at the
+     * loop when the in_range() loop termination condition becomes false, so the assert doesn't fail in this case
+     * @return
+     *  row position within Table
+     */
+    uint_t index() const {
+        DEBUG_ASSERT_LE(m_i, m_table->m_hwm, "the row index is not in the permitted range");
+        return m_i;
+    }
+
+
+    /**
      * @param irow_end
      *  exclusive maximum value for the stored row index
      * @return
@@ -112,17 +124,6 @@ public:
         DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
         DEBUG_ASSERT_TRUE(ptr_in_range(), "the row is not pointing to memory in the permitted range");
         return m_begin;
-    }
-
-    /**
-     * m_i == m_table->m_hwm is not valid for access, but is the state in which the row position data are left at the
-     * loop when the in_range() loop termination condition becomes false, so the assert doesn't fail in this case
-     * @return
-     *  row position within Table
-     */
-    uint_t index() const {
-        DEBUG_ASSERT_LE(m_i, m_table->m_hwm, "the row index is not in the permitted range");
-        return m_i;
     }
 
     /*
@@ -225,12 +226,13 @@ public:
 
     uint_t nfield() const;
 
-    void clear();
+    void free();
 
-    bool is_cleared() const;
+    bool is_freed() const {
+        return m_table->is_freed(index());
+    }
 
     virtual bool is_h5_write_exempt() const;
-
 
 };
 

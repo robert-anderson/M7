@@ -269,7 +269,7 @@ void Solver::loop_over_spawned() {
 }
 
 void Solver::propagate_row(Walker& walker, const uint_t &ipart) {
-    if (walker.is_cleared()) return;
+    if (walker.is_freed()) return;
     if (fptol::numeric_zero(walker.m_weight[ipart])) return;
     m_prop.off_diagonal(m_wf, walker, ipart);
     m_prop.diagonal(m_wf, walker, ipart);

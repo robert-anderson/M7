@@ -49,7 +49,7 @@ void ExtremalIndices::reset(uint_t hwm, uintv_t inds_ignore) {
 }
 
 void ExtremalIndices::reset(const TableBase &table) {
-    auto stack = table.m_empty_records;
+    auto stack = table.m_freed_slots;
     uintv_t irows_free;
     irows_free.reserve(stack.size());
     while(!stack.empty()) {

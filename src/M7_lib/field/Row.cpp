@@ -44,12 +44,8 @@ uint_t Row::nfield() const {
     return m_fields.size();
 }
 
-void Row::clear() {
-    std::fill(m_begin, m_begin+m_size, 0);
-}
-
-bool Row::is_cleared() const {
-    return m_table->is_cleared(index());
+void Row::free() {
+    m_table->free(index());
 }
 
 bool Row::is_h5_write_exempt() const {

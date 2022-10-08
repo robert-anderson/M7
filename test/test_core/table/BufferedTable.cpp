@@ -9,7 +9,7 @@
 TEST(BufferedTable, Empty) {
     typedef SingleFieldRow<field::Number<int>> row_t;
     buffered::Table<row_t> table({});
-    ASSERT_EQ(table.nrecord(), 0);
+    ASSERT_EQ(table.nslot(), 0);
     ASSERT_EQ(table.m_hwm, 0);
     ASSERT_EQ(table.m_bw.m_size, 0);
     ASSERT_EQ(table.m_bw.m_begin, nullptr);
@@ -17,7 +17,7 @@ TEST(BufferedTable, Empty) {
     ASSERT_FALSE(table.m_row.in_range());
     ASSERT_FALSE(table.m_row.ptr_in_range());
     auto cpy = table;
-    ASSERT_EQ(cpy.nrecord(), 0);
+    ASSERT_EQ(cpy.nslot(), 0);
     ASSERT_EQ(cpy.m_hwm, 0);
     ASSERT_EQ(cpy.m_bw.m_size, 0);
     ASSERT_EQ(cpy.m_bw.m_begin, nullptr);
