@@ -107,7 +107,7 @@ namespace shared_rows {
 //        }
 
         void clear() {
-            for (const auto& irow: m_irecs) static_cast<const TableBase&>(m_src).release(irow);
+            for (const auto& irow: m_irecs) static_cast<const TableBase&>(m_src).unprotect(irow);
             m_irecs.clear();
         }
 
@@ -139,7 +139,7 @@ namespace shared_rows {
 
         void redefine(TableBase::Loc loc) {
             clear();
-            if (loc.is_mine()) add_(loc.m_islot);
+            if (loc.is_mine()) add_(loc.m_irec);
             full_update();
         }
     };

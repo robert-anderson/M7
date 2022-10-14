@@ -73,6 +73,6 @@ bool Row::is_protected() const {
     return m_table->is_protected(index());
 }
 
-void Row::release() {
-    m_table->release(index());
+void Row::unprotect() {
+    m_table->unprotect(index());
 }

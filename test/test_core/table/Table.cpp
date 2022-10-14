@@ -196,7 +196,7 @@ TEST(Table, Copy){
     auto tcopy = t;
     ASSERT_EQ(tcopy.m_last_copied, nullptr);
     ASSERT_EQ(t.m_last_copied, &tcopy);
-    ASSERT_EQ(tcopy.m_slot_size, t.m_slot_size);
+    ASSERT_EQ(tcopy.m_row_size, t.m_row_size);
     ASSERT_EQ(tcopy.m_row_dsize, t.m_row_dsize);
     ASSERT_EQ(tcopy.m_shorts.m_format.nelement(), nshorts);
     ASSERT_EQ(tcopy.m_floats.m_format.nelement(), nfloats);
@@ -226,7 +226,7 @@ TEST(Table, CopyBuffered){
     auto tcopy = t;
     ASSERT_EQ(tcopy.m_last_copied, nullptr);
     ASSERT_EQ(t.m_last_copied, &tcopy);
-    ASSERT_EQ(tcopy.m_slot_size, t.m_slot_size);
+    ASSERT_EQ(tcopy.m_row_size, t.m_row_size);
     ASSERT_EQ(tcopy.m_row_dsize, t.m_row_dsize);
     ASSERT_EQ(tcopy.m_shorts.m_format.nelement(), nshorts);
     ASSERT_EQ(tcopy.m_floats.m_format.nelement(), nfloats);
@@ -237,10 +237,10 @@ TEST(Table, CopyBuffered){
     ASSERT_EQ(tcopy.m_columns.size(), 2);
 
     ASSERT_EQ(t.m_hwm, 4);
-    ASSERT_EQ(t.m_nslot, (uint_t)(4*(1+t.m_bw.expansion_factor())));
+    ASSERT_EQ(t.m_nrow, (uint_t)(4*(1+t.m_bw.expansion_factor())));
 
     // copied buffer should be empty
     ASSERT_EQ(tcopy.m_hwm, 0);
-    ASSERT_EQ(tcopy.m_nslot, 0);
+    ASSERT_EQ(tcopy.m_nrow, 0);
 }
 #endif

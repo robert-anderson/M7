@@ -14,7 +14,7 @@ class BufferedTableArray {
     v_t<table_impl_t> m_tables;
 
     uint_t row_size() const {
-        return static_cast<const TableBase&>(m_tables[0]).slot_size();
+        return static_cast<const TableBase &>(m_tables[0]).row_size();
     }
 
     uint_t window_size() const {
@@ -25,7 +25,7 @@ public:
     typedef table_impl_t table_t;
 
     uint_t nrow_per_table() const {
-        return static_cast<const TableBase&>(m_tables[0]).nslot();
+        return static_cast<const TableBase &>(m_tables[0]).capacity();
     }
 
     buf_t *begin() {
@@ -68,7 +68,7 @@ public:
             auto& this_table = m_tables[itable];
             auto& other_table = other.m_tables[itable];
             this_table.clear();
-            this_table.push_back(other_table.m_nslot);
+            this_table.push_back(other_table.m_nrow);
             this_table.m_bw = other_table.m_bw;
         }
         return *this;

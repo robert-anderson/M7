@@ -216,7 +216,7 @@ public:
     /**
      * decrement protection level of the currently indexed row
      */
-    void release();
+    void unprotect();
 
     str_t field_names_string() const;
 

@@ -11,9 +11,31 @@
 #include "RowProtector.h"
 #include "M7_lib/util/SmartPtr.h"
 
-TableBase::TableBase(uint_t slot_size) : m_bw(slot_size){}
+void TableBase::clear(uint_t i) {
+    DEBUG_ASSERT_LT(i, m_hwm, "row index OOB");
+    DEBUG_ASSERT_FALSE(is_protected(i), "cannot clear a protected row");
+    std::memset(begin(i), 0, row_size());
+}
 
-TableBase::TableBase(const TableBase &other) : TableBase(other.m_bw.m_slot_size){}
+bool TableBase::is_clear(uint_t i) const {
+    return std::memcmp(begin(i), m_null_row_string.data(), row_size()) == 0;
+}
+
+TableBase::TableBase(uint_t row_size) : m_bw(row_size), m_null_row_string(row_size, 0){}
+
+TableBase::TableBase(const TableBase &other) : TableBase(other.m_bw.m_row_size){}
+
+void TableBase::clear() {
+    DEBUG_ASSERT_FALSE(is_protected(), "cannot clear a table with protected records");
+    if (!m_bw.allocated()) return;
+    std::memset(begin(), 0, row_size() * m_hwm);
+    m_hwm = 0ul;
+}
+
+bool TableBase::is_clear() const {
+    for (uint_t irow=0ul; irow<m_bw.m_nrow; ++irow) if (!is_clear(irow)) return false;
+    return true;
+}
 
 buf_t *TableBase::begin() {
     return m_bw.m_begin;
@@ -23,12 +45,12 @@ const buf_t *TableBase::begin() const {
     return m_bw.m_begin;
 }
 
-buf_t *TableBase::begin(uint_t islot) {
-    return m_bw.m_begin + islot * slot_size();
+buf_t *TableBase::begin(uint_t irec) {
+    return m_bw.m_begin + irec * row_size();
 }
 
-const buf_t *TableBase::begin(uint_t islot) const {
-    return m_bw.m_begin + islot * slot_size();
+const buf_t *TableBase::begin(uint_t irec) const {
+    return m_bw.m_begin + irec * row_size();
 }
 
 void TableBase::set_buffer(Buffer *buffer) {
@@ -37,46 +59,44 @@ void TableBase::set_buffer(Buffer *buffer) {
     buffer->append_window(&m_bw);
 }
 
-uint_t TableBase::push_back(uint_t nslot) {
-    DEBUG_ASSERT_TRUE(slot_size(), "cannot resize a table with zero record size");
-    if (m_hwm + nslot > this->nslot()) expand(nslot);
+uint_t TableBase::push_back(uint_t n) {
+    DEBUG_ASSERT_TRUE(row_size(), "cannot resize a table with zero record size");
+    if (m_hwm + n > this->capacity()) expand(n);
     auto tmp = m_hwm;
-    m_hwm += nslot;
+    m_hwm += n;
     return tmp;
 }
 
-uint_t TableBase::get_free_slot() {
-    if (m_freed_slots.empty()) return push_back();
-    auto irec = m_freed_slots.top();
-    m_freed_slots.pop();
+uint_t TableBase::get_free_row() {
+    if (m_freed_rows.empty()) return push_back();
+    auto irec = m_freed_rows.top();
+    m_freed_rows.pop();
+    m_is_freed_row[irec] = false;
     return irec;
 }
 
-void TableBase::clear() {
-    DEBUG_ASSERT_FALSE(is_protected(), "cannot clear a table with protected records");
-    if (!m_bw.allocated()) return;
-    std::memset(begin(), 0, slot_size() * m_hwm);
-    m_hwm = 0ul;
-    while (!m_freed_slots.empty()) m_freed_slots.pop();
-    m_is_freed_slot.assign(m_is_freed_slot.size(), false);
+void TableBase::free(uint_t i) {
+    DEBUG_ASSERT_LT(i, m_hwm, "record index OOB");
+    DEBUG_ASSERT_FALSE(is_protected(i), "cannot clear a protected record");
+    DEBUG_ASSERT_FALSE(is_freed(i), "cannot free a record that is already freed");
+    clear(i);
+    m_freed_rows.push(i);
+    m_is_freed_row[i] = true;
 }
 
-void TableBase::free(uint_t islot) {
-    DEBUG_ASSERT_LT(islot, m_hwm, "slot index OOB");
-    DEBUG_ASSERT_FALSE(is_protected(islot), "cannot clear a protected record");
-    DEBUG_ASSERT_FALSE(is_freed(islot), "cannot free a slot that is already freed");
-    std::memset(begin(islot), 0, slot_size());
-    m_freed_slots.push(islot);
-    m_is_freed_slot[islot] = true;
+void TableBase::free() {
+    clear();
+    while (!m_freed_rows.empty()) m_freed_rows.pop();
+    m_is_freed_row.assign(m_is_freed_row.size(), false);
 }
 
 bool TableBase::empty() const {
     return !m_hwm;
 }
 
-bool TableBase::is_freed(uint_t islot) const {
-    DEBUG_ASSERT_LT(islot, m_hwm, "slot index OOB");
-    return m_is_freed_slot[islot];
+bool TableBase::is_freed(uint_t i) const {
+    DEBUG_ASSERT_LT(i, m_hwm, "record index OOB");
+    return m_is_freed_row[i];
 }
 
 uint_t TableBase::bw_size() const {
@@ -85,25 +105,25 @@ uint_t TableBase::bw_size() const {
 
 void TableBase::resize(uint_t nrec, double factor) {
     DEBUG_ASSERT_TRUE(nrec, "new size should be non-zero");
-    DEBUG_ASSERT_TRUE(slot_size(), "cannot resize, row size is zero");
+    DEBUG_ASSERT_TRUE(row_size(), "cannot resize, row size is zero");
     DEBUG_ASSERT_GE(nrec, m_hwm, "resize would discard uncleared data");
-    m_bw.resize(nrec * slot_size(), factor);
-    DEBUG_ASSERT_LT(m_hwm, m_bw.m_size / slot_size(), "resize has discarded uncleared data");
-    m_is_freed_slot.resize(nslot(), false);
+    m_bw.resize(nrec * row_size(), factor);
+    DEBUG_ASSERT_LT(m_hwm, m_bw.m_size / row_size(), "resize has discarded uncleared data");
+    m_is_freed_row.resize(capacity(), false);
 }
 
-void TableBase::expand(uint_t nrec, double factor) {
-    resize(this->nslot() + nrec, factor);
+void TableBase::expand(uint_t nrow, double factor) {
+    resize(this->capacity() + nrow, factor);
 }
 
-void TableBase::free_records(const uintv_t &irecs) {
-    for (auto irec : irecs) free(irec);
+void TableBase::free_many(const uintv_t &irows) {
+    for (auto irec : irows) free(irec);
 }
 
 void TableBase::insert_records(const Buffer::Window &recv, uint_t nrec, const std::list<recv_cb_t> &callbacks) {
     for (uint_t irec_recv = 0; irec_recv < nrec; ++irec_recv) {
-        auto irec = get_free_slot();
-        std::memcpy(begin(irec), recv.m_begin + irec_recv * slot_size(), slot_size());
+        auto irec = get_free_row();
+        std::memcpy(begin(irec), recv.m_begin + irec_recv * row_size(), row_size());
         post_insert(irec);
         for (auto f: callbacks) f(irec);
     }
@@ -123,17 +143,17 @@ void TableBase::transfer_records(const uintv_t &irecs, uint_t irank_send,
         }
         logging::info_("Transferring {} records outward to rank {}", nrec, irank_recv);
 
-        auto size_required = nrec * slot_size();
+        auto size_required = nrec * row_size();
         if (send_bw.m_size < size_required) send_bw.resize(size_required);
         for (auto iirec = 0ul; iirec < nrec; ++iirec) {
             const auto &irec = irecs[iirec];
-            std::memcpy(send_bw.m_begin + iirec * slot_size(), begin(irec), slot_size());
+            std::memcpy(send_bw.m_begin + iirec * row_size(), begin(irec), row_size());
         }
-        mpi::send(send_bw.m_begin, slot_size() * nrec, irank_recv, m_transfer->m_irecs_p2p_tag);
+        mpi::send(send_bw.m_begin, row_size() * nrec, irank_recv, m_transfer->m_irecs_p2p_tag);
         /*
          * sent records can now be erased
          */
-        free_records(irecs);
+        free_many(irecs);
     }
     if (mpi::i_am(irank_recv)){
         auto& recv_bw = m_transfer->m_send_bw;
@@ -142,10 +162,10 @@ void TableBase::transfer_records(const uintv_t &irecs, uint_t irank_send,
             logging::debug_("Recving rank notified by sending rank that no records are transferred");
             return;
         }
-        auto size_required = nrec * slot_size();
+        auto size_required = nrec * row_size();
         if (recv_bw.m_size<size_required) recv_bw.resize(size_required);
         logging::info_("Transferring {} records inward from rank {}", nrec, irank_send);
-        mpi::recv(recv_bw.m_begin, slot_size() * nrec, irank_send, m_transfer->m_irecs_p2p_tag);
+        mpi::recv(recv_bw.m_begin, row_size() * nrec, irank_send, m_transfer->m_irecs_p2p_tag);
         /*
          * now emplace received records in TableBase buffer window, and call all callbacks for each
          */
@@ -153,16 +173,16 @@ void TableBase::transfer_records(const uintv_t &irecs, uint_t irank_send,
     }
 }
 
-void TableBase::copy_record_in(const TableBase &src, uint_t islot_src, uint_t islot_dst) {
-    ASSERT(islot_dst < m_hwm);
-    std::memcpy(begin(islot_dst), src.begin(islot_src), slot_size());
+void TableBase::copy_record_in(const TableBase &src, uint_t isrc, uint_t idst) {
+    ASSERT(idst < m_hwm);
+    std::memcpy(begin(idst), src.begin(isrc), row_size());
 }
 
-void TableBase::swap_records(uint_t irec, uint_t jrec) {
-    if (irec == jrec) return;
-    auto iptr = begin(irec);
-    auto jptr = begin(jrec);
-    std::swap_ranges(iptr, iptr + slot_size(), jptr);
+void TableBase::swap_records(uint_t i, uint_t j) {
+    if (i == j) return;
+    auto iptr = begin(i);
+    auto jptr = begin(j);
+    std::swap_ranges(iptr, iptr + row_size(), jptr);
 }
 
 str_t TableBase::to_string(const uintv_t *ordering) const {
@@ -170,8 +190,8 @@ str_t TableBase::to_string(const uintv_t *ordering) const {
     auto begin_ptr = begin();
     for (uint_t i=0ul; i<m_hwm; ++i){
         auto irec = ordering ? ordering->at(i) : i;
-        auto rec = begin_ptr + irec * slot_size();
-        for (uint_t ibyte=0ul; ibyte < slot_size(); ++ibyte){
+        auto rec = begin_ptr + irec * row_size();
+        for (uint_t ibyte=0ul; ibyte < row_size(); ++ibyte){
             out+= std::to_string(static_cast<int>(rec[ibyte])) + " ";
         }
         out+="\n";
@@ -184,15 +204,15 @@ void TableBase::all_gatherv(const TableBase &src) {
     uintv_t nrecs(mpi::nrank());
     uintv_t counts(mpi::nrank());
     uintv_t displs(mpi::nrank());
-    DEBUG_ASSERT_EQ(src.slot_size(), slot_size(),
+    DEBUG_ASSERT_EQ(src.row_size(), row_size(),
                     "the size of records being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.m_hwm, nrecs);
     counts = nrecs;
-    for (auto &v: counts) v *= slot_size();
+    for (auto &v: counts) v *= row_size();
     mpi::counts_to_displs_consec(counts, displs);
     auto nrec_total = std::accumulate(nrecs.cbegin(), nrecs.cend(), 0ul);
     push_back(nrec_total);
-    mpi::all_gatherv(src.begin(), src.m_hwm * slot_size(), begin(), counts, displs);
+    mpi::all_gatherv(src.begin(), src.m_hwm * row_size(), begin(), counts, displs);
     post_insert_range(0, nrec_total);
 }
 
@@ -201,45 +221,41 @@ void TableBase::gatherv(const TableBase &src, uint_t irank) {
     uintv_t nrecs(mpi::nrank());
     uintv_t counts(mpi::nrank());
     uintv_t displs(mpi::nrank());
-    DEBUG_ASSERT_EQ(src.slot_size(), slot_size(),
+    DEBUG_ASSERT_EQ(src.row_size(), row_size(),
                     "the size of records being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.m_hwm, nrecs);
     counts = nrecs;
-    for (auto &v: counts) v *= slot_size();
+    for (auto &v: counts) v *= row_size();
     mpi::counts_to_displs_consec(counts, displs);
     auto nrec_total = std::accumulate(nrecs.cbegin(), nrecs.cend(), 0ul);
     if (mpi::i_am(irank))
         push_back(nrec_total);
-    mpi::gatherv(src.begin(), src.m_hwm * slot_size(), begin(), counts, displs, irank);
+    mpi::gatherv(src.begin(), src.m_hwm * row_size(), begin(), counts, displs, irank);
     if (mpi::i_am(irank))
         post_insert_range(0, nrec_total);
 }
 
 bool TableBase::is_protected() const {
-    return !m_protected_records.empty();
+    return !m_protected_rows.empty();
 }
 
-uint_t TableBase::nrecord() const {
-    return m_hwm - m_freed_slots.size();
-}
-
-bool TableBase::freed_slots_consistent() const {
-    const auto nfree_vec = std::accumulate(m_is_freed_slot.cbegin(), m_is_freed_slot.cend(), 0ul);
-    if (nfree_vec != m_freed_slots.size()) return false;
-    auto tmp_stack = m_freed_slots;
+bool TableBase::freed_records_consistent() const {
+    const auto nfree_vec = std::accumulate(m_is_freed_row.cbegin(), m_is_freed_row.cend(), 0ul);
+    if (nfree_vec != m_freed_rows.size()) return false;
+    auto tmp_stack = m_freed_rows;
     while (!tmp_stack.empty()) {
-        if (!m_is_freed_slot[tmp_stack.top()]) return false;
+        if (!m_is_freed_row[tmp_stack.top()]) return false;
         tmp_stack.pop();
     }
     return true;
 }
 
-TableBase::Loc::Loc(uint_t irank, uint_t islot) : m_irank(irank), m_islot(islot){
+TableBase::Loc::Loc(uint_t irank, uint_t irec) : m_irank(irank), m_irec(irec){
 #ifndef NDEBUG
     mpi::bcast(irank);
-    mpi::bcast(islot);
+    mpi::bcast(irec);
     DEBUG_ASSERT_EQ(m_irank, irank, "rank index in TableBase::Loc should be consistent across all ranks");
-    DEBUG_ASSERT_EQ(m_islot, islot, "record index in TableBase::Loc should be consistent across all ranks");
+    DEBUG_ASSERT_EQ(m_irec, irec, "record index in TableBase::Loc should be consistent across all ranks");
 #endif
 }
 
@@ -252,7 +268,7 @@ bool TableBase::Loc::is_mine() const {
 }
 
 bool TableBase::Loc::operator==(const TableBase::Loc &other) {
-    return m_irank==other.m_irank and m_islot == other.m_islot;
+    return m_irank==other.m_irank and m_irec == other.m_irec;
 }
 
 bool TableBase::Loc::operator!=(const TableBase::Loc &other) {

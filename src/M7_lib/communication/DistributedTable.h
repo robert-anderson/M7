@@ -162,7 +162,7 @@ namespace buffered {
             BufferedTable<row_t, ::DistributedTable<row_t>>(::DistributedTable<row_t>(row, dist_opts)){}
 
         using TableBase::rename;
-        using TableBase::slot_size;
+        using TableBase::row_size;
         using ::MappedTable<row_t>::resize;
         using BufferedTable<row_t, ::DistributedTable<row_t>>::set_expansion_factor;
         /**
@@ -172,7 +172,7 @@ namespace buffered {
                 DistributedTable(row, dist_opts){
             rename(name);
             const auto nrec_per_rank = sizing.m_nrec_est / mpi::nrank();
-            const auto nbyte_per_rank = nrec_per_rank * slot_size();
+            const auto nbyte_per_rank = nrec_per_rank * row_size();
             logging::info("Initially allocating {} per rank for \"{}\" buffer", string::memsize(nbyte_per_rank), name);
             resize(nrec_per_rank, 0.0);
             set_expansion_factor(sizing.m_exp_fac);

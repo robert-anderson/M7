@@ -195,7 +195,6 @@ void Wavefunction::remove_row(Walker& walker) {
     DEBUG_ASSERT_TRUE(m_store.lookup(walker.m_mbf), "MBF doesn't exist in table!");
     for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
         zero_weight(walker, ipart);
-        // in the case that nadd==0.0, the set_weight method won't revoke:
         m_delta_nocc_mbf.m_local--;
     }
     m_store.erase(walker.m_mbf);

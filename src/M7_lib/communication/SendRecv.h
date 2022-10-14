@@ -57,7 +57,7 @@ public:
             m_send(name + " send", mpi::nrank(), row),
             m_recv(name + " recv", row), m_row(m_recv.m_row) {
         logging::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
-                      string::memsize(mpi::nrank() * sizing.m_nrec_est * m_recv.slot_size()), name);
+                      string::memsize(mpi::nrank() * sizing.m_nrec_est * m_recv.row_size()), name);
         m_send.resize(integer::divceil(sizing.m_nrec_est, mpi::nrank()), 0.0);
         m_recv.resize(sizing.m_nrec_est, 0.0);
         m_send.set_expansion_factor(sizing.m_exp_fac);
@@ -65,7 +65,7 @@ public:
     }
 
     uint_t row_size() const {
-        return static_cast<const TableBase&>(m_recv).slot_size();
+        return static_cast<const TableBase &>(m_recv).row_size();
     }
 
     send_t &send() {
