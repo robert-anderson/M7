@@ -6,7 +6,7 @@
 #define M7_ARNOLDISOLVER_H
 
 #include <M7_lib/linalg/DistMvProd.h>
-#include <M7_lib/util/SmartPtr.h>
+#include <M7_lib/util/Pointer.h>
 
 #include <arpackf.h>
 #include <arrssym.h>
@@ -256,7 +256,7 @@ private:
 
     void setup(uint_t nrow, ArnoldiOptions opts, bool dist) override {
         if (mpi::i_am_root() || !dist) {
-            m_solver = smart_ptr::make_unique<ARrcSymStdEig<T>>(
+            m_solver = ptr::smart::make_unique<ARrcSymStdEig<T>>(
                     nrow, opts.m_nroot, "LM", opts.m_narnoldi_vector, opts.m_ritz_tol, opts.m_niter_max);
             ArnoldiProblemBase::begin_log(m_solver.get(), true);
         }
@@ -331,7 +331,7 @@ private:
 
     void setup(uint_t nrow, ArnoldiOptions opts, bool dist) override {
         if (mpi::i_am_root() || !dist) {
-            m_solver = smart_ptr::make_unique<ARrcNonSymStdEig<T>>(
+            m_solver = ptr::smart::make_unique<ARrcNonSymStdEig<T>>(
                     nrow, opts.m_nroot, "LM", opts.m_narnoldi_vector, opts.m_ritz_tol, opts.m_niter_max);
             ArnoldiProblemBase::begin_log(m_solver.get(), false);
         }

@@ -43,13 +43,13 @@ namespace shared_rows {
         row_t m_send_row;
 
     public:
-        Set(str_t name, const src_t& src, uintv_t irecs = {}) :
+        Set(str_t name, const src_t& src, uintv_t irows = {}) :
                 DistribDependent(src), m_src(src),
                 m_name(name), m_all(name+" all rows", m_src.m_row),
                 m_gather_send(name+" gather send", m_src.m_row),
                 m_gather_recv(name+" gather recv", m_src.m_row),
                 m_src_row(m_src.m_row), m_send_row(m_gather_send.m_row) {
-            for (auto irow: irecs) add_(irow);
+            for (auto irow: irows) add_(irow);
             full_update();
             m_all.m_row.restart();
         }
@@ -78,11 +78,11 @@ namespace shared_rows {
         }
 
         void row_index_update() {
-            REQUIRE_EQ_ALL(m_all.m_hwm, m_irecs.size(),
+            REQUIRE_EQ_ALL(m_all.nrow_in_use(), m_irecs.size(),
                            "this kind of refresh is only possible when all rows have already been gathered");
             m_irecs = {};
             auto& row = m_all.m_row;
-            for (row.restart(); row.in_range(); row.step()) {
+            for (row.restart(); row; ++row) {
                 auto result = m_src.lookup(row.key_field(), m_src_row);
                 if (result) {
                     const auto irec = static_cast<const Row&>(m_src_row).index();
@@ -95,7 +95,7 @@ namespace shared_rows {
             all_gatherv();
             m_all.clear();
             auto& recv_row = m_gather_recv.m_row;
-            for (recv_row.restart(); recv_row.in_range(); recv_row.step()) m_all.insert(recv_row);
+            for (recv_row.restart(); recv_row; ++recv_row) m_all.insert(recv_row);
         }
 
         uint_t nrec_() const {

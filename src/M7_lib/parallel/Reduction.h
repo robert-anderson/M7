@@ -6,7 +6,7 @@
 #define M7_REDUCTION_H
 
 #include <M7_lib/table/BufferedFields.h>
-#include "M7_lib/util/SmartPtr.h"
+#include "M7_lib/util/Pointer.h"
 
 template<typename T>
 struct ReductionBase {
@@ -156,7 +156,7 @@ struct ReductionSyndicate {
     void add_member(ReductionBase<T>& member) {
         auto igroup = mpi_type_ind<T>();
         if (!m_groups[igroup])
-            m_groups[igroup] = smart_ptr::make_unique<ReductionSyndicateGroup<T>>();
+            m_groups[igroup] = ptr::smart::make_unique<ReductionSyndicateGroup<T>>();
         dynamic_cast<ReductionSyndicateGroup<T> *>(m_groups[igroup].get())->add_member(member);
     }
 

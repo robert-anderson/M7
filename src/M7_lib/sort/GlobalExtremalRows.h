@@ -219,7 +219,7 @@ private:
         nrow = std::min(nrow, m_ninclude.m_reduced);
         uintv_t ninclude_each_rank(mpi::nrank(), 0ul);
         if (mpi::i_am_root()) {
-            REQUIRE_EQ(m_global_sorter.m_hwm, m_ninclude.m_reduced,
+            REQUIRE_EQ(m_global_sorter.nrow_in_use(), m_ninclude.m_reduced,
                        "global sorting table should have as many filled rows as total found rows across all ranks");
             auto row1 = m_global_sorter.m_row;
             auto row2 = m_global_sorter.m_row;

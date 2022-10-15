@@ -28,22 +28,13 @@ struct BufferedField : BufferedFieldRow, T {
     using T::operator=;
     TableBase m_internal_table;
 
-private:
-    /**
-     * contains common code for both ctors
-     */
-    void init() {
+    template<typename ...Args>
+    BufferedField(Args&&... args):
+        T(&m_internal_row, std::forward<Args>(args)...), m_internal_table(m_internal_row.m_size) {
         m_internal_table.set_buffer(&m_internal_buffer);
         m_internal_row.m_table = &m_internal_table;
         m_internal_table.push_back();
         m_internal_row.restart();
-    }
-
-public:
-    template<typename ...Args>
-    BufferedField(Args&&... args):
-        T(&m_internal_row, std::forward<Args>(args)...), m_internal_table(m_internal_row.m_size) {
-        init();
     }
 };
 

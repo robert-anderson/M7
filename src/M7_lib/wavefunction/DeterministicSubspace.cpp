@@ -3,7 +3,7 @@
 //
 
 #include "DeterministicSubspace.h"
-#include "M7_lib/util/SmartPtr.h"
+#include "M7_lib/util/Pointer.h"
 
 #if 0
 field::Mbf &DeterministicDataRow::key_field() {
@@ -76,7 +76,7 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
         m_local_row.jump(irec);
         // loop over local subspace (H rows)
         auto& all_row = m_all.m_row;
-        for (all_row.restart(); all_row.in_range(); all_row.step()) {
+        for (all_row.restart(); all_row; ++all_row) {
             // loop over full subspace (H columns)
             // only add to sparse H if dets are connected
             conn_work.connect(m_local_row.m_mbf, all_row.m_mbf);
@@ -155,7 +155,7 @@ void DeterministicSubspaces::build_from_most_occupied(const Hamiltonian &ham, co
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
     for (uint_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {
         REQUIRE_TRUE_ALL(m_detsubs[iroot] == nullptr, "detsubs should not already be allocated");
-        m_detsubs[iroot] = smart_ptr::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
+        m_detsubs[iroot] = ptr::smart::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
         m_detsubs[iroot]->build_from_most_occupied(ham, bilinears);
     }
     m_epoch.update(icycle, true);

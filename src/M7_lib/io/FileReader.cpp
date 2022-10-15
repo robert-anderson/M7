@@ -5,7 +5,7 @@
 #include <M7_lib/parallel/MPIAssert.h>
 
 #include "FileReader.h"
-#include "M7_lib/util/SmartPtr.h"
+#include "M7_lib/util/Pointer.h"
 
 FileReader::FileReader(str_t fname, uint_t iline) : m_fname(std::move(fname)) {
     reset(iline);
@@ -13,7 +13,7 @@ FileReader::FileReader(str_t fname, uint_t iline) : m_fname(std::move(fname)) {
 
 void FileReader::reset(uint_t iline) {
     if (m_file) m_file->close();
-    m_file = smart_ptr::make_unique<std::ifstream>(m_fname);
+    m_file = ptr::smart::make_unique<std::ifstream>(m_fname);
     REQUIRE_TRUE(m_file->is_open(), "File not found: " + m_fname);
     m_iline = ~0ul;
     skip(iline);
@@ -64,7 +64,7 @@ str_t FileReader::to_string(const str_t &fname) {
 }
 
 bool FileReader::exists(const str_t &fname) {
-    auto f = smart_ptr::make_unique<std::ifstream>(fname);
+    auto f = ptr::smart::make_unique<std::ifstream>(fname);
     bool res = f->is_open();
     if (res) f->close();
     return res;

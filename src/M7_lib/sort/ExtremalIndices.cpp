@@ -56,5 +56,5 @@ void ExtremalIndices::reset(const TableBase &table) {
         irows_free.push_back(stack.top());
         stack.pop();
     }
-    reset(table.m_hwm, irows_free);
+    reset(table.nrow_in_use(), irows_free);
 }

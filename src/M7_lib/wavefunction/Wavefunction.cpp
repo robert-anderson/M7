@@ -92,7 +92,7 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
     auto& row = xr_gathered.m_row;
     v_t<strv_t> rows;
     rows.push_back({"", "many-body basis function", "walker number", "initiator", "semistoch", "MPI rank"});
-    for (row.restart(); row.in_range(); row.step()) {
+    for (row.restart(); row; ++row) {
         rows.push_back({
             std::to_string(row.index()),
             row.m_mbf.to_string(),
@@ -153,7 +153,7 @@ void Wavefunction::end_cycle() {
 wf_comp_t Wavefunction::square_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto& row = m_store.m_row;
-    for (row.restart(); row.in_range(); row.step()) {
+    for (row.restart(); row; ++row) {
         const wf_t& weight = row.m_weight[ipart];
         res += std::pow(std::abs(weight), 2.0);
     }
@@ -163,7 +163,7 @@ wf_comp_t Wavefunction::square_norm(uint_t ipart) const {
 wf_comp_t Wavefunction::l1_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto& row = m_store.m_row;
-    for (row.restart(); row.in_range(); row.step()) {
+    for (row.restart(); row; ++row) {
         const wf_t& weight = row.m_weight[ipart];
         res += std::abs(weight);
     }
@@ -274,9 +274,9 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
         if (mpi::i_am_root()) {
             auto results = init.get_results();
             auto& row = init.m_mbf_order_table.m_row;
-            const auto irow_end = std::min(init.m_mbf_order_table.m_hwm, irow + max_ncomm);
+            const auto irow_end = std::min(init.m_mbf_order_table.nrow_in_use(), irow + max_ncomm);
             wf_t const* evec_ptr = nullptr;
-            for (row.jump(irow); row.in_range(irow_end); row.step()) {
+            for (row.jump(irow); row; ++row) {
                 for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
                     results.get_evec(iroot, evec_ptr);
                     for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
@@ -286,7 +286,7 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
                 }
             }
             irow = irow_end;
-            done = irow == init.m_mbf_order_table.m_hwm;
+            done = (irow == init.m_mbf_order_table.nrow_in_use());
         } else {
             done = true;
         }
@@ -295,7 +295,7 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
          */
         m_send_recv.communicate();
         auto& recv_row = m_send_recv.recv().m_row;
-        for (recv_row.restart(); recv_row.in_range(); recv_row.step()){
+        for (recv_row.restart(); recv_row; ++recv_row){
             create_row(0ul, recv_row.m_dst_mbf, h.get_energy(recv_row.m_dst_mbf), 0);
         }
     }

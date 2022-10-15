@@ -24,7 +24,7 @@ const field::Mbf &Reference::get_mbf() const {
 
 void Reference::update_ref_conn_flags() {
     auto row = m_wf.m_store.m_row;
-    for (row.restart(); row.in_range(); row.step()){
+    for (row.restart(); row; ++row){
         if (row.m_mbf.is_zero()) continue;
         row.m_ref_conn.put(m_ipart, is_connected(row.m_mbf));
     }

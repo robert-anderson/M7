@@ -9,7 +9,7 @@
 
 #include "ExactLinear.h"
 #include "StochLinear.h"
-#include "M7_lib/util/SmartPtr.h"
+#include "M7_lib/util/Pointer.h"
 
 namespace props {
 
@@ -24,9 +24,9 @@ namespace props {
          */
         bool only_nonzero_h_spawns = opts.m_av_ests.m_rdm.m_explicit_ref_conns;
         if (!opts.m_propagator.m_stochastic)
-            return smart_ptr::make_unique<Exact>(ham, opts, wf, only_nonzero_h_spawns);
+            return ptr::smart::make_unique<Exact>(ham, opts, wf, only_nonzero_h_spawns);
         else
-            return smart_ptr::make_unique<Stoch>(ham, opts, wf);
+            return ptr::smart::make_unique<Stoch>(ham, opts, wf);
     }
 
 }

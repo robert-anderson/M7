@@ -26,7 +26,7 @@
 #include "M7_lib/hamiltonian/frm/TcFrmHam.h"
 #include "M7_lib/hamiltonian/bos/InteractingBoseGasBosHam.h"
 #include "M7_lib/hamiltonian/frmbos/GeneralLadderHam.h"
-#include "M7_lib/util/SmartPtr.h"
+#include "M7_lib/util/Pointer.h"
 
 
 using namespace field;
@@ -68,7 +68,7 @@ struct HamiltonianTerms {
      */
     template<typename ham_t>
     static std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
-        using namespace smart_ptr;
+        using namespace ptr::smart;
         static_assert(std::is_base_of<FrmHam, ham_t>::value, "template arg must be derived from FrmHam");
         return make_poly_unique<FrmHam, ham_t>(opts);
         //auto j = opts.m_spin_penalty_j.get();
@@ -92,7 +92,7 @@ struct HamiltonianTerms {
     }
 
     std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
-        using namespace smart_ptr;
+        using namespace ptr::smart;
         if (opts.m_ham.m_hubbard.m_enabled)
             return make_frm<HubbardFrmHam>(opts);
         else if (opts.m_ham.m_heisenberg.m_enabled)
@@ -103,7 +103,7 @@ struct HamiltonianTerms {
     }
 
     std::unique_ptr<BosHam> make_bos(BosHam::opt_pair_t opts){
-        using namespace smart_ptr;
+        using namespace ptr::smart;
         if (opts.m_ham.m_num_op_weight) {
             const uint_t nsite = m_frm->m_basis.m_nsite;
             const sys::bos::Basis basis(nsite, opts.m_basis.m_bos_occ_cutoff);
@@ -124,7 +124,7 @@ struct HamiltonianTerms {
         REQUIRE_TRUE(m_bos.get(), "boson Hamiltonian unallocated");
         const sys::Basis basis(m_frm->m_basis, m_bos->m_basis);
 
-        using namespace smart_ptr;
+        using namespace ptr::smart;
         if (opts.m_ham.m_holstein_coupling) {
             const auto g = opts.m_ham.m_holstein_coupling.m_value;
             return make_poly_unique<FrmBosHam, HolsteinLadderHam>(basis, g);

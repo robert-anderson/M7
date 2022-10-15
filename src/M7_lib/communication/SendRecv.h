@@ -107,7 +107,7 @@ public:
      * table.
      */
     void communicate() {
-        m_last_send_counts = m_send.hwms();
+        m_last_send_counts = m_send.nrows_in_use();
         uintv_t sendcounts(m_last_send_counts);
         for (auto &it: sendcounts) it *= row_size();
         uintv_t recvcounts(mpi::nrank(), 0ul);
@@ -151,7 +151,7 @@ public:
                            recv().begin() + recvdispls[mpi::irank()], recvcounts[mpi::irank()]) == 0);
 
         REQUIRE_TRUE_ALL(tmp, "MPI AllToAllV failed");
-        recv().m_hwm = m_last_recv_count;
+        recv().m_hwm = recv().begin(m_last_recv_count);
         m_send.clear();
     }
 

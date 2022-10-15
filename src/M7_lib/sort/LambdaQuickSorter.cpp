@@ -21,7 +21,7 @@ void LambdaQuickSorter::preserve_sort(const uint_t &hwm) {
 }
 
 void LambdaQuickSorter::preserve_sort(const TableBase &table) {
-    preserve_sort(table.m_hwm);
+    preserve_sort(table.nrow_in_use());
 }
 
 bool LambdaQuickSorter::is_preserve_sorted(const uint_t &hwm) {
@@ -32,17 +32,17 @@ bool LambdaQuickSorter::is_preserve_sorted(const uint_t &hwm) {
 }
 
 bool LambdaQuickSorter::is_preserve_sorted(const TableBase &table) {
-    return is_preserve_sorted(table.m_hwm);
+    return is_preserve_sorted(table.nrow_in_use());
 }
 
 
 void LambdaQuickSorter::reorder_sort(TableBase &table) {
-    qs(0, table.m_hwm - 1, table);
+    qs(0, table.nrow_in_use() - 1, table);
     ASSERT(is_reorder_sorted(table));
 }
 
 bool LambdaQuickSorter::is_reorder_sorted(const TableBase &table) {
-    for (uint_t irow = 1ul; irow < table.m_hwm; ++irow) {
+    for (uint_t irow = 1ul; irow < table.nrow_in_use(); ++irow) {
         if (m_cmp_fn(irow, irow-1) && !m_cmp_fn(irow - 1, irow)) return false;
     }
     return true;

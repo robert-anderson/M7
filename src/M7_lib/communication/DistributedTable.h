@@ -147,7 +147,7 @@ public:
                 DEBUG_ASSERT_TRUE(mpi::i_am(irank_owner), "recv_row sent to wrong rank!");
                 insert(recv_row, row);
                 for (uint_t ilevel=0ul; ilevel < uint_t(prot_level_row.m_field); ++ilevel) row.protect();
-                prot_level_row.step();
+                ++prot_level_row;
             }
         }
         clear_work_figures();

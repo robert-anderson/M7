@@ -98,9 +98,9 @@ hash::digest_t FieldBase::hash() const {
 }
 
 uint_t FieldBase::to_buffer(buf_t* buf, uint_t irow_begin, uint_t nitem_max, std::set<uint_t> irows_empty) const {
-    DEBUG_ASSERT_LT(irow_begin, m_row->m_table->m_hwm, "row index OOB");
+    DEBUG_ASSERT_LT(irow_begin, m_row->m_table->nrow_in_use(), "row index OOB");
     uint_t nitem = 0ul;
-    for (uint_t irow = irow_begin; irow<m_row->m_table->m_hwm; ++irow){
+    for (uint_t irow = irow_begin; irow<m_row->m_table->nrow_in_use(); ++irow){
         if (nitem==nitem_max) return nitem;
         if (irows_empty.find(irow)!=irows_empty.end()) continue;
         auto dst = buf + irow*m_size;

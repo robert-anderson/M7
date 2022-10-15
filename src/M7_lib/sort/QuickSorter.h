@@ -48,7 +48,7 @@ struct QuickSorter {
     }
 
     void reorder_sort(TableBase &table){
-        qs(0, table.m_hwm - 1, table);
+        qs(0, table.nrow_in_use() - 1, table);
         ASSERT(is_reorder_sorted(table));
     }
 
@@ -64,7 +64,7 @@ struct QuickSorter {
      *  true if the rows in the given table are sorted according to m_cmp_fn
      */
     bool is_reorder_sorted(const TableBase &table){
-        for (uint_t irow = 1ul; irow < table.m_hwm; ++irow) {
+        for (uint_t irow = 1ul; irow < table.nrow_in_use(); ++irow) {
             if (m_cmp_fn(irow, irow-1) && !m_cmp_fn(irow - 1, irow)) return false;
         }
         return true;

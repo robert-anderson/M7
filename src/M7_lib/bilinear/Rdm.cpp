@@ -3,7 +3,7 @@
 //
 
 #include "Rdm.h"
-#include "M7_lib/util/SmartPtr.h"
+#include "M7_lib/util/Pointer.h"
 #include "SpinfreeRdm.h"
 
 uint_t Rdm::nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size) {
@@ -132,7 +132,7 @@ void Rdm::end_cycle() {
     if (!send().buffer_size()) return;
     communicate();
     if (!m_send_recv.recv().m_hwm) return;
-    for (m_recv_row.restart(); m_recv_row.in_range(); m_recv_row.step()) {
+    for (m_recv_row.restart(); m_recv_row; ++m_recv_row) {
         auto lookup = m_store.lookup(m_recv_row.m_inds, m_store_row);
         if (!lookup) m_store.insert(m_recv_row.m_inds, m_store_row);
         m_store_row.m_values += m_recv_row.m_values;
@@ -262,9 +262,9 @@ Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Size basis_size, uint_
         REQUIRE_LE(decode_nbos_ann(ranksig), 1ul,
                    "RDMs with more than one boson annihilation operator are not yet supported");
         REQUIRE_TRUE(m_rdms[ranksig] == nullptr, "No RDM rank should appear more than once in the specification");
-        m_rdms[ranksig] = smart_ptr::make_unique<Rdm>(opts, ranksig, ranksig, basis_size, nelec, 1ul);
+        m_rdms[ranksig] = ptr::smart::make_unique<Rdm>(opts, ranksig, ranksig, basis_size, nelec, 1ul);
     }
-    if (opts.m_fock_4rdm.m_enabled) m_fock_rdm4 = smart_ptr::make_unique<FockRdm4>(opts, basis_size, nelec, 1ul);
+    if (opts.m_fock_4rdm.m_enabled) m_fock_rdm4 = ptr::smart::make_unique<FockRdm4>(opts, basis_size, nelec, 1ul);
     m_total_norm.m_local = 0.0;
 }
 
@@ -343,7 +343,7 @@ ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     wf_t trace = 0.0;
     auto& row = rdm2->m_store.m_row;
 
-    for (row.restart(); row.in_range(); row.step()){
+    for (row.restart(); row; ++row){
         const uint_t i=row.m_inds.m_frm.m_cre[0];
         const uint_t j=row.m_inds.m_frm.m_cre[1];
         DEBUG_ASSERT_LT(i, j, "spin orbital creation indices should be ordered");
@@ -419,7 +419,7 @@ ham_comp_t Rdms::get_energy(const BosHam& ham) const {
     ham_t e = 0.0;
     auto& row = rdm->m_store.m_row;
 
-    for (row.restart(); row.in_range(); row.step()){
+    for (row.restart(); row; ++row){
         const uint_t n=row.m_inds.m_bos.m_cre[0];
         const uint_t m=row.m_inds.m_bos.m_ann[0];
         REQUIRE_EQ(n, m, "0011-RDM should currently only take 0000-exsig contributions");

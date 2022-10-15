@@ -48,7 +48,7 @@ bool RowHdf5WriterBase::write(const uint_t &n) {
     while (m_iitem < limit){
         if (m_iitem >= m_nitem || m_row.is_h5_write_exempt()) null_write_all_fields();
         else write_all_fields();
-        if (m_iitem < m_nitem) m_row.step();
+        if (m_iitem < m_nitem) ++m_row;
         ++m_iitem;
     }
     mpi::barrier();
@@ -148,7 +148,7 @@ bool RowHdf5ReaderBase::read(const uint_t &n) {
     while (m_iitem < limit) {
         if (m_iitem >= m_nitem) null_read_all_fields();
         else read_all_fields();
-        if (m_iitem < m_nitem) m_row.step();
+        if (m_iitem < m_nitem) ++m_row;
         ++m_iitem;
     }
     mpi::barrier();

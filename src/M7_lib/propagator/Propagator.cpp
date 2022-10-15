@@ -8,12 +8,12 @@ std::unique_ptr<guide::Wavefunction> Propagator::make_imp_samp_guide(const conf:
     const str_t fmt = "Guiding propagation via importance sampling with {} wavefunction";
     if (opts.m_gutzwiller_like.m_enabled) {
         logging::info(fmt, "Gutzwiller-like");
-        return smart_ptr::make_poly_unique<guide::Wavefunction, guide::GutzwillerLike>(
+        return ptr::smart::make_poly_unique<guide::Wavefunction, guide::GutzwillerLike>(
                 m_ham, opts.m_gutzwiller_like.m_fac.m_value);
     }
     else if (opts.m_suppress_multi_occ.m_enabled) {
         logging::info(fmt, "multiple occupation suppressing");
-        return smart_ptr::make_poly_unique<guide::Wavefunction, guide::SuppressMultiOcc>(
+        return ptr::smart::make_poly_unique<guide::Wavefunction, guide::SuppressMultiOcc>(
                 opts.m_suppress_multi_occ.m_fac.m_value);
     }
     return nullptr;

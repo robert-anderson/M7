@@ -23,13 +23,13 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
                   "this is biased");
 
     if (mpi::i_am_root()) {
-        m_stats = smart_ptr::make_unique<FciqmcStats>(
+        m_stats = ptr::smart::make_unique<FciqmcStats>(
             "M7.stats", "FCIQMC", FciqmcStatsRow(m_prop), m_opts.m_stats.m_period);
-        m_timing_stats = smart_ptr::make_unique<TimingStats>(
+        m_timing_stats = ptr::smart::make_unique<TimingStats>(
             "M7.timing", "FCIQMC Timings", TimingStatsRow(), m_opts.m_stats.m_period);
     }
     if (m_opts.m_stats.m_parallel) {
-        m_parallel_stats = smart_ptr::make_unique<ParallelStats>("M7.stats." + std::to_string(mpi::irank()),
+        m_parallel_stats = ptr::smart::make_unique<ParallelStats>("M7.stats." + std::to_string(mpi::irank()),
                  "FCIQMC Parallelization", ParallelStatsRow(), m_opts.m_stats.m_period);
     }
 
@@ -161,7 +161,7 @@ void Solver::begin_cycle() {
 void Solver::loop_over_occupied_mbfs() {
     auto& walker = m_wf.m_store.m_row;
 
-    for (walker.restart(); walker.in_range(); walker.step()) {
+    for (walker.restart(); walker; ++walker) {
         /*
          * stats always refer to the state of the wavefunction in the previous iteration
          */
@@ -243,7 +243,7 @@ void Solver::loop_over_occupied_mbfs() {
 void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
     if (!m_maes.m_accum_epoch || m_maes.is_period_cycle(icycle)) return;
     auto& walker = m_wf.m_store.m_row;
-    for (walker.restart(); walker.in_range(); walker.step()) {
+    for (walker.restart(); walker; ++walker) {
         if (walker.m_mbf.is_zero()) continue;
         m_maes.make_average_contribs(walker, m_refs, icycle);
     }
@@ -257,13 +257,13 @@ void Solver::loop_over_spawned() {
         //logging::debug_("no rows received, omitting loop over spawned");
         return;
     }
-    auto hwm_before = m_wf.m_store.m_hwm;
-    DEBUG_ONLY(hwm_before);
+    auto nrow_in_use_before = m_wf.m_store.nrow_in_use();
+    DEBUG_ONLY(nrow_in_use_before);
 
     m_annihilator.sort_recv();
     m_annihilator.loop_over_dst_mbfs();
 
-    DEBUG_ASSERT_LE(m_wf.m_store.m_hwm, hwm_before + m_wf.recv().m_hwm,
+    DEBUG_ASSERT_LE(m_wf.m_store.nrow_in_use(), nrow_in_use_before + m_wf.recv().nrow_in_use(),
                     "the store table shouldn't have grown by more rows than were received!");
     m_wf.recv().clear();
 }

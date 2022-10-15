@@ -23,7 +23,7 @@ TEST(Suites, Copy){
     ASSERT_EQ(copy_mbfs.m_row.m_frmbos.m_frm.m_basis, frm_basis);
     ASSERT_EQ(copy_mbfs.m_row.m_frmbos.m_bos.m_basis, bos_basis);
     ASSERT_TRUE(copy_mbfs.m_row.in_range());
-    ASSERT_TRUE(copy_mbfs.m_row.ptr_in_range());
+    ASSERT_TRUE(copy_mbfs.m_row.dereferencable());
     ASSERT_EQ(&copy_mbfs.m_row, copy_mbfs.m_row.m_frm.m_row);
     ASSERT_EQ(&copy_mbfs.m_row, copy_mbfs.m_row.m_bos.m_row);
     ASSERT_EQ(&copy_mbfs.m_row, copy_mbfs.m_row.m_frmbos.m_frm.m_row);

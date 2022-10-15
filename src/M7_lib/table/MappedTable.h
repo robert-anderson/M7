@@ -341,7 +341,7 @@ public:
         uint_t iitem = 0ul;
         clear();
         TableBase::push_back(row_reader.m_nitem);
-        for (row_reader.restart(); row_reader.in_range(); row_reader.step()) {
+        for (row_reader.restart(); row_reader; ++row_reader) {
             row_reader.read(iitem++);
             post_insert(row_reader.index());
         }

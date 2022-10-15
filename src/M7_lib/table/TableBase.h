@@ -10,28 +10,28 @@
 #include <numeric>
 #include "Buffer.h"
 
-struct RowTransfer {
-    /**
-     * make rows to be sent contiguous in memory
-     */
-    Buffer m_send_buffer, m_recv_buffer;
-    Buffer::Window m_send_bw, m_recv_bw;
-    /**
-     * need to get a unique pair of P2P tag from global variables
-     */
-    const int m_nrec_p2p_tag = mpi::new_p2p_tag();
-    const int m_irecs_p2p_tag = mpi::new_p2p_tag();
-
-    RowTransfer(str_t name) :
-            m_send_buffer("Outward transfer buffer", 1),
-            m_recv_buffer("Inward transfer buffer", 1) {
-        logging::info("Initializing row send/recv buffers for table \"{}\"", name);
-        logging::debug("P2P tag for number of row indices to transfer for \"{}\": {}", name, m_nrec_p2p_tag);
-        logging::debug("P2P tag for array of row indices to transfer for \"{}\": {}", name, m_irecs_p2p_tag);
-        m_send_buffer.append_window(&m_send_bw);
-        m_recv_buffer.append_window(&m_recv_bw);
-    }
-};
+//struct RowTransfer {
+//    /**
+//     * make rows to be sent contiguous in memory
+//     */
+//    Buffer m_send_buffer, m_recv_buffer;
+//    Buffer::Window m_send_bw, m_recv_bw;
+//    /**
+//     * need to get a unique pair of P2P tag from global variables
+//     */
+//    const int m_nrec_p2p_tag = mpi::new_p2p_tag();
+//    const int m_irecs_p2p_tag = mpi::new_p2p_tag();
+//
+//    RowTransfer(str_t name) :
+//            m_send_buffer("Outward transfer buffer", 1),
+//            m_recv_buffer("Inward transfer buffer", 1) {
+//        logging::info("Initializing row send/recv buffers for table \"{}\"", name);
+//        logging::debug("P2P tag for number of row indices to transfer for \"{}\": {}", name, m_nrec_p2p_tag);
+//        logging::debug("P2P tag for array of row indices to transfer for \"{}\": {}", name, m_irecs_p2p_tag);
+//        m_send_buffer.append_window(&m_send_bw);
+//        m_recv_buffer.append_window(&m_recv_bw);
+//    }
+//};
 
 /**
  * Base class for all row-contiguous data in the program.
@@ -88,9 +88,9 @@ struct TableBase {
      */
     Buffer::Window m_bw;
     /**
-     * "high water mark" is the number of rows in use, including those that have been freed
+     * "high water mark" is a pointer to the highest-index in-use row
      */
-    uint_t m_hwm = 0ul;
+    buf_t* m_hwm = nullptr;
     /**
      * indices of freed rows
      */
@@ -107,7 +107,7 @@ struct TableBase {
     /**
      * buffered space for communication in the event of rank reallocation, instantiate on first transfer if required
      */
-    std::unique_ptr<RowTransfer> m_transfer = nullptr;
+//    std::unique_ptr<RowTransfer> m_transfer = nullptr;
     /**
      * if a record is to be protected, its index must appear as a key in the following map. the value associated with
      * the key is the "protection level" of the record. if one object requires that a record i not be deleted, then
@@ -122,6 +122,15 @@ struct TableBase {
     TableBase(uint_t row_size);
 
 protected:
+
+    uint_t row_index(const buf_t* row_ptr) const {
+        DEBUG_ASSERT_TRUE(row_ptr, "row pointer is undefined");
+        const auto nbyte = std::distance<const buf_t*>(m_bw.m_begin, row_ptr);
+        DEBUG_ASSERT_GE(nbyte, 0l, "pointer is before the table beginning");
+        DEBUG_ASSERT_FALSE(nbyte % m_bw.m_row_size, "pointer does not point to beginning of a row");
+        return uint_t(nbyte / m_bw.m_row_size);
+    }
+
     /**
      * the copy assignment is not exposed as public, since otherwise the TableBase could be set equal to an incompatible
      * TableBase. Better and safer that the row-templated subclasses implement the public interface
@@ -135,7 +144,8 @@ protected:
             resize(other.capacity(), 0.0);
             m_bw = other.m_bw;
         }
-        m_hwm = other.m_hwm;
+        auto nrow_in_use = other.nrow_in_use();
+        m_hwm = begin(nrow_in_use);
         m_freed_rows = other.m_freed_rows;
         m_protected_rows = other.m_protected_rows;
         return *this;
@@ -169,6 +179,16 @@ public:
         return m_bw.m_nrow;
     }
 
+    uint_t nrow_in_use() const {
+        DEBUG_ASSERT_EQ(bool(m_hwm), bool(m_bw.m_begin),
+                        "if buffer is set, the HWM should be set, else the HWM should not be set");
+        return m_hwm ? row_index(m_hwm) : 0ul;
+    }
+
+    uint_t size_in_use() const {
+        return row_index(m_hwm) * row_size();
+    }
+
     /**
      * clear the entire table only if it contains no protected records, else fatal error. this also resets the freed
      * rows objects, so it is made public
@@ -193,7 +213,7 @@ public:
         if (this==&other) return true;
         if (capacity() != other.capacity()) return false;
         if (m_hwm!=other.m_hwm) return false;
-        return std::memcmp(begin(), other.begin(), m_hwm * row_size()) == 0;
+        return std::memcmp(m_bw.m_begin, other.m_bw.m_begin, size_in_use()) == 0;
     }
 
     bool operator!=(const TableBase& other) const {
@@ -274,7 +294,7 @@ public:
      * @return
      */
     uint_t nrecord() const {
-        return m_hwm - m_freed_rows.size();
+        return nrow_in_use() - m_freed_rows.size();
     }
 
     /**
@@ -330,7 +350,7 @@ public:
      *  record index of end of the already-inserted data
      */
     void post_insert_range(uint_t ibegin = 0ul, uint_t iend = ~0ul) {
-        if (iend == ~0ul) iend = m_hwm;
+        if (iend == ~0ul) iend = nrow_in_use();
         for (uint_t i = ibegin; i < iend; ++i) post_insert(i);
     }
 
@@ -398,7 +418,7 @@ public:
      *  index of the record to protect
      */
     void protect(uint_t i) const {
-        DEBUG_ASSERT_LT(i, m_hwm, "record index OOB");
+        DEBUG_ASSERT_LT(i, nrow_in_use(), "row index OOB");
         DEBUG_ASSERT_FALSE(m_is_freed_row[i], "cannot protect a freed record");
         auto it = m_protected_rows.find(i);
         if (it == m_protected_rows.end()) m_protected_rows.insert({i, 1ul});
@@ -412,7 +432,7 @@ public:
      *  number of protect(i) calls - number of unprotect(i) calls
      */
     uint_t protection_level(uint_t i) const {
-        DEBUG_ASSERT_LT(i, m_hwm, "record index OOB");
+        DEBUG_ASSERT_LT(i, nrow_in_use(), "record index OOB");
         auto it = m_protected_rows.find(i);
         if (it == m_protected_rows.end()) return 0ul;
         else return it->second;

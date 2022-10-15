@@ -94,9 +94,9 @@ public:
         return m_tables[itable];
     }
 
-    uintv_t hwms() const {
+    uintv_t nrows_in_use() const {
         uintv_t res(ntable());
-        for (uint_t i = 0ul; i < ntable(); ++i) res[i] = (*this)[i].m_hwm;
+        for (uint_t i = 0ul; i < ntable(); ++i) res[i] = (*this)[i].nrow_in_use();
         return res;
     }
 
@@ -107,10 +107,7 @@ public:
     }
 
     void clear() {
-        for (auto &table:m_tables) {
-            static_cast<TableBase &>(table).clear();
-            static_cast<TableBase &>(table).m_hwm = 0;
-        }
+        for (auto &table:m_tables) static_cast<TableBase &>(table).clear();
     }
 
     void set_expansion_factor(double f) {

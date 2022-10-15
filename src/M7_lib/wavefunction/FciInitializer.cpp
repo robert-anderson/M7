@@ -27,7 +27,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, FciInitOptions opts):
     logging::info("Building sparse H matrix ({} rows)", iters.niter_single());
     ProgressMonitor pm(true, "building sparse H", "basis functions", count_local);
     auto& row = m_mbf_order_table.m_row;
-    for (row.jump(displ_local); row.in_range(displ_local+count_local); row.step()) {
+    for (row.jump(displ_local); row.in_range(displ_local+count_local); ++row) {
         const auto& src_mbf = row.m_mbf;
         auto& dst_mbf = mbf;
         const auto irow = row.index()-displ_local;

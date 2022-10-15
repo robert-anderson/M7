@@ -64,7 +64,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
     if (fptol::numeric_zero(delta_weight)) return;
 
     m_wf.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
-    if (!dst_walker.in_range()) {
+    if (!dst_walker) {
         /*
          * the destination MBF row in m_wf.m_store is not currently occupied, so initiator rules must be applied
          */
@@ -99,7 +99,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
     /*
      * only consider RDM contributions if there are any RDMs being accumulated and the destination exists
      */
-    if (m_rdms && m_rdms.m_accum_epoch && dst_walker.in_range()) {
+    if (m_rdms && m_rdms.m_accum_epoch && dst_walker) {
         DEBUG_ASSERT_TRUE(block_begin.m_send_parents, "RDM sampling requires that parent MBFs are communicated");
         /*
          * store the original positions of the row objects in the recv table
@@ -111,7 +111,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
         wf_t src_weight = block_begin.m_src_weight;
         DEBUG_ONLY(src_weight);
 
-        for (current.jump(block_begin);; current.step()) {
+        for (current.jump(block_begin);; ++current) {
             if (!in_same_src_block(current, block_begin)) {
                 handle_src_block(block_begin, dst_walker);
                 block_begin.jump(current);
@@ -174,7 +174,7 @@ void Annihilator::handle_src_block(Spawn &block_begin, Walker &dst_row) {
 }
 
 void Annihilator::loop_over_dst_mbfs() {
-    if (!m_wf.recv().m_hwm) return;
+    if (!m_wf.recv().nrow_in_use()) return;
 
     /*
      * put the block_begin row to the beginning of the recv table
@@ -190,10 +190,10 @@ void Annihilator::loop_over_dst_mbfs() {
      */
     lookup_dst(block_begin, dst_deterministic);
     auto &current = m_work_row2;
-    for (current.restart();; current.step()) {
+    for (current.restart();; ++current) {
         if (!in_same_dst_block(current, block_begin)) {
             /*
-             * either the current row has been iterated over the high water mark of the recv table, or onto a row with a
+             * either the current row has been iterated over the high-water mark of the recv table, or onto a row with a
              * different (dst_mbf, ipart_dst) pair. In either case, we have reached the end of a block of the major
              * sorting field, so we must handle the block just finished
              */
@@ -205,7 +205,7 @@ void Annihilator::loop_over_dst_mbfs() {
              * which would be the start of the next block if current is not past the end of recv rows. In any case, the
              * two rows should be the same. If the new start of block is past the end of recv rows, we're done
              */
-            if (!block_begin.in_range()) break;
+            if (!block_begin) break;
             /*
              * new block of dst_mbfs, so reset total contrib
              */

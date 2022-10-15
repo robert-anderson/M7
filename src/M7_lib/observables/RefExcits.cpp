@@ -3,8 +3,7 @@
 //
 
 #include "RefExcits.h"
-#include "M7_lib/util/Exsig.h"
-#include "M7_lib/util/SmartPtr.h"
+#include "M7_lib/util/Pointer.h"
 
 RefExcitsOneExsig::RefExcitsOneExsig(uint_t exsig, uint_t nroot) :
         buffered::MappedTable<MaeRow>(
@@ -43,7 +42,7 @@ RefExcits::RefExcits(const conf::RefExcits& opts, sys::Size extents, uint_t nroo
     for (uint_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
         auto exsig = exsig::encode(iexlvl, iexlvl, 0, 0);
         m_active_exsigs.push_back(exsig);
-        m_ref_excits[exsig] = smart_ptr::make_unique<RefExcitsOneExsig>(exsig, nroot);
+        m_ref_excits[exsig] = ptr::smart::make_unique<RefExcitsOneExsig>(exsig, nroot);
     }
 }
 

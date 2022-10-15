@@ -7,7 +7,6 @@
 
 #include <utility>
 
-#include "M7_lib/util/SmartPtr.h"
 #include "M7_lib/hdf5/File.h"
 #include "FortranNamelistReader.h"
 

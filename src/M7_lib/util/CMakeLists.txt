@@ -11,13 +11,13 @@ target_sources(M7_lib
         Hash.h
         Integer.cpp
         Integer.h
-        Nd.h
         Math.h
         MeanStd.h
+        Nd.h
+        Pointer.h
         Probability.h
         ProgressMonitor.cpp
         ProgressMonitor.h
-        SmartPtr.h
         Sort.h
         String.cpp
         String.h

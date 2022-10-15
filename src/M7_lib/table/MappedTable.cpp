@@ -9,7 +9,7 @@ MappedTableBase::MappedTableBase(MappedTableOptions mapped_opts) : m_mapping_opt
 }
 
 MappedTableBase &MappedTableBase::operator=(const MappedTableBase &other) {
-    if (this==&other) return *this;
+    if (this == &other) return *this;
     m_buckets = other.m_buckets;
     m_nskip_total = other.m_nskip_total;
     m_nlookup_total = other.m_nlookup_total;
@@ -21,8 +21,8 @@ MappedTableBase::MappedTableBase(const MappedTableBase &other) : MappedTableBase
 }
 
 bool MappedTableBase::operator==(const MappedTableBase &other) const {
-    if (this==&other) return true;
-    if (nbucket()!=other.nbucket()) return false;
+    if (this == &other) return true;
+    if (nbucket() != other.nbucket()) return false;
     if (m_mapping_opts.m_remap_ratio != other.m_mapping_opts.m_remap_ratio) return false;
     if (m_mapping_opts.m_remap_nlookup != other.m_mapping_opts.m_remap_nlookup) return false;
     if (m_buckets!=other.m_buckets) return false;
@@ -53,7 +53,7 @@ bool MappedTableBase::all_nonzero_records_mapped(const TableBase &source) const 
         for (const auto& item: bucket) set.insert(item);
     }
     // then go through table, if the row is non-zero, its index should be in the set.
-    for (uint_t irow=0ul; irow<source.m_hwm; ++irow){
+    for (uint_t irow = 0ul; irow < source.nrow_in_use(); ++irow){
         bool in_set = set.find(irow)!=set.end();
         if (source.is_freed(irow) == in_set) return false;
     }

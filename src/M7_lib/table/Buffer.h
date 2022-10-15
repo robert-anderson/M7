@@ -11,6 +11,7 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/parallel/MPIWrapper.h>
 
+struct TableBase;
 
 class Buffer {
 public:
@@ -22,12 +23,17 @@ public:
      * number of bits in the system word
      */
     static constexpr uint_t c_nbit_word = CHAR_BIT * c_nbyte_word;
+
+
+
+
     class Window {
         friend class Buffer;
         /**
          * pointer to the Buffer with which this window is associated
          */
         Buffer *m_buffer = nullptr;
+        TableBase *m_table = nullptr;
 
     public:
         /**
@@ -39,15 +45,16 @@ public:
          */
         uint_t m_nrow = 0ul;
         buf_t *m_begin = nullptr;
+        buf_t *m_end = nullptr;
         uint_t m_size = 0ul;
 
-        Window(uint_t row_size=1): m_row_size(row_size) {}
+        Window(TableBase* table, uint_t row_size=1): m_table(table), m_row_size(row_size) {}
 
-        Window(const Window& other): Window(other.m_row_size) {}
+        Window(const Window& other): Window(other.m_table, other.m_row_size) {}
 
         Window& operator=(const Window& other);
 
-        explicit Window(Buffer *buffer, uint_t row_size=1);
+        Window(Buffer *buffer, TableBase* table, uint_t row_size=1);
         /**
          * @return
          *  true if this window has an associated Buffer and it has an allocated data vector
@@ -83,6 +90,7 @@ public:
         double get_expansion_factor() const;
 
     };
+
 
     double m_expansion_factor = 0.0;
     /**
@@ -124,7 +132,6 @@ public:
     str_t capacity_string() const;
 
 };
-
 
 struct Sizing {
     /**

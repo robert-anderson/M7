@@ -3,7 +3,7 @@
 //
 
 #include "Lattice.h"
-#include "M7_lib/util/SmartPtr.h"
+#include "M7_lib/util/Pointer.h"
 
 lattice::Lattice::Lattice(const sparse::dynamic::Matrix<int>& adj, uint_t nsite, str_t info_str) :
         m_nsite(nsite), m_info(std::move(info_str)), m_sparse_adj(adj), m_nadj_max(m_sparse_adj.m_max_nentry),
@@ -61,7 +61,7 @@ std::shared_ptr<lattice::Lattice> lattice::Lattice::make_next_nearest() const {
             if (nmutual == nmutual_max) sparse.insert(isite, {jsite, phase});
         }
     }
-    return smart_ptr::make_shared<Lattice>(Lattice(sparse, m_nsite, m_info + " next nearest neighbors"));
+    return ptr::smart::make_shared<Lattice>(Lattice(sparse, m_nsite, m_info + " next nearest neighbors"));
 }
 
 lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs) :
@@ -146,12 +146,12 @@ lattice::Topology::adj_t lattice::OrthoTopology::make_adj() const {
 
 
 std::shared_ptr<lattice::Lattice> lattice::make() {
-    return smart_ptr::make_shared<Lattice>(NullTopology());
+    return ptr::smart::make_shared<Lattice>(NullTopology());
 }
 
 std::shared_ptr<lattice::Lattice> lattice::make(str_t topo, uintv_t site_shape, v_t<int> bcs) {
     if (topo == "ortho" || topo == "orthogonal")
-        return smart_ptr::make_shared<Lattice>(OrthoTopology(site_shape, bcs));
+        return ptr::smart::make_shared<Lattice>(OrthoTopology(site_shape, bcs));
     return make();
 }
 

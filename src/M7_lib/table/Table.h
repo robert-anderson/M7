@@ -40,13 +40,13 @@ struct Table : TableBase {
     str_t to_string(const uintv_t *ordering = nullptr) const override {
         str_t tmp = m_row.field_names_string();
         if (!m_hwm) return tmp;
-        const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
+        const auto n = ordering ? std::min(ordering->size(), nrow_in_use()) : nrow_in_use();
         for (uint_t iirow = 0ul; iirow < n; ++iirow) {
             auto irow = ordering ? (*ordering)[iirow] : iirow;
             m_row.jump(irow);
             tmp += std::to_string(irow) + ". " + m_row.to_string() + "\n";
         }
-        DEBUG_ASSERT_TRUE(m_row.in_range(), "row is out of range");
+        DEBUG_ASSERT_TRUE(bool(m_row), "row is not dereferencable");
         return tmp;
     }
 
@@ -64,7 +64,7 @@ struct Table : TableBase {
 private:
     uint_t nrow_to_write() const {
         uint_t n = 0ul;
-        for (m_row.restart(); m_row.in_range(); m_row.step()) {
+        for (m_row.restart(); m_row; ++m_row) {
             n += !static_cast<const Row&>(m_row).is_h5_write_exempt();
         }
         return n;

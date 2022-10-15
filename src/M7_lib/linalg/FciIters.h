@@ -26,23 +26,23 @@ private:
     template<typename single_t>
     void set_pair(const single_t& single, const mbf_foreach::frm::Base&) {
         typedef mbf_foreach::frm::Pair<single_t> pair_t;
-        m_pair = smart_ptr::make_poly_unique<pair_poly_t, pair_t>(single);
+        m_pair = ptr::smart::make_poly_unique<pair_poly_t, pair_t>(single);
     }
     template<typename single_t>
     void set_pair(const single_t& single, const mbf_foreach::bos::Base&) {
         typedef mbf_foreach::bos::Pair<single_t> pair_t;
-        m_pair = smart_ptr::make_poly_unique<pair_poly_t, pair_t>(single);
+        m_pair = ptr::smart::make_poly_unique<pair_poly_t, pair_t>(single);
     }
     template<typename single_t>
     void set_pair(const single_t& single, const mbf_foreach::frm_bos::Base&) {
         typedef mbf_foreach::frm_bos::Pair<single_t> pair_t;
-        m_pair = smart_ptr::make_poly_unique<pair_poly_t, pair_t>(single);
+        m_pair = ptr::smart::make_poly_unique<pair_poly_t, pair_t>(single);
     }
 
 public:
     template<typename single_t>
     FciIters(const single_t& single) {
-        m_single = smart_ptr::make_poly_unique<single_poly_t, single_t>(single);
+        m_single = ptr::smart::make_poly_unique<single_poly_t, single_t>(single);
         /*
          * use overloading of the second parameter to statically dispatch to the correct ctor within either
          *  mbf_foreach::frm, mbf_foreach::bos, or mbf_foreach::frm_bos

@@ -3,13 +3,14 @@
 //
 
 #include "Buffer.h"
+#include "TableBase.h"
 #include <M7_lib/io/Logging.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include "M7_lib/util/String.h"
 #include <M7_lib/util/Integer.h>
 
 
-Buffer::Window::Window(Buffer *buffer, uint_t row_size): Window(row_size) {
+Buffer::Window::Window(Buffer *buffer, TableBase* table, uint_t row_size): Window(table, row_size) {
     ASSERT(buffer);
     buffer->append_window(this);
     ASSERT(m_buffer == buffer);
@@ -18,11 +19,11 @@ Buffer::Window::Window(Buffer *buffer, uint_t row_size): Window(row_size) {
 
 Buffer::Window &Buffer::Window::operator=(const Buffer::Window &other) {
     DEBUG_ASSERT_EQ(other.m_row_size, m_row_size, "can't assign to incompatible window");
-    DEBUG_ASSERT_FALSE(m_begin==nullptr, "this is an unallocated buffer window");
-    DEBUG_ASSERT_FALSE(other.m_begin==nullptr, "can't assign to an unallocated buffer window");
-    auto nbyte = std::min(other.m_size, m_size);
-    std::memcpy(m_begin, other.m_begin, nbyte);
-    m_size = nbyte;
+    DEBUG_ASSERT_TRUE(m_begin, "this is an unallocated buffer window");
+    DEBUG_ASSERT_TRUE(other.m_begin, "can't assign to an unallocated buffer window");
+    auto nbyte_cpy = std::min(other.m_size, m_size);
+    std::memcpy(m_begin, other.m_begin, nbyte_cpy);
+    m_size = nbyte_cpy;
     m_nrow = m_size / m_row_size;
     return *this;
 }
@@ -32,11 +33,16 @@ bool Buffer::Window::allocated() const {
 }
 
 void Buffer::Window::move(buf_t *begin, uint_t new_size) {
-    DEBUG_ASSERT_FALSE(begin==nullptr, "moving to invalid buffer pointer");
+    DEBUG_ASSERT_TRUE(begin, "moving to invalid buffer pointer");
+    const auto nrow_in_use = m_table->nrow_in_use();
     if (m_begin) std::memmove(begin, m_begin, std::min(new_size, m_size));
     m_begin = begin;
     m_size = new_size;
+    m_table->m_hwm = m_table->begin(nrow_in_use);
+    m_end = m_begin + m_size;
     m_nrow = m_size / m_row_size;
+    DEBUG_ASSERT_EQ(bool(m_table->m_hwm), bool(m_table->m_bw.m_begin),
+                    "if buffer is set, the HWM should be set, else the HWM should not be set");
 }
 
 void Buffer::Window::resize(uint_t size, double factor) {
@@ -80,7 +86,7 @@ void Buffer::append_window(Buffer::Window *window) {
 }
 
 void Buffer::resize(uint_t size, double factor) {
-    if (size>=this->size()) {
+    if (size >= this->size()) {
         // expanding the buffer
         if (factor < 0.0) factor = m_expansion_factor;
     }
