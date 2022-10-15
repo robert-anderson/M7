@@ -88,9 +88,9 @@ struct TableBase {
      */
     Buffer::Window m_bw;
     /**
-     * "high water mark" is the number of rows in use, including those that have been freed
+     * "high water mark" is a pointer to the highest-index in-use row
      */
-    uint_t m_hwm = 0ul;
+    buf_t* m_hwm = nullptr;
     /**
      * indices of freed rows
      */
@@ -122,6 +122,11 @@ struct TableBase {
     TableBase(uint_t row_size);
 
 protected:
+
+    uint_t row_index(const buf_t* row_ptr) const {
+        return uint_t(std::distance<const buf_t*>(m_bw.m_begin, row_ptr) / m_bw.m_row_size);
+    }
+
     /**
      * the copy assignment is not exposed as public, since otherwise the TableBase could be set equal to an incompatible
      * TableBase. Better and safer that the row-templated subclasses implement the public interface
@@ -193,7 +198,7 @@ public:
         if (this==&other) return true;
         if (capacity() != other.capacity()) return false;
         if (m_hwm!=other.m_hwm) return false;
-        return std::memcmp(begin(), other.begin(), m_hwm * row_size()) == 0;
+        return std::memcmp(m_bw.m_begin, other.m_bw.m_begin, m_hwm * row_size()) == 0;
     }
 
     bool operator!=(const TableBase& other) const {

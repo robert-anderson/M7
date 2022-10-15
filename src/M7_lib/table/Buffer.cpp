@@ -18,11 +18,11 @@ Buffer::Window::Window(Buffer *buffer, uint_t row_size): Window(row_size) {
 
 Buffer::Window &Buffer::Window::operator=(const Buffer::Window &other) {
     DEBUG_ASSERT_EQ(other.m_row_size, m_row_size, "can't assign to incompatible window");
-    DEBUG_ASSERT_FALSE(m_begin==nullptr, "this is an unallocated buffer window");
-    DEBUG_ASSERT_FALSE(other.m_begin==nullptr, "can't assign to an unallocated buffer window");
-    auto nbyte = std::min(other.m_size, m_size);
-    std::memcpy(m_begin, other.m_begin, nbyte);
-    m_size = nbyte;
+    DEBUG_ASSERT_TRUE(m_begin, "this is an unallocated buffer window");
+    DEBUG_ASSERT_TRUE(other.m_begin, "can't assign to an unallocated buffer window");
+    auto nbyte_cpy = std::min(other.m_size, m_size);
+    std::memcpy(m_begin, other.m_begin, nbyte_cpy);
+    m_size = nbyte_cpy;
     m_nrow = m_size / m_row_size;
     return *this;
 }
@@ -32,7 +32,7 @@ bool Buffer::Window::allocated() const {
 }
 
 void Buffer::Window::move(buf_t *begin, uint_t new_size) {
-    DEBUG_ASSERT_FALSE(begin==nullptr, "moving to invalid buffer pointer");
+    DEBUG_ASSERT_TRUE(begin, "moving to invalid buffer pointer");
     if (m_begin) std::memmove(begin, m_begin, std::min(new_size, m_size));
     m_begin = begin;
     m_size = new_size;

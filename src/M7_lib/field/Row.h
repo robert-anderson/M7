@@ -52,11 +52,8 @@ private:
      *  m_begin should be nullptr, and field dereferencing should fail ASSERTs
      * else:
      *  this state is invalid
-     *
-     * TODO: investigate whether dbegin needs to be cached with regard to performance
      */
     mutable buf_t *m_begin = nullptr;
-    mutable uint_t m_i = 0ul;
 
 public:
     /**
@@ -73,14 +70,38 @@ public:
     mutable Row *m_child = nullptr;
 
     /**
+     * @return
+     *  true if the m_dbegin pointer is valid with respect to the table object
+     */
+    bool ptr_in_range() const {
+        const auto begin_offset = std::distance(m_table->m_bw.m_begin, m_begin);
+        const auto end_offset = std::distance(m_begin, m_table->m_hwm);
+        return (begin_offset >= 0l) && (end_offset > 0l);
+    }
+
+    /**
+     * @return
+     *  true if the stored row index is within the range [0, m_table->m_hwm)
+     */
+    bool in_range() const {
+        return ptr_in_range();
+    }
+
+    operator bool () const {
+        return in_range();// < m_table->m_hwm;
+    }
+
+
+    /**
      * m_i == m_table->m_hwm is not valid for access, but is the state in which the row position data are left at the
      * loop when the in_range() loop termination condition becomes false, so the assert doesn't fail in this case
      * @return
      *  row position within Table
      */
     uint_t index() const {
-        DEBUG_ASSERT_LE(m_i, m_table->m_hwm, "the row index is not in the permitted range");
-        return m_i;
+        DEBUG_ASSERT_TRUE(ptr_in_range(), "the row is not pointing to memory in the permitted range");
+        const auto begin_offset = std::distance(m_table->m_bw.m_begin, m_begin);
+        return begin_offset / m_size;
     }
 
 
@@ -91,28 +112,11 @@ public:
      *  true if stored row index is within the range [0, irow_end)
      */
     bool in_range(uint_t irow_end) const {
-        return m_i < irow_end;
+        const auto begin_offset = std::distance(m_table->m_bw.m_begin, m_begin);
+        const auto end_offset = begin_offset + m_size * irow_end;
+        return (begin_offset >= 0l) && (end_offset > 0);
     }
 
-    /**
-     * @return
-     *  true if the stored row index is within the range [0, m_table->m_hwm)
-     */
-    bool in_range() const {
-        return m_i < m_table->m_hwm;
-    }
-
-    operator bool () const {
-        return m_i < m_table->m_hwm;
-    }
-
-    /**
-     * @return
-     *  true if the m_dbegin pointer is valid with respect to the table object
-     */
-    bool ptr_in_range() const {
-        return (m_begin >= m_table->begin()) && (m_begin < m_table->begin() + m_table->m_hwm * m_size);
-    }
 
     buf_t *begin() {
         DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
@@ -138,7 +142,6 @@ public:
             DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
             m_begin = m_table->begin(irow_begin);
         }
-        m_i = irow_begin;
     }
 
     void restart() const {
@@ -150,19 +153,17 @@ public:
         DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
         DEBUG_ASSERT_TRUE(in_range(), "Row is out of table bounds");
         m_begin += m_size;
-        m_i++;
     }
 
     void jump(uint_t i) const {
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
-        m_begin = m_table->begin() + m_size * i;
-        m_i = i;
+        m_begin = m_table->begin(i);
         DEBUG_ASSERT_LE(i, m_table->m_hwm, "Row is out of table bounds");
     }
 
     void jump(const Row &other) const {
-        jump(other.m_i);
+        jump(other.index());
     }
 
     void push_back_jump() {
@@ -170,20 +171,7 @@ public:
     }
 
     void select_null() const {
-        m_i = m_table->m_hwm;
         m_begin = nullptr;
-    }
-
-    bool null_selected() const {
-        DEBUG_ASSERT_EQ(m_i==m_table->m_hwm, m_begin==nullptr, "Row in inconsistent state");
-        return m_begin;
-    }
-
-    /**
-     * if m_table has been reallocated, the cached m_dbegin pointer is not valid, calling this method rectifies that
-     */
-    void refresh() const {
-        jump(m_i);
     }
 
     void copy_in(const Row &other) {

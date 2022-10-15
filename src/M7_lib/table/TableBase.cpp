@@ -29,7 +29,7 @@ void TableBase::clear() {
     DEBUG_ASSERT_FALSE(is_protected(), "cannot clear a table with protected records");
     if (!m_bw.allocated()) return;
     std::memset(begin(), 0, row_size() * m_hwm);
-    m_hwm = 0ul;
+    m_hwm = m_bw.m_begin;
 }
 
 bool TableBase::is_clear() const {
@@ -61,7 +61,8 @@ void TableBase::set_buffer(Buffer *buffer) {
 
 uint_t TableBase::push_back(uint_t n) {
     DEBUG_ASSERT_TRUE(row_size(), "cannot resize a table with zero record size");
-    if (m_hwm + n > this->capacity()) expand(n);
+    const auto nbyte_add = n * m_bw.m_row_size;
+    if (std::distance(m_hwm + nbyte_add, m_bw.m_row_size > this->capacity()) expand(n);
     auto tmp = m_hwm;
     m_hwm += n;
     return tmp;
