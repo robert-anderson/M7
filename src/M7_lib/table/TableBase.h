@@ -88,10 +88,6 @@ struct TableBase {
      */
     Buffer::Window m_bw;
     /**
-     * "high water mark" is a pointer to the highest-index in-use row
-     */
-    buf_t* m_hwm = nullptr;
-    /**
      * indices of freed rows
      */
     std::stack<uint_t> m_freed_rows;
@@ -144,8 +140,6 @@ protected:
             resize(other.capacity(), 0.0);
             m_bw = other.m_bw;
         }
-        auto nrow_in_use = other.nrow_in_use();
-        m_hwm = begin(nrow_in_use);
         m_freed_rows = other.m_freed_rows;
         m_protected_rows = other.m_protected_rows;
         return *this;
@@ -180,13 +174,9 @@ public:
     }
 
     uint_t nrow_in_use() const {
-        DEBUG_ASSERT_EQ(bool(m_hwm), bool(m_bw.m_begin),
+        DEBUG_ASSERT_EQ(bool(m_bw.m_hwm), bool(m_bw.m_begin),
                         "if buffer is set, the HWM should be set, else the HWM should not be set");
-        return m_hwm ? row_index(m_hwm) : 0ul;
-    }
-
-    uint_t size_in_use() const {
-        return row_index(m_hwm) * row_size();
+        return m_bw.m_hwm ? row_index(m_bw.m_hwm) : 0ul;
     }
 
     /**
@@ -211,9 +201,7 @@ public:
      */
     bool operator==(const TableBase& other) const {
         if (this == &other) return true;
-        if (capacity() != other.capacity()) return false;
-        if (nrow_in_use() != other.nrow_in_use()) return false;
-        return std::memcmp(m_bw.m_begin, other.m_bw.m_begin, size_in_use()) == 0;
+        return m_bw == other.m_bw;
     }
 
     bool operator!=(const TableBase& other) const {

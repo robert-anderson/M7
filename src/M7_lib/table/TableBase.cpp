@@ -21,15 +21,13 @@ bool TableBase::is_clear(uint_t i) const {
     return std::memcmp(begin(i), m_null_row_string.data(), row_size()) == 0;
 }
 
-TableBase::TableBase(uint_t row_size) : m_bw(this, row_size), m_null_row_string(row_size, 0){}
+TableBase::TableBase(uint_t row_size) : m_bw(row_size), m_null_row_string(row_size, 0){}
 
 TableBase::TableBase(const TableBase &other) : TableBase(other.m_bw.m_row_size){}
 
 void TableBase::clear() {
     DEBUG_ASSERT_FALSE(is_protected(), "cannot clear a table with protected records");
-    if (!m_bw.allocated()) return;
-    std::memset(begin(), 0, size_in_use());
-    m_hwm = m_bw.m_begin;
+    m_bw.clear();
 }
 
 bool TableBase::is_clear() const {
@@ -56,17 +54,15 @@ const buf_t *TableBase::begin(uint_t irec) const {
 void TableBase::set_buffer(Buffer *buffer) {
     DEBUG_ASSERT_TRUE(buffer, "buffer is null");
     DEBUG_ASSERT_TRUE(!m_bw.allocated(), "buffer window is not allocated")
-    const auto nrow_in_use = this->nrow_in_use();
     buffer->append_window(&m_bw);
-    m_hwm = begin(nrow_in_use);
 }
 
 uint_t TableBase::push_back(uint_t n) {
     DEBUG_ASSERT_TRUE(row_size(), "cannot resize a table with zero record size");
     const auto nbyte_add = n * m_bw.m_row_size;
-    if (!ptr::before_end(m_hwm + nbyte_add, m_bw.m_end)) expand(n);
+    if (!ptr::before_end(m_bw.m_hwm + nbyte_add, m_bw.m_end)) expand(n);
     const auto tmp = nrow_in_use();
-    m_hwm += n * row_size();
+    m_bw.m_hwm += n * row_size();
     return tmp;
 }
 
@@ -94,7 +90,7 @@ void TableBase::free() {
 }
 
 bool TableBase::empty() const {
-    return m_hwm == m_bw.m_begin;
+    return m_bw.empty();
 }
 
 bool TableBase::is_freed(uint_t i) const {
@@ -110,10 +106,7 @@ void TableBase::resize(uint_t nrec, double factor) {
     DEBUG_ASSERT_TRUE(nrec, "new size should be non-zero");
     DEBUG_ASSERT_TRUE(row_size(), "cannot resize, row size is zero");
     DEBUG_ASSERT_GE(nrec, nrow_in_use(), "resize would discard uncleared data");
-    const auto nrow_in_use = this->nrow_in_use();
     m_bw.resize(nrec * row_size(), factor);
-    // set the high-water mark to the appropriate pointer in the newly allocated memory
-    m_hwm = begin(nrow_in_use);
     DEBUG_ASSERT_LT(this->nrow_in_use(), m_bw.m_size / row_size(), "resize has discarded uncleared data");
     m_is_freed_row.resize(capacity(), false);
 }
@@ -220,7 +213,7 @@ void TableBase::all_gatherv(const TableBase &src) {
     auto nrec_total = std::accumulate(nrecs.cbegin(), nrecs.cend(), 0ul);
     if (!nrec_total) return;
     push_back(nrec_total);
-    mpi::all_gatherv(src.begin(), src.size_in_use(), begin(), counts, displs);
+    mpi::all_gatherv(src.begin(), src.m_bw.size_in_use(), begin(), counts, displs);
     post_insert_range(0, nrec_total);
 }
 
@@ -238,7 +231,7 @@ void TableBase::gatherv(const TableBase &src, uint_t irank) {
     auto nrec_total = std::accumulate(nrecs.cbegin(), nrecs.cend(), 0ul);
     if (mpi::i_am(irank))
         push_back(nrec_total);
-    mpi::gatherv(src.begin(), src.size_in_use(), begin(), counts, displs, irank);
+    mpi::gatherv(src.begin(), src.m_bw.size_in_use(), begin(), counts, displs, irank);
     if (mpi::i_am(irank))
         post_insert_range(0, nrec_total);
 }

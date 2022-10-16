@@ -24,16 +24,15 @@ public:
      */
     static constexpr uint_t c_nbit_word = CHAR_BIT * c_nbyte_word;
 
-
-
-
+    /**
+     * class representing the portion of a buffer alloted to a single table
+     */
     class Window {
         friend class Buffer;
         /**
          * pointer to the Buffer with which this window is associated
          */
         Buffer *m_buffer = nullptr;
-        TableBase *m_table = nullptr;
 
     public:
         /**
@@ -44,22 +43,48 @@ public:
          * Current number of whole rows that can be stored in the window
          */
         uint_t m_nrow = 0ul;
+        /**
+         * pointer to the beginning of the window
+         */
         buf_t *m_begin = nullptr;
+        /**
+         * pointer to the end of the window
+         */
         buf_t *m_end = nullptr;
+        /**
+         * "high water mark" is a pointer to the highest-index in-use row
+         */
+        buf_t* m_hwm = nullptr;
+        /**
+         * number of bytes currently allotted to the window
+         */
         uint_t m_size = 0ul;
 
-        Window(TableBase* table, uint_t row_size=1): m_table(table), m_row_size(row_size) {}
+        Window(uint_t row_size=1): m_row_size(row_size) {}
 
-        Window(const Window& other): Window(other.m_table, other.m_row_size) {}
+        Window(const Window& other): Window(other.m_row_size) {}
 
         Window& operator=(const Window& other);
 
-        Window(Buffer *buffer, TableBase* table, uint_t row_size=1);
+        Window(Buffer *buffer, uint_t row_size=1);
+
+        bool operator==(const Window& other) const;
         /**
          * @return
          *  true if this window has an associated Buffer and it has an allocated data vector
          */
         bool allocated() const;
+
+        uint_t size_in_use() const {
+            return std::distance(m_begin, m_hwm);
+        }
+
+        bool empty() const {
+            return m_hwm == m_begin;
+        }
+
+        void clear();
+
         /**
          * moves data if there's any in the window currently, and redefines the stored m_size, m_nrow, and m_begin
          * @param begin

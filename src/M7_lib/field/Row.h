@@ -68,8 +68,8 @@ public:
      */
     bool is_deref_valid() const {
         if (!m_table->m_bw.m_begin) return false;
-        DEBUG_ASSERT_TRUE(m_table->m_hwm, "buffer window has null HWM pointer");
-        return ptr::in_range(m_begin, m_table->m_bw.m_begin, m_table->m_hwm);
+        DEBUG_ASSERT_TRUE(m_table->m_bw.m_hwm, "buffer window has null HWM pointer");
+        return ptr::in_range(m_begin, m_table->m_bw.m_begin, m_table->m_bw.m_hwm);
     }
 
     /**
@@ -80,7 +80,7 @@ public:
      *  high water mark) the latter condition is typically fulfilled at the end of a loop over rows
      */
     bool is_valid() const {
-        return (m_begin==m_table->m_bw.m_begin) || is_deref_valid() || m_begin == m_table->m_hwm;
+        return (m_begin==m_table->m_bw.m_begin) || is_deref_valid() || m_begin == m_table->m_bw.m_hwm;
     }
 
     operator bool () const {
@@ -127,7 +127,7 @@ public:
     void restart(uint_t irow_begin) const {
         DEBUG_ASSERT_LE(irow_begin, m_table->nrow_in_use(), "Cannot restart to an out-of-range row index");
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
-        if (!m_table->m_hwm && !irow_begin){
+        if (!m_table->m_bw.m_hwm && !irow_begin){
             m_begin = nullptr;
         } else {
             DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
