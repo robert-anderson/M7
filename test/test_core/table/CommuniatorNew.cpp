@@ -34,7 +34,7 @@ TEST(CommunicatorNew, SharedRow) {
         row.m_key = key;
         row.m_value = 2.8*i;
     }
-    ASSERT_EQ(mpi::all_sum(comm.m_store.m_hwm), nrow_per_rank_expect*mpi::nrank());
+    ASSERT_EQ(mpi::all_sum(comm.m_store.nrow_in_use()), nrow_per_rank_expect*mpi::nrank());
 
 //    comm_t::SharedRow shared_row(comm, {0, 0}, "test shared row");
 }

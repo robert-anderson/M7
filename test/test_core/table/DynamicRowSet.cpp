@@ -26,7 +26,7 @@ TEST(DynamicRowSet, Test) {
 
     for (uint_t ibit = 2; ibit < 2 * nsite - 2; ++ibit) {
         det.set(ibit);
-        if (bt.m_hwm < nrow_per_rank and mpi::i_am(ra.get_rank(det))) {
+        if (bt.nrow_in_use() < nrow_per_rank and mpi::i_am(ra.get_rank(det))) {
             auto irow = bt.push_back();
             bt.m_config(irow) = det;
         }

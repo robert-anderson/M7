@@ -26,8 +26,8 @@ TEST(Wavefunction, DynamicRowSet){
      * select some arbitrary number of the rows from the beginning of the walker table
      */
     const uint_t nrow_rank_lo = 4, nrow_rank_hi = 7;
-    ASSERT_LT(nrow_rank_lo, table.m_hwm);
-    ASSERT_LT(nrow_rank_hi, table.m_hwm);
+    ASSERT_LT(nrow_rank_lo, table.nrow_in_use());
+    ASSERT_LT(nrow_rank_hi, table.nrow_in_use());
     const uint_t nrow_this_rank = hashing::in_range(mpi::irank(), nrow_rank_lo, nrow_rank_hi);
 
 

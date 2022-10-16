@@ -23,28 +23,28 @@ struct QuickSorter {
         return m_inds[i];
     }
 
-    void preserve_sort(const uint_t &hwm){
-        if (m_inds.size() < hwm) m_inds.reserve(hwm);
+    void preserve_sort(uint_t nrow){
+        if (m_inds.size() < nrow) m_inds.reserve(nrow);
         m_inds.clear();
         // reset ordering
-        for (uint_t i = 0; i < hwm; ++i) m_inds.push_back(i);
-        qs(0, hwm - 1);
+        for (uint_t i = 0; i < nrow; ++i) m_inds.push_back(i);
+        qs(0, nrow - 1);
         ASSERT(is_preserve_sorted(hwm));
     }
 
     void preserve_sort(const TableBase &table){
-        preserve_sort(table.m_hwm);
+        preserve_sort(table.nrow_in_use());
     }
 
-    bool is_preserve_sorted(const uint_t &hwm) {
-        for (uint_t irow = 1ul; irow < hwm; ++irow) {
+    bool is_preserve_sorted(uint_t nrow) {
+        for (uint_t irow = 1ul; irow < nrow; ++irow) {
             if (m_cmp_fn(m_inds[irow], m_inds[irow-1]) &&!m_cmp_fn(m_inds[irow - 1], m_inds[irow])) return false;
         }
         return true;
     }
 
     bool is_preserve_sorted(const TableBase &table){
-        return is_preserve_sorted(table.m_hwm);
+        return is_preserve_sorted(table.nrow_in_use());
     }
 
     void reorder_sort(TableBase &table){

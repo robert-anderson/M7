@@ -37,7 +37,7 @@ bool excit_gen_tester::ExcitGenTester::all_drawn_at_least_once() const {
 
 bool excit_gen_tester::ExcitGenTester::all_correct_weights(uint_t ndraw, double cutoff, prob_t tol) const {
     auto &row = m_results.m_row;
-    for (row.restart(); row.in_range(); row.step()){
+    for (row.restart(); row; ++row){
         auto ratio = double(row.m_occur)/ndraw;
         if (ratio<cutoff) continue;
         auto norm_weight = prob_t(row.m_weight)/ndraw;
@@ -49,7 +49,7 @@ bool excit_gen_tester::ExcitGenTester::all_correct_weights(uint_t ndraw, double 
 prob_t excit_gen_tester::ExcitGenTester::mean_abs_error(uint_t ndraw) const {
     auto &row = m_results.m_row;
     prob_t error = 0.0;
-    for (row.restart(); row.in_range(); row.step()){
+    for (row.restart(); row; ++row){
         auto norm_weight = prob_t(row.m_weight)/ndraw;
         error += std::abs(norm_weight-1.0);
     }

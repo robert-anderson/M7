@@ -10,20 +10,18 @@ TEST(BufferedTable, Empty) {
     typedef SingleFieldRow<field::Number<int>> row_t;
     buffered::Table<row_t> table({});
     ASSERT_EQ(table.capacity(), 0);
-    ASSERT_EQ(table.m_hwm, 0);
+    ASSERT_EQ(table.nrow_in_use(), 0);
     ASSERT_EQ(table.m_bw.m_size, 0);
     ASSERT_EQ(table.m_bw.m_begin, nullptr);
     table.m_row.restart();
-    ASSERT_FALSE(table.m_row.in_range());
-    ASSERT_FALSE(table.m_row.dereferencable());
+    ASSERT_FALSE(table.m_row.is_deref_valid());
     auto cpy = table;
     ASSERT_EQ(cpy.capacity(), 0);
-    ASSERT_EQ(cpy.m_hwm, 0);
+    ASSERT_EQ(cpy.nrow_in_use(), 0);
     ASSERT_EQ(cpy.m_bw.m_size, 0);
     ASSERT_EQ(cpy.m_bw.m_begin, nullptr);
     cpy.m_row.restart();
-    ASSERT_FALSE(cpy.m_row.in_range());
-    ASSERT_FALSE(cpy.m_row.dereferencable());
+    ASSERT_FALSE(cpy.m_row.is_deref_valid());
     ASSERT_NE(&cpy.m_row, &table.m_row);
     ASSERT_EQ(&table, table.m_row.m_table);
     ASSERT_EQ(&cpy, cpy.m_row.m_table);
@@ -34,7 +32,7 @@ TEST(BufferedTable, AllGathervEmpty) {
     buffered::Table<row_t> src_table("src", {});
     buffered::Table<row_t> dst_table("dst", {});
     dst_table.all_gatherv(src_table);
-    ASSERT_EQ(dst_table.m_hwm, 0ul);
+    ASSERT_EQ(dst_table.nrow_in_use(), 0ul);
 }
 
 TEST(BufferedTable, AllGatherv) {
@@ -59,7 +57,7 @@ TEST(BufferedTable, AllGatherv) {
     }
     buffered::Table<row_t> dst_table("dst", {});
     dst_table.all_gatherv(src_table);
-    ASSERT_EQ(dst_table.m_hwm, nrow_global);
+    ASSERT_EQ(dst_table.nrow_in_use(), nrow_global);
     auto& row = dst_table.m_row;
     row.restart();
     for (uint_t irank=0ul; irank<mpi::nrank(); ++irank){
@@ -95,7 +93,7 @@ TEST(BufferedTable, Gatherv) {
 
     dst_table.gatherv(src_table);
     if (mpi::i_am_root()) {
-        ASSERT_EQ(dst_table.m_hwm, nrow_global);
+        ASSERT_EQ(dst_table.nrow_in_use(), nrow_global);
         auto &row = dst_table.m_row;
         row.restart();
         for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
@@ -107,6 +105,6 @@ TEST(BufferedTable, Gatherv) {
         }
     }
     else {
-        ASSERT_EQ(dst_table.m_hwm, 0ul);
+        ASSERT_EQ(dst_table.nrow_in_use(), 0ul);
     }
 }

@@ -131,7 +131,7 @@ Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nelec, uint
 void Rdm::end_cycle() {
     if (!send().buffer_size()) return;
     communicate();
-    if (!m_send_recv.recv().empty()) return;
+    if (m_send_recv.recv().empty()) return;
     for (m_recv_row.restart(); m_recv_row; ++m_recv_row) {
         auto lookup = m_store.lookup(m_recv_row.m_inds, m_store_row);
         if (!lookup) m_store.insert(m_recv_row.m_inds, m_store_row);

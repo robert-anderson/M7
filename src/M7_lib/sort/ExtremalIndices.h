@@ -37,7 +37,7 @@ struct ExtremalIndices {
      */
     comparators::index_cmp_fn_t m_cmp_fn;
     /**
-     * total number of extremal valued elements found so far. never greater than m_hwm.
+     * total number of extremal valued elements found so far. never greater than nrow_in_use.
      */
     uint_t m_nfound;
 

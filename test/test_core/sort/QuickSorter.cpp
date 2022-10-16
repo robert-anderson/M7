@@ -75,7 +75,7 @@ TEST(QuickSorter, FunctorSort){
      */
     auto correct_order = quick_sorter_test::correct_order();
     auto correct = correct_order.cbegin();
-    for (uint_t i=0ul; i<table.m_hwm; ++i){
+    for (uint_t i=0ul; i<table.nrow_in_use(); ++i){
         row1.jump(qs.m_inds[i]);
         while (correct!=correct_order.cend() && row1.m_field != *correct) correct++;
     }
@@ -94,7 +94,7 @@ TEST(QuickSorter, FunctorSort){
     qs.reorder_sort(table);
     correct = correct_order.cbegin();
     row1.restart();
-    for (uint_t i=0ul; i<table.m_hwm; ++i){
+    for (uint_t i=0ul; i<table.nrow_in_use(); ++i){
         while (correct!=correct_order.cend() && row1.m_field != *correct) correct++;
         row1.step();
     }
@@ -138,7 +138,7 @@ TEST(QuickSorter, LambdaSort){
      */
     auto correct_order = quick_sorter_test::correct_order();
     auto correct = correct_order.cbegin();
-    for (uint_t i=0ul; i<table.m_hwm; ++i){
+    for (uint_t i=0ul; i<table.nrow_in_use(); ++i){
         row1.jump(qs.m_inds[i]);
         while (correct!=correct_order.cend() && row1.m_field != *correct) correct++;
     }
@@ -157,7 +157,7 @@ TEST(QuickSorter, LambdaSort){
     qs.reorder_sort(table);
     correct = correct_order.cbegin();
     row1.restart();
-    for (uint_t i=0ul; i<table.m_hwm; ++i){
+    for (uint_t i=0ul; i<table.nrow_in_use(); ++i){
         while (correct!=correct_order.cend() && row1.m_field != *correct) correct++;
         row1.step();
     }

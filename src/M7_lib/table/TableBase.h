@@ -77,7 +77,7 @@
  * resized buffer, and that each of the other windows are pointed to the beginning of that data.
  *
  * The number of records is determined by the size of the currently-allocated buffer window. This is analogous to the
- * capacity of a std::vector. The "high water mark" (m_hwm) is the analog of the size() of a std::vector.
+ * capacity of a std::vector. The "nrow_in_use" method is the analog of the size() of a std::vector.
  *
  * the m_row_size member of m_bw is the definitive length of the Table's row in bytes, and the Row class ensures that
  * this is always an integer multiple of the system word length
@@ -210,9 +210,9 @@ public:
      *  true if the other table is identical in value to this one
      */
     bool operator==(const TableBase& other) const {
-        if (this==&other) return true;
+        if (this == &other) return true;
         if (capacity() != other.capacity()) return false;
-        if (m_hwm!=other.m_hwm) return false;
+        if (nrow_in_use() != other.nrow_in_use()) return false;
         return std::memcmp(m_bw.m_begin, other.m_bw.m_begin, size_in_use()) == 0;
     }
 

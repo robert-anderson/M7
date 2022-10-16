@@ -43,16 +43,7 @@ struct Row {
     v_t<FieldBase *> m_fields;
 private:
     /**
-     * these fields define the position of the currently selected row. when set to these initial "null" values, the
-     * row is not pointing to anything and field dereferences / calls to step should cause ASSERTs to fail in the debug
-     * builds. no checks are enforced in the release build.
-     *
-     * if m_i < m_table->m_hwm:
-     *  m_begin should not be nullptr
-     * else if m_i == m_table->m_hwm:
-     *  m_begin should be nullptr, and field dereferencing should fail ASSERTs
-     * else:
-     *  this state is invalid
+     * the position of the currently selected record in the
      */
     mutable buf_t *m_begin = nullptr;
 
@@ -71,40 +62,37 @@ public:
     mutable Row *m_child = nullptr;
 
     /**
+     * the m_begin pointer must be in the range [table begin, table hwm) for valid dereferencing (field access)
      * @return
      *  true if the m_begin pointer is valid with respect to the "in use" range of the table object
      */
-    bool valid_for_deref() const {
+    bool is_deref_valid() const {
         if (!m_table->m_bw.m_begin) return false;
-        DEBUG_ASSERT_TRUE(m_table->m_hwm, "buffer window has no HWM pointer");
+        DEBUG_ASSERT_TRUE(m_table->m_hwm, "buffer window has null HWM pointer");
         return ptr::in_range(m_begin, m_table->m_bw.m_begin, m_table->m_hwm);
     }
 
-    bool valid_for_index() const {
-        return (m_begin==m_table->m_bw.m_begin) || valid_for_deref() || m_begin==m_table->m_hwm;
+    /**
+     * the Row can be in a state valid for record indexing, even when invalid for dereferencing. this is a debugging
+     * method used to ensure the Row is in a valid state
+     * @return
+     *  true if the m_begin pointer is dereferencable or (it is nullptr and so is table begin) or (it is equal to the
+     *  high water mark) the latter condition is typically fulfilled at the end of a loop over rows
+     */
+    bool is_valid() const {
+        return (m_begin==m_table->m_bw.m_begin) || is_deref_valid() || m_begin == m_table->m_hwm;
     }
 
-//    /**
-//     * @return
-//     *  true if the stored row index is within the range [0, m_table->m_hwm)
-//     */
-//    bool in_range() const {
-//        return dereferencable();
-//    }
-//
     operator bool () const {
-        return valid_for_deref();
+        return is_deref_valid();
     }
-
 
     /**
-     * m_i == m_table->m_hwm is not valid for access, but is the state in which the row position data are left at the
-     * loop when the in_range() loop termination condition becomes false, so the assert doesn't fail in this case
      * @return
-     *  row position within Table
+     * record position within Table
      */
     uint_t index() const {
-        DEBUG_ASSERT_TRUE(valid_for_index(), "the row is not pointing to memory in the permitted range");
+        DEBUG_ASSERT_TRUE(is_valid(), "the row is not pointing to memory in the permitted range");
         const auto begin_offset = std::distance(m_table->m_bw.m_begin, m_begin);
         return begin_offset / m_size;
     }
@@ -117,19 +105,19 @@ public:
      *  true if stored row index is within the range [0, irow_end)
      */
     bool in_range(uint_t irow_end) const {
-        DEBUG_ASSERT_TRUE(valid_for_index(), "invalid range end given");
+        DEBUG_ASSERT_TRUE(is_valid(), "invalid range end given");
         return ptr::in_range(m_begin, m_table->m_bw.m_begin, m_table->begin(irow_end));
     }
 
     buf_t *begin() {
         DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
-        DEBUG_ASSERT_TRUE(valid_for_deref(), "the row is not pointing to memory in the dereferencable range");
+        DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
         return m_begin;
     }
 
     const buf_t *begin() const {
         DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
-        DEBUG_ASSERT_TRUE(valid_for_deref(), "the row is not pointing to memory in the dereferencable range");
+        DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
         return m_begin;
     }
 
@@ -157,7 +145,7 @@ public:
     const Row& operator ++() const {
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
-        DEBUG_ASSERT_TRUE(valid_for_index(), "Row is out of table bounds");
+        DEBUG_ASSERT_TRUE(is_valid(), "Row is out of table bounds");
         m_begin += m_size;
         return *this;
     }

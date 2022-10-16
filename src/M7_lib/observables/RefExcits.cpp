@@ -66,7 +66,7 @@ void RefExcits::make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, 
 bool RefExcits::all_stores_empty() const {
     for (const auto& i: m_active_exsigs) {
         DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active encode_exsig was not allocated!");
-        if (m_ref_excits[i]->m_hwm) return false;
+        if (!m_ref_excits[i]->empty()) return false;
     }
     return true;
 }

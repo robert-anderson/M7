@@ -182,7 +182,7 @@ TEST(Table, PointToPointTransfer) {
     if (mpi::i_am(0)) send = {1, 2, 4};
     bt.transfer_rows(send, 0, 1);
     if (mpi::i_am(1)) {
-        ASSERT_EQ(bt.m_hwm, 8);
+        ASSERT_EQ(bt.nrow_in_use(), 8);
     }
     std::cout << std::endl;
     bt.print_contents();
@@ -236,11 +236,11 @@ TEST(Table, CopyBuffered){
     ASSERT_EQ(t.m_columns.size(), 2);
     ASSERT_EQ(tcopy.m_columns.size(), 2);
 
-    ASSERT_EQ(t.m_hwm, 4);
+    ASSERT_EQ(t.nrow_in_use(), 4);
     ASSERT_EQ(t.m_nrow, (uint_t)(4*(1+t.m_bw.expansion_factor())));
 
     // copied buffer should be empty
-    ASSERT_EQ(tcopy.m_hwm, 0);
+    ASSERT_EQ(tcopy.nrow_in_use(), 0);
     ASSERT_EQ(tcopy.m_nrow, 0);
 }
 #endif

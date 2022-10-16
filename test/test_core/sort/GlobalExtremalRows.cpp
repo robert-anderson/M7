@@ -112,7 +112,7 @@ TEST(GlobalExtremalRows, Nrow) {
     using namespace global_extremal_rows_test;
     scalar_table_t table("test", {});
     setup(table);
-    auto nrow = table.m_hwm;
+    auto nrow = table.nrow_in_use();
     nrow = mpi::all_sum(nrow);
     ASSERT_EQ(nrow, get_global_nrow());
 }
@@ -140,7 +140,7 @@ TEST(GlobalExtremalRows, FindAsc) {
          * the total number of values considered in the global sorter mus be at least at great as the total number of
          * rows included in the globally extremal set
          */
-        ASSERT_GE(gxr.m_global_sorter.m_hwm, gxr.m_ninclude.m_reduced);
+        ASSERT_GE(gxr.m_global_sorter.nrow_in_use(), gxr.m_ninclude.m_reduced);
         auto right_order = get_all_sorted(false, false);
         ASSERT_EQ(right_order.size(), get_global_nrow_nonzero());
 
@@ -179,7 +179,7 @@ TEST(GlobalExtremalRows, FindDesc) {
          * rows included in the globally extremal set
          */
 
-        ASSERT_GE(gxr.m_global_sorter.m_hwm, gxr.m_ninclude.m_reduced);
+        ASSERT_GE(gxr.m_global_sorter.nrow_in_use(), gxr.m_ninclude.m_reduced);
         auto right_order = get_all_sorted(true, false);
         ASSERT_EQ(right_order.size(), get_global_nrow_nonzero());
 

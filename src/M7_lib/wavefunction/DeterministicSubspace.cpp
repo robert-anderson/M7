@@ -63,7 +63,7 @@ void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, con
 
 void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
     full_update();
-    logging::info("Forming a deterministic subspace with {} ONVs", m_all.m_hwm);
+    logging::info("Forming a deterministic subspace with {} ONVs", m_all.nrow_in_use());
     suite::Conns conns_work(m_wf.m_sector.size());
     auto &conn_work = conns_work[m_local_row.m_mbf];
     uint_t n_hconn = 0ul;

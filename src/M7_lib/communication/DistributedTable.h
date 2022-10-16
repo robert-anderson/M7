@@ -133,7 +133,7 @@ public:
                     clear_row(row);
                 }
             }
-            DEBUG_ASSERT_FALSE(m_redist.send(mpi::irank()).m_hwm, "rank should not be sending to itself");
+            DEBUG_ASSERT_TRUE(m_redist.send(mpi::irank()).empty(), "rank should not be sending to itself");
         }
         m_redist.communicate();
         m_prot_level.communicate();

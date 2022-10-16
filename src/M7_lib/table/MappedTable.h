@@ -109,7 +109,6 @@ struct MappedTable : Table<row_t>, MappedTableBase {
 
     using Table<row_t>::to_string;
     using Table<row_t>::m_row;
-    using TableBase::m_hwm;
     using TableBase::m_bw;
 
     row_t m_lookup_row;

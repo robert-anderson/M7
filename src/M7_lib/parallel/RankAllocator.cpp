@@ -171,7 +171,7 @@ void RankAllocatorBase::update(uint_t icycle) {
     // prepare vector of row indices to send
     uintv_t irows_send;
     if (mpi::i_am(irank_send)){
-        for (uint_t irow = 0; irow<table().m_hwm; ++irow){
+        for (uint_t irow = 0; irow<table().nrow_in_use(); ++irow){
             if (table().is_cleared(irow)) continue;
             if (get_block_by_irow(irow) == *it_block_transfer) irows_send.push_back(irow);
         }
