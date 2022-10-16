@@ -94,7 +94,7 @@ void TableBase::free() {
 }
 
 bool TableBase::empty() const {
-    return !m_hwm;
+    return m_hwm == m_bw.m_begin;
 }
 
 bool TableBase::is_freed(uint_t i) const {
@@ -180,7 +180,7 @@ void TableBase::transfer_records(const uintv_t &/*irecs*/, uint_t /*irank_send*/
 }
 
 void TableBase::copy_record_in(const TableBase &src, uint_t isrc, uint_t idst) {
-    DEBUG_ASSERT_LT(isrc, nrow_in_use(), "src record index OOB");
+    DEBUG_ASSERT_LT(isrc, src.nrow_in_use(), "src record index OOB");
     DEBUG_ASSERT_LT(idst, nrow_in_use(), "dst record index OOB");
     std::memcpy(begin(idst), src.begin(isrc), row_size());
 }
@@ -218,6 +218,7 @@ void TableBase::all_gatherv(const TableBase &src) {
     for (auto &v: counts) v *= row_size();
     mpi::counts_to_displs_consec(counts, displs);
     auto nrec_total = std::accumulate(nrecs.cbegin(), nrecs.cend(), 0ul);
+    if (!nrec_total) return;
     push_back(nrec_total);
     mpi::all_gatherv(src.begin(), src.size_in_use(), begin(), counts, displs);
     post_insert_range(0, nrec_total);

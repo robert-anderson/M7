@@ -32,6 +32,7 @@ public:
     const uint_t m_rank_ind, m_nfrm_cre_ind, m_nfrm_ann_ind, m_nbos_cre_ind, m_nbos_ann_ind;
 
 protected:
+    bool m_ordered_inds = true;
     /**
      * enumerators of the promotions of contributing excitation signatures to the ranksig of the RDM
      */

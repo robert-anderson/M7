@@ -63,7 +63,7 @@ struct FermionRdm : Communicator<MaeRow<wf_t>, MaeRow<wf_t>, true>, Archivable {
         if (!send().buffer_size()) return;
         communicate();
         auto &row = m_comm.recv().m_row;
-        if (!m_comm.recv().m_hwm) return;
+        if (m_comm.recv().empty()) return;
         for (row.restart(); row.in_range(); row.step()) {
             auto irow_store = *m_store[row.m_inds];
             if (irow_store == ~0ul) irow_store = m_store.insert(row.m_inds);

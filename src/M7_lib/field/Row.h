@@ -75,7 +75,7 @@ public:
      *  true if the m_begin pointer is valid with respect to the "in use" range of the table object
      */
     bool valid_for_deref() const {
-        DEBUG_ASSERT_TRUE(m_table->m_bw.m_begin, "buffer window has no begin pointer");
+        if (!m_table->m_bw.m_begin) return false;
         DEBUG_ASSERT_TRUE(m_table->m_hwm, "buffer window has no HWM pointer");
         return ptr::in_range(m_begin, m_table->m_bw.m_begin, m_table->m_hwm);
     }

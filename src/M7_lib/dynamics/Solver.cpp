@@ -253,10 +253,8 @@ void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
 
 void Solver::loop_over_spawned() {
     mpi::barrier();
-    if (!m_wf.recv().m_hwm) {
-        //logging::debug_("no rows received, omitting loop over spawned");
-        return;
-    }
+    if (m_wf.recv().empty()) return;
+
     auto nrow_in_use_before = m_wf.m_store.nrow_in_use();
     DEBUG_ONLY(nrow_in_use_before);
 
