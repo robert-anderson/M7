@@ -214,7 +214,7 @@ def check_ninit(fname='M7.stats'):
     run, bench = stats_columns('Initiator', fname)
     if not np.allclose(run, bench): fail('initiator number trajectories do not agree')
 
-def check_rdms(fname='M7.h5'):
+def check_rdm_archives(fname='M7.h5'):
     if benchmarking: return
     run, bench = instance.rdms(fname)
     run = run['archive']['rdms']
