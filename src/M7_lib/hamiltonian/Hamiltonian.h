@@ -348,7 +348,7 @@ public:
     }
 
     bool is_hermitian() const {
-        return m_frm.is<TcFrmHam>() || m_bos.is<TcBosHam>();
+        return !(m_frm.is<TcFrmHam>() || m_bos.is<TcBosHam>());
     }
 
 };

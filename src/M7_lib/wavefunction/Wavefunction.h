@@ -221,9 +221,9 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn>, Archivable {
         return m_format.m_nelement;
     }
 
+    void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm=1000ul);
 private:
 
-    void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm=1000ul);
 
     void orthogonalize(NdReduction<wf_t, 3>& overlaps,
                        uint_t iroot, uint_t jroot, uint_t ireplica) {

@@ -6,6 +6,7 @@
 #define M7_UTIL_MATH_H
 
 #include <complex>
+#include <numeric>
 #include "M7_lib/defs.h"
 
 
@@ -57,6 +58,20 @@ namespace math {
     template<uint_t exp, typename T=void>
     static typename std::enable_if<exp != 0ul, T>::type pow(T x) {
         return x * pow<exp - 1, T>(x);
+    }
+
+    template<typename T>
+    T l1_norm(const T* ptr, uint_t n) {
+        return std::accumulate(ptr, ptr+n, T{}, [](const T& tot, const T& v){
+            return tot+std::abs(v);
+        });
+    }
+
+    template<typename T>
+    T l2_norm(const T* ptr, uint_t n) {
+        return std::sqrt(std::accumulate(ptr, ptr+n, T{}, [](const T& tot, const T& v){
+            return tot+pow<2>(std::abs(v));
+        }));
     }
 }
 

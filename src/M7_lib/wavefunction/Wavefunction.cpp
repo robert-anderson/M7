@@ -7,6 +7,7 @@
 #include "M7_lib/linalg/FciIters.h"
 #include "M7_lib/sort/QuickSorter.h"
 #include "FciInitializer.h"
+#include "M7_lib/util/Math.h"
 
 /*
 MappedTableBase::nbucket_guess(
@@ -25,40 +26,41 @@ opts.m_wavefunction.m_hash_mapping.m_remap_ratio
 
 
 Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector) :
-        communicator::BasicSend<Walker, Spawn>(
-            "wavefunction",
-            // walker row:
-            {
-                sector.basis(),
-                opts.m_wavefunction.m_nroot,
-                opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)
-            },
-            opts.m_wavefunction.m_distribution,
-            // store sizing
-            {
-                uint_t(opts.m_propagator.m_nw_target),
-                opts.m_wavefunction.m_buffers.m_store_exp_fac
-            },
-            // send/recv row
-            {sector.basis(), need_send_parents(opts)},
-            // send/recv sizing
-            {
-                std::max(10ul, uint_t(opts.m_propagator.m_nw_target * opts.m_propagator.m_tau_init)),
-                opts.m_wavefunction.m_buffers.m_comm_exp_fac
-            }
-        ),
-        Archivable("wavefunction", opts.m_wavefunction.m_archivable),
-        m_opts(opts),
-        m_sector(sector),
-        m_format(m_store.m_row.m_weight.m_format),
-        m_ninitiator(m_format),
-        m_nwalker(m_format),
-        m_delta_nwalker(m_format),
-        m_l2_norm_square(m_format),
-        m_delta_l2_norm_square(m_format),
-        m_nspawned(m_format),
-        m_nannihilated(m_format) {
-    ASSERT(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row());
+    communicator::BasicSend<Walker, Spawn>(
+        "wavefunction",
+        // walker row:
+        {
+            sector.basis(),
+            opts.m_wavefunction.m_nroot,
+            opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)
+        },
+        opts.m_wavefunction.m_distribution,
+        // store sizing
+        {
+            uint_t(opts.m_propagator.m_nw_target),
+            opts.m_wavefunction.m_buffers.m_store_exp_fac
+        },
+        // send/recv row
+        {sector.basis(), need_send_parents(opts)},
+        // send/recv sizing
+        {
+            std::max(10ul, uint_t(opts.m_propagator.m_nw_target * opts.m_propagator.m_tau_init)),
+            opts.m_wavefunction.m_buffers.m_comm_exp_fac
+        }
+    ),
+    Archivable("wavefunction", opts.m_wavefunction.m_archivable),
+    m_opts(opts),
+    m_sector(sector),
+    m_format(m_store.m_row.m_weight.m_format),
+    m_ninitiator(m_format),
+    m_nwalker(m_format),
+    m_delta_nwalker(m_format),
+    m_l2_norm_square(m_format),
+    m_delta_l2_norm_square(m_format),
+    m_nspawned(m_format),
+    m_nannihilated(m_format) {
+
+    REQUIRE_TRUE(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row(), "row-field reference error");
     m_summables.add_members(m_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
@@ -265,6 +267,26 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
      * perform the eigensolver procedure for the required number of states
      */
     FciInitializer init(h, opts);
+    /*
+     * load the pointers to the eigenvectors
+     */
+    v_t<wf_t const*> evec_ptrs;
+    /*
+     * compute the ratio of initial number of walkers to L1-norms of the eigenvectors to get the right scale
+     */
+    v_t<wf_t> scale_facs;
+    if (mpi::i_am_root()) {
+        auto results = init.get_results();
+
+        v_t<ham_t> evals;
+        results.get_evals(evals);
+        logging::info("FCI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
+
+        results.get_evecs(evec_ptrs);
+        const auto nw = m_opts.m_wavefunction.m_nw_init.m_value;
+        for (auto ptr: evec_ptrs) scale_facs.push_back(nw / math::l1_norm(ptr, results.nelement_evec()));
+    }
+
     uint_t irow = 0ul;
     /*
      * continue to distribute the eigenvectors in blocks until there are no remaining elements
@@ -272,16 +294,14 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
     char done = false;
     while (!mpi::all_land(done)) {
         if (mpi::i_am_root()) {
-            auto results = init.get_results();
             auto& row = init.m_mbf_order_table.m_row;
             const auto irow_end = std::min(init.m_mbf_order_table.nrow_in_use(), irow + max_ncomm);
-            wf_t const* evec_ptr = nullptr;
-            for (row.jump(irow); row; ++row) {
+            for (row.jump(irow); row.in_range(irow_end); ++row) {
                 for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
-                    results.get_evec(iroot, evec_ptr);
                     for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
                         auto ipart = m_format.flatten({iroot, ireplica});
-                        add_spawn(row.m_mbf, evec_ptr[row.index()], true, false, ipart);
+                        const auto weight = evec_ptrs[iroot][row.index()]*scale_facs[iroot];
+                        add_spawn(row.m_mbf, weight, true, false, ipart);
                     }
                 }
             }
@@ -291,12 +311,14 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
             done = true;
         }
         /*
-         * use the spawning send/recv tables to send distribute the wavefunction from the root rank to the correct ranks
+         * use the spawning send/recv tables to distribute the wavefunction from the root rank to the correct ranks
          */
         m_send_recv.communicate();
         auto& recv_row = m_send_recv.recv().m_row;
-        for (recv_row.restart(); recv_row; ++recv_row){
-            create_row(0ul, recv_row.m_dst_mbf, h.get_energy(recv_row.m_dst_mbf), 0);
+        for (recv_row.restart(); recv_row; ++recv_row) {
+            m_store.lookup(recv_row.m_dst_mbf, m_store.m_insert_row);
+            if (!m_store.m_insert_row) create_row(0ul, recv_row.m_dst_mbf, h.get_energy(recv_row.m_dst_mbf), 0);
+            m_store.m_insert_row.m_weight = recv_row.m_delta_weight;
         }
     }
 }

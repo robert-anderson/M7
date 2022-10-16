@@ -55,6 +55,17 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
         else
             logging::warn("Specified RDM rank signatures are insufficient for variational energy estimation");
     }
+
+    /**
+     * set up the wavefunctions to their FCI values if requested
+     */
+    if (m_opts.m_wavefunction.m_fci_init) {
+        logging::info("Performing exact FCI initialization of wavefunctions");
+        FciInitOptions fci_init_opts;
+        fci_init_opts.m_nroot = m_wf.nroot();
+        m_wf.fci_init(m_prop.m_ham, fci_init_opts);
+    }
+
     /**
      * read previous calculation data into archivable objects if archive loading is enabled
      */

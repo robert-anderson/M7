@@ -58,11 +58,12 @@ FciInitializer::FciInitializer(const Hamiltonian &h, FciInitOptions opts):
 
     dist_mv_prod::Sparse<double> dist(sparse_ham);
     if (h.is_hermitian()) {
-        m_arpack_sym.solve(dist, opts);
+        auto success = m_arpack_sym.solve(dist, opts);
+        REQUIRE_TRUE_ALL(success, "Symmetric ARPACK error");
         undo_shift(m_arpack_sym.m_solver.get());
-    }
-    else {
-        m_arpack_nonsym.solve(dist, opts);
+    } else {
+        auto success = m_arpack_nonsym.solve(dist, opts);
+        REQUIRE_TRUE_ALL(success, "Non-symmetric ARPACK error");
         undo_shift(m_arpack_nonsym.m_solver.get());
     }
 }

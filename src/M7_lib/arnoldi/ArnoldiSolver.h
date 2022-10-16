@@ -36,7 +36,7 @@ struct ArnoldiOptions {
     /**
      * ritz vector tolerance determining convergence criterion
      */
-    double m_ritz_tol = 0.0;
+    double m_ritz_tol = 1e-9;
 };
 
 /**
@@ -147,6 +147,22 @@ public:
         eval = {m_real_evals[iroot], m_imag_evals[iroot]};
     }
 
+    void get_evals(v_t<T>& evals) const {
+        evals.clear();
+        for (size_t iroot = 0ul; iroot < nroot(); ++iroot) {
+            evals.push_back({});
+            get_eval(iroot, evals.back());
+        }
+    }
+
+    uint_t nroot() const {
+        return m_real_evals.size();
+    }
+
+    uint_t nelement_evec() const {
+        return m_nelement_evec;
+    }
+
     /**
      * @param iroot
      *  root index
@@ -154,13 +170,23 @@ public:
      *  reference to pointer to constant data (initial element of the iroot-th eigenvector)
      */
     void get_evec(uint_t iroot, T const * &evec) const {
+        REQUIRE_LT(iroot, nroot(), "root index OOB");
         REQUIRE_FALSE(m_complex_evecs, "cannot dereference complex eigenvector as a real vector");
-        evec = m_evecs[iroot] + m_nelement_evec;
+        evec = m_evecs[iroot] + iroot * m_nelement_evec;
     }
 
     void get_evec(uint_t iroot, std::complex<T> const * &evec) const {
+        REQUIRE_LT(iroot, nroot(), "root index OOB");
         REQUIRE_TRUE(m_complex_evecs, "cannot dereference real eigenvector as a complex vector");
         evec = reinterpret_cast<std::complex<T>*>(m_evecs) + iroot * m_nelement_evec;
+    }
+
+    void get_evecs(v_t<const T*>& evecs) const {
+        evecs.clear();
+        for (uint_t iroot = 0ul; iroot<nroot(); ++iroot) {
+            evecs.push_back(nullptr);
+            get_evec(iroot, evecs.back());
+        }
     }
 
     /**
@@ -248,8 +274,7 @@ private:
     void find_eigenvalues() override { m_solver->FindEigenvalues(); }
 
     bool find_eigenvectors() override {
-        m_solver->FindEigenvectors();
-        return m_solver->EigenvectorsFound();
+        return m_solver->FindEigenvectors();
     }
 
 private:
@@ -325,8 +350,7 @@ private:
     void find_eigenvalues() override { m_solver->FindEigenvalues(); }
 
     bool find_eigenvectors() override {
-        m_solver->FindEigenvectors();
-        return m_solver->EigenvectorsFound();
+        return m_solver->FindEigenvectors();
     }
 
     void setup(uint_t nrow, ArnoldiOptions opts, bool dist) override {
