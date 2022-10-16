@@ -121,7 +121,7 @@ public:
              *  write those which no longer belong here into the communicating send table,
              *  clear them from the store
              */
-            for (row.restart(); row.in_range(); row.step()) {
+            for (row.restart(); row; ++row) {
                 if (row.key_field().is_zero()) continue;
                 auto irank_owner = irank(row.key_field());
                 if (!mpi::i_am(irank_owner)) {
@@ -129,7 +129,7 @@ public:
                     m_redist.send(irank_owner).m_row = row;
                     m_prot_level.send(irank_owner).m_row.push_back_jump();
                     m_prot_level.send(irank_owner).m_row.m_field = row.protection_level();
-                    while (row.is_protected()) row.release();
+                    while (row.is_protected()) row.unprotect();
                     clear_row(row);
                 }
             }
@@ -141,7 +141,7 @@ public:
             auto& recv_row = m_redist.recv().m_row;
             auto& prot_level_row = m_prot_level.recv().m_row;
             prot_level_row.restart();
-            for (recv_row.restart(); recv_row.in_range(); recv_row.step()) {
+            for (recv_row.restart(); recv_row; ++recv_row) {
                 const auto irank_owner = irank(recv_row.key_field());
                 DEBUG_ONLY(irank_owner);
                 DEBUG_ASSERT_TRUE(mpi::i_am(irank_owner), "recv_row sent to wrong rank!");

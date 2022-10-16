@@ -64,7 +64,7 @@ TEST(BufferedTable, AllGatherv) {
         auto nrow = get_nrow(irank);
         for (uint_t irow=0ul; irow<nrow; ++irow){
             ASSERT_EQ(row.m_field, get_value(irank, irow));
-            row.step();
+            ++row;
         }
     }
 }
@@ -100,7 +100,7 @@ TEST(BufferedTable, Gatherv) {
             auto nrow = get_nrow(irank);
             for (uint_t irow = 0ul; irow < nrow; ++irow) {
                 ASSERT_EQ(row.m_field, get_value(irank, irow));
-                row.step();
+                ++row;
             }
         }
     }

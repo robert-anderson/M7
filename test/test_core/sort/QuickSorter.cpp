@@ -27,7 +27,7 @@ namespace quick_sorter_test {
         row.restart();
         for (auto& word: words){
             row.m_field = word;
-            row.step();
+            ++row;
         }
     }
 
@@ -96,7 +96,7 @@ TEST(QuickSorter, FunctorSort){
     row1.restart();
     for (uint_t i=0ul; i<table.nrow_in_use(); ++i){
         while (correct!=correct_order.cend() && row1.m_field != *correct) correct++;
-        row1.step();
+        ++row1;
     }
     /*
      * correct ordering iterator should not be exhausted
@@ -159,7 +159,7 @@ TEST(QuickSorter, LambdaSort){
     row1.restart();
     for (uint_t i=0ul; i<table.nrow_in_use(); ++i){
         while (correct!=correct_order.cend() && row1.m_field != *correct) correct++;
-        row1.step();
+        ++row1;
     }
     /*
      * correct ordering iterator should not be exhausted

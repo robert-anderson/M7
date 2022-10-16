@@ -289,12 +289,17 @@ public:
 
     bool empty() const;
 
+
+    uint_t nfreed_row() const {
+        DEBUG_ASSERT_TRUE(freed_rows_consistent(), "inconsistent freed row indices");
+        return m_freed_rows.size();
+    }
     /**
      * the number of records (rows in use that have not been freed)
      * @return
      */
     uint_t nrecord() const {
-        return nrow_in_use() - m_freed_rows.size();
+        return nrow_in_use() - nfreed_row();
     }
 
     /**
@@ -465,7 +470,7 @@ public:
      * @return
      *  true is m_free_records member is consistent with m_is_free_record
      */
-    bool freed_records_consistent() const;
+    bool freed_rows_consistent() const;
 
     /**
      * "Location" class which describes the location of a record in a distributed table i.e. by a local record index and

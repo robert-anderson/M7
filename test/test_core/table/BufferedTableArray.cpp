@@ -19,25 +19,25 @@ TEST(BufferedTableArray, Resize){
     bta[0].push_back(3);
     bta[0].m_row.restart();
     bta[0].m_row.m_onv = {1, 2, 3};
-    bta[0].m_row.step();
+    ++bta[0].m_row;
     bta[0].m_row.m_onv = {1, 2, 4};
-    bta[0].m_row.step();
+    ++bta[0].m_row;
     bta[0].m_row.m_onv = {1, 2, 5};
 
     bta[1].push_back(3);
     bta[1].m_row.restart();
     bta[1].m_row.m_onv = {6, 2, 3};
-    bta[1].m_row.step();
+    ++bta[1].m_row;
     bta[1].m_row.m_onv = {6, 2, 4};
-    bta[1].m_row.step();
+    ++bta[1].m_row;
     bta[1].m_row.m_onv = {6, 2, 5};
 
     bta[2].push_back(3);
     bta[2].m_row.restart();
     bta[2].m_row.m_onv = {7, 2, 3};
-    bta[2].m_row.step();
+    ++bta[2].m_row;
     bta[2].m_row.m_onv = {7, 2, 4};
-    bta[2].m_row.step();
+    ++bta[2].m_row;
     bta[2].m_row.m_onv = {7, 2, 5};
 
 
@@ -47,46 +47,45 @@ TEST(BufferedTableArray, Resize){
 
     bta[0].m_row.restart();
     onv = {1, 2, 3}; ASSERT_EQ(bta[0].m_row.m_onv, onv);
-    bta[0].m_row.step();
+    ++bta[0].m_row;
     onv = {1, 2, 4}; ASSERT_EQ(bta[0].m_row.m_onv, onv);
-    bta[0].m_row.step();
+    ++bta[0].m_row;
     onv = {1, 2, 5}; ASSERT_EQ(bta[0].m_row.m_onv, onv);
 
     bta[1].m_row.restart();
     onv = {6, 2, 3}; ASSERT_EQ(bta[1].m_row.m_onv, onv);
-    bta[1].m_row.step();
+    ++bta[1].m_row;
     onv = {6, 2, 4}; ASSERT_EQ(bta[1].m_row.m_onv, onv);
-    bta[1].m_row.step();
+    ++bta[1].m_row;
     onv = {6, 2, 5}; ASSERT_EQ(bta[1].m_row.m_onv, onv);
 
     bta[2].m_row.restart();
     onv = {7, 2, 3}; ASSERT_EQ(bta[2].m_row.m_onv, onv);
-    bta[2].m_row.step();
+    ++bta[2].m_row;
     onv = {7, 2, 4}; ASSERT_EQ(bta[2].m_row.m_onv, onv);
-    bta[2].m_row.step();
+    ++bta[2].m_row;
     onv = {7, 2, 5}; ASSERT_EQ(bta[2].m_row.m_onv, onv);
 
 
     bta.expand(5);
     bta[0].m_row.restart();
     onv = {1, 2, 3}; ASSERT_EQ(bta[0].m_row.m_onv, onv);
-    bta[0].m_row.step();
+    ++bta[0].m_row;
     onv = {1, 2, 4}; ASSERT_EQ(bta[0].m_row.m_onv, onv);
-    bta[0].m_row.step();
+    ++bta[0].m_row;
     onv = {1, 2, 5}; ASSERT_EQ(bta[0].m_row.m_onv, onv);
 
     bta[1].m_row.restart();
     onv = {6, 2, 3}; ASSERT_EQ(bta[1].m_row.m_onv, onv);
-    bta[1].m_row.step();
+    ++bta[1].m_row;
     onv = {6, 2, 4}; ASSERT_EQ(bta[1].m_row.m_onv, onv);
-    bta[1].m_row.step();
+    ++bta[1].m_row;
     onv = {6, 2, 5}; ASSERT_EQ(bta[1].m_row.m_onv, onv);
 
     bta[2].m_row.restart();
     onv = {7, 2, 3}; ASSERT_EQ(bta[2].m_row.m_onv, onv);
-    bta[2].m_row.step();
+    ++bta[2].m_row;
     onv = {7, 2, 4}; ASSERT_EQ(bta[2].m_row.m_onv, onv);
-    bta[2].m_row.step();
+    ++bta[2].m_row;
     onv = {7, 2, 5}; ASSERT_EQ(bta[2].m_row.m_onv, onv);
-
 }

@@ -247,7 +247,7 @@ bool TableBase::is_protected() const {
     return !m_protected_rows.empty();
 }
 
-bool TableBase::freed_records_consistent() const {
+bool TableBase::freed_rows_consistent() const {
     const auto nfree_vec = std::accumulate(m_is_freed_row.cbegin(), m_is_freed_row.cend(), 0ul);
     if (nfree_vec != m_freed_rows.size()) return false;
     auto tmp_stack = m_freed_rows;

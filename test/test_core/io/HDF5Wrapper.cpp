@@ -160,7 +160,7 @@ TEST(HDF5Wrapper, NumberDistributed) {
     logging::debug_("number of local rows {}", nrow);
     write_table.push_back(nrow);
     auto row = write_table.m_row;
-    for (row.restart(); row.in_range(); row.step()) {
+    for (row.restart(); row; ++row){
         row.m_field = hash::in_range((row.index() + 1) * (mpi::irank() + 1), 4, 123);
         logging::debug_("writing value: {}", hash::digest_t(row.m_field));
     }
@@ -179,7 +179,7 @@ TEST(HDF5Wrapper, NumberDistributed) {
         ASSERT_FALSE(gr.child_exists("not_the_table"));
         read_table.load(gr, "table");
     }
-    for (row.restart(); row.in_range(); row.step()) {
+    for (row.restart(); row; ++row) {
         ASSERT_EQ(row.m_field, hash::in_range((row.index() + 1) * (mpi::irank() + 1), 4, 123));
     }
 }

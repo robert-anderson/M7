@@ -29,7 +29,7 @@ struct QuickSorter {
         // reset ordering
         for (uint_t i = 0; i < nrow; ++i) m_inds.push_back(i);
         qs(0, nrow - 1);
-        ASSERT(is_preserve_sorted(hwm));
+        ASSERT(is_preserve_sorted(nrow));
     }
 
     void preserve_sort(const TableBase &table){

@@ -55,7 +55,7 @@ namespace global_extremal_rows_test {
         table.resize(data.size());
         for (auto &v: data) {
             row.push_back_jump();
-            if (skip(mpi::irank(), row.index())) table.clear(row.index());
+            if (skip(mpi::irank(), row.index())) table.free(row.index());
             else row.m_field = v;
         }
     }
@@ -149,7 +149,7 @@ TEST(GlobalExtremalRows, FindAsc) {
             const auto &item = right_order[iitem];
             int value = sorted_row.m_value;
             ASSERT_EQ(value, item.m_value);
-            sorted_row.step();
+            ++sorted_row;
         }
     }
 }
@@ -188,7 +188,7 @@ TEST(GlobalExtremalRows, FindDesc) {
             const auto &item = right_order[iitem];
             int value = sorted_row.m_value;
             ASSERT_EQ(value, item.m_value);
-            sorted_row.step();
+            ++sorted_row;
         }
     }
 }

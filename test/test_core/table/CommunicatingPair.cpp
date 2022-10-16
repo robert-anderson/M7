@@ -35,7 +35,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
     comm_pair.communicate();
 
     auto& row = comm_pair.recv().m_row;
-    for (row.restart(); row.in_range(); row.step()) {
+    for (row.restart(); row; ++row) {
         auto irank_src = row.index();
         ASSERT_EQ(row.m_field, hash::in_range({mpi::irank(), irank_src}, hash_lo, hash_hi));
     }
@@ -115,7 +115,7 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
 
     auto& row = comm_pair.recv().m_row;
     auto irank_src = 0ul;
-    for (row.restart(); row.in_range(); row.step()) {
+    for (row.restart(); row; ++row) {
         if (irank_src+1<mpi::nrank()){
             if (row.index()==nrow_displs_expect[irank_src+1]) ++irank_src;
         }
