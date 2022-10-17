@@ -45,9 +45,9 @@ void Annihilator::sort_recv() {
     qs.reorder_sort(m_wf.recv());
 }
 
-Lookup Annihilator::lookup_dst(const Spawn& recv_row, bool& deterministic) {
-    auto res = m_wf.m_store.lookup(recv_row.m_dst_mbf, m_dst_walker);
-    deterministic = res && m_dst_walker.m_deterministic.get(m_wf.iroot_part(recv_row.m_ipart_dst));
+Lookup Annihilator::lookup_dst(const Mbf& dst_mbf, uint_t ipart_dst, bool& deterministic) {
+    auto res = m_wf.m_store.lookup(dst_mbf, m_dst_walker);
+    deterministic = res && m_dst_walker.m_deterministic.get(m_wf.iroot_part(ipart_dst));
     return res;
 }
 
@@ -188,7 +188,7 @@ void Annihilator::loop_over_dst_mbfs() {
     /*
      * set m_dst_walker to the record corresponding to the child walker if it exists
      */
-    lookup_dst(block_begin, dst_deterministic);
+    lookup_dst(block_begin.m_dst_mbf, block_begin.m_ipart_dst, dst_deterministic);
     auto &current = m_work_row2;
     for (current.restart();; ++current) {
         if (!in_same_dst_block(current, block_begin)) {
@@ -212,8 +212,9 @@ void Annihilator::loop_over_dst_mbfs() {
             total_delta = 0.0;
             /*
              * and look it up in the wavefunction store
+             * i.e. set m_dst_walker to the record corresponding to the child walker if it exists
              */
-            lookup_dst(block_begin, dst_deterministic);
+            lookup_dst(block_begin.m_dst_mbf, block_begin.m_ipart_dst, dst_deterministic);
         } else {
             if (current.m_send_parents) {
                 DEBUG_ASSERT_NE(current.m_dst_mbf, current.m_src_mbf,

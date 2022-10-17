@@ -97,6 +97,19 @@ public:
         return begin_offset / m_size;
     }
 
+    /**
+     * @param other
+     *  row object in the same table as this row
+     * @return
+     *  number of rows by which "other" is offset from "this" (positive if other is ahead of this, negative if this is
+     *  ahead of other, and zero if the two Rows are pointing to the same record)
+     */
+    unsigned long offset(const Row& other) const {
+        DEBUG_ASSERT_EQ(m_table, other.m_table, "offset rows must be associated with the same table");
+        const unsigned long n = std::distance(m_begin, other.m_begin)/m_size;
+        DEBUG_ASSERT_EQ(n, other.index() - index(), "incorrect offset");
+        return n;
+    }
 
     /**
      * @param irow_end

@@ -10,32 +10,6 @@
 #include <M7_lib/wavefunction/Reference.h>
 #include <M7_lib/bilinear/Rdm.h>
 
-/**
- * we need to be able to lookup the dst in the main table.
- */
-struct DstLookup {
-    /**
-     * wavefunction object
-     */
-    Wavefunction& m_wf;
-    /**
-     * true if destination Walker is in the deterministic subspace
-     */
-    bool m_deterministic = false;
-    /**
-     * row object for pointing to the destination Walker record (or null if not found)
-     */
-    Walker m_row;
-    DstLookup(Wavefunction& wf);
-
-    /**
-     * @param m_block_start_row
-     *  row pointing to the first record in the current block in the recv table
-     * @return
-     */
-    Lookup lookup(const Spawn &recv_row);
-};
-
 
 /**
  * updates the state of the stored wavefunction subject to the new walkers in the receive buffer,
@@ -98,14 +72,16 @@ public:
 
     /**
      * lookup the destination walker row in the wavefunction store table and store the result in m_dst_walker
-     * @param recv_row
-     *  row in the spawning recv table
+     * @param dst_mbf
+     *  destination many-body basis function
+     * @param ipart_dst
+     *  index among walker populations for which the spawned contribution is destined
      * @param deterministic
      *  return with value true if the dst walker exists and is in the deterministic subspace
      * @return
      *  lookup result
      */
-    Lookup lookup_dst(const Spawn& recv_row, bool& deterministic);
+    Lookup lookup_dst(const Mbf& dst_mbf, uint_t ipart_dst, bool& deterministic);
 
     /**
      * performs coefficient lookup and (if initiator criteria are satisfied) update due to the sum of all spawned
