@@ -19,6 +19,7 @@ struct StatsRow : Row {};
 namespace statistic {
 
     struct Base {
+        static constexpr uint_t c_default_fp = 8ul;
         virtual void commit() = 0;
 
         virtual void reset() = 0;
@@ -26,13 +27,13 @@ namespace statistic {
         virtual str_t stats_string() const = 0;
 
         template<typename T>
-        static str_t stats_string_element(const T &v, uint_t denom) {
-            return convert::to_string(v / denom);
+        static str_t stats_string_element(T v, uint_t denom, uint_t fp=c_default_fp) {
+            return convert::to_string(v / denom, fp);
         }
 
         template<typename T>
-        static str_t stats_string_element(const std::complex<T> &v, uint_t denom) {
-            return convert::to_string(v.real() / denom) + " " + convert::to_string(v.imag() / denom);
+        static str_t stats_string_element(std::complex<T> v, uint_t denom, uint_t fp=c_default_fp) {
+            return convert::to_string(v.real() / denom, fp) + " " + convert::to_string(v.imag() / denom, fp);
         }
     };
 
@@ -44,18 +45,20 @@ namespace statistic {
         using base_t::operator+=;
 
         const bool m_mean;
-        const uint_t m_precision;
+        /**
+         * floating point precision
+         */
+        const uint_t m_fp;
         uint_t m_ncommit_this_period = 0ul;
 
         v_t<T> m_reduced;
 
-        Numbers(StatsRow *row, NdFormat<nind> format, str_t name = "", bool mean = true, uint_t precision=6) :
-                NdNumberField<T, nind>(row, format, name), m_mean(mean),
-                m_precision(precision), m_reduced(this->m_nelement) {}
+        Numbers(StatsRow *row, NdFormat<nind> format, str_t name = "", bool mean = true, uint_t fp=c_default_fp) :
+                NdNumberField<T, nind>(row, format, name), m_mean(mean), m_fp(fp), m_reduced(this->m_nelement) {}
 
         Numbers(const Numbers& other):
                 NdNumberField<T, nind>(other), m_mean(other.m_mean),
-                m_precision(other.m_precision), m_reduced(other.m_nelement){}
+                m_fp(other.m_fp), m_reduced(other.m_nelement){}
 
         void commit() override {
             if (m_mean) this->add_to(m_reduced);
@@ -72,7 +75,7 @@ namespace statistic {
         str_t stats_string() const override {
             str_t tmp;
             for (uint_t ielement = 0ul; ielement < nelement(); ++ielement)
-                tmp += stats_string_element(m_reduced[ielement], m_mean ? m_ncommit_this_period : 1ul) + " ";
+                tmp += stats_string_element(m_reduced[ielement], m_mean ? m_ncommit_this_period : 1ul, m_fp) + " ";
             return tmp;
         }
 

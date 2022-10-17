@@ -10,11 +10,11 @@
 
 
 namespace hdf5 {
-/**
- * Base class for the serialization of a distributed list of N-dimensional data.
- * Each rank handles (reads or writes) a number of items, and each item has a dimensionality which is constant
- * across all ranks. The list item dimension increases the overall dimensionality of the dataset by 1.
- */
+    /**
+     * Base class for the serialization of a distributed list of N-dimensional data.
+     * Each rank handles (reads or writes) a number of items, and each item has a dimensionality which is constant
+     * across all ranks. The list item dimension increases the overall dimensionality of the dataset by 1.
+     */
     struct NdDistListBase {
         /**
          * HDF5 handle for the parent structure
@@ -118,9 +118,9 @@ namespace hdf5 {
         ~NdDistListBase();
     };
 
-/**
- * The writing case for a distributed N-dimensional list
- */
+    /**
+     * The writing case for a distributed N-dimensional list
+     */
     struct NdDistListWriter : public NdDistListBase {
     private:
         NdDistListWriter(hid_t parent_handle, str_t name, const uintv_t &item_dims,
@@ -143,10 +143,10 @@ namespace hdf5 {
 
     };
 
-/**
- * The reading case for a distributed N-dimensional list, splitting the reading load equally among all ranks, with
- * redistribution of items to be handled separately and subsquently
- */
+    /**
+     * The reading case for a distributed N-dimensional list, splitting the reading load equally among all ranks, with
+     * redistribution of items to be handled separately and subsquently
+     */
     struct NdDistListReader : NdDistListBase {
         /**
          * interrogate the named dataset's object info for the number of shape elements
