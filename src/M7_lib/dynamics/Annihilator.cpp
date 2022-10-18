@@ -160,6 +160,7 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
 
     uint_t ipart_dst = block_begin.m_ipart_dst;
 
+    ++m_ncall;
     /*
      * don't make contributions to RDM elements if they already take the equivalent contribution from deterministic
      * average connections to the reference
