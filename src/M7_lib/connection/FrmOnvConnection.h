@@ -339,9 +339,9 @@ public:
      * @param nop_insert
      *  number of pairs of same-indexed creation and annihilation operators to insert into the normal-ordered product
      * @return
-     *  excitation signature of the resulting term
+     *  rank signature of the resulting term
      */
-    uint_t exsig(const uint_t& nop_insert) const;
+    uint_t ranksig(uint_t nop_insert) const;
 };
 
 static std::ostream &operator<<(std::ostream &os, const FrmOnvConnection &conn) {

@@ -207,6 +207,6 @@ uint_t FrmOnvConnection::exsig() const {
     return exsig::encode(m_cre.size(), m_ann.size(), 0ul, 0ul);
 }
 
-uint_t FrmOnvConnection::exsig(const uint_t& nop_insert) const {
+uint_t FrmOnvConnection::ranksig(uint_t nop_insert) const {
     return exsig::encode(m_cre.size() + nop_insert, m_ann.size() + nop_insert, 0ul, 0ul);
 }

@@ -182,7 +182,7 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
     if (block_begin.m_src_deterministic && dst_row.m_deterministic.get(iroot)) return;
 
 
-    DEBUG_ASSERT_EQ(recv_row.m_dst_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
+    DEBUG_ASSERT_EQ(block_begin.m_dst_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
     const auto ipart_replica = dst_row.ipart_replica(ipart_dst);
     wf_t contrib = m_dst_weight[ipart_replica];
     // recover pre-death value of replica population (on average)

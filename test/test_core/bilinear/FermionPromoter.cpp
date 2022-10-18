@@ -24,7 +24,7 @@ TEST(FermionPromoter, Promoter1BodyDiagonal) {
     ASSERT_FALSE(conn.phase(in));
     FermionPromoter fp(com.size(), nop_insert);
 
-    const auto exsig = conn.exsig(nop_insert);
+    const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, exsig::ex_1100);
     buffered::MaeInds inds(exsig);
     /*
@@ -54,7 +54,7 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
     ASSERT_FALSE(conn.phase(in));
     FermionPromoter fp(com.size(), nop_insert);
 
-    const auto exsig = conn.exsig(nop_insert);
+    const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, exsig::ex_2200);
     buffered::MaeInds inds(exsig);
     /*
@@ -91,13 +91,13 @@ TEST(FermionPromoter, Promoter2BodySingle) {
     conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
-    // 3 -> 8 excitation moves through 3 occupied SQ op uintv_t => fermi phase -1
+    // 3 -> 8 excitation moves through 3 occupied SQ ops => fermi phase -1
     ASSERT_TRUE(conn.phase(in));
     ASSERT_EQ(conn.m_ann[0], 3);
     ASSERT_EQ(conn.m_cre[0], 8);
     FermionPromoter fp(com.size(), nop_insert);
 
-    const auto exsig = conn.exsig(nop_insert);
+    const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, exsig::ex_double);
     buffered::MaeInds inds(exsig);
 
@@ -156,7 +156,7 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
-    // 3, 7 -> 2, 8 excitation moves through 0 occupied SQ op uintv_t => fermi phase +1
+    // 3, 7 -> 2, 8 excitation moves through 0 occupied SQ ops => fermi phase +1
     ASSERT_FALSE(conn.phase(in));
     ASSERT_EQ(conn.m_ann[0], 3);
     ASSERT_EQ(conn.m_ann[1], 7);
@@ -164,7 +164,7 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     ASSERT_EQ(conn.m_cre[1], 8);
     FermionPromoter fp(com.size(), nop_insert);
 
-    const auto exsig = conn.exsig(nop_insert);
+    const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, exsig::ex_2200);
     ASSERT_EQ(exsig, conn.exsig());
     buffered::MaeInds inds(exsig);
@@ -175,4 +175,66 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     ASSERT_EQ(inds.m_frm.m_ann[1], 7);
     ASSERT_EQ(inds.m_frm.m_cre[0], 2);
     ASSERT_EQ(inds.m_frm.m_cre[1], 8);
+}
+
+
+TEST(FermionPromoter, Promoter3BodySingle) {
+    const uint_t nsite = 5;
+    const uint_t nop_insert = 2;
+    buffered::FrmOnv in(nsite);
+    buffered::FrmOnv out(nsite);
+    FrmOps com(nsite);
+
+    in = {1, 4, 5, 6, 7, 9};
+    out = {1, 4, 6, 7, 8, 9};
+
+    conn::FrmOnv conn(in);
+    conn.connect(in, out, com);
+
+    // 5 -> 8 excitation moves through 2 occupied SQ ops => fermi phase 1
+    ASSERT_FALSE(conn.phase(in));
+    ASSERT_EQ(conn.m_ann[0], 5);
+    ASSERT_EQ(conn.m_cre[0], 8);
+    FermionPromoter fp(com.size(), nop_insert);
+
+    const auto exsig = conn.ranksig(nop_insert);
+    ASSERT_EQ(exsig, exsig::ex_triple);
+    buffered::MaeInds inds(exsig);
+
+    // common: 1 4 6 7 9
+    bool phase;
+    phase = fp.apply(0, conn, com, inds.m_frm);
+    ASSERT_FALSE(phase);
+    ASSERT_EQ(inds.m_frm.m_ann[0], 1);
+    ASSERT_EQ(inds.m_frm.m_ann[1], 3);
+    ASSERT_EQ(inds.m_frm.m_cre[0], 1);
+    ASSERT_EQ(inds.m_frm.m_cre[1], 8);
+
+    phase = fp.apply(1, conn, com, inds.m_frm);
+    ASSERT_TRUE(phase);
+    ASSERT_EQ(inds.m_frm.m_ann[0], 3);
+    ASSERT_EQ(inds.m_frm.m_ann[1], 4);
+    ASSERT_EQ(inds.m_frm.m_cre[0], 4);
+    ASSERT_EQ(inds.m_frm.m_cre[1], 8);
+
+    phase = fp.apply(2, conn, com, inds.m_frm);
+    ASSERT_TRUE(phase);
+    ASSERT_EQ(inds.m_frm.m_ann[0], 3);
+    ASSERT_EQ(inds.m_frm.m_ann[1], 6);
+    ASSERT_EQ(inds.m_frm.m_cre[0], 6);
+    ASSERT_EQ(inds.m_frm.m_cre[1], 8);
+
+    phase = fp.apply(3, conn, com, inds.m_frm);
+    ASSERT_TRUE(phase);
+    ASSERT_EQ(inds.m_frm.m_ann[0], 3);
+    ASSERT_EQ(inds.m_frm.m_ann[1], 7);
+    ASSERT_EQ(inds.m_frm.m_cre[0], 7);
+    ASSERT_EQ(inds.m_frm.m_cre[1], 8);
+
+    phase = fp.apply(4, conn, com, inds.m_frm);
+    ASSERT_FALSE(phase);
+    ASSERT_EQ(inds.m_frm.m_ann[0], 3);
+    ASSERT_EQ(inds.m_frm.m_ann[1], 9);
+    ASSERT_EQ(inds.m_frm.m_cre[0], 8);
+    ASSERT_EQ(inds.m_frm.m_cre[1], 9);
 }
