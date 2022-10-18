@@ -104,14 +104,14 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
         /*
          * store the original positions of the row objects in the recv table
          */
-        uint_t irow_begin = block_begin.index();
-        uint_t irow_next_begin = next_block_begin.index();
+        const uint_t irow_begin = block_begin.index();
+        const uint_t irow_next_begin = next_block_begin.index();
 
         auto &current = next_block_begin;
         wf_t src_weight = block_begin.m_src_weight;
         DEBUG_ONLY(src_weight);
 
-        for (current.jump(block_begin);; ++current) {
+        for (current.jump(irow_begin);; ++current) {
             if (!in_same_src_block(current, block_begin)) {
                 handle_src_block(block_begin, dst_walker);
                 block_begin.jump(current);
@@ -139,7 +139,11 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
         next_block_begin.jump(irow_next_begin);
     }
 
-    bool allow_initiation = (next_block_begin.index() - block_begin.index()) > 1;
+    // obviate further determination of initiation behavior if the destination already exists
+    bool allow_initiation = dst_walker;
+    // always allow new walker to be created if multiple sources are simultaneously spawning here
+    if (!allow_initiation) allow_initiation = block_begin.offset(next_block_begin) > 1;
+    // else, only allow initiation if the lone parent was an initiator
     if (!allow_initiation) {
         // only one src_mbf for this dst_mbf. If the parent is an initiator,
         // contributions to unoccupied ONVs are allowed
@@ -147,14 +151,16 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
     }
     annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta, allow_initiation, dst_walker);
     block_begin.jump(next_block_begin);
+    DEBUG_ASSERT_EQ(next_block_begin.index(), block_begin.index(), "row not set to beginning of next block");
 }
 
-void Annihilator::handle_src_block(Spawn &block_begin, Walker &dst_row) {
+void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_row) {
     DEBUG_ASSERT_TRUE(m_rdms.m_accum_epoch, "shouldn't be sampling RDMs yet");
     DEBUG_ASSERT_EQ(block_begin.m_dst_mbf, dst_row.m_mbf, "wrong dst_row found");
 
     uint_t ipart_dst = block_begin.m_ipart_dst;
 
+    ++m_ncall;
     /*
      * don't make contributions to RDM elements if they already take the equivalent contribution from deterministic
      * average connections to the reference
@@ -163,7 +169,7 @@ void Annihilator::handle_src_block(Spawn &block_begin, Walker &dst_row) {
         if (dst_row.m_mbf == m_refs[ipart_dst].get_mbf()) return;
         if (block_begin.m_src_mbf == m_refs[m_wf.ipart_replica(ipart_dst)].get_mbf()) return;
     }
-    auto iroot = m_wf.iroot_part(ipart_dst);
+    const auto iroot = m_wf.iroot_part(ipart_dst);
     /*
      * or if they already take contributions from deterministic subspace connections.
      * i.e. the src MBF is a deterministic subspace member for this root index, and so too is the dst MBF

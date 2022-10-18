@@ -116,7 +116,7 @@ public:
     void handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
                           const wf_t &total_delta, Walker& dst_walker);
 
-    void handle_src_block(Spawn &block_begin, Walker& dst_row);
+    void handle_src_block(const Spawn &block_begin, const Walker& dst_row);
 
     /**
      * loop through all received spawned rows and group them into blocks using a pair of Row objects. Once a block has
