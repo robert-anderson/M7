@@ -25,9 +25,19 @@ struct Annihilator {
     const uint_t& m_icycle;
 
 private:
-    Spawn m_work_row1;
-    Spawn m_work_row2;
+    /**
+     * traversal of the wavefunction recv table requires two working rows, for the beginning of adjacent blocks
+     * a pair of working rows is also needed for sorting the received spawns
+     */
+    Spawn m_work_row1, m_work_row2;
+    /**
+     * Row pointing to the destination walker record if it is found to exist
+     */
     Walker m_dst_walker;
+    /**
+     * weights of the dst walker are cached so their pre-annihilation values are available to MAE accumulation
+     */
+    v_t<wf_t> m_dst_weight;
     /**
      * function that returns the relative order of two rows in the receive buffer
      */
@@ -71,17 +81,17 @@ public:
     void sort_recv();
 
     /**
-     * lookup the destination walker row in the wavefunction store table and store the result in m_dst_walker
+     * lookup the destination walker row in the wavefunction store table and point m_dst_walker at the result.
+     * also, cache the weights on all parts of the dst walker so sequential annihilation of replicas can take place
+     * without biasing RDM contributions
      * @param dst_mbf
      *  destination many-body basis function
      * @param ipart_dst
      *  index among walker populations for which the spawned contribution is destined
      * @param deterministic
      *  return with value true if the dst walker exists and is in the deterministic subspace
-     * @return
-     *  lookup result
      */
-    Lookup lookup_dst(const Mbf& dst_mbf, uint_t ipart_dst, bool& deterministic);
+    void lookup_dst(const Mbf& dst_mbf, uint_t ipart_dst, bool& deterministic);
 
     /**
      * performs coefficient lookup and (if initiator criteria are satisfied) update due to the sum of all spawned

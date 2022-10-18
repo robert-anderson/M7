@@ -26,9 +26,9 @@ uintv_t DeterministicSubspace::make_iparts() {
     return {ipart, ipart + 1};
 }
 
-void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const Mbf &ref, const sparse::Element& elem) {
+void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const Mbf& ref, const sparse::Element& elem) {
     m_all.m_row.jump(elem);
-    if (m_all.m_row.m_mbf == ref) return;
+    if (rdms.m_explicit_ref_conns && (m_all.m_row.m_mbf == ref)) return;
     if (m_wf.nreplica() == 2) {
         rdms.make_contribs(m_local_row.m_mbf, m_all.m_row.m_mbf,
                            m_local_row.m_weight[0] * m_all.m_row.m_weight[1]);
@@ -103,7 +103,7 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref)
     for (auto irec: m_irecs) {
         ++iirec;
         m_local_row.jump(irec);
-        if (m_local_row.m_mbf == ref) continue;
+        if (rdms.m_explicit_ref_conns && (m_local_row.m_mbf == ref)) continue;
         /*
          * make contributions due to hamiltonian connections
          */

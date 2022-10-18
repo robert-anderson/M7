@@ -34,8 +34,8 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
 Annihilator::Annihilator(Wavefunction &wf, const Propagator &prop, const References &refs,
                          Rdms &rdms, const uint_t &icycle, wf_comp_t nadd) :
         m_wf(wf), m_prop(prop), m_refs(refs), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
-        m_work_row1(wf.m_send_recv.m_row), m_work_row2(wf.m_send_recv.m_row),
-        m_dst_walker(m_wf.m_store.m_row), m_sort_cmp_fn(make_sort_cmp_fn()) {
+        m_work_row1(wf.m_send_recv.m_row), m_work_row2(wf.m_send_recv.m_row), m_dst_walker(m_wf.m_store.m_row),
+        m_dst_weight(m_wf.npart(), {}), m_sort_cmp_fn(make_sort_cmp_fn()) {
     REQUIRE_TRUE_ALL(bool(m_rdms)==m_work_row1.m_send_parents,
                      "cannot sample RDMs through annihilation unless parent MBFs are communicated");
 }
@@ -45,10 +45,16 @@ void Annihilator::sort_recv() {
     qs.reorder_sort(m_wf.recv());
 }
 
-Lookup Annihilator::lookup_dst(const Mbf& dst_mbf, uint_t ipart_dst, bool& deterministic) {
-    auto res = m_wf.m_store.lookup(dst_mbf, m_dst_walker);
-    deterministic = res && m_dst_walker.m_deterministic.get(m_wf.iroot_part(ipart_dst));
-    return res;
+void Annihilator::lookup_dst(const Mbf &dst_mbf, uint_t ipart_dst, bool &deterministic) {
+    /*
+     * if the current walker is valid and has MBF equal to dst_mbf, then this is not the first part being
+     * contributed to in this annihilation loop, and so m_dst_walker and m_dst_weight should be left as-is
+     */
+    if (m_dst_walker && (m_dst_walker.m_mbf == dst_mbf)) return;
+    auto success = m_wf.m_store.lookup(dst_mbf, m_dst_walker);
+    deterministic = success && m_dst_walker.m_deterministic.get(m_wf.iroot_part(ipart_dst));
+    if (success) m_dst_walker.m_weight.copy_to(m_dst_weight);
+    else m_dst_weight.assign(m_dst_weight.size(), dtype::null(m_dst_weight[0]));
 }
 
 void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
@@ -160,7 +166,6 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
 
     uint_t ipart_dst = block_begin.m_ipart_dst;
 
-    ++m_ncall;
     /*
      * don't make contributions to RDM elements if they already take the equivalent contribution from deterministic
      * average connections to the reference
@@ -176,12 +181,19 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
      */
     if (block_begin.m_src_deterministic && dst_row.m_deterministic.get(iroot)) return;
 
-    m_rdms.make_contribs(block_begin, dst_row, m_prop);
+
+    DEBUG_ASSERT_EQ(recv_row.m_dst_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
+    const auto ipart_replica = dst_row.ipart_replica(ipart_dst);
+    wf_t contrib = m_dst_weight[ipart_replica];
+    // recover pre-death value of replica population (on average)
+    contrib /= 1.0 - m_prop.tau() * (dst_row.m_hdiag - m_prop.m_shift.m_values[ipart_replica]);
+    contrib = arith::conj(contrib);
+    contrib *= block_begin.m_src_weight;
+    m_rdms.make_contribs(block_begin.m_src_mbf, dst_row.m_mbf, contrib);
 }
 
 void Annihilator::loop_over_dst_mbfs() {
     if (!m_wf.recv().nrow_in_use()) return;
-
     /*
      * put the block_begin row to the beginning of the recv table
      */
@@ -192,7 +204,8 @@ void Annihilator::loop_over_dst_mbfs() {
     wf_t total_delta = 0.0;
 
     /*
-     * set m_dst_walker to the record corresponding to the child walker if it exists
+     * set m_dst_walker to the record corresponding to the child walker if it exists, and set the replica weights if the
+     * current destination walker differs from the previous
      */
     lookup_dst(block_begin.m_dst_mbf, block_begin.m_ipart_dst, dst_deterministic);
     auto &current = m_work_row2;

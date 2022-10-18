@@ -84,7 +84,10 @@ void Solver::execute(uint_t ncycle) {
 
         m_propagate_timer.reset();
         m_propagate_timer.unpause();
-        if (m_detsubs) m_detsubs.update();
+        if (m_detsubs) {
+            m_detsubs.update();
+            m_detsubs.make_rdm_contribs(m_maes.m_bilinears.m_rdms, m_refs[0].get_mbf());
+        }
         loop_over_occupied_mbfs();
         m_propagate_timer.pause();
 
@@ -98,10 +101,7 @@ void Solver::execute(uint_t ncycle) {
         m_annihilate_timer.unpause();
         loop_over_spawned();
         mpi::barrier();
-        if (m_detsubs) {
-            m_detsubs.make_rdm_contribs(m_maes.m_bilinears.m_rdms, m_refs[0].get_mbf());
-            m_detsubs.project(m_prop.tau());
-        }
+        if (m_detsubs) m_detsubs.project(m_prop.tau());
         m_annihilate_timer.pause();
 
         end_cycle();

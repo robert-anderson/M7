@@ -187,8 +187,6 @@ public:
 
     void make_contribs(const field::Mbf& src_onv, const field::Mbf& dst_onv, const wf_t& contrib);
 
-    void make_contribs(const Spawn& recv_row, const Walker& dst_row, const Propagator& prop);
-
     bool all_stores_empty() const;
 
     void end_cycle();

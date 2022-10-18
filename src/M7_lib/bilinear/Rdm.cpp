@@ -294,17 +294,6 @@ void Rdms::make_contribs(const Mbf& src_onv, const Mbf& dst_onv, const wf_t& con
     make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops[src_onv], contrib);
 }
 
-void Rdms::make_contribs(const Spawn& recv_row, const Walker& dst_row, const Propagator& prop) {
-    DEBUG_ASSERT_EQ(recv_row.m_dst_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
-    auto ipart_replica = dst_row.ipart_replica(recv_row.m_ipart_dst);
-    wf_t contrib = dst_row.m_weight[ipart_replica];
-    // recover pre-death value of replica population (on average)
-    contrib /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[ipart_replica]);
-    contrib = arith::conj(contrib);
-    contrib *= recv_row.m_src_weight;
-    make_contribs(recv_row.m_src_mbf, dst_row.m_mbf, contrib);
-}
-
 bool Rdms::all_stores_empty() const {
     for (auto& ranksig: m_rdm_ranksigs)
         if (!m_rdms[ranksig]->m_store.empty())
