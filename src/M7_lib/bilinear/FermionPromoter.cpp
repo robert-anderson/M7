@@ -25,41 +25,34 @@ FermionPromoter::FermionPromoter(uint_t ncom, uint_t nop_insert) :
     foreach_comb.loop(fn);
 }
 
-const mev_ind_t *FermionPromoter::begin(const uint_t &icomb) const {
-    ASSERT(icomb < m_ncomb);
+const mev_ind_t *FermionPromoter::begin(uint_t icomb) const {
+    DEBUG_ASSERT_LT(icomb, m_ncomb, "combination index OOB");
     return m_all_combs.data() + icomb * m_nop_insert;
 }
 
-bool FermionPromoter::apply(const uint_t &icomb, const conn::FrmOnv &conn,
-                            const FrmOps &com, MaeIndsPair &frm_inds) const {
-    auto comb_begin = begin(icomb);
-    frm_inds.zero();
-    uint_t ann_passed = 0ul;
-    uint_t cre_passed = 0ul;
-    for (uint_t iins = 0ul; iins < m_nop_insert; ++iins) {
-        auto ins = com[comb_begin[iins]];
-        while (ann_passed < conn.m_ann.size() && conn.m_ann[ann_passed] < ins) {
-            frm_inds.m_ann[ann_passed + iins] = conn.m_ann[ann_passed];
-            ++ann_passed;
+uint_t FermionPromoter::apply(uint_t icomb, const FrmOps &conn_ops, const FrmOps &com, MaeIndsPartition &mae_inds) const {
+    uint_t nexchange = 0ul;
+    uint_t icom = 0ul;
+    const auto comb = begin(icomb);
+    for (uint_t iop = 0ul; iop < conn_ops.size(); ++iop) {
+        auto op = conn_ops[iop];
+        // insert all common indices below this excitation index
+        for (; icom < m_nop_insert && com[comb[icom]] < op; ++icom) {
+            mae_inds[iop + icom] = com[comb[icom]];
+            nexchange += icom + comb[icom];
         }
-        frm_inds.m_ann[ann_passed + iins] = ins;
+        // insert the excitation index itself
+        mae_inds[iop + icom] = op;
+    }
+    // insert remaining common indices
+    for (; icom < m_nop_insert; ++icom) {
+        mae_inds[conn_ops.size() + icom] = com[comb[icom]];
+    }
+    return nexchange;
+}
 
-        while (cre_passed < conn.m_cre.size() && conn.m_cre[cre_passed] < ins) {
-            frm_inds.m_cre[cre_passed + iins] = conn.m_cre[cre_passed];
-            ++cre_passed;
-        }
-        frm_inds.m_cre[cre_passed + iins] = ins;
-    }
-    auto phase = (ann_passed + cre_passed) & 1ul;
-
-    // the rest of the promoted connection is the same as the connection
-    while (ann_passed < conn.m_ann.size()) {
-        frm_inds.m_ann[ann_passed + m_nop_insert] = conn.m_ann[ann_passed];
-        ++ann_passed;
-    }
-    while (cre_passed < conn.m_cre.size()) {
-        frm_inds.m_cre[cre_passed + m_nop_insert] = conn.m_cre[cre_passed];
-        ++cre_passed;
-    }
-    return phase;
+bool FermionPromoter::apply(uint_t icomb, const conn::FrmOnv &conn, const FrmOps &com, MaeIndsPair &frm_inds) const {
+    const auto nexchange_ann = apply(icomb, conn.m_ann, com, frm_inds.m_ann);
+    const auto nexchange_cre = apply(icomb, conn.m_cre, com, frm_inds.m_cre);
+    return (nexchange_cre + nexchange_ann) & 1ul;
 }

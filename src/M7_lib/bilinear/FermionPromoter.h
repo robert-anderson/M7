@@ -18,8 +18,8 @@
  * RDM is due for each of the (N_site-N) choose (R-N) occupied indices in common between the contributing bra and ket.
  *
  * elements of the m_cre and m_ann members of both fields::FermionMevInds conn::FrmOnv alike must be stored in
- * ascending order. However, whereas the connection arrays must not have any elements in common, the MEV uintv_t in general
- * do have elements in common, this is brought about by promotion.
+ * ascending order. However, whereas the connection arrays must not have any elements in common, the MAE indices in
+ * general do have elements in common, this is brought about by promotion.
  *
  * e.g.
  *     01234 56789
@@ -61,8 +61,22 @@ private:
      * @return
      *  const pointer to beginning of combination in m_all_combs
      */
-    const mev_ind_t *begin(const uint_t &icomb) const;
+    const mev_ind_t *begin(uint_t icomb) const;
 
+    /**
+     * apply the promotion to one half of the connection (cre or ann)
+     * @param icomb
+     *  combination index
+     * @param conn_ops
+     *  cre or ann partition of the connection
+     * @param com
+     *  common indices between bra and ket determinants
+     * @param mae_inds
+     *  cre or ann operators in the MAE-indexing string
+     * @return
+     *  number of SQ operator exchanges required in the reordering
+     */
+    uint_t apply(uint_t icomb, const FrmOps &conn_ops, const FrmOps &com, MaeIndsPartition &mae_inds) const;
 public:
     /**
      * apply the icomb-th promotion to the connection given and store the result uintv_t
@@ -77,8 +91,7 @@ public:
      * @return
      *  antisymmetric phase associated with sorting both ann and cre to ascending order
      */
-    bool apply(const uint_t &icomb, const conn::FrmOnv &conn,
-               const FrmOps& com, MaeIndsPair &frm_inds) const;
+    bool apply(uint_t icomb, const conn::FrmOnv &conn, const FrmOps& com, MaeIndsPair &frm_inds) const;
 
 };
 

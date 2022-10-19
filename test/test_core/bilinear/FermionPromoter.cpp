@@ -11,17 +11,17 @@
 TEST(FermionPromoter, Promoter1BodyDiagonal) {
     const uint_t nsite = 5;
     const uint_t nop_insert = 1;
-    buffered::FrmOnv in(nsite);
-    buffered::FrmOnv out(nsite);
+    buffered::FrmOnv src(nsite);
+    buffered::FrmOnv dst(nsite);
     FrmOps com(nsite);
 
-    in = {1, 3, 4, 6, 7, 9};
-    out = {1, 3, 4, 6, 7, 9};
+    src = {1, 3, 4, 6, 7, 9};
+    dst = {1, 3, 4, 6, 7, 9};
 
-    conn::FrmOnv conn(in);
-    conn.connect(in, out, com);
+    conn::FrmOnv conn(src);
+    conn.connect(src, dst, com);
 
-    ASSERT_FALSE(conn.phase(in));
+    ASSERT_FALSE(conn.phase(src));
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.ranksig(nop_insert);
@@ -41,17 +41,17 @@ TEST(FermionPromoter, Promoter1BodyDiagonal) {
 TEST(FermionPromoter, Promoter2BodyDiagonal) {
     const uint_t nsite = 5;
     const uint_t nop_insert = 2;
-    buffered::FrmOnv in(nsite);
-    buffered::FrmOnv out(nsite);
+    buffered::FrmOnv src(nsite);
+    buffered::FrmOnv dst(nsite);
     FrmOps com(nsite);
 
-    in = {1, 3, 4, 6, 7, 9};
-    out = {1, 3, 4, 6, 7, 9};
+    src = {1, 3, 4, 6, 7, 9};
+    dst = {1, 3, 4, 6, 7, 9};
 
-    conn::FrmOnv conn(in);
-    conn.connect(in, out, com);
+    conn::FrmOnv conn(src);
+    conn.connect(src, dst, com);
 
-    ASSERT_FALSE(conn.phase(in));
+    ASSERT_FALSE(conn.phase(src));
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.ranksig(nop_insert);
@@ -67,7 +67,7 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
         // enumerates all ways to choose nop_insert elements of the common array
         auto phase = fp.apply(icomb, conn, com, inds.m_frm);
         ASSERT_FALSE(phase);
-        // since this is a diagonal element, all indices are "inserted" and should be found in order in the com array
+        // since this is a diagonal element, all indices are "inserted" and should be found src order src the com array
         for (uint_t iop = 0ul; iop < inds.m_frm.m_cre.size(); ++iop)
             ASSERT_EQ(inds.m_frm.m_cre[iop], com[insert_inds[iop]]);
         for (uint_t iop = 0ul; iop < inds.m_frm.m_ann.size(); ++iop)
@@ -81,18 +81,18 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
 TEST(FermionPromoter, Promoter2BodySingle) {
     const uint_t nsite = 5;
     const uint_t nop_insert = 1;
-    buffered::FrmOnv in(nsite);
-    buffered::FrmOnv out(nsite);
+    buffered::FrmOnv src(nsite);
+    buffered::FrmOnv dst(nsite);
     FrmOps com(nsite);
 
-    in = {1, 3, 4, 6, 7, 9};
-    out = {1, 4, 6, 7, 8, 9};
+    src = {1, 3, 4, 6, 7, 9};
+    dst = {1, 4, 6, 7, 8, 9};
 
-    conn::FrmOnv conn(in);
-    conn.connect(in, out, com);
+    conn::FrmOnv conn(src);
+    conn.connect(src, dst, com);
 
-    // 3 -> 8 excitation moves through 3 occupied SQ ops => fermi phase -1
-    ASSERT_TRUE(conn.phase(in));
+    // 3 -> 8 excitation moves through 3 occupied SQ ops => fermi phase true
+    ASSERT_TRUE(conn.phase(src));
     ASSERT_EQ(conn.m_ann[0], 3);
     ASSERT_EQ(conn.m_cre[0], 8);
     FermionPromoter fp(com.size(), nop_insert);
@@ -142,22 +142,22 @@ TEST(FermionPromoter, Promoter2BodySingle) {
 TEST(FermionPromoter, Promoter2BodyDouble) {
     /*
      * simple test of the edge-case where no promotion is actually performed, but we need to ensure that the connection's
-     * contents are faithfully reproduced in the single contributing key (fields::FermionMevInds object) emitted.
+     * contents are faithfully reproduced src the single contributing key (fields::FermionMevInds object) emitted.
      */
     const uint_t nsite = 5;
     const uint_t nop_insert = 0;
-    buffered::FrmOnv in(nsite);
-    buffered::FrmOnv out(nsite);
+    buffered::FrmOnv src(nsite);
+    buffered::FrmOnv dst(nsite);
     FrmOps com(nsite);
 
-    in = {1, 3, 4, 6, 7, 9};
-    out = {1, 2, 4, 6, 8, 9};
+    src = {1, 3, 4, 6, 7, 9};
+    dst = {1, 2, 4, 6, 8, 9};
 
-    conn::FrmOnv conn(in);
-    conn.connect(in, out, com);
+    conn::FrmOnv conn(src);
+    conn.connect(src, dst, com);
 
-    // 3, 7 -> 2, 8 excitation moves through 0 occupied SQ ops => fermi phase +1
-    ASSERT_FALSE(conn.phase(in));
+    // 3, 7 -> 2, 8 excitation moves through 0 occupied SQ ops => fermi phase false
+    ASSERT_FALSE(conn.phase(src));
     ASSERT_EQ(conn.m_ann[0], 3);
     ASSERT_EQ(conn.m_ann[1], 7);
     ASSERT_EQ(conn.m_cre[0], 2);
@@ -175,66 +175,81 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     ASSERT_EQ(inds.m_frm.m_ann[1], 7);
     ASSERT_EQ(inds.m_frm.m_cre[0], 2);
     ASSERT_EQ(inds.m_frm.m_cre[1], 8);
+
+    ASSERT_EQ(fp.m_ncomb, 1ul);
 }
 
 
 TEST(FermionPromoter, Promoter3BodySingle) {
     const uint_t nsite = 5;
     const uint_t nop_insert = 2;
-    buffered::FrmOnv in(nsite);
-    buffered::FrmOnv out(nsite);
+    buffered::FrmOnv src(nsite);
+    buffered::FrmOnv dst(nsite);
     FrmOps com(nsite);
 
-    in = {1, 4, 5, 6, 7, 9};
-    out = {1, 4, 6, 7, 8, 9};
+    src = {1, 4, 5, 6, 7, 9};
+    dst = {1, 4, 6, 7, 8, 9};
 
-    conn::FrmOnv conn(in);
-    conn.connect(in, out, com);
+    conn::FrmOnv conn(src);
+    conn.connect(src, dst, com);
 
-    // 5 -> 8 excitation moves through 2 occupied SQ ops => fermi phase 1
-    ASSERT_FALSE(conn.phase(in));
+    // 5 -> 8 excitation moves through 2 occupied SQ ops => fermi phase false
+    ASSERT_FALSE(conn.phase(src));
     ASSERT_EQ(conn.m_ann[0], 5);
     ASSERT_EQ(conn.m_cre[0], 8);
     FermionPromoter fp(com.size(), nop_insert);
+
+    // number of pairs in common
+    ASSERT_EQ(fp.m_ncomb, 10ul);
 
     const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, exsig::ex_triple);
     buffered::MaeInds inds(exsig);
 
     // common: 1 4 6 7 9
+    /*
+     * 5 1 4 6 7 9
+     *   ^ ^
+     * bring common pair to front (F):
+     * 5 1 4 6 7 9
+     * put 1 in place (T)
+     * 1 5 4 6 7 9
+     * put 4 in place (T)
+     * 1 4 5 6 7 9
+     * overall phase: F
+     *
+     *
+     * 5 1 4 6 7 9
+     *   ^   ^
+     * bring common pair to front (T):
+     * 5 1 6 4 7 9
+     * put 1 in place (T)
+     * 1 5 6 4 7 9
+     * put 6 in place (F)
+     * 1 5 6 4 7 9
+     * overall phase: F
+     *
+     */
+    v_t<std::pair<bool, uintv_t>> correct = {
+        {0, {1, 4, 5,  1, 4, 8}},
+//        {0, {1, 5, 6,  1, 6, 8}},
+//        {1, {4, 5, 6,  4, 6, 8}},
+//        {1, {1, 5, 7,  1, 7, 8}},
+//        {1, {4, 5, 7,  4, 7, 8}},
+//        {0, {5, 6, 7,  6, 7, 8}},
+    };
+
     bool phase;
-    phase = fp.apply(0, conn, com, inds.m_frm);
-    ASSERT_FALSE(phase);
-    ASSERT_EQ(inds.m_frm.m_ann[0], 1);
-    ASSERT_EQ(inds.m_frm.m_ann[1], 3);
-    ASSERT_EQ(inds.m_frm.m_cre[0], 1);
-    ASSERT_EQ(inds.m_frm.m_cre[1], 8);
-
-    phase = fp.apply(1, conn, com, inds.m_frm);
-    ASSERT_TRUE(phase);
-    ASSERT_EQ(inds.m_frm.m_ann[0], 3);
-    ASSERT_EQ(inds.m_frm.m_ann[1], 4);
-    ASSERT_EQ(inds.m_frm.m_cre[0], 4);
-    ASSERT_EQ(inds.m_frm.m_cre[1], 8);
-
-    phase = fp.apply(2, conn, com, inds.m_frm);
-    ASSERT_TRUE(phase);
-    ASSERT_EQ(inds.m_frm.m_ann[0], 3);
-    ASSERT_EQ(inds.m_frm.m_ann[1], 6);
-    ASSERT_EQ(inds.m_frm.m_cre[0], 6);
-    ASSERT_EQ(inds.m_frm.m_cre[1], 8);
-
-    phase = fp.apply(3, conn, com, inds.m_frm);
-    ASSERT_TRUE(phase);
-    ASSERT_EQ(inds.m_frm.m_ann[0], 3);
-    ASSERT_EQ(inds.m_frm.m_ann[1], 7);
-    ASSERT_EQ(inds.m_frm.m_cre[0], 7);
-    ASSERT_EQ(inds.m_frm.m_cre[1], 8);
-
-    phase = fp.apply(4, conn, com, inds.m_frm);
-    ASSERT_FALSE(phase);
-    ASSERT_EQ(inds.m_frm.m_ann[0], 3);
-    ASSERT_EQ(inds.m_frm.m_ann[1], 9);
-    ASSERT_EQ(inds.m_frm.m_cre[0], 8);
-    ASSERT_EQ(inds.m_frm.m_cre[1], 9);
+    for (uint_t icomb = 0ul; icomb < correct.size(); ++icomb) {
+        phase = fp.apply(icomb, conn, com, inds.m_frm);
+        const auto& bench_phase = correct[icomb].first;
+        const auto& bench_inds = correct[icomb].second;
+        ASSERT_EQ(inds.m_frm.m_ann[0], bench_inds[0]);
+        ASSERT_EQ(inds.m_frm.m_ann[1], bench_inds[1]);
+        ASSERT_EQ(inds.m_frm.m_ann[2], bench_inds[2]);
+        ASSERT_EQ(inds.m_frm.m_cre[0], bench_inds[3]);
+        ASSERT_EQ(inds.m_frm.m_cre[1], bench_inds[4]);
+        ASSERT_EQ(inds.m_frm.m_cre[2], bench_inds[5]);
+        ASSERT_EQ(bench_phase, phase);
+    }
 }
