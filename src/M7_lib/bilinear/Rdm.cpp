@@ -123,8 +123,10 @@ Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nelec, uint
      * contributing exsig
      */
     m_frm_promoters.reserve(m_rank + 1);
-    for (uint_t nins = 0ul; nins <= m_rank; ++nins)
-        m_frm_promoters.emplace_back(nelec + nins - m_rank, nins);
+    for (uint_t nins = 0ul; nins <= m_rank; ++nins) {
+        const auto nexcit = m_rank - nins;
+        m_frm_promoters.emplace_back(nelec - nexcit, exsig::encode(nexcit, nexcit, 0, 0), nins);
+    }
 }
 
 

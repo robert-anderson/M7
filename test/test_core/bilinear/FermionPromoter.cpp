@@ -22,7 +22,7 @@ TEST(FermionPromoter, Promoter1BodyDiagonal) {
     conn.connect(src, dst, com);
 
     ASSERT_FALSE(conn.phase(src));
-    FermionPromoter fp(com.size(), nop_insert);
+    FermionPromoter fp(com.size(), conn.exsig(), nop_insert);
 
     const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, exsig::ex_1100);
@@ -52,7 +52,7 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
     conn.connect(src, dst, com);
 
     ASSERT_FALSE(conn.phase(src));
-    FermionPromoter fp(com.size(), nop_insert);
+    FermionPromoter fp(com.size(), conn.exsig(), nop_insert);
 
     const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, exsig::ex_2200);
@@ -95,7 +95,7 @@ TEST(FermionPromoter, Promoter2BodySingle) {
     ASSERT_TRUE(conn.phase(src));
     ASSERT_EQ(conn.m_ann[0], 3);
     ASSERT_EQ(conn.m_cre[0], 8);
-    FermionPromoter fp(com.size(), nop_insert);
+    FermionPromoter fp(com.size(), conn.exsig(), nop_insert);
 
     const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, exsig::ex_double);
@@ -162,7 +162,7 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     ASSERT_EQ(conn.m_ann[1], 7);
     ASSERT_EQ(conn.m_cre[0], 2);
     ASSERT_EQ(conn.m_cre[1], 8);
-    FermionPromoter fp(com.size(), nop_insert);
+    FermionPromoter fp(com.size(), conn.exsig(), nop_insert);
 
     const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, exsig::ex_2200);
@@ -197,7 +197,7 @@ TEST(FermionPromoter, Promoter3BodySingle) {
     ASSERT_FALSE(conn.phase(src));
     ASSERT_EQ(conn.m_ann[0], 5);
     ASSERT_EQ(conn.m_cre[0], 8);
-    FermionPromoter fp(com.size(), nop_insert);
+    FermionPromoter fp(com.size(), conn.exsig(), nop_insert);
 
     // number of pairs in common
     ASSERT_EQ(fp.m_ncomb, 10ul);
@@ -207,36 +207,17 @@ TEST(FermionPromoter, Promoter3BodySingle) {
     buffered::MaeInds inds(exsig);
 
     // common: 1 4 6 7 9
-    /*
-     * 5 1 4 6 7 9
-     *   ^ ^
-     * bring common pair to front (F):
-     * 5 1 4 6 7 9
-     * put 1 in place (T)
-     * 1 5 4 6 7 9
-     * put 4 in place (T)
-     * 1 4 5 6 7 9
-     * overall phase: F
-     *
-     *
-     * 5 1 4 6 7 9
-     *   ^   ^
-     * bring common pair to front (T):
-     * 5 1 6 4 7 9
-     * put 1 in place (T)
-     * 1 5 6 4 7 9
-     * put 6 in place (F)
-     * 1 5 6 4 7 9
-     * overall phase: F
-     *
-     */
     v_t<std::pair<bool, uintv_t>> correct = {
         {0, {1, 4, 5,  1, 4, 8}},
-//        {0, {1, 5, 6,  1, 6, 8}},
-//        {1, {4, 5, 6,  4, 6, 8}},
-//        {1, {1, 5, 7,  1, 7, 8}},
-//        {1, {4, 5, 7,  4, 7, 8}},
-//        {0, {5, 6, 7,  6, 7, 8}},
+        {1, {1, 5, 6,  1, 6, 8}},
+        {1, {4, 5, 6,  4, 6, 8}},
+        {1, {1, 5, 7,  1, 7, 8}},
+        {1, {4, 5, 7,  4, 7, 8}},
+        {0, {5, 6, 7,  6, 7, 8}},
+        {0, {1, 5, 9,  1, 8, 9}},
+        {0, {4, 5, 9,  4, 8, 9}},
+        {1, {5, 6, 9,  6, 8, 9}},
+        {1, {5, 7, 9,  7, 8, 9}},
     };
 
     bool phase;

@@ -40,6 +40,15 @@
  */
 struct FermionPromoter {
     /**
+     * total number of common fermion operators between bra and ket determinants
+     */
+    const uint_t m_ncom;
+    /**
+     * number of creation operators in the connection between determinants (must be the same as the number of
+     * annihilation operators since this promoter is specialized to fermion-number conserving connections)
+     */
+    const uint_t m_nexcit;
+    /**
      * number of common creation-annihilation operator pairs to insert into connection
      */
     const uint_t m_nop_insert;
@@ -50,9 +59,9 @@ struct FermionPromoter {
     /**
      * enumeration of all possible combinations
      */
-    v_t<mev_ind_t> m_all_combs;
+    uintv_t m_all_combs;
 
-    FermionPromoter(uint_t ncom, uint_t nop_insert);
+    FermionPromoter(uint_t ncom, uint_t exsig, uint_t nop_insert);
 
 private:
     /**
@@ -61,7 +70,7 @@ private:
      * @return
      *  const pointer to beginning of combination in m_all_combs
      */
-    const mev_ind_t *begin(uint_t icomb) const;
+    const uint_t *begin(uint_t icomb) const;
 
     /**
      * apply the promotion to one half of the connection (cre or ann)
