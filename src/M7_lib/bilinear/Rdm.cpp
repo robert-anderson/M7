@@ -149,7 +149,7 @@ void Rdm::save(hdf5::NodeWriter& gw) const {
 FockRdm4::FockRdm4(const conf::Rdms &opts, sys::Size basis_size, uint_t nelec, uint_t nvalue) :
         Rdm(opts, exsig::ex_4400, exsig::ex_3300, basis_size, nelec, nvalue, "4400f"),
         m_fock(basis_size.m_frm.m_nsite){
-    logging::info("loading generalized Fock matrix for CASPT2 contracted 4RDM accumulation");
+    logging::info("Loading generalized Fock matrix for accumulation of its contraction with the 4RDM");
     hdf5::FileReader reader(opts.m_fock_4rdm.m_fock_path);
     REQUIRE_TRUE(reader.child_exists("ACT_FOCK_INDEX"), "invalid fock matrix file contents");
     REQUIRE_TRUE(reader.child_exists("ACT_FOCK_VALUES"), "invalid fock matrix file contents");
@@ -160,8 +160,12 @@ FockRdm4::FockRdm4(const conf::Rdms &opts, sys::Size basis_size, uint_t nelec, u
     REQUIRE_EQ(inds.size(), values.size()*2, "incorrect number of indices");
     for (uint_t i = 0ul; i<values.size(); ++i) {
         // offset by one to account for the Fortran indices in the HDF5 format
-        m_fock(inds[2*i]-1, inds[2*i+1]-1) = values[i];
+        const auto irow = inds[2*i]-1;
+        const auto icol = inds[2*i+1]-1;
+        if (irow!=icol) m_diagonal = false;
+        m_fock(irow, icol) = values[i];
     }
+    logging::info("The given Fock matrix was found to be {}diagonal", (m_diagonal ? "":"non-"));
 }
 
 void FockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn,
@@ -200,6 +204,7 @@ void FockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn
                 if (ispin_ann != ispin_cre) continue;
 
                 const auto fock_element = m_fock(isite_cre, isite_ann);
+                // TODO: continue if the fock_element is zero
 
                 contract_phase = !contract_phase;
                 /*
