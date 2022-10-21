@@ -40,9 +40,10 @@ TEST(FciInitializer, J1J2) {
 TEST(FciInitializer, BosHub) {
     HubbardBosHam bos_ham(-0.1, lattice::make("ortho", {10}, {1}));
     Hamiltonian ham(&bos_ham);
-    ArnoldiOptions opt;
+    FciInitOptions opt;
     opt.m_nroot = 12;
     opt.m_ritz_tol = 1e-10;
-    FciInitializer init(ham, -91, opt);
+    opt.m_diag_shift = -91.0;
+    FciInitializer init(ham, opt);
 }
 #endif
