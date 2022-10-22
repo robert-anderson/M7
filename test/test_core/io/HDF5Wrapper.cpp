@@ -92,7 +92,7 @@ TEST(HDF5Wrapper, FloatArray) {
     v[2] = hash::in_range(mpi::irank(), 4, 18);
     {
         hdf5::FileWriter fw("table_test.h5");
-        fw.write_data("a_float_array", v);
+        fw.write_data("a_float_array", v, definitive_irank);
     }
     mpi::barrier();
     {
