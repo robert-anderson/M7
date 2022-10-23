@@ -16,14 +16,15 @@
 
 
 struct MappedTableOptions {
+    static constexpr uint_t c_default_nbucket_init = 100ul;
     double m_remap_ratio = conf::HashMapping::c_default_remap_ratio;
     uint_t m_remap_nlookup = conf::HashMapping::c_default_remap_nlookup;
+    uint_t m_nbucket_init = c_default_nbucket_init;
     MappedTableOptions() = default;
     MappedTableOptions(const conf::HashMapping& opts) {
         m_remap_ratio = opts.c_default_remap_ratio;
         m_remap_nlookup = opts.m_remap_nlookup;
     }
-    static constexpr uint_t c_nbucket_min = 100ul;
 };
 
 struct MappedTableBase {
@@ -115,9 +116,11 @@ struct MappedTable : Table<row_t>, MappedTableBase {
     row_t m_insert_row;
     row_t m_erase_row;
 
-    MappedTable(const row_t &row) :
-        Table<row_t>(row), MappedTableBase({}),
-        m_lookup_row(m_row), m_insert_row(m_row), m_erase_row(m_row){}
+    MappedTable(const row_t &row, MappedTableOptions opts) :
+            Table<row_t>(row), MappedTableBase(opts),
+            m_lookup_row(m_row), m_insert_row(m_row), m_erase_row(m_row){}
+
+    MappedTable(const row_t &row) : MappedTable(row, MappedTableOptions()){}
 
     MappedTable& operator=(const MappedTable& other) {
         MappedTableBase::operator=(other);
@@ -125,9 +128,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         return *this;
     }
 
-    MappedTable(const MappedTable<row_t> &other) : MappedTable(other.m_row) {
-        m_mapping_opts = other.m_mapping_opts;
-    }
+    MappedTable(const MappedTable<row_t> &other) : MappedTable(other.m_row, other.m_mapping_opts) {}
 
     bool operator==(const MappedTable<row_t> &other) const {
         if (!MappedTableBase::operator==(other)) return false;

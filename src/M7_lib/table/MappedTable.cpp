@@ -5,7 +5,7 @@
 #include "MappedTable.h"
 
 MappedTableBase::MappedTableBase(MappedTableOptions mapped_opts) : m_mapping_opts(mapped_opts) {
-    m_buckets.assign(MappedTableOptions::c_nbucket_min, {});
+    m_buckets.assign(m_mapping_opts.m_nbucket_init, {});
 }
 
 MappedTableBase &MappedTableBase::operator=(const MappedTableBase &other) {

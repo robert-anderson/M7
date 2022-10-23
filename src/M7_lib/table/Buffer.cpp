@@ -22,10 +22,15 @@ Buffer::Window &Buffer::Window::operator=(const Buffer::Window &other) {
     DEBUG_ASSERT_TRUE(m_begin, "this is an unallocated buffer window");
     DEBUG_ASSERT_TRUE(other.m_begin, "can't assign to an unallocated buffer window");
     const auto nbyte_cpy = std::min(other.m_size, m_size);
+    /*
+     * allocate enough memory for the copied records if needed
+     */
+    if (m_size < nbyte_cpy) Buffer::Window::resize(nbyte_cpy);
     std::memcpy(m_begin, other.m_begin, nbyte_cpy);
     m_size = nbyte_cpy;
     m_end = m_begin + m_size;
     m_nrow = m_size / m_row_size;
+    m_hwm = m_begin + other.size_in_use();
     return *this;
 }
 

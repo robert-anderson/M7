@@ -46,15 +46,19 @@ TEST(MappedTable, Empty) {
 
 TEST(MappedTable, Remap) {
     using namespace mapped_table_test;
-    const uint_t nbucket_init = 3ul;
-    key_only_table_t table("test", {});
-    table.m_mapping_opts.m_remap_ratio = 0.5;
-    table.m_mapping_opts.m_remap_nlookup = 10ul;
+    MappedTableOptions mapping_opts;
+    mapping_opts.m_nbucket_init = 3ul;
+    mapping_opts.m_remap_ratio = 0.5;
+    mapping_opts.m_remap_nlookup = 10ul;
+    key_only_table_t table("test", {}, mapping_opts);
+    ASSERT_EQ(table.nbucket(), mapping_opts.m_nbucket_init);
+
     table.set_expansion_factor(1);
     buffered::Number<uint_t> key;
     key = 100;
     while ((key++) < 120) table.insert(key);
 
+    ASSERT_EQ(table.nbucket(), mapping_opts.m_nbucket_init);
     ASSERT_EQ(nitem_in_bucket(table, 0), 6);
     ASSERT_EQ(nitem_in_bucket(table, 1), 6);
     ASSERT_EQ(nitem_in_bucket(table, 2), 8);
@@ -120,7 +124,7 @@ TEST(MappedTable, Remap) {
 
     const auto nitem = table.nrecord();
     ASSERT_EQ(nitem, 20);
-    const uint_t nbucket = nbucket_init *
+    const uint_t nbucket = mapping_opts.m_nbucket_init *
             (ratio / table.m_mapping_opts.m_remap_ratio) * (1.0 + table.get_expansion_factor());
     ASSERT_EQ(nbucket, table.nbucket());
 
@@ -145,10 +149,10 @@ TEST(MappedTable, Copy) {
     buffered::Number<uint_t> key;
     for (uint_t i=0ul; i<nentry; ++i) {
         key = ibegin+i*nstep;
-        table.insert(key);
-        table.m_row.m_text = strings[i];
-        table.m_row.m_numbers = floats;
-        table.m_row.m_numbers += float(i);
+        auto& row = table.insert(key);
+        row.m_text = strings[i];
+        row.m_numbers = floats;
+        row.m_numbers += float(i);
     }
 
     /*
