@@ -16,6 +16,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
     comm_pair.resize(1ul, 0.0);
 
     for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) ASSERT_EQ(comm_pair.send(irank).capacity(), 1ul);
+    ASSERT_EQ(comm_pair.send(0).capacity(), 1ul);
     ASSERT_EQ(comm_pair.recv().capacity(), mpi::nrank());
 
     for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
@@ -24,6 +25,8 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
         row.m_field = hash::in_range({irank, mpi::irank()}, hash_lo, hash_hi);
     }
 
+    ASSERT_EQ(comm_pair.send(0).capacity(), 1ul);
+    ASSERT_EQ(comm_pair.send(0).bw_size(), bw_size);
     for (uint_t idst = 1ul; idst < mpi::nrank(); ++idst) {
         // check pointer distance between adjacent send tables
         ASSERT_EQ(std::distance(comm_pair.send(idst - 1).begin(), comm_pair.send(idst).begin()), bw_size);

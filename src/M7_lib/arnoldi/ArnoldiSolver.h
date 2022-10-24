@@ -169,13 +169,13 @@ public:
      * @param evec
      *  reference to pointer to constant data (initial element of the iroot-th eigenvector)
      */
-    void get_evec(uint_t iroot, T const * &evec) const {
+    void get_evec(uint_t iroot, const T* &evec) const {
         REQUIRE_LT(iroot, nroot(), "root index OOB");
         REQUIRE_FALSE(m_complex_evecs, "cannot dereference complex eigenvector as a real vector");
         evec = m_evecs[iroot] + iroot * m_nelement_evec;
     }
 
-    void get_evec(uint_t iroot, std::complex<T> const * &evec) const {
+    void get_evec(uint_t iroot, const std::complex<T>* &evec) const {
         REQUIRE_LT(iroot, nroot(), "root index OOB");
         REQUIRE_TRUE(m_complex_evecs, "cannot dereference real eigenvector as a complex vector");
         evec = reinterpret_cast<std::complex<T>*>(m_evecs) + iroot * m_nelement_evec;

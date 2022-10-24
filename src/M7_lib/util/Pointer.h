@@ -15,13 +15,43 @@ namespace ptr {
     }
 
     template<typename T>
+    bool after_begin(const T* ptr, const T* begin) {
+        return std::distance(ptr, begin) < 0l;
+    }
+
+    template<typename T>
     bool before_end(const T* ptr, const T* end) {
         return std::distance(end, ptr) < 0l;
     }
 
     template<typename T>
+    bool after_end(const T* ptr, const T* end) {
+        return std::distance(end, ptr) > 0l;
+    }
+
+    /**
+     * for a memory block defined by a "begin" pointer and a number of elements n. a pointer is dereferencable to a
+     * value within that block if it is equal to or posivitively offset from begin, and is strictly negatively offset
+     * from the end pointer: begin + n
+     * @tparam T
+     *  type of value stored in the block
+     * @param ptr
+     *  pointer to be checked
+     * @param begin
+     *  pointer to beginning of the block of memory
+     * @param end
+     *  pointer to the memory just after the block
+     * @return
+     *  true if ptr is in the range [begin, end)
+     */
+    template<typename T>
     bool in_range(const T* ptr, const T* begin, const T* end) {
         return before_end(ptr, end) && !before_begin(ptr, begin);
+    }
+
+    template<typename T>
+    bool in_range(const T* ptr, const T* begin, uint_t n) {
+        return before_end(ptr, begin + n) && !before_begin(ptr, begin);
     }
 
     /**
