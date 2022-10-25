@@ -91,8 +91,8 @@ fockdump(cas_fock_mo, 'fock.h5')
 dms = {
     'sf_1100' : np.array(dm1),
     'sf_2200' : np.array(dm2).transpose(0, 2, 1, 3),
-    'sf_3300' : np.array(dm3).transpose(0, 3, 1, 4, 2, 5),
-    'sf_4400f': np.array(dm4f).transpose(0, 3, 1, 4, 2, 5),
+    'sf_3300' : np.array(dm3).transpose(0, 2, 4, 1, 3, 5),
+    'sf_4400f': np.array(dm4f).transpose(0, 2, 4, 1, 3, 5),
 }
 
 import pickle as pkl
