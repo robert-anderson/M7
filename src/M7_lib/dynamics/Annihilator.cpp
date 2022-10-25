@@ -145,8 +145,8 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
         next_block_begin.jump(irow_next_begin);
     }
 
-    // obviate further determination of initiation behavior if the destination already exists
-    bool allow_initiation = dst_walker;
+    // spawning is never prevented if the destination walker exists and is populated in the relevant part
+    bool allow_initiation = dst_walker && dst_walker.m_weight[block_begin.m_ipart_dst];
     // always allow new walker to be created if multiple sources are simultaneously spawning here
     if (!allow_initiation) allow_initiation = block_begin.offset(next_block_begin) > 1;
     // else, only allow initiation if the lone parent was an initiator
