@@ -1,25 +1,62 @@
-
-#INFO: **** input file is /home/rja/work/bases/rdm.py ****
-from pyscf import M, mrpt, mcscf, scf, fci, symm, fciqmcscf
-import sys, os
+#INFO: **** input file is /home/anderson/CLionProjects/M7/assets/HF_RDMs/rdm.py ****
+from pyscf import M, mrpt, mcscf, scf, fci, symm, tools
+import sys, os, h5py
 sys.path.append(os.path.abspath('.'))
 import numpy as np
+from functools import reduce
 
 d = {
-        'mol_kwargs': {
-            'atom':
-            '''
-            H 0.000000 0.000000 0.000000
-            F 0.000000 0.000000 1.4
-            ''',
-            'basis': {'H': 'cc-pvdz', 'F': 'cc-pvdz'},
-            'symmetry': True,
-            'symmetry_subgroup': 'C2v',
-            'verbose': 4,
-            'charge': 0,
-            'spin': 0
+    'mol_kwargs': {
+        'atom':
+        '''
+        H 0.000000 0.000000 0.000000
+        F 0.000000 0.000000 1.4
+        ''',
+        'basis': {'H': 'cc-pvdz', 'F': 'cc-pvdz'},
+        'symmetry': True,
+        'symmetry_subgroup': 'C2v',
+        'verbose': 4,
+        'charge': 0,
+        'spin': 0
         }
     }
+
+def fcidump(mc, mol, filename='FCIDUMP.new'):
+    IRREP_MAP = {
+        'D2h': (1, 4, 6, 7, 8, 5, 3, 2),
+        'C2v': (1, 4, 2, 3),
+        'C2h': (1, 4, 2, 3),
+        'D2' : (1, 4, 3, 2),
+        'Cs' : (1, 2),
+        'C2' : (1, 2),
+        'Ci' : (1, 2),
+        'C1' : (1,)
+    }
+    eri_cas = mc.get_h2eff(mc.mo_coeff)
+    h1eff, energy_core = mc.get_h1eff(mc.mo_coeff)
+    orbsym = symm.label_orb_symm(mol, mol.irrep_name, mol.symm_orb, mc.mo_coeff)
+    orbsym = [symm.param.IRREP_ID_TABLE[mol.groupname][i] for i in orbsym]
+    orbsym = [IRREP_MAP[mol.groupname][i] for i in orbsym]
+    orbsym = orbsym[mc.ncore:mc.ncore+h1eff.shape[0]]
+    tools.fcidump.from_integrals(filename, h1eff, eri_cas, h1eff.shape[0], mc.nelecas, energy_core, mol.ms, orbsym)
+
+'''
+output Fock matrix in Molcas HDF5 format
+'''
+def fockdump(fock, fname):
+    inds = []
+    values = []
+    for i in range(fock.shape[0]):
+        for j in range(0, i+1):
+            if fock[i, j]:
+                inds.append((i, j))
+                values.append(fock[i,j])
+    inds = np.array(inds)
+    values = np.array(values)
+
+    f = h5py.File(fname, 'w')
+    f['ACT_FOCK_INDEX'] = inds
+    f['ACT_FOCK_VALUES'] = values
 
 nelecas = 6
 ncas = 5
@@ -38,42 +75,39 @@ mc.kernel()
 ao_rdm = mc.make_rdm1()[mc.ncore:mc.ncore+ncas, mc.ncore:mc.ncore+ncas]
 mo_rdm = mc.fcisolver.make_rdm1(mc.fcisolver.ci, ncas, nelecas)
 
+fock_ao = mc.get_fock(mc.mo_coeff, mc.fcisolver.ci, mc.get_h2eff(mc.mo_coeff), mo_rdm)
+fock_mo = reduce(np.dot, (mc.mo_coeff.T, fock_ao, mc.mo_coeff))
+cas_fock_mo = fock_mo[mc.ncore:mc.ncore+ncas, mc.ncore:mc.ncore+ncas]
 
-dm1, dm2, dm3 = fci.rdm.make_dm123('FCI3pdm_kern_sf', mc.fcisolver.ci, mc.fcisolver.ci, ncas, (neleca, nelecb))
-dm1, dm2, dm3 = fci.rdm.reorder_dm123(dm1, dm2, dm3)
+dm1, dm2, dm3, dm4 = fci.rdm.make_dm1234('FCI4pdm_kern_sf', mc.fcisolver.ci, mc.fcisolver.ci, ncas, (neleca, nelecb))
+dm1, dm2, dm3, dm4 = fci.rdm.reorder_dm1234(dm1, dm2, dm3, dm4)
+dm4f = np.einsum('iajbkcld,ld->iajbkc', dm4, cas_fock_mo)
 
 assert ao_rdm.shape==mo_rdm.shape
-print(mo_rdm.diagonal())
-print(sum(mo_rdm.diagonal()))
-print(mo_rdm)
 
+fcidump(mc, mol, 'FCIDUMP')
+fockdump(cas_fock_mo, 'fock.h5')
+
+# transpose higher-rank arrays such that the creation inds are first, then the annihilations
 dms = {
-        '1': np.array(dm1),
-        '2': np.array(dm2),
-        '3': np.array(dm3)
-        }
+    'sf_1100' : np.array(dm1),
+    'sf_2200' : np.array(dm2).transpose(0, 2, 1, 3),
+    'sf_3300' : np.array(dm3).transpose(0, 3, 1, 4, 2, 5),
+    'sf_4400f': np.array(dm4f).transpose(0, 3, 1, 4, 2, 5),
+}
 
 import pickle as pkl
 with open('exact_rdms.pkl', 'wb') as f:
     pkl.dump(dms, f)
-
-'''
-mc = mcscf.CASCI(myhf, ncas, nelecas)
-mc.fcisolver = fciqmcscf.fciqmc.FCIQMCCI(mol)
-mc.kernel()
-'''
 #INFO: ******************** input file end ********************
 
 
-System: uname_result(system='Linux', node='MS-7B86', release='5.4.0-72-generic', version='#80~18.04.1-Ubuntu SMP Mon Apr 12 23:26:25 UTC 2021', machine='x86_64', processor='x86_64')  Threads 12
-Python 3.6.9 (default, Jan 26 2021, 15:33:00) 
-[GCC 8.4.0]
-numpy 1.18.4  scipy 1.4.1
-Date: Thu Apr 29 07:56:43 2021
-PySCF version 1.7.3
-PySCF path  /home/rja/opt/pyscf/pyscf
-GIT HEAD      ref: refs/heads/master
-GIT master branch  adbdcbdd426356485d9a249d7461f668d19d6f9e
+System: uname_result(system='Linux', node='pcal011', release='5.3.18-lp152.106-default', version='#1 SMP Mon Nov 22 08:38:17 UTC 2021 (52078fe)', machine='x86_64', processor='x86_64')  Threads 8
+Python 3.6.12 (default, Dec 02 2020, 09:44:23) [GCC]
+numpy 1.19.5  scipy 1.5.4
+Date: Tue Oct 25 15:15:39 2022
+PySCF version 2.0.1
+PySCF path  /scratch/anderson/opt/pyscf-2.0.1/pyscf
 
 [CONFIG] conf_file None
 [INPUT] verbose = 4
@@ -97,7 +131,7 @@ number of NR pGTOs = 33
 number of NR cGTOs = 19
 basis = {'H': 'cc-pvdz', 'F': 'cc-pvdz'}
 ecp = {}
-CPU time:         0.24
+CPU time:         0.38
 
 
 ******** <class 'pyscf.scf.hf_symm.SymAdaptedROHF'> ********
@@ -113,61 +147,61 @@ SCF conv_tol_grad = None
 SCF max_cycles = 50
 direct_scf = True
 direct_scf_tol = 1e-13
-chkfile to save SCF result = /home/rja/work/bases/tmp9w7gweq7
-max_memory 4000 MB (current use 76 MB)
+chkfile to save SCF result = /home/anderson/CLionProjects/M7/assets/HF_RDMs/tmpt35r2c98
+max_memory 4000 MB (current use 84 MB)
 num. doubly occ = 5  num. singly occ = 0
 Freeze 0 electrons in irreps []
     10 free electrons in irreps A1 A2 B1 B2
 Set gradient conv threshold to 3.16228e-05
-init E= -99.4736608092961
-HOMO (B1) = -0.622836761526098  LUMO (A1) = -0.0671283112376556
-cycle= 1 E= -99.8167374576533  delta_E= -0.343  |g|= 0.568  |ddm|= 0.54
-HOMO (B1) = -0.400219308423758  LUMO (A1) = 0.0235185423814558
+init E= -99.4736608092962
+HOMO (B2) = -0.622836761526105  LUMO (A1) = -0.0671283112376671
+cycle= 1 E= -99.8167374576534  delta_E= -0.343  |g|= 0.568  |ddm|= 0.54
+HOMO (B1) = -0.400219308423751  LUMO (A1) = 0.0235185423814368
 cycle= 2 E= -99.8660687139546  delta_E= -0.0493  |g|= 0.481  |ddm|= 0.418
-HOMO (B2) = -0.57789305089769  LUMO (A1) = 0.0201152440866953
-cycle= 3 E= -99.8992273107928  delta_E= -0.0332  |g|= 0.0467  |ddm|= 0.169
-HOMO (B2) = -0.588582089065241  LUMO (A1) = 0.0433746557935513
-cycle= 4 E= -99.9006606814954  delta_E= -0.00143  |g|= 0.0146  |ddm|= 0.0421
-HOMO (A1) = -0.589138577166344  LUMO (A1) = 0.0456183283857617
-cycle= 5 E= -99.9007877828253  delta_E= -0.000127  |g|= 0.00218  |ddm|= 0.0162
-HOMO (A1) = -0.588792336740402  LUMO (A1) = 0.0450098228040149
-cycle= 6 E= -99.900789729742  delta_E= -1.95e-06  |g|= 0.000387  |ddm|= 0.00206
-HOMO (A1) = -0.5889133542906  LUMO (A1) = 0.0451430607589174
+HOMO (B1) = -0.577893050897682  LUMO (A1) = 0.0201152440866841
+cycle= 3 E= -99.899227310793  delta_E= -0.0332  |g|= 0.0467  |ddm|= 0.169
+HOMO (B2) = -0.588582089065238  LUMO (A1) = 0.0433746557935432
+cycle= 4 E= -99.9006606814955  delta_E= -0.00143  |g|= 0.0146  |ddm|= 0.0421
+HOMO (A1) = -0.589138577166337  LUMO (A1) = 0.0456183283857536
+cycle= 5 E= -99.9007877828255  delta_E= -0.000127  |g|= 0.00218  |ddm|= 0.0162
+HOMO (A1) = -0.588792336740392  LUMO (A1) = 0.0450098228040058
+cycle= 6 E= -99.9007897297422  delta_E= -1.95e-06  |g|= 0.000387  |ddm|= 0.00206
+HOMO (A1) = -0.588913354290591  LUMO (A1) = 0.0451430607589104
 cycle= 7 E= -99.9007897926556  delta_E= -6.29e-08  |g|= 3.14e-05  |ddm|= 0.000405
-HOMO (A1) = -0.588883963052488  LUMO (A1) = 0.0451310615031614
+HOMO (A1) = -0.58888396305248  LUMO (A1) = 0.0451310615031541
 cycle= 8 E= -99.9007897928924  delta_E= -2.37e-10  |g|= 5.33e-06  |ddm|= 1.62e-05
-HOMO (A1) = -0.588887403751202  LUMO (A1) = 0.0451328406727375
-Extra cycle  E= -99.9007897928981  delta_E= -5.63e-12  |g|= 1.81e-06  |ddm|= 2.98e-06
-converged SCF energy = -99.9007897928981
+HOMO (A1) = -0.588887403751203  LUMO (A1) = 0.0451328406727154
+Extra cycle  E= -99.900789792898  delta_E= -5.51e-12  |g|= 1.81e-06  |ddm|= 2.98e-06
+converged SCF energy = -99.900789792898
 **** SCF Summaries ****
-Total Energy =                         -99.900789792898053
+Total Energy =                         -99.900789792897953
 Nuclear Repulsion Energy =               3.401853498771429
-One-electron Energy =                 -147.491624143051240
-Two-electron Energy =                   44.188980851381764
+One-electron Energy =                 -147.491624143051411
+Two-electron Energy =                   44.188980851382027
 Wave-function symmetry = A1
 occupancy for each irrep:     A1   A2   B1   B2
 double occ                     3    0    1    1
 single occ                     0    0    0    0
 **** MO energy ****
                           Roothaan           | alpha              | beta
-MO #1   (A1  #1 ) energy= -26.2801705445606  | -26.2801705445607  | -26.2801705445607  occ= 2
-MO #2   (A1  #2 ) energy= -1.4925185586862   | -1.49251855868619  | -1.49251855868619  occ= 2
-MO #3   (B1  #1 ) energy= -0.597630747215336 | -0.597630747215335 | -0.597630747215335 occ= 2
-MO #4   (B2  #1 ) energy= -0.597630747215333 | -0.597630747215333 | -0.597630747215333 occ= 2
-MO #5   (A1  #3 ) energy= -0.588887403751202 | -0.588887403751202 | -0.588887403751202 occ= 2
-MO #6   (A1  #4 ) energy= 0.0451328406727375 | 0.0451328406727359 | 0.0451328406727359 occ= 0
-MO #7   (A1  #5 ) energy= 0.585884083939433  | 0.585884083939435  | 0.585884083939435  occ= 0
+MO #1   (A1  #1 ) energy= -26.2801705445606  | -26.2801705445606  | -26.2801705445606  occ= 2
+MO #2   (A1  #2 ) energy= -1.49251855868617  | -1.49251855868617  | -1.49251855868617  occ= 2
+MO #3   (B1  #1 ) energy= -0.597630747215332 | -0.597630747215332 | -0.597630747215332 occ= 2
+MO #4   (B2  #1 ) energy= -0.597630747215332 | -0.597630747215333 | -0.597630747215333 occ= 2
+MO #5   (A1  #3 ) energy= -0.588887403751203 | -0.5888874037512   | -0.5888874037512   occ= 2
+MO #6   (A1  #4 ) energy= 0.0451328406727154 | 0.0451328406727221 | 0.0451328406727221 occ= 0
+MO #7   (A1  #5 ) energy= 0.585884083939444  | 0.585884083939447  | 0.585884083939447  occ= 0
 MO #8   (B1  #2 ) energy= 1.31425679099995   | 1.31425679099995   | 1.31425679099995   occ= 0
-MO #9   (B2  #2 ) energy= 1.31425679099996   | 1.31425679099996   | 1.31425679099996   occ= 0
+MO #9   (B2  #2 ) energy= 1.31425679099995   | 1.31425679099995   | 1.31425679099995   occ= 0
 MO #10  (A1  #6 ) energy= 1.56743306088791   | 1.56743306088791   | 1.56743306088791   occ= 0
-MO #11  (A1  #7 ) energy= 1.60737055187226   | 1.60737055187226   | 1.60737055187226   occ= 0
+MO #11  (A1  #7 ) energy= 1.60737055187225   | 1.60737055187225   | 1.60737055187225   occ= 0
 MO #12  (B1  #3 ) energy= 1.6163482071078    | 1.6163482071078    | 1.6163482071078    occ= 0
 MO #13  (B2  #3 ) energy= 1.6163482071078    | 1.6163482071078    | 1.6163482071078    occ= 0
-MO #14  (A1  #8 ) energy= 2.30051769941305   | 2.30051769941305   | 2.30051769941305   occ= 0
-MO #15  (A1  #9 ) energy= 4.03722626034269   | 4.03722626034269   | 4.03722626034269   occ= 0
-MO #16  (A2  #1 ) energy= 4.03722626034269   | 4.03722626034269   | 4.03722626034269   occ= 0
-MO #17  (B1  #4 ) energy= 4.04590855836412   | 4.04590855836412   | 4.04590855836412   occ= 0
-MO #18  (B2  #4 ) energy= 4.04590855836412   | 4.04590855836412   | 4.04590855836412   occ= 0
+MO #14  (A1  #8 ) energy= 2.30051769941309   | 2.3005176994131    | 2.3005176994131    occ= 0
+MO #15  (A1  #9 ) energy= 4.03722626034271   | 4.03722626034271   | 4.03722626034271   occ= 0
+MO #16  (A2  #1 ) energy= 4.03722626034271   | 4.03722626034271   | 4.03722626034271   occ= 0
+MO #17  (B1  #4 ) energy= 4.04590855836415   | 4.04590855836415   | 4.04590855836415   occ= 0
+MO #18  (B2  #4 ) energy= 4.04590855836415   | 4.04590855836415   | 4.04590855836415   occ= 0
 MO #19  (A1  #10) energy= 4.33267983139734   | 4.33267983139734   | 4.33267983139734   occ= 0
  ** Mulliken pop on meta-lowdin orthogonal AOs  **
  ** Mulliken pop  **
@@ -216,11 +250,4 @@ spin = None
 Input CI wfn symmetry = A1
 Density matrix diagonal elements [1.99976515 1.99976515 1.89438488 0.09365305 0.01243177]
 CASCI converged
-CASCI E = -99.9421389039332  E(CI) = -14.4625646137448  S^2 = 0.0000000
-[1.99976515 1.99976515 1.89438488 0.09365305 0.01243177]
-6.000000000000003
-[[ 1.99976515  0.          0.          0.          0.        ]
- [ 0.          1.99976515  0.          0.          0.        ]
- [ 0.          0.          1.89438488 -0.09695294 -0.03325109]
- [ 0.          0.         -0.09695294  0.09365305  0.03376582]
- [ 0.          0.         -0.03325109  0.03376582  0.01243177]]
+CASCI E = -99.9421389039331  E(CI) = -14.4625646137449  S^2 = 0.0000000
