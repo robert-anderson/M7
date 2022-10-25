@@ -165,6 +165,7 @@ FockRdm4::FockRdm4(const conf::Rdms &opts, sys::Size basis_size, uint_t nelec, u
         if (irow!=icol) m_diagonal = false;
         m_fock(irow, icol) = values[i];
     }
+    m_fock.symmetrize();
     logging::info("The given Fock matrix was found to be {}diagonal", (m_diagonal ? "":"non-"));
 }
 
