@@ -193,7 +193,6 @@ void FockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn
          * include the Fermi phase of the excitation
          */
         phase = phase ^ conn.phase(src_onv);
-        bool contract_phase = true;
         // TODO: diagonal Fock optimisation
         for (uint_t icre_contract = 0ul; icre_contract < 4ul; ++icre_contract){
             const uint_t icre = m_full_inds.m_frm.m_cre[icre_contract];
@@ -209,7 +208,6 @@ void FockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn
                 const auto fock_element = m_fock(isite_cre, isite_ann);
                 // TODO: continue if the fock_element is zero
 
-                contract_phase = !contract_phase;
                 /*
                  * fill the uncontracted indices (those identifying the elements of the intermediate)
                  */
@@ -229,6 +227,7 @@ void FockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn
                 /*
                  * include the Fermi phase of the contraction and the promotion when computing the overall sign
                  */
+                const bool contract_phase = (icre_contract+iann_contract)&1ul;
                 add_to_send_table(m_uncontracted_inds,
                                   ((phase ^ contract_phase) ? -contrib : contrib) * fock_element);
             }
