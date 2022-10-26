@@ -1,0 +1,544 @@
+[1666784528] [info] +----------------------------+-------------------------+
+[1666784528] [info] |                 compile definitions                  |
+[1666784528] [info] +----------------------------+-------------------------+
+[1666784528] [info] |  git revision              |  #51f2f028              |
+[1666784528] [info] +----------------------------+-------------------------+
+[1666784528] [info] |  build mode                |  RELEASE                |
+[1666784528] [info] +----------------------------+-------------------------+
+[1666784528] [info] |  compilation timestamp     |  2022-10-26 13:40:28    |
+[1666784528] [info] +----------------------------+-------------------------+
+[1666784528] [info] |  many-body basis function  |  fermion (determinant)  |
+[1666784528] [info] +----------------------------+-------------------------+
+[1666784528] [info] |  walker arithmetic         |  real                   |
+[1666784528] [info] +----------------------------+-------------------------+
+[1666784528] [info] |  Hamiltonian arithmetic    |  real                   |
+[1666784528] [info] +----------------------------+-------------------------+
+[1666784528] [info] |  TCHINT interface          |  enabled                |
+[1666784528] [info] +----------------------------+-------------------------+
+[1666784528] [info] |  rank-resolved logging     |  enabled                |
+[1666784528] [info] +----------------------------+-------------------------+
+[1666784528] [info] Number of MPI ranks in world communicator: 1
+[1666784528] [info] Number of MPI ranks per node: 1
+[1666784528] [info] formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run
+[1666784528] [warning] propagator.min_death_mag was zero, defaulting to the specified value of propagator.min_spawn_mag
+[1666784528] [warning] propagator.max_bloom was zero, defaulting to the specified value of propagator.nadd
+[1666784528] [info] prng (enabled)
+[1666784528] [info] prng.seed                                         | 123
+[1666784528] [info] prng.ngen_block                                   | 10000
+[1666784528] [info] archive (enabled)
+[1666784528] [info] archive.load_path                                 | ""
+[1666784528] [info] archive.save_path                                 | "M7.h5"
+[1666784528] [info] archive.chkpt_path                                | ""
+[1666784528] [info] archive.period                                    | 0
+[1666784528] [info] archive.period_mins                               | 0
+[1666784528] [info] basis (enabled)
+[1666784528] [info] basis.bos_occ_cutoff                              | 255
+[1666784528] [info] particles (enabled)
+[1666784528] [info] particles.nelec                                   | 0
+[1666784528] [info] particles.ms2                                     | inf
+[1666784528] [info] particles.nboson                                  | 0
+[1666784528] [info] wavefunction (enabled)
+[1666784528] [info] wavefunction.nw_init                              | 1.000000e+02
+[1666784528] [info] wavefunction.nroot                                | 1
+[1666784528] [info] wavefunction.fci_init                             | false
+[1666784528] [info] wavefunction.buffers (enabled)
+[1666784528] [info] wavefunction.buffers.store_fac_init               | 1.000000e+00
+[1666784528] [info] wavefunction.buffers.store_expand_fac             | 5.000000e-01
+[1666784528] [info] wavefunction.buffers.comm_fac_init                | 1.000000e+00
+[1666784528] [info] wavefunction.buffers.comm_expand_fac              | 5.000000e-01
+[1666784528] [info] wavefunction.hash_mapping (enabled)
+[1666784528] [info] wavefunction.hash_mapping.remap_ratio             | 2.000000e+00
+[1666784528] [info] wavefunction.hash_mapping.remap_nlookup           | 500
+[1666784528] [info] wavefunction.archive (disabled)
+[1666784528] [info] wavefunction.distribution (enabled)
+[1666784528] [info] wavefunction.distribution.nblock_per_rank         | 6
+[1666784528] [info] wavefunction.distribution.period                  | 10
+[1666784528] [info] wavefunction.distribution.imbalance_thresh        | 5.000000e-02
+[1666784528] [info] reference (enabled)
+[1666784528] [info] reference.mbf_init (disabled)
+[1666784528] [info] reference.redef_thresh                            | 2.000000e+00
+[1666784528] [info] shift (enabled)
+[1666784528] [info] shift.init                                        | 0.000000e+00
+[1666784528] [info] shift.damp                                        | 5.000000e-01
+[1666784528] [info] shift.target_damp                                 | 0.000000e+00
+[1666784528] [info] shift.period                                      | 5
+[1666784528] [info] shift.ncycle_av                                   | 100
+[1666784528] [info] shift.jump                                        | false
+[1666784528] [info] propagator (enabled)
+[1666784528] [info] propagator.ncycle                                 | 500000
+[1666784528] [info] propagator.stochastic                             | false
+[1666784528] [info] propagator.excit_gen (enabled)
+[1666784528] [info] propagator.excit_gen.hubbard_prefer_double_occ (disabled)
+[1666784528] [info] propagator.nw_target                              | 2.000000e+02
+[1666784528] [info] propagator.max_bloom                              | 3.000000e+00
+[1666784528] [info] propagator.nadd                                   | 3.000000e+00
+[1666784528] [info] propagator.tau_init                               | 1.000000e-01
+[1666784528] [info] propagator.tau_min                                | 1.000000e-05
+[1666784528] [info] propagator.tau_max                                | 1.000000e-02
+[1666784528] [info] propagator.static_tau                             | true
+[1666784528] [info] propagator.static_probs                           | true
+[1666784528] [info] propagator.min_spawn_mag                          | 4.000000e-01
+[1666784528] [info] propagator.min_death_mag                          | 4.000000e-01
+[1666784528] [info] propagator.min_exlvl_prob                         | 1.000000e-03
+[1666784528] [info] propagator.exlvl_probs_init                       | []
+[1666784528] [info] propagator.ndraw_min_for_dynamic                  | 1000
+[1666784528] [info] propagator.period                                 | 10
+[1666784528] [info] propagator.imp_samp_guide.gutzwiller_like (disabled)
+[1666784528] [info] propagator.imp_samp_guide.suppress_multi_occ (disabled)
+[1666784528] [info] propagator.semistochastic (enabled)
+[1666784528] [info] propagator.semistochastic.size                    | 28
+[1666784528] [info] propagator.semistochastic.l1_fraction_cutoff      | 1.000000e+00
+[1666784528] [info] propagator.semistochastic.delay                   | 10
+[1666784528] [info] hamiltonian (enabled)
+[1666784528] [info] hamiltonian.fermion (enabled)
+[1666784528] [info] hamiltonian.fermion.fcidump (enabled)
+[1666784528] [info] hamiltonian.fermion.fcidump.path                  | "FCIDUMP"
+[1666784528] [info] hamiltonian.fermion.fcidump.spin_major            | false
+[1666784528] [info] hamiltonian.fermion.hubbard (disabled)
+[1666784528] [info] hamiltonian.fermion.heisenberg (disabled)
+[1666784528] [info] hamiltonian.fermion.spin_penalty_j                | 0.000000e+00
+[1666784528] [info] hamiltonian.ladder (disabled)
+[1666784528] [info] hamiltonian.boson (disabled)
+[1666784528] [info] stats (enabled)
+[1666784528] [info] stats.path                                        | "M7.stats"
+[1666784528] [info] stats.period                                      | 5
+[1666784528] [info] stats.parallel                                    | false
+[1666784528] [info] inst_ests (disabled)
+[1666784528] [info] mae (enabled)
+[1666784528] [info] mae.delay                                         | 1000
+[1666784528] [info] mae.ncycle                                        | 100
+[1666784528] [info] mae.stats_period                                  | 100
+[1666784528] [info] mae.stats_path                                    | "M7.mae.stats"
+[1666784528] [info] mae.rdm (enabled)
+[1666784528] [info] mae.rdm.ranks                                     | ["1", "2", "3"]
+[1666784528] [info] mae.rdm.buffers (enabled)
+[1666784528] [info] mae.rdm.buffers.store_fac_init                    | 1.000000e+00
+[1666784528] [info] mae.rdm.buffers.store_expand_fac                  | 5.000000e-01
+[1666784528] [info] mae.rdm.buffers.comm_fac_init                     | 1.000000e+00
+[1666784528] [info] mae.rdm.buffers.comm_expand_fac                   | 5.000000e-01
+[1666784528] [info] mae.rdm.hash_mapping (enabled)
+[1666784528] [info] mae.rdm.hash_mapping.remap_ratio                  | 2.000000e+00
+[1666784528] [info] mae.rdm.hash_mapping.remap_nlookup                | 500
+[1666784528] [info] mae.rdm.distribution (enabled)
+[1666784528] [info] mae.rdm.distribution.nblock_per_rank              | 6
+[1666784528] [info] mae.rdm.distribution.period                       | 10
+[1666784528] [info] mae.rdm.distribution.imbalance_thresh             | 5.000000e-02
+[1666784528] [info] mae.rdm.archive (enabled)
+[1666784528] [info] mae.rdm.archive.load                              | false
+[1666784528] [info] mae.rdm.archive.save                              | true
+[1666784528] [info] mae.rdm.archive.chkpt                             | false
+[1666784528] [info] mae.rdm.explicit_ref_conns                        | true
+[1666784528] [info] mae.rdm.spinfree                                  | true
+[1666784528] [info] mae.rdm.fock_4rdm (enabled)
+[1666784528] [info] mae.rdm.fock_4rdm.fock_path                       | "fock.h5"
+[1666784528] [info] mae.spec_mom (disabled)
+[1666784528] [info] mae.ref_excits (disabled)
+[1666784528] [info] Reading fermion Hamiltonian coefficients from plain text CSV file "FCIDUMP"...
+[1666784528] [info] FCIDUMP file conserves spin in 1 particle integrals
+[1666784528] [info] FCIDUMP file conserves spin in 2 particle integrals
+[1666784528] [info] initially assuming hermitian permutational symmetry for 1e integrals
+[1666784528] [info] initially assuming 8-fold permutational symmetry for 2e integrals
+[1666784528] [info] this storage scheme assumes that ["<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>", "<aj|ib>", "<ab|ij>", "<bi|ja>", "<ji|ba>"] integrals are equivalent
+[1666784528] [info] FCIDUMP loading complete.
+[1666784528] [info] Initially allocating 64.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784528] [info] Reallocating buffer " send" 0B -> 64.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 64.000000KB
+[1666784528] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784528] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 64.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784528] [info] Initially allocating 12.800000KB per rank for "wavefunction" buffer
+[1666784528] [info] Reallocating buffer "wavefunction" 0B -> 12.800000KB
+[1666784528] [info] Initially allocating 800B per rank for each communicating buffer of "wavefunction" (send and recv)
+[1666784528] [info] Reallocating buffer "wavefunction send" 0B -> 800B
+[1666784528] [info] Reallocating buffer "wavefunction recv" 0B -> 800B
+[1666784528] [info] Distributing wavefunction rows in 6 blocks
+[1666784528] [info] Listening for changes to interactive variable "nwalker_target" in file "nwalker_target.var"
+[1666784528] [info] Connection iterator excitation signatures: ["2200", "1100"]
+[1666784528] [info] Initializing magnitude logger with max_bloom 3 for 1 excitation levels
+[1666784528] [info] Dynamic tau optimization: false
+[1666784528] [info] Dynamic excitation level probability optimization: false
+[1666784528] [info] Reallocating buffer "reference gather send" 0B -> 64B
+[1666784528] [info] Reallocating buffer "reference gather recv" 0B -> 64B
+[1666784528] [info] Reallocating buffer "reference all rows" 0B -> 64B
+[1666784528] [info] Initial reference ONV for WF part 0 is (11100,11100) with energy -9.990079e+01 
+[1666784528] [info] Reallocating buffer "reference gather send" 0B -> 64B
+[1666784528] [info] Reallocating buffer "reference gather recv" 0B -> 64B
+[1666784528] [info] Reallocating buffer "reference all rows" 0B -> 64B
+[1666784528] [info] Initial reference ONV for WF part 1 is (11100,11100) with energy -9.990079e+01 
+[1666784528] [info] Listening for changes to interactive variable "exit" in file "exit.var"
+[1666784528] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784528] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784528] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784528] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784528] [info] Initially allocating 160B per rank for "rdm_1100" buffer
+[1666784528] [info] Reallocating buffer "rdm_1100" 0B -> 160B
+[1666784528] [info] Initially allocating 160B per rank for each communicating buffer of "rdm_1100" (send and recv)
+[1666784528] [info] Reallocating buffer "rdm_1100 send" 0B -> 160B
+[1666784528] [info] Reallocating buffer "rdm_1100 recv" 0B -> 160B
+[1666784528] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784528] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784528] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784528] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784528] [info] Initially allocating 720B per rank for "rdm_2200" buffer
+[1666784528] [info] Reallocating buffer "rdm_2200" 0B -> 720B
+[1666784528] [info] Initially allocating 720B per rank for each communicating buffer of "rdm_2200" (send and recv)
+[1666784528] [info] Reallocating buffer "rdm_2200 send" 0B -> 720B
+[1666784528] [info] Reallocating buffer "rdm_2200 recv" 0B -> 720B
+[1666784528] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784528] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784528] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784528] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784528] [info] Initially allocating 1.920000KB per rank for "rdm_3300" buffer
+[1666784528] [info] Reallocating buffer "rdm_3300" 0B -> 1.920000KB
+[1666784528] [info] Initially allocating 1.920000KB per rank for each communicating buffer of "rdm_3300" (send and recv)
+[1666784528] [info] Reallocating buffer "rdm_3300 send" 0B -> 1.920000KB
+[1666784528] [info] Reallocating buffer "rdm_3300 recv" 0B -> 1.920000KB
+[1666784528] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784528] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784528] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784528] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784528] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784528] [info] Initially allocating 1.920000KB per rank for "rdm_4400f" buffer
+[1666784528] [info] Reallocating buffer "rdm_4400f" 0B -> 1.920000KB
+[1666784528] [info] Initially allocating 1.920000KB per rank for each communicating buffer of "rdm_4400f" (send and recv)
+[1666784528] [info] Reallocating buffer "rdm_4400f send" 0B -> 1.920000KB
+[1666784528] [info] Reallocating buffer "rdm_4400f recv" 0B -> 1.920000KB
+[1666784528] [info] Loading generalized Fock matrix for accumulation of its contraction with the 4RDM
+[1666784528] [info] The given Fock matrix was found to be non-diagonal
+[1666784528] [info] Excitation signatures contributing to the sampled RDMs: ["0000", "1100", "2200", "3300", "4400"]
+[1666784528] [info] Reallocating buffer "M7.mae.stats" 0B -> 24B
+[1666784528] [info] not reading archive from file
+[1666784528] [info] saving archive to file "M7.h5" upon termination of the solver loop
+[1666784528] [info] not dumping checkpoint archives
+[1666784528] [info] Replicating walker populations: true
+[1666784528] [warning] Replica populations are redundant when doing exact propagation
+[1666784528] [info] Reallocating buffer "M7.stats" 0B -> 200B
+[1666784528] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1666784528] [info] Specified RDM rank signatures are sufficient for variational energy estimation
+[1666784528] [info] Beginning solver loop...
+[1666784528] [info] Reallocating buffer "wavefunction send" 800B -> 1.264000KB
+[1666784528] [info] Reallocating buffer "wavefunction send" 1.264000KB -> 1.920000KB
+[1666784528] [info] Reallocating buffer "wavefunction recv" 800B -> 1.920000KB
+[1666784528] [info] Reallocating buffer "wavefunction send" 1.920000KB -> 2.944000KB
+[1666784528] [info] Reallocating buffer "wavefunction send" 2.944000KB -> 4.440000KB
+[1666784528] [info] Reallocating buffer "wavefunction send" 4.440000KB -> 6.720000KB
+[1666784528] [info] Reallocating buffer "wavefunction send" 6.720000KB -> 10.144000KB
+[1666784528] [info] Reallocating buffer "wavefunction send" 10.144000KB -> 15.240000KB
+[1666784528] [info] Reallocating buffer "wavefunction send" 15.240000KB -> 22.920000KB
+[1666784528] [info] Reallocating buffer "wavefunction recv" 1.920000KB -> 30.720000KB
+[1666784528] [info] Reallocating buffer "wavefunction send" 22.920000KB -> 34.440000KB
+[1666784528] [info] Reallocating buffer "wavefunction recv" 30.720000KB -> 49.680000KB
+[1666784528] [info] Entering "variable shift mode (WF part 0)" epoch on cycle 73 
+[1666784528] [info] Variable shift triggered for WF part 0. Cycle 72 nw: 199.60728353864624, cycle 73 nw: 200.5141775267332
+[1666784528] [info] Entering "variable shift mode (WF part 1)" epoch on cycle 73 
+[1666784528] [info] Variable shift triggered for WF part 1. Cycle 72 nw: 199.60728353864624, cycle 73 nw: 200.5141775267332
+[1666784528] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 448B
+[1666784528] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 448B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 0B -> 64B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 64B -> 128B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 128B -> 192B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 192B -> 256B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 256B -> 320B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 320B -> 384B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 384B -> 448B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 448B -> 512B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 512B -> 576B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 576B -> 640B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 640B -> 704B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 704B -> 768B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 768B -> 832B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 832B -> 896B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 896B -> 960B
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 960B -> 1.024000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.024000KB -> 1.088000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.088000KB -> 1.152000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.152000KB -> 1.216000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.216000KB -> 1.280000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.280000KB -> 1.344000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.344000KB -> 1.408000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.408000KB -> 1.472000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.472000KB -> 1.536000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.536000KB -> 1.600000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.600000KB -> 1.664000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.664000KB -> 1.728000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather send" 1.728000KB -> 1.792000KB
+[1666784528] [info] Reallocating buffer "semistochastic gather recv" 0B -> 1.792000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 0B -> 64B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 64B -> 128B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 128B -> 192B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 192B -> 256B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 256B -> 320B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 320B -> 384B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 384B -> 448B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 448B -> 512B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 512B -> 576B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 576B -> 640B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 640B -> 704B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 704B -> 768B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 768B -> 832B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 832B -> 896B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 896B -> 960B
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 960B -> 1.024000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.024000KB -> 1.088000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.088000KB -> 1.152000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.152000KB -> 1.216000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.216000KB -> 1.280000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.280000KB -> 1.344000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.344000KB -> 1.408000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.408000KB -> 1.472000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.472000KB -> 1.536000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.536000KB -> 1.600000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.600000KB -> 1.664000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.664000KB -> 1.728000KB
+[1666784528] [info] Reallocating buffer "semistochastic all rows" 1.728000KB -> 1.792000KB
+[1666784528] [info] Forming a deterministic subspace with 28 ONVs
+[1666784528] [info] Number of H-connected pairs of MBFs in the deterministic subspace: 414
+[1666784528] [info] Number of H-unconnected, but RDM-contributing pairs of MBFs: 342
+[1666784528] [info] Entering "semistochastic" epoch on cycle 84 
+[1666784528] [info] Initialized deterministic subspace
+[1666784529] [info] Entering "MAE accumulation" epoch on cycle 1074 
+[1666784529] [info] Reallocating buffer "rdm_4400f send" 1.920000KB -> 2.904000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f send" 2.904000KB -> 4.368000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f send" 4.368000KB -> 6.576000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f send" 6.576000KB -> 9.888000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f send" 9.888000KB -> 14.856000KB
+[1666784529] [info] Reallocating buffer "rdm_3300 send" 1.920000KB -> 2.904000KB
+[1666784529] [info] Reallocating buffer "rdm_2200 send" 720B -> 1.104000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f send" 14.856000KB -> 22.296000KB
+[1666784529] [info] remapping hash table for "rdm_4400f send"
+[1666784529] [info] current ratio of skips to total lookups (2.408245755860954) exceeds set limit (2)
+[1666784529] [info] replacing current bucket vector of size 100 with a new one of size 180
+[1666784529] [info] Reallocating buffer "rdm_3300 send" 2.904000KB -> 4.368000KB
+[1666784529] [info] Reallocating buffer "rdm_2200 send" 1.104000KB -> 1.680000KB
+[1666784529] [info] Reallocating buffer "rdm_3300 send" 4.368000KB -> 6.576000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f send" 22.296000KB -> 33.456000KB
+[1666784529] [info] remapping hash table for "rdm_4400f send"
+[1666784529] [info] current ratio of skips to total lookups (2.975348094042456) exceeds set limit (2)
+[1666784529] [info] replacing current bucket vector of size 180 with a new one of size 400
+[1666784529] [info] Reallocating buffer "rdm_2200 send" 1.680000KB -> 2.544000KB
+[1666784529] [info] Reallocating buffer "rdm_1100 send" 160B -> 264B
+[1666784529] [info] Reallocating buffer "rdm_3300 send" 6.576000KB -> 9.888000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f send" 33.456000KB -> 50.208000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f send" 50.208000KB -> 75.336000KB
+[1666784529] [info] remapping hash table for "rdm_4400f send"
+[1666784529] [info] current ratio of skips to total lookups (2.1399043389135635) exceeds set limit (2)
+[1666784529] [info] replacing current bucket vector of size 400 with a new one of size 640
+[1666784529] [info] Reallocating buffer "rdm_3300 send" 9.888000KB -> 14.856000KB
+[1666784529] [info] Reallocating buffer "rdm_2200 send" 2.544000KB -> 3.840000KB
+[1666784529] [info] Reallocating buffer "rdm_1100 recv" 160B -> 288B
+[1666784529] [info] Reallocating buffer "rdm_1100" 160B -> 264B
+[1666784529] [info] Reallocating buffer "rdm_2200 recv" 720B -> 4.080000KB
+[1666784529] [info] Reallocating buffer "rdm_2200" 720B -> 1.104000KB
+[1666784529] [info] Reallocating buffer "rdm_2200" 1.104000KB -> 1.680000KB
+[1666784529] [info] Reallocating buffer "rdm_2200" 1.680000KB -> 2.544000KB
+[1666784529] [info] Reallocating buffer "rdm_2200" 2.544000KB -> 3.840000KB
+[1666784529] [info] Reallocating buffer "rdm_3300 recv" 1.920000KB -> 21.024000KB
+[1666784529] [info] Reallocating buffer "rdm_3300" 1.920000KB -> 2.904000KB
+[1666784529] [info] Reallocating buffer "rdm_3300" 2.904000KB -> 4.368000KB
+[1666784529] [info] Reallocating buffer "rdm_3300" 4.368000KB -> 6.576000KB
+[1666784529] [info] Reallocating buffer "rdm_3300" 6.576000KB -> 9.888000KB
+[1666784529] [info] Reallocating buffer "rdm_3300" 9.888000KB -> 14.856000KB
+[1666784529] [info] remapping hash table for "rdm_3300"
+[1666784529] [info] current ratio of skips to total lookups (3.3505654281098547) exceeds set limit (2)
+[1666784529] [info] replacing current bucket vector of size 100 with a new one of size 250
+[1666784529] [info] Reallocating buffer "rdm_4400f recv" 1.920000KB -> 95.568000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f" 1.920000KB -> 2.904000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f" 2.904000KB -> 4.368000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f" 4.368000KB -> 6.576000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f" 6.576000KB -> 9.888000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f" 9.888000KB -> 14.856000KB
+[1666784529] [info] remapping hash table for "rdm_4400f"
+[1666784529] [info] current ratio of skips to total lookups (3.25686591276252) exceeds set limit (2)
+[1666784529] [info] replacing current bucket vector of size 100 with a new one of size 243
+[1666784529] [info] Reallocating buffer "rdm_4400f" 14.856000KB -> 22.296000KB
+[1666784529] [info] Reallocating buffer "rdm_4400f" 22.296000KB -> 33.456000KB
+[1666784529] [info] remapping hash table for "rdm_4400f"
+[1666784529] [info] current ratio of skips to total lookups (4.24) exceeds set limit (2)
+[1666784529] [info] replacing current bucket vector of size 243 with a new one of size 772
+[1666784529] [info] Reallocating buffer "rdm_4400f" 33.456000KB -> 50.208000KB
+[1666784529] [info] remapping hash table for "rdm_4400f"
+[1666784529] [info] current ratio of skips to total lookups (2.348137535816619) exceeds set limit (2)
+[1666784529] [info] replacing current bucket vector of size 772 with a new one of size 1359
+[1666784529] [info] Reallocating buffer "rdm_4400f" 50.208000KB -> 75.336000KB
+[1666784529] [info] remapping hash table for "rdm_4400f"
+[1666784529] [info] current ratio of skips to total lookups (2.0305635148042023) exceeds set limit (2)
+[1666784529] [info] replacing current bucket vector of size 1359 with a new one of size 2068
+[1666784530] [info] Reallocating buffer "rdm_1100 send" 264B -> 408B
+[1666784530] [info] Reallocating buffer "rdm_3300 send" 14.856000KB -> 22.296000KB
+[1666784530] [info] remapping hash table for "rdm_3300 send"
+[1666784530] [info] current ratio of skips to total lookups (2.5562750782100108) exceeds set limit (2)
+[1666784530] [info] replacing current bucket vector of size 100 with a new one of size 190
+[1666784530] [info] Reallocating buffer "rdm_1100 recv" 288B -> 528B
+[1666784530] [info] Reallocating buffer "rdm_1100" 264B -> 408B
+[1666784530] [info] Reallocating buffer "rdm_3300" 14.856000KB -> 22.296000KB
+[1666784530] [info] Maximum number of MAE accumulating cycles (100) reached at MC cycle 1174. Terminating solver loop.
+[1666784530] [info] saving "propagator" to archive
+[1666784530] [info] saving "rdms" to archive
+[1666784535] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784535] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784535] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784535] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784535] [info] Initially allocating 352B per rank for "rdm_sf_1100" buffer
+[1666784535] [info] Reallocating buffer "rdm_sf_1100" 0B -> 352B
+[1666784535] [info] Initially allocating 64.000000KB per rank for each communicating buffer of "rdm_sf_1100" (send and recv)
+[1666784535] [info] Reallocating buffer "rdm_sf_1100 send" 0B -> 64.000000KB
+[1666784535] [info] Reallocating buffer "rdm_sf_1100 recv" 0B -> 64.000000KB
+[1666784535] [info] computing the normalized spin-trace of 1100
+[1666784535] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784535] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784535] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784535] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784535] [info] Initially allocating 3.440000KB per rank for "rdm_sf_2200" buffer
+[1666784535] [info] Reallocating buffer "rdm_sf_2200" 0B -> 3.440000KB
+[1666784535] [info] Initially allocating 64.000000KB per rank for each communicating buffer of "rdm_sf_2200" (send and recv)
+[1666784535] [info] Reallocating buffer "rdm_sf_2200 send" 0B -> 64.000000KB
+[1666784535] [info] Reallocating buffer "rdm_sf_2200 recv" 0B -> 64.000000KB
+[1666784535] [info] computing the normalized spin-trace of 2200
+[1666784535] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784535] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784535] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784535] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784535] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784535] [info] Initially allocating 15.936000KB per rank for "rdm_sf_3300" buffer
+[1666784535] [info] Reallocating buffer "rdm_sf_3300" 0B -> 15.936000KB
+[1666784535] [info] Initially allocating 64.000000KB per rank for each communicating buffer of "rdm_sf_3300" (send and recv)
+[1666784535] [info] Reallocating buffer "rdm_sf_3300 send" 0B -> 64.000000KB
+[1666784535] [info] Reallocating buffer "rdm_sf_3300 recv" 0B -> 64.000000KB
+[1666784535] [info] computing the normalized spin-trace of 3300
+[1666784535] [info] Reallocating buffer "rdm_sf_3300" 15.936000KB -> 23.928000KB
+[1666784535] [info] remapping hash table for "rdm_sf_3300"
+[1666784535] [info] current ratio of skips to total lookups (5.374122367101304) exceeds set limit (2)
+[1666784535] [info] replacing current bucket vector of size 100 with a new one of size 402
+[1666784535] [info] Reallocating buffer "rdm_sf_3300" 23.928000KB -> 35.904000KB
+[1666784535] [info] Reallocating buffer "rdm_sf_3300" 35.904000KB -> 53.880000KB
+[1666784535] [info] remapping hash table for "rdm_sf_3300"
+[1666784535] [info] current ratio of skips to total lookups (4.100961538461538) exceeds set limit (2)
+[1666784535] [info] replacing current bucket vector of size 402 with a new one of size 1236
+[1666784535] [info] Reallocating buffer "rdm_sf_3300" 53.880000KB -> 80.832000KB
+[1666784535] [info] remapping hash table for "rdm_sf_3300"
+[1666784535] [info] current ratio of skips to total lookups (2.263579697239537) exceeds set limit (2)
+[1666784535] [info] replacing current bucket vector of size 1236 with a new one of size 2097
+[1666784539] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784539] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1666784539] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784539] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
+[1666784539] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1666784539] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784539] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1666784539] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1666784539] [info] Initially allocating 64.576000KB per rank for "rdm_sf_4400f" buffer
+[1666784539] [info] Reallocating buffer "rdm_sf_4400f" 0B -> 64.576000KB
+[1666784539] [info] Initially allocating 64.000000KB per rank for each communicating buffer of "rdm_sf_4400f" (send and recv)
+[1666784539] [info] Reallocating buffer "rdm_sf_4400f send" 0B -> 64.000000KB
+[1666784539] [info] Reallocating buffer "rdm_sf_4400f recv" 0B -> 64.000000KB
+[1666784539] [info] computing the normalized spin-trace of 4400f
+[1666784539] [info] Reallocating buffer "rdm_sf_4400f send" 64.000000KB -> 128.032000KB
+[1666784539] [info] remapping hash table for "rdm_sf_4400f send"
+[1666784539] [info] current ratio of skips to total lookups (14.751477399776393) exceeds set limit (2)
+[1666784539] [info] replacing current bucket vector of size 100 with a new one of size 1474
+[1666784539] [info] Reallocating buffer "rdm_sf_4400f send" 128.032000KB -> 256.096000KB
+[1666784539] [info] remapping hash table for "rdm_sf_4400f send"
+[1666784539] [info] current ratio of skips to total lookups (2.646225417635864) exceeds set limit (2)
+[1666784539] [info] replacing current bucket vector of size 1474 with a new one of size 3900
+[1666784539] [info] Reallocating buffer "rdm_sf_4400f recv" 64.000000KB -> 456.192000KB
+[1666784539] [info] Reallocating buffer "rdm_sf_4400f" 64.576000KB -> 96.888000KB
+[1666784539] [info] remapping hash table for "rdm_sf_4400f"
+[1666784539] [info] current ratio of skips to total lookups (19.999256873916273) exceeds set limit (2)
+[1666784539] [info] replacing current bucket vector of size 100 with a new one of size 1498
+[1666784539] [info] Reallocating buffer "rdm_sf_4400f" 96.888000KB -> 145.344000KB
+[1666784539] [info] remapping hash table for "rdm_sf_4400f"
+[1666784539] [info] current ratio of skips to total lookups (3.5898959881129273) exceeds set limit (2)
+[1666784539] [info] replacing current bucket vector of size 1498 with a new one of size 4032
+[1666784539] [info] Reallocating buffer "rdm_sf_4400f" 145.344000KB -> 218.040000KB
+[1666784539] [info] Reallocating buffer "rdm_sf_4400f" 218.040000KB -> 327.072000KB
+[1666784539] [info] remapping hash table for "rdm_sf_4400f"
+[1666784539] [info] current ratio of skips to total lookups (2.5639197041732698) exceeds set limit (2)
+[1666784539] [info] replacing current bucket vector of size 4032 with a new one of size 7752
+[1666784553] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1666784553] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1666784553] [info] Reallocating buffer "locally included globally extreme rows" 0B -> 1.280000KB
+[1666784553] [info] Reallocating buffer "global top weighted" 0B -> 1.280000KB
+[1666784553] [info] +----+--------------------------+---------------+-----------+-----------+----------+
+[1666784553] [info] |                       Top-weighted WF elements for part 0                        |
+[1666784553] [info] +----+--------------------------+---------------+-----------+-----------+----------+
+[1666784553] [info] |    | many-body basis function | walker number | initiator | semistoch | MPI rank |
+[1666784553] [info] +====+==========================+===============+===========+===========+==========+
+[1666784553] [info] | 0  | (11100,11100)            |  1.267651e+02 | true      | true      | 0        |
+[1666784553] [info] | 1  | (11010,11010)            | -2.544613e+01 | true      | true      | 0        |
+[1666784553] [info] | 2  | (11001,11010)            | -8.747847e+00 | true      | true      | 0        |
+[1666784553] [info] | 3  | (11010,11001)            | -8.747847e+00 | true      | true      | 0        |
+[1666784553] [info] | 4  | (11100,11010)            | -8.411211e+00 | true      | true      | 0        |
+[1666784553] [info] | 5  | (11010,11100)            | -8.411211e+00 | true      | true      | 0        |
+[1666784553] [info] | 6  | (11001,11001)            | -4.547892e+00 | true      | true      | 0        |
+[1666784553] [info] | 7  | (11100,11001)            | -2.922890e+00 | false     | true      | 0        |
+[1666784553] [info] | 8  | (11001,11100)            | -2.922890e+00 | false     | true      | 0        |
+[1666784553] [info] | 9  | (01110,01110)            | -1.330128e+00 | false     | true      | 0        |
+[1666784553] [info] | 10 | (10110,10110)            | -1.330128e+00 | false     | true      | 0        |
+[1666784553] [info] | 11 | (01101,01110)            | -3.275430e-01 | false     | true      | 0        |
+[1666784553] [info] | 12 | (01110,01101)            | -3.275430e-01 | false     | true      | 0        |
+[1666784553] [info] | 13 | (10101,10110)            | -3.275430e-01 | false     | true      | 0        |
+[1666784553] [info] | 14 | (10110,10101)            | -3.275430e-01 | false     | true      | 0        |
+[1666784553] [info] | 15 | (10101,10101)            | -9.945493e-02 | false     | true      | 0        |
+[1666784553] [info] | 16 | (01101,01101)            | -9.945493e-02 | false     | true      | 0        |
+[1666784553] [info] | 17 | (01101,01011)            |  4.554874e-02 | false     | true      | 0        |
+[1666784553] [info] | 18 | (01011,01101)            |  4.554874e-02 | false     | true      | 0        |
+[1666784553] [info] | 19 | (10101,10011)            |  4.554874e-02 | false     | true      | 0        |
+[1666784553] [info] +----+--------------------------+---------------+-----------+-----------+----------+
+[1666784553] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1666784553] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1666784553] [info] Reallocating buffer "locally included globally extreme rows" 0B -> 1.280000KB
+[1666784553] [info] Reallocating buffer "global top weighted" 0B -> 1.280000KB
+[1666784553] [info] +----+--------------------------+---------------+-----------+-----------+----------+
+[1666784553] [info] |                       Top-weighted WF elements for part 1                        |
+[1666784553] [info] +----+--------------------------+---------------+-----------+-----------+----------+
+[1666784553] [info] |    | many-body basis function | walker number | initiator | semistoch | MPI rank |
+[1666784553] [info] +====+==========================+===============+===========+===========+==========+
+[1666784553] [info] | 0  | (11100,11100)            |  1.267651e+02 | true      | true      | 0        |
+[1666784553] [info] | 1  | (11010,11010)            | -2.544613e+01 | true      | true      | 0        |
+[1666784553] [info] | 2  | (11001,11010)            | -8.747847e+00 | true      | true      | 0        |
+[1666784553] [info] | 3  | (11010,11001)            | -8.747847e+00 | true      | true      | 0        |
+[1666784553] [info] | 4  | (11100,11010)            | -8.411211e+00 | true      | true      | 0        |
+[1666784553] [info] | 5  | (11010,11100)            | -8.411211e+00 | true      | true      | 0        |
+[1666784553] [info] | 6  | (11001,11001)            | -4.547892e+00 | true      | true      | 0        |
+[1666784553] [info] | 7  | (11100,11001)            | -2.922890e+00 | false     | true      | 0        |
+[1666784553] [info] | 8  | (11001,11100)            | -2.922890e+00 | false     | true      | 0        |
+[1666784553] [info] | 9  | (01110,01110)            | -1.330128e+00 | false     | true      | 0        |
+[1666784553] [info] | 10 | (10110,10110)            | -1.330128e+00 | false     | true      | 0        |
+[1666784553] [info] | 11 | (01101,01110)            | -3.275430e-01 | false     | true      | 0        |
+[1666784553] [info] | 12 | (01110,01101)            | -3.275430e-01 | false     | true      | 0        |
+[1666784553] [info] | 13 | (10101,10110)            | -3.275430e-01 | false     | true      | 0        |
+[1666784553] [info] | 14 | (10110,10101)            | -3.275430e-01 | false     | true      | 0        |
+[1666784553] [info] | 15 | (10101,10101)            | -9.945493e-02 | false     | true      | 0        |
+[1666784553] [info] | 16 | (01101,01101)            | -9.945493e-02 | false     | true      | 0        |
+[1666784553] [info] | 17 | (01101,01011)            |  4.554874e-02 | false     | true      | 0        |
+[1666784553] [info] | 18 | (01011,01101)            |  4.554874e-02 | false     | true      | 0        |
+[1666784553] [info] | 19 | (10101,10011)            |  4.554874e-02 | false     | true      | 0        |
+[1666784553] [info] +----+--------------------------+---------------+-----------+-----------+----------+

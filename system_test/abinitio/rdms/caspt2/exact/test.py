@@ -3,7 +3,7 @@ from system_test import *
 skip_unless('many-body basis function', 'fermion (determinant)')
 run(assets=['HF_RDMs/FCIDUMP', 'HF_RDMs/fock.h5', 'HF_RDMs/exact_rdms.pkl'])
 check_nw()
-#check_rdm_archives()
+check_rdm_archives()
 
 import h5py
 import pickle as pkl
@@ -26,5 +26,6 @@ with open(pkl_fname, 'rb') as f: py_rdms = pkl.load(f)
 for key in ('sf_4400f',):
     h5_rdm = load_hdf5_rdm(h5_rdms[key])
     py_rdm = py_rdms[key]
-    max_diff = max(np.abs(h5_rdm-py_rdm).flatten())
-    if max_diff > 1e-5: fail(f'RDM {key} does not match exact value {h5_rdm.flatten().sum()}')
+    diff = np.abs(h5_rdm-py_rdm).flatten()
+    imax = np.argmax(diff)
+    if diff[imax] > 1e-4: fail(f'RDM {key} does not match exact value {h5_rdm.flatten()[imax], py_rdm.flatten()[imax]}')
