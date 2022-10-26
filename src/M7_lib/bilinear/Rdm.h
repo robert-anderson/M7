@@ -140,12 +140,13 @@ class FockRdm4 : public Rdm {
      * Generalized Fock in the active space
      */
     dense::SquareMatrix<ham_t> m_fock;
+
+public:
     /**
      * assume diagonal Fock matrix until a non-diagonal value is read-in
      */
     bool m_diagonal;
 
-public:
     FockRdm4(const conf::Rdms& opts, sys::Size basis_size, uint_t nelec, uint_t nvalue);
 
     /**

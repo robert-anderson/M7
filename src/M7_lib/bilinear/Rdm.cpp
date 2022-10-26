@@ -162,6 +162,8 @@ FockRdm4::FockRdm4(const conf::Rdms &opts, sys::Size basis_size, uint_t nelec, u
         // offset by one to account for the Fortran indices in the HDF5 format
         const auto irow = inds[2*i]-1;
         const auto icol = inds[2*i+1]-1;
+        REQUIRE_GE(irow, 0, "Fock matrix row index OOB (HDF5 indices dataset must count from 1)");
+        REQUIRE_GE(icol, 0, "Fock matrix col index OOB (HDF5 indices dataset must count from 1)");
         if (irow!=icol) m_diagonal = false;
         m_fock(irow, icol) = values[i];
     }
@@ -274,6 +276,13 @@ Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Size basis_size, uint_
     }
     if (opts.m_fock_4rdm.m_enabled) m_fock_rdm4 = ptr::smart::make_unique<FockRdm4>(opts, basis_size, nelec, 1ul);
     m_total_norm.m_local = 0.0;
+
+    strv_t exsigs;
+    for (uint_t exsig=0ul; exsig < exsig::c_ndistinct; ++exsig){
+        if (takes_contribs_from(exsig)) exsigs.push_back(exsig::to_string(exsig));
+    }
+    logging::info("Excitation signatures contributing to the sampled RDMs: {}", convert::to_string(exsigs));
+
 }
 
 Rdms::operator bool() const {
@@ -282,6 +291,7 @@ Rdms::operator bool() const {
 
 bool Rdms::takes_contribs_from(uint_t exsig) const {
     if (exsig > exsig::c_ndistinct) return false;
+    if ((exsig==ex_quadruple) && m_fock_rdm4 && !m_fock_rdm4->m_diagonal) return true;
     return !m_exsig_ranks[exsig].empty();
 }
 
