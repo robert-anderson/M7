@@ -206,8 +206,7 @@ void FockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn
                 if (ispin_ann != ispin_cre) continue;
 
                 const auto fock_element = m_fock(isite_cre, isite_ann);
-                // TODO: continue if the fock_element is zero
-
+                if (!ham::is_significant(fock_element)) continue;
                 /*
                  * fill the uncontracted indices (those identifying the elements of the intermediate)
                  */
