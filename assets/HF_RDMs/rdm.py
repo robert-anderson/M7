@@ -48,7 +48,7 @@ def fockdump(fock, fname):
     for i in range(fock.shape[0]):
         for j in range(0, i+1):
             if fock[i, j]:
-                inds.append((i, j))
+                inds.append((i+1, j+1))
                 values.append(fock[i,j])
     inds = np.array(inds)
     values = np.array(values)
