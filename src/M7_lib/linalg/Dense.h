@@ -81,7 +81,7 @@ namespace dense {
     template<typename T>
     static bool nearly_equal(const T* v1, const T* v2, uint_t size, arith::comp_t<T> rtol, arith::comp_t<T> atol) {
         for (uint_t i = 0ul; i < size; ++i) {
-            if (!fptol::nearly_equal(v1[i], v2[i], rtol, atol)) return false;
+            if (!fptol::near_equal(v1[i], v2[i], rtol, atol)) return false;
         }
         return true;
     }

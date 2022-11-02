@@ -56,7 +56,7 @@ TEST(GeneralFrmHam, Elements) {
         buffered::FrmOnv dst(h.m_basis);
         dst = {{0, 1, 3}, {0, 1, 4}};
         auto helem = h.get_element(src, dst);
-        ASSERT_NEARLY_EQ(benchmark, helem);
+        ASSERT_NEAR_EQ(benchmark, helem);
     }
     {
         buffered::FrmBosOnv src(h.m_basis);
@@ -64,7 +64,7 @@ TEST(GeneralFrmHam, Elements) {
         buffered::FrmBosOnv dst(h.m_basis);
         dst.m_frm = {{0, 1, 3}, {0, 1, 4}};
         auto helem = h.get_element(src, dst);
-        ASSERT_NEARLY_EQ(benchmark, helem);
+        ASSERT_NEAR_EQ(benchmark, helem);
     }
 }
 
@@ -78,8 +78,8 @@ TEST(GeneralFrmHam, RhfEnergy) {
     buffered::FrmOnv onv(ham.m_basis);
     mbf::set_aufbau_mbf(onv, ham.default_particles().m_frm);
     auto elem = ham.get_element(onv);
-    ASSERT_NEARLY_EQ(elem, benchmark);
-    ASSERT_NEARLY_EQ(ham.get_energy(onv), benchmark);
+    ASSERT_NEAR_EQ(elem, benchmark);
+    ASSERT_NEAR_EQ(ham.get_energy(onv), benchmark);
 }
 
 TEST(GeneralFrmHam, RhfEnergyMolcas) {
@@ -96,8 +96,8 @@ TEST(GeneralFrmHam, RhfEnergyMolcas) {
     buffered::FrmOnv onv(ham.m_basis);
     mbf::set_aufbau_mbf(onv, ham.default_particles().m_frm);
     auto elem = ham.get_element(onv);
-    ASSERT_NEARLY_EQ(elem, benchmark);
-    ASSERT_NEARLY_EQ(ham.get_energy(onv), benchmark);
+    ASSERT_NEAR_EQ(elem, benchmark);
+    ASSERT_NEAR_EQ(ham.get_energy(onv), benchmark);
 }
 
 TEST(GeneralFrmHam, RhfBrillouinTheorem) {
@@ -116,7 +116,7 @@ TEST(GeneralFrmHam, RhfBrillouinTheorem) {
         for (uint_t vac : vacs.get()){
             conn.m_ann.set(occ);
             conn.m_cre.set(vac);
-            ASSERT_NEARLY_EQ(ham.get_element_1100(onv, conn), 0.0);
+            ASSERT_NEAR_EQ(ham.get_element_1100(onv, conn), 0.0);
         }
     }
 }

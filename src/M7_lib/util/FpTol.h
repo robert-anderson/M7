@@ -16,7 +16,7 @@
 namespace fptol {
     /**
      * @return
-     *  default relative tolerance for nearly_equal comparisons
+     *  default relative tolerance for near_equal comparisons
      */
     template<typename T>
     static constexpr T default_rtol(const T&) {return {};}
@@ -29,7 +29,7 @@ namespace fptol {
     }
     /**
      * @return
-     *  default absolute tolerance for nearly_equal comparisons
+     *  default absolute tolerance for near_equal comparisons
      */
     template<typename T>
     static constexpr T default_atol(const T&) {return {};}
@@ -43,7 +43,7 @@ namespace fptol {
 
     /**
      * @return
-     *  default absolute tolerance for nearly_zero comparisons
+     *  default absolute tolerance for near_zero comparisons
      */
     template<typename T>
     static constexpr T default_ztol(const T&) {return {};}
@@ -57,49 +57,49 @@ namespace fptol {
 
 
     template<typename T>
-    static constexpr bool nearly_equal(T a, T b, T rtol, T atol){
+    static constexpr bool near_equal(T a, T b, T rtol, T atol){
         return std::abs(a-b) <= (atol+rtol*std::abs(b));
     }
 
     template<typename T>
-    static constexpr bool nearly_equal(T a, T b){
-        return nearly_equal(a, b, default_rtol(a), default_atol(b));
+    static constexpr bool near_equal(T a, T b){
+        return near_equal(a, b, default_rtol(a), default_atol(b));
     }
 
     template<typename T>
-    static constexpr bool nearly_equal(std::complex<T> a, std::complex<T> b, T rtol, T atol){
-        return nearly_equal(a.real(), b.real(), rtol, atol) && nearly_equal(a.real(), b.real(), rtol, atol);
+    static constexpr bool near_equal(std::complex<T> a, std::complex<T> b, T rtol, T atol){
+        return near_equal(a.real(), b.real(), rtol, atol) && near_equal(a.real(), b.real(), rtol, atol);
     }
 
     template<typename T>
-    static constexpr bool nearly_equal(std::complex<T> a, std::complex<T> b){
-        return nearly_equal(a, b, default_rtol<T>(), default_atol(a));
+    static constexpr bool near_equal(std::complex<T> a, std::complex<T> b){
+        return near_equal(a, b, default_rtol<T>(), default_atol(a));
     }
 
     template<typename T>
-    static constexpr bool nearly_zero(T b, arith::comp_t<T> atol) {
-        return nearly_equal(T(0), b, T(0), atol);
+    static constexpr bool near_zero(T b, arith::comp_t<T> atol) {
+        return near_equal(T(0), b, T(0), atol);
     }
 
     template<typename T>
-    static constexpr bool nearly_zero(T b) {
-        return nearly_equal(T(0), b, T(0), default_ztol(b));
+    static constexpr bool near_zero(T b) {
+        return near_equal(T(0), b, T(0), default_ztol(b));
     }
 
     template<typename T>
-    static constexpr bool nearly_real(T b, arith::comp_t<T> atol) {
-        return nearly_zero(arith::imag(b), atol);
+    static constexpr bool near_real(T b, arith::comp_t<T> atol) {
+        return near_zero(arith::imag(b), atol);
     }
 
     template<typename T>
-    static constexpr bool nearly_real(T b){
-        return nearly_zero(arith::imag(b));
+    static constexpr bool near_real(T b){
+        return near_zero(arith::imag(b));
     }
 
     template<typename T>
-    bool nearly_integer(const T &v) {
+    bool near_integer(const T &v) {
         static_assert(std::is_floating_point<T>::value, "T must be floating point");
-        return nearly_equal(std::round(v), v);
+        return near_equal(std::round(v), v);
     }
 }
 

@@ -110,22 +110,22 @@ namespace excit_gen_tester {
                 if (prob < 0.0 || prob > 1.0) {
                     return InvalidDrawProb;
                 }
-                if (fptol::nearly_zero(prob)) return GenWithZeroProb;
+                if (fptol::near_zero(prob)) return GenWithZeroProb;
                 const auto chk_prob = m_excit_gen.prob(src_mbf, conn);
                 if (chk_prob < 0.0 || chk_prob > 1.0) return InvalidProb;
-                if (!fptol::nearly_zero(prob, chk_prob)) {
+                if (!fptol::near_zero(prob, chk_prob)) {
                     return ProbMismatch;
                 }
                 const auto chk_prob_given_helem = m_excit_gen.prob(src_mbf, conn, helem);
                 if (chk_prob_given_helem < 0.0 || chk_prob_given_helem > 1.0) return InvalidProbGivenHElem;
-                if (!fptol::nearly_equal(prob, chk_prob_given_helem)) return ProbMismatchGivenHElem;
+                if (!fptol::near_equal(prob, chk_prob_given_helem)) return ProbMismatchGivenHElem;
                 if (conn.exsig()!=exsig) return WrongExsig;
                 work_inds = conn;
                 auto lookup = m_results.lookup(work_inds, row);
                 if (!lookup) return Unconnected;
                 row.m_occur++;
                 row.m_weight += 1 / prob;
-                if (!fptol::nearly_equal(ham_t(row.m_helem), helem)) return WrongHElem;
+                if (!fptol::near_equal(ham_t(row.m_helem), helem)) return WrongHElem;
             }
             return Success;
         }

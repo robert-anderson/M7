@@ -21,7 +21,7 @@ TEST(FciInitializer, N2) {
     auto results = init.get_results();
     results.bcast();
     results.get_eval(0, eval);
-    ASSERT_NEARLY_EQ(eval, dense_evals[0]);
+    ASSERT_NEAR_EQ(eval, dense_evals[0]);
 }
 
 TEST(FciInitializer, J1J2) {
@@ -32,7 +32,7 @@ TEST(FciInitializer, J1J2) {
     auto results = init.get_results();
     results.bcast();
     results.get_eval(0, eval);
-    ASSERT_NEARLY_EQ(eval, -6.44708);
+    ASSERT_NEAR_EQ(eval, -6.44708);
 }
 #endif
 

@@ -88,7 +88,7 @@ namespace asserts {
     template<typename T>
     static void compare_zero_abort(const char *kind, const char *sym, const char *file, int line, bool collective,
                                    T v, arith::comp_t<T> atol, const str_t &reason) {
-        auto outcome = fptol::nearly_zero(v, atol);
+        auto outcome = fptol::near_zero(v, atol);
         if (collective || mpi::nrank() == 1) {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
@@ -145,8 +145,8 @@ namespace asserts {
                           const arith::comp_t<T> &rtol, const arith::comp_t<T> &atol,
                           const char *lhs_sym, const char *rhs_sym,
                           const char *file, int line, bool collective, const str_t &reason) {
-        compare_nearly_abort(kind, "equal", lhs, rhs, rtol, atol,lhs_sym, rhs_sym, file, line,
-                             collective, fptol::nearly_equal(lhs, rhs, rtol, atol), reason);
+        compare_nearly_abort(kind, "equal", lhs, rhs, rtol, atol, lhs_sym, rhs_sym, file, line,
+                             collective, fptol::near_equal(lhs, rhs, rtol, atol), reason);
     }
 
     template<typename T>

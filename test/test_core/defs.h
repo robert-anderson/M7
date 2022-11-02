@@ -16,7 +16,7 @@ namespace test_defs {
         const arith::comp_t<T> m_rtol;
         const arith::comp_t<T> m_atol;
         bool operator==(const T& b) const {
-            return fptol::nearly_equal(m_a, b, m_rtol, m_atol);
+            return fptol::near_equal(m_a, b, m_rtol, m_atol);
         }
 
         /**
@@ -40,10 +40,10 @@ namespace test_defs {
  * the ASSERT_EQ macro is used in conjunction with an instance of a helper class in order to perform the necessary
  * near or numeric comparison, but still allow Gtest to output the values upon failure
  */
-#define ASSERT_NEARLY_EQ_TOL(a, b, rtol, atol) ASSERT_EQ(test_defs::make_helper(a, rtol, atol), b);
-#define ASSERT_NEARLY_EQ(a, b) ASSERT_NEARLY_EQ_TOL(a, b, fptol::default_rtol(a), fptol::default_atol(a));
-#define ASSERT_NEARLY_ZERO_TOL(b, atol) ASSERT_NEARLY_EQ_TOL(0.0, b, 0.0, atol);
-#define ASSERT_NEARLY_ZERO(b) ASSERT_NEARLY_ZERO_TOL(b, fptol::default_ztol(b));
+#define ASSERT_NEAR_EQ_TOL(a, b, rtol, atol) ASSERT_EQ(test_defs::make_helper(a, rtol, atol), b);
+#define ASSERT_NEAR_EQ(a, b) ASSERT_NEAR_EQ_TOL(a, b, fptol::default_rtol(a), fptol::default_atol(a));
+#define ASSERT_NEAR_ZERO_TOL(b, atol) ASSERT_NEAR_EQ_TOL(0.0, b, 0.0, atol);
+#define ASSERT_NEAR_ZERO(b) ASSERT_NEAR_ZERO_TOL(b, fptol::default_ztol(b));
 
 // TODO: make these work for vectors
 

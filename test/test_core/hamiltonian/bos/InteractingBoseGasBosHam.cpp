@@ -14,5 +14,5 @@ TEST(InteractingBosGasBosHam, DiagonalMatrixElements) {
     mbf = {0, 0, 0, 0, 0, 0, 3};
     ham_t helem;
     helem = ham_src.get_element(mbf);
-    ASSERT_NEARLY_EQ(helem, 5.07);
+    ASSERT_NEAR_EQ(helem, 5.07);
 }

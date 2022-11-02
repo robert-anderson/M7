@@ -20,8 +20,8 @@ TEST(Aliaser, DistributionCheck) {
     }
     auto norm = std::accumulate(probs.begin(), probs.end(), 0.0);
     for (uint_t i = 0ul; i < probs.size(); ++i) {
-        if (fptol::nearly_zero(probs[i])) {
-            ASSERT_NEARLY_ZERO(results[i]);
+        if (fptol::near_zero(probs[i])) {
+            ASSERT_NEAR_ZERO(results[i]);
         }
         else {
             ASSERT_LT(std::abs(1.0 - (float(results[i]) / float(n_attempts)) / (probs[i] / norm)), 0.01);

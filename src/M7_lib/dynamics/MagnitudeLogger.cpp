@@ -45,7 +45,7 @@ void MagnitudeLogger::update(uint_t icycle, double &tau, ExcitGenGroup &excit_ge
     m_gamma.all_max();
     auto gamma_sum = m_gamma.m_reduced.sum();
     // don't update any probabilities or timestep if all gammas are zero
-    if (fptol::nearly_zero(gamma_sum)) return;
+    if (fptol::near_zero(gamma_sum)) return;
     update_tau(tau, gamma_sum);
     if (!m_static_probs){
         m_new_probs.assign(m_gamma.m_reduced.dbegin(), m_gamma.m_reduced.dend());

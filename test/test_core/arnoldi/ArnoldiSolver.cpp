@@ -30,7 +30,7 @@ TEST(ArnoldiSolver, SymNonDist) {
     double eval;
     for (uint_t iroot=0ul; iroot<opts.m_nroot; ++iroot){
         results.get_eval(iroot, eval);
-        ASSERT_NEARLY_EQ(eval, evals[iroot]);
+        ASSERT_NEAR_EQ(eval, evals[iroot]);
     }
 }
 
@@ -59,7 +59,7 @@ TEST(ArnoldiSolver, SymDist) {
         double eval;
         for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
             results.get_eval(iroot, eval);
-            ASSERT_NEARLY_EQ(eval, dense_eval_it[iroot]);
+            ASSERT_NEAR_EQ(eval, dense_eval_it[iroot]);
         }
     }
 }
@@ -87,7 +87,7 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     std::complex<double> eval;
     for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
         results.get_eval(iroot, eval);
-        ASSERT_NEARLY_EQ(eval, dense_eval_it[iroot]);
+        ASSERT_NEAR_EQ(eval, dense_eval_it[iroot]);
     }
 }
 
@@ -116,7 +116,7 @@ TEST(ArnoldiSolver, NonSymDist) {
 
         for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
             results.get_eval(iroot, eval);
-            ASSERT_NEARLY_EQ(eval, arith::real(dense_eval_it[iroot]));
+            ASSERT_NEAR_EQ(eval, arith::real(dense_eval_it[iroot]));
         }
     }
 }

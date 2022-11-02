@@ -374,14 +374,14 @@ TEST(Dense, SingleInnerProduct) {
     typedef float T;
     v_t<T> p = {0.7, 3. , 2.8, 2.9, 3.7};
     v_t<T> q = {0.6, 0.8, 0. , 2.6, 4. };
-    ASSERT_NEARLY_EQ(dense::inner_product(p, q), T(25.16));
+    ASSERT_NEAR_EQ(dense::inner_product(p, q), T(25.16));
 }
 
 TEST(Dense, DoubleInnerProduct) {
     typedef double T;
     v_t<T> p = {0.7, 3. , 2.8, 2.9, 3.7};
     v_t<T> q = {0.6, 0.8, 0. , 2.6, 4. };
-    ASSERT_NEARLY_EQ(dense::inner_product(p, q), T(25.16));
+    ASSERT_NEAR_EQ(dense::inner_product(p, q), T(25.16));
 }
 
 TEST(Dense, ComplexSingleInnerProduct) {
@@ -390,9 +390,9 @@ TEST(Dense, ComplexSingleInnerProduct) {
     v_t<T> p = {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}};
     v_t<T> q = {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}};
     auto r = dense::inner_product(p, q);
-    ASSERT_NEARLY_EQ(r, T(-0.41, 51.24));
+    ASSERT_NEAR_EQ(r, T(-0.41, 51.24));
     r = dense::inner_product(p, q, true);
-    ASSERT_NEARLY_EQ(r, T(50.73, 10.48));
+    ASSERT_NEAR_EQ(r, T(50.73, 10.48));
 }
 
 TEST(Dense, ComplexDoubleInnerProduct) {
@@ -401,9 +401,9 @@ TEST(Dense, ComplexDoubleInnerProduct) {
     v_t<T> p = {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}};
     v_t<T> q = {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}};
     auto r = dense::inner_product(p, q);
-    ASSERT_NEARLY_EQ(r, T(-0.41, 51.24));
+    ASSERT_NEAR_EQ(r, T(-0.41, 51.24));
     r = dense::inner_product(p, q, true);
-    ASSERT_NEARLY_EQ(r, T(50.73, 10.48));
+    ASSERT_NEAR_EQ(r, T(50.73, 10.48));
 }
 
 
@@ -428,7 +428,7 @@ TEST(Dense, RealSymEig) {
 
     v_t<T> evals_chk = {-2.84695223, -0.7346574, 4.90333541, 8.67827421};
 
-    for (uint_t i = 0ul; i < n; ++i) ASSERT_NEARLY_EQ(evals[i], evals_chk[i]);
+    for (uint_t i = 0ul; i < n; ++i) ASSERT_NEAR_EQ(evals[i], evals_chk[i]);
     /*
      * [[ 0.42674891, -0.30080954, -0.59964891, -0.6064818 ],
        [ 0.81540297, -0.2009709 ,  0.51855174,  0.16072585],

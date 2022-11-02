@@ -25,7 +25,7 @@ TEST(DenseHamiltonian, N2Rhf) {
     DenseHamiltonian hmat(ham);
     v_t<ham_t> evals;
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], -108.916561245585);
+    ASSERT_NEAR_EQ(evals[0], -108.916561245585);
 }
 
 TEST(DenseHamiltonian, HeisenbergFrmHam) {
@@ -43,7 +43,7 @@ TEST(DenseHamiltonian, HeisenbergFrmHam) {
         auto particles = ham.default_particles();
         DenseHamiltonian hmat(ham, particles);
         dense::diag(hmat, evals);
-        ASSERT_NEARLY_EQ(evals[0], energy);
+        ASSERT_NEAR_EQ(evals[0], energy);
     }
 }
 
@@ -59,7 +59,7 @@ TEST(DenseHamiltonian, J1J2FrmHam) {
         auto particles = ham.default_particles();
         DenseHamiltonian hmat(ham, particles);
         dense::diag(hmat, evals);
-        ASSERT_NEARLY_EQ(evals[0], energy);
+        ASSERT_NEAR_EQ(evals[0], energy);
     }
 }
 
@@ -71,7 +71,7 @@ TEST(DenseHamiltonian, HF) {
     DenseHamiltonian hmat(ham, particles);
     v_t<double> evals;
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], -99.9421389039332);
+    ASSERT_NEAR_EQ(evals[0], -99.9421389039332);
 }
 
 
@@ -87,7 +87,7 @@ TEST(DenseHamiltonian, N2Molcas) {
     DenseHamiltonian hmat(ham, particles);
     v_t<double> evals;
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], -109.02180323);
+    ASSERT_NEAR_EQ(evals[0], -109.02180323);
 }
 
 TEST(DenseHamiltonian, PyscfX2cCheck) {
@@ -97,7 +97,7 @@ TEST(DenseHamiltonian, PyscfX2cCheck) {
     v_t<double> evals;
     dense::diag(hmat, evals);
     // compare the ground and first excited states to PySCF's values
-    ASSERT_NEARLY_EQ(evals[0], -76.08150945314577);
+    ASSERT_NEAR_EQ(evals[0], -76.08150945314577);
 }
 
 TEST(DenseHamiltonian, Hubbard3Site) {
@@ -106,7 +106,7 @@ TEST(DenseHamiltonian, Hubbard3Site) {
     v_t<double> evals;
     DenseHamiltonian hmat(ham, ham.default_particles(4));
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], 2.0);
+    ASSERT_NEAR_EQ(evals[0], 2.0);
 }
 
 TEST(DenseHamiltonian, Hubbard4Site) {
@@ -115,7 +115,7 @@ TEST(DenseHamiltonian, Hubbard4Site) {
     v_t<double> evals;
     DenseHamiltonian hmat(ham);
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], -1.9531453086749293);
+    ASSERT_NEAR_EQ(evals[0], -1.9531453086749293);
 }
 
 TEST(DenseHamiltonian, Hubbard6Site) {
@@ -124,7 +124,7 @@ TEST(DenseHamiltonian, Hubbard6Site) {
     v_t<double> evals;
     DenseHamiltonian hmat(ham);
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], -3.0925653194551845);
+    ASSERT_NEAR_EQ(evals[0], -3.0925653194551845);
 }
 
 TEST(DenseHamiltonian, Hubbard2x3Site) {
@@ -133,7 +133,7 @@ TEST(DenseHamiltonian, Hubbard2x3Site) {
     v_t<double> evals;
     DenseHamiltonian hmat(ham);
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], -3.6193213239575694);
+    ASSERT_NEAR_EQ(evals[0], -3.6193213239575694);
 }
 
 TEST(DenseHamiltonian, Hubbard3x2Site) {
@@ -145,7 +145,7 @@ TEST(DenseHamiltonian, Hubbard3x2Site) {
     v_t<double> evals;
     DenseHamiltonian hmat(ham);
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], -3.6193213239575694);
+    ASSERT_NEAR_EQ(evals[0], -3.6193213239575694);
 }
 
 TEST(DenseHamiltonian, Hubbard3x2SiteApbc) {
@@ -154,7 +154,7 @@ TEST(DenseHamiltonian, Hubbard3x2SiteApbc) {
     v_t<double> evals;
     DenseHamiltonian hmat(ham);
     dense::diag(hmat, evals);
-    ASSERT_NEARLY_EQ(evals[0], -3.7898230716677883);
+    ASSERT_NEAR_EQ(evals[0], -3.7898230716677883);
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
@@ -169,7 +169,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
     DenseHamiltonian ham(ham_src, particles);
     v_t<double> evals;
     dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], 2.0);
+    ASSERT_NEAR_EQ(evals[0], 2.0);
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff2) {
@@ -185,11 +185,11 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff2) {
             for (uint_t q = 0ul; q < frm_basis.m_nspinorb; ++q) {
                 const auto qsite = frm_basis.isite(q);
                 if (n == psite && psite == qsite) {
-                    ASSERT_NEARLY_EQ(arith::real(ham_src.m_frmbos.get_coeff_1101(n, p, q)), 1.4);
-                    ASSERT_NEARLY_EQ(arith::real(ham_src.m_frmbos.get_coeff_1110(n, p, q)), 1.4);
+                    ASSERT_NEAR_EQ(arith::real(ham_src.m_frmbos.get_coeff_1101(n, p, q)), 1.4);
+                    ASSERT_NEAR_EQ(arith::real(ham_src.m_frmbos.get_coeff_1110(n, p, q)), 1.4);
                 } else {
-                    ASSERT_NEARLY_EQ(arith::real(ham_src.m_frmbos.get_coeff_1101(n, p, q)), 0.0);
-                    ASSERT_NEARLY_EQ(arith::real(ham_src.m_frmbos.get_coeff_1110(n, p, q)), 0.0);
+                    ASSERT_NEAR_EQ(arith::real(ham_src.m_frmbos.get_coeff_1101(n, p, q)), 0.0);
+                    ASSERT_NEAR_EQ(arith::real(ham_src.m_frmbos.get_coeff_1110(n, p, q)), 0.0);
                 }
             }
         }
@@ -197,7 +197,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff2) {
     DenseHamiltonian ham(ham_src, ham_src.default_particles(4));
     v_t<double> evals;
     dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], -7.699484522379835);
+    ASSERT_NEAR_EQ(evals[0], -7.699484522379835);
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff3) {
@@ -208,7 +208,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff3) {
     DenseHamiltonian ham(ham_src, ham_src.default_particles(4));
     v_t<double> evals;
     dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], -11.07271962268484);
+    ASSERT_NEAR_EQ(evals[0], -11.07271962268484);
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinOccCutoff1) {
@@ -219,7 +219,7 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff1) {
     DenseHamiltonian ham(ham_src, ham_src.default_particles(4));
     v_t<double> evals;
     dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], -3.1699561178752873);
+    ASSERT_NEAR_EQ(evals[0], -3.1699561178752873);
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinOccCutoff2) {
@@ -230,7 +230,7 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff2) {
     DenseHamiltonian ham(ham_src, ham_src.default_particles(4));
     v_t<double> evals;
     dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], -6.692966463435127);
+    ASSERT_NEAR_EQ(evals[0], -6.692966463435127);
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinOccCutoff3) {
@@ -241,7 +241,7 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff3) {
     DenseHamiltonian ham(ham_src, ham_src.default_particles(4));
     v_t<double> evals;
     dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], -9.423844225360671);
+    ASSERT_NEAR_EQ(evals[0], -9.423844225360671);
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
@@ -255,7 +255,7 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
     DenseHamiltonian ham(ham_src, particles);
     v_t<double> evals;
     dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], 0.5090148148366922);
+    ASSERT_NEAR_EQ(evals[0], 0.5090148148366922);
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
@@ -269,7 +269,7 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
     DenseHamiltonian ham(ham_src, particles);
     v_t<double> evals;
     dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], -0.38125085248276913);
+    ASSERT_NEAR_EQ(evals[0], -0.38125085248276913);
 }
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3) {
@@ -283,7 +283,7 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3) {
     DenseHamiltonian ham(ham_src, particles);
     v_t<double> evals;
     dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], -0.9998830020871416);
+    ASSERT_NEAR_EQ(evals[0], -0.9998830020871416);
 }
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3BosNumOp) {
     HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
@@ -299,7 +299,7 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3BosNumOp) {
     DenseHamiltonian ham(ham_src, particles);
     v_t<double> evals;
     dense::diag(ham, evals);
-    ASSERT_NEARLY_EQ(evals[0], -0.9998830020871416);
+    ASSERT_NEAR_EQ(evals[0], -0.9998830020871416);
 }
 
 
@@ -313,7 +313,7 @@ TEST(DenseHamiltonian, BoseHubbard2site) {
     const auto radical = std::sqrt(16.0+4*u*u)/2.0;
     const v_t<double> evals_chk = {u-radical, 2*u, u+radical};
     dense::diag(ham, evals);
-    for (uint_t i=0ul; i<evals.size(); ++i) ASSERT_NEARLY_EQ(evals[i], evals_chk[i]);
+    for (uint_t i=0ul; i<evals.size(); ++i) ASSERT_NEAR_EQ(evals[i], evals_chk[i]);
 }
 
 TEST(DenseHamiltonian, BoseHubbard3site) {
@@ -334,7 +334,7 @@ TEST(DenseHamiltonian, BoseHubbard3site) {
     const v_t<double> evals_chk = {
             -3.48339005,  1.29844597,  1.29844597,  3.24071331,  4.67236331,
             4.67236331,  6.4       , 10.84267674, 11.02919072, 11.02919072};
-    for (uint_t i=0ul; i<evals.size(); ++i) ASSERT_NEARLY_EQ(evals[i], evals_chk[i]);
+    for (uint_t i=0ul; i<evals.size(); ++i) ASSERT_NEAR_EQ(evals[i], evals_chk[i]);
 }
 
 TEST(DenseHamiltonian, BoseHubbard4site) {
@@ -360,5 +360,5 @@ TEST(DenseHamiltonian, BoseHubbard4site) {
              9.53555317,  9.8878064 , 10.15219989, 10.2       , 11.16603393,
             11.16603393, 11.92064932, 12.48707081, 13.08252964, 13.08252964,
             13.8435421 , 21.16592182, 21.20080428, 21.20080428, 21.23688884};
-    for (uint_t i=0ul; i<evals.size(); ++i) ASSERT_NEARLY_EQ(evals[i], evals_chk[i]);
+    for (uint_t i=0ul; i<evals.size(); ++i) ASSERT_NEAR_EQ(evals[i], evals_chk[i]);
 }

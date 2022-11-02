@@ -27,17 +27,17 @@ TEST(FcidumpFileReader, Real_6orb) {
     // first entry
     test_inds = {0, 0, 0, 0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_NEARLY_EQ(v, 0.5406487462037872);
+    ASSERT_NEAR_EQ(v, 0.5406487462037872);
     // scan to arbitrary element
     for (uint_t i = 0; i < 17; ++i) file_reader.next(inds, v);
     test_inds = {2, 1, 4, 3};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_NEARLY_EQ(v, 0.01759459248922075);
+    ASSERT_NEAR_EQ(v, 0.01759459248922075);
     // scan to final element
     while (file_reader.next(inds, v)) {}
     test_inds = {~0ul, ~0ul, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_NEARLY_EQ(v, -98.46644393370157);
+    ASSERT_NEAR_EQ(v, -98.46644393370157);
 }
 
 TEST(FcidumpFileReader, Integer_8orb) {
@@ -52,17 +52,17 @@ TEST(FcidumpFileReader, Integer_8orb) {
     // core energy is the first entry
     test_inds = {~0ul, ~0ul, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_NEARLY_EQ(v, 0.0);
+    ASSERT_NEAR_EQ(v, 0.0);
     // scan to arbitrary element
     for (uint_t i = 0; i < 8; ++i) file_reader.next(inds, v);
     test_inds = {7, 7, 7, 7};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_NEARLY_EQ(v, 4.0);
+    ASSERT_NEAR_EQ(v, 4.0);
     // scan to final element
     while (file_reader.next(inds, v)) {}
     test_inds = {7, 6, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_NEARLY_EQ(v, -1.0);
+    ASSERT_NEAR_EQ(v, -1.0);
 }
 
 TEST(FcidumpFileReader, Molcas) {
@@ -77,11 +77,11 @@ TEST(FcidumpFileReader, Molcas) {
 
     test_inds = {0, 0, 0, 0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_NEARLY_EQ(v, 0.75132124044);
+    ASSERT_NEAR_EQ(v, 0.75132124044);
     file_reader.next(inds, v);
     test_inds = {1, 0, 1, 0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_NEARLY_EQ(v, 0.32107592937E-01);
+    ASSERT_NEAR_EQ(v, 0.32107592937E-01);
 }
 
 #ifdef ENABLE_COMPLEX

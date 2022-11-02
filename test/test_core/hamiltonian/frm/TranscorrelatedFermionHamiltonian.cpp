@@ -31,7 +31,7 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_0000) {
     mbf::set_aufbau_mbf(onv, ham.default_nelec());
     auto elem = ham.get_element_0000(onv);
     auto benchmark = two_body_ham.get_element_0000(onv) + 2.3545134053388529E-002;
-    ASSERT_NEARLY_EQ(elem, benchmark);
+    ASSERT_NEAR_EQ(elem, benchmark);
 }
 
 /**
@@ -60,7 +60,7 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
     auto elemdiff =
         ham.get_element_1100(onv, conn) - two_body_ham.get_element_1100(onv, conn);
     auto benchmark = -2.0033789485348489E-003;
-    ASSERT_NEARLY_EQ(elemdiff, benchmark);
+    ASSERT_NEAR_EQ(elemdiff, benchmark);
 }
 
 /**
@@ -93,7 +93,7 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
         ham.get_element_2200(onv, conn) - two_body_ham.get_element_2200(onv, conn);
     auto benchmark = -2.2700965657479885E-005;
     // we also pick up a phase, hence -benchmark
-    ASSERT_NEARLY_EQ(elemdiff, -benchmark);
+    ASSERT_NEAR_EQ(elemdiff, -benchmark);
 }
 
 /**
@@ -119,7 +119,7 @@ TEST(TranscorrelatedFermionHamiltonian, check_nonhermiticity) {
     // 0.19621434645836822E-002 - -0.63747363394572173E-002
     auto el2 = ham.get_coeff_2200(1, 6, 0, 2);
 
-    ASSERT_NEARLY_EQ(el1, el2);
+    ASSERT_NEAR_EQ(el1, el2);
 }
 
 /**
@@ -163,7 +163,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     // all but the last two are zero
     auto benchmark = -0.20360278843803472E-006 + 0.0 + 0.0 - 0.0 - 0.0 -
                      -0.20360278843803271E-006;
-    ASSERT_NEARLY_EQ(-matel33 / 3.0, benchmark);
+    ASSERT_NEAR_EQ(-matel33 / 3.0, benchmark);
     // also test spin-non-conserving excitation (should give 0 for Fermions):
     onv = {{0, 1}, {0, 1}};
     conn.clear();
@@ -175,7 +175,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     conn.m_cre.add({1, 9});
     matel33 = ham.get_element_3300(onv, conn);
     // does not conserve spin, ipso facto = 0
-    ASSERT_NEARLY_EQ(matel33 / 3.0, 0.0);
+    ASSERT_NEAR_EQ(matel33 / 3.0, 0.0);
 
     onv = {{0, 1}, {0, 13}};
     conn.clear();
@@ -188,7 +188,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     conn.m_ann.add({1, 0});
     matel33 = ham.get_element_3300(onv, conn);
     // same test as the first one but with positive phase
-    ASSERT_NEARLY_EQ(matel33 / 3.0, benchmark);
+    ASSERT_NEAR_EQ(matel33 / 3.0, benchmark);
 }
 
 #endif  // ENABLE_TCHINT
