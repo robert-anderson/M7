@@ -6,6 +6,7 @@ target_sources(unittest
         Convert.cpp
         Exsig.cpp
         ForeachVirtual.cpp
+        FpTol.cpp
         Hashing.cpp
         Integer.cpp
         Math.cpp
