@@ -78,19 +78,29 @@ extern "C" void zgemm_(const char *transa, const char *transb,
 
 namespace dense {
 
-    using namespace fptol;
     template<typename T>
-    static bool nearly_equal(const T* v1, const T* v2, uint_t size, arith::comp_t<T> atol = default_atol_near<T>()) {
+    static bool nearly_equal(const T* v1, const T* v2, uint_t size, arith::comp_t<T> rtol, arith::comp_t<T> atol) {
         for (uint_t i = 0ul; i < size; ++i) {
-            if (!fptol::nearly_equal(v1[i], v2[i], arith::comp_t<T>(0), atol)) return false;
+            if (!fptol::nearly_equal(v1[i], v2[i], rtol, atol)) return false;
         }
         return true;
     }
 
     template<typename T>
-    static bool nearly_equal(const v_t<T> v1, const v_t<T> v2, arith::comp_t<T> atol = default_atol_near<T>()) {
+    static bool nearly_equal(const T* v1, const T* v2, uint_t size) {
+        return nearly_equal(v1, v2, size, fptol::default_rtol(*v1), fptol::default_atol(*v1));
+    }
+
+    template<typename T>
+    static bool nearly_equal(const v_t<T> v1, const v_t<T> v2, arith::comp_t<T> rtol, arith::comp_t<T> atol) {
         REQUIRE_EQ(v1.size(), v2.size(), "vectors must have same number of elements to be compared");
-        return nearly_equal(v1.data(), v2.data(), v1.size(), atol);
+        return nearly_equal(v1.data(), v2.data(), v1.size(), rtol, atol);
+    }
+
+    template<typename T>
+    static bool nearly_equal(const v_t<T> v1, const v_t<T> v2) {
+        REQUIRE_EQ(v1.size(), v2.size(), "vectors must have same number of elements to be compared");
+        return nearly_equal(v1.data(), v2.data(), v1.size());
     }
 
 
@@ -128,9 +138,11 @@ namespace dense {
             m_buffer = other.m_buffer;
             return *this;
         }
-        Matrix& operator=(const v_t<T>& v) {
+
+        template<typename U>
+        Matrix& operator=(const v_t<U>& v) {
             REQUIRE_EQ(v.size(), m_buffer.size(), "cannot assign due to incorrect buffer size");
-            m_buffer = v;
+            set(v.data());
             return *this;
         }
         Matrix& operator=(const sparse::dynamic::Matrix<T>& sparse){
@@ -187,16 +199,66 @@ namespace dense {
             m_buffer.assign(m_buffer.size(), 0);
         }
 
-        bool nearly_equal(const Matrix<T>& other, arith::comp_t<T> atol= fptol::default_atol_near<T>()) const {
+        bool nearly_equal(const Matrix<T>& other, arith::comp_t<T> rtol, arith::comp_t<T> atol) const {
             REQUIRE_TRUE(m_buffer.size()==other.m_buffer.size(),
                          "matrices must have same number of elements to be compared");
-            return dense::nearly_equal(ptr(), other.ptr(), m_buffer.size(), atol);
+            return dense::nearly_equal(ptr(), other.ptr(), m_buffer.size(), rtol, atol);
+        }
+
+        bool nearly_equal(const Matrix<T>& other) const {
+            REQUIRE_TRUE(m_buffer.size()==other.m_buffer.size(),
+                         "matrices must have same number of elements to be compared");
+            return dense::nearly_equal(ptr(), other.ptr(), m_buffer.size());
+        }
+
+        Matrix<T>& operator +=(Matrix<T>& other) {
+            DEBUG_ASSERT_EQ(m_nrow, other.m_nrow, "incompatible number of rows");
+            DEBUG_ASSERT_EQ(m_ncol, other.m_ncol, "incompatible number of columns");
+            for (uint_t ielem = 0ul; ielem < m_buffer.size(); ++ielem) m_buffer[ielem] += other.m_buffer[ielem];
+            return *this;
+        }
+
+        Matrix<T>& operator -=(Matrix<T>& other) {
+            DEBUG_ASSERT_EQ(m_nrow, other.m_nrow, "incompatible number of rows");
+            DEBUG_ASSERT_EQ(m_ncol, other.m_ncol, "incompatible number of columns");
+            for (uint_t ielem = 0ul; ielem < m_buffer.size(); ++ielem) m_buffer[ielem] -= other.m_buffer[ielem];
+            return *this;
         }
 
     protected:
         /*
          * for bounds safety, we keep these set-from and get-to pointer methods protected
          */
+
+
+        /**
+         * non-converting copy-in
+         * @tparam U
+         *  U (==T)
+         * @param src
+         *  data source
+         */
+        template<typename U>
+        typename std::enable_if<std::is_same<U, T>::value, void>::type
+        set(const U* src) {
+            memcpy(m_buffer.data(), src, m_buffer.size() * sizeof(T));
+        }
+
+        /**
+         * converting copy-in
+         * @tparam U
+         *  U (!=T)
+         * @param src
+         *  data source
+         */
+        template<typename U>
+        typename std::enable_if<!std::is_same<U, T>::value, void>::type
+        set_row(const U* src) {
+            static_assert(std::is_convertible<U, T>::value, "invalid conversion");
+            for (uint_t ielem = 0ul; ielem < m_buffer.size(); ++ielem) m_buffer[ielem] = src[ielem];
+        }
+
+
         /**
          * non-converting copy-in
          * @tparam U
@@ -225,7 +287,7 @@ namespace dense {
         typename std::enable_if<!std::is_same<U, T>::value, void>::type
         set_row(const uint_t &irow, const U* src) {
             static_assert(std::is_convertible<U, T>::value, "invalid conversion");
-            for (uint_t icol = 0ul; irow<m_ncol; ++icol) (*this)(irow, icol) = src[icol];
+            for (uint_t icol = 0ul; icol<m_ncol; ++icol) (*this)(irow, icol) = src[icol];
         }
 
         /**
@@ -379,6 +441,18 @@ namespace dense {
                     if (irow!=icol) other_element = this_element;
                 }
             }
+        }
+
+        bool is_diagonal() const {
+//            const auto n = Matrix<T>::nrow();
+//            const T* row;
+//            if (std::any_of(row+irow+1, row+n)) return false;
+//            for (uint_t irow=0ul; irow<n; ++irow) {
+//                Matrix<T>::get_row(irow, row);
+//                if (std::any_of(row, row+irow)) return false;
+//                if (std::any_of(row+irow+1, row+n)) return false;
+//            }
+            return true;
         }
     };
 

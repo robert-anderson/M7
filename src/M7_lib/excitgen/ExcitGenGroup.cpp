@@ -8,7 +8,7 @@ void ExcitGenGroup::update_cumprobs() {
     m_cumprobs = m_probs;
     for (uint_t icase = 1ul; icase < m_probs.size(); ++icase)
         m_cumprobs[icase] = m_cumprobs[icase - 1] + m_probs[icase];
-    DEBUG_ASSERT_NUM_EQ(m_cumprobs.back(), 1.0, "cumulative probability should be 1.0");
+    DEBUG_ASSERT_NEARLY_EQ(m_cumprobs.back(), 1.0, "cumulative probability should be 1.0");
 }
 
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian& ham, const conf::Propagator& opts, PRNG& prng) :

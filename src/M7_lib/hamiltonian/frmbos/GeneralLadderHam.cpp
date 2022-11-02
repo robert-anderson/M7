@@ -20,7 +20,7 @@ GeneralLadderHam::GeneralLadderHam(sys::Basis basis, const EbdumpInfo& info):
 
     logging::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
-        if (fptol::numeric_zero(value)) continue;
+        if (fptol::nearly_zero(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
         if (ranksig == exsig::ex_1110 || ranksig == exsig::ex_1101) {

@@ -54,29 +54,28 @@ TEST(Dense, Dagger) {
 
 TEST(Dense, RectSingleMatMatProduct) {
     typedef float T;
-    const float tol = 5e-6;
     dense::Matrix<float> p(3, 5);
-
-    p.set_row<T>(0, {0.7, 3. , 2.8, 2.9, 3.7});
-    p.set_row<T>(1, {0.6, 0.8, 0. , 2.6, 4. });
-    p.set_row<T>(2, {1.6, 2.2, 0.2, 3.3, 2.3});
-
     dense::Matrix<float> q(5, 4);
-
-    q.set_row<T>(0, {3.7, 2.7, 1.4, 1.4});
-    q.set_row<T>(1, {1.4, 3.3, 1.1, 1.2});
-    q.set_row<T>(2, {1.2, 3.4, 1.7, 3.8});
-    q.set_row<T>(3, {1. , 2.9, 2.6, 2.8});
-    q.set_row<T>(4, {3.4, 3.7, 1.1, 4. });
-
     dense::Matrix<float> r_chk(3, 4);
-    r_chk.set_row<T>(0, {25.63, 43.41, 20.65, 38.14});
-    r_chk.set_row<T>(1, {19.54, 26.6 , 12.88, 25.08});
-    r_chk.set_row<T>(2, {20.36, 30.34, 16.11, 24.08});
+
+    p = v_t<T>{0.2,  0.6,  0.8, -0.6,  0.5,
+               0.5,  0.1, -0.9,  0.7,  0.8,
+               0.3, -0.6,  0.4, -0.6,  0.7};
+
+    q = v_t<T>{-0.5, -1. , -0.4,  0.8,
+                0.2, -0.2,  0.9,  0.7,
+               -0.3,  0.8, -0.6,  0.5,
+               -0.3,  0. ,  0.2, -0.5,
+               -0.2,  0.4,  0.6,  0.7};
+
+    r_chk = v_t<T>{-0.14,  0.52,  0.16,  1.63,
+                   -0.33, -0.92,  1.05,  0.23,
+                   -0.35,  0.42, -0.6 ,  0.81};
 
     dense::Matrix<float> r(3, 4);
     dense::multiply(p, q, r);
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+
+    ASSERT_TRUE(r.nearly_equal(r_chk));
 
     /*
      * check transpose flags in GEMM interface are working with P physically transposed
@@ -84,28 +83,28 @@ TEST(Dense, RectSingleMatMatProduct) {
     r.zero();
     p.transpose();
     dense::multiply(p, q, r, 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
     /*
      * check transpose flags in GEMM interface are working with P and Q physically transposed
      */
     r.zero();
     q.transpose();
     dense::multiply(p, q, r, 'T', 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
     /*
      * check transpose flags in GEMM interface are working with Q physically transposed
      */
     r.zero();
     p.transpose();
     dense::multiply(p, q, r, 'N', 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
 }
 
 TEST(Dense, RectDoubleMatMatProduct) {
     typedef float T;
-    const float tol = 1e-12;
     dense::Matrix<double> p(3, 5);
 
+    // setting double precision elements from single precision floats
     p.set_row<T>(0, {0.7, 3. , 2.8, 2.9, 3.7});
     p.set_row<T>(1, {0.6, 0.8, 0. , 2.6, 4. });
     p.set_row<T>(2, {1.6, 2.2, 0.2, 3.3, 2.3});
@@ -125,7 +124,7 @@ TEST(Dense, RectDoubleMatMatProduct) {
 
     dense::Matrix<double> r(3, 4);
     dense::multiply(p, q, r);
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
 
     /*
      * check transpose flags in GEMM interface are working with P physically transposed
@@ -133,27 +132,26 @@ TEST(Dense, RectDoubleMatMatProduct) {
     r.zero();
     p.transpose();
     dense::multiply(p, q, r, 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
     /*
      * check transpose flags in GEMM interface are working with P and Q physically transposed
      */
     r.zero();
     q.transpose();
     dense::multiply(p, q, r, 'T', 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
     /*
      * check transpose flags in GEMM interface are working with Q physically transposed
      */
     r.zero();
     p.transpose();
     dense::multiply(p, q, r, 'N', 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
 }
 
 TEST(Dense, RectComplexSingleMatMatProduct) {
     typedef float comp_t;
     typedef std::complex<comp_t> T;
-    const comp_t tol = 1e-5;
     dense::Matrix<T> p(3, 5);
 
     p.set_row<T>(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
@@ -176,7 +174,7 @@ TEST(Dense, RectComplexSingleMatMatProduct) {
 
     dense::Matrix<T> r(3, 4);
     dense::multiply(p, q, r);
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
 
     /*
      * check transpose flags in GEMM interface are working with P physically transposed
@@ -184,21 +182,21 @@ TEST(Dense, RectComplexSingleMatMatProduct) {
     r.zero();
     p.transpose();
     dense::multiply(p, q, r, 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
     /*
      * check transpose flags in GEMM interface are working with P and Q physically transposed
      */
     r.zero();
     q.transpose();
     dense::multiply(p, q, r, 'T', 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
     /*
      * check transpose flags in GEMM interface are working with Q physically transposed
      */
     r.zero();
     p.transpose();
     dense::multiply(p, q, r, 'N', 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
     /*
      * check transpose flags in GEMM interface are working with P and Q physically conjugate-transposed
      */
@@ -206,13 +204,12 @@ TEST(Dense, RectComplexSingleMatMatProduct) {
     p.dagger();
     q.conj();
     dense::multiply(p, q, r, 'C', 'C');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
 }
 
 TEST(Dense, RectComplexDoubleMatMatProduct) {
     typedef double comp_t;
     typedef std::complex<comp_t> T;
-    const comp_t tol = 1e-11;
     dense::Matrix<T> p(3, 5);
 
     p.set_row<T>(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
@@ -235,7 +232,7 @@ TEST(Dense, RectComplexDoubleMatMatProduct) {
 
     dense::Matrix<T> r(3, 4);
     dense::multiply(p, q, r);
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
 
     /*
      * check transpose flags in GEMM interface are working with P physically transposed
@@ -243,21 +240,21 @@ TEST(Dense, RectComplexDoubleMatMatProduct) {
     r.zero();
     p.transpose();
     dense::multiply(p, q, r, 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
     /*
      * check transpose flags in GEMM interface are working with P and Q physically transposed
      */
     r.zero();
     q.transpose();
     dense::multiply(p, q, r, 'T', 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
     /*
      * check transpose flags in GEMM interface are working with Q physically transposed
      */
     r.zero();
     p.transpose();
     dense::multiply(p, q, r, 'N', 'T');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
     /*
      * check transpose flags in GEMM interface are working with P and Q physically conjugate-transposed
      */
@@ -265,12 +262,11 @@ TEST(Dense, RectComplexDoubleMatMatProduct) {
     p.dagger();
     q.conj();
     dense::multiply(p, q, r, 'C', 'C');
-    ASSERT_TRUE(r.nearly_equal(r_chk, tol));
+    ASSERT_TRUE(r.nearly_equal(r_chk));
 }
 
 TEST(Dense, RectSingleMatVecProduct) {
     typedef float T;
-    const T tol = 1e-5;
     dense::Matrix<T> p(3, 5);
 
     p.set_row<T>(0, {0.7, 3. , 2.8, 2.9, 3.7});
@@ -280,7 +276,7 @@ TEST(Dense, RectSingleMatVecProduct) {
     v_t<T> q = {1.4, 3.3, 1.1, 1.2, 4.0};
     v_t<T> r_chk = {32.24, 22.6 , 22.88};
     auto r = dense::multiply(p, q);
-    ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
+    ASSERT_TRUE(dense::nearly_equal(r_chk, r));
 
     /*
      * now premultiply the vector by the transpose of the matrix
@@ -288,12 +284,11 @@ TEST(Dense, RectSingleMatVecProduct) {
     q = {1.4, 3.3, 1.1};
     r_chk = {4.72,  9.26,  4.14, 16.27, 20.91};
     r = dense::multiply(p, q, 'T');
-    ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
+    ASSERT_TRUE(dense::nearly_equal(r_chk, r));
 }
 
 TEST(Dense, RectDoubleMatVecProduct) {
     typedef double T;
-    const T tol = 1e-11;
     dense::Matrix<T> p(3, 5);
 
     p.set_row<T>(0, {0.7, 3. , 2.8, 2.9, 3.7});
@@ -303,7 +298,7 @@ TEST(Dense, RectDoubleMatVecProduct) {
     v_t<T> q = {1.4, 3.3, 1.1, 1.2, 4.0};
     v_t<T> r_chk = {32.24, 22.6 , 22.88};
     auto r = dense::multiply(p, q);
-    ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
+    ASSERT_TRUE(dense::nearly_equal(r_chk, r));
 
     /*
      * now premultiply a vector by the transpose of the matrix
@@ -311,14 +306,13 @@ TEST(Dense, RectDoubleMatVecProduct) {
     q = {1.4, 3.3, 1.1};
     r_chk = {4.72,  9.26,  4.14, 16.27, 20.91};
     r = dense::multiply(p, q, 'T');
-    ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
+    ASSERT_TRUE(dense::nearly_equal(r_chk, r));
 }
 
 
 TEST(Dense, RectComplexSingleMatVecProduct) {
     typedef float comp_t;
     typedef std::complex<comp_t> T;
-    const comp_t tol = 1e-5;
     dense::Matrix<T> p(3, 5);
 
     p.set_row<T>(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
@@ -328,7 +322,7 @@ TEST(Dense, RectComplexSingleMatVecProduct) {
     v_t<T> q = {{2.6, 2.5}, {3.9, 1.3}, {2.5, 4.0}, {2.9, 2.2}, {2.1, 1.4}};
     v_t<T> r_chk = {{11.35, 53.53}, {-11.87, 51.0}, {10.03, 45.82}};
     auto r = dense::multiply(p, q);
-    ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
+    ASSERT_TRUE(dense::nearly_equal(r_chk, r));
 
     /*
      * now premultiply a vector by the transpose of the matrix
@@ -336,20 +330,19 @@ TEST(Dense, RectComplexSingleMatVecProduct) {
     q = {{2.6, 2.5}, {3.9, 1.3}, {2.5, 4.0}};
     r_chk = {{-9.04, 33.69}, {1.6, 35.66}, {-5.07, 29.75}, {9.88, 38.92}, {11.63, 45.03}};
     r = dense::multiply(p, q, 'T');
-    ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
+    ASSERT_TRUE(dense::nearly_equal(r_chk, r));
 
     /*
      * finally, premultiply the same vector by the conjugate-transpose of the matrix
      */
     r_chk = {{25.36, -15.83}, {31.24, -0.98}, {20.63, -14.15}, {41.98, 8.74}, {50.31, 2.27}};
     r = dense::multiply(p, q, 'C');
-    ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
+    ASSERT_TRUE(dense::nearly_equal(r_chk, r));
 }
 
 TEST(Dense, RectComplexDoubleMatVecProduct) {
     typedef float comp_t;
     typedef std::complex<comp_t> T;
-    const comp_t tol = 1e-5;
     dense::Matrix<T> p(3, 5);
 
     p.set_row<T>(0, {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}});
@@ -359,7 +352,7 @@ TEST(Dense, RectComplexDoubleMatVecProduct) {
     v_t<T> q = {{2.6, 2.5}, {3.9, 1.3}, {2.5, 4.0}, {2.9, 2.2}, {2.1, 1.4}};
     v_t<T> r_chk = {{11.35, 53.53}, {-11.87, 51.0}, {10.03, 45.82}};
     auto r = dense::multiply(p, q);
-    ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
+    ASSERT_TRUE(dense::nearly_equal(r_chk, r));
 
     /*
      * now premultiply a vector by the transpose of the matrix
@@ -367,54 +360,50 @@ TEST(Dense, RectComplexDoubleMatVecProduct) {
     q = {{2.6, 2.5}, {3.9, 1.3}, {2.5, 4.0}};
     r_chk = {{-9.04, 33.69}, {1.6, 35.66}, {-5.07, 29.75}, {9.88, 38.92}, {11.63, 45.03}};
     r = dense::multiply(p, q, 'T');
-    ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
+    ASSERT_TRUE(dense::nearly_equal(r_chk, r));
 
     /*
      * finally, premultiply the same vector by the conjugate-transpose of the matrix
      */
     r_chk = {{25.36, -15.83}, {31.24, -0.98}, {20.63, -14.15}, {41.98, 8.74}, {50.31, 2.27}};
     r = dense::multiply(p, q, 'C');
-    ASSERT_TRUE(dense::nearly_equal(r_chk, r, tol));
+    ASSERT_TRUE(dense::nearly_equal(r_chk, r));
 }
 
 TEST(Dense, SingleInnerProduct) {
     typedef float T;
-    const T tol = 1e-5;
     v_t<T> p = {0.7, 3. , 2.8, 2.9, 3.7};
     v_t<T> q = {0.6, 0.8, 0. , 2.6, 4. };
-    ASSERT_NEARLY_EQ_TOL(dense::inner_product(p, q), T(25.16), T(0.0), tol);
+    ASSERT_NEARLY_EQ(dense::inner_product(p, q), T(25.16));
 }
 
 TEST(Dense, DoubleInnerProduct) {
     typedef double T;
-    const T tol = 1e-11;
     v_t<T> p = {0.7, 3. , 2.8, 2.9, 3.7};
     v_t<T> q = {0.6, 0.8, 0. , 2.6, 4. };
-    ASSERT_NEARLY_EQ_TOL(dense::inner_product(p, q), T(25.16), T(0.0), tol);
+    ASSERT_NEARLY_EQ(dense::inner_product(p, q), T(25.16));
 }
 
 TEST(Dense, ComplexSingleInnerProduct) {
     typedef float comp_t;
     typedef std::complex<comp_t> T;
-    const comp_t tol = 1e-5;
     v_t<T> p = {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}};
     v_t<T> q = {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}};
     auto r = dense::inner_product(p, q);
-    ASSERT_NEARLY_EQ_TOL(r, T(-0.41, 51.24), comp_t(0), tol);
+    ASSERT_NEARLY_EQ(r, T(-0.41, 51.24));
     r = dense::inner_product(p, q, true);
-    ASSERT_NEARLY_EQ_TOL(r, T(50.73, 10.48), comp_t(0), tol);
+    ASSERT_NEARLY_EQ(r, T(50.73, 10.48));
 }
 
 TEST(Dense, ComplexDoubleInnerProduct) {
     typedef float comp_t;
     typedef std::complex<comp_t> T;
-    const comp_t tol = 1e-11;
     v_t<T> p = {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}};
     v_t<T> q = {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}};
     auto r = dense::inner_product(p, q);
-    ASSERT_NEARLY_EQ_TOL(r, T(-0.41, 51.24), comp_t(0), tol);
+    ASSERT_NEARLY_EQ(r, T(-0.41, 51.24));
     r = dense::inner_product(p, q, true);
-    ASSERT_NEARLY_EQ_TOL(r, T(50.73, 10.48), comp_t(0), tol);
+    ASSERT_NEARLY_EQ(r, T(50.73, 10.48));
 }
 
 
@@ -452,7 +441,7 @@ TEST(Dense, RealSymEig) {
     evecs_chk.set_row<T>(2, {-0.29154909, -0.92861347, 0.02794618, 0.22780509});
     evecs_chk.set_row<T>(3, {0.26077289, 0.08247022, -0.60888775, 0.74461525});
 
-    ASSERT_TRUE(evecs.nearly_equal(evecs_chk, 1e-7));
+    ASSERT_TRUE(evecs.nearly_equal(evecs_chk));
 }
 
 #if 0

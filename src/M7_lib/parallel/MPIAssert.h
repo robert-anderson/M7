@@ -153,16 +153,8 @@ namespace asserts {
     static void nearly_eq(const char *kind, const T &lhs, const T &rhs,
                           const char *lhs_sym, const char *rhs_sym,
                           const char *file, int line, bool collective, const str_t &reason) {
-        nearly_eq(kind, lhs, rhs, fptol::default_rtol_near<T>(), fptol::default_atol_near<T>(),
+        nearly_eq(kind, lhs, rhs, fptol::default_rtol(lhs), fptol::default_atol(lhs),
                   lhs_sym, rhs_sym, file, line, collective, reason);
-    }
-
-
-    template<typename T>
-    static void numeric_eq(const char *kind, const T &lhs, const T &rhs,
-                           const char *lhs_sym, const char *rhs_sym,
-                           const char *file, int line, bool collective, const str_t &reason) {
-        nearly_eq(kind, lhs, rhs, 0.0, fptol::default_atol_num<T>(), lhs_sym, rhs_sym, file, line, collective, reason);
     }
 
     template<typename T>
@@ -170,13 +162,6 @@ namespace asserts {
                             const char *file, int line, bool collective, const str_t &reason) {
         compare_zero_abort(kind, sym, file, line, collective, v, atol, true, reason);
     }
-
-    template<typename T>
-    static void numeric_zero(const char *kind, T v, const char *sym,
-                            const char *file, int line, bool collective, const str_t &reason) {
-        nearly_zero(kind, v, fptol::default_atol_num<T>(), sym, file, line, collective, v, atol, true, reason);
-    }
-
 
     template<typename lhs_t, typename rhs_t>
     static void lt(const char *kind, const lhs_t &lhs, const rhs_t &rhs, const char *lhs_sym, const char *rhs_sym,
@@ -253,19 +238,15 @@ namespace asserts {
 
 #define DEBUG_ASSERT_NEARLY_EQ_TOL_ALL(lhs, rhs, rtol, atol, reason) MPI_NEARLY_EQ_TOL_BASE("ASSERT", lhs, rhs, rtol, atol, true, reason)
 #define DEBUG_ASSERT_NEARLY_EQ_ALL(lhs, rhs, reason) MPI_NEARLY_EQ_BASE("ASSERT", lhs, rhs, true, reason)
-#define DEBUG_ASSERT_NUM_EQ_ALL(lhs, rhs, reason) MPI_NUM_EQ_BASE("ASSERT", lhs, rhs, true, reason)
 
 #define DEBUG_ASSERT_NEARLY_EQ_TOL(lhs, rhs, rtol, atol, reason) MPI_NEARLY_EQ_TOL_BASE("ASSERT", lhs, rhs, rtol, atol, false, reason)
 #define DEBUG_ASSERT_NEARLY_EQ(lhs, rhs, reason) MPI_NEARLY_EQ_BASE("ASSERT", lhs, rhs, false, reason)
-#define DEBUG_ASSERT_NUM_EQ(lhs, rhs, reason) MPI_NUM_EQ_BASE("ASSERT", lhs, rhs, false, reason)
 
 #define DEBUG_ASSERT_NEARLY_ZERO_TOL_ALL(v, atol, reason) MPI_NEARLY_ZERO_TOL_BASE("ASSERT", v, atol, true, reason)
 #define DEBUG_ASSERT_NEARLY_ZERO_ALL(v, atol, reason) MPI_NEARLY_ZERO_BASE("ASSERT", v, atol, true, reason)
-#define DEBUG_ASSERT_NUM_ZERO_ALL(v, atol, reason) MPI_NUM_ZERO_BASE("ASSERT", v, true, reason)
 
 #define DEBUG_ASSERT_NEARLY_ZERO_TOT(v, atol, reason) MPI_NEARLY_ZERO_TOL_BASE("ASSERT", v, atol, false, reason)
 #define DEBUG_ASSERT_NEARLY_ZERO(v, atol, reason) MPI_NEARLY_ZERO_BASE("ASSERT", v, atol, false, reason)
-#define DEBUG_ASSERT_NUM_ZERO(v, atol, reason) MPI_NUM_ZERO_BASE("ASSERT", v, false, reason)
 
 #define DEBUG_ASSERT_NE_ALL(lhs, rhs, reason) MPI_NE_BASE("ASSERT", lhs, rhs, true, reason)
 #define DEBUG_ASSERT_NE(lhs, rhs, reason) MPI_NE_BASE("ASSERT", lhs, rhs, false, reason)
@@ -296,19 +277,15 @@ namespace asserts {
 
 #define DEBUG_ASSERT_NEARLY_EQ_TOL_ALL(lhs, rhs, rtol, atol, reason)
 #define DEBUG_ASSERT_NEARLY_EQ_ALL(lhs, rhs, reason)
-#define DEBUG_ASSERT_NUM_EQ_ALL(lhs, rhs, reason)
 
 #define DEBUG_ASSERT_NEARLY_EQ_TOL(lhs, rhs, rtol, atol, reason)
 #define DEBUG_ASSERT_NEARLY_EQ(lhs, rhs, reason)
-#define DEBUG_ASSERT_NUM_EQ(lhs, rhs, reason)
 
 #define DEBUG_ASSERT_NEARLY_ZERO_TOL_ALL(v, atol, reason)
 #define DEBUG_ASSERT_NEARLY_ZERO_ALL(v, atol, reason)
-#define DEBUG_ASSERT_NUM_ZERO_ALL(v, atol, reason)
 
 #define DEBUG_ASSERT_NEARLY_ZERO_TOT(v, atol, reason)
 #define DEBUG_ASSERT_NEARLY_ZERO(v, atol, reason)
-#define DEBUG_ASSERT_NUM_ZERO(v, atol, reason)
 
 #define DEBUG_ASSERT_LT_ALL(lhs, rhs, reason)
 #define DEBUG_ASSERT_LT(lhs, rhs, reason)
@@ -337,19 +314,15 @@ namespace asserts {
 
 #define REQUIRE_NEARLY_EQ_TOL_ALL(lhs, rhs, rtol, atol, reason) MPI_NEARLY_EQ_TOL_BASE("REQUIRE", lhs, rhs, rtol, atol, true, reason)
 #define REQUIRE_NEARLY_EQ_ALL(lhs, rhs, reason) MPI_NEARLY_EQ_BASE("REQUIRE", lhs, rhs, true, reason)
-#define REQUIRE_NUM_EQ_ALL(lhs, rhs, reason) MPI_NUM_EQ_BASE("REQUIRE", lhs, rhs, true, reason)
 
 #define REQUIRE_NEARLY_EQ_TOL(lhs, rhs, rtol, atol, reason) MPI_NEARLY_EQ_TOL_BASE("REQUIRE", lhs, rhs, rtol, atol, false, reason)
 #define REQUIRE_NEARLY_EQ(lhs, rhs, reason) MPI_NEARLY_EQ_BASE("REQUIRE", lhs, rhs, false, reason)
-#define REQUIRE_NUM_EQ(lhs, rhs, reason) MPI_NUM_EQ_BASE("REQUIRE", lhs, rhs, false, reason)
 
 #define REQUIRE_NEARLY_ZERO_TOL_ALL(v, atol, reason) MPI_NEARLY_ZERO_TOL_BASE("REQUIRE", v, atol, true, reason)
 #define REQUIRE_NEARLY_ZERO_ALL(v, atol, reason) MPI_NEARLY_ZERO_BASE("REQUIRE", v, atol, true, reason)
-#define REQUIRE_NUM_ZERO_ALL(v, atol, reason) MPI_NUM_ZERO_BASE("REQUIRE", v, true, reason)
 
 #define REQUIRE_NEARLY_ZERO_TOT(v, atol, reason) MPI_NEARLY_ZERO_TOL_BASE("REQUIRE", v, atol, false, reason)
 #define REQUIRE_NEARLY_ZERO(v, atol, reason) MPI_NEARLY_ZERO_BASE("REQUIRE", v, atol, false, reason)
-#define REQUIRE_NUM_ZERO(v, atol, reason) MPI_NUM_ZERO_BASE("REQUIRE", v, false, reason)
 
 #define REQUIRE_LT_ALL(lhs, rhs, reason) MPI_LT_BASE("REQUIRE", lhs, rhs, true, reason)
 #define REQUIRE_LT(lhs, rhs, reason) MPI_LT_BASE("REQUIRE", lhs, rhs, false, reason)

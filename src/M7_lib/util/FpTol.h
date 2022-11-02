@@ -15,51 +15,46 @@
  */
 namespace fptol {
     /**
-     * @tparam T
-     *  type of number being compared
      * @return
      *  default relative tolerance for nearly_equal comparisons
      */
     template<typename T>
-    static constexpr arith::comp_t<T> default_rtol_near() {return 1e-5;}
+    static constexpr T default_rtol(const T&) {return {};}
+    static constexpr float default_rtol(const float&) {return 1e-5;}
+    static constexpr double default_rtol(const double&) {return 1e-5;}
 
     template<typename T>
-    static constexpr arith::comp_t<T> default_rtol_near(const T&) {return default_rtol_near<T>();}
-
+    static constexpr arith::comp_t<T> default_rtol(const std::complex<T>& z) {
+        return default_rtol(arith::real_ref(z));
+    }
     /**
-     * @tparam T
-     *  type of number being compared
      * @return
      *  default absolute tolerance for nearly_equal comparisons
      */
     template<typename T>
-    static constexpr arith::comp_t<T> default_atol_near() {return 1e-8;}
+    static constexpr T default_atol(const T&) {return {};}
+    static constexpr float default_atol(const float&) {return 1e-8;}
+    static constexpr double default_atol(const double&) {return 1e-8;}
 
     template<typename T>
-    static constexpr arith::comp_t<T> default_atol_near(const T&) {return default_atol_near<T>();}
+    static constexpr arith::comp_t<T> default_atol(const std::complex<T>& z) {
+        return default_atol(arith::real_ref(z));
+    }
 
-    template<typename T>
-    static constexpr T default_atol_num(const float&) {return T(0);}
-    static constexpr float default_atol_num(const float&) {return 1e-7;}
-    static constexpr double default_atol_num(const double&) {return 1e-14;}
-
-    template<typename T>
-    static constexpr arith::comp_t<T> default_atol_num(const T&) {return default_atol_num<T>();}
     /**
-     * a different default atol is used for numeric equality, where one is only leaving room for discrepancies due to
-     * non-associativity of floating point ops - useful e.g. in MPI reductions: where the order of operations is
-     * non-deterministic, and the number of terms is runtime specifiable
-     *
-     * this atol is also to be used when comparing against zero, where non-zero rtol is not suitable, although in this
-     * case the user can specify another tolerance when the above reasons are not expected to be those responsible
-     * discrepancies via nearly_equal
-     * @tparam T
-     *  type of number being compared
      * @return
-     *  default absolute tolerance for numeric_zero comparisons
+     *  default absolute tolerance for nearly_zero comparisons
      */
     template<typename T>
-    static constexpr arith::comp_t<T> default_atol_num() {return default_atol_num(arith::comp_t<T>());}
+    static constexpr T default_ztol(const T&) {return {};}
+    static constexpr float default_ztol(const float&) {return 1e-12;}
+    static constexpr double default_ztol(const double&) {return 1e-12;}
+
+    template<typename T>
+    static constexpr arith::comp_t<T> default_ztol(const std::complex<T>& z) {
+        return default_ztol(arith::real_ref(z));
+    }
+
 
     template<typename T>
     static constexpr bool nearly_equal(T a, T b, T rtol, T atol){
@@ -68,7 +63,7 @@ namespace fptol {
 
     template<typename T>
     static constexpr bool nearly_equal(T a, T b){
-        return nearly_equal(a, b, default_rtol_near<T>(), default_atol_near<T>());
+        return nearly_equal(a, b, default_rtol(a), default_atol(b));
     }
 
     template<typename T>
@@ -78,38 +73,33 @@ namespace fptol {
 
     template<typename T>
     static constexpr bool nearly_equal(std::complex<T> a, std::complex<T> b){
-        return nearly_equal(a, b, default_rtol_near<T>(), default_atol_near<T>());
+        return nearly_equal(a, b, default_rtol<T>(), default_atol(a));
     }
 
     template<typename T>
-    static constexpr bool nearly_zero(T b, arith::comp_t<T> atol){
+    static constexpr bool nearly_zero(T b, arith::comp_t<T> atol) {
         return nearly_equal(T(0), b, T(0), atol);
     }
 
     template<typename T>
-    static constexpr bool nearly_real(T b, arith::comp_t<T> atol){
-        return numeric_zero(imag(b), atol);
+    static constexpr bool nearly_zero(T b) {
+        return nearly_equal(T(0), b, T(0), default_ztol(b));
     }
 
     template<typename T>
-    static constexpr bool numeric_equal(T a, T b){
-        return nearly_equal(a, b, arith::comp_t<T>(0.0), default_atol_num<T>());
+    static constexpr bool nearly_real(T b, arith::comp_t<T> atol) {
+        return nearly_zero(arith::imag(b), atol);
     }
 
     template<typename T>
-    static constexpr bool numeric_zero(T b){
-        return nearly_zero(b, default_atol_num<T>());
+    static constexpr bool nearly_real(T b){
+        return nearly_zero(arith::imag(b));
     }
 
     template<typename T>
-    static constexpr bool numeric_real(T b){
-        return numeric_zero(arith::imag(b));
-    }
-
-    template<typename T>
-    bool numeric_integer(const T &v) {
+    bool nearly_integer(const T &v) {
         static_assert(std::is_floating_point<T>::value, "T must be floating point");
-        return numeric_equal(std::round(v), v);
+        return nearly_equal(std::round(v), v);
     }
 }
 

@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-02-20.
 //
 
-#include <gtest/gtest.h>
+#include "test_core/defs.h"
 #include <M7_lib/defs.h>
 #include <M7_lib/sample/Aliaser.h>
 
@@ -20,7 +20,11 @@ TEST(Aliaser, DistributionCheck) {
     }
     auto norm = std::accumulate(probs.begin(), probs.end(), 0.0);
     for (uint_t i = 0ul; i < probs.size(); ++i) {
-        if (fptol::numeric_zero(probs[i])) ASSERT_EQ(results[i], 0);
-        else ASSERT_LT(std::abs(1.0 - (float(results[i]) / float(n_attempts)) / (probs[i] / norm)), 0.01);
+        if (fptol::nearly_zero(probs[i])) {
+            ASSERT_NEARLY_ZERO(results[i]);
+        }
+        else {
+            ASSERT_LT(std::abs(1.0 - (float(results[i]) / float(n_attempts)) / (probs[i] / norm)), 0.01);
+        }
     }
 }

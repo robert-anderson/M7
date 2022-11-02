@@ -67,7 +67,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
     DEBUG_ASSERT_EQ(m_wf.m_dist.irank(dst_mbf), mpi::irank(),
                     "the received ONV has not been sent to the right MPI rank!")
     // zero magnitude weights should not have been communicated
-    if (fptol::numeric_zero(delta_weight)) return;
+    if (delta_weight == 0.0) return;
 
     m_wf.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
     if (!dst_walker) {
@@ -85,7 +85,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
 
     } else {
         wf_t weight_before = dst_walker.m_weight[dst_ipart];
-        if (fptol::numeric_zero(weight_before) && !allow_initiation) {
+        if (weight_before == 0.0 && !allow_initiation) {
             // the row exists, but that does not necessarily mean that each part has non-zero occupation
             //m_aborted_weight += std::abs(*delta_weight);
             return;

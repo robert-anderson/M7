@@ -50,7 +50,7 @@ void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uin
     prob_t p_succeed_at_least_once = 1.0;
 
     DEBUG_ASSERT_NE(weight, 0.0, "should not attempt off-diagonal propagation from zero weight");
-    DEBUG_ASSERT_TRUE(m_ham.complex_valued() || fptol::numeric_real(weight),
+    DEBUG_ASSERT_TRUE(m_ham.complex_valued() || fptol::nearly_real(weight),
                       "real-valued hamiltonian should never result in non-zero imaginary walker component")
     const auto& src_mbf = walker.m_mbf;
     bool is_initiator = walker.is_initiator(ipart, m_nadd_initiator);
@@ -90,7 +90,7 @@ void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uin
 
         conn.apply(src_mbf, dst_mbf);
         auto delta = -tau() * phase(weight) * helem / prob_gen;
-        if (fptol::numeric_zero(delta)) continue;
+        if (fptol::nearly_zero(delta)) continue;
         imp_samp_delta(delta, src_mbf, dst_mbf);
         /*
          * the stochastically-realized spawned contribution is equal to delta if delta is not lower in magnitude than

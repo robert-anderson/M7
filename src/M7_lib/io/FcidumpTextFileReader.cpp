@@ -13,7 +13,7 @@ FcidumpTextFileReader::FcidumpTextFileReader(const FcidumpInfo& info) :
         uintv_t inds(4);
         ham_t v;
         while (next(inds, v)) {
-            if (fptol::numeric_zero(v)) continue;
+            if (fptol::nearly_zero(v)) continue;
             if (((inds[0] < nsite) != (inds[1] < nsite)) || ((inds[2] < nsite) != (inds[3] < nsite))) {
                 // spin non-conserving example found
                 if (nset_ind(inds)==2) m_spin_conserving_1e = false;
