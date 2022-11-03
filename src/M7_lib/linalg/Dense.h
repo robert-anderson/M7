@@ -123,6 +123,11 @@ namespace dense {
             REQUIRE_TRUE(m_nrow, "matrix must have a non-zero number of rows");
             REQUIRE_TRUE(m_ncol, "matrix must have a non-zero number of columns");
         }
+
+        Matrix(uint_t nrow, const v_t<T>& rows): Matrix(nrow, rows.size()/nrow) {
+            *this = rows;
+        }
+
         Matrix(const hdf5::NodeReader& nr, const str_t name) :
             Matrix(nr.dataset_shape(name)[0], nr.dataset_shape(name)[1]) {
             nr.read_data(name, m_buffer.data(), m_buffer.size());
@@ -145,6 +150,7 @@ namespace dense {
             set(v.data());
             return *this;
         }
+
         Matrix& operator=(const sparse::dynamic::Matrix<T>& sparse){
             REQUIRE_GE(m_nrow, sparse.nrow(), "not enough rows in dense matrix to store contents of source");
             REQUIRE_GT(m_ncol, sparse.max_col_ind(), "not enough columns in dense matrix store contents of source");
@@ -412,9 +418,15 @@ namespace dense {
 
     template<typename T>
     class SquareMatrix : public Matrix<T> {
+        static uint_t nrow_from_flat_size(uint_t n) {
+            const auto nrow = integer::sqrt(n);
+            REQUIRE_NE(nrow, ~0ul, "SquareMatrix initialization from std::vector requires square number of elements");
+            return nrow;
+        }
     public:
         using Matrix<T>::operator=;
         SquareMatrix(uint_t n): Matrix<T>(n, n){}
+        SquareMatrix(const v_t<T>& v): Matrix<T>(nrow_from_flat_size(v.size()), v){}
         SquareMatrix(const sparse::dynamic::Matrix<T>& sparse) :
                 SquareMatrix(std::max(sparse.nrow(), sparse.max_col_ind()+1)){
             *this = sparse;
@@ -444,14 +456,19 @@ namespace dense {
         }
 
         bool is_diagonal() const {
-//            const auto n = Matrix<T>::nrow();
-//            const T* row;
-//            if (std::any_of(row+irow+1, row+n)) return false;
-//            for (uint_t irow=0ul; irow<n; ++irow) {
-//                Matrix<T>::get_row(irow, row);
-//                if (std::any_of(row, row+irow)) return false;
-//                if (std::any_of(row+irow+1, row+n)) return false;
-//            }
+            const auto n = Matrix<T>::ncol();
+            if (n==1) return true;
+            auto first_row_ptr = Matrix<T>::ptr()+1ul;
+            if (std::any_of(first_row_ptr, first_row_ptr+n, [](const T& v){return v;})) return false;
+            /*
+             * non-diagonal part of first row and first element of second row are all zero, so compare all subsequent
+             * non-diagonal parts with this string
+             */
+            auto ptr = first_row_ptr;
+            for (auto irow=2ul; irow < n; ++irow) {
+                ptr+=n+1;
+                if (std::memcmp(ptr, first_row_ptr, n*sizeof(T))) return false;
+            }
             return true;
         }
     };

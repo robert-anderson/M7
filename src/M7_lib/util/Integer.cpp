@@ -102,6 +102,24 @@ uint_t integer::combinatorial_with_repetition(uint_t n, uint_t r) {
     return combinatorial(n + r - 1, r);
 }
 
+uint_t integer::sqrt(uint_t n) {
+    if (n <= 1) return n;
+    /*
+     * iterate Newton's method until the candidate root is found
+     */
+    unsigned int x0 = n / 2;
+    unsigned int x1 = ( x0 + n / x0 ) / 2;
+    while ( x1 < x0 ) {
+        x0 = x1;
+        x1 = ( x0 + n / x0 ) / 2;
+    }
+    /*
+     * if the candidate root does not square to n, then n is not a square number
+     */
+    if (x0*x0 != n) return ~0ul;
+    return x0;
+}
+
 uint_t integer::gcd(uint_t a, uint_t b) {
     if (b == 0) return a;
     return gcd(b, a % b);

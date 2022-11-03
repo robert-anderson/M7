@@ -30,7 +30,6 @@ TEST(FpTol, NearEqual){
 TEST(FpTol, NearZero){
     const double b = std::pow(2.0, -11.0);
     const double tol = std::pow(2.0, -10.0);
-    const auto tmp = b-tol;
     ASSERT_TRUE(fptol::near_zero(b, tol));
     ASSERT_TRUE(fptol::near_zero(-b, tol));
     ASSERT_FALSE(fptol::near_zero(b+2*tol, tol));

@@ -99,3 +99,16 @@ TEST(UtilInteger, LeastCommonMultipleLe) {
     ASSERT_EQ(integer::lcm_le(15), 13*11*7*5*3*3*2*2*2);
     ASSERT_EQ(integer::lcm_le(16), 13*11*7*5*3*3*2*2*2*2);
 }
+
+TEST(UtilInteger, Sqrt) {
+    const uint_t nroot = 100ul;
+    uint_t inonsq = 0ul;
+    for (uint_t iroot = 0ul; iroot<nroot; ++iroot){
+        const auto isq = iroot * iroot;
+        for (; inonsq != isq; ++inonsq){
+            ASSERT_EQ(integer::sqrt(inonsq), ~0ul);
+        }
+        ++inonsq;
+        ASSERT_EQ(integer::sqrt(isq), iroot);
+    }
+}

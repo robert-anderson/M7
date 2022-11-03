@@ -62,6 +62,8 @@ namespace integer {
 
     uint_t combinatorial_with_repetition(uint_t n, uint_t r);
 
+    uint_t sqrt(uint_t n);
+
     /**
      * get greatest common divisor of the two given whole numbers
      */

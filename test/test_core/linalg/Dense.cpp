@@ -52,6 +52,38 @@ TEST(Dense, Dagger) {
     ASSERT_TRUE(p.nearly_equal(p_chk));
 }
 
+TEST(Dense, IsDiagonal) {
+    typedef float T;
+    {
+        dense::SquareMatrix<T> mat(6);
+        ASSERT_TRUE(mat.is_diagonal());
+        mat(0, 0) = 1.0;
+        mat(1, 1) = 2.0;
+        mat(2, 2) = 3.0;
+        mat(3, 3) = 4.0;
+        mat(4, 4) = 5.0;
+        mat(5, 5) = 6.0;
+        ASSERT_TRUE(mat.is_diagonal());
+        mat(1, 2) = 1.0;
+        ASSERT_FALSE(mat.is_diagonal());
+        mat(1, 2) = 0.0;
+        ASSERT_TRUE(mat.is_diagonal());
+        mat(5, 2) = 1.0;
+        ASSERT_FALSE(mat.is_diagonal());
+    }
+    {
+        dense::SquareMatrix<T> mat(2);
+        mat = v_t<T>{0.0, 0.0, 0.0, 0.0};
+        ASSERT_TRUE(mat.is_diagonal());
+        mat = v_t<T>{1.0, 0.0, 0.0, 1.0};
+        ASSERT_TRUE(mat.is_diagonal());
+        mat = v_t<T>{1.0, 1.0, 0.0, 1.0};
+        ASSERT_FALSE(mat.is_diagonal());
+        mat = v_t<T>{1.0, 1.0, 1.0, 1.0};
+        ASSERT_FALSE(mat.is_diagonal());
+    }
+}
+
 TEST(Dense, RectSingleMatMatProduct) {
     typedef float T;
     dense::Matrix<float> p(3, 5);
