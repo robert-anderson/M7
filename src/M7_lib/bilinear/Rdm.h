@@ -19,7 +19,10 @@ using namespace exsig;
 
 class Rdm : public communicator::MappedSend<MaeRow, MaeRow> {
 public:
-    const sys::Size m_basis_size;
+    /**
+     * RDM accumulation requires knowledge of the size of the basis and the numbers of particles
+     */
+    const sys::Sector m_sector;
     /**
      * rank signature of the RDM, along with convenient decoded
      */
@@ -84,9 +87,7 @@ public:
         return name(m_name, m_ranksig);
     }
 
-    const uint_t m_nelec;
-
-    Rdm(uint_t ranksig, uint_t indsig, sys::Size basis_size, uint_t nelec, uint_t nvalue,
+    Rdm(uint_t ranksig, uint_t indsig, sys::Sector sector, uint_t nvalue,
         DistribOptions dist_opts, Sizing store_sizing, Sizing comm_sizing, str_t name="");
 
     /**
@@ -94,11 +95,8 @@ public:
      *  RDM section of the config document
      * @param ranksig
      *  rank of the SQ operators in each contribution
-     * @param basis_size
-     *  dimensions of the stored basis
-     * @param nelec
-     *  number of electrons to use in enforcing probability-conserving trace
-     *  TODO: generalize to use sys::Particles
+     * @param sector
+     *  dimensions of the stored basis and number of particles to use in enforcing probability-conserving trace
      * @param nvalue
      *  number of values to encode in each RDM element
      * @param name
@@ -106,13 +104,7 @@ public:
      * @param indsig
      *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
      */
-    Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig,
-        sys::Size basis_size, uint_t nelec, uint_t nvalue, str_t name=""):
-        Rdm(ranksig, indsig, basis_size, nelec, nvalue, opts.m_distribution,
-            // store sizing
-            Sizing{nrec_est(basis_size, indsig), opts.m_buffers.m_store_exp_fac},
-            // send/recv sizing
-            Sizing{nrec_est(basis_size, indsig), opts.m_buffers.m_comm_exp_fac}, name){}
+    Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Sector sector, uint_t nvalue, str_t name="");
 
     void end_cycle();
 
@@ -132,131 +124,6 @@ public:
                        const com_ops::Bos& com, const wf_t& contrib) {
         bos_make_contribs(src_onv, conn, com, contrib);
     }
-};
-
-class FockRdm4 : public Rdm {
-
-    /**
-     * Generalized Fock in the active space
-     */
-    dense::SquareMatrix<ham_t> m_fock;
-
-public:
-    /**
-     * assume diagonal Fock matrix until a non-diagonal value is read-in
-     */
-    bool m_diagonal;
-
-    FockRdm4(const conf::Rdms& opts, sys::Size basis_size, uint_t nelec, uint_t nvalue);
-
-    /**
-     * override the default method to implement on-the-fly contraction
-     */
-    void frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
-                           const FrmOps& com, const wf_t& contrib) override;
-};
-
-class Rdms : public Archivable {
-    /**
-     * RDM objects managed by this instance
-     */
-    std::array<std::unique_ptr<Rdm>, exsig::c_ndistinct> m_rdms;
-    /**
-     * if true, the spinfree versions of the full RDMs are all computed and output to the HDF5 archive (note that this
-     * is only a finalization procedure, NOT done on the fly)
-     */
-    const bool m_spinfree;
-    /**
-     * optionally-allocatable contraction of the 4RDM with the active space generalize Fock matrix for use in CASPT2
-     */
-    std::unique_ptr<FockRdm4> m_fock_rdm4;
-    const uintv_t m_rdm_ranksigs;
-    const std::array<uintv_t, exsig::c_ndistinct> m_exsig_ranks;
-
-    suite::Conns m_work_conns;
-    suite::ComOps m_work_com_ops;
-
-    std::array<uintv_t, exsig::c_ndistinct> make_exsig_ranks() const;
-
-public:
-    const bool m_explicit_ref_conns;
-    const Epoch& m_accum_epoch;
-    Reduction<wf_t> m_total_norm;
-    const uint_t m_nelec;
-
-    Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Size basis_size, uint_t nelec, const Epoch& accum_epoch);
-
-    operator bool() const;
-
-    bool takes_contribs_from(uint_t exsig) const;
-
-    void make_contribs(const field::Mbf& src_onv, const conn::Mbf& conn,
-                       const com_ops::Mbf& com, const wf_t& contrib);
-
-    void make_contribs(const field::Mbf& src_onv, const field::Mbf& dst_onv, const wf_t& contrib);
-
-    bool all_stores_empty() const;
-
-    void end_cycle();
-
-    /**
-     * @param ham
-     *  hamiltonian corresponding to the evolution of the wavefunction(s) used in the RDM estimation
-     * @return
-     *  true only if the ranks of RDMs estimated are sufficient for pseudo-variational energy estimation via contraction
-     *  of the RDMs with the Hamiltonian coefficients.
-     */
-    bool is_energy_sufficient(const Hamiltonian& ham) const;
-
-    /**
-     * compute the fermion 2-RDM energy
-     * @param ham
-     * @return
-     *  MPI-reduced sum of 0, 1, and 2 body parts of the RDM energy
-     *
-     *  E_RDM = h0 + h1[i,j] * rdm1[i,j] + <ij|kl> * rdm2[i,j,k,l]
-     *
-     *  rdm1[i,j] = sum_k rdm2[i,k,j,k] / (n_elec - 1)
-     */
-    ham_comp_t get_energy(const FrmHam& ham) const;
-
-    /**
-     * compute the RDM energy contribution from the boson number-nonconserving terms
-     * @param ham
-     *  boson ladder-operator (pure and coupled) hamiltonian
-     * @return
-     */
-    ham_comp_t get_energy(const FrmBosHam& ham, uint_t nelec, uint_t exsig) const;
-
-    ham_comp_t get_energy(const FrmBosHam& ham, uint_t nelec) const {
-        return get_energy(ham, nelec, exsig::ex_1101) + get_energy(ham, nelec, exsig::ex_1110);
-    }
-
-    /**
-     * compute the RDM energy contribution from the boson number-conserving terms
-     * @param ham
-     *  boson number conserving hamiltonian
-     * @return
-     */
-    ham_comp_t get_energy(const BosHam& ham) const;
-
-    /**
-     * @param ham
-     *  full hamiltonian including all terms
-     * @return
-     *  E_RDM = E_2RDM + E_RDM_ladder + E_RDM_boson
-     */
-    ham_comp_t get_energy(const Hamiltonian& ham) const {
-        if (!is_energy_sufficient(ham)) return 0.0;
-        return get_energy(ham.m_frm) + get_energy(ham.m_frmbos, m_nelec) + get_energy(ham.m_bos);
-    }
-
-private:
-    void load_fn(const hdf5::NodeReader& /*parent*/) override {
-
-    }
-
-    void save_fn(const hdf5::NodeWriter& parent) override;
 };
 
 #endif //M7_RDM_H

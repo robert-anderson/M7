@@ -34,7 +34,7 @@ uint_t SpinFreeRdm::spatsig(const MaeIndsPartition& spat_inds) {
 void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
     const auto elem = row.m_values[0] / norm;
     auto& given_inds = m_uncontracted_inds;
-    const auto orbs = m_basis_size.m_frm;
+    const auto& orbs = m_sector.m_frm.m_basis;
     const bool is_diagonal = (row.m_inds.m_frm.m_cre==row.m_inds.m_frm.m_ann);
     if (m_nfrm_cre_ind==1ul) {
         /*
@@ -68,7 +68,7 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
         /*
          * first, convert to spatial indices
          */
-        spinorbs_to_spat(row.m_inds.m_frm, given_inds.m_frm, m_basis_size.m_frm);
+        spinorbs_to_spat(row.m_inds.m_frm, given_inds.m_frm, m_sector.m_frm.m_basis);
         /*
          * from these, the spatial signatures can be obtained
          */
@@ -77,7 +77,7 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
         /*
          * also required is the pair spin signature, this is available from the original indices
          */
-        const auto pair_spinsig = SpinFreeRdm::pair_spinsig(row.m_inds.m_frm, m_basis_size.m_frm);
+        const auto pair_spinsig = SpinFreeRdm::pair_spinsig(row.m_inds.m_frm, m_sector.m_frm.m_basis);
         DEBUG_ASSERT_LT(pair_spinsig, m_rank_ind==2 ? c_npair_spinsig_2 : c_npair_spinsig_3, "pair spinsig OOB");
         /*
          * from the information extracted so far, we can obtain the spin-tracing case index
@@ -130,7 +130,7 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
 }
 
 SpinFreeRdm::SpinFreeRdm(const Rdm& src, wf_t norm, uint_t nelem_per_comm) :
-        Rdm(src.m_ranksig, src.m_indsig, src.m_basis_size, src.m_nelec, src.m_store.m_row.m_values.nelement(),
+        Rdm(src.m_ranksig, src.m_indsig, src.m_sector, src.m_store.m_row.m_values.nelement(),
             src.m_store.m_dist_opts,
             {src.m_store.nrow_in_use(), src.m_store.m_bw.get_expansion_factor()},
             {nelem_per_comm, 1.0}, "sf_"+src.name()), m_insert_inds(src.m_indsig){

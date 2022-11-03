@@ -8,7 +8,7 @@
 
 #include <M7_lib/wavefunction/Wavefunction.h>
 #include <M7_lib/wavefunction/Reference.h>
-#include <M7_lib/bilinear/Rdm.h>
+#include <M7_lib/bilinear/Rdms.h>
 
 
 /**

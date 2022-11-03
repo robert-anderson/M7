@@ -4,8 +4,12 @@ target_sources(M7_lib
         Bilinears.h
         FermionPromoter.cpp
         FermionPromoter.h
+        FockRdm4.cpp
+        FockRdm4.h
         Rdm.cpp
         Rdm.h
+        Rdms.cpp
+        Rdms.h
         SpectralMoment.cpp
         SpectralMoment.h
         SpinfreeRdm.cpp
