@@ -81,11 +81,13 @@ cas_fock_mo = fock_mo[mc.ncore:mc.ncore+ncas, mc.ncore:mc.ncore+ncas]
 dm1, dm2, dm3, dm4 = fci.rdm.make_dm1234('FCI4pdm_kern_sf', mc.fcisolver.ci, mc.fcisolver.ci, ncas, (neleca, nelecb))
 dm1, dm2, dm3, dm4 = fci.rdm.reorder_dm1234(dm1, dm2, dm3, dm4)
 dm4f = np.einsum('iajbkcld,ld->iajbkc', dm4, cas_fock_mo)
+dm4fd = np.einsum('iajbkcll,ll->iajbkc', dm4, cas_fock_mo)
 
 assert ao_rdm.shape==mo_rdm.shape
 
 fcidump(mc, mol, 'FCIDUMP')
 fockdump(cas_fock_mo, 'fock.h5')
+fockdump(np.diag(cas_fock_mo.diagonal()), 'fock_diag.h5')
 
 # transpose higher-rank arrays such that the creation inds are first, then the annihilations
 dms = {
@@ -93,8 +95,8 @@ dms = {
     'sf_2200' : np.array(dm2).transpose(0, 2, 1, 3),
     'sf_3300' : np.array(dm3).transpose(0, 2, 4, 1, 3, 5),
     'sf_4400f': np.array(dm4f).transpose(0, 2, 4, 1, 3, 5),
+    'sf_4400fd': np.array(dm4fd).transpose(0, 2, 4, 1, 3, 5),
 }
 
 import pickle as pkl
-with open('exact_rdms.pkl', 'wb') as f:
-    pkl.dump(dms, f)
+with open('exact_rdms.pkl', 'wb') as f: pkl.dump(dms, f)
