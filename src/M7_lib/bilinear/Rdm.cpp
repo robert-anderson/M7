@@ -164,10 +164,10 @@ FockRdm4::FockRdm4(const conf::Rdms &opts, sys::Size basis_size, uint_t nelec, u
         const auto icol = inds[2*i+1]-1;
         REQUIRE_GE(irow, 0, "Fock matrix row index OOB (HDF5 indices dataset must count from 1)");
         REQUIRE_GE(icol, 0, "Fock matrix col index OOB (HDF5 indices dataset must count from 1)");
-        if (irow!=icol) m_diagonal = false;
         m_fock(irow, icol) = values[i];
     }
     m_fock.symmetrize();
+    m_diagonal = m_fock.is_diagonal();
     logging::info("The given Fock matrix was found to be {}diagonal", (m_diagonal ? "":"non-"));
 }
 
@@ -432,7 +432,7 @@ ham_comp_t Rdms::get_energy(const BosHam& ham) const {
         e += rdm_element*ham.get_coeff_0011(n, m);
     }
     e = mpi::all_sum(e) / m_total_norm.m_reduced;
-    REQUIRE_TRUE(fptol::numeric_real(e), "energy should be purely real")
+    REQUIRE_TRUE(fptol::near_real(e), "energy should be purely real")
     return arith::real(e);
 }
 
