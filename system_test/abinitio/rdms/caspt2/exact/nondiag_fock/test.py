@@ -23,9 +23,8 @@ h5_file = h5py.File(h5_fname, 'r')
 h5_rdms = h5_file['archive']['rdms']
 with open(pkl_fname, 'rb') as f: py_rdms = pkl.load(f)
 
-for key in ('sf_4400f',):
-    h5_rdm = load_hdf5_rdm(h5_rdms[key])
-    py_rdm = py_rdms[key]
-    diff = np.abs(h5_rdm-py_rdm).flatten()
-    imax = np.argmax(diff)
-    if diff[imax] > 1e-4: fail(f'RDM {key} does not match exact value {h5_rdm.flatten()[imax], py_rdm.flatten()[imax]}')
+h5_rdm = load_hdf5_rdm(h5_rdms['sf_4400f'])
+py_rdm = py_rdms['sf_4400f']
+diff = np.abs(h5_rdm-py_rdm).flatten()
+imax = np.argmax(diff)
+if diff[imax] > 1e-4: fail(f'F*4RDM does not match exact value {h5_rdm.flatten()[imax], py_rdm.flatten()[imax]}')
