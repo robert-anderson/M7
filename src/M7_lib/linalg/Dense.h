@@ -471,6 +471,14 @@ namespace dense {
             }
             return true;
         }
+
+        v_t<T> get_diagonal() const {
+            const auto n = Matrix<T>::ncol();
+            v_t<T> tmp;
+            tmp.reserve(n);
+            for (uint_t i=0ul; i<n; ++i) tmp.push_back((*this)(i, i));
+            return tmp;
+        }
     };
 
 

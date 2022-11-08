@@ -43,8 +43,12 @@ Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Sector sector, const E
         m_rdms[ranksig] = ptr::smart::make_unique<Rdm>(opts, ranksig, ranksig, sector, 1ul);
     }
     if (opts.m_fock_4rdm.m_enabled) {
+        logging::info("Loading generalized Fock matrix for accumulation of its contraction with the 4RDM");
         FockMatrix fock(sector.m_frm.size(), opts.m_fock_4rdm.m_fock_path);
-        m_fock_rdm4 = ptr::smart::make_unique<FockRdm4>(opts, fock, sector, 1ul);
+        const auto diag = fock.is_diagonal();
+        logging::info("The given Fock matrix was found to be {}diagonal", (diag ? "" : "non-"));
+        if (!diag) m_fock_rdm4 = ptr::smart::make_poly_unique<FockRdm4, NonDiagFockRdm4>(opts, fock, sector, 1ul);
+        else m_fock_rdm4 = ptr::smart::make_poly_unique<FockRdm4, DiagFockRdm4>(opts, fock, sector, 1ul);
     }
 
     m_total_norm.m_local = 0.0;
@@ -63,8 +67,8 @@ Rdms::operator bool() const {
 
 bool Rdms::takes_contribs_from(uint_t exsig) const {
     if (exsig > exsig::c_ndistinct) return false;
-//    if ((exsig==ex_quadruple) && m_fock_rdm4 && !m_fock_rdm4->m_diagonal) return true;
-    if ((exsig==ex_quadruple) && m_fock_rdm4) return true;
+    if (exsig==ex_quadruple)
+        return m_fock_rdm4 && dynamic_cast<const NonDiagFockRdm4*>(m_fock_rdm4.get());
     return !m_exsig_ranks[exsig].empty();
 }
 
