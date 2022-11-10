@@ -126,4 +126,45 @@ public:
     }
 };
 
+class PureRdm : public Rdm {
+public:
+    /**
+     * @param opts
+     *  RDM section of the config document
+     * @param ranksig
+     *  rank of the SQ operators in each contribution
+     * @param sector
+     *  dimensions of the stored basis and number of particles to use in enforcing probability-conserving trace
+     * @param nvalue
+     *  number of values to encode in each RDM element
+     * @param name
+     *  string identifier for logging and archive output. if empty, this is generated from the ranksig
+     * @param indsig
+     *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
+     */
+    PureRdm(const conf::Rdms& opts, uint_t ranksig, sys::Sector sector, uint_t nvalue, str_t name=""):
+            Rdm(opts, ranksig, ranksig, sector, nvalue, name){}
+};
+
+class ContractedRdm : public Rdm {
+public:
+    /**
+     * @param opts
+     *  RDM section of the config document
+     * @param ranksig
+     *  rank of the SQ operators in each contribution
+     * @param sector
+     *  dimensions of the stored basis and number of particles to use in enforcing probability-conserving trace
+     * @param nvalue
+     *  number of values to encode in each RDM element
+     * @param name
+     *  string identifier for logging and archive output. if empty, this is generated from the ranksig
+     * @param indsig
+     *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
+     */
+    ContractedRdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig,
+                  sys::Sector sector, uint_t nvalue, str_t name=""):
+            Rdm(opts, ranksig, indsig, sector, nvalue, name){}
+};
+
 #endif //M7_RDM_H

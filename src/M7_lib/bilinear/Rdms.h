@@ -8,12 +8,11 @@
 #include "Rdm.h"
 #include "FockRdm4.h"
 
-
 class Rdms : public Archivable {
     /**
      * RDM objects managed by this instance
      */
-    std::array<std::unique_ptr<Rdm>, exsig::c_ndistinct> m_rdms;
+    std::forward_list<std::unique_ptr<Rdm>> m_rdms;
     /**
      * if true, the spinfree versions of the full RDMs are all computed and output to the HDF5 archive (note that this
      * is only a finalization procedure, NOT done on the fly)
@@ -22,14 +21,25 @@ class Rdms : public Archivable {
     /**
      * optionally-allocatable contraction of the 4RDM with the active space generalize Fock matrix for use in CASPT2
      */
-    std::unique_ptr<FockRdm4> m_fock_rdm4;
-    const uintv_t m_rdm_ranksigs;
-    const std::array<uintv_t, exsig::c_ndistinct> m_exsig_ranks;
+//    FockRdm4* m_fock_rdm4 = nullptr;
+    /**
+     * each array element is indexed by an exsig, and contains a list of pointers to RDM objects which take
+     * contributions from that exsig, either because the RDM's ranksig matches the exsig, or the exsig is promotable to
+     * it
+     */
+    typedef std::array<std::forward_list<Rdm*>, exsig::c_ndistinct> exsig_to_rdms_t;
+    exsig_to_rdms_t m_exsig_to_rdms;
+
+    /**
+     * each array element is indexed by a ranksig, and points to the pure RDM of that rank
+     */
+    typedef std::array<Rdm*, exsig::c_ndistinct> pure_rdms_t;
+    pure_rdms_t m_pure_rdms;
 
     suite::Conns m_work_conns;
     suite::ComOps m_work_com_ops;
 
-    std::array<uintv_t, exsig::c_ndistinct> make_exsig_ranks() const;
+    exsig_to_rdms_t make_exsig_to_rdms() const;
 
 public:
     const bool m_explicit_ref_conns;
