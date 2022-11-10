@@ -8,12 +8,13 @@
 Rdms::exsig_to_rdms_t Rdms::make_exsig_to_rdms() const {
     exsig_to_rdms_t exsig_to_rdms;
     for (const auto& rdm: m_rdms) {
-        auto ranksig = rdm->m_ranksig;
-        auto nfrm_cre = decode_nfrm_cre(ranksig);
-        auto nfrm_ann = decode_nfrm_cre(ranksig);
+        auto contr_cast = dynamic_cast<const ContractedRdm*>(rdm.get());
+        auto max_contrib_exsig = contr_cast ? contr_cast->m_max_contrib_exsig : rdm->m_ranksig;
+        auto nfrm_cre = decode_nfrm_cre(max_contrib_exsig);
+        auto nfrm_ann = decode_nfrm_cre(max_contrib_exsig);
         while (nfrm_cre != ~0ul && nfrm_ann != ~0ul) {
-            auto nbos_cre = decode_nbos_cre(ranksig);
-            auto nbos_ann = decode_nbos_ann(ranksig);
+            auto nbos_cre = decode_nbos_cre(max_contrib_exsig);
+            auto nbos_ann = decode_nbos_ann(max_contrib_exsig);
             while (nbos_cre != ~0ul && nbos_ann != ~0ul) {
                 auto exsig = encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
                 DEBUG_ASSERT_LT(exsig, exsig::c_ndistinct, "exsig OOB");
@@ -40,7 +41,7 @@ Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Sector sector, const E
                    "RDMs with more than one boson creation operator are not yet supported");
         REQUIRE_LE(decode_nbos_ann(ranksig), 1ul,
                    "RDMs with more than one boson annihilation operator are not yet supported");
-        m_rdms.emplace_front(ptr::smart::make_unique<Rdm>(opts, ranksig, ranksig, sector, 1ul));
+        m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, PureRdm>(opts, ranksig, sector, 1ul));
         m_pure_rdms[ranksig] = m_rdms.front().get();
     }
     if (opts.m_fock_4rdm.m_enabled) {

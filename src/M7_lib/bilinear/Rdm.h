@@ -146,13 +146,30 @@ public:
             Rdm(opts, ranksig, ranksig, sector, nvalue, name){}
 };
 
+/**
+ * To reduce the memory storage requirement of high-rank RDMs, they may be contracted with a tensor on the fly
+ *  https://aip.scitation.org/doi/10.1063/1.5140086
+ * such that instead of storing G[a, b, c,..., i, j, k,...], we instead store for example:
+ * FG[b, c, ..., j, k, ...] = sum_ai F[a, i] G[a, b, c,..., i, j, k,...]
+ * where F is a coefficient array of rank 1100
+ */
 class ContractedRdm : public Rdm {
 public:
+
+    /**
+     * the maximum exsig contributing to this ContractedRdm
+     */
+    const uint_t m_max_contrib_exsig;
+
     /**
      * @param opts
      *  RDM section of the config document
      * @param ranksig
      *  rank of the SQ operators in each contribution
+     * @param indsig
+     *  rank of the SQ operators retained for element indexing after contraction
+     * @param max_contrib_exsig
+     *  highest exsig which can make a non-zero contribution
      * @param sector
      *  dimensions of the stored basis and number of particles to use in enforcing probability-conserving trace
      * @param nvalue
@@ -162,9 +179,9 @@ public:
      * @param indsig
      *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
      */
-    ContractedRdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig,
+    ContractedRdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, uint_t max_contrib_exsig,
                   sys::Sector sector, uint_t nvalue, str_t name=""):
-            Rdm(opts, ranksig, indsig, sector, nvalue, name){}
+            Rdm(opts, ranksig, indsig, sector, nvalue, name), m_max_contrib_exsig(max_contrib_exsig){}
 };
 
 #endif //M7_RDM_H

@@ -19,10 +19,6 @@ class Rdms : public Archivable {
      */
     const bool m_spinfree;
     /**
-     * optionally-allocatable contraction of the 4RDM with the active space generalize Fock matrix for use in CASPT2
-     */
-//    FockRdm4* m_fock_rdm4 = nullptr;
-    /**
      * each array element is indexed by an exsig, and contains a list of pointers to RDM objects which take
      * contributions from that exsig, either because the RDM's ranksig matches the exsig, or the exsig is promotable to
      * it
