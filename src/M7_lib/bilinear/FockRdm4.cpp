@@ -17,7 +17,7 @@ NonDiagFockRdm4::NonDiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock,
 }
 
 void NonDiagFockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn,
-                                        const FrmOps &com, const wf_t &contrib) {
+                                        const FrmOps &com, wf_t contrib) {
     const auto exlvl = conn.m_cre.size();
     DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
                       "this method should not have been delegated given the exsig of the contribution");
@@ -82,7 +82,7 @@ DiagFockRdm4::DiagFockRdm4(const conf::Rdms& opts, const FockMatrix& fock, sys::
         FockRdm4(opts, ex_3300, sector, nvalue), m_fock(fock.get_diagonal()){}
 
 void DiagFockRdm4::frm_make_contribs(const FrmOnv& src_onv, const conn::FrmOnv& conn,
-                                     const FrmOps& com, const wf_t& contrib) {
+                                     const FrmOps& com, wf_t contrib) {
     const auto exlvl = conn.m_cre.size();
     DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
                       "this method should not have been delegated given the exsig of the contribution");

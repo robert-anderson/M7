@@ -38,67 +38,6 @@ void Rdm::add_to_send_table(const MaeInds &inds, wf_t contrib) {
     m_send_row.m_values[0] += contrib;
 }
 
-void Rdm::frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
-                            const FrmOps& com, const wf_t& contrib) {
-    const auto exlvl = conn.m_cre.size();
-    DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
-                      "this method should not have been delegated given the exsig of the contribution");
-    /*
-     * number of "inserted" fermion creation/annihilation operator pairs
-     */
-    const auto nins = m_rank - exlvl;
-    /*
-     * this determines the precomputed promoter required
-     */
-    const auto& promoter = m_frm_promoters[nins];
-    /*
-     * apply each combination of the promoter deterministically
-     */
-    for (uint_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
-        auto phase = promoter.apply(icomb, conn, com, m_full_inds.m_frm);
-        /*
-         * include the Fermi phase of the excitation
-         */
-        phase ^= conn.phase(src_onv);
-        add_to_send_table(m_full_inds, phase ? -contrib : contrib);
-    }
-}
-
-void Rdm::frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
-                               const com_ops::FrmBos& com, const wf_t& contrib) {
-    auto exsig = conn.exsig();
-    m_full_inds.zero();
-    if (is_pure_frm(exsig) && is_pure_frm(m_ranksig))
-        make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib);
-    /*
-     * fermion promotion (if any) is handled in the delegated method, but if this is a hopping-coupled or density-coupled
-     * boson contribution, then the boson occupation factor must also be included (like we have to consider in the
-     * matrix elements in FrmBosHamiltonian)
-     */
-    if (decode_nbos(exsig)==1) {
-        // "ladder" contribution
-        m_full_inds = conn.m_bos;
-        auto occ_fac = src_onv.m_bos.occ_fac(conn.m_bos);
-        make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib * occ_fac);
-    }
-
-    m_full_inds.m_frm.zero();
-    if (m_nbos_cre == 1ul && m_nbos_ann == 1ul && is_pure_frm(exsig)) {
-        /*
-         * this is the only currently supported situation in which boson promotion is required: a purely fermionic
-         * (nbos_cre = 0, nbos_ann = 0) excitation or a diagonal (!exsig) contribution
-         * loop through all modes in src_onv to extract all "common" modes
-         */
-        for (uint_t imode = 0ul; imode < src_onv.m_bos.nelement(); ++imode) {
-            const auto ncom = src_onv.m_bos[imode];
-            if (!ncom) continue;
-            m_full_inds.m_bos.m_cre[0] = imode;
-            m_full_inds.m_bos.m_ann[0] = imode;
-            make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, double(ncom) * contrib);
-        }
-    }
-}
-
 Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Sector sector, uint_t nvalue,
          DistribOptions dist_opts, Sizing store_sizing, Sizing comm_sizing, str_t name) :
         communicator::MappedSend<MaeRow, MaeRow>(
@@ -150,4 +89,64 @@ void Rdm::end_cycle() {
 
 void Rdm::save(hdf5::NodeWriter& gw) const {
     m_store.save(gw, this->name());
+}
+
+void PureRdm::frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn, const FrmOps& com, wf_t contrib) {
+    const auto exlvl = conn.m_cre.size();
+    DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
+                      "this method should not have been delegated given the exsig of the contribution");
+    /*
+     * number of "inserted" fermion creation/annihilation operator pairs
+     */
+    const auto nins = m_rank - exlvl;
+    /*
+     * this determines the precomputed promoter required
+     */
+    const auto& promoter = m_frm_promoters[nins];
+    /*
+     * apply each combination of the promoter deterministically
+     */
+    for (uint_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
+        auto phase = promoter.apply(icomb, conn, com, m_full_inds.m_frm);
+        /*
+         * include the Fermi phase of the excitation
+         */
+        phase ^= conn.phase(src_onv);
+        add_to_send_table(m_full_inds, phase ? -contrib : contrib);
+    }
+}
+
+void PureRdm::frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
+                               const com_ops::FrmBos& com, wf_t contrib) {
+    auto exsig = conn.exsig();
+    m_full_inds.zero();
+    if (is_pure_frm(exsig) && is_pure_frm(m_ranksig))
+        make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib);
+    /*
+     * fermion promotion (if any) is handled in the delegated method, but if this is a hopping-coupled or density-coupled
+     * boson contribution, then the boson occupation factor must also be included (like we have to consider in the
+     * matrix elements in FrmBosHamiltonian)
+     */
+    if (decode_nbos(exsig)==1) {
+        // "ladder" contribution
+        m_full_inds = conn.m_bos;
+        auto occ_fac = src_onv.m_bos.occ_fac(conn.m_bos);
+        make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib * occ_fac);
+    }
+
+    m_full_inds.m_frm.zero();
+    if (m_nbos_cre == 1ul && m_nbos_ann == 1ul && is_pure_frm(exsig)) {
+        /*
+         * this is the only currently supported situation in which boson promotion is required: a purely fermionic
+         * (nbos_cre = 0, nbos_ann = 0) excitation or a diagonal (!exsig) contribution
+         * loop through all modes in src_onv to extract all "common" modes
+         */
+        for (uint_t imode = 0ul; imode < src_onv.m_bos.nelement(); ++imode) {
+            const auto ncom = src_onv.m_bos[imode];
+            if (!ncom) continue;
+            m_full_inds.m_bos.m_cre[0] = imode;
+            m_full_inds.m_bos.m_ann[0] = imode;
+            make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, double(ncom) * contrib);
+        }
+    }
 }

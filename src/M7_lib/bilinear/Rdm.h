@@ -65,16 +65,14 @@ protected:
 
     void add_to_send_table(const field::MaeInds& inds, wf_t contrib);
 
-    virtual void frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
-                                   const com_ops::Frm& com, const wf_t& contrib);
+    virtual void frm_make_contribs(const field::FrmOnv& /*src_onv*/, const conn::FrmOnv& /*conn*/,
+                                   const com_ops::Frm& /*com*/, wf_t /*contrib*/) {}
 
-    virtual void frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
-                                      const com_ops::FrmBos& com, const wf_t& contrib);
+    virtual void frmbos_make_contribs(const field::FrmBosOnv& /*src_onv*/, const conn::FrmBosOnv& /*conn*/,
+                                      const com_ops::FrmBos& /*com*/, wf_t /*contrib*/) {}
 
     virtual void bos_make_contribs(const field::BosOnv& /*src_onv*/, const conn::BosOnv& /*conn*/,
-                                   const com_ops::Bos& /*com*/, const wf_t& /*contrib*/) {
-        ABORT("not yet implemented");
-    }
+                                   const com_ops::Bos& /*com*/, wf_t /*contrib*/) {}
 
     static uint_t nrec_est(sys::Size basis_size, uint_t indsig) {
         const auto nrec_frm = integer::combinatorial(basis_size.m_frm.m_nspinorb, decode_nfrm_cre(indsig));
@@ -110,18 +108,17 @@ public:
 
     void save(hdf5::NodeWriter& gw) const;
 
-    void make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
-                       const com_ops::Frm& com, const wf_t& contrib) {
+    void make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn, const com_ops::Frm& com, wf_t contrib) {
         frm_make_contribs(src_onv, conn, com, contrib);
     }
 
     void make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
-                       const com_ops::FrmBos& com, const wf_t& contrib) {
+                       const com_ops::FrmBos& com, wf_t contrib) {
         frmbos_make_contribs(src_onv, conn, com, contrib);
     }
 
     void make_contribs(const field::BosOnv& src_onv, const conn::BosOnv& conn,
-                       const com_ops::Bos& com, const wf_t& contrib) {
+                       const com_ops::Bos& com, wf_t contrib) {
         bos_make_contribs(src_onv, conn, com, contrib);
     }
 };
@@ -144,6 +141,18 @@ public:
      */
     PureRdm(const conf::Rdms& opts, uint_t ranksig, sys::Sector sector, uint_t nvalue, str_t name=""):
             Rdm(opts, ranksig, ranksig, sector, nvalue, name){}
+
+protected:
+    void frm_make_contribs(const FrmOnv& src_onv, const conn::FrmOnv& conn,
+                           const com_ops::Frm& com, wf_t contrib) override;
+
+    void frmbos_make_contribs(const FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
+                              const com_ops::FrmBos& com, wf_t contrib) override;
+
+    void bos_make_contribs(const BosOnv& /*onv*/, const conn::BosOnv& /*bosOnv*/,
+                           const com_ops::Bos& /*bos*/, wf_t /*wf*/) override {
+        ABORT("not yet implemented");
+    }
 };
 
 /**
@@ -182,6 +191,19 @@ public:
     ContractedRdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, uint_t max_contrib_exsig,
                   sys::Sector sector, uint_t nvalue, str_t name=""):
             Rdm(opts, ranksig, indsig, sector, nvalue, name), m_max_contrib_exsig(max_contrib_exsig){}
+
+protected:
+
+    void frmbos_make_contribs(const FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
+                              const com_ops::FrmBos& com, wf_t contrib) override {
+        // so far, there is no use for contracted mixed fermion-boson RDMs, delegate to fermion sector method
+        make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib);
+    }
+
+    void bos_make_contribs(const BosOnv& /*onv*/, const conn::BosOnv& /*bosOnv*/,
+                           const com_ops::Bos& /*bos*/, wf_t /*wf*/) override {
+        // so far, there is no use for contracted boson RDMs
+    }
 };
 
 #endif //M7_RDM_H

@@ -48,7 +48,7 @@ public:
      * override the default method to implement on-the-fly contraction
      */
     void frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
-                           const FrmOps& com, const wf_t& contrib) override;
+                           const FrmOps& com, wf_t contrib) override;
 };
 
 class DiagFockRdm4 : public FockRdm4 {
@@ -65,7 +65,7 @@ public:
      * override the default method to implement on-the-fly, diagonal-only contraction
      */
     void frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn,
-                           const FrmOps& com, const wf_t& contrib) override;
+                           const FrmOps& com, wf_t contrib) override;
 };
 
 #endif //M7_FOCKRDM4_H
