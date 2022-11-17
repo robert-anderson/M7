@@ -4,4 +4,5 @@ target_sources(unittest
         BosOps.cpp
         FrmBosOnvConnection.cpp
         FrmOnvConnection.cpp
+        OpSig.cpp
 )

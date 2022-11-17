@@ -1,5 +1,7 @@
 target_sources(M7_lib
     PRIVATE
+        OpSig.cpp
+        OpSig.h
         BosOnvConnection.cpp
         BosOnvConnection.h
         ComOps.cpp

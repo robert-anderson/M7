@@ -4,7 +4,6 @@ target_sources(unittest
         BasicForeach.cpp
         Bit.cpp
         Convert.cpp
-        Exsig.cpp
         ForeachVirtual.cpp
         FpTol.cpp
         Hashing.cpp
