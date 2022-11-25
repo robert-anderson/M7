@@ -57,13 +57,14 @@ TEST(FciInitializer, BosHubLoop) {
         opt.m_diag_shift = -91.0;
         FciInitializer init(ham, opt);
         auto results = init.get_results();
+        results.bcast();
         hdf5::FileWriter fw(logging::format("bos_hub_u={:.4f}.h5", u));
         v_t<double> evals;
         results.get_evals(evals);
         fw.write_data("evals", evals);
         const ham_comp_t* evec = nullptr;
         results.get_evec(0ul, evec);
-        const uintv_t shape = {results.nroot(), results.nelement_evec()};
+        const uintv_t shape = {results.nelement_evec(), results.nroot()};
         fw.write_data("evecs", evec, shape);
     }
 }

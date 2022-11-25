@@ -170,18 +170,33 @@ public:
      *  reference to pointer to constant data (initial element of the iroot-th eigenvector)
      */
     void get_evec(uint_t iroot, const T* &evec) const {
+        if (m_evecs.empty()) {
+            // this rank does not have access to the eigenvectors
+            evec = nullptr;
+            return;
+        }
         REQUIRE_LT(iroot, nroot(), "root index OOB");
         REQUIRE_FALSE(m_complex_evecs, "cannot dereference complex eigenvector as a real vector");
         evec = m_evecs[iroot] + iroot * m_nelement_evec;
     }
 
     void get_evec(uint_t iroot, const std::complex<T>* &evec) const {
+        if (m_evecs.empty()) {
+            // this rank does not have access to the eigenvectors
+            evec = nullptr;
+            return;
+        }
         REQUIRE_LT(iroot, nroot(), "root index OOB");
         REQUIRE_TRUE(m_complex_evecs, "cannot dereference real eigenvector as a complex vector");
         evec = reinterpret_cast<std::complex<T>*>(m_evecs) + iroot * m_nelement_evec;
     }
 
     void get_evecs(v_t<const T*>& evecs) const {
+        if (m_evecs.empty()) {
+            // this rank does not have access to the eigenvectors
+            evecs.clear();
+            return;
+        }
         evecs.clear();
         for (uint_t iroot = 0ul; iroot<nroot(); ++iroot) {
             evecs.push_back(nullptr);
