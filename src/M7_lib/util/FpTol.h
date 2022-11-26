@@ -77,13 +77,13 @@ namespace fptol {
     }
 
     template<typename T>
-    static constexpr bool near_zero(T b, arith::comp_t<T> atol) {
-        return near_equal(T(0), b, T(0), atol);
+    static constexpr bool near_zero(T b, arith::comp_t<T> ztol) {
+        return near_equal(T{}, b, arith::comp_t<T>{}, ztol);
     }
 
     template<typename T>
     static constexpr bool near_zero(T b) {
-        return near_equal(T(0), b, T(0), default_ztol(b));
+        return near_zero(b, default_ztol(b));
     }
 
     template<typename T>
@@ -100,6 +100,11 @@ namespace fptol {
     bool near_integer(const T &v) {
         static_assert(std::is_floating_point<T>::value, "T must be floating point");
         return near_equal(std::round(v), v);
+    }
+
+    template<typename T>
+    bool near_integer(const std::complex<T> &v) {
+        return near_real(v) && near_integer(arith::real_ref(v));
     }
 }
 

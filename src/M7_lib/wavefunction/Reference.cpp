@@ -61,7 +61,7 @@ void Reference::contrib_row() {
     auto &row = m_wf.m_store.m_row;
     auto weight = 0.5*(row.m_weight[m_ipart]+row.m_weight[m_wf.ipart_replica(m_ipart)]);
     if (std::abs(weight) > std::abs(m_candidate_weight)) {
-        m_candidate_weight = weight;
+        m_candidate_weight = std::abs(weight);
         m_irow_candidate = row.index();
     }
     if (row.m_ref_conn.get(m_ipart)) {

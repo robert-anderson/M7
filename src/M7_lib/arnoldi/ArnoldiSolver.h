@@ -147,7 +147,8 @@ public:
         eval = {m_real_evals[iroot], m_imag_evals[iroot]};
     }
 
-    void get_evals(v_t<T>& evals) const {
+    template<bool real>
+    void get_evals(v_t<arith::num_t<T, real>>& evals) const {
         evals.clear();
         for (size_t iroot = 0ul; iroot < nroot(); ++iroot) {
             evals.push_back({});
@@ -163,35 +164,25 @@ public:
         return m_nelement_evec;
     }
 
-    /**
-     * @param iroot
-     *  root index
-     * @param evec
-     *  reference to pointer to constant data (initial element of the iroot-th eigenvector)
-     */
-    void get_evec(uint_t iroot, const T* &evec) const {
+    template<bool real>
+    void get_evec(uint_t iroot, const arith::num_t<T, real>* &evec) const {
+        if (real) {
+            REQUIRE_FALSE(m_complex_evecs, "cannot dereference complex eigenvector as a real vector");
+        }
+        else {
+            REQUIRE_TRUE(m_complex_evecs, "cannot dereference real eigenvector as a complex vector");
+        }
         if (m_evecs.empty()) {
             // this rank does not have access to the eigenvectors
             evec = nullptr;
             return;
         }
         REQUIRE_LT(iroot, nroot(), "root index OOB");
-        REQUIRE_FALSE(m_complex_evecs, "cannot dereference complex eigenvector as a real vector");
-        evec = m_evecs[iroot] + iroot * m_nelement_evec;
+        evec = reinterpret_cast<arith::num_t<T, real>*>(m_evecs) + iroot * m_nelement_evec;
     }
 
-    void get_evec(uint_t iroot, const std::complex<T>* &evec) const {
-        if (m_evecs.empty()) {
-            // this rank does not have access to the eigenvectors
-            evec = nullptr;
-            return;
-        }
-        REQUIRE_LT(iroot, nroot(), "root index OOB");
-        REQUIRE_TRUE(m_complex_evecs, "cannot dereference real eigenvector as a complex vector");
-        evec = reinterpret_cast<std::complex<T>*>(m_evecs) + iroot * m_nelement_evec;
-    }
-
-    void get_evecs(v_t<const T*>& evecs) const {
+    template<bool complex>
+    void get_evecs(v_t<const arith::num_t<T, complex>>& evecs) const {
         if (m_evecs.empty()) {
             // this rank does not have access to the eigenvectors
             evecs.clear();

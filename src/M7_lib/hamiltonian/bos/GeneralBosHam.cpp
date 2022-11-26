@@ -53,7 +53,7 @@ ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
             ham_comp_t occj = onv[jmode];
             // imode and jmode are different
             // i, j -> i, j
-            h += 2 * m_coeffs_2.get(imode, imode, jmode, jmode) * occi * occj;
+            h += 2.0 * m_coeffs_2.get(imode, imode, jmode, jmode) * occi * occj;
         }
         h += 0.5 * m_coeffs_2.get(imode, imode, imode, imode) * occi * (occi - 1);
     }

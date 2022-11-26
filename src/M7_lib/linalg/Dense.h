@@ -464,10 +464,10 @@ namespace dense {
             for (uint_t irow=0ul; irow < n; ++irow) {
                 for (uint_t icol=0ul; icol < n; ++icol) {
                     auto this_element = (*this)(irow, icol);
-                    if (!this_element) continue;
+                    if (this_element == 0.0) continue;
                     if (conj) this_element = arith::conj(this_element);
                     auto& other_element = (*this)(icol, irow);
-                    if (other_element) {
+                    if (other_element != 0.0) {
                         DEBUG_ASSERT_NEARLY_EQ(this_element, other_element, "inconsistent elements");
                     }
                     if (irow!=icol) other_element = this_element;
@@ -479,7 +479,7 @@ namespace dense {
             const auto n = Matrix<T>::ncol();
             if (n==1) return true;
             auto first_row_ptr = Matrix<T>::ptr()+1ul;
-            if (std::any_of(first_row_ptr, first_row_ptr+n, [](const T& v){return v;})) return false;
+            if (std::any_of(first_row_ptr, first_row_ptr+n, [](const T& v){return v!=0.0;})) return false;
             /*
              * non-diagonal part of first row and first element of second row are all zero, so compare all subsequent
              * non-diagonal parts with this string

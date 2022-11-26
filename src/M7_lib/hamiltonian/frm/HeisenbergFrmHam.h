@@ -32,12 +32,12 @@ struct HeisenbergFrmHam : SpinModelFrmHam {
     /**
      * interaction strength
      */
-    const ham_t m_j;
+    const ham_comp_t m_j;
 
-    HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::Lattice>& basis_lattice,
+    HeisenbergFrmHam(ham_comp_t j, const std::shared_ptr<lattice::Lattice>& basis_lattice,
                      const std::shared_ptr<lattice::Lattice>& h_lattice);
 
-    HeisenbergFrmHam(ham_t j, const std::shared_ptr<lattice::Lattice>& lattice);
+    HeisenbergFrmHam(ham_comp_t j, const std::shared_ptr<lattice::Lattice>& lattice);
 
     explicit HeisenbergFrmHam(FrmHam::opt_pair_t opts);
 

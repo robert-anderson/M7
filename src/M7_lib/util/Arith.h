@@ -16,6 +16,13 @@
  * defines overloaded and templated functions to deal with complex/real arithmetic appropriately
  */
 namespace arith {
+
+    /**
+     * real or complex number with a given component type
+     */
+    template <typename comp_t, bool real>
+    using num_t = typename std::conditional<real, comp_t, std::complex<comp_t>>::type;
+
     /**
      * In the generic case, the type of a single complex component "comp" (real or imag part) is simply the type itself
      */

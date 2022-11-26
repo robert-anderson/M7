@@ -11,10 +11,10 @@ class HubbardBosHam : public BosHam {
     /**
      * on-site repulsion scalar in units of the hopping
      */
-    const ham_t m_u;
+    const ham_comp_t m_u;
 
 public:
-    HubbardBosHam(ham_t u, const std::shared_ptr<lattice::Lattice>& lattice);
+    HubbardBosHam(ham_comp_t u, const std::shared_ptr<lattice::Lattice>& lattice);
 
     HubbardBosHam(opt_pair_t opts);
 

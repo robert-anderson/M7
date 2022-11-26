@@ -21,7 +21,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, FciInitOptions opts):
     conn::Mbf conn(mbf);
     ConnForeachGroup conn_iters(h);
 
-    sparse::dynamic::Matrix<double> sparse_ham;
+    sparse::dynamic::Matrix<ham_t> sparse_ham;
     sparse_ham.resize(count_local);
 
     logging::info("Building sparse H matrix ({} rows)", iters.niter_single());
@@ -56,7 +56,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, FciInitOptions opts):
             *ptr-=opts.m_diag_shift;
     };
 
-    dist_mv_prod::Sparse<double> dist(sparse_ham);
+    dist_mv_prod::Sparse<ham_t> dist(sparse_ham);
     if (h.is_hermitian()) {
         auto success = m_arpack_sym.solve(dist, opts);
         REQUIRE_TRUE_ALL(success, "Symmetric ARPACK error");

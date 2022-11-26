@@ -11,9 +11,9 @@ struct HubbardFrmHam : FrmHam {
     /**
      * on-site repulsion scalar in units of the hopping
      */
-    const ham_t m_u;
+    const ham_comp_t m_u;
 
-    HubbardFrmHam(ham_t u, const std::shared_ptr<lattice::Lattice>& lattice);
+    HubbardFrmHam(ham_comp_t u, const std::shared_ptr<lattice::Lattice>& lattice);
 
     HubbardFrmHam(opt_pair_t opts);
 

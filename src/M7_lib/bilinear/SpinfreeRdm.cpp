@@ -102,7 +102,7 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
             /*
              * get the factor by which the contribution must be multiplied
              */
-            const auto factor = m_rank_ind==2 ? c_factors_2[iperm] : c_factors_3[iperm];
+            const double factor = m_rank_ind==2 ? c_factors_2[iperm] : c_factors_3[iperm];
             /*
              * get pointers to the current arrays of permutations
              */

@@ -6,7 +6,7 @@
 #include "M7_lib/excitgen/frm/Hubbard.h"
 
 
-HubbardFrmHam::HubbardFrmHam(ham_t u, const std::shared_ptr<lattice::Lattice>& lattice) :
+HubbardFrmHam::HubbardFrmHam(ham_comp_t u, const std::shared_ptr<lattice::Lattice>& lattice) :
         FrmHam(lattice), m_u(u){
     m_contribs_1100.set_nonzero(exsig::ex_single);
     m_contribs_2200.set_nonzero(0);
