@@ -33,7 +33,7 @@ bool FcidumpTextFileReader::spin_conserving() const {
 }
 
 void FcidumpTextFileReader::convert_inds(uintv_t &inds) {
-    if (!m_info.m_spin_resolved || m_info.m_spin_major) return;
+    if (!m_info.m_spin_resolved || m_info.m_ur_style) return;
     for (auto &ind: inds)
         ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_info.m_nsite : 0));
 }

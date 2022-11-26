@@ -9,7 +9,7 @@
 
 #ifdef ENABLE_FERMIONS
 TEST(FciInitializer, N2) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", true});
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     Hamiltonian ham(&frm_ham);
     FciInitOptions opt;
     opt.m_ritz_tol = 1e-7;

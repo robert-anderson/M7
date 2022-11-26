@@ -142,7 +142,7 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info):
 }
 
 GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
-        GeneralFrmHam({opts.m_ham.m_fcidump.m_path, opts.m_ham.m_fcidump.m_spin_major}) {}
+        GeneralFrmHam({opts.m_ham.m_fcidump.m_path, FcidumpInfo::ur_style(opts.m_ham.m_fcidump.m_unrestrict_style)}) {}
 
 ham_t GeneralFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
     if (m_info.m_spin_resolved) return m_ints.m_1e->get(a, i);

@@ -439,6 +439,26 @@ namespace dense {
             return *this;
         }
 
+        bool is_symmetric(bool conj=dtype::is_complex<T>()) {
+            const auto n = Matrix<T>::nrow();
+            for (uint_t irow=0ul; irow < n; ++irow) {
+                const auto& diag = (*this)(irow, irow);
+                if (conj && arith::imag(diag)!=0.0) return false;
+                for (uint_t icol = irow + 1; icol < n; ++icol) {
+                    const auto& upper = (*this)(irow, icol);
+                    const auto& lower = (*this)(icol, irow);
+                    if (conj) {
+                        if (upper != arith::conj(lower)) return false;
+                    }
+                    else {
+                        if (upper != lower) return false;
+                    }
+                }
+            }
+            // no non-symmetric pairs found
+            return true;
+        }
+
         void symmetrize(bool conj=dtype::is_complex<T>()) {
             const auto n = Matrix<T>::nrow();
             for (uint_t irow=0ul; irow < n; ++irow) {

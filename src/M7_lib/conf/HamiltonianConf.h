@@ -13,7 +13,7 @@ namespace conf {
 
     struct Fcidump : Section {
         Param<str_t> m_path;
-        Param<bool> m_spin_major;
+        SingleChoice<str_t> m_unrestrict_style;
 
         explicit Fcidump(Group *parent);
     };

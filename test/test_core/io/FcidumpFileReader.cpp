@@ -16,7 +16,7 @@ TEST(FcidumpInfo, EmptyFilename) {
 }
 
 TEST(FcidumpFileReader, Real_6orb) {
-    FcidumpTextFileReader file_reader({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", false});
+    FcidumpTextFileReader file_reader({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 6);
@@ -41,7 +41,7 @@ TEST(FcidumpFileReader, Real_6orb) {
 }
 
 TEST(FcidumpFileReader, Integer_8orb) {
-    FcidumpTextFileReader file_reader({PROJECT_ROOT"/assets/Hubbard_U4_8site/FCIDUMP", false});
+    FcidumpTextFileReader file_reader({PROJECT_ROOT"/assets/Hubbard_U4_8site/FCIDUMP"});
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 8);
@@ -66,7 +66,7 @@ TEST(FcidumpFileReader, Integer_8orb) {
 }
 
 TEST(FcidumpFileReader, Molcas) {
-    FcidumpTextFileReader file_reader({PROJECT_ROOT"/assets/O2_Molcas/FCIDUMP", false});
+    FcidumpTextFileReader file_reader({PROJECT_ROOT"/assets/O2_Molcas/FCIDUMP"});
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 6);

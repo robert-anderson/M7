@@ -333,9 +333,9 @@ namespace conf_components {
     class SingleChoice : public ChoiceBase<T>, Param<T> {
         using ChoiceBase<T>::m_choices;
         using ChoiceBase<T>::m_choice_descriptions;
-        using ChoiceBase<T>::is_choices;
+        using ChoiceBase<T>::is_a_choice;
         void require_is_choice(const T& v) const {
-            REQUIRE_TRUE(is_choices(v), logging::format("\"{}\" is not among the valid choices for param {}",
+            REQUIRE_TRUE(is_a_choice(v), logging::format("\"{}\" is not among the valid choices for param {}",
                                                     convert::to_string(v), Node::m_path.m_string));
         }
         static T get_first(const v_t<T>& choices) {
@@ -366,12 +366,12 @@ namespace conf_components {
     public:
         SingleChoice(Group *parent, str_t name, const v_t<std::pair<T, str_t>>& choice_and_descs,
                      const v_t<T> &v_default, str_t description):
-                ChoiceBase<T>(choice_and_descs), Param<v_t<T>>(parent, name, v_default, description){
+                ChoiceBase<T>(choice_and_descs), Param<T>(parent, name, v_default, description){
             validate(v_default);
         }
 
-        SingleChoice(Group *parent, str_t name, v_t<T> choices, const v_t<T> &v_default, str_t description):
-                ChoiceBase<T>(choices), Param<v_t<T>>(parent, name, v_default, description){
+        SingleChoice(Group *parent, str_t name, v_t<T> choices, const T &v_default, str_t description):
+                ChoiceBase<T>(choices), Param<T>(parent, name, v_default, description){
             validate(v_default);
         }
         /*
