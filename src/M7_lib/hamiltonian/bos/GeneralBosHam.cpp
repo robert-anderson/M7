@@ -15,7 +15,7 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, uint_t occ_cutoff) :
 
     logging::info("Reading Boson Hamiltonian coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
-        if (ham::is_significant(value)) continue;
+        if (!ham::is_significant(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
         DEBUG_ASSERT_TRUE(exsig::contribs_to(exsig, ranksig),
