@@ -443,8 +443,8 @@ public:
     /**
      * tags to statically specify symmetric or non-symmetric ARPACK algorithms
      */
-    static constexpr tag::Int<0> c_sym = {};
-    static constexpr tag::Int<1> c_nonsym = {};
+    static constexpr tag::Int<1> c_sym = {};
+    static constexpr tag::Int<0> c_nonsym = {};
 
     ArnoldiSolverBase(uint_t nroot, uint_t nelement_evec): m_nroot(nroot), m_nelement_evec(nelement_evec){}
     template<typename comp_t, bool real, bool sym> struct SolverSelector {};
