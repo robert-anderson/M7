@@ -16,6 +16,10 @@ struct FciInitOptions : ArnoldiOptions {
 };
 
 struct FciInitializer {
+    const FciInitOptions m_opts;
+    const bool m_is_hermitian;
+    sparse::dynamic::Matrix<ham_t> m_sparse_ham;
+
     struct MbfOrderRow : Row {
         field::Mbf m_mbf;
         MbfOrderRow(sys::Basis basis): m_mbf(this, basis, "key"){}
@@ -26,18 +30,31 @@ struct FciInitializer {
      * mapped list of basis functions to aid in the setup of sparse H, and retain the physical meaning of its rows
      */
     buffered::MappedTable<MbfOrderRow> m_mbf_order_table;
-    /**
-     * instance of the ARPACK wrapper which is only used if H is hermitian (Lanczos)
-     */
-    ArnoldiProblemSym<ham_t> m_arpack_sym;
-    /**
-     * instance of the ARPACK wrapper which is only used if H is non-hermitian
-     */
-    ArnoldiProblemNonSym<ham_t> m_arpack_nonsym;
+
     explicit FciInitializer(const Hamiltonian& h, FciInitOptions opts={});
 
-    ArnoldiResults<ham_comp_t> get_results() {
-        return m_arpack_sym.m_solver ? m_arpack_sym.get_results() : m_arpack_nonsym.get_results();
+private:
+    template<uint_t sym>
+    ArnoldiSolver<ham_t> solve(tag::Int<sym>){
+        dist_mv_prod::Sparse<ham_t> dist(m_sparse_ham);
+        ArnoldiSolver<ham_t> solver(dist, m_opts, tag::Int<sym>());
+        /*
+         * once the ARPACK procedure is complete, the eigenvalues must be adjusted to undo the diagonal shift
+         */
+        solver.shift_evals(-m_opts.m_diag_shift);
+        return solver;
+    }
+public:
+
+    ArnoldiSolver<ham_t> solve(){
+        return m_is_hermitian ? solve(ArnoldiSolverBase::c_sym) : solve(ArnoldiSolverBase::c_nonsym);
+    }
+
+    /**
+     * in instances where retention of the MBF list and sparse Hamiltonian is not desired
+     */
+    static ArnoldiSolver<ham_t> solve(const Hamiltonian& h, FciInitOptions opts={}) {
+        return FciInitializer(h, opts).solve();
     }
 };
 

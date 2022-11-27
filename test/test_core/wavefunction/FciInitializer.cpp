@@ -13,13 +13,11 @@ TEST(FciInitializer, N2) {
     Hamiltonian ham(&frm_ham);
     FciInitOptions opt;
     opt.m_ritz_tol = 1e-7;
-    FciInitializer init(ham, opt);
     DenseHamiltonian hmat(ham);
     v_t<ham_t> dense_evals;
     dense::diag(hmat, dense_evals);
     ham_comp_t eval;
-    auto results = init.get_results();
-    results.bcast();
+    auto results = FciInitializer::solve(ham, opt);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, dense_evals[0]);
 }
@@ -27,10 +25,8 @@ TEST(FciInitializer, N2) {
 TEST(FciInitializer, J1J2) {
     J1J2FrmHam frm_ham(0.25, lattice::make("ortho", {16}, {1}));
     Hamiltonian ham(&frm_ham);
-    FciInitializer init(ham);
     ham_comp_t eval;
-    auto results = init.get_results();
-    results.bcast();
+    auto results = FciInitializer::solve(ham);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, -6.44708);
 }
