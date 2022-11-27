@@ -97,6 +97,7 @@ protected:
 
 template<typename T>
 struct ArnoldiResults {
+    static_assert(!dtype::is_complex<T>(), "Results are held in component type");
 protected:
     v_t<T> m_real_evals;
     v_t<T> m_imag_evals;
@@ -147,14 +148,22 @@ public:
         eval = {m_real_evals[iroot], m_imag_evals[iroot]};
     }
 
+private:
+    /*
+     * final arg is a dummy to enable static dispatch in the arithmetic-resolving methods below
+     */
     template<bool real>
-    void get_evals(v_t<arith::num_t<T, real>>& evals) const {
+    void get_evals(v_t<arith::num_t<T, real>>& evals, int) const {
         evals.clear();
         for (size_t iroot = 0ul; iroot < nroot(); ++iroot) {
             evals.push_back({});
             get_eval(iroot, evals.back());
         }
     }
+
+public:
+    void get_evals(v_t<T>& evals) const { get_evals<true>(evals, 0); }
+    void get_evals(v_t<std::complex<T>>& evals) const { get_evals<false>(evals, 0); }
 
     uint_t nroot() const {
         return m_real_evals.size();
@@ -164,8 +173,9 @@ public:
         return m_nelement_evec;
     }
 
+private:
     template<bool real>
-    void get_evec(uint_t iroot, const arith::num_t<T, real>* &evec) const {
+    void get_evec(uint_t iroot, const arith::num_t<T, real>* &evec, int) const {
         if (real) {
             REQUIRE_FALSE(m_complex_evecs, "cannot dereference complex eigenvector as a real vector");
         }
@@ -178,11 +188,16 @@ public:
             return;
         }
         REQUIRE_LT(iroot, nroot(), "root index OOB");
-        evec = reinterpret_cast<arith::num_t<T, real>*>(m_evecs) + iroot * m_nelement_evec;
+        evec = reinterpret_cast<const arith::num_t<T, real>*>(m_evecs[iroot]);
     }
 
-    template<bool complex>
-    void get_evecs(v_t<const arith::num_t<T, complex>>& evecs) const {
+public:
+    void get_evec(uint_t iroot, const T* &evec) const { get_evec<true>(iroot, evec, 0);}
+    void get_evec(uint_t iroot, const std::complex<T>* &evec) const { get_evec<false>(iroot, evec, 0);}
+
+private:
+    template<bool real>
+    void get_evecs(v_t<const arith::num_t<T, real>*>& evecs, int) const {
         if (m_evecs.empty()) {
             // this rank does not have access to the eigenvectors
             evecs.clear();
@@ -194,6 +209,10 @@ public:
             get_evec(iroot, evecs.back());
         }
     }
+
+public:
+    void get_evecs(v_t<const T*>& evecs) const { get_evecs<true>(evecs, 0);}
+    void get_evecs(v_t<const std::complex<T>*>& evecs) const { get_evecs<false>(evecs, 0);}
 
     /**
      * send the eigenvalues to each process
