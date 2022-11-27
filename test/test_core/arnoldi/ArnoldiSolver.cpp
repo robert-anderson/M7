@@ -6,7 +6,6 @@
 #include <test_core/sparse/Examples.h>
 #include <M7_lib/linalg/Dense.h>
 #include "M7_lib/arnoldi/ArnoldiSolver.h"
-#include "M7_lib/util/Sort.h"
 #include "M7_lib/hdf5/File.h"
 
 TEST(ArnoldiSolver, SymNonDist) {
@@ -88,6 +87,7 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     }
 }
 
+
 TEST(ArnoldiSolver, NonSymDist) {
     const uint_t nrow = 20;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
@@ -112,6 +112,46 @@ TEST(ArnoldiSolver, NonSymDist) {
         for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
             solver.get_eval(iroot, eval);
             ASSERT_NEAR_EQ(eval, arith::real(dense_eval_it[iroot]));
+        }
+    }
+}
+
+TEST(ArnoldiSolver, ComplexNonDist) {
+    const uint_t nrow = 20;
+    auto mat = sparse_matrix_examples::rect_double_complex(nrow, nrow, 2);
+    typedef std::complex<double> T;
+
+    ArnoldiOptions opts;
+    opts.m_nroot = 4ul;
+    ArnoldiSolver<T> solver(mat, nrow, opts, ArnoldiSolverBase::c_nonsym);
+
+    v_t<T> bench_evals = {{6, 0}, {3.06252172e+00, 4.33378602e+00}, {4, 2}, {-1, -3}};
+    T eval;
+    for (uint_t iroot = 0ul; iroot < bench_evals.size(); ++iroot) {
+        solver.get_eval(iroot, eval);
+        ASSERT_NEAR_EQ(eval, bench_evals[iroot]);
+    }
+}
+
+TEST(ArnoldiSolver, ComplexDist) {
+    const uint_t nrow = 20;
+    auto mat = sparse_matrix_examples::rect_double_complex(nrow, nrow, 2);
+    typedef std::complex<double> T;
+    dist_mv_prod::Sparse<T> prod(mat);
+
+    ArnoldiOptions opts;
+    opts.m_nroot = 4ul;
+    ArnoldiSolver<T> solver(prod, opts, ArnoldiSolverBase::c_nonsym);
+
+    /*
+     * check Arnoldi solution against dense LAPACK full diagonalization
+     */
+    if (mpi::i_am_root()) {
+        v_t<T> bench_evals = {{6, 0}, {3.06252172e+00, 4.33378602e+00}, {4, 2}, {-1, -3}};
+        T eval;
+        for (uint_t iroot = 0ul; iroot < bench_evals.size(); ++iroot) {
+            solver.get_eval(iroot, eval);
+            ASSERT_NEAR_EQ(eval, bench_evals[iroot]);
         }
     }
 }
