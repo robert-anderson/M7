@@ -13,10 +13,10 @@ TEST(ArnoldiSolver, SymNonDist) {
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
     auto sym = mat.symmetrized(false);
 
-    ArnoldiProblemSym<double> arnoldi_problem;
     ArnoldiOptions opts;
     opts.m_nroot = 3ul;
-    arnoldi_problem.solve(sym, opts);
+
+    ArnoldiSolver<double> solver(sym, nrow, opts, ArnoldiSolverBase::c_sym);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
@@ -26,10 +26,9 @@ TEST(ArnoldiSolver, SymNonDist) {
     dense::diag(dense, evals);
     // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
     sort::inplace(evals, false, true);
-    auto results = arnoldi_problem.get_results();
     double eval;
     for (uint_t iroot=0ul; iroot<opts.m_nroot; ++iroot){
-        results.get_eval(iroot, eval);
+        solver.get_eval(iroot, eval);
         ASSERT_NEAR_EQ(eval, evals[iroot]);
     }
 }
@@ -40,10 +39,10 @@ TEST(ArnoldiSolver, SymDist) {
     auto sym = mat.symmetrized(false);
     dist_mv_prod::Sparse<double> prod(sym);
 
-    ArnoldiProblemSym<double> arnoldi_problem;
     ArnoldiOptions opts;
     opts.m_nroot = 3ul;
-    arnoldi_problem.solve(sym, opts);
+
+    ArnoldiSolver<double> solver(prod, opts, ArnoldiSolverBase::c_sym);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
@@ -55,10 +54,9 @@ TEST(ArnoldiSolver, SymDist) {
         // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
         sort::inplace(evals, false, true);
         auto dense_eval_it = evals.cbegin();
-        auto results = arnoldi_problem.get_results();
         double eval;
         for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
-            results.get_eval(iroot, eval);
+            solver.get_eval(iroot, eval);
             ASSERT_NEAR_EQ(eval, dense_eval_it[iroot]);
         }
     }
