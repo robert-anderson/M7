@@ -139,6 +139,10 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info):
      */
     m_contribs_1100.bcast();
     m_contribs_2200.bcast();
+    /*
+     * same for the Kramers symmetry attributes
+     */
+    m_kramers_attrs.bcast();
 }
 
 GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):

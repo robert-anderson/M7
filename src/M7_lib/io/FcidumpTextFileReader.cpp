@@ -9,7 +9,7 @@
 FcidumpTextFileReader::FcidumpTextFileReader(const FcidumpInfo& info) :
         HamTextFileReader(info.m_fname, 4), m_info(info){
     auto nsite = m_info.m_nsite;
-    if (m_info.m_spin_resolved && m_info.m_ur_style!=FcidumpInfo::SpinBlocks) {
+    if (m_info.m_spin_resolved && (m_info.m_ur_style!=FcidumpInfo::SpinBlocks)) {
         uintv_t inds(4);
         ham_t v;
         while (next(inds, v)) {
@@ -21,11 +21,18 @@ FcidumpTextFileReader::FcidumpTextFileReader(const FcidumpInfo& info) :
             }
         }
         FileReader::reset(); // go back to beginning of entries
+        m_nnull_lines = 0ul;
     }
     if (m_spin_conserving_1e) logging::info("FCIDUMP file conserves spin in 1 particle integrals");
     else logging::info("FCIDUMP file does NOT conserve spin in 1 particle integrals");
     if (m_spin_conserving_2e) logging::info("FCIDUMP file conserves spin in 2 particle integrals");
     else logging::info("FCIDUMP file does NOT conserve spin in 2 particle integrals");
+}
+
+FcidumpTextFileReader::~FcidumpTextFileReader() {
+    if ((m_nnull_lines > 1) && m_info.m_ur_style!=FcidumpInfo::SpinBlocks) {
+        logging::warn(R"(More than one block delimiter line "0.0  0  0  0  0" found, but "blocks" unrestrict style not enabled)");
+    }
 }
 
 bool FcidumpTextFileReader::spin_conserving() const {
@@ -101,10 +108,4 @@ uint_t FcidumpTextFileReader::exsig(const uintv_t &inds, uint_t ranksig) const {
 
 bool FcidumpTextFileReader::inds_in_range(const uintv_t &inds) const {
     return std::all_of(inds.cbegin(), inds.cend(), [this](uint_t i){return i<=m_info.m_norb_distinct;});
-}
-
-FcidumpTextFileReader::~FcidumpTextFileReader() {
-    if ((m_nnull_lines > 1) && m_info.m_ur_style!=FcidumpInfo::SpinBlocks) {
-        logging::warn(R"(More than one block delimiter line "0.0  0  0  0  0" found, but "blocks" unrestrict style not enabled)");
-    }
 }

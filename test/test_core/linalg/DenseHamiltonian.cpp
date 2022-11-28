@@ -15,11 +15,11 @@ TEST(DenseHamiltonian, FciEnergyCheck4c) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/DHF_Be_STO-3G/FCIDUMP"});
     Hamiltonian ham(&frm_ham);
     DenseHamiltonian hmat(ham);
-//    v_t<ham_comp_t> evals;
-//    dense::diag(hmat, evals);
-//    // compare the ground and first excited states to BAGEL's values
-//    ASSERT_NEAR_EQ(evals[0], -14.40597603432);
-//    ASSERT_NEAR_EQ(evals[1], -14.28883698406);
+    v_t<ham_comp_t> evals;
+    dense::diag(hmat, evals);
+    // compare the ground and first excited states to BAGEL's values
+    ASSERT_NEAR_EQ(evals[0], -14.40597603432);
+    ASSERT_NEAR_EQ(evals[1], -14.28883698406);
 }
 #endif
 TEST(DenseHamiltonian, N2Rhf) {

@@ -71,12 +71,17 @@ void ham::TermContribs::bcast(uint_t iroot) {
     mpi::bcast(m_exsig_nonzero, iroot);
 }
 
-bool ham::KramersAttributes::conserving() const {
-    return m_conserving_singles && m_conserving_doubles;
-}
-
 ham::KramersAttributes::KramersAttributes(const ham::KramersAttributes &attrs_1,
                                           const ham::KramersAttributes &attrs_2) {
     m_conserving_singles = attrs_1.m_conserving_singles && attrs_2.m_conserving_singles;
     m_conserving_doubles = attrs_1.m_conserving_doubles && attrs_2.m_conserving_doubles;
+}
+
+bool ham::KramersAttributes::conserving() const {
+    return m_conserving_singles && m_conserving_doubles;
+}
+
+void ham::KramersAttributes::bcast() {
+    mpi::bcast(m_conserving_singles);
+    mpi::bcast(m_conserving_doubles);
 }

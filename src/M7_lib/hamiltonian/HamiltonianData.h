@@ -76,6 +76,8 @@ namespace ham {
         KramersAttributes(const KramersAttributes& attrs_1, const KramersAttributes& attrs_2);
 
         bool conserving() const;
+
+        void bcast();
     };
 
     static constexpr double c_element_tol = 1e-12;
