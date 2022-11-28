@@ -25,8 +25,8 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_0000) {
     AssetSymlink fcidump("TC_Be_CCPVDZ/FCIDUMP", "FCIDUMP");
     // 2.3545134053388529E-002 for 1,2,3,4 (this is only the lmat part)
     // assuming GeneralFrmHam is working properly
-    TcFrmHam ham({"FCIDUMP", false});
-    GeneralFrmHam two_body_ham({"FCIDUMP", false});
+    TcFrmHam ham({"FCIDUMP"});
+    GeneralFrmHam two_body_ham({"FCIDUMP"});
     buffered::FrmOnv onv(ham.m_basis);
     mbf::set_aufbau_mbf(onv, ham.default_nelec());
     auto elem = ham.get_element_0000(onv);
@@ -46,8 +46,8 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
     //      D1=           1           2           3           4
     //  excit1=           4          12
     //   -2.0033789485348489E-003
-    TcFrmHam ham({"FCIDUMP", false});
-    GeneralFrmHam two_body_ham({"FCIDUMP", false});
+    TcFrmHam ham({"FCIDUMP"});
+    GeneralFrmHam two_body_ham({"FCIDUMP"});
     buffered::FrmOnv onv(ham.m_basis);
     mbf::set_aufbau_mbf(onv, ham.default_nelec());
     conn::FrmOnv conn(onv);
@@ -76,8 +76,8 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
     //  excit2=           1           9           4          16
     //   -2.2700965657479885E-005
     // TcFrmHam with spin *minor* ordering, i.e. mirroring NECI & TCHInt
-    TcFrmHam ham({"FCIDUMP", false});
-    GeneralFrmHam two_body_ham({"FCIDUMP", false});
+    TcFrmHam ham({"FCIDUMP"});
+    GeneralFrmHam two_body_ham({"FCIDUMP"});
     buffered::FrmOnv onv(ham.m_basis);
     mbf::set_aufbau_mbf(onv, ham.default_nelec());
     conn::FrmOnv conn(onv);
@@ -110,7 +110,7 @@ TEST(TranscorrelatedFermionHamiltonian, check_nonhermiticity) {
     // remember we antisymmetrise: [ij|kl] - [il|kj]
     // (see FCIDUMP file)
     // the FCIDUMP is in chemist notation but the code is in physicist notations
-    TcFrmHam ham({"FCIDUMP", false});
+    TcFrmHam ham({"FCIDUMP"});
     // these two would be the same assuming Hermiticity, but not in this FCIDUMP
     // chemist notation: 1237 - 1732
     // -0.37788782091129145E-003 - -0.40412978632087910E-003
@@ -131,7 +131,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     AssetSymlink tcdump("TC_Be_CCPVDZ/TCDUMP", "TCDUMP");
     AssetSymlink fcidump("TC_Be_CCPVDZ/FCIDUMP", "FCIDUMP");
     // TC Fermion Hamiltonian to be tested
-    TcFrmHam ham({"FCIDUMP", false});
+    TcFrmHam ham({"FCIDUMP"});
     buffered::FrmOnv onv(ham.m_basis);
     onv = {{0, 1}, {0, 1}};
     conn::FrmOnv conn(onv);
@@ -152,7 +152,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     // expect element (1,2,1|3,4,10)=(1,1,1|3,10,4) (1-based indexing)
     // Also has a phase of -1
     std::cout << "lmat:" << std::endl;
-    auto tmp = ham.get_lmat_coeff(1, 0, 0, 3, 2, 9) / 3;
+    auto tmp = ham.get_lmat_coeff(1, 0, 0, 3, 2, 9) / 3.0;
     std::cout << tmp << std::endl;
     // these are the matrix elements that come from anti-symmetrising:
     //   1 1 2 3 10 4 + 2 1 1 4 3 10 + 1 2 1 10 4 3

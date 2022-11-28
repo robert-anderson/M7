@@ -145,3 +145,17 @@ bool dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, dense::Sq
     zheev_("V", "U", &n, evecs.ptr(), &n, evals.data(), work.data(), &lwork, rwork.data(), &info);
     return !info;
 }
+
+
+bool dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, v_t<std::complex<double>> &evals) {
+    const int n = mat.nrow();
+    const int lwork = std::max(1, 4*n);
+    v_t<std::complex<double>> work(lwork);
+    v_t<double> rwork(lwork);
+    int info;
+    evals.resize(n);
+    auto a = mat;
+    zgeev_("N", "N", &n, a.ptr(), &n, evals.data(),
+           nullptr, &n, nullptr, &n, work.data(), &lwork, rwork.data(), &info);
+    return !info;
+}

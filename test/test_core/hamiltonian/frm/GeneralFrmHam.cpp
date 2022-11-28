@@ -46,7 +46,7 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 
 
 TEST(GeneralFrmHam, Elements) {
-    const auto benchmark = 0.01759459248922075;
+    const ham_t benchmark = 0.01759459248922075;
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     ASSERT_EQ(frm_ham.m_ints.m_2e->sym(), integrals_2e::syms::DHR);
     Hamiltonian h(&frm_ham);
@@ -69,7 +69,7 @@ TEST(GeneralFrmHam, Elements) {
 }
 
 TEST(GeneralFrmHam, RhfEnergy) {
-    const auto benchmark = -108.76171800006861;
+    const ham_comp_t benchmark = -108.76171800006861;
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     Hamiltonian ham(&frm_ham);
     uintv_t chk_orbsyms = {0, 2, 1, 5, 6, 4};
@@ -87,7 +87,7 @@ TEST(GeneralFrmHam, RhfEnergyMolcas) {
      * HF:      -108.9540866268
      * CASCI:   -109.02180323
      */
-    const auto benchmark = -108.9540866268;
+    const ham_comp_t benchmark = -108.9540866268;
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5"});
     Hamiltonian ham(&frm_ham);
     uintv_t chk_orbsyms = {0, 0, 0, 0, 0, 0};

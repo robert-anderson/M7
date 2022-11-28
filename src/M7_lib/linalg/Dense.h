@@ -39,7 +39,10 @@ extern "C" void dgeev_(const char *jobvl, const char *jobvr, const int *n, doubl
                        double *vr, const int* ldvr,
                        double *work, const int *lwork, int *info);
 
-
+extern "C" void zgeev_(const char* jobvl, const char* jobvr, const int* n, std::complex<double>* a,
+                       const int* lda, std::complex<double>* w, std::complex<double>* vl, const int* ldvl,
+                       std::complex<double>* vr, const int* ldvr, std::complex<double>* work,
+                       const int* lwork, double* rwork, int* info);
 
 
 
@@ -640,6 +643,10 @@ namespace dense {
               SquareMatrix<std::complex<double>>& evecs, v_t<double>& evals);
 
     bool diag(const SquareMatrix<std::complex<double>>& mat, v_t<double>& evals);
+
+
+    bool diag(const dense::SquareMatrix<std::complex<double>> &mat, v_t<std::complex<double>> &evals);
+
 }
 
 #endif //M7_DENSE_H

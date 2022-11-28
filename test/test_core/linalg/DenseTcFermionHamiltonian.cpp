@@ -21,11 +21,11 @@
 TEST(DenseTcFermionHamiltonian, TcBe631G) {
     AssetSymlink tcdump("TC_Be_6-31G/TCDUMP", "TCDUMP");
     AssetSymlink fcidump("TC_Be_6-31G/FCIDUMP", "FCIDUMP");
-    TcFrmHam ham_src({"FCIDUMP", false});
+    TcFrmHam ham_src({"FCIDUMP"});
     Hamiltonian gham(&ham_src);
     DenseHamiltonian ham(gham);
     // non-symmetric real matrices have (in general) complex eigenvalues
-    v_t<std::complex<ham_t>> evals;
+    v_t<std::complex<ham_comp_t>> evals;
     dense::diag(ham, evals); // dense diagonalisation
     // unlike hermitian case, we need to sort the eigenvalue array by the real part (lowest first)
     sort::inplace(evals, false, false);

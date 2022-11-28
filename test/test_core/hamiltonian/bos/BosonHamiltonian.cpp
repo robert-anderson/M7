@@ -2,23 +2,23 @@
 // Created by Robert J. Anderson on 21/11/2021.
 //
 
+#include <test_core/defs.h>
 #include "M7_lib/hamiltonian/bos/GeneralBosHam.h"
 #include "M7_lib/conf/Conf.h"
 #include "M7_lib/hamiltonian/Hamiltonian.h"
-#include "gtest/gtest.h"
 
 TEST(BosonHamiltonian, Coefficients) {
     GeneralBosHam bos_ham({PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP"}, sys::bos::c_max_occ);
     ASSERT_EQ(bos_ham.m_basis.m_nmode, 5ul);
     //0.2209708691 2 4 5 3
-    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.get(1, 3, 4, 2), 0.2209708691);
-    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.phys_element(1, 4, 3, 2), 0.2209708691);
+    ASSERT_NEAR_EQ(bos_ham.m_coeffs_2.get(1, 3, 4, 2), 0.2209708691);
+    ASSERT_NEAR_EQ(bos_ham.m_coeffs_2.phys_element(1, 4, 3, 2), 0.2209708691);
     //0.1530931089 5 3 1 3
-    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.get(4, 2, 0, 2), 0.1530931089);
-    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.phys_element(4, 0, 2, 2), 0.1530931089);
+    ASSERT_NEAR_EQ(bos_ham.m_coeffs_2.get(4, 2, 0, 2), 0.1530931089);
+    ASSERT_NEAR_EQ(bos_ham.m_coeffs_2.phys_element(4, 0, 2, 2), 0.1530931089);
 
-    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.get(0, 3, 0, 3), 0.0);
-    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.phys_element(0, 0, 3, 3), 0.0);
+    ASSERT_NEAR_EQ(bos_ham.m_coeffs_2.get(0, 3, 0, 3), 0.0);
+    ASSERT_NEAR_EQ(bos_ham.m_coeffs_2.phys_element(0, 0, 3, 3), 0.0);
 }
 
 TEST(BosonHamiltonian, DiagonalMatrixElements) {
@@ -35,17 +35,17 @@ TEST(BosonHamiltonian, DiagonalMatrixElements) {
     Hamiltonian ham(&bos_ham);
     buffered::BosOnv onv(ham.m_basis);
     onv = {0, 0, 0, 5, 0};
-    ASSERT_FLOAT_EQ(ham.get_element(onv), 3.125);
+    ASSERT_NEAR_EQ(ham.get_element(onv), 3.125);
     onv = {0, 0, 1, 3, 1};
-    ASSERT_FLOAT_EQ(ham.get_element(onv), 4.921875);
+    ASSERT_NEAR_EQ(ham.get_element(onv), 4.921875);
     onv = {0, 0, 2, 1, 2};
-    ASSERT_FLOAT_EQ(ham.get_element(onv), 4.8671875);
+    ASSERT_NEAR_EQ(ham.get_element(onv), 4.8671875);
     onv = {0, 1, 0, 2, 2};
-    ASSERT_FLOAT_EQ(ham.get_element(onv), 4.3984375);
+    ASSERT_NEAR_EQ(ham.get_element(onv), 4.3984375);
     onv = {0, 1, 1, 0, 3};
-    ASSERT_FLOAT_EQ(ham.get_element(onv), 3.9140625);
+    ASSERT_NEAR_EQ(ham.get_element(onv), 3.9140625);
     onv = {1, 0, 0, 1, 3};
-    ASSERT_FLOAT_EQ(ham.get_element(onv), 3.0859375);
+    ASSERT_NEAR_EQ(ham.get_element(onv), 3.0859375);
 }
 
 TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
@@ -90,10 +90,10 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
         for (uint_t j=i+1; j<basis.size(); ++j) {
             dst = basis[j];
             conn.connect(src, dst);
-            ASSERT_FLOAT_EQ(ham.get_element(src, conn), h_upper_triangle[n]);
+            ASSERT_NEAR_EQ(ham.get_element(src, conn), h_upper_triangle[n]);
             // hamiltonian is hermitian
             conn.connect(dst, src);
-            ASSERT_FLOAT_EQ(ham.get_element(dst, conn), h_upper_triangle[n]);
+            ASSERT_NEAR_EQ(ham.get_element(dst, conn), h_upper_triangle[n]);
             ++n;
         }
     }
@@ -102,7 +102,7 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
     dst = {2, 0, 0, 3, 0};
     // should not be connected due to angular momentum conservation
     conn.connect(src, dst);
-    ASSERT_FLOAT_EQ(ham.get_element(src, conn), 0.0);
+    ASSERT_NEAR_EQ(ham.get_element(src, conn), 0.0);
     conn.connect(dst, src);
-    ASSERT_FLOAT_EQ(ham.get_element(dst, conn), 0.0);
+    ASSERT_NEAR_EQ(ham.get_element(dst, conn), 0.0);
 }

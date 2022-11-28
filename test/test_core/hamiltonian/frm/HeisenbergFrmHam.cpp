@@ -3,7 +3,7 @@
 //
 
 #include <M7_lib/field/Mbf.h>
-#include "gtest/gtest.h"
+#include <test_core/defs.h>
 #include "M7_lib/hamiltonian/frm/HeisenbergFrmHam.h"
 
 namespace heisenberg_test {
@@ -42,17 +42,17 @@ TEST(HeisenbergFrmHam, LocalExchangeOnly){
     set_onv_from_spinvec(src, {1, 0, 0, 1, 1, 0});
     set_onv_from_spinvec(dst, {1, 0, 0, 1, 0, 1});
     conn.connect(src, dst);
-    ASSERT_TRUE(ham.get_element_2200(src, conn));
+    ASSERT_EQ(ham.get_element_2200(src, conn), 0.0);
 
     set_onv_from_spinvec(dst, {0, 0, 0, 1, 1, 1});
     conn.connect(src, dst);
     // with PBCs, boundary sites on the lattice with opposite spins are allowed to exchange
-    ASSERT_TRUE(ham.get_element_2200(src, conn));
+    ASSERT_NE(ham.get_element_2200(src, conn), 0.0);
 
     set_onv_from_spinvec(dst, {1, 1, 0, 1, 0, 0});
     conn.connect(src, dst);
     // non-neighboring sites on the lattice with opposite spins are not allowed to exchange
-    ASSERT_FALSE(ham.get_element_2200(src, conn));
+    ASSERT_EQ(ham.get_element_2200(src, conn), 0.0);
 }
 
 TEST(HeisenbergFrmHam, Elements){
@@ -71,14 +71,14 @@ TEST(HeisenbergFrmHam, Elements){
     uint_t noffdiag_nonzero = 0ul;
     for (uint_t isrc=0ul; isrc<spinvecs.size(); ++isrc) {
         heisenberg_test::set_onv_from_spinvec(src, spinvecs[isrc]);
-        ASSERT_FLOAT_EQ(ham.get_energy(src), energies[isrc]);
+        ASSERT_NEAR_EQ(ham.get_energy(src), energies[isrc]);
         for (auto & dst_spinvec : spinvecs) {
             heisenberg_test::set_onv_from_spinvec(dst, dst_spinvec);
             conn.connect(src, dst);
             if (conn.exsig()!=exsig::ex_double) continue;
             auto helem = ham.get_element_2200(src, conn);
-            if (!helem) continue;
-            ASSERT_FLOAT_EQ(helem, 0.5);
+            if (helem==0.0) continue;
+            ASSERT_NEAR_EQ(helem, 0.5);
             ++noffdiag_nonzero;
         }
     }

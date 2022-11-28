@@ -14,7 +14,7 @@ TEST(FciInitializer, N2) {
     FciInitOptions opt;
     opt.m_ritz_tol = 1e-7;
     DenseHamiltonian hmat(ham);
-    v_t<ham_t> dense_evals;
+    v_t<ham_comp_t> dense_evals;
     dense::diag(hmat, dense_evals);
     ham_comp_t eval;
     auto results = FciInitializer::solve(ham, opt);

@@ -229,7 +229,7 @@ public:
     }
 
     void get_eval(uint_t iroot, comp_t& eval) const {
-        REQUIRE_FALSE(m_imag_evals[m_root_ordering[iroot]], "non-zero imaginary part");
+        REQUIRE_NEARLY_ZERO(m_imag_evals[m_root_ordering[iroot]], "non-zero imaginary part");
         eval = m_real_evals[m_root_ordering[iroot]];
     }
 
