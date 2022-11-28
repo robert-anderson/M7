@@ -9,7 +9,7 @@
 
 TEST(Pchb2200, FromHFDeterminant) {
     PRNG prng(14, 1000000);
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_LiH_STO-3G/FCIDUMP", true});
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_LiH_STO-3G/FCIDUMP"});
     Hamiltonian h(&frm_ham);
     exgen::Pchb2200 excit_gen(frm_ham, prng);
     conn_foreach::frm::Ms2Conserve<2> conn_iter;
@@ -21,7 +21,7 @@ TEST(Pchb2200, FromHFDeterminant) {
 
 TEST(Pchb2200, FromExcited){
     PRNG prng(14, 1000000);
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", true});
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     Hamiltonian h(&frm_ham);
     exgen::Pchb2200 excit_gen(frm_ham, prng);
     conn_foreach::frm::Ms2Conserve<2> conn_iter;

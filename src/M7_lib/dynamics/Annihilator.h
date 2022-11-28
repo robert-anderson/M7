@@ -136,14 +136,18 @@ public:
 
     /**
      * TODO: complex sign problem or "phase problem"
-     *
-     *  magnitude of the sign difference between two real-valued walker weights
      */
     template<typename T>
     static T annihilated_magnitude(const T& weight, const T& delta){
         if (weight > 0.0 && delta < 0.0) return std::min(weight, -delta);
         if (weight < 0.0 && delta > 0.0) return std::min(-weight, delta);
         return 0.0;
+    }
+
+    template<typename T>
+    static T annihilated_magnitude(const std::complex<T>& weight, const std::complex<T>& delta){
+        return annihilated_magnitude(arith::real_ref(weight), arith::real_ref(delta)) +
+               annihilated_magnitude(arith::imag_ref(weight), arith::imag_ref(delta));
     }
 };
 

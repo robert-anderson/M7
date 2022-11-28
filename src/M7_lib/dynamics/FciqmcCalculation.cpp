@@ -23,7 +23,7 @@ FciqmcCalculation::FciqmcCalculation(const conf::Document &opts) :
         auto ref_walker = m_wf.m_store.m_row;
         ref_walker.jump(ref_loc.m_irec);
         for (uint_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
-            m_wf.set_weight(ref_walker, ipart, opts.m_wavefunction.m_nw_init);
+            m_wf.set_weight(ref_walker, ipart, wf_t(opts.m_wavefunction.m_nw_init));
     }
     m_prop->m_shift.m_values = ref_energy+opts.m_shift.m_init;
     Solver solver(opts, *m_prop, m_wf, ref_loc);

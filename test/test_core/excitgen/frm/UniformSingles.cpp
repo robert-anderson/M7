@@ -9,7 +9,7 @@
 
 TEST(UniformSingles, FromExcited){
     PRNG prng(14, 1000000);
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/H2O_RHF/FCIDUMP", true});
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/H2O_RHF/FCIDUMP"});
     Hamiltonian h(&frm_ham);
     exgen::UniformSingles excit_gen(frm_ham, prng);
     conn_foreach::frm::Ms2Conserve<1> excit_iter;

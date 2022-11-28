@@ -23,7 +23,7 @@ struct GeneralLadderHam : FrmBosHam {
 
     GeneralLadderHam(sys::Basis basis, opt_pair_t opts):
         GeneralLadderHam(std::move(basis),
-                         EbdumpInfo(opts.m_ham.m_ebdump.m_path, opts.m_ham.m_ebdump.m_spin_major)){}
+             EbdumpInfo(opts.m_ham.m_ebdump.m_path, FcidumpInfo::ur_style(opts.m_ham.m_ebdump.m_spin_major))){}
 
     ham_t get_coeff_1110(uint_t imode, uint_t i, uint_t j) const override;
 

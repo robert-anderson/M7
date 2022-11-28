@@ -125,7 +125,7 @@ struct HamiltonianTerms {
         const sys::Basis basis(m_frm->m_basis, m_bos->m_basis);
 
         using namespace ptr::smart;
-        if (opts.m_ham.m_holstein_coupling) {
+        if (opts.m_ham.m_holstein_coupling.m_value != 0.0) {
             const auto g = opts.m_ham.m_holstein_coupling.m_value;
             return make_poly_unique<FrmBosHam, HolsteinLadderHam>(basis, g);
         }

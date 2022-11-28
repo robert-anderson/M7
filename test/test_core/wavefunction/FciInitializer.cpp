@@ -9,17 +9,15 @@
 
 #ifdef ENABLE_FERMIONS
 TEST(FciInitializer, N2) {
-    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP", true});
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     Hamiltonian ham(&frm_ham);
     FciInitOptions opt;
     opt.m_ritz_tol = 1e-7;
-    FciInitializer init(ham, opt);
     DenseHamiltonian hmat(ham);
     v_t<ham_t> dense_evals;
     dense::diag(hmat, dense_evals);
     ham_comp_t eval;
-    auto results = init.get_results();
-    results.bcast();
+    auto results = FciInitializer::solve(ham, opt);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, dense_evals[0]);
 }
@@ -27,10 +25,8 @@ TEST(FciInitializer, N2) {
 TEST(FciInitializer, J1J2) {
     J1J2FrmHam frm_ham(0.25, lattice::make("ortho", {16}, {1}));
     Hamiltonian ham(&frm_ham);
-    FciInitializer init(ham);
     ham_comp_t eval;
-    auto results = init.get_results();
-    results.bcast();
+    auto results = FciInitializer::solve(ham);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, -6.44708);
 }
@@ -57,13 +53,14 @@ TEST(FciInitializer, BosHubLoop) {
         opt.m_diag_shift = -91.0;
         FciInitializer init(ham, opt);
         auto results = init.get_results();
+        results.bcast();
         hdf5::FileWriter fw(logging::format("bos_hub_u={:.4f}.h5", u));
         v_t<double> evals;
         results.get_evals(evals);
         fw.write_data("evals", evals);
         const ham_comp_t* evec = nullptr;
         results.get_evec(0ul, evec);
-        const uintv_t shape = {results.nroot(), results.nelement_evec()};
+        const uintv_t shape = {results.nelement_evec(), results.nroot()};
         fw.write_data("evecs", evec, shape);
     }
 }

@@ -20,14 +20,14 @@ ham_t HolsteinLadderHam::get_element_0010(const field::FrmBosOnv &onv, const con
     const auto imode = conn.m_bos.m_cre[0].m_imode;
     const auto nocc_frm = onv.m_frm.site_nocc(imode);
     const auto occ_fac = onv.m_bos.occ_fac(conn.m_bos);
-    return m_g*nocc_frm*occ_fac;
+    return m_g * ham_t(nocc_frm * occ_fac);
 }
 
 ham_t HolsteinLadderHam::get_element_0001(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
     const auto imode = conn.m_bos.m_ann[0].m_imode;
     const auto nocc_frm = onv.m_frm.site_nocc(imode);
     const auto occ_fac = onv.m_bos.occ_fac(conn.m_bos);
-    return m_g*nocc_frm*occ_fac;
+    return m_g * ham_t(nocc_frm * occ_fac);
 }
 
 HamOpTerm::excit_gen_list_t HolsteinLadderHam::make_excit_gens(PRNG& prng, const conf::Propagator& /*propagator*/) const {

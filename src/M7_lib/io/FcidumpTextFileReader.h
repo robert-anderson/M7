@@ -16,7 +16,7 @@ struct FcidumpTextFileReader : public HamTextFileReader {
     /**
      * spin-resolved FCIDUMPs index in spinorbs, which may not or may not be spin-major, depending on the program they
      * were generated for. E.g. NECI assumes spin-minor ordering, so if the FCIDUMP supplied was intended for use with
-     * NECI, m_spin_major should be false.
+     * NECI, m_ur_style should be false.
      */
     const FcidumpInfo m_info;
 

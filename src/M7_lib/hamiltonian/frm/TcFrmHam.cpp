@@ -22,7 +22,7 @@ ham_t TcFrmHam::get_coeff_3300(uint_t a, uint_t b, uint_t c, uint_t i, uint_t j,
     auto add_contrib = [&](uint_t mp, uint_t mq, uint_t mr, uint_t ip,
                            uint_t iq, uint_t ir, int sgn) {
         if (mp == ma && mq == mb && mr == mc) {
-            coeff += sgn * get_lmat_coeff(ia, ib, ic, ip, iq, ir);
+            coeff += ham_t(sgn) * get_lmat_coeff(ia, ib, ic, ip, iq, ir);
         }
     };
     // add all exchange terms

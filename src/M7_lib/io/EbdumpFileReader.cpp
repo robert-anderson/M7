@@ -34,7 +34,7 @@ bool EbdumpFileReader::inds_in_range(const uintv_t& inds) const {
 }
 
 void EbdumpFileReader::convert_inds(uintv_t& inds) {
-    if (!m_info.m_spin_resolved || m_info.m_spin_major) return;
+    if (!m_info.m_spin_resolved || m_info.m_ur_style) return;
     auto fn = [&inds, this](uint_t i){
         auto& ind = inds[i];
         ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_info.m_nsite : 0));

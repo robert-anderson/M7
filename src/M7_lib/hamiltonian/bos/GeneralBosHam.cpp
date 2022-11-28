@@ -15,7 +15,7 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, uint_t occ_cutoff) :
 
     logging::info("Reading Boson Hamiltonian coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
-        if (ham::is_significant(value)) continue;
+        if (!ham::is_significant(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
         DEBUG_ASSERT_TRUE(exsig::contribs_to(exsig, ranksig),
@@ -53,7 +53,7 @@ ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
             ham_comp_t occj = onv[jmode];
             // imode and jmode are different
             // i, j -> i, j
-            h += 2 * m_coeffs_2.get(imode, imode, jmode, jmode) * occi * occj;
+            h += 2.0 * m_coeffs_2.get(imode, imode, jmode, jmode) * occi * occj;
         }
         h += 0.5 * m_coeffs_2.get(imode, imode, imode, imode) * occi * (occi - 1);
     }

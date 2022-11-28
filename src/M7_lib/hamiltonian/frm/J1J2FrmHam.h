@@ -9,7 +9,7 @@
 #include "HeisenbergFrmHam.h"
 
 struct J1J2FrmHam : SumFrmHam<HeisenbergFrmHam, HeisenbergFrmHam> {
-    J1J2FrmHam(ham_t j2, const std::shared_ptr<lattice::Lattice>& lattice):
+    J1J2FrmHam(ham_comp_t j2, const std::shared_ptr<lattice::Lattice>& lattice):
         SumFrmHam<HeisenbergFrmHam, HeisenbergFrmHam>(
                 {1.0, lattice},{j2, lattice, lattice->make_next_nearest()}, 1.0){}
 };

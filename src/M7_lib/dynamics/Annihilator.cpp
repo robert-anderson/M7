@@ -35,7 +35,7 @@ Annihilator::Annihilator(Wavefunction &wf, const Propagator &prop, const Referen
                          Rdms &rdms, const uint_t &icycle, wf_comp_t nadd) :
         m_wf(wf), m_prop(prop), m_refs(refs), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
         m_work_row1(wf.m_send_recv.m_row), m_work_row2(wf.m_send_recv.m_row), m_dst_walker(m_wf.m_store.m_row),
-        m_dst_weight(m_wf.npart(), {}), m_sort_cmp_fn(make_sort_cmp_fn()) {
+        m_dst_weight(m_wf.npart(), wf_t{}), m_sort_cmp_fn(make_sort_cmp_fn()) {
     REQUIRE_TRUE_ALL(bool(m_rdms)==m_work_row1.m_send_parents,
                      "cannot sample RDMs through annihilation unless parent MBFs are communicated");
 }
@@ -146,7 +146,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
     }
 
     // spawning is never prevented if the destination walker exists and is populated in the relevant part
-    bool allow_initiation = dst_walker && dst_walker.m_weight[block_begin.m_ipart_dst];
+    bool allow_initiation = dst_walker && (dst_walker.m_weight[block_begin.m_ipart_dst] != 0.0);
     // always allow new walker to be created if multiple sources are simultaneously spawning here
     if (!allow_initiation) allow_initiation = block_begin.offset(next_block_begin) > 1;
     // else, only allow initiation if the lone parent was an initiator
@@ -188,7 +188,7 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
     // recover pre-death value of replica population (on average)
     contrib /= 1.0 - m_prop.tau() * (dst_row.m_hdiag - m_prop.m_shift.m_values[ipart_replica]);
     contrib = arith::conj(contrib);
-    contrib *= block_begin.m_src_weight;
+    contrib *= wf_t(block_begin.m_src_weight);
     m_rdms.make_contribs(block_begin.m_src_mbf, dst_row.m_mbf, contrib);
 }
 

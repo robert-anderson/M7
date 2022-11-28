@@ -86,6 +86,12 @@ endif()
 
 target_compile_definitions(M7_lib PUBLIC MBF_TYPE=${MBF_TYPE})
 
+option(ENABLE_COMPLEX "ENABLE_COMPLEX")
+if (ENABLE_COMPLEX)
+    set(ENABLE_COMPLEX_WF 1)
+    set(ENABLE_COMPLEX_HAM 1)
+endif ()
+
 option(ENABLE_COMPLEX_WF "ENABLE_COMPLEX_WF")
 if (ENABLE_COMPLEX_WF)
     target_compile_definitions(M7_lib PUBLIC ENABLE_COMPLEX_WF)

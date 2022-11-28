@@ -13,7 +13,7 @@ namespace conf {
 
     struct Fcidump : Section {
         Param<str_t> m_path;
-        Param<bool> m_spin_major;
+        SingleChoice<str_t> m_unrestrict_style;
 
         explicit Fcidump(Group *parent);
     };
@@ -70,7 +70,7 @@ namespace conf {
 
     struct FrmBosHam : Section {
         Ebdump m_ebdump;
-        Param<ham_t> m_holstein_coupling;
+        Param<ham_comp_t> m_holstein_coupling;
 
         explicit FrmBosHam(Group *parent);
     };
@@ -78,7 +78,7 @@ namespace conf {
     struct InteractingBoseGas : Section {
         Param<uint_t> m_ndim;
         Param<uint_t> m_nwave;
-        Param<ham_t> m_ek_scale;
+        Param<ham_comp_t> m_ek_scale;
 
         explicit InteractingBoseGas(Group *parent);
     };

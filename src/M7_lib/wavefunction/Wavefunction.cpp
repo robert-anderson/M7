@@ -267,24 +267,19 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
      * perform the eigensolver procedure for the required number of states
      */
     FciInitializer init(h, opts);
-    /*
-     * load the pointers to the eigenvectors
-     */
-    v_t<wf_t const*> evec_ptrs;
+    const auto results = init.solve();
     /*
      * compute the ratio of initial number of walkers to L1-norms of the eigenvectors to get the right scale
      */
     v_t<wf_t> scale_facs;
     if (mpi::i_am_root()) {
-        auto results = init.get_results();
-
         v_t<ham_t> evals;
         results.get_evals(evals);
         logging::info("FCI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
 
-        results.get_evecs(evec_ptrs);
         const auto nw = m_opts.m_wavefunction.m_nw_init.m_value;
-        for (auto ptr: evec_ptrs) scale_facs.push_back(nw / math::l1_norm(ptr, results.nelement_evec()));
+        for (uint_t iroot=0ul; iroot<opts.m_nroot; ++iroot)
+            scale_facs.push_back(nw / math::l1_norm(results.get_evec(iroot), results.nelement_evec()));
     }
 
     uint_t irow = 0ul;
@@ -300,7 +295,7 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
                 for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
                     for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
                         auto ipart = m_format.flatten({iroot, ireplica});
-                        const auto weight = evec_ptrs[iroot][row.index()]*scale_facs[iroot];
+                        const auto weight = results.get_evec(iroot)[row.index()]*scale_facs[iroot];
                         add_spawn(row.m_mbf, weight, true, false, ipart);
                     }
                 }

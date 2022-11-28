@@ -18,12 +18,12 @@ void FcidumpInfo::set_metadata(bool uhf, bool relativistic, uint_t nelec, uint_t
     REQUIRE_EQ(m_orbsym.size(), m_nsite, "invalid ORBSYM specified in FCIDUMP file");
 }
 
-FcidumpInfo::FcidumpInfo(str_t fname, bool spin_major) : m_fname(std::move(fname)),
-                                                         m_impl(hdf5::FileBase::is_hdf5(m_fname) ? MolcasHDF5 : CSV), m_spin_major(spin_major) {
+FcidumpInfo::FcidumpInfo(str_t fname, UnrestrictStyle ur_style) :
+        m_fname(std::move(fname)), m_impl(hdf5::FileBase::is_hdf5(m_fname) ? MolcasHDF5 : CSV), m_ur_style(ur_style) {
     if (m_impl==CSV) {
         FortranNamelistReader reader(m_fname);
         set_metadata(
-            reader.read_bool("UHF"), reader.read_bool("TREL"),
+            reader.read_bool("UHF") || reader.read_int("IUHF"), reader.read_bool("TREL"),
             reader.read_uint("NELEC"), reader.read_uint("NORB"),
             reader.read_int("MS2", sys::frm::c_undefined_ms2),
             integer::shifted(reader.read_uints("ORBSYM", {}), false));
@@ -38,7 +38,7 @@ FcidumpInfo::FcidumpInfo(str_t fname, bool spin_major) : m_fname(std::move(fname
     }
 }
 
-EbdumpInfo::EbdumpInfo(str_t fname, bool spin_major) : FcidumpInfo(fname, spin_major) {
+EbdumpInfo::EbdumpInfo(str_t fname, UnrestrictStyle ur_style) : FcidumpInfo(fname, ur_style) {
     FortranNamelistReader reader(m_fname);
     m_nmode = reader.read_int("NMODE");
 }
