@@ -37,7 +37,7 @@ void ExactLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uin
 
 void ExactLinear::diagonal(Wavefunction& wf, Walker& walker, const uint_t& ipart) {
     const ham_comp_t& hdiag = walker.m_hdiag;
-    DEBUG_ASSERT_NEARLY_EQ(hdiag, m_ham.get_energy(walker.m_mbf), "incorrect diagonal H element cached");
+    DEBUG_ASSERT_NEAR_EQ(hdiag, m_ham.get_energy(walker.m_mbf), "incorrect diagonal H element cached");
     wf.scale_weight(walker, ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }
 

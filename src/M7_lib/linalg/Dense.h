@@ -471,7 +471,7 @@ namespace dense {
                     if (conj) this_element = arith::conj(this_element);
                     auto& other_element = (*this)(icol, irow);
                     if (other_element != 0.0) {
-                        DEBUG_ASSERT_NEARLY_EQ(this_element, other_element, "inconsistent elements");
+                        DEBUG_ASSERT_NEAR_EQ(this_element, other_element, "inconsistent elements");
                     }
                     if (irow!=icol) other_element = this_element;
                 }

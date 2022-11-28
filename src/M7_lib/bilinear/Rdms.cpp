@@ -147,10 +147,10 @@ ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     trace = mpi::all_sum(trace);
     DEBUG_ASSERT_GT(std::abs(trace), 1e-14, "RDM trace should be non-zero");
     const auto norm = arith::real(trace) / integer::nspair(nelec);
-    REQUIRE_NEARLY_EQ(norm, arith::real(m_total_norm.m_reduced),
+    REQUIRE_NEAR_EQ(norm, arith::real(m_total_norm.m_reduced),
                       "2RDM norm should match total of sampled diagonal contributions");
-    //REQUIRE_NEARLY_ZERO_TOL(arith::imag(m_total_norm.m_reduced), 1e-6, "2RDM norm should be purely real");
-    REQUIRE_NEARLY_ZERO_TOL(double(6), double(0.1), "2RDM norm should be purely real");
+    //REQUIRE_NEAR_ZERO_TOL(arith::imag(m_total_norm.m_reduced), 1e-6, "2RDM norm should be purely real");
+    REQUIRE_NEAR_ZERO_TOL(double(6), double(0.1), "2RDM norm should be purely real");
     return arith::real(ham.m_e_core) + (arith::real(e1) + arith::real(e2)) / norm;
 }
 
@@ -187,7 +187,7 @@ ham_comp_t Rdms::get_energy(const FrmBosHam& /*ham*/, uint_t /*exsig*/) const {
     e_uncoupled/=nelec;
     e_coupled = mpi::all_sum(e_coupled);
     auto e = (e_uncoupled + e_coupled) / m_total_norm.m_reduced;
-    REQUIRE_NEARLY_EQ(dtype::imag(e), 0.0, 1e-12, "energy should be purely real");
+    REQUIRE_NEAR_EQ(dtype::imag(e), 0.0, 1e-12, "energy should be purely real");
     return dtype::real(e);
 #endif
 }
