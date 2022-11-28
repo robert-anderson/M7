@@ -19,7 +19,7 @@ void ExactLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uin
     bool src_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
     src_mbf.m_decoded.clear();
 
-    DEBUG_ASSERT_TRUE(weight,"shouldn't be trying to propagate off-diagonal from zero weight");
+    DEBUG_ASSERT_NE(weight, 0.0, "shouldn't be trying to propagate off-diagonal from zero weight");
     conn::Mbf conn(src_mbf);
     auto body = [&]() {
         DEBUG_ASSERT_NE(conn.exsig(), 0ul, "diagonal connection generated");

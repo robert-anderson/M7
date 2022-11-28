@@ -17,7 +17,7 @@ protected:
     str_t m_work_line;
 public:
 
-    CsvFileReader(const str_t& fname, str_t delimiters=", ", uint_t iline=0ul);
+    CsvFileReader(const str_t& fname, str_t delimiters=", ()", uint_t iline=0ul);
 
     bool next(strv_t& tokens);
 };
@@ -30,7 +30,7 @@ class NumericCsvFileReader : public CsvFileReader {
 public:
     const uint_t m_ncolumn;
     NumericCsvFileReader(const str_t& fname, uint_t ncolumn,
-                         str_t delimiters=", ", uint_t iline=0ul);
+                         str_t delimiters=", ()", uint_t iline=0ul);
 
     bool next(strv_t& tokens);
 

@@ -44,24 +44,20 @@ TEST(FciInitializer, BosHub) {
 }
 
 TEST(FciInitializer, BosHubLoop) {
-    for (ham_t u=-0.17; u<-0.14; u+=0.0005) {
+    for (ham_comp_t u=-0.17; u<-0.14; u+=0.0005) {
         HubbardBosHam bos_ham(u, lattice::make("ortho", {10}, {1}));
         Hamiltonian ham(&bos_ham);
         FciInitOptions opt;
         opt.m_nroot = 10ul;
         opt.m_ritz_tol = 1e-10;
         opt.m_diag_shift = -91.0;
-        FciInitializer init(ham, opt);
-        auto results = init.get_results();
-        results.bcast();
+        auto results = FciInitializer::solve(ham, opt);
         hdf5::FileWriter fw(logging::format("bos_hub_u={:.4f}.h5", u));
         v_t<double> evals;
         results.get_evals(evals);
         fw.write_data("evals", evals);
-        const ham_comp_t* evec = nullptr;
-        results.get_evec(0ul, evec);
         const uintv_t shape = {results.nelement_evec(), results.nroot()};
-        fw.write_data("evecs", evec, shape);
+        fw.write_data("evecs", results.get_evec(0ul), shape);
     }
 }
 #endif

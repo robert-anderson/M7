@@ -58,8 +58,7 @@ uint_t GeneralFrmHam::make_ints_(IntegralReader *reader, GeneralFrmHam::ints_1e_
 GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader* reader) {
     if (!m_basis.m_nsite) return {nullptr, nullptr};
 
-    REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),
-               m_basis.ncoeff_ind(m_info.m_spin_resolved), "site map size incorrect");
+    REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),m_basis.m_nsite, "site map size incorrect");
 
     m_complex_valued = false;
     if (reader) m_complex_valued = reader->complex_valued();
