@@ -7,38 +7,37 @@
 #include <M7_lib/field/Mbf.h>
 #include "M7_lib/caches/DecodedDeterminants.h"
 
-#ifdef ENABLE_COMPLEX
+#ifdef ENABLE_COMPLEX_HAM
 TEST(FermionHamiltonian, DhfEnergy) {
     const auto benchmark = -14.354220448530139;
-    FermionHamiltonian ham(assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
+    GeneralFrmHam ham({PROJECT_ROOT"/assets/DHF_Be_STO-3G/FCIDUMP"});
     ASSERT_FALSE(ham.m_kramers_attrs.conserving());
-    buffered::FrmOnv onv(ham.m_nsite);
-    onv = {0, 1, ham.m_nsite, ham.m_nsite + 1};
+    buffered::FrmOnv onv(ham.m_basis);
+    onv = {{0, 1}, {0, 1}};
     auto elem = ham.get_element(onv);
-    ASSERT_TRUE(dtype::floats_equal(dtype::real(elem), benchmark));
-    ASSERT_TRUE(dtype::float_nearly_zero(dtype::imag(elem), 1e-14));
-    ASSERT_TRUE(dtype::floats_equal(ham.get_energy(onv), benchmark));
+    ASSERT_NEAR_EQ(arith::real(elem), benchmark);
+    ASSERT_NEAR_ZERO(arith::imag(elem));
+    ASSERT_NEAR_EQ(ham.get_energy(onv), benchmark);
 }
 
 TEST(FermionHamiltonian, DhfBrillouinTheorem) {
-    FermionHamiltonian ham(PROJECT_ROOT"/assets/DHF_Be_STO-3G/FCIDUMP", false);
+    GeneralFrmHam ham({PROJECT_ROOT"/assets/DHF_Be_STO-3G/FCIDUMP"});
     ASSERT_FALSE(ham.m_kramers_attrs.conserving());
-    buffered::FrmOnv hf_det(ham.m_nsite);
-    hf_det = {0, 1, ham.m_nsite, ham.m_nsite + 1};
+    buffered::FrmOnv hf_det(ham.m_basis);
+    hf_det = {{0, 1}, {0, 1}};
 
-    OccOrbs occs(hf_det);
-    VacOrbs vacs(hf_det);
+    buffered::FrmOnv excited(ham.m_basis);
+    conn::FrmOnv conn(hf_det.m_basis);
 
-    buffered::FrmOnv excited(ham.m_nsite);
-
-    conn::FrmOnv conn(hf_det.m_nsite);
-
+    const auto& occs = hf_det.m_decoded.m_simple_occs.get();
+    const auto& vacs = hf_det.m_decoded.m_simple_vacs.get();
     for (uint_t iocc = 0ul; iocc < occs.size(); ++iocc) {
         const auto &occ = occs[iocc];
         for (uint_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
-            const auto &vac = vacs[iocc];
-            conn.set(occ, vac);
-            ASSERT_TRUE(dtype::float_is_zero(ham.get_element(hf_det, conn)));
+            const auto &vac = vacs[ivac];
+            conn.m_ann.set(occ);
+            conn.m_cre.set(vac);
+            ASSERT_NEAR_ZERO(ham.get_element(hf_det, conn));
         }
     }
 }

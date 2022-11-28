@@ -22,6 +22,7 @@ TEST(DenseHamiltonian, FciEnergyCheck4c) {
     ASSERT_NEAR_EQ(evals[1], -14.28883698406);
 }
 #endif
+
 TEST(DenseHamiltonian, N2Rhf) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     Hamiltonian ham(&frm_ham);

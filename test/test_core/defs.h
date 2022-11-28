@@ -42,8 +42,8 @@ namespace test_defs {
  */
 #define ASSERT_NEAR_EQ_TOL(a, b, rtol, atol) ASSERT_EQ(test_defs::make_helper(a, rtol, atol), b);
 #define ASSERT_NEAR_EQ(a, b) ASSERT_NEAR_EQ_TOL(a, b, fptol::default_rtol(a), fptol::default_atol(a));
-#define ASSERT_NEAR_ZERO_TOL(b, atol) ASSERT_NEAR_EQ_TOL(0.0, b, 0.0, atol);
-#define ASSERT_NEAR_ZERO(b) ASSERT_NEAR_ZERO_TOL(b, fptol::default_ztol(b));
+#define ASSERT_NEAR_ZERO_TOL(a, ztol) ASSERT_NEAR_EQ_TOL(a, 0.0, 0.0, ztol);
+#define ASSERT_NEAR_ZERO(a) ASSERT_NEAR_ZERO_TOL(a, fptol::default_ztol(a));
 
 // TODO: make these work for vectors
 
