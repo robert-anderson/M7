@@ -132,3 +132,24 @@ TEST(GeneralFrmHam, NonHermitian) {
 TEST(GeneralFrmHam, FromMolcasHdf5Archive) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N2_Molcas/molcas.FciDmp.h5"});
 }
+
+TEST(GeneralFrmHam, UhfFcidump) {
+    GeneralFrmHam frm_ham_minor({PROJECT_ROOT"/assets/N_UHF/FCIDUMP.spin_minor", FcidumpInfo::SpinMinor});
+    GeneralFrmHam frm_ham_major({PROJECT_ROOT"/assets/N_UHF/FCIDUMP.spin_major", FcidumpInfo::SpinMajor});
+    GeneralFrmHam frm_ham_blocks({PROJECT_ROOT"/assets/N_UHF/FCIDUMP.spin_blocks", FcidumpInfo::SpinBlocks});
+    ASSERT_EQ(frm_ham_minor.m_ints.m_2e->sym(), integrals_2e::syms::DHR);
+    ASSERT_EQ(frm_ham_major.m_ints.m_2e->sym(), integrals_2e::syms::DHR);
+    ASSERT_EQ(frm_ham_blocks.m_ints.m_2e->sym(), integrals_2e::syms::DHR);
+
+    auto test_fn = [&](uint_t i, uint_t j, uint_t k, uint_t l, ham_t bench_value) {
+        ASSERT_NEAR_EQ(frm_ham_minor.m_ints.m_2e->get(i, j, k, l), bench_value);
+        ASSERT_NEAR_EQ(frm_ham_major.m_ints.m_2e->get(i, j, k, l), bench_value);
+        ASSERT_NEAR_EQ(frm_ham_blocks.m_ints.m_2e->get(i, j, k, l), bench_value);
+    };
+    /*
+     * FCIDUMP.spin_major row
+     *  0.1149374791420607    5    2   13   11
+     *  < 4 12 | 1 10 >
+     */
+    test_fn(4, 12, 1, 10, 0.1149374791420607);
+}

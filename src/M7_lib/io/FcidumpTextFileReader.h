@@ -32,6 +32,8 @@ private:
 public:
     FcidumpTextFileReader(const FcidumpInfo& info);
 
+    ~FcidumpTextFileReader() override;
+
     bool spin_conserving() const;
 
     /**

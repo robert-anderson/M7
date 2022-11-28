@@ -125,6 +125,11 @@ namespace sys {
                 return ispinorb >= nsite;
             }
 
+            uint_t ispin_flipped(uint_t ispinorb) const {
+                DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
+                return (ispinorb < m_nsite) ? (ispinorb + m_nsite) : (ispinorb - m_nsite);
+            }
+
             uint_t ispinorb(uint_t ispin, uint_t isite) const {
                 DEBUG_ASSERT_LT(ispin, 2ul, "spin channel index OOB");
                 DEBUG_ASSERT_LT(isite, m_nsite, "site index OOB");

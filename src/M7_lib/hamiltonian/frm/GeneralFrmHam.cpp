@@ -57,6 +57,8 @@ uint_t GeneralFrmHam::make_ints_(IntegralReader *reader, GeneralFrmHam::ints_1e_
 
 GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader* reader) {
     if (!m_basis.m_nsite) return {nullptr, nullptr};
+    m_kramers_attrs.m_conserving_singles = reader->spin_conserving(1);
+    m_kramers_attrs.m_conserving_doubles = reader->spin_conserving(2);
 
     REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),m_basis.m_nsite, "site map size incorrect");
 
@@ -130,8 +132,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints() {
 
 
 GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info):
-        FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}}),
-        m_info(info), m_ints(make_ints()){
+        FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}}), m_info(info), m_ints(make_ints()){
     /*
      * since reading only happens on a subset of ranks, the excitation signatures contributing to each rank were only
      * set on these reading ranks. here they must be synchronized

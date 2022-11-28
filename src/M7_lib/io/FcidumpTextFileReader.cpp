@@ -102,3 +102,9 @@ uint_t FcidumpTextFileReader::exsig(const uintv_t &inds, uint_t ranksig) const {
 bool FcidumpTextFileReader::inds_in_range(const uintv_t &inds) const {
     return std::all_of(inds.cbegin(), inds.cend(), [this](uint_t i){return i<=m_info.m_norb_distinct;});
 }
+
+FcidumpTextFileReader::~FcidumpTextFileReader() {
+    if ((m_nnull_lines > 1) && m_info.m_ur_style!=FcidumpInfo::SpinBlocks) {
+        logging::warn(R"(More than one block delimiter line "0.0  0  0  0  0" found, but "blocks" unrestrict style not enabled)");
+    }
+}

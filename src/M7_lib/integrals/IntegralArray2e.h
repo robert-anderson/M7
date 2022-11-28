@@ -293,6 +293,7 @@ namespace integrals_2e {
     template<typename T>
     void next_sym_attempt(std::unique_ptr<Array<T>>& ptr){
         if (!ptr) return;
+        REQUIRE_FALSE(ptr->sym()==syms::None, "Integrals are internally inconsistent");
         std::unique_ptr<Array<T>> new_ptr = make<T>(ptr->m_norb, syms::Sym(ptr->sym()-1));
         if (!new_ptr) {
             ptr = nullptr;

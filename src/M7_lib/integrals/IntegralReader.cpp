@@ -66,12 +66,21 @@ bool CsvIntegralReader::complex_valued() const {
     return m_reader.m_complex_valued;
 }
 
+bool CsvIntegralReader::spin_conserving(uint_t iex) const {
+    REQUIRE_TRUE((iex==1ul) || (iex==2ul), "integrals only refer to 1 or 2 body Hamiltonian coefficients");
+    switch (iex) {
+        case 1: return m_reader.m_spin_conserving_1e;
+        case 2: return m_reader.m_spin_conserving_2e;
+    }
+    return true;
+}
+
 Hdf5IntegralReader::Hdf5IntegralReader(const FcidumpInfo& info, Hdf5IntegralReader::KeyNames names) :
         m_reader(info.m_fname), m_names(std::move(names)),
         m_indices_2e(m_reader, m_names.m_2e_inds),
-        m_values_2e(m_reader.read_data<v_t<ham_t>>(m_names.m_2e_values)),
+        m_values_2e(m_reader.read_data<v_t<ham_comp_t>>(m_names.m_2e_values)),
         m_indices_1e(m_reader, m_names.m_1e_inds),
-        m_values_1e(m_reader.read_data<v_t<ham_t>>(m_names.m_1e_values)){
+        m_values_1e(m_reader.read_data<v_t<ham_comp_t>>(m_names.m_1e_values)){
     REQUIRE_EQ(m_indices_2e.nrow(), m_values_2e.size(),
                "number of 2e matrix index arrays should match the number of values");
     REQUIRE_EQ(m_indices_1e.nrow(), m_values_1e.size(),
@@ -113,6 +122,10 @@ ham_t Hdf5IntegralReader::ecore() const {
 
 bool Hdf5IntegralReader::complex_valued() const {
     return false;
+}
+
+bool Hdf5IntegralReader::spin_conserving(uint_t /*iex*/) const {
+    return true;
 }
 
 MolcasHdf5IntegralReader::MolcasHdf5IntegralReader(const FcidumpInfo& info) : Hdf5IntegralReader(info,

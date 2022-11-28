@@ -44,6 +44,8 @@ struct IntegralReader {
      * whether the values data require a complex container
      */
     virtual bool complex_valued() const = 0;
+
+    virtual bool spin_conserving(uint_t iex) const = 0;
 };
 
 struct CsvIntegralReader : IntegralReader {
@@ -52,6 +54,7 @@ struct CsvIntegralReader : IntegralReader {
     uint_t m_iline_first_1e = ~0ul;
     uint_t m_iline_first_2e = ~0ul;
     CsvIntegralReader(const FcidumpInfo& info);
+
     bool next(IterData& data) override;
 
     void goto_first_1e() override;
@@ -61,6 +64,8 @@ struct CsvIntegralReader : IntegralReader {
     ham_t ecore() const override;
 
     bool complex_valued() const override;
+
+    bool spin_conserving(uint_t iex) const override;
 };
 
 /**
@@ -70,6 +75,7 @@ struct CsvIntegralReader : IntegralReader {
  *  - 2 electron indices: (4, nentry) int64
  *  - 2 electron values: (nentry) double
  * and an attribute with the zero-electron contribution to the energy
+ * only supports real integrals
  */
 struct Hdf5IntegralReader : IntegralReader {
     struct KeyNames {
@@ -83,9 +89,9 @@ private:
     hdf5::FileReader m_reader;
     const KeyNames m_names;
     dense::Matrix<int64_t> m_indices_2e;
-    v_t<ham_t> m_values_2e;
+    v_t<ham_comp_t> m_values_2e;
     dense::Matrix<int64_t> m_indices_1e;
-    v_t<ham_t> m_values_1e;
+    v_t<ham_comp_t> m_values_1e;
     uint_t m_iline = 0ul;
 public:
     Hdf5IntegralReader(const FcidumpInfo& info, KeyNames names);
@@ -98,6 +104,8 @@ public:
     ham_t ecore() const override;
 
     bool complex_valued() const override;
+
+    bool spin_conserving(uint_t iex) const override;
 };
 
 /**
