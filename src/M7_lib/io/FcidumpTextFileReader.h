@@ -14,6 +14,7 @@
 
 struct FcidumpTextFileReader : public HamTextFileReader {
     /**
+     * TODO: rework this comment to refer to Molpro-style blocks UR style
      * spin-resolved FCIDUMPs index in spinorbs, which may not or may not be spin-major, depending on the program they
      * were generated for. E.g. NECI assumes spin-minor ordering, so if the FCIDUMP supplied was intended for use with
      * NECI, m_ur_style should be false.
@@ -22,7 +23,13 @@ struct FcidumpTextFileReader : public HamTextFileReader {
 
     bool m_spin_conserving_1e = true;
     bool m_spin_conserving_2e = true;
+private:
+    /**
+     * each time line of the form "0.0  0 0 0 0" is encountered, increment this counter
+     */
+    uint_t m_nnull_lines = 0ul;
 
+public:
     FcidumpTextFileReader(const FcidumpInfo& info);
 
     bool spin_conserving() const;

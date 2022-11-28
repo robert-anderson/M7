@@ -9,7 +9,7 @@
 FcidumpTextFileReader::FcidumpTextFileReader(const FcidumpInfo& info) :
         HamTextFileReader(info.m_fname, 4), m_info(info){
     auto nsite = m_info.m_nsite;
-    if (m_info.m_spin_resolved) {
+    if (m_info.m_spin_resolved && m_info.m_ur_style!=FcidumpInfo::SpinBlocks) {
         uintv_t inds(4);
         ham_t v;
         while (next(inds, v)) {
@@ -33,13 +33,49 @@ bool FcidumpTextFileReader::spin_conserving() const {
 }
 
 void FcidumpTextFileReader::convert_inds(uintv_t &inds) {
-    if (!m_info.m_spin_resolved || m_info.m_ur_style) return;
+    if (!m_info.m_spin_resolved || m_info.m_ur_style==FcidumpInfo::SpinMajor) return;
+    if (m_info.m_spin_resolved && m_info.m_ur_style==FcidumpInfo::SpinBlocks) {
+        switch (m_nnull_lines) {
+            case 0:
+                // (uu|uu) block
+                break;
+            case 1:
+                // (uu|dd) block
+                inds[2] += m_info.m_nsite;
+                inds[3] += m_info.m_nsite;
+                break;
+            case 2:
+                // (dd|dd) block
+                inds[0] += m_info.m_nsite;
+                inds[1] += m_info.m_nsite;
+                inds[2] += m_info.m_nsite;
+                inds[3] += m_info.m_nsite;
+                break;
+            case 3:
+                // h_uu block
+                break;
+            case 4:
+                // h_dd block
+                inds[0] += m_info.m_nsite;
+                inds[1] += m_info.m_nsite;
+                break;
+            default:
+                // core energy
+                break;
+        }
+        return;
+    }
     for (auto &ind: inds)
         ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_info.m_nsite : 0));
 }
 
 bool FcidumpTextFileReader::next(uintv_t &inds, ham_t &v) {
     if (!HamTextFileReader::next(inds, v)) return false;
+    // check for line of the form "0.0  0 0 0 0"
+    if ((v==0.0) && std::all_of(inds.cbegin(), inds.cend(), [](uint_t i){return i==~0ul;})){
+        ++m_nnull_lines;
+        return next(inds, v);
+    }
     convert_inds(inds);
     return true;
 }

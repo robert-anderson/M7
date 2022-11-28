@@ -27,6 +27,8 @@ FcidumpInfo::FcidumpInfo(str_t fname, UnrestrictStyle ur_style) :
             reader.read_uint("NELEC"), reader.read_uint("NORB"),
             reader.read_int("MS2", sys::frm::c_undefined_ms2),
             integer::shifted(reader.read_uints("ORBSYM", {}), false));
+        if (ur_style==SpinBlocks)
+            REQUIRE_FALSE(m_relativistic, "SpinBlocks format is not compatible with spin non-conservation");
     }
     else {
         hdf5::FileReader reader(m_fname);

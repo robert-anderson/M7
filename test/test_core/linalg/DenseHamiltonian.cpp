@@ -99,8 +99,39 @@ TEST(DenseHamiltonian, PyscfX2cCheck) {
     DenseHamiltonian hmat(ham);
     v_t<ham_comp_t> evals;
     dense::diag(hmat, evals);
-    // compare the ground and first excited states to PySCF's values
     ASSERT_NEAR_EQ(evals[0], -76.08150945314577);
+}
+
+TEST(DenseHamiltonian, UhfSpinMinor) {
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N_UHF/FCIDUMP.spin_minor", FcidumpInfo::SpinMinor});
+    Hamiltonian ham(&frm_ham);
+    DenseHamiltonian hmat(ham);
+    v_t<ham_comp_t> evals;
+    dense::diag(hmat, evals);
+    /*
+     * test against exact eigenvalues from PySCF
+     */
+    ASSERT_NEAR_EQ(evals[0], -54.419939662413);
+    ASSERT_NEAR_EQ(evals[1], -54.013409988683);
+    ASSERT_NEAR_EQ(evals[2], -54.013409988683);
+    ASSERT_NEAR_EQ(evals[3], -54.013409988683);
+    ASSERT_NEAR_EQ(evals[4], -53.534317528139);
+}
+
+TEST(DenseHamiltonian, UhfSpinBlocks) {
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/N_UHF/FCIDUMP.spin_blocks", FcidumpInfo::SpinBlocks});
+    Hamiltonian ham(&frm_ham);
+    DenseHamiltonian hmat(ham);
+    v_t<ham_comp_t> evals;
+    dense::diag(hmat, evals);
+    /*
+     * test against exact eigenvalues from PySCF
+     */
+    ASSERT_NEAR_EQ(evals[0], -54.419939662413);
+    ASSERT_NEAR_EQ(evals[1], -54.013409988683);
+    ASSERT_NEAR_EQ(evals[2], -54.013409988683);
+    ASSERT_NEAR_EQ(evals[3], -54.013409988683);
+    ASSERT_NEAR_EQ(evals[4], -53.534317528139);
 }
 
 TEST(DenseHamiltonian, Hubbard3Site) {

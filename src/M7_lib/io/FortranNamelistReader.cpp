@@ -102,7 +102,9 @@ void FortranNamelistReader::read(v_t<bool> &v, const str_t &label, v_t<bool> def
     v.clear();
     for (auto &token: tokens) {
         if (token==".TRUE.") v.push_back(true);
+        if (token=="TRUE") v.push_back(true);
         else if (token==".FALSE.") v.push_back(false);
+        else if (token=="FALSE") v.push_back(false);
         else {
             v = default_;
             return;
