@@ -149,8 +149,7 @@ ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     const auto norm = arith::real(trace) / integer::nspair(nelec);
     REQUIRE_NEAR_EQ(norm, arith::real(m_total_norm.m_reduced),
                       "2RDM norm should match total of sampled diagonal contributions");
-    //REQUIRE_NEAR_ZERO_TOL(arith::imag(m_total_norm.m_reduced), 1e-6, "2RDM norm should be purely real");
-    REQUIRE_NEAR_ZERO_TOL(double(6), double(0.1), "2RDM norm should be purely real");
+    REQUIRE_NEAR_ZERO(arith::imag(m_total_norm.m_reduced), "2RDM norm should be purely real");
     return arith::real(ham.m_e_core) + (arith::real(e1) + arith::real(e2)) / norm;
 }
 
