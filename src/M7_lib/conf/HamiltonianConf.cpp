@@ -12,7 +12,7 @@ conf::Fcidump::Fcidump(Group *parent) :
                {"minor",  "spin orbitals in the ududud... ordering"},
                {"major",  "spin orbitals in the uuu...ddd... ordering"},
                {"blocks", "spatial orbitals in Molpro-style blocks (uu|uu), (uu|dd), (dd|dd), h_uu, h_dd"}
-           }, "minor", "protocol assumed when reading integrals expressed in an unrestricted basis"){}
+           }, "protocol assumed when reading integrals expressed in an unrestricted basis"){}
 
 conf::Bosdump::Bosdump(Group *parent) :
         Section(parent, "bosdump", "options relating to 4-indexed text file defining arbitrary "

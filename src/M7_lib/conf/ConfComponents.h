@@ -364,14 +364,9 @@ namespace conf_components {
         }
 
     public:
-        SingleChoice(Group *parent, str_t name, const v_t<std::pair<T, str_t>>& choice_and_descs,
-                     const v_t<T> &v_default, str_t description):
-                ChoiceBase<T>(choice_and_descs), Param<T>(parent, name, v_default, description){
-            validate(v_default);
-        }
-
-        SingleChoice(Group *parent, str_t name, v_t<T> choices, const T &v_default, str_t description):
-                ChoiceBase<T>(choices), Param<T>(parent, name, v_default, description){
+        SingleChoice(Group *parent, str_t name, const v_t<std::pair<T, str_t>>& choices_and_descs,
+                     const T &v_default, str_t description):
+                ChoiceBase<T>(choices_and_descs), Param<T>(parent, name, v_default, description){
             validate(v_default);
         }
         /*
@@ -379,9 +374,6 @@ namespace conf_components {
          */
         SingleChoice(Group *parent, str_t name, const v_t<std::pair<T, str_t>>& choice_and_descs, str_t description):
                 SingleChoice(parent, name, choice_and_descs, get_first(choice_and_descs), description){}
-
-        SingleChoice(Group *parent, str_t name, const v_t<T>& choices, str_t description):
-                SingleChoice(parent, name, choices, get_first(choices), description){}
 
     private:
 
