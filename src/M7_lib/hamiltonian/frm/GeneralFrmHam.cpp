@@ -46,7 +46,8 @@ uint_t GeneralFrmHam::make_ints_(IntegralReader *reader, GeneralFrmHam::ints_1e_
             // FCIDUMP integral indices are in chemists' ordering
             auto success = ints_2e->set(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3], d.m_value);
             if (!success) {
-                logging::info_("integral value {} is at odds with stored value {}", d.m_value,
+                logging::info_("integral < {} {} | {} {} > value {} is at odds with stored value {}",
+                               d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3], d.m_value,
                                ints_2e->get(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3]));
                 return 2ul;
             }
@@ -85,7 +86,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader* reader) {
      * if the source is complex-valued, then it cannot have DHR symmetry (and still represent a physical Hamiltonian)
      */
     auto ints_2e = integrals_2e::make<ham_t>(m_basis.ncoeff_ind(m_info.m_spin_resolved),
-                                             m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR);
+                                             m_complex_valued ? integrals_2e::syms::DH : integrals_2e::syms::DHR);
     log_ints_sym(ints_2e->sym(), true);
     REQUIRE_TRUE(ints_2e.get(), "2e integral array object unallocated");
 
@@ -118,6 +119,14 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints() {
     const str_t fmt = "Reading fermion Hamiltonian coefficients from {} file \"" + m_info.m_fname + "\"...";
     if (m_info.m_impl==FcidumpInfo::CSV) {
         logging::info(fmt, "plain text CSV");
+
+        if (m_info.m_spin_resolved) {
+            logging::info("FCIDUMP file is spin resolved (e.g. UHF)");
+            logging::info("Following the {} convention for spin-resolved integrals",
+                          FcidumpInfo::ur_desc(m_info.m_ur_style));
+        }
+        else logging::info("FCIDUMP file is not spin resolved (e.g. RHF)");
+
         if (mpi::on_node_i_am_root()) {
             CsvIntegralReader reader(m_info);
             return make_ints(&reader);
@@ -237,4 +246,12 @@ uint_t GeneralFrmHam::default_nelec() const {
 
 int GeneralFrmHam::default_ms2_value() const {
     return m_info.m_ms2;
+}
+
+bool GeneralFrmHam::is_hermitian() const {
+    const auto s1 = m_ints.m_1e->sym();
+    const auto s2 = m_ints.m_2e->sym();
+    const auto h1 = s1==integrals_1e::syms::H;
+    const auto h2 = (s2==integrals_2e::syms::DHR) || (s2==integrals_2e::syms::DH) || (s2==integrals_2e::syms::H);
+    return h1 && h2;
 }

@@ -212,6 +212,7 @@ private:
                "Frm and FrmBos H terms do not have the same fermionic basis definition");
         if (m_bos && m_frmbos) REQUIRE_EQ(m_bos.m_basis, m_frmbos.m_basis.m_bos,
               "Bos and FrmBos H terms do not have the same bosonic basis definition");
+        logging::info("Hamiltonian is {}hermitian", (is_hermitian() ? "" : "NON-"));
     }
 
     static void require_non_null(const HamOpTerm* ptr) {
@@ -319,37 +320,11 @@ public:
 //    }
 
     // TODO: rename
-    sys::Particles default_particles(uint_t nelec=0ul, int ms2=sys::frm::c_undefined_ms2, uint_t nboson=0ul) const {
-        // if nelec is not already set, give precedence to nelec value given by FrmHam
-        if (!nelec && m_frm) nelec = m_frm.default_nelec();
-        if (!nelec && m_frmbos) nelec = m_frmbos.default_nelec();
+    sys::Particles default_particles(uint_t nelec=0ul, int ms2=sys::frm::c_undefined_ms2, uint_t nboson=0ul) const;
 
-        bool ms2_conserve = true;
-        if (m_frm) ms2_conserve = m_frm.m_kramers_attrs.conserving();
-        // currently only FrmHam can break Kramers symmetry (FrmBosHam always commutes with Sz)
+    sys::Particles default_particles(const conf::Particles &opts) const;
 
-        if (m_frm && ms2==sys::frm::c_undefined_ms2) ms2 = m_frm.default_ms2_value();
-        if (m_frmbos && ms2==sys::frm::c_undefined_ms2) ms2 = m_frmbos.default_ms2_value();
-        if (ms2==sys::frm::c_undefined_ms2) {
-            logging::info("2*Ms value not defined by configuration document or Hamiltonian, "
-                      "defaulting to lowest valid positive value");
-            ms2 = sys::frm::Ms2::lowest_value(nelec);
-        }
-
-        // give precedence to nboson value given by BosHam
-        if (!nboson) nboson = m_bos.default_nboson();
-        if (!nboson) nboson = m_frmbos.default_nboson();
-
-        return {{nelec, {ms2, ms2_conserve}}, {nboson, m_boson_number_conserve}};
-    }
-
-    sys::Particles default_particles(const conf::Particles &opts) const {
-        return default_particles(opts.m_nelec, opts.m_ms2, opts.m_nboson);
-    }
-
-    bool is_hermitian() const {
-        return !(m_frm.is<TcFrmHam>() || m_bos.is<TcBosHam>());
-    }
+    bool is_hermitian() const;
 
 };
 

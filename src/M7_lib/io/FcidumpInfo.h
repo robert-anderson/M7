@@ -46,6 +46,14 @@ struct FcidumpInfo {
         ABORT_ALL("invalid unrestrict style");
         return {};
     }
+    static str_t ur_desc(UnrestrictStyle style){
+        switch (style) {
+            case SpinMinor: return "spin minor";
+            case SpinMajor: return "spin major";
+            case SpinBlocks: return "spin blocks (Molpro)";
+        }
+        return {};
+    }
 
     const str_t m_fname;
     const Implementation m_impl;

@@ -88,6 +88,8 @@ public:
     uint_t default_nelec() const override;
 
     int default_ms2_value() const override;
+
+    bool is_hermitian() const override;
 };
 
 

@@ -91,6 +91,10 @@ struct HamOpTerm {
     virtual conn_foreach::base_list_t make_foreach_iters() const {
         return {};
     }
+
+    virtual bool is_hermitian() const {
+        return true;
+    }
 };
 
 

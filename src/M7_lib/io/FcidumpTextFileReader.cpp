@@ -20,13 +20,12 @@ FcidumpTextFileReader::FcidumpTextFileReader(const FcidumpInfo& info) :
                 else m_spin_conserving_2e = false;
             }
         }
-        FileReader::reset(); // go back to beginning of entries
-        m_nnull_lines = 0ul;
+        reset(); // go back to beginning of entries
     }
-    if (m_spin_conserving_1e) logging::info("FCIDUMP file conserves spin in 1 particle integrals");
-    else logging::info("FCIDUMP file does NOT conserve spin in 1 particle integrals");
-    if (m_spin_conserving_2e) logging::info("FCIDUMP file conserves spin in 2 particle integrals");
-    else logging::info("FCIDUMP file does NOT conserve spin in 2 particle integrals");
+    logging::info("FCIDUMP file {} spin in 1 particle integrals",
+                  m_spin_conserving_1e ? "conserves" : "does NOT conserve");
+    logging::info("FCIDUMP file {} spin in 2 particle integrals",
+                  m_spin_conserving_2e ? "conserves" : "does NOT conserve");
 }
 
 FcidumpTextFileReader::~FcidumpTextFileReader() {
@@ -47,14 +46,14 @@ void FcidumpTextFileReader::convert_inds(uintv_t &inds) {
                 // (uu|uu) block
                 break;
             case 1:
-                // (uu|dd) block
+                // (dd|dd) block
+                inds[0] += m_info.m_nsite;
+                inds[1] += m_info.m_nsite;
                 inds[2] += m_info.m_nsite;
                 inds[3] += m_info.m_nsite;
                 break;
             case 2:
-                // (dd|dd) block
-                inds[0] += m_info.m_nsite;
-                inds[1] += m_info.m_nsite;
+                // (uu|dd) block
                 inds[2] += m_info.m_nsite;
                 inds[3] += m_info.m_nsite;
                 break;
@@ -68,6 +67,8 @@ void FcidumpTextFileReader::convert_inds(uintv_t &inds) {
                 break;
             default:
                 // core energy
+                REQUIRE_TRUE(std::all_of(inds.cbegin(), inds.cend(), [](uint_t i){return i==~0ul;}),
+                             "integrals specified beyond last block");
                 break;
         }
         return;
@@ -85,6 +86,11 @@ bool FcidumpTextFileReader::next(uintv_t &inds, ham_t &v) {
     }
     convert_inds(inds);
     return true;
+}
+
+void FcidumpTextFileReader::reset(uint_t iline) {
+    FileReader::reset(iline);
+    m_nnull_lines = 0ul;
 }
 
 uint_t FcidumpTextFileReader::ranksig(const uintv_t &inds) const {

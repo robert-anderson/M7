@@ -62,7 +62,7 @@ namespace integrals_2e {
 
     namespace syms {
         enum Sym {
-            Null, None, H, D, DH, DR, DHR
+            Null, None, H, D, DR, DH, DHR
         };
 
         str_t name(Sym sym);
@@ -294,6 +294,8 @@ namespace integrals_2e {
     void next_sym_attempt(std::unique_ptr<Array<T>>& ptr){
         if (!ptr) return;
         REQUIRE_FALSE(ptr->sym()==syms::None, "Integrals are internally inconsistent");
+        if (ptr->sym()==syms::D)
+            logging::warn("Integration variable interchange should be a symmetry of the 2-electron integrals!");
         std::unique_ptr<Array<T>> new_ptr = make<T>(ptr->m_norb, syms::Sym(ptr->sym()-1));
         if (!new_ptr) {
             ptr = nullptr;

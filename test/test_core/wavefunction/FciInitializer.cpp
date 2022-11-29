@@ -30,6 +30,7 @@ TEST(FciInitializer, J1J2) {
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, -6.44708);
 }
+
 #endif
 
 #ifdef ENABLE_BOSONS
