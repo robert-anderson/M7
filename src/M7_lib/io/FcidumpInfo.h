@@ -40,9 +40,9 @@ struct FcidumpInfo {
         return spin_major ? SpinMajor : SpinMinor;
     }
     static UnrestrictStyle ur_style(const str_t& str){
-        if (str=="spin_minor") return SpinMinor;
-        if (str=="spin_major") return SpinMajor;
-        if (str=="spin_blocks") return SpinBlocks;
+        if (str=="minor") return SpinMinor;
+        if (str=="major") return SpinMajor;
+        if (str=="blocks") return SpinBlocks;
         ABORT_ALL("invalid unrestrict style");
         return {};
     }
