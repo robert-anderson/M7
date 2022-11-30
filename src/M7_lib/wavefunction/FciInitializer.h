@@ -31,6 +31,8 @@ struct FciInitializer {
      */
     buffered::MappedTable<MbfOrderRow> m_mbf_order_table;
 
+    FciInitializer(const Hamiltonian& h, sys::Particles particles, FciInitOptions opts={});
+
     explicit FciInitializer(const Hamiltonian& h, FciInitOptions opts={});
 
 private:
@@ -53,8 +55,11 @@ public:
     /**
      * in instances where retention of the MBF list and sparse Hamiltonian is not desired
      */
+    static ArnoldiSolver<ham_t> solve(const Hamiltonian& h, sys::Particles particles, FciInitOptions opts={}) {
+        return FciInitializer(h, particles, opts).solve();
+    }
     static ArnoldiSolver<ham_t> solve(const Hamiltonian& h, FciInitOptions opts={}) {
-        return FciInitializer(h, opts).solve();
+        return FciInitializer(h, h.default_particles(), opts).solve();
     }
 };
 

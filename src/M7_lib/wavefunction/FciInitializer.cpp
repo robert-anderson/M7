@@ -6,9 +6,9 @@
 #include "FciInitializer.h"
 #include "M7_lib/foreach/ConnForeachGroup.h"
 
-FciInitializer::FciInitializer(const Hamiltonian &h, FciInitOptions opts):
+FciInitializer::FciInitializer(const Hamiltonian &h, sys::Particles particles, FciInitOptions opts):
         m_opts(opts), m_is_hermitian(h.is_hermitian()), m_mbf_order_table("MBF order table", {{h.m_basis}}){
-    auto iters = FciIters::make(h);
+    auto iters = FciIters::make(h, particles, false);
     const auto count = iters.niter_single();
     const uint_t count_local = mpi::evenly_shared_count(count);
     const uint_t displ_local = mpi::evenly_shared_displ(count);
@@ -46,3 +46,6 @@ FciInitializer::FciInitializer(const Hamiltonian &h, FciInitOptions opts):
         pm.next();
     }
 }
+
+FciInitializer::FciInitializer(const Hamiltonian &h, FciInitOptions opts):
+        FciInitializer(h, h.default_particles(), opts){}

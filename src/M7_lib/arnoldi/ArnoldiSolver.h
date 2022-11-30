@@ -254,7 +254,7 @@ public:
 
     void shift_evals(comp_t shift) {
         if (m_real_evals.empty()) return;
-        for (auto& it: m_real_evals) it-=shift;
+        for (auto& it: m_real_evals) it+=shift;
     }
 
     void get_evals(v_t<comp_t>& evals) const { get_evals<true>(evals, 0); }
