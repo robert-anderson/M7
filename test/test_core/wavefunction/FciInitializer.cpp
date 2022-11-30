@@ -45,19 +45,45 @@ TEST(FciInitializer, BosHub) {
 }
 
 TEST(FciInitializer, BosHubLoop) {
-    for (ham_comp_t u=-0.17; u<-0.14; u+=0.0005) {
-        HubbardBosHam bos_ham(u, lattice::make("ortho", {10}, {1}));
+    const uint_t nsite = 9;
+    const uint_t nbos = 9;
+    {
+        HubbardBosHam bos_ham(1.0, lattice::make("ortho", {nsite}, {1}));
         Hamiltonian ham(&bos_ham);
+        const sys::Particles particles = {sys::frm::Electrons(0), sys::bos::Bosons(nbos, true)};
+//        DenseHamiltonian dham(ham, particles);
+//
+//        hdf5::FileWriter fw1(logging::format("dense_{}site_{}bos.h5", nsite, nbos));
+//        dham.save("data", fw1);
+
+        auto iters = FciIters::make(ham, particles, false);
+        buffered::BosOnv onv(ham.m_basis);
+        v_t<buf_t> perms;
+        perms.reserve(iters.m_single->m_niter*nsite);
+        auto fn = [&onv, &perms]() {
+            perms.insert(perms.end(), onv.begin(), onv.end());
+        };
+        iters.m_single->loop(onv, fn);
+        hdf5::FileWriter fw(logging::format("perms_{}site_{}bos.h5", nsite, nbos));
+        fw.write_data("data", perms, {iters.m_single->m_niter, nsite});
+    }
+
+    for (ham_comp_t u=-0.5; u<0.2; u+=0.005) {
+        HubbardBosHam bos_ham(u, lattice::make("ortho", {3, 3}, {1, 1}));
+        Hamiltonian ham(&bos_ham);
+        const sys::Particles particles = {sys::frm::Electrons(0), sys::bos::Bosons(nbos, true)};
         FciInitOptions opt;
-        opt.m_nroot = 10ul;
-        opt.m_ritz_tol = 1e-10;
-        opt.m_diag_shift = -91.0;
-        auto results = FciInitializer::solve(ham, opt);
+        opt.m_nroot = nsite;
+        opt.m_niter_max = 1000;
+        opt.m_ritz_tol = 1e-8;
+        opt.m_diag_shift = -20;
+        auto results = FciInitializer::solve(ham, particles, opt);
         hdf5::FileWriter fw(logging::format("bos_hub_u={:.4f}.h5", u));
         v_t<double> evals;
         results.get_evals(evals);
         fw.write_data("evals", evals);
-        const uintv_t shape = {results.nelement_evec(), results.nroot()};
+        uintv_t shape;
+        shape.push_back(results.nelement_evec());//, results.nroot()};
         fw.write_data("evecs", results.get_evec(0ul), shape);
     }
 }
