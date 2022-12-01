@@ -58,13 +58,15 @@ private:
     }
 
 public:
-    OpSig(uint_t opsig=0ul): m_i(opsig){}
+    constexpr OpSig(uint_t opsig): m_i(opsig){}
 
-    OpSig(const OpSig& opsig): OpSig(opsig.m_i){}
+    constexpr OpSig(): OpSig(0ul){}
 
-    OpSig(OpSig&& opsig): OpSig(opsig.m_i){}
+    constexpr OpSig(const OpSig& opsig): OpSig(opsig.m_i){}
 
-    OpSig(uintp_t frm, uintp_t bos): m_i(encode(frm.first, frm.second, bos.first, bos.second)){}
+    constexpr OpSig(OpSig&& opsig): OpSig(opsig.m_i){}
+
+    constexpr OpSig(uintp_t frm, uintp_t bos): m_i(encode(frm.first, frm.second, bos.first, bos.second)){}
 
 //    operator const uint_t& ()  const {
 //        return m_i;
