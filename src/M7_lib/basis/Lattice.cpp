@@ -69,6 +69,7 @@ lattice::OrthoTopology::OrthoTopology(const uintv_t &shape, const v_t<int> &bcs)
                  logging::format("orthogonal lattice with shape {} and boundary conds {}",
                              convert::to_string(shape), convert::to_string(bcs))),
     m_inds(shape), m_bcs(bcs) {
+    REQUIRE_EQ(m_bcs.size(), shape.size(), "number of boundaries should equal number of dimensions");
     for (uint_t idim=0ul; idim<m_inds.m_nind; ++idim){
         REQUIRE_TRUE(m_inds.m_shape[idim], "every extent in the site shape must be non-zero");
         if (m_inds.m_shape[idim] == 1ul)
