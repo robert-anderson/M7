@@ -54,7 +54,7 @@ namespace sparse {
                 entries_t out;
                 out.reserve(src.nrow());
                 for (uint_t irow = 0ul; irow < src.nrow(); ++irow) {
-                    out.insert(out.cend(), src[irow].cbegin(), src[irow].cend());
+                    out.insert(out.end(), src[irow].cbegin(), src[irow].cend());
                     if (ordered) {
                         /*
                          * operate only on the block just inserted
