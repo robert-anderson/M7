@@ -6,8 +6,19 @@
 
 void mbf::set_aufbau_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
     onv.zero();
-    for (uint_t i = 0ul; i < elecs.m_nalpha; ++i) onv.set({0, i});
-    for (uint_t i = 0ul; i < elecs.m_nbeta; ++i) onv.set({1, i});
+    uint_t nalpha, nbeta;
+    if (elecs.m_ms2.conserve()){
+        nalpha = elecs.m_nalpha;
+        nbeta = elecs.m_nbeta;
+    }
+    else {
+        // initialize elecs for conserving case
+        auto tmp = sys::frm::Electrons(uint_t(elecs));
+        nalpha = tmp.m_nalpha;
+        nbeta = tmp.m_nbeta;
+    }
+    for (uint_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
+    for (uint_t i = 0ul; i < nbeta; ++i) onv.set({1, i});
 
 }
 
@@ -76,7 +87,7 @@ void mbf::set(field::FrmOnv &mbf, sys::Particles particles, const conf::MbfDef &
     if (!def.m_frm.m_value.empty()) set_from_def_array(mbf, def.m_frm, idef);
     else if (def.m_neel) set_neel_mbf(mbf, elecs);
     else set_aufbau_mbf(mbf, elecs);
-    REQUIRE_EQ(mbf.nsetbit(), elecs, "too many electrons in MBF");
+    REQUIRE_EQ(mbf.nsetbit(), elecs, "incorrect number of electrons in MBF");
     if (elecs.m_ms2.conserve())
         REQUIRE_EQ(mbf.ms2(), elecs.m_ms2, "MBF has incorrect total 2*Ms");
 }
