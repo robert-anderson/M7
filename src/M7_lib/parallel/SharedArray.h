@@ -12,13 +12,10 @@
 template<typename T>
 class SharedArray {
     const uint_t m_size;
-#ifdef ENABLE_MPI
     MPI_Win m_win;
-#endif
     T *m_data = nullptr;
 public:
     SharedArray(uint_t size) : m_size(size) {
-#ifdef ENABLE_MPI
         auto baseptr = reinterpret_cast<void *>(&m_data);
         if (mpi::on_node_i_am_root()) {
             auto ierr = MPI_Win_allocate_shared(size * sizeof(T), sizeof(T), MPI_INFO_NULL, g_node_comm,
@@ -44,35 +41,23 @@ public:
         MPI_Win_unlock_all(m_win);
         if (mpi::on_node_i_am_root()) std::memset(reinterpret_cast<char*>(m_data), 0, size * sizeof(T));
         mpi::barrier_on_node();
-#else
-        m_rows = new T[m_size];
-        std::memset((void*)m_rows, 0, m_size * sizeof(T));
-#endif
     }
 
     SharedArray(SharedArray &&rhs) : m_size(rhs.m_size) {
         m_data = rhs.m_data;
-#ifdef ENABLE_MPI
         m_win = rhs.m_win;
         /*
          * nullify memory window handle in rhs so that the destructor does not
          * free memory still in use here
          */
         rhs.m_win = MPI_WIN_NULL;
-#else
-        rhs.m_rows = nullptr;
-#endif
     }
 
     SharedArray(const SharedArray &rhs) : SharedArray(rhs.m_size) {}
 
     ~SharedArray() {
         ASSERT(m_data)
-#ifdef ENABLE_MPI
         if (m_win != MPI_WIN_NULL) MPI_Win_free(&m_win);
-#else
-        if (m_rows) delete m_rows;
-#endif
     }
 
     const uint_t &size() {

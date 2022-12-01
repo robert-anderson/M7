@@ -62,8 +62,8 @@ build_or_find_hdf5(M7_hdf5)
 target_link_libraries(M7_lib M7_hdf5)
 
 find_package(MPI REQUIRED COMPONENTS C)
-target_compile_definitions(M7_lib PUBLIC ENABLE_MPI)
-target_link_libraries(M7_lib MPI::MPI_C)
+target_include_directories(M7_lib PUBLIC ${MPI_INCLUDE_PATH})
+target_link_libraries(M7_lib ${MPI_C_LIBRARIES})
 
 target_compile_definitions(M7_lib PUBLIC PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 
@@ -200,8 +200,6 @@ message(STATUS "${compile_options}")
 get_target_property(compile_definitions M7_lib COMPILE_DEFINITIONS)
 message(STATUS "The compile definitions are:")
 message(STATUS "${compile_definitions}")
-
-
 
 set_source_files_properties(test.cpp
     PROPERTIES COMPILE_FLAGS
