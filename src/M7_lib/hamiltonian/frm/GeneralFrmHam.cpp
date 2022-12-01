@@ -82,11 +82,9 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader* reader) {
     log_ints_sym(ints_1e->sym(), true);
     REQUIRE_TRUE(ints_1e.get(), "1e integral array object unallocated");
     /*
-     *
-     * if the source is complex-valued, then it cannot have DHR symmetry (and still represent a physical Hamiltonian)
+     * even if the source is complex-valued, it can still have DHR symmetry
      */
-    auto ints_2e = integrals_2e::make<ham_t>(m_basis.ncoeff_ind(m_info.m_spin_resolved),
-                                             m_complex_valued ? integrals_2e::syms::DH : integrals_2e::syms::DHR);
+    auto ints_2e = integrals_2e::make<ham_t>(m_basis.ncoeff_ind(m_info.m_spin_resolved), integrals_2e::syms::DHR);
     log_ints_sym(ints_2e->sym(), true);
     REQUIRE_TRUE(ints_2e.get(), "2e integral array object unallocated");
 
