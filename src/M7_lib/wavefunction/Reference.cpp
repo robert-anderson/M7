@@ -91,8 +91,8 @@ uint_t Reference::exsig(const field::Mbf &mbf) const {
 }
 
 void Reference::make_numerator_contribs(const field::Mbf &mbf, const wf_t& weight) {
-    m_conn[mbf].connect(get_mbf(), mbf);
-    m_proj_energy_num.m_local += m_ham.get_element(get_mbf(), m_conn[mbf]) * weight;
+    m_conn[mbf].connect(mbf, get_mbf());
+    m_proj_energy_num.m_local += m_ham.get_element(mbf, m_conn[mbf]) * weight;
     m_nwalker_at_doubles.m_local += std::abs(weight);
 }
 
