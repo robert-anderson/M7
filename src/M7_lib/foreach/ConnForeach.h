@@ -117,6 +117,7 @@ namespace conn_foreach {
                                 conn.m_cre.clear();
                                 for (uint_t iop = 0ul; iop != nalpha; ++iop) conn.m_cre.add(vacs[0][cre_alpha_ops[iop]]);
                                 for (uint_t iop = 0ul; iop != nbeta; ++iop) conn.m_cre.add(vacs[1][cre_beta_ops[iop]]);
+                                DEBUG_ASSERT_EQ(conn.exsig(), m_exsig, "invalid excitation");
                                 fn();
                             };
                             ctnd::Ordered<nbeta, true, true> cre_beta_foreach(vacs.size(1));

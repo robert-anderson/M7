@@ -66,6 +66,7 @@ void mbf::set_from_def_array(field::FrmOnv &mbf, const v_t<uintv_t> &def, uint_t
         // assume the determinant is specified as a vector of set spin orbital indices
         for (auto& ind: definds){
             REQUIRE_LT(ind, mbf.m_basis.m_nspinorb, "spin orbital index OOB");
+            REQUIRE_FALSE(mbf.get(ind), "spin orbital index may not appear multiple times in definition");
             mbf.set(ind);
         }
     }
