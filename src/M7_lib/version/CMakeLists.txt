@@ -4,7 +4,7 @@
 # also, this special target is used to bring in the correct compilation timestamp. the __DATE__, __TIME__ macros defined
 # by the compiler will only change when the files that call them are recompiled, so cmake variables are a better solution
 
-add_library(M7_version version.h)
+add_library(M7_version STATIC version.h)
 
 # adapted from https://www.mattkeeter.com/blog/2018-01-06-versioning/
 execute_process(COMMAND git log --pretty=format:%h -n 1 OUTPUT_VARIABLE GIT_REV ERROR_QUIET)
