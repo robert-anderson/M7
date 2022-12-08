@@ -163,7 +163,7 @@ public:
      * @return
      *  true if the exsig represents a boson number-conserving operator product
      */
-    constexpr bool conserves_nbos() {
+    constexpr bool conserves_nbos() const {
         return nbos_cre() == nbos_ann();
     }
 
