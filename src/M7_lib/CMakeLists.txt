@@ -52,14 +52,12 @@ add_subdirectory(
 )
 target_link_libraries(M7_lib spdlog)
 
-build_arpack(my_arpack)
-target_link_libraries(M7_lib my_arpack)
-
 find_package(LAPACK REQUIRED)
-target_link_libraries(M7_lib LAPACK::LAPACK)
+target_link_libraries(M7_lib ${LAPACK_LIBRARIES})
 
-build_or_find_hdf5(M7_hdf5)
-target_link_libraries(M7_lib M7_hdf5)
+add_arpack(M7_lib)
+add_parallel_hdf5(M7_lib)
+
 
 find_package(MPI REQUIRED COMPONENTS C)
 target_include_directories(M7_lib PUBLIC ${MPI_INCLUDE_PATH})
