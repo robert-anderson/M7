@@ -68,7 +68,7 @@ namespace fptol {
 
     template<typename T>
     static constexpr bool near_equal(std::complex<T> a, std::complex<T> b, T rtol, T atol){
-        return near_equal(a.real(), b.real(), rtol, atol) && near_equal(a.real(), b.real(), rtol, atol);
+        return near_equal(a.real(), b.real(), rtol, atol) && near_equal(a.imag(), b.imag(), rtol, atol);
     }
 
     template<typename T>
