@@ -90,7 +90,11 @@ conf::Reference::Reference(Group *parent) :
         m_mbf_init(this, "mbf_init"),
         m_redef_thresh(this, "redef_thresh", 2.0,
             "when the highest-weighted non-reference MBF (the candidate) reaches this multiple of the weight on the "
-            "reference, the candidate will be adopted as the new reference. set to exactly 0.0 to disable") {}
+            "reference, the candidate will be adopted as the new reference. set to exactly 0.0 to disable"),
+        m_assume_hf_like(this, "assume_hf_like", false,
+             "even if the ground-state initial reference does not satisfy the Brillouin theorem, let it be treated "
+             "as a HF-like state anyway. Some features require a fixed HF-like state (e.g. hf_excits), others may"
+             "simply stochastically benefit from it (e.g. explicit HF connections in RDMs)"){}
 
 conf::Wavefunction::Wavefunction(Group *parent) :
         Section(parent, "wavefunction",

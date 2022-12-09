@@ -149,9 +149,10 @@ private:
 
     std::unique_ptr<shared_rows::Walker> make_hf() const {
         /*
-         * even if there is no true HF determinant, we need to treat the initial ref as one for averaged excits
+         * even if there is no true HF determinant, we need to treat the initial ref as one for averaged excits or when
+         * this behaviour is explicitly requested in the configuration document
          */
-        const bool force_hf = m_opts.m_av_ests.m_hf_excits.m_enabled;
+        const bool force_hf = m_opts.m_reference.m_assume_hf_like.m_value || m_opts.m_av_ests.m_hf_excits.m_enabled;
         /*
          * assuming that if there exists a Hartree-Fock determinant, it will be the initial reference of the zero-th root
          */

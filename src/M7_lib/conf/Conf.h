@@ -100,6 +100,7 @@ namespace conf {
     struct Reference : Section {
         MbfDef m_mbf_init;
         Param<double> m_redef_thresh;
+        Param<bool> m_assume_hf_like;
 
         explicit Reference(Group *parent);
     };
