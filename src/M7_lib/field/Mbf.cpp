@@ -112,9 +112,9 @@ uint_t mbf::exsig(const field::FrmOnv &src, const field::FrmOnv &dst) {
         src_work = src.get_dataword(idataword);
         dst_work = dst.get_dataword(idataword);
         work = src_work & ~dst_work;
-        while (work) ++nann;
+        while (work) nann += bool(bit::next_setbit(work));
         work = dst_work & ~src_work;
-        while (work) ++ncre;
+        while (work) ncre += bool(bit::next_setbit(work));
     }
     using namespace ::exsig;
     return encode(ncre, nann, 0, 0);
