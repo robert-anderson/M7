@@ -70,12 +70,12 @@ void Maes::make_average_contribs(Walker &row, const shared_rows::Walker* hf, uin
             if (hf) {
                 auto exsig_from_hf = mbf::exsig(hf->mbf(), row.m_mbf);
                 if (exsig_from_hf && m_bilinears.m_rdms.takes_contribs_from(exsig_from_hf)) {
-                    const auto av_weight_ref = hf->norm_average_weight(icycle, ipart);
-                    const auto av_weight_ref_rep = hf->norm_average_weight(icycle, ipart_replica);
+                    const auto av_weight_hf = hf->norm_average_weight(icycle, ipart);
+                    const auto av_weight_hf_rep = hf->norm_average_weight(icycle, ipart_replica);
                     m_bilinears.m_rdms.make_contribs(hf->mbf(), row.m_mbf,
-                                                     ncycle_occ * av_weight_ref * av_weight_rep);
+                                                     ncycle_occ * av_weight_hf * av_weight_rep);
                     m_bilinears.m_rdms.make_contribs(row.m_mbf, hf->mbf(),
-                                                     ncycle_occ * av_weight * av_weight_ref_rep);
+                                                     ncycle_occ * av_weight * av_weight_hf_rep);
                 }
             }
         }

@@ -172,7 +172,7 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
      */
     if (m_hf) {
         if (dst_row.m_mbf == m_hf->mbf()) return;
-        if (block_begin.m_src_mbf == m_refs[m_wf.ipart_replica(ipart_dst)].mbf()) return;
+        if (block_begin.m_src_mbf == m_hf->mbf()) return;
     }
     const auto iroot = m_wf.iroot_part(ipart_dst);
     /*

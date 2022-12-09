@@ -156,6 +156,7 @@ void Solver::begin_cycle() {
         m_wf.orthogonalize();
     }
     m_refs.begin_cycle(m_icycle);
+    if (m_hf) m_hf->update();
 
     auto update_epoch = [&](const uint_t &ncycle_wait) {
         const auto &epochs = m_prop.m_shift.m_variable_mode;
