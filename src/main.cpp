@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
     {
         mpi::barrier();
-        FciqmcCalculation calc(opts);
+        fciqmc::run(opts);
     }
 
     if (!mpi::i_am_root()) {

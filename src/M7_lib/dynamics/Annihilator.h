@@ -17,11 +17,33 @@
  * MAEs sue to the sampled connections
  */
 struct Annihilator {
+    /**
+     * wavefunction whose recv and store tables are merged herein
+     */
     Wavefunction &m_wf;
+    /**
+     * propagator object providing access to Hamiltonian and deterministic subspace information
+     */
     const Propagator& m_prop;
+    /**
+     * references are needed to discern whether newly-created walkers contribute to the reference energies
+     */
     const References& m_refs;
+    /**
+     * Hartree-Fock MBF, fixed throughout the calculation, for Brillouin theorem RDM accumulation, may be null
+     */
+    const shared_rows::Walker* m_hf;
+    /**
+     * all RDM objects, including contracted tensors
+     */
     Rdms& m_rdms;
+    /**
+     * initiator threshold
+     */
     const wf_comp_t m_nadd;
+    /**
+     * reference to the current cycle counter of the Solver class
+     */
     const uint_t& m_icycle;
 
 private:
@@ -72,8 +94,8 @@ private:
 
 public:
 
-    Annihilator(Wavefunction &wf, const Propagator& prop, const References& refs, Rdms& rdms,
-                const uint_t& icycle, wf_comp_t nadd);
+    Annihilator(Wavefunction &wf, const Propagator& prop, const References& refs,
+                const shared_rows::Walker* hf, Rdms& rdms, const uint_t& icycle, wf_comp_t nadd);
 
     /**
      * using the comparator implementation, sort the m_recv table of the referenced wavefunction

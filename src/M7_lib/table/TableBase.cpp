@@ -251,13 +251,12 @@ bool TableBase::freed_rows_consistent() const {
     return true;
 }
 
-TableBase::Loc::Loc(uint_t irank, uint_t irec) : m_irank(irank), m_irec(irec){
-#ifndef NDEBUG
-    mpi::bcast(irank);
-    mpi::bcast(irec);
-    DEBUG_ASSERT_EQ(m_irank, irank, "rank index in TableBase::Loc should be consistent across all ranks");
-    DEBUG_ASSERT_EQ(m_irec, irec, "record index in TableBase::Loc should be consistent across all ranks");
-#endif
+TableBase::Loc::Loc(uint_t irank, uint_t irec) : m_irank(irank), m_irec(irec){}
+
+TableBase::Loc::Loc(uint_t irec) : Loc(mpi::all_min(uint_t(irec==~0ul ? mpi::nrank() : mpi::irank())), irec) {
+    const uint_t is_mine = (irec != ~0ul);
+    REQUIRE_EQ_ALL(mpi::all_sum(is_mine), 1ul,
+                   "a distributed table location can only be on one rank!");
 }
 
 TableBase::Loc::operator bool() const {
@@ -275,3 +274,4 @@ bool TableBase::Loc::operator==(const TableBase::Loc &other) {
 bool TableBase::Loc::operator!=(const TableBase::Loc &other) {
     return !(*this==other);
 }
+

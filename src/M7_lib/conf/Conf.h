@@ -205,7 +205,6 @@ namespace conf {
     };
 
     struct Rdms : Bilinears {
-        Param<bool> m_explicit_ref_conns;
         Param<bool> m_spinfree;
         Fock4rdm m_fock_4rdm;
 
@@ -226,12 +225,12 @@ namespace conf {
         explicit InstEsts(Group *parent);
     };
 
-    struct RefExcits : Section {
+    struct HfExcits : Section {
         Param<uint_t> m_max_exlvl;
         Buffers m_buffers;
         Archivable m_archivable;
 
-        explicit RefExcits(Group *parent);
+        explicit HfExcits(Group *parent);
     };
 
     struct Mae : Section {
@@ -241,7 +240,7 @@ namespace conf {
         Param<str_t> m_stats_path;
         Rdms m_rdm;
         SpecMoms m_spec_mom;
-        RefExcits m_ref_excits;
+        HfExcits m_hf_excits;
 
         explicit Mae(Group *parent);
 

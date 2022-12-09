@@ -7,7 +7,7 @@
 
 #include <M7_lib/io/MaeStats.h>
 #include <M7_lib/bilinear/Bilinears.h>
-#include <M7_lib/observables/RefExcits.h>
+#include <M7_lib/observables/HfExcits.h>
 
 /**
  * A group of all Multidimensional Averaging Estimators needed for a calculation
@@ -22,9 +22,9 @@ struct Maes {
      */
     Bilinears m_bilinears;
     /**
-     * averaged amplitudes of MBFs that are excitations of the reference MBF
+     * averaged amplitudes of MBFs that are excitations of the HF-like MBF
      */
-    RefExcits m_ref_excits;
+    HfExcits m_hf_excits;
     /**
      * number of cycles between consecutive averaging operations and stats output
      */
@@ -51,7 +51,7 @@ struct Maes {
     /**
      * Make all contributions to MAEs from the current occupied MBF row.
      *
-     * Currently MAEs consist of the average reference excitations and the bilinears, of which the latter entail the
+     * Currently MAEs consist of the average HF excitations and the bilinears, of which the latter entail the
      * most careful handling.
      *
      * Averaged contributions to the bilinear MAEs always include the diagonals, where the bra and ket MBFs are the
@@ -106,7 +106,7 @@ struct Maes {
      *     be added in a special "finalizing" loop over occupied MBFs. crucially, this is done *before* the
      *     instantaneous weight is summed into the average, since this was already done in the previous iteration.
      */
-    void make_average_contribs(Walker &row, const References &refs, const uint_t &icycle);
+    void make_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle);
 
     void output(uint_t icycle, const Hamiltonian& ham, bool final=false);
 };

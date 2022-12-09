@@ -2,8 +2,8 @@ target_sources(M7_lib
     PRIVATE
         KramersSectorOccupation.cpp
         KramersSectorOccupation.h
-        RefExcits.cpp
-        RefExcits.h
+        HfExcits.cpp
+        HfExcits.h
         SignProblemFreeTwf.cpp
         SignProblemFreeTwf.h
         TrialWavefunction.cpp

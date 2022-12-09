@@ -6,6 +6,7 @@
 #define M7_SHAREDROWS_H
 
 #include "Communicator.h"
+#include "M7_lib/wavefunction/WalkerTable.h"
 
 namespace shared_rows {
     /**
@@ -134,6 +135,7 @@ namespace shared_rows {
         using Set<row_t>::clear;
         using Set<row_t>::add_;
         using Set<row_t>::full_update;
+        using Set<row_t>::m_irecs;
 
         Single(str_t name, const src_t& src, TableBase::Loc loc): Set<row_t>(name, src, loc) {}
 
@@ -141,6 +143,41 @@ namespace shared_rows {
             clear();
             if (loc.is_mine()) add_(loc.m_irec);
             full_update();
+        }
+
+        uint_t irec() const {
+            return m_irecs.empty() ? ~0ul : *m_irecs.cbegin();
+        }
+
+        bool is_mine() const {
+            return irec() != ~0ul;
+        }
+    };
+
+    struct Walker : Single<::Walker> {
+
+        Walker(str_t name, const src_t& src, TableBase::Loc loc): Single<::Walker>(name, src, loc) {}
+
+        const field::Mbf &mbf() const {
+            return m_all.m_row.m_mbf;
+        }
+
+        const wf_t &weight(uint_t ipart) const {
+            return m_all.m_row.m_weight[ipart];
+        }
+
+        /**
+         * this method includes the current weight in the average, bringing the normalized average up to date.
+         * @param icycle
+         *  cycle on which average is being used
+         * @param ipart
+         *  wf part index
+         * @return
+         *  normalized average weight
+         */
+        wf_t norm_average_weight(uint_t icycle, uint_t ipart) const {
+            auto unnorm = m_all.m_row.m_average_weight[ipart]+m_all.m_row.m_weight[ipart];
+            return unnorm/static_cast<wf_comp_t>(m_all.m_row.occupied_ncycle(icycle));
         }
     };
 }

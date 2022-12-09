@@ -72,7 +72,7 @@ private:
 
     uintv_t make_iparts();
 
-    void make_rdm_contrib(Rdms &rdms, const field::Mbf &ref, const sparse::Element& elem);
+    void make_rdm_contrib(Rdms &rdms, const shared_rows::Walker *hf, const sparse::Element& elem);
 
 
 public:
@@ -92,7 +92,7 @@ public:
 
     void build_connections(const Hamiltonian &ham, const Bilinears &bilinears);
 
-    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref);
+    void make_rdm_contribs(Rdms &rdms, const shared_rows::Walker* hf);
 
     /**
       * for every deterministically-propagated row on this MPI rank, update its value.
@@ -126,7 +126,7 @@ struct DeterministicSubspaces {
 
     void project(double tau);
 
-    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref);
+    void make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf);
 };
 
 #endif //M7_DETERMINISTICSUBSPACE_H

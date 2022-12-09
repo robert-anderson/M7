@@ -38,7 +38,6 @@ class Rdms : public Archivable {
     exsig_to_rdms_t make_exsig_to_rdms() const;
 
 public:
-    const bool m_explicit_ref_conns;
     const Epoch& m_accum_epoch;
     Reduction<wf_t> m_total_norm;
 

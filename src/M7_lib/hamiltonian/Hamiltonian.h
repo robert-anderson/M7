@@ -326,6 +326,21 @@ public:
 
     bool is_hermitian() const;
 
+    /**
+     * determine whether this Hamiltonian has a Brillouin theorem with respect to the given MBF
+     */
+    template<typename mbf_t>
+    bool has_brillouin_theorem(const mbf_t&) const {
+        return false;
+    }
+
+    /**
+     * @param onv
+     *  candidate Hartree-Fock determinant
+     * @return
+     *  true if there are single excitations from ONV with significant H matrix element
+     */
+    bool has_brillouin_theorem(const field::FrmOnv& onv) const;
 };
 
 #endif //M7_HAMILTONIAN_H

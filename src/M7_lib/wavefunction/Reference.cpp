@@ -6,7 +6,7 @@
 
 Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
                      const Wavefunction &wf, uint_t ipart, TableBase::Loc loc) :
-        shared_rows::Single<Walker>("reference", wf.m_store, loc),
+        shared_rows::Walker("reference", wf.m_store, loc),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
     if (m_redefinition_thresh==0.0)
@@ -15,11 +15,7 @@ Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
         REQUIRE_GE_ALL(m_redefinition_thresh, 1.0, "invalid redefinition threshold");
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
     logging::info("Initial reference MBF for WF part {} is {} with energy {}",
-              m_ipart, get_mbf(), m_all.m_row.m_hdiag);
-}
-
-const field::Mbf &Reference::get_mbf() const {
-    return m_all.m_row.m_mbf;
+              m_ipart, mbf(), m_all.m_row.m_hdiag);
 }
 
 void Reference::update_ref_conn_flags() {
@@ -44,14 +40,14 @@ void Reference::accept_candidate(uint_t icycle) {
     uint_t irank_with_candidate = std::distance(gather.cbegin(), it_best);
     mpi::bcast(m_irow_candidate, irank_with_candidate);
     auto candidate_weight = *it_best;
-    auto current_weight = weight();
+    auto current_weight = weight(m_ipart);
     if (std::abs(candidate_weight) > std::abs(current_weight * m_redefinition_thresh)){
         logging::info("Changing reference for WF part {} on cycle {}", m_ipart, icycle);
         logging::info("Current: {}, weight: {: .6e}, MPI rank: {}",
-                      get_mbf().to_string(), current_weight, m_wf.m_dist.irank(get_mbf()));
+                      mbf().to_string(), current_weight, m_wf.m_dist.irank(mbf()));
         redefine({irank_with_candidate, m_irow_candidate});
         logging::info("New    : {}, weight: {: .6e}, MPI rank: {}",
-                      get_mbf().to_string(), candidate_weight, m_wf.m_dist.irank(get_mbf()));
+                      mbf().to_string(), candidate_weight, m_wf.m_dist.irank(mbf()));
         m_candidate_weight = 0.0;
         update_ref_conn_flags();
     }
@@ -81,17 +77,12 @@ void Reference::end_cycle(uint_t /*icycle*/) {
 }
 
 bool Reference::is_connected(const field::Mbf &mbf) const {
-    m_conn[mbf].connect(get_mbf(), mbf);
-    return ham::is_significant(m_ham.get_element(get_mbf(), m_conn[mbf]));
-}
-
-uint_t Reference::exsig(const field::Mbf &mbf) const {
-    m_conn[mbf].connect(get_mbf(), mbf);
-    return m_conn[mbf].exsig();
+    m_conn[mbf].connect(this->mbf(), mbf);
+    return ham::is_significant(m_ham.get_element(this->mbf(), m_conn[mbf]));
 }
 
 void Reference::make_numerator_contribs(const field::Mbf &mbf, const wf_t& weight) {
-    m_conn[mbf].connect(mbf, get_mbf());
+    m_conn[mbf].connect(mbf, this->mbf());
     m_proj_energy_num.m_local += m_ham.get_element(mbf, m_conn[mbf]) * weight;
     m_nwalker_at_doubles.m_local += std::abs(weight);
 }
@@ -102,16 +93,6 @@ const wf_comp_t& Reference::nwalker_at_doubles() {
 
 const ham_t& Reference::proj_energy_num() const {
     return m_proj_energy_num.m_reduced;
-}
-
-
-const wf_t &Reference::weight() const {
-    return m_all.m_row.m_weight[m_ipart];
-}
-
-wf_t Reference::norm_average_weight(const uint_t& icycle, const uint_t& ipart) const {
-    auto unnorm = m_all.m_row.m_average_weight[ipart]+m_all.m_row.m_weight[ipart];
-    return unnorm/static_cast<wf_comp_t>(m_all.m_row.occupied_ncycle(icycle));
 }
 
 References::References(const conf::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf,
@@ -156,6 +137,9 @@ const field::Numbers<ham_t, c_ndim_wf> &References::proj_energy_nums() {
 
 const field::Numbers<wf_t, c_ndim_wf> &References::weights() {
     uint_t ipart = 0ul;
-    for (auto& ref: m_refs) m_weights[ipart++] = ref.weight();
+    for (auto& ref: m_refs) {
+        m_weights[ipart] = ref.weight(ipart);
+        ++ipart;
+    }
     return m_weights;
 }
