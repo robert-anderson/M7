@@ -21,9 +21,9 @@
 #  9.  Reference weight (B)
 #  10.  Reference-projected energy (B)
 #  11.  L2 norm of the wavefunction (B)
-#  12.  Initiator ONVs (B)
-#  13.  Occupied ONVs (B)
-#  14.  Change in number of occupied ONVs (B)
+#  12.  Initiator MBFs (B)
+#  13.  Occupied MBFs (B)
+#  14.  Change in number of occupied MBFs (B)
 #  15.  Probability of attempting to draw excitation level (C)
 #
 0  1.000000e-03  0.000000e+00  1.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  1.000000e+00  0.000000e+00  1.000000e+00  1  1  0  1.000000e+00  

@@ -24,7 +24,7 @@ class Reference : public shared_rows::Single<Walker> {
     const uint_t m_ipart;
 
     /**
-     * work space for computing connections to other ONVs via the Hamiltonian
+     * work space for computing connections to other MBFs via the Hamiltonian
      */
     mutable suite::Conns m_conn;
 
@@ -98,11 +98,11 @@ public:
     uint_t exsig(const field::Mbf &mbf) const;
 
     /**
-     * occupied ONVs connected to the reference must contribute to the numerator inner product <ref | H | onv>
-     * @param onv
+     * occupied MBFs connected to the reference must contribute to the numerator inner product <ref | H | mbf>
+     * @param mbf
      * @param weights
      */
-    void make_numerator_contribs(const field::Mbf &onv, const wf_t& weight);
+    void make_numerator_contribs(const field::Mbf &mbf, const wf_t& weight);
 
     const wf_comp_t &nwalker_at_doubles();
 

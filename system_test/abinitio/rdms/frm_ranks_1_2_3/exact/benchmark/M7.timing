@@ -9,7 +9,7 @@
 # A: scalar
 #
 #  1.  Total time waited at MPI_Barrier (A)
-#  2.  Time spent in loop over occupied ONVs (A)
+#  2.  Time spent in loop over occupied MBFs (A)
 #  3.  Time spent in communicating spawns (A)
 #  4.  Time spent in annihilation loop (A)
 #  5.  Total cycle time (A)

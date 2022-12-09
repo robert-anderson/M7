@@ -65,7 +65,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
     }
     DEBUG_ASSERT_FALSE(dst_mbf.is_zero(), "recv table is contiguous, shouldn't have any cleared rows");
     DEBUG_ASSERT_EQ(m_wf.m_dist.irank(dst_mbf), mpi::irank(),
-                    "the received ONV has not been sent to the right MPI rank!")
+                    "the received MBF has not been sent to the right MPI rank!")
     // zero magnitude weights should not have been communicated
     if (delta_weight == 0.0) return;
 
@@ -152,7 +152,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
     // else, only allow initiation if the lone parent was an initiator
     if (!allow_initiation) {
         // only one src_mbf for this dst_mbf. If the parent is an initiator,
-        // contributions to unoccupied ONVs are allowed
+        // contributions to unoccupied MBFs are allowed
         allow_initiation = block_begin.m_src_initiator;
     }
     annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta, allow_initiation, dst_walker);

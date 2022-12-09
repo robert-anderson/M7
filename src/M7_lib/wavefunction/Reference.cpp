@@ -14,7 +14,7 @@ Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
     else
         REQUIRE_GE_ALL(m_redefinition_thresh, 1.0, "invalid redefinition threshold");
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
-    logging::info("Initial reference ONV for WF part {} is {} with energy {}",
+    logging::info("Initial reference MBF for WF part {} is {} with energy {}",
               m_ipart, get_mbf(), m_all.m_row.m_hdiag);
 }
 

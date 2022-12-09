@@ -63,7 +63,7 @@ void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, con
 
 void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
     full_update();
-    logging::info("Forming a deterministic subspace with {} ONVs", m_all.nrow_in_use());
+    logging::info("Forming a deterministic subspace with {} MBFs", m_all.nrow_in_use());
     suite::Conns conns_work(m_wf.m_sector.size());
     auto &conn_work = conns_work[m_local_row.m_mbf];
     uint_t n_hconn = 0ul;
@@ -132,7 +132,7 @@ void DeterministicSubspace::project(double tau) {
             all_row.jump(elem.m_i);
             // one replica or two
             for (const auto &ipart: m_iparts) {
-                // update the walker population locally due to coeffs from all connected deterministic ONVs
+                // update the walker population locally due to coeffs from all connected deterministic MBFs
                 const auto coeff = all_row.m_weight[ipart];
                 delta[ipart] -= tau * elem.m_v * coeff;
             }

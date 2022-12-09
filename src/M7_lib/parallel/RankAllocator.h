@@ -15,13 +15,13 @@
  *  The assignment of individual elements to MPI ranks would ultimately defeat the purpose of
  *  the distributed approach, and so elements are assigned their MPI rank block-wise. The block
  *  index is computed via a simple modular hash function acting on the mapped field identifying
- *  the element (ONV for the wavefunction, index array for the MEVs)
+ *  the element (MBF for the wavefunction, index array for the MEVs)
  *
  *  Thus, the space of non-zero elements is more or less uniformly spread out across the
  *  compute resources. However their cost (which is of course not a-priori ascertainable) is not.
  *
  *  This cost can be any user-defined measure. In this implementation, the wavefunction uses the
- *  total time elapsed in the spawning loop over occupied ONVs.
+ *  total time elapsed in the spawning loop over occupied MBFs.
  */
 
 #ifndef M7_RANKALLOCATOR_H

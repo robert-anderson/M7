@@ -89,7 +89,7 @@ struct MaeIndsPair {
 /**
  * Field for storage of general MAE indices,
  * Constructs two MaeIndsPair objects as views on the fermion and boson sectors of the indices respectively.
- * Unlike the ONV case, in this situation it is overhead-free to handle fermions and bosons at the same time, because
+ * Unlike the MBF case, in this situation it is overhead-free to handle fermions and bosons at the same time, because
  * they do not demand fundamentally different datastructures. If the calculation is purely fermionic, the m_bos view
  * will simply not be accessed, since neither view is considered in hashing and comparison operations, the underlying
  * field is.
