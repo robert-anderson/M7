@@ -5,6 +5,8 @@ stats:
   period: 5
 wavefunction:
   nw_init: 100
+reference:
+  assume_hf_like: yes
 propagator:
   tau_init: 0.1
   stochastic: no

@@ -7,7 +7,6 @@
 
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/util/Timer.h>
-#include <M7_lib/observables/HfExcits.h>
 #include <M7_lib/observables/UniformTwf.h>
 #include <M7_lib/observables/HfExcits.h>
 #include <M7_lib/bilinear/Bilinears.h>
