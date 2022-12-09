@@ -26,9 +26,9 @@ uintv_t DeterministicSubspace::make_iparts() {
     return {ipart, ipart + 1};
 }
 
-void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const Mbf& ref, const sparse::Element& elem) {
+void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const shared_rows::Walker *hf, const sparse::Element& elem) {
     m_all.m_row.jump(elem);
-    if (rdms.m_explicit_ref_conns && (m_all.m_row.m_mbf == ref)) return;
+    if (hf && (m_all.m_row.m_mbf == hf->mbf())) return;
     if (m_wf.nreplica() == 2) {
         rdms.make_contribs(m_local_row.m_mbf, m_all.m_row.m_mbf,
                            m_local_row.m_weight[0] * m_all.m_row.m_weight[1]);
@@ -63,7 +63,7 @@ void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, con
 
 void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
     full_update();
-    logging::info("Forming a deterministic subspace with {} ONVs", m_all.nrow_in_use());
+    logging::info("Forming a deterministic subspace with {} MBFs", m_all.nrow_in_use());
     suite::Conns conns_work(m_wf.m_sector.size());
     auto &conn_work = conns_work[m_local_row.m_mbf];
     uint_t n_hconn = 0ul;
@@ -97,24 +97,24 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
         logging::info("Number of H-unconnected, but RDM-contributing pairs of MBFs: {}", n_rdm_conn);
 }
 
-void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref) {
+void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf) {
     if (!rdms || !rdms.m_accum_epoch) return;
     uint_t iirec = ~0ul;
     for (auto irec: m_irecs) {
         ++iirec;
         m_local_row.jump(irec);
-        if (rdms.m_explicit_ref_conns && (m_local_row.m_mbf == ref)) continue;
+        if (hf && (m_local_row.m_mbf == hf->mbf())) continue;
         /*
          * make contributions due to hamiltonian connections
          */
         for (auto& elem : m_ham_matrix[iirec]){
-            make_rdm_contrib(rdms, ref, elem);
+            make_rdm_contrib(rdms, hf, elem);
         }
         /*
          * make contributions due to RDM-only connections
          */
         for (auto& elem : m_rdm_network[iirec]){
-            make_rdm_contrib(rdms, ref, elem);
+            make_rdm_contrib(rdms, hf, elem);
         }
     }
 }
@@ -132,7 +132,7 @@ void DeterministicSubspace::project(double tau) {
             all_row.jump(elem.m_i);
             // one replica or two
             for (const auto &ipart: m_iparts) {
-                // update the walker population locally due to coeffs from all connected deterministic ONVs
+                // update the walker population locally due to coeffs from all connected deterministic MBFs
                 const auto coeff = all_row.m_weight[ipart];
                 delta[ipart] -= tau * elem.m_v * coeff;
             }
@@ -171,7 +171,7 @@ void DeterministicSubspaces::project(double tau) {
     for (auto &detsub: m_detsubs) detsub->project(tau);
 }
 
-void DeterministicSubspaces::make_rdm_contribs(Rdms &rdms, const Mbf &ref) {
+void DeterministicSubspaces::make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf) {
     if (!*this) return;
-    for (auto &detsub: m_detsubs) detsub->make_rdm_contribs(rdms, ref);
+    for (auto &detsub: m_detsubs) detsub->make_rdm_contribs(rdms, hf);
 }

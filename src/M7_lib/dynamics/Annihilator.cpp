@@ -32,8 +32,8 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
 }
 
 Annihilator::Annihilator(Wavefunction &wf, const Propagator &prop, const References &refs,
-                         Rdms &rdms, const uint_t &icycle, wf_comp_t nadd) :
-        m_wf(wf), m_prop(prop), m_refs(refs), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
+                         const shared_rows::Walker* hf, Rdms &rdms, const uint_t &icycle, wf_comp_t nadd) :
+        m_wf(wf), m_prop(prop), m_refs(refs), m_hf(hf), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
         m_work_row1(wf.m_send_recv.m_row), m_work_row2(wf.m_send_recv.m_row), m_dst_walker(m_wf.m_store.m_row),
         m_dst_weight(m_wf.npart(), wf_t{}), m_sort_cmp_fn(make_sort_cmp_fn()) {
     REQUIRE_TRUE_ALL(bool(m_rdms)==m_work_row1.m_send_parents,
@@ -65,7 +65,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
     }
     DEBUG_ASSERT_FALSE(dst_mbf.is_zero(), "recv table is contiguous, shouldn't have any cleared rows");
     DEBUG_ASSERT_EQ(m_wf.m_dist.irank(dst_mbf), mpi::irank(),
-                    "the received ONV has not been sent to the right MPI rank!")
+                    "the received MBF has not been sent to the right MPI rank!")
     // zero magnitude weights should not have been communicated
     if (delta_weight == 0.0) return;
 
@@ -152,7 +152,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
     // else, only allow initiation if the lone parent was an initiator
     if (!allow_initiation) {
         // only one src_mbf for this dst_mbf. If the parent is an initiator,
-        // contributions to unoccupied ONVs are allowed
+        // contributions to unoccupied MBFs are allowed
         allow_initiation = block_begin.m_src_initiator;
     }
     annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta, allow_initiation, dst_walker);
@@ -168,11 +168,11 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
 
     /*
      * don't make contributions to RDM elements if they already take the equivalent contribution from deterministic
-     * average connections to the reference
+     * average connections to the Hartree-Fock determinant
      */
-    if (m_rdms.m_explicit_ref_conns) {
-        if (dst_row.m_mbf == m_refs[ipart_dst].get_mbf()) return;
-        if (block_begin.m_src_mbf == m_refs[m_wf.ipart_replica(ipart_dst)].get_mbf()) return;
+    if (m_hf) {
+        if (dst_row.m_mbf == m_hf->mbf()) return;
+        if (block_begin.m_src_mbf == m_hf->mbf()) return;
     }
     const auto iroot = m_wf.iroot_part(ipart_dst);
     /*

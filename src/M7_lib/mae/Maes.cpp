@@ -6,7 +6,7 @@
 
 Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t nroot) :
         m_accum_epoch("MAE accumulation"), m_bilinears(opts, sector, m_accum_epoch),
-        m_ref_excits(opts.m_ref_excits, sector.size(), nroot), m_period(opts.m_stats_period) {
+        m_hf_excits(opts.m_hf_excits, sector.size(), nroot), m_period(opts.m_stats_period) {
     if (*this) {
         m_stats = ptr::smart::make_unique<MaeStats>(
                 opts.m_stats_path, "FCIQMC Multidimensional Averaged Estimators",
@@ -15,11 +15,11 @@ Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t nroot) :
 }
 
 Maes::operator bool() const {
-    return m_bilinears || m_ref_excits;
+    return m_bilinears || m_hf_excits;
 }
 
 bool Maes::all_stores_empty() const {
-    return m_bilinears.all_stores_empty() && m_ref_excits.all_stores_empty();
+    return m_bilinears.all_stores_empty() && m_hf_excits.all_stores_empty();
 }
 
 bool Maes::is_period_cycle(uint_t icycle) {
@@ -36,7 +36,7 @@ void Maes::end_cycle() {
     m_bilinears.end_cycle();
 }
 
-void Maes::make_average_contribs(Walker &row, const References &refs, const uint_t &icycle) {
+void Maes::make_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle) {
     if (!m_accum_epoch) return;
     // the current cycle should be included in the denominator
     if (!row.occupied_ncycle(icycle)) {
@@ -46,8 +46,6 @@ void Maes::make_average_contribs(Walker &row, const References &refs, const uint
     wf_comp_t ncycle_occ = row.occupied_ncycle(icycle);
 
     for (uint_t ipart = 0ul; ipart < row.m_wf_format.m_nelement; ++ipart) {
-        auto &ref = refs[ipart];
-        auto &ref_mbf = ref.get_mbf();
         auto ipart_replica = row.ipart_replica(ipart);
         const auto iroot = ipart / row.nreplica();
         /*
@@ -59,7 +57,7 @@ void Maes::make_average_contribs(Walker &row, const References &refs, const uint
         /*
          * accumulate contributions to reference excitations if required
          */
-        m_ref_excits.make_contribs(row.m_mbf, ref_mbf, ncycle_occ * av_weight, iroot);
+        if (hf) m_hf_excits.make_contribs(row.m_mbf, hf->mbf(), ncycle_occ * av_weight, iroot);
 
         if (m_bilinears.m_rdms) {
             auto av_weight_rep = row.m_average_weight[ipart_replica] / ncycle_occ;
@@ -69,15 +67,16 @@ void Maes::make_average_contribs(Walker &row, const References &refs, const uint
              */
             m_bilinears.make_contribs(row.m_mbf, ncycle_occ * av_weight * av_weight_rep);
 
-            auto exsig_from_ref = ref.exsig(row.m_mbf);
-            auto is_ref_conn = exsig_from_ref && m_bilinears.m_rdms.takes_contribs_from(exsig_from_ref);
-            if (m_bilinears.m_rdms.m_explicit_ref_conns && is_ref_conn) {
-                const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
-                const auto av_weight_ref_rep = ref.norm_average_weight(icycle, ipart_replica);
-                m_bilinears.m_rdms.make_contribs(ref_mbf, row.m_mbf,
-                                                 ncycle_occ * av_weight_ref * av_weight_rep);
-                m_bilinears.m_rdms.make_contribs(row.m_mbf, ref_mbf,
-                                                 ncycle_occ * av_weight * av_weight_ref_rep);
+            if (hf) {
+                auto exsig_from_hf = mbf::exsig(hf->mbf(), row.m_mbf);
+                if (exsig_from_hf && m_bilinears.m_rdms.takes_contribs_from(exsig_from_hf)) {
+                    const auto av_weight_hf = hf->norm_average_weight(icycle, ipart);
+                    const auto av_weight_hf_rep = hf->norm_average_weight(icycle, ipart_replica);
+                    m_bilinears.m_rdms.make_contribs(hf->mbf(), row.m_mbf,
+                                                     ncycle_occ * av_weight_hf * av_weight_rep);
+                    m_bilinears.m_rdms.make_contribs(row.m_mbf, hf->mbf(),
+                                                     ncycle_occ * av_weight * av_weight_hf_rep);
+                }
             }
         }
     }

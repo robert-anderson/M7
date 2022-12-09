@@ -7,9 +7,9 @@
 
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/util/Timer.h>
-#include <M7_lib/observables/RefExcits.h>
+#include <M7_lib/observables/HfExcits.h>
 #include <M7_lib/observables/UniformTwf.h>
-#include <M7_lib/observables/RefExcits.h>
+#include <M7_lib/observables/HfExcits.h>
 #include <M7_lib/bilinear/Bilinears.h>
 #include <M7_lib/io/FciqmcStats.h>
 #include <M7_lib/io/Archivable.h>
@@ -53,46 +53,115 @@
  * the reduced quantities in the update method call in the next cycle before rezeroing.
  */
 class Solver {
-
+    /**
+     * current cycle number
+     */
     uint_t m_icycle = 0ul;
-    Propagator &m_prop;
+    /**
+     * configuration document read from the YAML file provided as the command line argument
+     */
     const conf::Document &m_opts;
+    /**
+     * generates the diagonal and off-diagonal updates to the solution vector due to application of the integrator
+     */
+    Propagator &m_prop;
+    /**
+     * solution vector storing multiple eigenvectors of H in distributed memory
+     */
     Wavefunction &m_wf;
+    /**
+     * reference many-body basis functions (MBFs)
+     */
     References m_refs;
-
+    /**
+     * Hartree-Fock basis function, allocated only when H has a Brillouin theorem wrt the initial reference
+     */
+    const std::unique_ptr<shared_rows::Walker> m_hf = nullptr;
+    /**
+     * statistics relating to the propagation of the walker population
+     */
     std::unique_ptr<FciqmcStats> m_stats = nullptr;
+    /**
+     * statistics relating to the walltime of major operations
+     */
     std::unique_ptr<TimingStats> m_timing_stats = nullptr;
+    /**
+     * statistics relating to parallelization and load balancing
+     */
     std::unique_ptr<ParallelStats> m_parallel_stats = nullptr;
 
     /*
      * Timers for the main parts of the solver
      */
-    // whole cycle
+    /**
+     * timer for a whole FCIQMC cycle
+     */
     Timer m_cycle_timer;
-    // whole loop over occupied rows
+    /**
+     * timer for a whole loop over occupied rows
+     */
     Timer m_propagate_timer;
-    // individual iterations over an occupied row
+    /**
+     * timer for individual iterations over an occupied row
+     */
     Timer m_spawning_timer;
-    // time waited at MPI_Barrier
+    /**
+     * time waited at MPI_Barrier
+     */
     Timer m_synchronization_timer;
-    // time taken to complete communication of spawned walkers
+    /**
+     * time taken to complete communication of spawned walkers
+     */
     Timer m_communicate_timer;
-    // time taken to complete whole annihilation loop
+    /**
+     * time taken to complete whole annihilation loop
+     */
     Timer m_annihilate_timer;
 
-    /*
+    /**
      * Sanity checking variables
      */
     wf_t m_chk_nwalker_local = 0.0;
 
+    /**
+     * listens for a file requesting a "soft exit"
+     */
     InteractiveVariable<bool> m_exit;
 public:
+    /**
+     * Multidimensional averaging estimators i.e. reference connections, RDMs, spectral moments
+     */
     Maes m_maes;
 
 private:
+    /**
+     * instance of helper class to handle annihilation of received spawns with each other and the existing walkers
+     */
     Annihilator m_annihilator;
+    /**
+     * a store of calculation data between runs
+     */
     Archive m_archive;
+    /**
+     * selections of MBF in which semi-stochastic propagation is performed
+     */
     DeterministicSubspaces m_detsubs;
+
+    std::unique_ptr<shared_rows::Walker> make_hf() const {
+        /*
+         * even if there is no true HF determinant, we need to treat the initial ref as one for averaged excits or when
+         * this behaviour is explicitly requested in the configuration document
+         */
+        const bool force_hf = m_opts.m_reference.m_assume_hf_like.m_value || m_opts.m_av_ests.m_hf_excits.m_enabled;
+        /*
+         * assuming that if there exists a Hartree-Fock determinant, it will be the initial reference of the zero-th root
+         */
+        if (force_hf || m_prop.m_ham.has_brillouin_theorem(m_refs[0].mbf())) {
+            const TableBase::Loc loc(m_refs[0].irec());
+            return ptr::smart::make_unique<shared_rows::Walker>("Hartree-Fock ONV", m_wf.m_store, loc);
+        }
+        return nullptr;
+    }
 
 public:
 

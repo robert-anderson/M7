@@ -90,7 +90,11 @@ conf::Reference::Reference(Group *parent) :
         m_mbf_init(this, "mbf_init"),
         m_redef_thresh(this, "redef_thresh", 2.0,
             "when the highest-weighted non-reference MBF (the candidate) reaches this multiple of the weight on the "
-            "reference, the candidate will be adopted as the new reference. set to exactly 0.0 to disable") {}
+            "reference, the candidate will be adopted as the new reference. set to exactly 0.0 to disable"),
+        m_assume_hf_like(this, "assume_hf_like", false,
+             "even if the ground-state initial reference does not satisfy the Brillouin theorem, let it be treated "
+             "as a HF-like state anyway. Some features require a fixed HF-like state (e.g. hf_excits), others may"
+             "simply stochastically benefit from it (e.g. explicit HF connections in RDMs)"){}
 
 conf::Wavefunction::Wavefunction(Group *parent) :
         Section(parent, "wavefunction",
@@ -166,8 +170,6 @@ void conf::Bilinears::validate_node_contents() {
 
 conf::Rdms::Rdms(Group *parent, str_t name, str_t description) :
         Bilinears(parent, name, description),
-        m_explicit_ref_conns(this, "explicit_ref_conns", true,
-             "if true, take contributions from reference connections into account exactly"),
         m_spinfree(this, "spinfree", false,
              "if true, output the spinfree RDMs along with the spin-resolved versions"),
         m_fock_4rdm(this){}
@@ -192,11 +194,11 @@ conf::InstEsts::InstEsts(Group *parent) :
                           "switch on estimation of energy by uniform TWF (applicable only in sign problem-free systems)"),
         m_spf_weighted_twf(this) {}
 
-conf::RefExcits::RefExcits(Group *parent) :
-        Section(parent, "ref_excits",
-                        "options relating to averaged amplitudes of reference-connected MBFs", Explicit),
+conf::HfExcits::HfExcits(Group *parent) :
+        Section(parent, "hf_excits",
+                        "options relating to averaged amplitudes of MBFs connected to a Hartree-Fock-like MBF", Explicit),
         m_max_exlvl(this, "max_exlvl", 0ul,
-                    "maximum excitation level from the reference for which to accumulate average amplitudes"),
+                    "maximum excitation level from the HF MBF for which to accumulate average amplitudes"),
         m_buffers(this), m_archivable(this) {}
 
 conf::Mae::Mae(Group *parent) :
@@ -212,7 +214,7 @@ conf::Mae::Mae(Group *parent) :
         m_stats_path(this, "stats_path", "M7.mae.stats", "output path for contracted value statistics"),
         m_rdm(this, "rdm", "options relating to the accumulation and sampling of RDM elements"),
         m_spec_mom(this, "spec_mom", "options relating to the accumulation and sampling of spectral moments"),
-        m_ref_excits(this) {}
+        m_hf_excits(this) {}
 
 
 conf::GuideWavefunction::ExpFac::ExpFac(conf::GuideWavefunction* parent, str_t name, str_t description) :
@@ -283,8 +285,7 @@ void conf::Propagator::validate_node_contents() {
 conf::Document::Document(const str_t& fname) :
         conf_components::Document(fname, "a calculation in M7"),
         m_prng(this), m_archive(this), m_basis(this), m_particles(this),
-        m_wavefunction(this), m_reference(this),
-        m_shift(this), m_propagator(this),
+        m_wavefunction(this), m_reference(this), m_shift(this), m_propagator(this),
         m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this) {}
 
 void conf::Document::validate_node_contents() {
@@ -302,8 +303,8 @@ conf::MbfDef::MbfDef(Group *parent, str_t name) :
         Section(parent, name, "definition of a vector of many-body basis functions", Explicit),
         m_frm(this, "fermion", {},
               "fermion sector occupation of the MBF (each element can be a boolean "
-              "array of occupation status of all spin-orbitals or list of occupied spin-obrital indices)"),
-        m_bos(this, "boson", {}, "boson sector occupation of the MBF as an arrays of occupation "
-                                   "levels of all modes"),
+              "array of occupation status of all spin-orbitals or list of occupied spin-orbital indices)"),
+        m_bos(this, "boson", {},
+          "boson sector occupation of the MBF as an arrays of occupation levels of all modes"),
         m_neel(this, "neel", false,
-                        "initialize the MBF to a Neel state rather than assuming Aufbau principle"){}
+          "initialize the MBF to a Neel state rather than assuming Aufbau principle"){}

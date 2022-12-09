@@ -2,8 +2,8 @@
 // Created by Robert J. Anderson on 03/03/2021.
 //
 
-#ifndef M7_REFEXCITS_H
-#define M7_REFEXCITS_H
+#ifndef M7_HFEXCITS_H
+#define M7_HFEXCITS_H
 
 #include <M7_lib/connection/Connections.h>
 #include <M7_lib/conf/Conf.h>
@@ -15,7 +15,12 @@
 #include <M7_lib/mae/MaeTable.h>
 #include <M7_lib/util/Exsig.h>
 
-struct RefExcitsOneExsig : buffered::MappedTable<MaeRow> {
+/**
+ * Averages weights on the MBFs local to the HF MBF in the Hilbert space.
+ * This MBF need not be a true HF determinant with a Brillouin theorem, so it is sometimes referred to in the code as
+ * HF-like
+ */
+struct HfExcitsOneExsig : buffered::MappedTable<MaeRow> {
 protected:
     /**
      * work space for converting between indexing vector type and the stored key type of the MEV tables
@@ -23,7 +28,7 @@ protected:
     mutable buffered::MaeInds m_working_inds;
 
 public:
-    RefExcitsOneExsig(uint_t exsig, uint_t nroot);
+    HfExcitsOneExsig(uint_t exsig, uint_t nroot);
 
     MaeRow& lookup(const conn::FrmOnv& key);
 
@@ -38,17 +43,29 @@ public:
 };
 
 
-struct RefExcits : Archivable {
-    const conf::RefExcits& m_opts;
-    buffered::Numbers<wf_t, 1> m_av_ref;
-    std::array<std::unique_ptr<RefExcitsOneExsig>, exsig::c_ndistinct> m_ref_excits;
+struct HfExcits : Archivable {
+    /**
+     * relevant section of configuration document
+     */
+    const conf::HfExcits& m_opts;
+    /**
+     * averaged weights on HF-like MBF
+     */
+    buffered::Numbers<wf_t, 1> m_av_hf;
+    /**
+     * all one-exsig objects
+     */
+    std::array<std::unique_ptr<HfExcitsOneExsig>, exsig::c_ndistinct> m_hf_excits;
+    /**
+     * excitation signatures for which HF excits are currently accumulated
+     */
     uintv_t m_active_exsigs;
     /**
      * work space for computing connections between reference and contributing ONVs
      */
     conn::Mbf m_conn;
 
-    RefExcits(const conf::RefExcits& opts, sys::Size extents, uint_t nroot);
+    HfExcits(const conf::HfExcits& opts, sys::Size extents, uint_t nroot);
 
     void make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot);
 
@@ -58,7 +75,7 @@ struct RefExcits : Archivable {
         ABORT("not yet implemented");
     }
 
-    void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const wf_t& contrib, uint_t iroot);
+    void make_contribs(const field::Mbf& mbf, const field::Mbf& hf_mbf, const wf_t& contrib, uint_t iroot);
 
     bool all_stores_empty() const;
 
@@ -71,4 +88,4 @@ private:
     void save_fn(const hdf5::NodeWriter& parent) override;
 };
 
-#endif //M7_REFEXCITS_H
+#endif //M7_HFEXCITS_H

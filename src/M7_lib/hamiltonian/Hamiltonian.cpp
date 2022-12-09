@@ -64,3 +64,18 @@ sys::Particles Hamiltonian::default_particles(const conf::Particles &opts) const
 bool Hamiltonian::is_hermitian() const {
     return m_frm.is_hermitian() && m_frmbos.is_hermitian() && m_bos.is_hermitian();
 }
+
+bool Hamiltonian::has_brillouin_theorem(const FrmOnv &onv) const {
+    conn::FrmOnv conn(onv);
+    bool any_nonzero = false;
+    auto fn = [&](){any_nonzero |= ham::is_significant(get_element(onv, conn));};
+    if (m_frm.m_kramers_attrs.conserving()) {
+        conn_foreach::frm::Ms2Conserve<1> foreach;
+        foreach.loop_fn(conn, onv, fn);
+    }
+    else {
+        conn_foreach::frm::General<1> foreach;
+        foreach.loop_fn(conn, onv, fn);
+    }
+    return !any_nonzero;
+}

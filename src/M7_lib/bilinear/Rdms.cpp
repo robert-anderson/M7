@@ -31,8 +31,9 @@ Rdms::exsig_to_rdms_t Rdms::make_exsig_to_rdms() const {
 
 Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Sector sector, const Epoch& accum_epoch) :
         Archivable("rdms", opts.m_archivable),
-        m_spinfree(opts.m_spinfree), m_work_conns(sector.size()), m_work_com_ops(sector.size()),
-        m_explicit_ref_conns(opts.m_explicit_ref_conns), m_accum_epoch(accum_epoch) {
+        m_spinfree(opts.m_spinfree), m_work_conns(sector.size()),
+        m_work_com_ops(sector.size()),
+        m_accum_epoch(accum_epoch) {
     for (const auto& ranksig: ranksigs) {
         REQUIRE_FALSE(m_pure_rdms[ranksig], "No RDM rank should appear more than once in the specification");
         REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");

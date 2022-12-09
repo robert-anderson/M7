@@ -5,7 +5,7 @@
 #ifndef M7_REFERENCE_H
 #define M7_REFERENCE_H
 
-#include <M7_lib/observables/RefExcits.h>
+#include <M7_lib/observables/HfExcits.h>
 #include <M7_lib/basis/Suites.h>
 #include <M7_lib/parallel/RankAllocator.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
@@ -15,7 +15,7 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
-class Reference : public shared_rows::Single<Walker> {
+class Reference : public shared_rows::Walker {
     const Hamiltonian &m_ham;
     const Wavefunction &m_wf;
     /**
@@ -24,7 +24,7 @@ class Reference : public shared_rows::Single<Walker> {
     const uint_t m_ipart;
 
     /**
-     * work space for computing connections to other ONVs via the Hamiltonian
+     * work space for computing connections to other MBFs via the Hamiltonian
      */
     mutable suite::Conns m_conn;
 
@@ -49,8 +49,6 @@ class Reference : public shared_rows::Single<Walker> {
 public:
     Reference(const conf::Reference &opts, const Hamiltonian &ham,
               const Wavefunction &wf, uint_t ipart, TableBase::Loc loc);
-
-    const field::Mbf& get_mbf() const;
 
     uint_t occupied_ncycle(const uint_t& icycle) const {
         return m_all.m_row.occupied_ncycle(icycle);
@@ -89,38 +87,17 @@ public:
      *  true if the matrix element of the Hamiltonian between the current reference and the argument is non-zero
      */
     bool is_connected(const field::Mbf &mbf) const;
-    /**
-     * @param mbf
-     *  reference to MBF
-     * @return
-     *  excitation signature from ref to arg
-     */
-    uint_t exsig(const field::Mbf &mbf) const;
 
     /**
-     * occupied ONVs connected to the reference must contribute to the numerator inner product <ref | H | onv>
-     * @param onv
+     * occupied MBFs connected to the reference must contribute to the numerator inner product <ref | H | mbf>
+     * @param mbf
      * @param weights
      */
-    void make_numerator_contribs(const field::Mbf &onv, const wf_t& weight);
+    void make_numerator_contribs(const field::Mbf &mbf, const wf_t& weight);
 
     const wf_comp_t &nwalker_at_doubles();
 
     const ham_t& proj_energy_num() const;
-
-    const wf_t& weight() const;
-
-    /**
-     * this method includes the current weight in the average, bringing the normalized average up to date.
-     * @param icycle
-     *  cycle on which average is being used
-     * @param ipart
-     *  wf part index
-     * @return
-     *  normalized average weight
-     */
-    wf_t norm_average_weight(const uint_t& icycle, const uint_t& ipart) const;
-
 };
 
 /**

@@ -473,6 +473,13 @@ public:
         Loc(uint_t irank, uint_t irec);
 
         /**
+         * call on all procs, with all irecs = ~0ul except for on the owning rank
+         * @param irec
+         *  record (row) index in the distributed table if owned by MPI rank, else ~0ul
+         */
+        Loc(uint_t irec);
+
+        /**
          * @return
          *  true if the location is anywhere i.e. has a valid rank index
          */

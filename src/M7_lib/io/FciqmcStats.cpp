@@ -17,9 +17,9 @@ FciqmcStatsRow::FciqmcStatsRow(Propagator& prop) :
         m_ref_weight(this, m_wf_format, "Reference weight"),
         m_ref_proj_energy(this, m_wf_format, "Reference-projected energy"),
         m_l2_norm(this, m_wf_format, "L2 norm of the wavefunction"),
-        m_ninitiator(this, m_wf_format, "Initiator ONVs"),
-        m_nocc_mbf(this, m_wf_format, "Occupied ONVs"),
-        m_delta_nocc_mbf(this, m_wf_format, "Change in number of occupied ONVs"),
+        m_ninitiator(this, m_wf_format, "Initiator MBFs"),
+        m_nocc_mbf(this, m_wf_format, "Occupied MBFs"),
+        m_delta_nocc_mbf(this, m_wf_format, "Change in number of occupied MBFs"),
         m_exlvl_probs(prop.ncase_excit_gen() ? this : nullptr,
                       {{prop.ncase_excit_gen()}, {"excitation generator index"}},
                       "Probability of attempting to draw excitation level")

@@ -6,11 +6,10 @@
 
 Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
                v_t<TableBase::Loc> ref_locs) :
-        m_prop(prop), m_opts(opts), m_wf(wf),
+        m_opts(opts), m_prop(prop), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
-        m_exit("exit"),
-        m_maes(opts.m_av_ests, m_wf.m_sector, m_wf.nroot()),
-        m_annihilator(m_wf, m_prop, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
+        m_hf(make_hf()), m_exit("exit"), m_maes(opts.m_av_ests, m_wf.m_sector, m_wf.nroot()),
+        m_annihilator(m_wf, m_prop, m_refs, m_hf.get(), m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_archive(opts), m_detsubs(opts.m_propagator.m_semistochastic) {
 
     logging::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
@@ -39,11 +38,22 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
                    integer::to_hex_string(m_prop.checksum_()));
     }
 
+    if (m_hf) {
+        const auto s = m_hf->mbf().to_string();
+        if (m_prop.m_ham.has_brillouin_theorem(m_hf->mbf()))
+            logging::info("Brillouin theorem condition satisfied: assuming {} as HF state", s);
+        else
+            logging::info("Brillouin-theorem condition not satisfied, but assuming {} as HF-like state", s);
+    }
+    else {
+        logging::info("No Hartree-Fock state detected or assumed");
+    }
+
     /**
      * setup archive members
      */
     m_archive.add_member(m_prop);
-    if (m_maes.m_ref_excits) m_archive.add_member(m_maes.m_ref_excits);
+    if (m_maes.m_hf_excits) m_archive.add_member(m_maes.m_hf_excits);
     if (m_maes.m_bilinears) {
         if (m_maes.m_bilinears.m_rdms) m_archive.add_member(m_maes.m_bilinears.m_rdms);
         if (m_maes.m_bilinears.m_spec_moms) m_archive.add_member(m_maes.m_bilinears.m_spec_moms);
@@ -85,7 +95,7 @@ void Solver::execute(uint_t ncycle) {
         m_propagate_timer.unpause();
         if (m_detsubs) {
             m_detsubs.update();
-            m_detsubs.make_rdm_contribs(m_maes.m_bilinears.m_rdms, m_refs[0].get_mbf());
+            m_detsubs.make_rdm_contribs(m_maes.m_bilinears.m_rdms, m_hf.get());
         }
         loop_over_occupied_mbfs();
         m_propagate_timer.pause();
@@ -146,6 +156,7 @@ void Solver::begin_cycle() {
         m_wf.orthogonalize();
     }
     m_refs.begin_cycle(m_icycle);
+    if (m_hf) m_hf->update();
 
     auto update_epoch = [&](const uint_t &ncycle_wait) {
         const auto &epochs = m_prop.m_shift.m_variable_mode;
@@ -188,7 +199,7 @@ void Solver::loop_over_occupied_mbfs() {
              * MBF has become unoccupied in all parts and must be removed from mapped list, but it must first make all
              * associated averaged contributions to MEVs
              */
-            m_maes.make_average_contribs(walker, m_refs, m_icycle);
+            m_maes.make_average_contribs(walker, m_hf.get(), m_icycle);
             m_wf.remove_row(walker);
             continue;
         }
@@ -212,7 +223,7 @@ void Solver::loop_over_occupied_mbfs() {
              * this is the end of a planned block-averaging cycle, therefore there may be unaccounted-for contributions
              * which need to be included in the average
              */
-            m_maes.make_average_contribs(walker, m_refs, m_icycle);
+            m_maes.make_average_contribs(walker, m_hf.get(), m_icycle);
         }
 
         m_refs.contrib_row();
@@ -255,7 +266,7 @@ void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
     auto& walker = m_wf.m_store.m_row;
     for (walker.restart(); walker; ++walker) {
         if (walker.m_mbf.is_zero()) continue;
-        m_maes.make_average_contribs(walker, m_refs, icycle);
+        m_maes.make_average_contribs(walker, m_hf.get(), icycle);
     }
     m_maes.end_cycle();
     m_maes.output(m_icycle, m_prop.m_ham, true);

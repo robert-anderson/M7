@@ -94,7 +94,7 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn>, Archivable {
 
     static bool need_av_weights(const conf::Document &opts) {
         if (need_send_parents(opts)) return true;
-        return opts.m_av_ests.m_ref_excits.m_max_exlvl > 0;
+        return opts.m_av_ests.m_hf_excits.m_max_exlvl > 0;
     }
 
     bool storing_av_weights() const {
