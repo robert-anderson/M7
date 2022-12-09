@@ -57,6 +57,7 @@ function(add_parallel_hdf5 target)
                     "and compile HDF5 automatically."
                     )
         endif()
-        target_link_libraries(${target} INTERFACE hdf5::hdf5 hdf5::hdf5_hl)
+        target_link_libraries(${target} hdf5::hdf5 hdf5::hdf5_hl)
     endif()
+    target_link_libraries(${target} ${CMAKE_DL_LIBS})
 endfunction()
