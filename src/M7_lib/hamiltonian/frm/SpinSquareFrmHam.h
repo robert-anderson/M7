@@ -15,7 +15,7 @@ struct SpinSquareFrmHam : FrmHam, ElecSpecTerm {
     /*
      * electron number and Sz sector information is required in order to store the required conserved m_sz_term
      */
-    SpinSquareFrmHam(const sys::frm::Basis& basis, const sys::frm::Electrons& elecs);
+    SpinSquareFrmHam(const sys::frm::Sector& sector);
 
     ham_t get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const override;
 

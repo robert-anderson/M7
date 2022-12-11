@@ -4,9 +4,10 @@
 
 #include "SpinSquareFrmHam.h"
 
-SpinSquareFrmHam::SpinSquareFrmHam(const sys::frm::Basis& basis, const sys::frm::Electrons& elecs):
-        FrmHam(basis), ElecSpecTerm(elecs), m_sz_term(0.25 * elecs.m_ms2 * (elecs.m_ms2 - 2)){
-    REQUIRE_TRUE(elecs.m_ms2.conserve(),
+SpinSquareFrmHam::SpinSquareFrmHam(const sys::frm::Sector& sector):
+        FrmHam(sector.m_basis), ElecSpecTerm(sector.m_elecs),
+        m_sz_term(0.25 * m_elecs.m_ms2 * (m_elecs.m_ms2 - 2)){
+    REQUIRE_TRUE(m_elecs.m_ms2.conserve(),
                  "spin square operator requires a Hilbert space restricted to a given 2*Ms sector");
 }
 
