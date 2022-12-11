@@ -13,7 +13,7 @@ HubbardFrmHam::HubbardFrmHam(ham_comp_t u, const std::shared_ptr<lattice::Lattic
     logging::info("Fermi-Hubbard Hamiltonian initialized with U={}; {}", m_u, m_basis.m_lattice->m_info);
 }
 
-HubbardFrmHam::HubbardFrmHam(opt_pair_t opts) :
+HubbardFrmHam::HubbardFrmHam(init_opts_t opts) :
         HubbardFrmHam(opts.m_ham.m_hubbard.m_repulsion, lattice::make(opts.m_ham.m_hubbard)){}
 
 ham_t HubbardFrmHam::get_coeff_1100(uint_t a, uint_t i) const {

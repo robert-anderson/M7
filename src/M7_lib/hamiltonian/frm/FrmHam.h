@@ -43,9 +43,9 @@
  */
 struct FrmHam : HamOpTerm {
     /**
-     * a convenient pair of references to the relevant Hamiltonian section and the Basis configuration section
+     * a convenient bundle of references to the relevant initialization information for particle-agnostic FrmHams
      */
-    typedef HamOpTerm::OptPair<conf::FrmHam> opt_pair_t;
+    typedef HamOpTerm::InitOpts<conf::FrmHam> init_opts_t;
     /**
      * properties of the single particle basis
      */
@@ -185,6 +185,8 @@ public:
     virtual int default_ms2_value() const {
         return sys::frm::c_undefined_ms2;
     }
+
+    sys::frm::Electrons electrons(const conf::Particles& p) const;
 };
 
 /**

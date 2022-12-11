@@ -21,6 +21,9 @@ struct NullOpTerm {};
  * sector. This is indicated by multiple inheritance with SectoredTerm as a superclass
  */
 struct ElecSpecTerm {
+    /**
+     * a convenient bundle of references to the relevant initialization information for particle-specific FrmHams
+     */
     sys::frm::Electrons m_elecs;
     ElecSpecTerm(sys::frm::Electrons elecs): m_elecs(std::move(elecs)){}
 };
@@ -34,12 +37,28 @@ struct ElecSpecTerm {
  */
 struct HamOpTerm {
 
+    /**
+     * bundle of const refs to all configuration document information relevant to Hamiltonian term initialization
+     * @tparam ham_opt_t
+     *  section type of the Hamiltonian term
+     */
     template<typename ham_opt_t>
-    struct OptPair {
+    struct InitOpts {
         static_assert(std::is_base_of<conf_components::Section, ham_opt_t>::value,
-                "template arg must be derived from conf_components::Section");
+                      "template arg must be derived from conf_components::Section");
+        /**
+         * Hamiltonian subsection in configuration doc
+         */
         const ham_opt_t& m_ham;
+        /**
+         * section in configuration document that helps determine properties of the single particle basis
+         */
         const conf::Basis& m_basis;
+        /**
+         * section in configuration document that helps determine particle-related quantities (number, conservation,
+         * Ms2 sector etc) which is not needed in most Hamiltonian definitions
+         */
+        const conf::Particles& m_particles;
     };
 
     HamOpTerm(){}
@@ -96,6 +115,5 @@ struct HamOpTerm {
         return true;
     }
 };
-
 
 #endif //M7_HAMOPTERM_H

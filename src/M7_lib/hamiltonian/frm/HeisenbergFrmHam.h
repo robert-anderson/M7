@@ -39,7 +39,7 @@ struct HeisenbergFrmHam : SpinModelFrmHam {
 
     HeisenbergFrmHam(ham_comp_t j, const std::shared_ptr<lattice::Lattice>& lattice);
 
-    explicit HeisenbergFrmHam(FrmHam::opt_pair_t opts);
+    explicit HeisenbergFrmHam(FrmHam::init_opts_t opts);
 
     ham_t get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const override;
 

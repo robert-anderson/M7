@@ -17,7 +17,7 @@ HeisenbergFrmHam::HeisenbergFrmHam(ham_comp_t j, const std::shared_ptr<lattice::
         HeisenbergFrmHam(j, lattice, lattice){}
 
 
-HeisenbergFrmHam::HeisenbergFrmHam(FrmHam::opt_pair_t opts) :
+HeisenbergFrmHam::HeisenbergFrmHam(FrmHam::init_opts_t opts) :
         HeisenbergFrmHam(opts.m_ham.m_heisenberg.m_coupling, lattice::make(opts.m_ham.m_heisenberg)){}
 
 ham_t HeisenbergFrmHam::get_coeff_2200(uint_t a, uint_t b, uint_t i, uint_t j) const {

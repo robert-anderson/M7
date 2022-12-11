@@ -17,9 +17,9 @@
 
 struct BosHam : HamOpTerm {
     /**
-     * a convenient pair of references to the relevant Hamiltonian section and the Basis configuration section
+     * a convenient bundle of references to the relevant initialization information
      */
-    typedef HamOpTerm::OptPair<conf::BosHam> opt_pair_t;
+    typedef HamOpTerm::InitOpts<conf::BosHam> init_opts_t;
     /**
      * properties of the many-body basis
      */

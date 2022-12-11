@@ -12,7 +12,7 @@ void fciqmc::run(const conf::Document &opts) {
     /*
      * sum of weighted many-body operator products determining the energies and transition amplitudes between MBFs
      */
-    const Hamiltonian ham({opts.m_hamiltonian, opts.m_basis});
+    const Hamiltonian ham({opts.m_hamiltonian, opts.m_basis, opts.m_particles});
     /*
      * distributed solution vectors
      */

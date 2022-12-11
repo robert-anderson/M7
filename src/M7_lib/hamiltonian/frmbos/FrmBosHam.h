@@ -19,9 +19,9 @@
  */
 struct FrmBosHam : HamOpTerm {
     /**
-     * a convenient pair of references to the relevant Hamiltonian section and the Basis configuration section
+     * a convenient bundle of references to the relevant initialization information
      */
-    typedef HamOpTerm::OptPair<conf::FrmBosHam> opt_pair_t;
+    typedef HamOpTerm::InitOpts<conf::FrmBosHam> init_opts_t;
 
     const sys::Basis m_basis;
 

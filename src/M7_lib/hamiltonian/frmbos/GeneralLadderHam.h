@@ -21,7 +21,7 @@ struct GeneralLadderHam : FrmBosHam {
 
     GeneralLadderHam(sys::Basis basis, const EbdumpInfo& info);
 
-    GeneralLadderHam(sys::Basis basis, opt_pair_t opts):
+    GeneralLadderHam(sys::Basis basis, init_opts_t opts):
         GeneralLadderHam(std::move(basis),
              EbdumpInfo(opts.m_ham.m_ebdump.m_path, FcidumpInfo::ur_style(opts.m_ham.m_ebdump.m_spin_major))){}
 

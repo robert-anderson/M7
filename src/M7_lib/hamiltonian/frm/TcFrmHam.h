@@ -13,7 +13,7 @@ struct TcFrmHam : TcHam, GeneralFrmHam {
 
     explicit TcFrmHam(const FcidumpInfo& info): TcHam(), GeneralFrmHam(info) {};
 
-    explicit TcFrmHam(opt_pair_t opts): TcHam(), GeneralFrmHam(opts) {}
+    explicit TcFrmHam(init_opts_t opts): TcHam(), GeneralFrmHam(opts) {}
 
     ham_t get_coeff_3300(uint_t a, uint_t b, uint_t c, uint_t i, uint_t j, uint_t k) const override;
 

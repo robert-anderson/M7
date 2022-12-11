@@ -16,7 +16,7 @@ class HubbardBosHam : public BosHam {
 public:
     HubbardBosHam(ham_comp_t u, const std::shared_ptr<lattice::Lattice>& lattice);
 
-    HubbardBosHam(opt_pair_t opts);
+    HubbardBosHam(init_opts_t opts);
 
     ham_t get_coeff_0011(uint_t a, uint_t i) const override;
 

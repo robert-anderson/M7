@@ -15,8 +15,8 @@ struct GeneralFrmHam : FrmHam {
 
     typedef integrals_1e::Array<ham_t> ints_1e_t;
     typedef integrals_2e::Array<ham_t> ints_2e_t;
-    typedef std::unique_ptr<ints_1e_t> ints_1e_ptr_t;
-    typedef std::unique_ptr<ints_2e_t> ints_2e_ptr_t;
+    typedef std::shared_ptr<ints_1e_t> ints_1e_ptr_t;
+    typedef std::shared_ptr<ints_2e_t> ints_2e_ptr_t;
 
     struct Integrals {
         ints_1e_ptr_t m_1e;
@@ -56,7 +56,7 @@ public:
 
     explicit GeneralFrmHam(const FcidumpInfo& info);
 
-    explicit GeneralFrmHam(opt_pair_t opts);
+    explicit GeneralFrmHam(init_opts_t opts);
 
     ham_t get_coeff_1100(uint_t a, uint_t i) const override;
 

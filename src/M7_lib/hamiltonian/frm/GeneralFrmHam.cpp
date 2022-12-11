@@ -158,7 +158,7 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info):
     m_kramers_attrs.bcast();
 }
 
-GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
+GeneralFrmHam::GeneralFrmHam(init_opts_t opts):
         GeneralFrmHam({opts.m_ham.m_fcidump.m_path, FcidumpInfo::ur_style(opts.m_ham.m_fcidump.m_unrestrict_style)}) {}
 
 ham_t GeneralFrmHam::get_coeff_1100(uint_t a, uint_t i) const {

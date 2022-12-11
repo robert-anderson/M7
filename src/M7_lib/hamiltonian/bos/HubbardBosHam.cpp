@@ -12,7 +12,7 @@ HubbardBosHam::HubbardBosHam(ham_comp_t u, const std::shared_ptr<lattice::Lattic
     logging::info("Bose-Hubbard Hamiltonian initialized with U={}; {}", m_u, m_basis.m_lattice->m_info);
 }
 
-HubbardBosHam::HubbardBosHam(opt_pair_t opts) :
+HubbardBosHam::HubbardBosHam(init_opts_t opts) :
     HubbardBosHam(opts.m_ham.m_hubbard.m_repulsion, lattice::make(opts.m_ham.m_hubbard)){}
 
 ham_t HubbardBosHam::get_coeff_0011(uint_t a, uint_t i) const {

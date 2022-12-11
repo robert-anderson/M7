@@ -31,7 +31,7 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, uint_t occ_cutoff) :
     log_data();
 }
 
-GeneralBosHam::GeneralBosHam(opt_pair_t opts) :
+GeneralBosHam::GeneralBosHam(init_opts_t opts) :
         GeneralBosHam(BosdumpHeader(opts.m_ham.m_bosdump.m_path), opts.m_basis.m_bos_occ_cutoff){}
 
 ham_t GeneralBosHam::get_coeff_0011(uint_t i, uint_t j) const {

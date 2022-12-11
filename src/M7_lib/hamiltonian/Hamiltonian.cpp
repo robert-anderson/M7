@@ -7,7 +7,80 @@
 #include "M7_lib/hamiltonian/frmbos/GeneralLadderHam.h"
 #include "M7_lib/hamiltonian/bos/InteractingBoseGasBosHam.h"
 
-Hamiltonian::Hamiltonian(opt_pair_t opts): Hamiltonian(HamiltonianTerms(opts), nullptr, nullptr, nullptr){}
+std::unique_ptr<FrmHam> HamiltonianTerms::make_frm(FrmHam::init_opts_t opts) const {
+    using namespace ptr::smart;
+    if (opts.m_ham.m_hubbard.m_enabled)
+        return make_frm_modified<HubbardFrmHam>(opts);
+    else if (opts.m_ham.m_heisenberg.m_enabled)
+        return make_frm_modified<HeisenbergFrmHam>(opts);
+    else if (opts.m_ham.m_fcidump.m_enabled)
+        return make_frm_modified<GeneralFrmHam>(opts);
+    return make_poly_unique<FrmHam, NullFrmHam>();
+}
+
+std::unique_ptr<BosHam> HamiltonianTerms::make_bos(BosHam::init_opts_t opts) const {
+    using namespace ptr::smart;
+    if (opts.m_ham.m_num_op_weight) {
+        const uint_t nsite = m_frm->m_basis.m_nsite;
+        const sys::bos::Basis basis(nsite, opts.m_basis.m_bos_occ_cutoff);
+        const auto omega = opts.m_ham.m_num_op_weight.m_value;
+        return make_poly_unique<BosHam, NumOpBosHam>(basis, omega);
+    }
+    else if (opts.m_ham.m_interacting_bose_gas.m_enabled)
+        return make_poly_unique<BosHam, InteractingBoseGasBosHam>(opts);
+    else if (opts.m_ham.m_hubbard.m_enabled)
+        return make_poly_unique<BosHam, HubbardBosHam>(opts);
+    else if (opts.m_ham.m_bosdump.m_enabled)
+        return make_poly_unique<BosHam, GeneralBosHam>(opts);
+    return make_poly_unique<BosHam, NullBosHam>();
+}
+
+std::unique_ptr<FrmBosHam> HamiltonianTerms::make_frmbos(FrmBosHam::init_opts_t opts) const {
+    REQUIRE_TRUE(m_frm.get(), "fermion Hamiltonian unallocated");
+    REQUIRE_TRUE(m_bos.get(), "boson Hamiltonian unallocated");
+    const sys::Basis basis(m_frm->m_basis, m_bos->m_basis);
+
+    using namespace ptr::smart;
+    if (opts.m_ham.m_holstein_coupling.m_value != 0.0) {
+        const auto g = opts.m_ham.m_holstein_coupling.m_value;
+        return make_poly_unique<FrmBosHam, HolsteinLadderHam>(basis, g);
+    }
+    else if (opts.m_ham.m_ebdump.m_enabled) {
+        return make_poly_unique<FrmBosHam, GeneralLadderHam>(basis, opts);
+    }
+    return make_poly_unique<FrmBosHam, NullFrmBosHam>();
+}
+
+HamiltonianTerms::HamiltonianTerms(HamiltonianTerms::init_opts_t opts) :
+        m_frm(make_frm({opts.m_ham.m_fermion, opts.m_basis, opts.m_particles})),
+        m_bos(make_bos({opts.m_ham.m_boson, opts.m_basis, opts.m_particles})),
+        m_frmbos(make_frmbos({opts.m_ham.m_ladder, opts.m_basis, opts.m_particles})){
+    if (*m_frm && *m_frmbos)
+        REQUIRE_TRUE(m_frm->m_basis==m_frmbos->m_basis.m_frm, "incompatible fermion basis definitions");
+    if (*m_bos && *m_frmbos)
+        REQUIRE_TRUE(m_bos->m_basis==m_frmbos->m_basis.m_bos, "incompatible boson basis definitions");
+}
+
+Hamiltonian::Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosHam* bos, const FrmBosHam* frmbos) :
+        m_terms(std::move(terms)), m_frm(frm ? *frm : *m_terms.m_frm), m_bos(bos ? *bos : *m_terms.m_bos),
+        m_frmbos(frmbos ? *frmbos : *m_terms.m_frmbos),
+        m_basis(frmbos ? m_frmbos.m_basis : sys::Basis(m_frm.m_basis, m_bos.m_basis)),
+        m_boson_number_conserve(boson_number_conserve()), m_work_conn(m_basis.size()){
+    REQUIRE_TRUE(m_basis, "No system defined");
+    if (!m_frm) logging::info("Fermion Hamiltonian is disabled");
+    if (c_enable_bosons) {
+        if (!m_frmbos) logging::info("Fermion-boson ladder Hamiltonian is disabled");
+        if (!m_bos) logging::info("Number-conserving boson Hamiltonian is disabled");
+    }
+
+    if (m_frm && m_frmbos) REQUIRE_EQ(m_frm.m_basis, m_frmbos.m_basis.m_frm,
+                                      "Frm and FrmBos H terms do not have the same fermionic basis definition");
+    if (m_bos && m_frmbos) REQUIRE_EQ(m_bos.m_basis, m_frmbos.m_basis.m_bos,
+                                      "Bos and FrmBos H terms do not have the same bosonic basis definition");
+    logging::info("Hamiltonian is {}hermitian", (is_hermitian() ? "" : "NON-"));
+}
+
+Hamiltonian::Hamiltonian(init_opts_t opts): Hamiltonian(HamiltonianTerms(opts), nullptr, nullptr, nullptr){}
 
 Hamiltonian::Hamiltonian(const FrmHam *ham): Hamiltonian({}, ham, nullptr, nullptr){
     require_non_null(ham);

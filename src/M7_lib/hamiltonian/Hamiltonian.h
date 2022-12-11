@@ -43,7 +43,7 @@ using namespace field;
  * FrmBosHam is set up last, so its initialization can make read-only reference to both the FrmHam and BosHam.
  */
 struct HamiltonianTerms {
-    typedef HamOpTerm::OptPair<conf::Hamiltonian> opt_pair_t;
+    typedef HamOpTerm::InitOpts<conf::Hamiltonian> init_opts_t;
     /**
      * purely fermionic number-conserving terms in the Hamiltonian for traditional electronic structure calculations
      */
@@ -58,7 +58,7 @@ struct HamiltonianTerms {
     std::unique_ptr<FrmBosHam> m_frmbos = nullptr;
     /**
      * make the type of fermion Hamiltonian called for by the configuration, Then either return it directly, or combine
-     * it with the spin penalty if this modification is specified in the options
+     * it with any modification specified in the options
      * @tparam ham_t
      *  FrmHam-derived class defining the Hamiltonian being created
      * @param opts
@@ -67,83 +67,31 @@ struct HamiltonianTerms {
      *  unique pointer to the polymorphic base class, FrmHam
      */
     template<typename ham_t>
-    static std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
+    static std::unique_ptr<FrmHam> make_frm_modified(FrmHam::init_opts_t opts) {
         using namespace ptr::smart;
         static_assert(std::is_base_of<FrmHam, ham_t>::value, "template arg must be derived from FrmHam");
-        return make_poly_unique<FrmHam, ham_t>(opts);
-        //auto j = opts.m_spin_penalty_j.get();
-        /*
-         * if the scalar of the spin square operator is zero, just return the bare hamiltonian
-         */
-        //if (j==0.0) return make_poly_unique<FrmHam, ham_t>(opts);
-        //TODO: pass basis / hilbert config section
-#if 0
-        /*
-         * build the bare hamiltonian and let a spin square hamiltonian instance be created by read-only access to the
-         * bare hamiltonian
-         */
         ham_t bare_ham(opts);
-        SpinSquareFrmHam spin_ham(bare_ham);
+        const auto spin_penalty_j = opts.m_ham.m_spin_penalty_j.m_value;
+        if (spin_penalty_j != 0.0) {
+            logging::info("Adding spin penalty to fermion Hamiltonian with J={}", spin_penalty_j);
+            typedef SumFrmHam<ham_t, SpinSquareFrmHam> mod_ham_t;
+            const FrmHam& base = bare_ham;
+            const sys::frm::Sector sector(base.m_basis, base.electrons(opts.m_particles));
+            return make_poly_unique<FrmHam, mod_ham_t>(std::move(bare_ham), SpinSquareFrmHam(sector), spin_penalty_j);
+        }
         /*
-         * now the sum can be cheaply created by moving these two components
+         * if the configuration doc calls for no modification, just return the bare hamiltonian
          */
-        return make_poly_unique<FrmHam, SumFrmHam<ham_t, SpinSquareFrmHam>>(std::move(bare_ham), std::move(spin_ham), j);
-#endif
+        return make_poly_unique<FrmHam, ham_t>(std::move(bare_ham));
     }
 
-    std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
-        using namespace ptr::smart;
-        if (opts.m_ham.m_hubbard.m_enabled)
-            return make_frm<HubbardFrmHam>(opts);
-        else if (opts.m_ham.m_heisenberg.m_enabled)
-            return make_frm<HeisenbergFrmHam>(opts);
-        else if (opts.m_ham.m_fcidump.m_enabled)
-            return make_frm<GeneralFrmHam>(opts);
-        return make_poly_unique<FrmHam, NullFrmHam>();
-    }
+    std::unique_ptr<FrmHam> make_frm(FrmHam::init_opts_t opts) const;
 
-    std::unique_ptr<BosHam> make_bos(BosHam::opt_pair_t opts){
-        using namespace ptr::smart;
-        if (opts.m_ham.m_num_op_weight) {
-            const uint_t nsite = m_frm->m_basis.m_nsite;
-            const sys::bos::Basis basis(nsite, opts.m_basis.m_bos_occ_cutoff);
-            const auto omega = opts.m_ham.m_num_op_weight.m_value;
-            return make_poly_unique<BosHam, NumOpBosHam>(basis, omega);
-        }
-        else if (opts.m_ham.m_interacting_bose_gas.m_enabled)
-            return make_poly_unique<BosHam, InteractingBoseGasBosHam>(opts);
-        else if (opts.m_ham.m_hubbard.m_enabled)
-            return make_poly_unique<BosHam, HubbardBosHam>(opts);
-        else if (opts.m_ham.m_bosdump.m_enabled)
-            return make_poly_unique<BosHam, GeneralBosHam>(opts);
-        return make_poly_unique<BosHam, NullBosHam>();
-    }
+    std::unique_ptr<BosHam> make_bos(BosHam::init_opts_t opts) const;
 
-    std::unique_ptr<FrmBosHam> make_frmbos(FrmBosHam::opt_pair_t opts) {
-        REQUIRE_TRUE(m_frm.get(), "fermion Hamiltonian unallocated");
-        REQUIRE_TRUE(m_bos.get(), "boson Hamiltonian unallocated");
-        const sys::Basis basis(m_frm->m_basis, m_bos->m_basis);
+    std::unique_ptr<FrmBosHam> make_frmbos(FrmBosHam::init_opts_t opts) const;
 
-        using namespace ptr::smart;
-        if (opts.m_ham.m_holstein_coupling.m_value != 0.0) {
-            const auto g = opts.m_ham.m_holstein_coupling.m_value;
-            return make_poly_unique<FrmBosHam, HolsteinLadderHam>(basis, g);
-        }
-        else if (opts.m_ham.m_ebdump.m_enabled) {
-            return make_poly_unique<FrmBosHam, GeneralLadderHam>(basis, opts);
-        }
-        return make_poly_unique<FrmBosHam, NullFrmBosHam>();
-    }
-
-    HamiltonianTerms(opt_pair_t opts):
-        m_frm(make_frm({opts.m_ham.m_fermion, opts.m_basis})),
-        m_bos(make_bos({opts.m_ham.m_boson, opts.m_basis})),
-        m_frmbos(make_frmbos({opts.m_ham.m_ladder, opts.m_basis})){
-        if (*m_frm && *m_frmbos)
-            REQUIRE_TRUE(m_frm->m_basis==m_frmbos->m_basis.m_frm, "incompatible fermion basis definitions");
-        if (*m_bos && *m_frmbos)
-            REQUIRE_TRUE(m_bos->m_basis==m_frmbos->m_basis.m_bos, "incompatible boson basis definitions");
-    }
+    explicit HamiltonianTerms(init_opts_t opts);
 
     HamiltonianTerms(): m_frm(new NullFrmHam), m_bos(new NullBosHam), m_frmbos(new NullFrmBosHam){}
 
@@ -154,7 +102,7 @@ struct HamiltonianTerms {
  * generalized Hamiltonian class for fermionic, bosonic, and fermion-boson coupled interactions
  */
 class Hamiltonian {
-    typedef HamiltonianTerms::opt_pair_t opt_pair_t;
+    typedef HamiltonianTerms::init_opts_t init_opts_t;
 
     const HamiltonianTerms m_terms;
 
@@ -196,24 +144,7 @@ private:
      * @param frmbos
      *  nullptr if m_terms.m_frmbos is to be dereferenced, else this points to an externally allocated FrmBosHam
      */
-    explicit Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosHam* bos, const FrmBosHam* frmbos):
-            m_terms(std::move(terms)), m_frm(frm ? *frm : *m_terms.m_frm), m_bos(bos ? *bos : *m_terms.m_bos),
-            m_frmbos(frmbos ? *frmbos : *m_terms.m_frmbos),
-            m_basis(frmbos ? m_frmbos.m_basis : sys::Basis(m_frm.m_basis, m_bos.m_basis)),
-            m_boson_number_conserve(boson_number_conserve()), m_work_conn(m_basis.size()){
-        REQUIRE_TRUE(m_basis, "No system defined");
-        if (!m_frm) logging::info("Fermion Hamiltonian is disabled");
-        if (c_enable_bosons) {
-            if (!m_frmbos) logging::info("Fermion-boson ladder Hamiltonian is disabled");
-            if (!m_bos) logging::info("Number-conserving boson Hamiltonian is disabled");
-        }
-
-        if (m_frm && m_frmbos) REQUIRE_EQ(m_frm.m_basis, m_frmbos.m_basis.m_frm,
-               "Frm and FrmBos H terms do not have the same fermionic basis definition");
-        if (m_bos && m_frmbos) REQUIRE_EQ(m_bos.m_basis, m_frmbos.m_basis.m_bos,
-              "Bos and FrmBos H terms do not have the same bosonic basis definition");
-        logging::info("Hamiltonian is {}hermitian", (is_hermitian() ? "" : "NON-"));
-    }
+    explicit Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosHam* bos, const FrmBosHam* frmbos);
 
     static void require_non_null(const HamOpTerm* ptr) {
         REQUIRE_TRUE(ptr, "pointer to externally-allocated term Hamiltonian must be non-null");
@@ -226,7 +157,7 @@ public:
      * @param opts
      *  pair of Sections from the configuration document: hamiltonian and basis
      */
-    explicit Hamiltonian(opt_pair_t opts);
+    explicit Hamiltonian(init_opts_t opts);
 
     /*
      * ctors for initialization using externally-owned term objects (m_terms is initialized to nulls and referred to for
@@ -302,22 +233,6 @@ public:
     }
 
     bool complex_valued() const;
-
-    /**
-     * due the FCIDUMP format and default definitions of model Hamiltonians, the number of particles in the system and
-     * their constraints are determined partly by this class, and partly by the user in the configuration document, this
-     * function decides those parameters and raises errors when faced with any inconsistencies.
-     * @param opts
-     *  configuration document section
-     * @return
-     *  electron and boson number data
-     */
-//    sys::Particles get_quanta(const conf::Hamiltonian &opts) const {
-//        // TODO: move config opts around
-//        sys::frm::Electrons elecs(0ul);
-//        sys::bos::Bosons bosons(0ul);
-//        return {elecs, bosons};
-//    }
 
     // TODO: rename
     sys::Particles default_particles(uint_t nelec=0ul, int ms2=sys::frm::c_undefined_ms2, uint_t nboson=0ul) const;

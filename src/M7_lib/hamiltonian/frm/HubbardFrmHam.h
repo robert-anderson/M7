@@ -15,7 +15,7 @@ struct HubbardFrmHam : FrmHam {
 
     HubbardFrmHam(ham_comp_t u, const std::shared_ptr<lattice::Lattice>& lattice);
 
-    HubbardFrmHam(opt_pair_t opts);
+    HubbardFrmHam(init_opts_t opts);
 
     ham_t get_coeff_1100(uint_t a, uint_t i) const override;
 

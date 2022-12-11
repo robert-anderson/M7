@@ -48,3 +48,12 @@ void FrmHam::log_data() const {
     if (!m_contribs_2200.is_nonzero(exsig::ex_double))
         logging::info("2-electron term has no double-excitation contributions");
 }
+
+sys::frm::Electrons FrmHam::electrons(const conf::Particles& p) const {
+    uint_t nelec = p.m_nelec.m_value;
+    int ms2_value = p.m_ms2.m_value;
+    // if either of these are not set, fallback to defaults.
+    if (!nelec) nelec = default_nelec();
+    if (ms2_value==sys::frm::c_undefined_ms2) ms2_value = default_ms2_value();
+    return {nelec, ms2_value};
+}

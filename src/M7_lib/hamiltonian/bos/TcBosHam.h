@@ -19,9 +19,9 @@ struct TcBosHam : TcHam, GeneralBosHam {
     // as in the Fermion case, need to write a get_coeff_0033 method and also
     // need to rewrite the get_element methods as they get the 0033 coeffs
     // "folded in"
-    // note we do not ned to rewrite the get_coeff methods as we have a K+U
+    // note we do not need to rewrite the get_coeff methods as we have a K+U
     // FCIDUMP file
-    explicit TcBosHam(opt_pair_t opts) : TcHam(), GeneralBosHam(opts) {}
+    explicit TcBosHam(init_opts_t opts) : TcHam(), GeneralBosHam(opts) {}
 
     /**
      * @brief Get the coeff of type 0033 (Bosonic "triple excitation")
