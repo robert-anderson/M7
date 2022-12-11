@@ -98,7 +98,7 @@ void Rdms::end_cycle() {
 }
 
 bool Rdms::is_energy_sufficient(const Hamiltonian& ham) const {
-    if (ham.m_bos.m_contribs_0011.is_nonzero(opsig::c_0000)){
+    if (ham.m_bos.m_contribs_0011.is_nonzero(opsig::c_zero)){
         if (!m_pure_rdms[opsig::c_0011.to_int()]) return false;
     }
     if (ham.m_frmbos.m_contribs_1101.is_nonzero(opsig::c_1101)){

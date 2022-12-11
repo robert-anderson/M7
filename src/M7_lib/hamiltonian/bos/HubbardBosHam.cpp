@@ -8,7 +8,7 @@
 HubbardBosHam::HubbardBosHam(ham_comp_t u, const std::shared_ptr<lattice::Lattice> &lattice) :
         BosHam(lattice), m_u(u){
     m_contribs_0011.set_nonzero(opsig::c_0011);
-    m_contribs_0022.set_nonzero(opsig::c_0000);
+    m_contribs_0022.set_nonzero(opsig::c_zero);
     logging::info("Bose-Hubbard Hamiltonian initialized with U={}; {}", m_u, m_basis.m_lattice->m_info);
 }
 

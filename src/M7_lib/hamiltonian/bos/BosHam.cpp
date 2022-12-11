@@ -9,11 +9,11 @@
 
 void BosHam::log_data() const {
     if (*this) return;
-    if (!m_contribs_0011.is_nonzero(opsig::c_0000))
+    if (!m_contribs_0011.is_nonzero(opsig::c_zero))
         logging::info("1-boson (0011) term has no diagonal (0000) contributions");
     if (!m_contribs_0011.is_nonzero(opsig::c_0011))
         logging::info("1-boson (0011) term has no single-excitation (0011) contributions");
-    if (!m_contribs_0022.is_nonzero(opsig::c_0000))
+    if (!m_contribs_0022.is_nonzero(opsig::c_zero))
         logging::info("2-boson (0022) term has no diagonal (0000) contributions");
     if (!m_contribs_0022.is_nonzero(opsig::c_0011))
         logging::info("2-boson (0022) term has no single-excitation (0011) contributions");
