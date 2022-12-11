@@ -7,6 +7,7 @@
 #include "M7_lib/connection/OpSig.h"
 
 TEST(UtilExsig, EncodeDecode) {
+    using namespace ::opsig;
     /*
      * assert that all excitation signatures are encoded and decoded correctly
      */
@@ -21,21 +22,21 @@ TEST(UtilExsig, EncodeDecode) {
                     ASSERT_EQ(opsig.nbos_ann(), nannb);
                 }
                 OpSig opsig({ncref, nannf}, {ncreb, opsig::c_nop_mask_bos + 1});
-                ASSERT_FALSE(opsig.is_valid());
+                ASSERT_EQ(opsig, c_invalid);
             }
             OpSig opsig({ncref, nannf}, {opsig::c_nop_mask_bos + 1, 0ul});
-            ASSERT_FALSE(opsig.is_valid());
+            ASSERT_EQ(opsig, c_invalid);
         }
         OpSig opsig({ncref, opsig::c_nop_mask_frm + 1}, {0ul, 0ul});
-        ASSERT_FALSE(opsig.is_valid());
+        ASSERT_EQ(opsig, c_invalid);
     }
     OpSig opsig({opsig::c_nop_mask_frm + 1, 0ul}, {0ul, 0ul});
-    ASSERT_FALSE(opsig.is_valid());
+    ASSERT_EQ(opsig, c_invalid);
 }
 
 TEST(UtilExsig, RanksigContribs) {
     OpSig ranksig({4ul, 7ul}, {3ul, 2ul});
-    ASSERT_TRUE(ranksig.is_valid());
+    ASSERT_NE(ranksig, opsig::c_invalid);
     ASSERT_EQ(ranksig.ncontrib_frm(), 5ul); // 4732, 3632, 2532, 1432, 0332
     ASSERT_EQ(ranksig.ncontrib_bos(), 3ul); // 4732, 4721, 4710
 

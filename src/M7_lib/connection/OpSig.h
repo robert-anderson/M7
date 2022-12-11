@@ -100,10 +100,6 @@ public:
 //        return m_i < c_ndistinct;
 //    }
 
-    bool is_valid() const {
-        return m_i < opsig::c_ndistinct;
-    }
-
     /**
      * @return
      *  the number of fermion creation indices in the SQ operator product encoded within exsig

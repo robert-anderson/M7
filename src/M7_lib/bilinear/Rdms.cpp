@@ -37,7 +37,7 @@ Rdms::Rdms(const conf::Rdms& opts, v_t<OpSig> ranksigs, sys::Sector sector, cons
         m_accum_epoch(accum_epoch) {
     for (const auto& ranksig: ranksigs) {
         REQUIRE_FALSE(m_pure_rdms[ranksig.to_int()], "No RDM rank should appear more than once in the specification");
-        REQUIRE_TRUE(ranksig.is_valid(), "invalid RDM rank signature (perhaps too many operators for OpSig object)");
+        REQUIRE_NE(ranksig, opsig::c_invalid, "invalid RDM rank signature (perhaps too many operators for OpSig object)");
         REQUIRE_TRUE(ranksig.to_int(), "multidimensional estimators require a nonzero number of SQ operator indices");
         REQUIRE_TRUE(ranksig.conserves_nfrm(), "fermion non-conserving RDMs are not yet supported");
         REQUIRE_LE(ranksig.nbos(), 1ul, "RDMs with more than one boson operator are not yet supported");
@@ -72,12 +72,12 @@ Rdms::operator bool() const {
 }
 
 bool Rdms::takes_contribs_from(OpSig exsig) const {
-    return exsig.is_valid() && !m_exsig_to_rdms[exsig.to_int()].empty();
+    return (exsig != opsig::c_invalid) && !m_exsig_to_rdms[exsig.to_int()].empty();
 }
 
 void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_ops::Mbf& com, const wf_t& contrib) {
     auto exsig = conn.exsig();
-    if (!exsig.is_valid()) return;
+    if (exsig == opsig::c_invalid) return;
     if (!exsig.to_int()) m_total_norm.m_local+=contrib;
     for (auto& rdm: m_exsig_to_rdms[exsig.to_int()]) rdm->make_contribs(src_onv, conn, com, contrib);
 }
