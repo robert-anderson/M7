@@ -5,9 +5,9 @@
 #include "HfExcits.h"
 #include "M7_lib/util/Pointer.h"
 
-HfExcitsOneExsig::HfExcitsOneExsig(uint_t exsig, uint_t nroot) :
+HfExcitsOneExsig::HfExcitsOneExsig(OpSig exsig, uint_t nroot) :
         buffered::MappedTable<MaeRow>(
-                logging::format("average {} HF-like excitation coefficients", exsig::to_string(exsig)),
+                logging::format("average {} HF-like excitation coefficients", exsig.to_string()),
                 MaeRow{exsig, nroot}),
         m_working_inds(exsig) {}
 
@@ -26,7 +26,7 @@ strv_t HfExcitsOneExsig::h5_field_names() const {
 }
 
 void HfExcitsOneExsig::save(const hdf5::NodeWriter& gw) const {
-    Table<MaeRow>::save(gw, exsig::to_string(m_working_inds.m_exsig), h5_field_names());
+    Table<MaeRow>::save(gw, m_working_inds.m_exsig.to_string(), h5_field_names());
 }
 
 void HfExcitsOneExsig::make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot) {
@@ -40,17 +40,17 @@ HfExcits::HfExcits(const conf::HfExcits& opts, sys::Size extents, uint_t nroot) 
         m_opts(opts), m_av_hf({nroot}), m_conn(extents) {
     REQUIRE_EQ_ALL(nroot, 1ul, "HF excitation averaging currently only implemented for a single root");
     for (uint_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
-        auto exsig = exsig::encode(iexlvl, iexlvl, 0, 0);
+        const auto exsig = opsig::frm(iexlvl);
         m_active_exsigs.push_back(exsig);
-        m_hf_excits[exsig] = ptr::smart::make_unique<HfExcitsOneExsig>(exsig, nroot);
+        m_hf_excits[exsig.to_int()] = ptr::smart::make_unique<HfExcitsOneExsig>(exsig, nroot);
     }
 }
 
 void HfExcits::make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot) {
     auto exsig = conn.exsig();
-    if (!exsig) m_av_hf[iroot] += contrib;
-    if (exsig==~0ul || !m_hf_excits[exsig]) return;
-    m_hf_excits[exsig]->make_contribs(conn, contrib, iroot);
+    if (exsig == opsig::c_zero) m_av_hf[iroot] += contrib;
+    if (exsig == opsig::c_invalid || !m_hf_excits[exsig.to_int()]) return;
+    m_hf_excits[exsig.to_int()]->make_contribs(conn, contrib, iroot);
 }
 
 void HfExcits::make_contribs(const conn::FrmBosOnv& conn, const wf_t& contrib, uint_t iroot) {
@@ -65,8 +65,8 @@ void HfExcits::make_contribs(const field::Mbf& mbf, const field::Mbf& hf_mbf, co
 
 bool HfExcits::all_stores_empty() const {
     for (const auto& i: m_active_exsigs) {
-        DEBUG_ASSERT_TRUE(m_hf_excits[i].get(), "active encode_exsig was not allocated!");
-        if (!m_hf_excits[i]->empty()) return false;
+        DEBUG_ASSERT_TRUE(m_hf_excits[i.to_int()].get(), "active encode_exsig was not allocated!");
+        if (!m_hf_excits[i.to_int()]->empty()) return false;
     }
     return true;
 }
@@ -81,7 +81,7 @@ void HfExcits::save_fn(const hdf5::NodeWriter& parent) {
     hdf5::GroupWriter gw(parent, "hf_excits");
     gw.save("0000", av_hf);
     for (const auto& i: m_active_exsigs) {
-        DEBUG_ASSERT_TRUE(m_hf_excits[i].get(), "active exsig was not allocated!");
-        m_hf_excits[i]->save(gw);
+        DEBUG_ASSERT_TRUE(m_hf_excits[i.to_int()].get(), "active exsig was not allocated!");
+        m_hf_excits[i.to_int()]->save(gw);
     }
 }

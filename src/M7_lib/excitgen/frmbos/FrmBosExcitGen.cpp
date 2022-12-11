@@ -4,11 +4,11 @@
 
 #include "FrmBosExcitGen.h"
 
-FrmBosExcitGen::FrmBosExcitGen(const FrmBosHam& h, PRNG& prng, uintv_t exsigs, str_t description) :
+FrmBosExcitGen::FrmBosExcitGen(const FrmBosHam& h, PRNG& prng, v_t<OpSig> exsigs, str_t description) :
         ExcitGen(prng, std::move(exsigs), std::move(description)), m_h(h) {}
 
 
-bool FrmBosExcitGen::draw_h_frmbos(uint_t exsig, const field::FrmBosOnv& src, prob_t& prob,
+bool FrmBosExcitGen::draw_h_frmbos(OpSig exsig, const field::FrmBosOnv& src, prob_t& prob,
                                    ham_t& helem, conn::FrmBosOnv& conn) {
     auto result = draw(exsig, src, prob, conn);
     if (!result) return false;

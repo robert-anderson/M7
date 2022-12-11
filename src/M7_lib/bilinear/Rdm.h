@@ -15,8 +15,6 @@
 
 #include "FermionPromoter.h"
 
-using namespace exsig;
-
 class Rdm : public communicator::MappedSend<MaeRow, MaeRow> {
 public:
     /**
@@ -24,15 +22,15 @@ public:
      */
     const sys::Sector m_sector;
     /**
-     * rank signature of the RDM, along with convenient decoded
+     * rank signature of the RDM, along with convenient decoded numbers of operators in the ranksig
      */
-    const uint_t m_ranksig;
-    const uint_t m_rank, m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
+    const OpSig m_ranksig;
+    const uint_t m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
     /**
      * index signature (different to ranksig if RDM is stored as an on-the-fly contraction)
      */
-    const uint_t m_indsig;
-    const uint_t m_rank_ind, m_nfrm_cre_ind, m_nfrm_ann_ind, m_nbos_cre_ind, m_nbos_ann_ind;
+    const OpSig m_indsig;
+    const uint_t m_nfrm_cre_ind, m_nfrm_ann_ind, m_nbos_cre_ind, m_nbos_ann_ind;
 
 protected:
     bool m_ordered_inds = true;
@@ -59,9 +57,9 @@ protected:
 
     static uint_t nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size);
 
-    static uint_t nrow_estimate(uint_t exsig, sys::Size basis_size);
+    static uint_t nrow_estimate(OpSig exsig, sys::Size basis_size);
 
-    str_t name(str_t str, uint_t ranksig) const;
+    str_t name(str_t str, OpSig ranksig) const;
 
     void add_to_send_table(const field::MaeInds& inds, wf_t contrib);
 
@@ -74,9 +72,9 @@ protected:
     virtual void bos_make_contribs(const field::BosOnv& /*src_onv*/, const conn::BosOnv& /*conn*/,
                                    const com_ops::Bos& /*com*/, wf_t /*contrib*/) {}
 
-    static uint_t nrec_est(sys::Size basis_size, uint_t indsig) {
-        const auto nrec_frm = integer::combinatorial(basis_size.m_frm.m_nspinorb, decode_nfrm_cre(indsig));
-        return nrec_frm * integer::combinatorial_with_repetition(basis_size.m_bos.m_nmode, decode_nbos(indsig));
+    static uint_t nrec_est(sys::Size basis_size, OpSig indsig) {
+        const auto nrec_frm = integer::combinatorial(basis_size.m_frm.m_nspinorb, indsig.nfrm_cre());
+        return nrec_frm * integer::combinatorial_with_repetition(basis_size.m_bos.m_nmode, indsig.nbos());
     }
 
 public:
@@ -85,7 +83,7 @@ public:
         return name(m_name, m_ranksig);
     }
 
-    Rdm(uint_t ranksig, uint_t indsig, sys::Sector sector, uint_t nvalue,
+    Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue,
         DistribOptions dist_opts, Sizing store_sizing, Sizing comm_sizing, str_t name="");
 
     /**
@@ -102,7 +100,7 @@ public:
      * @param indsig
      *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
      */
-    Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Sector sector, uint_t nvalue, str_t name="");
+    Rdm(const conf::Rdms& opts, OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue, str_t name="");
 
     void end_cycle();
 
@@ -139,7 +137,7 @@ public:
      * @param indsig
      *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
      */
-    PureRdm(const conf::Rdms& opts, uint_t ranksig, sys::Sector sector, uint_t nvalue, str_t name=""):
+    PureRdm(const conf::Rdms& opts, OpSig ranksig, sys::Sector sector, uint_t nvalue, str_t name=""):
             Rdm(opts, ranksig, ranksig, sector, nvalue, name){}
 
 protected:
@@ -168,7 +166,7 @@ public:
     /**
      * the maximum exsig contributing to this ContractedRdm
      */
-    const uint_t m_max_contrib_exsig;
+    const OpSig m_max_contrib_exsig;
 
     /**
      * @param opts
@@ -188,9 +186,11 @@ public:
      * @param indsig
      *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
      */
-    ContractedRdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, uint_t max_contrib_exsig,
+    ContractedRdm(const conf::Rdms& opts, OpSig ranksig, OpSig indsig, OpSig max_contrib_exsig,
                   sys::Sector sector, uint_t nvalue, str_t name=""):
-            Rdm(opts, ranksig, indsig, sector, nvalue, name), m_max_contrib_exsig(max_contrib_exsig){}
+            Rdm(opts, ranksig, indsig, sector, nvalue, name), m_max_contrib_exsig(max_contrib_exsig){
+        REQUIRE_TRUE(m_max_contrib_exsig.contribs_to(m_ranksig), "max contributing exsig is incompatible with ranksig");
+    }
 
 protected:
 

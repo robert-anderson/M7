@@ -43,7 +43,7 @@ uint_t HamTextFileReader::nset_ind(const uintv_t &inds) {
     return std::count_if(inds.begin(), inds.end(), [](const uint_t &a) { return a != ~0ul; });
 }
 
-uint_t HamTextFileReader::exsig(const uintv_t &inds) const {
+OpSig HamTextFileReader::exsig(const uintv_t &inds) const {
     return exsig(inds, ranksig(inds));
 }
 

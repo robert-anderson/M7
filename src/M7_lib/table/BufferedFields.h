@@ -259,12 +259,12 @@ namespace buffered {
         using field::MaeInds::operator=;
         using field::MaeInds::m_frm;
         using field::MaeInds::m_bos;
-        MaeInds(uint_t exsig): BufferedField<field::MaeInds>(exsig){}
+        MaeInds(OpSig exsig): BufferedField<field::MaeInds>(exsig){}
     };
 
     struct SpecMomInds : BufferedField<field::SpecMomInds> {
         using field::SpecMomInds::operator=;
-        SpecMomInds(uint_t exsig): BufferedField<field::SpecMomInds>(exsig){}
+        SpecMomInds(OpSig exsig): BufferedField<field::SpecMomInds>(exsig){}
     };
 }
 

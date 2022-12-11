@@ -14,8 +14,8 @@ struct HolsteinLadderHam : FrmBosHam {
 
     HolsteinLadderHam(sys::Basis basis, ham_t g) :
             FrmBosHam(std::move(basis)), m_g(g) {
-        m_contribs_1101.set_nonzero(exsig::ex_0001);
-        m_contribs_1110.set_nonzero(exsig::ex_0010);
+        m_contribs_1101.set_nonzero(opsig::c_0001);
+        m_contribs_1110.set_nonzero(opsig::c_0010);
     }
 
     HolsteinLadderHam(sys::frm::Basis basis, ham_t g, uint_t bos_occ_cutoff=sys::bos::c_max_occ) :

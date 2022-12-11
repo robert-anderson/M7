@@ -3,30 +3,28 @@
 //
 
 #include "EbdumpFileReader.h"
-#include "M7_lib/util/Exsig.h"
-
 
 EbdumpFileReader::EbdumpFileReader(const EbdumpInfo& info) :
         HamTextFileReader(info.m_fname, 3), m_info(info),
         m_norb_distinct((m_info.m_uhf ? 2 : 1)*m_info.m_nsite) {}
 
-uint_t EbdumpFileReader::ranksig(const uintv_t& inds) const {
+OpSig EbdumpFileReader::ranksig(const uintv_t& inds) const {
     DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
     switch (nset_ind(inds)) {
         case 1ul:
             DEBUG_ASSERT_NE(inds[0], ~0ul, "set index should be the first one: the boson mode index");
-            return exsig::ex_0010;
+            return opsig::c_0010;
         case 3ul:
-            return exsig::ex_1110;
+            return opsig::c_1110;
         default:
-            return ~0ul;
+            return opsig::c_invalid;
     }
 }
 
-uint_t EbdumpFileReader::exsig(const uintv_t& inds, uint_t) const {
+OpSig EbdumpFileReader::exsig(const uintv_t& inds, OpSig /*ranksig*/) const {
     DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
-    if (inds[1] == inds[2]) return exsig::ex_0010;
-    else return exsig::ex_1110;
+    if (inds[1] == inds[2]) return opsig::c_0010;
+    else return opsig::c_1110;
 }
 
 bool EbdumpFileReader::inds_in_range(const uintv_t& inds) const {

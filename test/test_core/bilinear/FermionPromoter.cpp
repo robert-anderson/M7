@@ -6,7 +6,6 @@
 #include "M7_lib/bilinear/FermionPromoter.h"
 #include "gtest/gtest.h"
 #include "M7_lib/table/BufferedFields.h"
-#include "M7_lib/util/Exsig.h"
 
 TEST(FermionPromoter, Promoter1BodyDiagonal) {
     const uint_t nsite = 5;
@@ -25,7 +24,7 @@ TEST(FermionPromoter, Promoter1BodyDiagonal) {
     FermionPromoter fp(com.size(), conn.exsig(), nop_insert);
 
     const auto exsig = conn.ranksig(nop_insert);
-    ASSERT_EQ(exsig, exsig::ex_1100);
+    ASSERT_EQ(exsig, opsig::c_1100);
     buffered::MaeInds inds(exsig);
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
@@ -55,7 +54,7 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
     FermionPromoter fp(com.size(), conn.exsig(), nop_insert);
 
     const auto exsig = conn.ranksig(nop_insert);
-    ASSERT_EQ(exsig, exsig::ex_2200);
+    ASSERT_EQ(exsig, opsig::c_2200);
     buffered::MaeInds inds(exsig);
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
@@ -98,7 +97,7 @@ TEST(FermionPromoter, Promoter2BodySingle) {
     FermionPromoter fp(com.size(), conn.exsig(), nop_insert);
 
     const auto exsig = conn.ranksig(nop_insert);
-    ASSERT_EQ(exsig, exsig::ex_double);
+    ASSERT_EQ(exsig, opsig::c_doub);
     buffered::MaeInds inds(exsig);
 
     // common: 1 4 6 7 9
@@ -165,7 +164,7 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     FermionPromoter fp(com.size(), conn.exsig(), nop_insert);
 
     const auto exsig = conn.ranksig(nop_insert);
-    ASSERT_EQ(exsig, exsig::ex_2200);
+    ASSERT_EQ(exsig, opsig::c_2200);
     ASSERT_EQ(exsig, conn.exsig());
     buffered::MaeInds inds(exsig);
 
@@ -203,7 +202,7 @@ TEST(FermionPromoter, Promoter3BodySingle) {
     ASSERT_EQ(fp.m_ncomb, 10ul);
 
     const auto exsig = conn.ranksig(nop_insert);
-    ASSERT_EQ(exsig, exsig::ex_triple);
+    ASSERT_EQ(exsig, opsig::c_trip);
     buffered::MaeInds inds(exsig);
 
     // common: 1 4 6 7 9

@@ -7,6 +7,7 @@
 
 #include <M7_lib/field/BosOnvField.h>
 #include <M7_lib/parallel/MPIAssert.h>
+#include <M7_lib/connection/OpSig.h>
 
 struct BosOpPair {
     const uint_t m_imode;
@@ -139,7 +140,7 @@ struct BosOnvConnection {
 
     void apply(const BosOnvField &src, BosOnvField &dst, BosOps &com) const;
 
-    uint_t exsig() const;
+    OpSig exsig() const;
 
     bool respects_occ_range(const BosOnvField &src, uint_t nboson_max) const;
 

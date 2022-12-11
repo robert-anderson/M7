@@ -8,16 +8,15 @@
 #include <M7_lib/mae/MaeTable.h>
 #include <M7_lib/io/Archivable.h>
 #include <M7_lib/field/Fields.h>
-#include <M7_lib/util/Exsig.h>
 
 
 //Communicator<MaeRow<wf_t>, MaeRow<wf_t>, true>
 struct SpectralMoment {
-    const uint_t m_exsig, m_order;
-    SpectralMoment(uint_t exsig, uint_t order): m_exsig(exsig), m_order(order){
+    const OpSig m_exsig;
+    const uint_t m_order;
+    SpectralMoment(OpSig exsig, uint_t order): m_exsig(exsig), m_order(order){
         REQUIRE_EQ(order, 1ul, "Spectral moment quantities are currently only implemented for n=1")
-        REQUIRE_TRUE(exsig::is_pure_frm(exsig),
-                     "Spectral moment excitations must refer to purely fermionic perturbations");
+        REQUIRE_TRUE(m_exsig.is_pure_frm(), "Spectral moment excitations must refer to purely fermionic perturbations");
     }
 };
 

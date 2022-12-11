@@ -9,16 +9,17 @@ Rdms::exsig_to_rdms_t Rdms::make_exsig_to_rdms() const {
     exsig_to_rdms_t exsig_to_rdms;
     for (const auto& rdm: m_rdms) {
         auto contr_cast = dynamic_cast<const ContractedRdm*>(rdm.get());
+        // pointer is only non-null (i.e. bool true) if the cast was successful
         auto max_contrib_exsig = contr_cast ? contr_cast->m_max_contrib_exsig : rdm->m_ranksig;
-        auto nfrm_cre = decode_nfrm_cre(max_contrib_exsig);
-        auto nfrm_ann = decode_nfrm_cre(max_contrib_exsig);
+        auto nfrm_cre = max_contrib_exsig.nfrm_cre();
+        auto nfrm_ann = max_contrib_exsig.nfrm_ann();
         while (nfrm_cre != ~0ul && nfrm_ann != ~0ul) {
-            auto nbos_cre = decode_nbos_cre(max_contrib_exsig);
-            auto nbos_ann = decode_nbos_ann(max_contrib_exsig);
+            auto nbos_cre = max_contrib_exsig.nbos_cre();
+            auto nbos_ann = max_contrib_exsig.nbos_ann();
             while (nbos_cre != ~0ul && nbos_ann != ~0ul) {
-                auto exsig = encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
-                DEBUG_ASSERT_LT(exsig, exsig::c_ndistinct, "exsig OOB");
-                exsig_to_rdms[exsig].push_front(rdm.get());
+                OpSig exsig ({nfrm_cre, nfrm_ann}, {nbos_cre, nbos_ann});
+                DEBUG_ASSERT_TRUE(exsig.is_valid(), "exsig OOB");
+                exsig_to_rdms[exsig.to_int()].push_front(rdm.get());
                 --nbos_cre;
                 --nbos_ann;
             }
@@ -29,21 +30,19 @@ Rdms::exsig_to_rdms_t Rdms::make_exsig_to_rdms() const {
     return exsig_to_rdms;
 }
 
-Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Sector sector, const Epoch& accum_epoch) :
+Rdms::Rdms(const conf::Rdms& opts, v_t<OpSig> ranksigs, sys::Sector sector, const Epoch& accum_epoch) :
         Archivable("rdms", opts.m_archivable),
         m_spinfree(opts.m_spinfree), m_work_conns(sector.size()),
         m_work_com_ops(sector.size()),
         m_accum_epoch(accum_epoch) {
     for (const auto& ranksig: ranksigs) {
-        REQUIRE_FALSE(m_pure_rdms[ranksig], "No RDM rank should appear more than once in the specification");
-        REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
-        REQUIRE_TRUE(conserves_nfrm(ranksig), "fermion non-conserving RDMs are not yet supported");
-        REQUIRE_LE(decode_nbos_cre(ranksig), 1ul,
-                   "RDMs with more than one boson creation operator are not yet supported");
-        REQUIRE_LE(decode_nbos_ann(ranksig), 1ul,
-                   "RDMs with more than one boson annihilation operator are not yet supported");
+        REQUIRE_FALSE(m_pure_rdms[ranksig.to_int()], "No RDM rank should appear more than once in the specification");
+        REQUIRE_TRUE(ranksig.is_valid(), "invalid RDM rank signature (perhaps too many operators for OpSig object)");
+        REQUIRE_TRUE(ranksig.to_int(), "multidimensional estimators require a nonzero number of SQ operator indices");
+        REQUIRE_TRUE(ranksig.conserves_nfrm(), "fermion non-conserving RDMs are not yet supported");
+        REQUIRE_LE(ranksig.nbos(), 1ul, "RDMs with more than one boson operator are not yet supported");
         m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, PureRdm>(opts, ranksig, sector, 1ul));
-        m_pure_rdms[ranksig] = m_rdms.front().get();
+        m_pure_rdms[ranksig.to_int()] = m_rdms.front().get();
     }
     if (opts.m_fock_4rdm.m_enabled) {
         logging::info("Loading generalized Fock matrix for accumulation of its contraction with the 4RDM");
@@ -60,8 +59,9 @@ Rdms::Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Sector sector, const E
     m_total_norm.m_local = 0.0;
 
     strv_t exsigs;
-    for (uint_t exsig=0ul; exsig < exsig::c_ndistinct; ++exsig){
-        if (takes_contribs_from(exsig)) exsigs.push_back(exsig::to_string(exsig));
+    for (uint_t iexsig=0ul; iexsig < opsig::c_ndistinct; ++iexsig){
+        const OpSig exsig(iexsig);
+        if (takes_contribs_from(exsig)) exsigs.push_back(exsig.to_string());
     }
     logging::info("Excitation signatures contributing to the sampled RDMs: {}", convert::to_string(exsigs));
 
@@ -71,16 +71,15 @@ Rdms::operator bool() const {
     return !m_rdms.empty();
 }
 
-bool Rdms::takes_contribs_from(uint_t exsig) const {
-    if (exsig==~0ul) return false;
-    return !m_exsig_to_rdms[exsig].empty();
+bool Rdms::takes_contribs_from(OpSig exsig) const {
+    return exsig.is_valid() && !m_exsig_to_rdms[exsig.to_int()].empty();
 }
 
 void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_ops::Mbf& com, const wf_t& contrib) {
     auto exsig = conn.exsig();
-    if (exsig==~0ul) return;
-    if (!exsig) m_total_norm.m_local+=contrib;
-    for (auto& rdm: m_exsig_to_rdms[exsig]) rdm->make_contribs(src_onv, conn, com, contrib);
+    if (!exsig.is_valid()) return;
+    if (!exsig.to_int()) m_total_norm.m_local+=contrib;
+    for (auto& rdm: m_exsig_to_rdms[exsig.to_int()]) rdm->make_contribs(src_onv, conn, com, contrib);
 }
 
 void Rdms::make_contribs(const Mbf& src_onv, const Mbf& dst_onv, const wf_t& contrib) {
@@ -99,23 +98,23 @@ void Rdms::end_cycle() {
 }
 
 bool Rdms::is_energy_sufficient(const Hamiltonian& ham) const {
-    if (ham.m_bos.m_contribs_0011.is_nonzero(0ul)){
-        if (!m_pure_rdms[exsig::ex_0011]) return false;
+    if (ham.m_bos.m_contribs_0011.is_nonzero(opsig::c_0000)){
+        if (!m_pure_rdms[opsig::c_0011.to_int()]) return false;
     }
-    if (ham.m_frmbos.m_contribs_1101.is_nonzero(exsig::ex_1101)){
-        if (!m_pure_rdms[exsig::ex_1101]) return false;
+    if (ham.m_frmbos.m_contribs_1101.is_nonzero(opsig::c_1101)){
+        if (!m_pure_rdms[opsig::c_1101.to_int()]) return false;
     }
-    if (ham.m_frmbos.m_contribs_1110.is_nonzero(exsig::ex_1110)){
-        if (!m_pure_rdms[exsig::ex_1110]) return false;
+    if (ham.m_frmbos.m_contribs_1110.is_nonzero(opsig::c_1110)){
+        if (!m_pure_rdms[opsig::c_1110.to_int()]) return false;
     }
-    if (!m_pure_rdms[exsig::ex_double]) return false;
+    if (!m_pure_rdms[opsig::c_doub.to_int()]) return false;
     return true;
 }
 
 
 ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     if (!ham) return 0.0;
-    auto& rdm2 = m_pure_rdms[ex_2200];
+    auto& rdm2 = m_pure_rdms[opsig::c_doub.to_int()];
     REQUIRE_TRUE_ALL(rdm2!=nullptr, "cannot compute energy without the 2RDM");
     ham_t e1 = 0.0;
     ham_t e2 = 0.0;
@@ -156,7 +155,7 @@ ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     return arith::real(ham.m_e_core) + (arith::real(e1) + arith::real(e2)) / norm;
 }
 
-ham_comp_t Rdms::get_energy(const FrmBosHam& /*ham*/, uint_t /*exsig*/) const {
+ham_comp_t Rdms::get_energy(const FrmBosHam& /*ham*/, OpSig /*exsig*/) const {
     return 0.0;
     // TODO: update for new HamOpTerm partitioning
 #if 0
@@ -196,7 +195,7 @@ ham_comp_t Rdms::get_energy(const FrmBosHam& /*ham*/, uint_t /*exsig*/) const {
 
 ham_comp_t Rdms::get_energy(const BosHam& ham) const {
     if (!ham) return 0.0;
-    auto& rdm = m_pure_rdms[exsig::ex_0011];
+    auto& rdm = m_pure_rdms[opsig::c_0011.to_int()];
     REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the 0011-RDM");
     ham_t e = 0.0;
     auto& row = rdm->m_store.m_row;

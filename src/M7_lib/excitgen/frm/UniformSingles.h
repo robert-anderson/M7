@@ -10,9 +10,9 @@
 namespace exgen {
     struct UniformSingles : FrmExcitGen {
         UniformSingles(const FrmHam &h, PRNG &prng) :
-                FrmExcitGen(h, prng, {exsig::ex_single}, "uniform") {}
+                FrmExcitGen(h, prng, {opsig::c_sing}, "uniform") {}
 
-        bool draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) override;
+        bool draw_frm(OpSig exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) override;
 
         static bool draw_spin_conserve_fn(PRNG &prng, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn);
 
@@ -28,7 +28,7 @@ namespace exgen {
 
         prob_t prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const override;
 
-        uint_t approx_nconn(uint_t /*exsig*/, sys::Particles particles) const override;
+        uint_t approx_nconn(OpSig /*exsig*/, sys::Particles particles) const override;
     };
 }
 

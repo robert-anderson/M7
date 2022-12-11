@@ -5,14 +5,14 @@
 #include "HeisenbergExchange.h"
 
 exgen::HeisenbergExchange::HeisenbergExchange(const FrmHam& h, PRNG& prng) :
-        FrmLatticeExcitGen(h, prng, {exsig::ex_double}, "lattice local exchange"){
+        FrmLatticeExcitGen(h, prng, {opsig::c_doub}, "lattice local exchange"){
     REQUIRE_TRUE(h.is<HeisenbergFrmHam>(), "given hamiltonian is not of HeisenbergFrmHam type");
 }
 
-bool exgen::HeisenbergExchange::draw_frm(uint_t exsig, const field::FrmOnv& src,
+bool exgen::HeisenbergExchange::draw_frm(OpSig exsig, const field::FrmOnv& src,
                                   prob_t& prob, conn::FrmOnv& conn) {
     DEBUG_ONLY(exsig);
-    DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
+    DEBUG_ASSERT_EQ(exsig, opsig::c_doub, "this excitation generator is only suitable for exsig 2200");
     const auto& lattice = m_h.m_basis.m_lattice;
     /*
      * the number of neighboring sites accessible is not decided till the occupied index has been chosen. If the integer
@@ -52,6 +52,6 @@ prob_t exgen::HeisenbergExchange::prob_frm(const field::FrmOnv& src, const conn:
     return prob / basis.m_nsite;
 }
 
-uint_t exgen::HeisenbergExchange::approx_nconn(uint_t, sys::Particles) const {
+uint_t exgen::HeisenbergExchange::approx_nconn(OpSig, sys::Particles) const {
     return 1ul<<m_h.m_basis.m_lattice->m_nadj_max;
 }

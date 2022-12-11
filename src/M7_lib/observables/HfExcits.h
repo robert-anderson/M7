@@ -13,7 +13,6 @@
 #include <M7_lib/table/BufferedTable.h>
 #include <M7_lib/table/BufferedFields.h>
 #include <M7_lib/mae/MaeTable.h>
-#include <M7_lib/util/Exsig.h>
 
 /**
  * Averages weights on the MBFs local to the HF MBF in the Hilbert space.
@@ -28,7 +27,7 @@ protected:
     mutable buffered::MaeInds m_working_inds;
 
 public:
-    HfExcitsOneExsig(uint_t exsig, uint_t nroot);
+    HfExcitsOneExsig(OpSig exsig, uint_t nroot);
 
     MaeRow& lookup(const conn::FrmOnv& key);
 
@@ -55,11 +54,11 @@ struct HfExcits : Archivable {
     /**
      * all one-exsig objects
      */
-    std::array<std::unique_ptr<HfExcitsOneExsig>, exsig::c_ndistinct> m_hf_excits;
+    std::array<std::unique_ptr<HfExcitsOneExsig>, opsig::c_ndistinct> m_hf_excits;
     /**
      * excitation signatures for which HF excits are currently accumulated
      */
-    uintv_t m_active_exsigs;
+    v_t<OpSig> m_active_exsigs;
     /**
      * work space for computing connections between reference and contributing ONVs
      */

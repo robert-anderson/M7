@@ -6,18 +6,18 @@
 
 #include <utility>
 
-FrmExcitGen::FrmExcitGen(const FrmHam &h, PRNG &prng, uintv_t exsigs, str_t description) :
+FrmExcitGen::FrmExcitGen(const FrmHam &h, PRNG &prng, v_t<OpSig> exsigs, str_t description) :
         ExcitGen(prng, std::move(exsigs), std::move(description)), m_h(h){
     for (auto exsig: m_exsigs)
-        REQUIRE_TRUE(exsig::is_pure_frm(exsig), "excitations must be expressed in terms of fermion operators only");
+        REQUIRE_TRUE(exsig.is_pure_frm(), "excitations must be expressed in terms of fermion operators only");
 }
 
-bool FrmExcitGen::draw_frmbos(uint_t exsig, const field::FrmBosOnv &src,
+bool FrmExcitGen::draw_frmbos(OpSig exsig, const field::FrmBosOnv &src,
                               prob_t &prob, conn::FrmBosOnv &conn) {
     return draw_frm(exsig, src.m_frm, prob, conn.m_frm);
 }
 
-bool FrmExcitGen::draw_h_frm(uint_t exsig, const field::FrmOnv &src, prob_t &prob,
+bool FrmExcitGen::draw_h_frm(OpSig exsig, const field::FrmOnv &src, prob_t &prob,
                              ham_t &helem, conn::FrmOnv &conn) {
     auto result = draw(exsig, src, prob, conn);
     if (!result) return false;
@@ -25,7 +25,7 @@ bool FrmExcitGen::draw_h_frm(uint_t exsig, const field::FrmOnv &src, prob_t &pro
     return ham::is_significant(helem);
 }
 
-bool FrmExcitGen::draw_h_frmbos(uint_t exsig, const field::FrmBosOnv &src, prob_t &prob,
+bool FrmExcitGen::draw_h_frmbos(OpSig exsig, const field::FrmBosOnv &src, prob_t &prob,
                                 ham_t &helem, conn::FrmBosOnv &conn) {
     auto result = draw(exsig, src.m_frm, prob, conn.m_frm);
     if (!result) return false;

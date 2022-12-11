@@ -6,6 +6,7 @@
 #define M7_FRMONVCONNECTION_H
 
 #include <M7_lib/field/FrmOnvField.h>
+#include "OpSig.h"
 
 /**
  * A generic string of ordered, distinct spin-orbital indices.
@@ -333,7 +334,7 @@ public:
      */
     bool phase(const FrmOnvField &src) const;
 
-    uint_t exsig() const;
+    OpSig exsig() const;
 
     /**
      * @param nop_insert
@@ -341,7 +342,7 @@ public:
      * @return
      *  rank signature of the resulting term
      */
-    uint_t ranksig(uint_t nop_insert) const;
+    OpSig ranksig(uint_t nop_insert) const;
 };
 
 static std::ostream &operator<<(std::ostream &os, const FrmOnvConnection &conn) {

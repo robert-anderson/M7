@@ -4,33 +4,32 @@
 
 #include <algorithm>
 #include "gtest/gtest.h"
-#include "M7_lib/util/Exsig.h"
 #include "M7_lib/connection/OpSig.h"
 
 TEST(UtilExsig, EncodeDecode) {
     /*
      * assert that all excitation signatures are encoded and decoded correctly
      */
-    for (uint_t ncref = 0ul; ncref <= OpSig::c_nop_mask_frm; ++ncref) {
-        for (uint_t nannf = 0ul; nannf <= OpSig::c_nop_mask_frm; ++nannf) {
-            for (uint_t ncreb = 0ul; ncreb <= OpSig::c_nop_mask_bos; ++ncreb) {
-                for (uint_t nannb = 0ul; nannb <= OpSig::c_nop_mask_bos; ++nannb) {
+    for (uint_t ncref = 0ul; ncref <= opsig::c_nop_mask_frm; ++ncref) {
+        for (uint_t nannf = 0ul; nannf <= opsig::c_nop_mask_frm; ++nannf) {
+            for (uint_t ncreb = 0ul; ncreb <= opsig::c_nop_mask_bos; ++ncreb) {
+                for (uint_t nannb = 0ul; nannb <= opsig::c_nop_mask_bos; ++nannb) {
                     OpSig opsig({ncref, nannf}, {ncreb, nannb});
                     ASSERT_EQ(opsig.nfrm_cre(), ncref);
                     ASSERT_EQ(opsig.nfrm_ann(), nannf);
                     ASSERT_EQ(opsig.nbos_cre(), ncreb);
                     ASSERT_EQ(opsig.nbos_ann(), nannb);
                 }
-                OpSig opsig({ncref, nannf}, {ncreb, OpSig::c_nop_mask_bos + 1});
+                OpSig opsig({ncref, nannf}, {ncreb, opsig::c_nop_mask_bos + 1});
                 ASSERT_FALSE(opsig.is_valid());
             }
-            OpSig opsig({ncref, nannf}, {OpSig::c_nop_mask_bos + 1, 0ul});
+            OpSig opsig({ncref, nannf}, {opsig::c_nop_mask_bos + 1, 0ul});
             ASSERT_FALSE(opsig.is_valid());
         }
-        OpSig opsig({ncref, OpSig::c_nop_mask_frm + 1}, {0ul, 0ul});
+        OpSig opsig({ncref, opsig::c_nop_mask_frm + 1}, {0ul, 0ul});
         ASSERT_FALSE(opsig.is_valid());
     }
-    OpSig opsig({OpSig::c_nop_mask_frm + 1, 0ul}, {0ul, 0ul});
+    OpSig opsig({opsig::c_nop_mask_frm + 1, 0ul}, {0ul, 0ul});
     ASSERT_FALSE(opsig.is_valid());
 }
 
@@ -58,5 +57,5 @@ TEST(UtilExsig, RanksigContribs) {
     ASSERT_TRUE(ranksig.takes_contribs_from({{1, 4}, {1, 0}}));
     ASSERT_TRUE(ranksig.takes_contribs_from({{0, 3}, {1, 0}}));
 
-    ASSERT_FALSE(ranksig.takes_contribs_from(0ul));
+    ASSERT_FALSE(ranksig.takes_contribs_from(opsig::c_zero));
 }

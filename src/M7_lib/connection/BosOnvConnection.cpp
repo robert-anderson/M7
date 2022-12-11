@@ -3,7 +3,6 @@
 //
 
 #include "BosOnvConnection.h"
-#include "M7_lib/util/Exsig.h"
 
 BosOpPair::BosOpPair(uint_t imode, uint_t nop) : m_imode(imode), m_nop(nop){
     DEBUG_ASSERT_GT(m_nop, 0ul, "mode with no associated operators should not appear in operator product")
@@ -194,8 +193,8 @@ void BosOnvConnection::apply(const BosOnvField &src, BosOnvField &dst, BosOps &c
     apply(src, com);
 }
 
-uint_t BosOnvConnection::exsig() const {
-    return exsig::encode(0, 0, m_cre.size(), m_ann.size());
+OpSig BosOnvConnection::exsig() const {
+    return opsig::bos(m_cre.size(), m_ann.size());
 }
 
 bool BosOnvConnection::respects_occ_range(const BosOnvField &src, uint_t nboson_max) const {

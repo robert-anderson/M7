@@ -2,7 +2,6 @@
 // Created by Robert J. Anderson on 11/29/21.
 //
 
-#include <M7_lib/util/Exsig.h>
 #include "Mbf.h"
 
 void mbf::set_aufbau_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
@@ -104,7 +103,7 @@ void mbf::set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDe
     set(mbf.m_bos, particles, def, idef);
 }
 
-uint_t mbf::exsig(const field::FrmOnv &src, const field::FrmOnv &dst) {
+OpSig mbf::exsig(const field::FrmOnv &src, const field::FrmOnv &dst) {
     uint_t src_work, dst_work, work;
     uint_t nann = 0ul;
     uint_t ncre = 0ul;
@@ -116,24 +115,21 @@ uint_t mbf::exsig(const field::FrmOnv &src, const field::FrmOnv &dst) {
         work = dst_work & ~src_work;
         while (work) ncre += (bit::next_setbit(work), 1ul);
     }
-    using namespace ::exsig;
-    return encode(ncre, nann, 0, 0);
+    return opsig::frm(ncre, nann);
 }
 
-uint_t mbf::exsig(const field::BosOnv &src, const field::BosOnv &dst) {
+OpSig mbf::exsig(const field::BosOnv &src, const field::BosOnv &dst) {
     uint_t nann = 0ul;
     uint_t ncre = 0ul;
     for (uint_t imode = 0ul; imode < src.nelement(); ++imode) {
         if (src[imode] > dst[imode]) ++nann;
         else if (src[imode] < dst[imode]) ++ncre;
     }
-    using namespace ::exsig;
-    return encode(0, 0, ncre, nann);
+    return opsig::bos(ncre, nann);
 }
 
-uint_t mbf::exsig(const field::FrmBosOnv &src, const field::FrmBosOnv &dst) {
+OpSig mbf::exsig(const field::FrmBosOnv &src, const field::FrmBosOnv &dst) {
     const auto frm = exsig(src.m_frm, dst.m_frm);
     const auto bos = exsig(src.m_bos, dst.m_bos);
-    using namespace ::exsig;
-    return encode(decode_nfrm_cre(frm), decode_nfrm_ann(frm), decode_nbos_cre(bos), decode_nbos_cre(bos));
+    return {{frm.nfrm_cre(), frm.nfrm_ann()}, {bos.nbos_cre(), bos.nbos_ann()}};
 }

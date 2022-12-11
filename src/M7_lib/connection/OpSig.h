@@ -7,7 +7,7 @@
 
 #include "M7_lib/util/Integer.h"
 
-struct OpSig {
+namespace opsig {
     /**
      * number of bits in the signature representing each number of fermion SQ operators
      */
@@ -28,9 +28,10 @@ struct OpSig {
      * total number of distinct excitation signatures that can be stored
      */
     static constexpr uint_t c_ndistinct = (1 << (2 * c_nbit_nop_frm + 2 * c_nbit_nop_bos));
+}
 
-private:
-    const uint_t m_i;
+class OpSig {
+    uint_t m_i;
 
     /**
      * compactly expresses an arbitrary SQ operator product as a single integer given some compile-time constant numbers
@@ -50,33 +51,57 @@ private:
      *  the excitation signature
      */
     static constexpr uint_t encode(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann) {
-        return (nfrm_cre > c_nop_mask_frm || nfrm_ann > c_nop_mask_frm ||
-                nbos_cre > c_nop_mask_bos || nbos_ann > c_nop_mask_bos) ?
-               ~0ul : nfrm_cre | (nfrm_ann << c_nbit_nop_frm) |
-                      (nbos_cre << (2 * c_nbit_nop_frm)) |
-                      (nbos_ann << (2 * c_nbit_nop_frm + c_nbit_nop_bos));
+        return (nfrm_cre > opsig::c_nop_mask_frm || nfrm_ann > opsig::c_nop_mask_frm ||
+                nbos_cre > opsig::c_nop_mask_bos || nbos_ann > opsig::c_nop_mask_bos) ?
+               ~0ul : nfrm_cre | (nfrm_ann << opsig::c_nbit_nop_frm) |
+                      (nbos_cre << (2 * opsig::c_nbit_nop_frm)) |
+                      (nbos_ann << (2 * opsig::c_nbit_nop_frm + opsig::c_nbit_nop_bos));
     }
 
 public:
-    constexpr OpSig(uint_t opsig): m_i(opsig){}
+    constexpr explicit OpSig(uint_t opsig): m_i(opsig){}
 
     constexpr OpSig(): OpSig(0ul){}
 
+    constexpr OpSig(uintp_t frm, uintp_t bos): m_i(encode(frm.first, frm.second, bos.first, bos.second)){}
+
     constexpr OpSig(const OpSig& opsig): OpSig(opsig.m_i){}
+
+    OpSig& operator=(const OpSig& other) {
+        return (m_i = other.m_i, *this);
+    }
 
     constexpr OpSig(OpSig&& opsig): OpSig(opsig.m_i){}
 
-    constexpr OpSig(uintp_t frm, uintp_t bos): m_i(encode(frm.first, frm.second, bos.first, bos.second)){}
+    OpSig& operator=(OpSig&& other) noexcept {
+        return (m_i = other.m_i, *this);
+    }
 
-//    operator const uint_t& ()  const {
-//        return m_i;
-//    }
+    bool operator==(const OpSig& other) const {
+        return other.m_i==m_i;
+    }
+
+    bool operator!=(const OpSig& other) const {
+        return other.m_i!=m_i;
+    }
+
+    constexpr explicit operator const uint_t& () const {
+        return m_i;
+    }
+
+    /*
+     * TODO: delete after refactor
+     */
+    constexpr const uint_t& to_int() const {
+        return m_i;
+    }
+
 //    operator const bool ()  const {
 //        return m_i < c_ndistinct;
 //    }
 
     bool is_valid() const {
-        return m_i < c_ndistinct;
+        return m_i < opsig::c_ndistinct;
     }
 
     /**
@@ -84,7 +109,7 @@ public:
      *  the number of fermion creation indices in the SQ operator product encoded within exsig
      */
     constexpr uint_t nfrm_cre() const {
-        return c_nop_mask_frm & m_i;
+        return opsig::c_nop_mask_frm & m_i;
     }
 
     /**
@@ -92,7 +117,7 @@ public:
      *  the number of fermion annihilation indices in the SQ operator product encoded within exsig
      */
     constexpr uint_t nfrm_ann() const {
-        return c_nop_mask_frm & (m_i >> c_nbit_nop_frm);
+        return opsig::c_nop_mask_frm & (m_i >> opsig::c_nbit_nop_frm);
     }
 
     /**
@@ -100,7 +125,7 @@ public:
      *  the number of boson creation indices in the SQ operator product encoded within exsig
      */
     constexpr uint_t nbos_cre() const {
-        return c_nop_mask_bos & (m_i >> (2 * c_nbit_nop_frm));
+        return opsig::c_nop_mask_bos & (m_i >> (2 * opsig::c_nbit_nop_frm));
     }
 
     /**
@@ -108,7 +133,7 @@ public:
      *  the number of boson annihilation indices in the SQ operator product encoded within exsig
      */
     constexpr uint_t nbos_ann() const {
-        return c_nop_mask_bos & (m_i >> (2 * c_nbit_nop_frm + c_nbit_nop_bos));
+        return opsig::c_nop_mask_bos & (m_i >> (2 * opsig::c_nbit_nop_frm + opsig::c_nbit_nop_bos));
     }
 
     /**
@@ -189,14 +214,14 @@ public:
      */
     OpSig base() const {
         return {
-                {
-                    nfrm_cre() - (ncontrib_frm() - 1),
-                    nfrm_ann() - (ncontrib_frm() - 1)
-                },
-                {
-                    nbos_cre() - (ncontrib_bos() - 1),
-                    nbos_ann() - (ncontrib_bos() - 1)
-                }
+            {
+                nfrm_cre() - (ncontrib_frm() - 1),
+                nfrm_ann() - (ncontrib_frm() - 1)
+            },
+            {
+                nbos_cre() - (ncontrib_bos() - 1),
+                nbos_ann() - (ncontrib_bos() - 1)
+            }
         };
     }
 
@@ -239,10 +264,46 @@ public:
     }
 
     str_t to_string() const {
-        if (m_i >= c_ndistinct) return "invalid";
+        if (m_i >= opsig::c_ndistinct) return "invalid";
         return std::to_string(nfrm_cre()) + std::to_string(nfrm_ann()) +
                std::to_string(nbos_cre()) + std::to_string(nbos_ann());
     }
 };
+
+namespace opsig {
+    static constexpr OpSig c_0000 ({0, 0}, {0, 0});
+    static constexpr OpSig c_invalid (~0ul);
+
+    static constexpr OpSig c_1100 ({1, 1}, {0, 0});
+    static constexpr OpSig c_2200 ({2, 2}, {0, 0});
+    static constexpr OpSig c_3300 ({3, 3}, {0, 0});
+    static constexpr OpSig c_4400 ({4, 4}, {0, 0});
+
+    static constexpr OpSig c_zero = c_0000;
+    static constexpr OpSig c_sing = c_1100;
+    static constexpr OpSig c_doub = c_2200;
+    static constexpr OpSig c_trip = c_3300;
+    static constexpr OpSig c_quad = c_4400;
+
+    static constexpr OpSig frm(uint_t ncre, uint_t nann) {
+        return {{ncre, nann}, {0ul, 0ul}};
+    }
+    static constexpr OpSig frm(uint_t nop) {
+        return frm(nop, nop);
+    }
+    static constexpr OpSig bos(uint_t ncre, uint_t nann) {
+        return {{0ul, 0ul}, {ncre, nann}};
+    }
+    static constexpr OpSig bos(uint_t nop) {
+        return bos(nop, nop);
+    }
+
+    static constexpr OpSig c_1101 ({1, 1}, {0, 1});
+    static constexpr OpSig c_1110 ({1, 1}, {1, 0});
+    static constexpr OpSig c_0001 ({0, 0}, {0, 1});
+    static constexpr OpSig c_0010 ({0, 0}, {1, 0});
+    static constexpr OpSig c_0011 ({0, 0}, {1, 1});
+    static constexpr OpSig c_0022 ({0, 0}, {2, 2});
+}
 
 #endif //M7_OPSIG_H

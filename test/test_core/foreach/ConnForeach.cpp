@@ -67,7 +67,7 @@ TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
         ++iiter;
     };
     conn_foreach::frm::General<1> foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_single);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_sing);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(iiter, setbits.size() * clrbits.size());
@@ -97,7 +97,7 @@ TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
         ++iiter;
     };
     conn_foreach::frm::General<1> foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_single);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_sing);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn.m_frm, mbf.m_frm, fn);
     ASSERT_EQ(iiter, setbits.size() * clrbits.size());
@@ -126,7 +126,7 @@ TEST(ConnForeach, FrmGeneralEx2200) {
         ++result;
     };
     conn_foreach::frm::General<2> foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_double);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_doub);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(result, results.cend());
@@ -219,13 +219,13 @@ TEST(ConnForeach, FrmHeisenbergEx2200) {
     auto result = results.cbegin();
     conn::FrmOnv conn(mbf);
     auto fn = [&]() {
-        ASSERT_EQ(conn.exsig(), exsig::ex_double);
+        ASSERT_EQ(conn.exsig(), opsig::c_doub);
         ASSERT_EQ(conn.m_cre, result->m_cre);
         ASSERT_EQ(conn.m_ann, result->m_ann);
         ++result;
     };
     conn_foreach::frm::Heisenberg foreach(basis.m_lattice);
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_double);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_doub);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(result, results.cend());
@@ -272,7 +272,7 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
         ++iiter;
     };
     conn_foreach::frm::Ms2Conserve<1> foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_single);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_sing);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(iiter, nalpha_pair + nbeta_pair);
@@ -300,7 +300,7 @@ TEST(ConnForeach, FrmMs2ConserveEx1100AlphaTooSmall) {
         ++iiter;
     };
     conn_foreach::frm::Ms2Conserve<1> foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_single);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_sing);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(iiter, beta_setbits.size()*(nsite-beta_setbits.size()));
@@ -350,7 +350,7 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
         ++iiter;
     };
     conn_foreach::frm::Ms2Conserve<2> foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_double);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_doub);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(iiter, naaaa + nabab + nbbbb);
@@ -395,7 +395,7 @@ TEST(ConnForeach, FrmMs2ConserveEx2200AlphaTooSmall) {
     };
 
     conn_foreach::frm::Ms2Conserve<2> foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_double);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_doub);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(iiter, nabab+nbbbb);
@@ -443,7 +443,7 @@ TEST(ConnForeach, FrmMs2ConserveEx2200BothTooSmall) {
     };
 
     conn_foreach::frm::Ms2Conserve<2> foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_double);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_doub);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(iiter, nabab);
@@ -468,7 +468,7 @@ TEST(ConnForeach, BosEx0001) {
         ++iiter;
     };
     conn_foreach::bos::Ann foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_0001);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_0001);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(iiter, chk_modes.size());
@@ -495,7 +495,7 @@ TEST(ConnForeach, BosEx0010BosOnv) {
             ++iiter;
         };
         conn_foreach::bos::Cre foreach;
-        ASSERT_EQ(foreach.m_exsig, exsig::ex_0010);
+        ASSERT_EQ(foreach.m_exsig, opsig::c_0010);
         // first, the compile time polymorphic loop:
         foreach.loop_fn(conn, mbf, fn);
         ASSERT_EQ(iiter, chk_modes.size());
@@ -519,7 +519,7 @@ TEST(ConnForeach, BosEx0010BosOnv) {
             ++iiter;
         };
         conn_foreach::bos::Cre foreach;
-        ASSERT_EQ(foreach.m_exsig, exsig::ex_0010);
+        ASSERT_EQ(foreach.m_exsig, opsig::c_0010);
         // first, the compile time polymorphic loop:
         foreach.loop_fn(conn, mbf, fn);
         ASSERT_EQ(iiter, chk_modes.size());
@@ -546,7 +546,7 @@ TEST(ConnForeach, BosEx0010FrmBosOnv) {
         ++iiter;
     };
     conn_foreach::bos::Cre foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_0010);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_0010);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn.m_bos, mbf.m_bos, fn);
     ASSERT_EQ(iiter, chk_modes.size());
@@ -591,7 +591,7 @@ TEST(ConnForeach, FrmBosEx1110) {
             ++iiter;
         };
         frmbos::Product<frm::Ms2Conserve<1>, bos::Cre> foreach;
-        ASSERT_EQ(foreach.m_exsig, exsig::ex_1110);
+        ASSERT_EQ(foreach.m_exsig, opsig::c_1110);
         // first, the compile time polymorphic loop:
         foreach.loop_fn(conn, mbf, fn);
         ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());
@@ -634,7 +634,7 @@ TEST(ConnForeach, FrmBosEx1101) {
         ++iiter;
     };
     frmbos::Product<frm::Ms2Conserve<1>, bos::Ann> foreach;
-    ASSERT_EQ(foreach.m_exsig, exsig::ex_1101);
+    ASSERT_EQ(foreach.m_exsig, opsig::c_1101);
     // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());

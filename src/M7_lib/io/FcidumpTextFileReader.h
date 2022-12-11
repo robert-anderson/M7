@@ -48,9 +48,9 @@ public:
 
     void reset(uint_t iline=0ul);
 
-    uint_t ranksig(const uintv_t &inds) const override;
+    OpSig ranksig(const uintv_t &inds) const override;
 
-    uint_t exsig(const uintv_t &inds, uint_t ranksig) const override;
+    OpSig exsig(const uintv_t &inds, OpSig ranksig) const override;
 
     bool inds_in_range(const uintv_t &inds) const override;
 

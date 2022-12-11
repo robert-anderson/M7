@@ -12,9 +12,7 @@ struct SpecMomIndsField : CompositeField<MaeIndsField, MaeIndsField> {
     const uint_t m_exsig;
     MaeIndsField m_left, m_right;
 
-    SpecMomIndsField(Row *row, uint_t exsig, str_t name = "indices");
-
-    SpecMomIndsField(const SpecMomIndsField &other);
+    SpecMomIndsField(Row *row, OpSig exsig, str_t name = "indices");
 };
 
 #endif //M7_SPECMOMINDSFIELD_H

@@ -61,7 +61,7 @@ struct FermionPromoter {
      */
     uintv_t m_all_combs;
 
-    FermionPromoter(uint_t ncom, uint_t exsig, uint_t nop_insert);
+    FermionPromoter(uint_t ncom, OpSig exsig, uint_t nop_insert);
 
 private:
     /**

@@ -10,11 +10,11 @@
 namespace exgen {
     struct BosHubbardUniform : BosExcitGen {
         BosHubbardUniform(const BosHam& h, PRNG& prng) :
-                BosExcitGen(h, prng, {exsig::ex_0011}, "uniform Bose-Hubbard hopping") {}
+                BosExcitGen(h, prng, {opsig::c_0011}, "uniform Bose-Hubbard hopping") {}
 
-        bool draw_bos(uint_t exsig, const field::BosOnv& src, prob_t& prob, conn::BosOnv& conn) override {
+        bool draw_bos(OpSig exsig, const field::BosOnv& src, prob_t& prob, conn::BosOnv& conn) override {
             DEBUG_ONLY(exsig);
-            DEBUG_ASSERT_EQ(exsig, exsig::ex_0011, "this excitation generator is only suitable for exsig 0011");
+            DEBUG_ASSERT_EQ(exsig, opsig::c_0011, "this excitation generator is only suitable for exsig 0011");
             const auto &occs = src.m_decoded.m_occ_modes.get();
             const auto nconn_lcm = m_h.m_basis.m_lattice->m_lcm_le_nadj_max;
             prob = 1/double(occs.size());
@@ -41,7 +41,7 @@ namespace exgen {
             return 1/double(occs.size()*m_h.m_basis.m_lattice->m_sparse_adj.nentry(conn.m_ann[0].m_imode));
         }
 
-        uint_t approx_nconn(uint_t /*exsig*/, sys::Particles particles) const override {
+        uint_t approx_nconn(OpSig /*exsig*/, sys::Particles particles) const override {
             return particles.m_bos;
         }
     };

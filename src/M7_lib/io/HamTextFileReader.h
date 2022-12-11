@@ -5,6 +5,8 @@
 #ifndef M7_HAMTEXTFILEREADER_H
 #define M7_HAMTEXTFILEREADER_H
 
+#include <M7_lib/connection/OpSig.h>
+
 #include "CsvFileReader.h"
 #include "FortranNamelistReader.h"
 
@@ -27,11 +29,11 @@ public:
 
     static uint_t nset_ind(const uintv_t &inds);
 
-    virtual uint_t ranksig(const uintv_t &inds) const = 0;
+    virtual OpSig ranksig(const uintv_t &inds) const = 0;
 
-    virtual uint_t exsig(const uintv_t &inds, uint_t ranksig) const = 0;
+    virtual OpSig exsig(const uintv_t &inds, OpSig ranksig) const = 0;
 
-    uint_t exsig(const uintv_t &inds) const;
+    OpSig exsig(const uintv_t &inds) const;
 
     virtual bool inds_in_range(const uintv_t& inds) const = 0;
 

@@ -18,12 +18,11 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, uint_t occ_cutoff) :
         if (!ham::is_significant(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
-        DEBUG_ASSERT_TRUE(exsig::contribs_to(exsig, ranksig),
-                          "excitation does not contribute to this operator rank");
-        if (ranksig == exsig::ex_0011) {
+        DEBUG_ASSERT_TRUE(exsig.contribs_to(ranksig), "excitation does not contribute to this operator rank");
+        if (ranksig == opsig::c_0011) {
             m_contribs_0011.set_nonzero(exsig);
             m_coeffs_1.set(inds[0], inds[1], value);
-        } else if (ranksig == exsig::ex_0022) {
+        } else if (ranksig == opsig::c_0022) {
             m_contribs_0022.set_nonzero(exsig);
             m_coeffs_2.set(inds[0], inds[1], inds[2], inds[3], value);
         }
@@ -61,7 +60,7 @@ ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
 }
 
 ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_0011, "passed connection has incorrect exsig");
+    DEBUG_ASSERT_EQ(conn.exsig(), opsig::c_0011, "passed connection has incorrect exsig");
     // get mode indices
     const auto a = conn.m_cre[0].m_imode;
     const auto i = conn.m_ann[0].m_imode;
@@ -70,7 +69,7 @@ ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosO
 }
 
 ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_0022, "passed connection has incorrect exsig");
+    DEBUG_ASSERT_EQ(conn.exsig(), opsig::c_0022, "passed connection has incorrect exsig");
     // get mode indices
     auto i = conn.m_cre[0].m_imode;
     auto j = conn.m_cre[0].m_nop == 2 ? i : conn.m_cre[1].m_imode;

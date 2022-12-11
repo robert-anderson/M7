@@ -10,7 +10,7 @@
 
 
 TEST(SpinSquareFrmHam, Elements) {
-    SpinSquareFrmHam ham({8}, {6, 0});
+    SpinSquareFrmHam ham(sys::frm::Sector({8}, {6, 0}));
     {
         buffered::FrmOnv onv(ham.m_basis);
         onv = {{0, 1, 2, 3}, {0, 1, 2, 4}};

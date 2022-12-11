@@ -33,9 +33,10 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian& ham, const conf::Propagator& opt
             m_probs.push_back(1.0);
         }
     }
-    m_exsig_icases.resize(exsig::c_ndistinct, uintv_t());
+    m_exsig_icases.resize(opsig::c_ndistinct, uintv_t());
     // fill the map from exsigs to exgens
-    for (uint_t icase=0ul; icase<m_excit_cases.size(); ++icase) m_exsig_icases[m_excit_cases[icase].m_exsig].push_back(icase);
+    for (uint_t icase=0ul; icase<m_excit_cases.size(); ++icase)
+        m_exsig_icases[m_excit_cases[icase].m_exsig.to_int()].push_back(icase);
     set_probs(m_probs);
     log();
 }
@@ -80,7 +81,7 @@ const v_t<prob_t>& ExcitGenGroup::get_probs() const {
 void ExcitGenGroup::log() const {
     v_t<strv_t> rows = {{"Excitation Signature", "Description", "Probability"}};
     for (uint_t icase=0ul; icase<ncase(); ++icase){
-        auto exsig_str = exsig::to_string(m_excit_cases[icase].m_exsig);
+        auto exsig_str = m_excit_cases[icase].m_exsig.to_string();
         auto prob_str = convert::to_string(get_prob(icase));
         rows.push_back({exsig_str, m_excit_cases[icase].m_excit_gen->m_description, prob_str});
     }

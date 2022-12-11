@@ -14,22 +14,22 @@ struct BosExcitGen : ExcitGen {
 
     const BosHam& m_h;
 
-    BosExcitGen(const BosHam& h, PRNG& prng, uintv_t exsigs, str_t description);
+    BosExcitGen(const BosHam& h, PRNG& prng, v_t<OpSig> exsigs, str_t description);
 
-    bool draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
+    bool draw_frmbos(OpSig exsig, const field::FrmBosOnv& src,
                      prob_t& prob, conn::FrmBosOnv& conn) override;
 
-    bool draw_h_frm(uint_t /*exsig*/, const field::FrmOnv& /*src*/, prob_t& prob,
+    bool draw_h_frm(OpSig /*exsig*/, const field::FrmOnv& /*src*/, prob_t& prob,
                     ham_t& helem, conn::FrmOnv& /*conn*/) override {
         prob = 0.0;
         helem = 0.0;
         return false;
     }
 
-    bool draw_h_frmbos(uint_t exsig, const field::FrmBosOnv& src, prob_t& prob,
+    bool draw_h_frmbos(OpSig exsig, const field::FrmBosOnv& src, prob_t& prob,
                        ham_t& helem, conn::FrmBosOnv& conn) override;
 
-    bool draw_h_bos(uint_t exsig, const field::BosOnv& src, prob_t& prob,
+    bool draw_h_bos(OpSig exsig, const field::BosOnv& src, prob_t& prob,
                     ham_t& helem, conn::BosOnv& conn) override;
 
 };

@@ -19,13 +19,13 @@ namespace exgen {
 
         Pchb1101hc(const FrmBosHam &h, PRNG &prng);
 
-        bool draw_frmbos(uint_t exsig, const field::FrmBosOnv &src, prob_t &prob, conn::FrmBosOnv &conn) override;
+        bool draw_frmbos(OpSig exsig, const field::FrmBosOnv &src, prob_t &prob, conn::FrmBosOnv &conn) override;
 
         prob_t prob_h_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn, ham_t helem) const override;
 
         prob_t prob_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn) const override;
 
-        uint_t approx_nconn(uint_t /*exsig*/, sys::Particles /*particles*/) const override;
+        uint_t approx_nconn(OpSig /*exsig*/, sys::Particles /*particles*/) const override;
     };
 }
 

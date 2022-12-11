@@ -5,32 +5,32 @@
 #include "IntegralReader.h"
 
 void IntegralReader::IterData::update_ranksig_exsig() {
-    if (dtype::all_null(m_inds[0], m_inds[1], m_inds[2], m_inds[3])) m_ranksig = 0ul;
+    if (dtype::all_null(m_inds[0], m_inds[1], m_inds[2], m_inds[3])) m_ranksig = opsig::c_zero;
     else if (!dtype::is_null(m_inds[0]) && dtype::is_null(m_inds[1])) {
         // this is an orbital energy, not a Hamiltonian coefficient, so discard
-        m_ranksig = ~0ul;
-        m_exsig = ~0ul;
+        m_ranksig = opsig::c_invalid;
+        m_exsig = opsig::c_invalid;
         return;
     }
     else {
         REQUIRE_FALSE(dtype::is_null(m_inds[0]),
                       "if not core energy entry, at least the first index must be validly defined");
-        m_ranksig = dtype::all_null(m_inds[2], m_inds[3]) ? exsig::ex_single : exsig::ex_double;
+        m_ranksig = dtype::all_null(m_inds[2], m_inds[3]) ? opsig::c_sing : opsig::c_doub;
     }
-    switch (m_ranksig) {
-        case 0ul:
-            m_exsig = 0ul;
+    switch (m_ranksig.to_int()) {
+        case opsig::c_zero.to_int():
+            m_exsig = opsig::c_zero;
             break;
-        case exsig::ex_single:
-            m_exsig = m_inds[0] == m_inds[1] ? 0ul : exsig::ex_single;
+        case opsig::c_sing.to_int():
+            m_exsig = m_inds[0] == m_inds[1] ? opsig::c_zero : opsig::c_sing;
             break;
-        case exsig::ex_double:
+        case opsig::c_doub.to_int():
             m_exsig = m_inds[0] == m_inds[2] ?
-                      (m_inds[1] == m_inds[3] ? 0ul : exsig::ex_single) :
-                      (m_inds[1] == m_inds[3] ? exsig::ex_single : exsig::ex_double);
+                      (m_inds[1] == m_inds[3] ? opsig::c_zero : opsig::c_sing) :
+                      (m_inds[1] == m_inds[3] ? opsig::c_sing : opsig::c_doub);
             break;
         default:
-            m_exsig = dtype::null(m_exsig);
+            m_exsig = opsig::c_invalid;
     }
 }
 
@@ -40,8 +40,8 @@ bool CsvIntegralReader::next(IntegralReader::IterData& data) {
     auto out = m_reader.next(data.m_inds, data.m_value);
     if (!out) return false;
     data.update_ranksig_exsig();
-    if (data.m_ranksig==exsig::ex_double && m_iline_first_2e==~0ul) m_iline_first_2e = m_iline;
-    else if (data.m_ranksig==exsig::ex_single && m_iline_first_1e==~0ul) m_iline_first_1e = m_iline;
+    if ((data.m_ranksig==opsig::c_doub) && m_iline_first_2e==~0ul) m_iline_first_2e = m_iline;
+    else if ((data.m_ranksig==opsig::c_sing) && m_iline_first_1e==~0ul) m_iline_first_1e = m_iline;
     ++m_iline;
     return out;
 }

@@ -27,9 +27,9 @@ namespace exgen {
 
     public:
 
-        bool draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) override;
+        bool draw_frm(OpSig exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) override;
 
-        uint_t approx_nconn(uint_t exsig, sys::Particles particles) const override;
+        uint_t approx_nconn(OpSig exsig, sys::Particles particles) const override;
 
     };
     /**

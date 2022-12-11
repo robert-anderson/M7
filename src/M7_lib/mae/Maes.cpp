@@ -69,7 +69,7 @@ void Maes::make_average_contribs(Walker &row, const shared_rows::Walker* hf, uin
 
             if (hf) {
                 auto exsig_from_hf = mbf::exsig(hf->mbf(), row.m_mbf);
-                if (exsig_from_hf && m_bilinears.m_rdms.takes_contribs_from(exsig_from_hf)) {
+                if ((exsig_from_hf != opsig::c_zero) && m_bilinears.m_rdms.takes_contribs_from(exsig_from_hf)) {
                     const auto av_weight_hf = hf->norm_average_weight(icycle, ipart);
                     const auto av_weight_hf_rep = hf->norm_average_weight(icycle, ipart_replica);
                     m_bilinears.m_rdms.make_contribs(hf->mbf(), row.m_mbf,

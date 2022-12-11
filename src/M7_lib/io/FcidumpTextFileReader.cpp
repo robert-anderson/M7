@@ -3,7 +3,6 @@
 //
 
 #include "FcidumpTextFileReader.h"
-#include "M7_lib/util/Exsig.h"
 #include "M7_lib/basis/BasisData.h"
 
 FcidumpTextFileReader::FcidumpTextFileReader(const FcidumpInfo& info) :
@@ -93,22 +92,22 @@ void FcidumpTextFileReader::reset(uint_t iline) {
     m_nnull_lines = 0ul;
 }
 
-uint_t FcidumpTextFileReader::ranksig(const uintv_t &inds) const {
+OpSig FcidumpTextFileReader::ranksig(const uintv_t &inds) const {
     auto nset_inds = HamTextFileReader::nset_ind(inds);
-    return exsig::encode(nset_inds/2, nset_inds/2, 0, 0);
+    return opsig::frm(nset_inds/2);
 }
 
-uint_t FcidumpTextFileReader::exsig(const uintv_t &inds, uint_t ranksig) const {
-    switch (ranksig) {
-        case 0ul: return 0ul;
-        case exsig::ex_single:
-            return inds[0]==inds[1] ? 0ul : exsig::ex_single;
-            case exsig::ex_double:
+OpSig FcidumpTextFileReader::exsig(const uintv_t &inds, OpSig ranksig) const {
+    switch (ranksig.to_int()) {
+        case opsig::c_0000.to_int(): return opsig::c_0000;
+        case opsig::c_sing.to_int():
+            return (inds[0]==inds[1]) ? opsig::c_0000 : opsig::c_sing;
+            case opsig::c_doub.to_int():
             return inds[0]==inds[2] ?
-                (inds[1]==inds[3] ? 0ul : exsig::ex_single):
-                (inds[1]==inds[3] ? exsig::ex_single : exsig::ex_double);
+                (inds[1]==inds[3] ? opsig::c_0000 : opsig::c_sing):
+                (inds[1]==inds[3] ? opsig::c_sing : opsig::c_doub);
         default:
-            return ~0ul;
+            return opsig::c_invalid;
     }
 }
 

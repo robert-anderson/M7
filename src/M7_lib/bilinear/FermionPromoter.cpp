@@ -3,15 +3,14 @@
 //
 
 #include <M7_lib/foreach/BasicForeach.h>
-#include <M7_lib/util/Exsig.h>
 #include "FermionPromoter.h"
 
 
-FermionPromoter::FermionPromoter(uint_t ncom, uint_t exsig, uint_t nop_insert) :
-    m_ncom(ncom), m_nexcit(exsig::decode_nfrm_cre(exsig)), m_nop_insert(nop_insert),
+FermionPromoter::FermionPromoter(uint_t ncom, OpSig exsig, uint_t nop_insert) :
+    m_ncom(ncom), m_nexcit(exsig.nfrm_cre()), m_nop_insert(nop_insert),
     m_ncomb(integer::combinatorial(m_ncom, m_nop_insert)),
     m_all_combs(m_nop_insert * m_ncomb){
-    REQUIRE_TRUE(exsig::conserves_nfrm(exsig), "Fermion promotion requires fermion number conservation");
+    REQUIRE_TRUE(exsig.conserves_nfrm(), "Fermion promotion requires fermion number conservation");
     if (!nop_insert) return;
 
     basic_foreach::rtnd::Ordered<> foreach_comb(m_ncom, m_nop_insert);
@@ -56,7 +55,7 @@ uint_t FermionPromoter::apply(uint_t icomb, const FrmOps &conn_ops, const FrmOps
 
 bool FermionPromoter::apply(uint_t icomb, const conn::FrmOnv &conn, const FrmOps &com, MaeIndsPair &frm_inds) const {
     DEBUG_ASSERT_LT(icomb, m_ncomb, "combination index OOB");
-    DEBUG_ASSERT_EQ(conn.exsig(), exsig::encode(m_nexcit, m_nexcit, 0, 0),
+    DEBUG_ASSERT_EQ(conn.exsig(), OpSig({m_nexcit, m_nexcit}, {0, 0}),
                     "exsig incompatible with fermion promoter");
     DEBUG_ASSERT_EQ(com.size(), m_ncom, "number of common operators incompatible with fermion promoter");
     const auto nexchange_ann = apply(icomb, conn.m_ann, com, frm_inds.m_ann);

@@ -23,13 +23,13 @@ class Rdms : public Archivable {
      * contributions from that exsig, either because the RDM's ranksig matches the exsig, or the exsig is promotable to
      * it
      */
-    typedef std::array<std::forward_list<Rdm*>, exsig::c_ndistinct> exsig_to_rdms_t;
+    typedef std::array<std::forward_list<Rdm*>, opsig::c_ndistinct> exsig_to_rdms_t;
     exsig_to_rdms_t m_exsig_to_rdms;
 
     /**
      * each array element is indexed by a ranksig, and points to the pure RDM of that rank
      */
-    typedef std::array<Rdm*, exsig::c_ndistinct> pure_rdms_t;
+    typedef std::array<Rdm*, opsig::c_ndistinct> pure_rdms_t;
     pure_rdms_t m_pure_rdms;
 
     suite::Conns m_work_conns;
@@ -41,11 +41,11 @@ public:
     const Epoch& m_accum_epoch;
     Reduction<wf_t> m_total_norm;
 
-    Rdms(const conf::Rdms& opts, uintv_t ranksigs, sys::Sector sector, const Epoch& accum_epoch);
+    Rdms(const conf::Rdms& opts, v_t<OpSig> ranksigs, sys::Sector sector, const Epoch& accum_epoch);
 
     operator bool() const;
 
-    bool takes_contribs_from(uint_t exsig) const;
+    bool takes_contribs_from(OpSig exsig) const;
 
     void make_contribs(const field::Mbf& src_onv, const conn::Mbf& conn,
                        const com_ops::Mbf& com, const wf_t& contrib);
@@ -83,10 +83,10 @@ public:
      *  boson ladder-operator (pure and coupled) hamiltonian
      * @return
      */
-    ham_comp_t get_energy(const FrmBosHam& ham, uint_t exsig) const;
+    ham_comp_t get_energy(const FrmBosHam& ham, OpSig exsig) const;
 
     ham_comp_t get_energy(const FrmBosHam& ham) const {
-        return get_energy(ham, exsig::ex_1101) + get_energy(ham, exsig::ex_1110);
+        return get_energy(ham, opsig::c_1101) + get_energy(ham, opsig::c_1110);
     }
 
     /**

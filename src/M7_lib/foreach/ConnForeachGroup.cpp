@@ -18,6 +18,6 @@ ConnForeachGroup::ConnForeachGroup(const Hamiltonian &ham) {
 
 void ConnForeachGroup::log() const {
     strv_t exsigs;
-    for (auto& it : m_list) exsigs.emplace_back(exsig::to_string(it->m_exsig));
+    for (auto& it : m_list) exsigs.emplace_back(it->m_exsig.to_string());
     logging::info("Connection iterator excitation signatures: {}", convert::to_string(exsigs));
 }

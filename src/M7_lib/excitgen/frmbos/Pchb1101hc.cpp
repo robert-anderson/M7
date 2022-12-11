@@ -6,7 +6,7 @@
 #include "M7_lib/util/Math.h"
 
 exgen::Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
-        FrmBosExcitGen(h, prng, {exsig::ex_1101, exsig::ex_1110}, "precomputed heatbath"),
+        FrmBosExcitGen(h, prng, {opsig::c_1101, opsig::c_1110}, "precomputed heatbath"),
         m_pick_n_given_pq(math::pow<2>(h.m_basis.m_frm.m_nspinorb), h.m_basis.m_bos.m_nmode) {
     const auto nmode = m_h.m_basis.m_bos.m_nmode;
     const auto nspinorb = m_h.m_basis.m_frm.m_nspinorb;
@@ -32,7 +32,7 @@ exgen::Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
     mpi::barrier();
 }
 
-bool exgen::Pchb1101hc::draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
+bool exgen::Pchb1101hc::draw_frmbos(OpSig exsig, const field::FrmBosOnv& src,
                              prob_t& prob, conn::FrmBosOnv& conn) {
     /*
      * draw random occupied and vacant fermion indices
@@ -43,7 +43,7 @@ bool exgen::Pchb1101hc::draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
     /*
      * the fermion-boson coupling V_npq is defined with precedence to the "bosonic excitation" case (exsig 1110)
      */
-    const bool cre = exsig::decode_nbos_cre(exsig);
+    const bool cre = exsig.nbos_cre();
     const auto p = cre ? conn.m_frm.m_cre[0]: conn.m_frm.m_ann[0];
     const auto q = cre ? conn.m_frm.m_ann[0]: conn.m_frm.m_cre[0];
     const auto pq = p*m_h.m_basis.m_frm.m_nspinorb+q;
@@ -64,7 +64,7 @@ bool exgen::Pchb1101hc::draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
 prob_t exgen::Pchb1101hc::prob_h_frmbos(const field::FrmBosOnv& src,
                                        const conn::FrmBosOnv& conn, ham_t helem) const {
     auto prob = exgen::UniformSingles::prob_spin_conserve_fn(src.m_frm, conn.m_frm);
-    const bool cre = exsig::decode_nbos_cre(conn.exsig());
+    const bool cre = conn.exsig().nbos_cre();
     const auto p = cre ? conn.m_frm.m_cre[0]: conn.m_frm.m_ann[0];
     const auto q = cre ? conn.m_frm.m_ann[0]: conn.m_frm.m_cre[0];
     const auto pq = p*m_h.m_basis.m_frm.m_nspinorb+q;
@@ -75,6 +75,6 @@ prob_t exgen::Pchb1101hc::prob_frmbos(const field::FrmBosOnv& src, const conn::F
     return prob_h_frmbos(src, conn, m_h.get_element(src, conn));
 }
 
-uint_t exgen::Pchb1101hc::approx_nconn(uint_t, sys::Particles) const {
+uint_t exgen::Pchb1101hc::approx_nconn(OpSig, sys::Particles) const {
     return m_h.m_basis.m_frm.m_nsite*m_h.m_basis.m_bos.m_nmode;
 }

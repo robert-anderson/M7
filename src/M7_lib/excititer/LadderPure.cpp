@@ -5,7 +5,7 @@
 #include "LadderPure.h"
 
 
-excititers::LadderPure::LadderPure(const Hamiltonian &ham, uint_t exsig) : Ladder(ham, exsig) {}
+excititers::LadderPure::LadderPure(const Hamiltonian &ham, OpSig) : Ladder(ham, exsig) {}
 
 void excititers::LadderPure::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {
     conn.clear();

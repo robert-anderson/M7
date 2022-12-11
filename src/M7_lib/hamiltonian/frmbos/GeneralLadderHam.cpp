@@ -23,10 +23,10 @@ GeneralLadderHam::GeneralLadderHam(sys::Basis basis, const EbdumpInfo& info):
         if (!ham::is_significant(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
-        if (ranksig == exsig::ex_1110 || ranksig == exsig::ex_1101) {
-            DEBUG_ASSERT_EQ(ranksig, exsig::ex_1110, "ranksig should be either 0010 or 1110");
+        if (ranksig == opsig::c_1110 || ranksig == opsig::c_1101) {
+            DEBUG_ASSERT_EQ(ranksig, opsig::c_1110, "ranksig should be either 0010 or 1110");
             m_contribs_1110.set_nonzero(exsig);
-            m_contribs_1101.set_nonzero(exsig::conj(exsig));
+            m_contribs_1101.set_nonzero(exsig.conj());
             m_v.set(inds[0], inds[1], inds[2], value);
         }
         // else, ignore any 0001 or 0010 coefficients here - they belong in the BosHam

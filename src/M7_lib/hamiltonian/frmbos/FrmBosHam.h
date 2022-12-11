@@ -55,11 +55,11 @@ struct FrmBosHam : HamOpTerm {
     }
 
     ham_t get_element(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {
-        switch (conn.exsig()) {
-            case exsig::ex_0001: return get_element_0001(onv, conn);
-            case exsig::ex_0010: return get_element_0010(onv, conn);
-            case exsig::ex_1101: return get_element_1101(onv, conn);
-            case exsig::ex_1110: return get_element_1110(onv, conn);
+        switch (conn.exsig().to_int()) {
+            case opsig::c_0001.to_int(): return get_element_0001(onv, conn);
+            case opsig::c_0010.to_int(): return get_element_0010(onv, conn);
+            case opsig::c_1101.to_int(): return get_element_1101(onv, conn);
+            case opsig::c_1110.to_int(): return get_element_1110(onv, conn);
         }
         return 0.0;
     }
@@ -89,9 +89,9 @@ struct FrmBosHam : HamOpTerm {
  */
 struct NullFrmBosHam : FrmBosHam, NullOpTerm {
     NullFrmBosHam() : FrmBosHam({0ul, 0ul}){
-        DEBUG_ASSERT_FALSE(m_contribs_1101.is_nonzero(exsig::ex_0001) || m_contribs_1101.is_nonzero(exsig::ex_1101),
+        DEBUG_ASSERT_FALSE(m_contribs_1101.is_nonzero(opsig::c_0001) || m_contribs_1101.is_nonzero(opsig::c_1101),
                            "No exsigs should contribute to null FrmBosHam");
-        DEBUG_ASSERT_FALSE(m_contribs_1110.is_nonzero(exsig::ex_0010) || m_contribs_1110.is_nonzero(exsig::ex_1110),
+        DEBUG_ASSERT_FALSE(m_contribs_1110.is_nonzero(opsig::c_0010) || m_contribs_1110.is_nonzero(opsig::c_1110),
                            "No exsigs should contribute to null FrmBosHam");
     }
 };

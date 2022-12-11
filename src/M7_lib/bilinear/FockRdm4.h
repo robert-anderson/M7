@@ -31,7 +31,7 @@ struct FockMatrix : dense::SquareMatrix<ham_t> {
 
 class FockRdm4 : public ContractedRdm {
 public:
-    FockRdm4(const conf::Rdms &opts, uint_t max_contrib_exsig, sys::Sector sector, uint_t nvalue);
+    FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector, uint_t nvalue);
 };
 
 class NonDiagFockRdm4 : public FockRdm4 {

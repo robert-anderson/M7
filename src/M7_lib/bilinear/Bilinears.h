@@ -51,36 +51,14 @@ private:
      * @return
      *  integer excitation signature
      */
-    static uint_t parse_exsig(const str_t &string) {
-        REQUIRE_TRUE_ALL(string.size() == 1 || string.size() == 4, "invalid exsig string specification");
-        if (string.size() == 1) {
-            uint_t rank = string::parse_decimal_digit(string.c_str());
-            REQUIRE_LE_ALL(rank, exsig::c_nop_mask_frm, "number of fermion operators exceeds limit");
-            return exsig::encode(rank, rank, 0, 0);
-        }
-        uint_t nfrm_cre = string::parse_decimal_digit(string.c_str());
-        REQUIRE_LE_ALL(nfrm_cre, exsig::c_nop_mask_frm, "number of fermion creation operators exceeds limit");
-        uint_t nfrm_ann = string::parse_decimal_digit(string.c_str()+1);
-        REQUIRE_LE_ALL(nfrm_ann, exsig::c_nop_mask_frm, "number of fermion annihilation operators exceeds limit");
-        uint_t nbos_cre = string::parse_decimal_digit(string.c_str()+2);
-        REQUIRE_LE_ALL(nbos_cre, exsig::c_nop_mask_bos, "number of boson creation operators exceeds limit");
-        uint_t nbos_ann = string::parse_decimal_digit(string.c_str()+3);
-        REQUIRE_LE_ALL(nbos_ann, exsig::c_nop_mask_bos, "number of boson annihilation operators exceeds limit");
-        return exsig::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
-    }
+    static OpSig parse_exsig(const str_t &string);
     /**
      * @param strings
      *  excitation signatures or fermion operator ranks defined in the configuration document
      * @return
      *  integer excitation signatures
      */
-    static uintv_t parse_exsigs(const strv_t &strings) {
-        uintv_t out;
-        for (auto &string: strings) out.push_back(parse_exsig(string));
-        DEBUG_ASSERT_EQ(out.size(), strings.size(),
-                        "output should have the same number of exsigs as specification");
-        return out;
-    }
+    static v_t<OpSig> parse_exsigs(const strv_t &strings);
 
 public:
 
@@ -107,7 +85,7 @@ public:
         return m_rdms;
     }
 
-    Bilinears(const conf::Mae &opts, uintv_t rdm_ranksigs, uintv_t /*specmom_exsigs*/,
+    Bilinears(const conf::Mae &opts, v_t<OpSig> rdm_ranksigs, v_t<OpSig> /*specmom_exsigs*/,
               sys::Sector sector, const Epoch &epoch) :
             m_rdms(opts.m_rdm, rdm_ranksigs, sector, epoch), m_spec_moms(opts.m_spec_mom), m_total_norm({1}) {}
 

@@ -5,7 +5,7 @@
 #include "LadderPureHolstein.h"
 
 
-excititers::LadderPureHolstein::LadderPureHolstein(const Hamiltonian &ham, uint_t exsig) : Ladder(ham, exsig){}
+excititers::LadderPureHolstein::LadderPureHolstein(const Hamiltonian &ham, OpSig) : Ladder(ham, exsig){}
 
 void excititers::LadderPureHolstein::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {
     const auto &occs = m_work_orbs.occ(src.m_frm).m_flat.inds();

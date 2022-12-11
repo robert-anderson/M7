@@ -16,7 +16,7 @@ namespace excit_gen_tester {
         field::Number<prob_t> m_weight;
         field::Number<ham_t> m_helem;
 
-        ResultRow(uint_t exsig) :
+        ResultRow(OpSig exsig) :
                 m_inds(this, exsig, "excitation indices"),
                 m_occur(this, "number of occurrences"),
                 m_weight(this, "sum of reciprocal probabilities"),
@@ -91,7 +91,7 @@ namespace excit_gen_tester {
         Status perform_draws(const mbf_t &src_mbf, uint_t ndraw) {
             typedef conn::from_field_t<mbf_t> conn_t;
             conn_t conn(src_mbf);
-            uint_t exsig = m_conn_iter.m_exsig;
+            OpSig exsig = m_conn_iter.m_exsig;
             buffered::MaeInds work_inds(m_conn_iter.m_exsig);
             uint_t nnull = 0ul;
 

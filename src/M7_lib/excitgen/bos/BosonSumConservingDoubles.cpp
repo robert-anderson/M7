@@ -6,7 +6,7 @@
 
 
 exgen::BosonSumConservingDoubles::BosonSumConservingDoubles(const BosHam &h, PRNG &prng) :
-        BosExcitGen(h, prng, {exsig::ex_0022}, "boson mode index sum conserving") {}
+        BosExcitGen(h, prng, {opsig::c_0022}, "boson mode index sum conserving") {}
 
 void exgen::BosonSumConservingDoubles::set_a_range(uint_t i, uint_t j, uint_t &min, uint_t &max, uint_t &nexclude) const {
     const auto nmode = m_h.m_basis.m_nmode;
@@ -24,7 +24,7 @@ uint_t exgen::BosonSumConservingDoubles::na(uint_t i, uint_t j) const {
     return (max - min) - nexclude;
 }
 
-bool exgen::BosonSumConservingDoubles::draw_bos(uint_t, const field::BosOnv &src, prob_t &prob, conn::BosOnv &conn) {
+bool exgen::BosonSumConservingDoubles::draw_bos(OpSig, const field::BosOnv &src, prob_t &prob, conn::BosOnv &conn) {
     const auto &op_inds = src.m_decoded.m_expanded.get();
     const auto nboson_pair = integer::nspair(op_inds.size());
     uint_t ij = m_prng.draw_uint(nboson_pair);

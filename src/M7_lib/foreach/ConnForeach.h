@@ -8,7 +8,7 @@
 #include "BasicForeach.h"
 #include "M7_lib/basis/Suites.h"
 #include "M7_lib/basis/Lattice.h"
-#include "M7_lib/util/Exsig.h"
+#include "M7_lib/connection/OpSig.h"
 
 /**
  * A collection of iterators over connections with different constraints. These are divided into those which loop over
@@ -28,9 +28,9 @@ namespace conn_foreach {
     using namespace basic_foreach;
 
     struct Base {
-        const uint_t m_exsig;
+        const OpSig m_exsig;
 
-        Base(uint_t exsig);
+        Base(OpSig exsig);
 
         virtual ~Base() {}
 
@@ -58,8 +58,8 @@ namespace conn_foreach {
 
     namespace frm {
         struct Base : conn_foreach::Base {
-            Base(uint_t exsig) : conn_foreach::Base(exsig) {
-                REQUIRE_TRUE(exsig::is_pure_frm(exsig), "excitation signature has boson operators");
+            Base(OpSig exsig) : conn_foreach::Base(exsig) {
+                REQUIRE_TRUE(exsig.is_pure_frm(), "excitation signature has boson operators");
             }
 
         protected:
@@ -68,7 +68,7 @@ namespace conn_foreach {
 
         template<uint_t nop>
         struct General : Base {
-            General() : Base(exsig::encode(nop, nop, 0, 0)) {}
+            General() : Base(opsig::frm(nop)) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn) {
@@ -97,7 +97,7 @@ namespace conn_foreach {
 
         template<uint_t nop>
         struct Ms2Conserve : Base {
-            Ms2Conserve(): Base(exsig::encode(nop, nop, 0, 0)) {}
+            Ms2Conserve(): Base(opsig::frm(nop)){}
 
         private:
 
@@ -167,7 +167,7 @@ namespace conn_foreach {
 
 
         struct Hubbard : Base {
-            Hubbard() : Base(exsig::ex_single) {}
+            Hubbard() : Base(opsig::c_sing){}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn) {
@@ -201,7 +201,7 @@ namespace conn_foreach {
 
         struct Heisenberg : Base {
             const std::shared_ptr<lattice::Lattice> m_lattice;
-            Heisenberg(std::shared_ptr<lattice::Lattice> lattice) : Base(exsig::ex_double), m_lattice(lattice) {}
+            Heisenberg(std::shared_ptr<lattice::Lattice> lattice) : Base(opsig::c_doub), m_lattice(lattice) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv& conn, const field::FrmOnv& src, const fn_t& fn) {
@@ -222,7 +222,7 @@ namespace conn_foreach {
                         if (!src.get({!ispin_occ, i})) continue;
                         conn.m_ann.set({0, isite_occ}, {1, i});
                         conn.m_cre.set({0, i}, {1, isite_occ});
-                        DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_double, "incorrect excitation level");
+                        DEBUG_ASSERT_EQ(conn.exsig(), opsig::c_doub, "incorrect excitation level");
                         fn();
                     }
                 }
@@ -238,8 +238,8 @@ namespace conn_foreach {
 
     namespace bos {
         struct Base : conn_foreach::Base {
-            Base(uint_t exsig): conn_foreach::Base(exsig){
-                REQUIRE_TRUE(exsig::is_pure_bos(exsig), "excitation signature has fermion operators");
+            Base(OpSig exsig): conn_foreach::Base(exsig){
+                REQUIRE_TRUE(exsig.is_pure_bos(), "excitation signature has fermion operators");
             }
 
         protected:
@@ -249,7 +249,7 @@ namespace conn_foreach {
         };
 
         struct Ann : Base {
-            Ann() : Base(exsig::ex_0001) {}
+            Ann() : Base(opsig::c_0001) {}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv& conn, const field::BosOnv& src, const fn_t& fn) {
@@ -269,7 +269,7 @@ namespace conn_foreach {
         };
 
         struct Cre : Base {
-            Cre(): Base(exsig::ex_0010) {}
+            Cre(): Base(opsig::c_0010) {}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv& conn, const field::BosOnv& src, const fn_t& fn) {
@@ -290,7 +290,7 @@ namespace conn_foreach {
 
 
         struct Hubbard : Base {
-            Hubbard() : Base(exsig::ex_0011) {}
+            Hubbard() : Base(opsig::c_0011) {}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv& conn, const field::BosOnv& src, const fn_t& fn) {
@@ -321,8 +321,8 @@ namespace conn_foreach {
 
     namespace frmbos {
         struct Base : conn_foreach::Base {
-            Base(uint_t exsig) : conn_foreach::Base(exsig) {
-                REQUIRE_TRUE(exsig::decode_nfrm(exsig) && exsig::decode_nbos(exsig),
+            Base(OpSig exsig) : conn_foreach::Base(exsig) {
+                REQUIRE_TRUE(exsig.nfrm() && exsig.nbos(),
                              "excitation signature is not that of a fermion-boson product");
             }
         };
@@ -337,14 +337,13 @@ namespace conn_foreach {
             frm_t m_frm_foreach;
             bos_t m_bos_foreach;
 
-            static uint_t combined_exsig() {
+            static OpSig combined_exsig() {
                 const frm::Base frm = frm_t();
-                auto nfrm_cre = exsig::decode_nfrm_cre(frm.m_exsig);
-                auto nfrm_ann = exsig::decode_nfrm_ann(frm.m_exsig);
                 const bos::Base bos = bos_t();
-                auto nbos_cre = exsig::decode_nbos_cre(bos.m_exsig);
-                auto nbos_ann = exsig::decode_nbos_ann(bos.m_exsig);
-                return exsig::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
+                return {
+                    {frm.m_exsig.nfrm_cre(), frm.m_exsig.nfrm_ann()},
+                    {bos.m_exsig.nbos_cre(), bos.m_exsig.nbos_ann()},
+                };
             }
 
         public:

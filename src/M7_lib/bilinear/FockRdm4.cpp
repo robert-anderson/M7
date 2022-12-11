@@ -5,12 +5,12 @@
 #include "FockRdm4.h"
 
 
-FockRdm4::FockRdm4(const conf::Rdms &opts, uint_t max_contrib_exsig, sys::Sector sector, uint_t nvalue) :
-        ContractedRdm(opts, exsig::ex_4400, exsig::ex_3300, max_contrib_exsig, sector, nvalue, "4400f"){}
+FockRdm4::FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector, uint_t nvalue) :
+        ContractedRdm(opts, opsig::c_4400, opsig::c_3300, max_contrib_exsig, sector, nvalue, "4400f"){}
 
 
 NonDiagFockRdm4::NonDiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue) :
-        FockRdm4(opts, exsig::ex_4400, sector, nvalue), m_fock(fock){
+        FockRdm4(opts, opsig::c_4400, sector, nvalue), m_fock(fock){
     REQUIRE_EQ(fock.nrow(), sector.m_frm.size(), "Incorrectly-sized Fock matrix given");
     if (m_fock.is_diagonal())
         logging::warn("Performing 4RDM contraction of a diagonal Fock matrix without exploiting diagonality");
@@ -24,7 +24,8 @@ void NonDiagFockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOn
     /*
      * number of "inserted" fermion creation/annihilation operator pairs
      */
-    const auto nins = m_rank - exlvl;
+    const auto rank = m_ranksig.nfrm_cre();
+    const auto nins = rank - exlvl;
     /*
      * this determines the precomputed promoter required
      */
@@ -79,7 +80,7 @@ void NonDiagFockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOn
 }
 
 DiagFockRdm4::DiagFockRdm4(const conf::Rdms& opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue) :
-        FockRdm4(opts, ex_3300, sector, nvalue), m_fock(fock.get_diagonal()){}
+        FockRdm4(opts, opsig::c_trip, sector, nvalue), m_fock(fock.get_diagonal()){}
 
 void DiagFockRdm4::frm_make_contribs(const FrmOnv& src_onv, const conn::FrmOnv& conn,
                                      const FrmOps& com, wf_t contrib) {
@@ -89,11 +90,12 @@ void DiagFockRdm4::frm_make_contribs(const FrmOnv& src_onv, const conn::FrmOnv& 
     /*
      * quadruples do not contribute
      */
-    if (exlvl==ex_quadruple) return;
+    if (exlvl == 4) return;
+    const auto rank = m_ranksig.nfrm_cre();
     /*
      * number of "inserted" fermion creation/annihilation operator pairs
      */
-    const auto nins = m_rank - exlvl;
+    const auto nins = rank - exlvl;
     /*
      * this determines the precomputed promoter required
      */

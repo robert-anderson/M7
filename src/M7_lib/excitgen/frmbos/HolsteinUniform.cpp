@@ -5,21 +5,21 @@
 #include "HolsteinUniform.h"
 #include "M7_lib/hamiltonian/frmbos/HolsteinLadderHam.h"
 
-exgen::HolsteinUniform::HolsteinUniform(const FrmBosHam& h, PRNG& prng, uint_t exsig) :
-        FrmBosExcitGen(h, prng, {exsig}, "uniform Holstein "+str_t(exsig==exsig::ex_0010 ? "creation" : "annhilation")){
+exgen::HolsteinUniform::HolsteinUniform(const FrmBosHam& h, PRNG& prng, OpSig exsig) :
+        FrmBosExcitGen(h, prng, {exsig}, "uniform Holstein "+str_t(exsig.nbos_cre() ? "creation" : "annhilation")){
     REQUIRE_TRUE(h.is<HolsteinLadderHam>(), "holstein excit gen requires holstein hamiltonian");
     REQUIRE_EQ(h.m_basis.m_frm.m_nsite, h.m_basis.m_bos.m_nmode,
                "holstein excit gen assumes one boson mode per fermion site");
 }
 
-uint_t exgen::HolsteinUniform::approx_nconn(uint_t /*exsig*/, sys::Particles particles) const {
+uint_t exgen::HolsteinUniform::approx_nconn(OpSig /*exsig*/, sys::Particles particles) const {
     return particles.m_frm;
 }
 
 bool exgen::HolsteinUniform0010::draw_frmbos(
-        uint_t exsig, const field::FrmBosOnv& src, prob_t& prob, conn::FrmBosOnv& conn) {
+        OpSig exsig, const field::FrmBosOnv& src, prob_t& prob, conn::FrmBosOnv& conn) {
     DEBUG_ONLY(exsig);
-    DEBUG_ASSERT_EQ(exsig, exsig::ex_0010, "invalid exsig specified");
+    DEBUG_ASSERT_EQ(exsig, opsig::c_0010, "invalid exsig specified");
     const auto& occ_cutoff = m_h.m_basis.m_bos.m_occ_cutoff;
     if (!m_h.m_basis.m_bos.m_occ_cutoff) return false;
     const auto &occs = src.m_frm.m_decoded.m_simple_occs.get();
@@ -47,9 +47,9 @@ prob_t exgen::HolsteinUniform0010::prob_frmbos(const field::FrmBosOnv& src, cons
 }
 
 bool exgen::HolsteinUniform0001::draw_frmbos(
-        uint_t exsig, const field::FrmBosOnv& src, prob_t& prob, conn::FrmBosOnv& conn) {
+        OpSig exsig, const field::FrmBosOnv& src, prob_t& prob, conn::FrmBosOnv& conn) {
     DEBUG_ONLY(exsig)
-    DEBUG_ASSERT_EQ(exsig, exsig::ex_0001, "invalid exsig specified");
+    DEBUG_ASSERT_EQ(exsig, opsig::c_0001, "invalid exsig specified");
     if (!m_h.m_basis.m_bos.m_occ_cutoff) return false;
 
     const auto &occs = src.m_decoded.m_occ_sites_nonzero_bosons.get();

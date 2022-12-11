@@ -5,7 +5,7 @@
 #include "Pchb2200.h"
 
 exgen::Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
-        FrmExcitGen(h, prng, {exsig::ex_double}, "precomputed heat-bath fermion doubles"),
+        FrmExcitGen(h, prng, {opsig::c_doub}, "precomputed heat-bath fermion doubles"),
         m_nspinorb_pair(m_h.m_basis.m_nspinorb_pair),
         m_pick_ab_given_ij(m_nspinorb_pair, m_nspinorb_pair) {
     v_t<prob_t> weights(m_nspinorb_pair, 0.0);
@@ -36,10 +36,10 @@ exgen::Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
     mpi::barrier();
 }
 
-bool exgen::Pchb2200::draw_h_frm(uint_t exsig, const field::FrmOnv& src, prob_t& prob,
+bool exgen::Pchb2200::draw_h_frm(OpSig exsig, const field::FrmOnv& src, prob_t& prob,
                           ham_t& helem, conn::FrmOnv& conn) {
     DEBUG_ONLY(exsig);
-    DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
+    DEBUG_ASSERT_EQ(exsig, opsig::c_doub, "this excitation generator is only suitable for exsig 2200");
     uint_t i, j, a, b;
     const auto& occs = src.m_decoded.m_simple_occs.get();
     const auto npair_elec = integer::nspair(occs.size());
@@ -74,7 +74,7 @@ bool exgen::Pchb2200::draw_h_frm(uint_t exsig, const field::FrmOnv& src, prob_t&
     return !fptol::near_zero(prob);
 }
 
-bool exgen::Pchb2200::draw_frm(uint_t exsig, const field::FrmOnv& src, prob_t& prob, conn::FrmOnv& conn) {
+bool exgen::Pchb2200::draw_frm(OpSig exsig, const field::FrmOnv& src, prob_t& prob, conn::FrmOnv& conn) {
     /*
      * need the helement to compute the probability so if it isn't actually needed, just dispose of it
      * in contrast to the generic case where it is not assumed that the helement must be computed to get the prob,
@@ -95,6 +95,6 @@ prob_t exgen::Pchb2200::prob_frm(const field::FrmOnv& src, const conn::FrmOnv& c
     return prob_h_frm(src, conn, m_h.get_element_2200(src, conn));
 }
 
-uint_t exgen::Pchb2200::approx_nconn(uint_t, sys::Particles particles) const {
+uint_t exgen::Pchb2200::approx_nconn(OpSig, sys::Particles particles) const {
     return particles.m_frm.m_npair * m_nspinorb_pair;
 }

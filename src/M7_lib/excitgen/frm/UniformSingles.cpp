@@ -4,9 +4,9 @@
 
 #include "UniformSingles.h"
 
-bool exgen::UniformSingles::draw_frm(uint_t exsig, const field::FrmOnv& src, prob_t& prob, conn::FrmOnv& conn) {
+bool exgen::UniformSingles::draw_frm(OpSig exsig, const field::FrmOnv& src, prob_t& prob, conn::FrmOnv& conn) {
     DEBUG_ONLY(exsig);
-    DEBUG_ASSERT_EQ(exsig, exsig::ex_single, "this excitation generator is only suitable for exsig 1100");
+    DEBUG_ASSERT_EQ(exsig, opsig::c_sing, "this excitation generator is only suitable for exsig 1100");
     auto spin_conserving = m_h.m_kramers_attrs.m_conserving_singles;
     if (spin_conserving) return draw_spin_conserve_fn(m_prng, src, prob, conn);
     return draw_spin_nonconserve_fn(m_prng, src, prob, conn);
@@ -79,7 +79,7 @@ prob_t exgen::UniformSingles::prob_frm(const field::FrmOnv& src, const conn::Frm
     return prob_spin_nonconserve_fn(src, conn);
 }
 
-uint_t exgen::UniformSingles::approx_nconn(uint_t, sys::Particles particles) const {
+uint_t exgen::UniformSingles::approx_nconn(OpSig, sys::Particles particles) const {
     const auto& elecs = particles.m_frm;
     sys::frm::Sector sector(m_h.m_basis, particles.m_frm);
     if (elecs.m_ms2.conserve()){

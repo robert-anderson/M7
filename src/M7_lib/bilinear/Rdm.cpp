@@ -17,13 +17,12 @@ uint_t Rdm::nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uin
     return nrow;
 }
 
-uint_t Rdm::nrow_estimate(uint_t exsig, sys::Size basis_size) {
-    return nrow_estimate(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig),
-                         decode_nbos_cre(exsig), decode_nbos_ann(exsig), basis_size);
+uint_t Rdm::nrow_estimate(OpSig exsig, sys::Size basis_size) {
+    return nrow_estimate(exsig.nfrm_cre(), exsig.nfrm_ann(), exsig.nbos_cre(), exsig.nbos_ann(), basis_size);
 }
 
-str_t Rdm::name(str_t str, uint_t ranksig) const {
-    return str.empty() ? exsig::to_string(ranksig) : str;
+str_t Rdm::name(str_t str, OpSig ranksig) const {
+    return str.empty() ? ranksig.to_string() : str;
 }
 
 void Rdm::add_to_send_table(const MaeInds &inds, wf_t contrib) {
@@ -38,7 +37,7 @@ void Rdm::add_to_send_table(const MaeInds &inds, wf_t contrib) {
     m_send_row.m_values[0] += contrib;
 }
 
-Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Sector sector, uint_t nvalue,
+Rdm::Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue,
          DistribOptions dist_opts, Sizing store_sizing, Sizing comm_sizing, str_t name) :
         communicator::MappedSend<MaeRow, MaeRow>(
                 "rdm_" + (name.empty() ? this->name(name, ranksig) : name),
@@ -48,12 +47,12 @@ Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Sector sector, uint_t nvalue,
                 // send/recv table row
                 MaeRow(indsig, nvalue),
                 comm_sizing),
-        m_sector(sector), m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
-        m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
-        m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)),
-        m_indsig(indsig), m_rank_ind(decode_nfrm_cre(m_indsig)),
-        m_nfrm_cre_ind(decode_nfrm_cre(m_indsig)), m_nfrm_ann_ind(decode_nfrm_ann(m_indsig)),
-        m_nbos_cre_ind(decode_nbos_cre(m_indsig)), m_nbos_ann_ind(decode_nbos_ann(m_indsig)),
+        m_sector(sector), m_ranksig(ranksig),
+        m_nfrm_cre(ranksig.nfrm_cre()), m_nfrm_ann(ranksig.nfrm_ann()),
+        m_nbos_cre(ranksig.nbos_cre()), m_nbos_ann(ranksig.nbos_ann()),
+        m_indsig(indsig), //m_rank_ind(m_indsig.(m_indsig)),
+        m_nfrm_cre_ind(m_indsig.nfrm_cre()), m_nfrm_ann_ind(m_indsig.nfrm_ann()),
+        m_nbos_cre_ind(m_indsig.nbos_cre()), m_nbos_ann_ind(m_indsig.nbos_ann()),
         m_full_inds(ranksig), m_uncontracted_inds(m_indsig), m_name(name),
         m_send_row(m_send_recv.m_row), m_recv_row(m_send_recv.m_row), m_store_row(m_store.m_row) {
     /*
@@ -61,14 +60,16 @@ Rdm::Rdm(uint_t ranksig, uint_t indsig, sys::Sector sector, uint_t nvalue,
      * the promoter to use is given by the difference between either fermion element of the ranksig and that of the
      * contributing exsig
      */
-    m_frm_promoters.reserve(m_rank + 1);
-    for (uint_t nins = 0ul; nins <= m_rank; ++nins) {
-        const auto nexcit = m_rank - nins;
-        m_frm_promoters.emplace_back(sector.m_frm.m_elecs - nexcit, exsig::encode(nexcit, nexcit, 0, 0), nins);
+    const auto frm_rank = m_ranksig.nfrm_cre();
+    REQUIRE_TRUE(m_ranksig.conserves_nfrm(), "RDMs not implemented for non-conserved fermion number");
+    m_frm_promoters.reserve(frm_rank + 1);
+    for (uint_t nins = 0ul; nins <= frm_rank; ++nins) {
+        const auto nexcit = frm_rank - nins;
+        m_frm_promoters.emplace_back(sector.m_frm.m_elecs - nexcit, opsig::frm(nexcit), nins);
     }
 }
 
-Rdm::Rdm(const conf::Rdms& opts, uint_t ranksig, uint_t indsig, sys::Sector sector, uint_t nvalue, str_t name) :
+Rdm::Rdm(const conf::Rdms& opts, OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue, str_t name) :
         Rdm(ranksig, indsig, sector, nvalue, opts.m_distribution,
                 // store sizing
             Sizing{nrec_est(sector.size(), indsig), opts.m_buffers.m_store_exp_fac},
@@ -95,10 +96,11 @@ void PureRdm::frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv
     const auto exlvl = conn.m_cre.size();
     DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
                       "this method should not have been delegated given the exsig of the contribution");
+    const auto rank = m_ranksig.nfrm_cre();
     /*
      * number of "inserted" fermion creation/annihilation operator pairs
      */
-    const auto nins = m_rank - exlvl;
+    const auto nins = rank - exlvl;
     /*
      * this determines the precomputed promoter required
      */
@@ -120,14 +122,13 @@ void PureRdm::frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::
                                const com_ops::FrmBos& com, wf_t contrib) {
     auto exsig = conn.exsig();
     m_full_inds.zero();
-    if (is_pure_frm(exsig) && is_pure_frm(m_ranksig))
-        make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib);
+    if (exsig.is_pure_frm() && m_ranksig.is_pure_frm()) make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib);
     /*
      * fermion promotion (if any) is handled in the delegated method, but if this is a hopping-coupled or density-coupled
      * boson contribution, then the boson occupation factor must also be included (like we have to consider in the
      * matrix elements in FrmBosHamiltonian)
      */
-    if (decode_nbos(exsig)==1) {
+    if (exsig.nbos()==1) {
         // "ladder" contribution
         m_full_inds = conn.m_bos;
         auto occ_fac = src_onv.m_bos.occ_fac(conn.m_bos);
@@ -135,7 +136,7 @@ void PureRdm::frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::
     }
 
     m_full_inds.m_frm.zero();
-    if (m_nbos_cre == 1ul && m_nbos_ann == 1ul && is_pure_frm(exsig)) {
+    if (m_nbos_cre == 1ul && m_nbos_ann == 1ul && exsig.is_pure_frm()) {
         /*
          * this is the only currently supported situation in which boson promotion is required: a purely fermionic
          * (nbos_cre = 0, nbos_ann = 0) excitation or a diagonal (!exsig) contribution

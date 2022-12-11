@@ -37,8 +37,8 @@ struct BosHam : HamOpTerm {
 
     BosHam(const sys::bos::Basis& basis):
             m_basis(basis),
-            m_contribs_0010(exsig::ex_0010), m_contribs_0001(exsig::ex_0001),
-            m_contribs_0011(exsig::ex_0011), m_contribs_0022(exsig::ex_0022) {}
+            m_contribs_0010(opsig::c_0010), m_contribs_0001(opsig::c_0001),
+            m_contribs_0011(opsig::c_0011), m_contribs_0022(opsig::c_0022) {}
 
 	virtual ~BosHam(){}
 
@@ -58,10 +58,10 @@ struct BosHam : HamOpTerm {
     }
 
     ham_t get_element(const field::BosOnv& src, const conn::BosOnv& conn) const {
-        switch (conn.exsig()) {
+        switch (conn.exsig().to_int()) {
             case 0: return get_element_0000(src);
-            case exsig::ex_0011: return get_element_0011(src, conn);
-            case exsig::ex_0022: return get_element_0022(src, conn);
+            case opsig::c_0011.to_int(): return get_element_0011(src, conn);
+            case opsig::c_0022.to_int(): return get_element_0022(src, conn);
         }
         return 0;
     }

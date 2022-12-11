@@ -7,15 +7,13 @@
 
 #include "M7_lib/hamiltonian/Hamiltonian.h"
 
-using namespace exsig;
-
 /**
  * excitation generator objects can (if uncommonly) be used to generate excitations of many different signatures. e.g.
  * a fermion-boson excitation generator from which an excitation of exsigs 1101 or 1110 may be requested. This struct
  * packages the polymorphic excitation generator base class pointer with one of the exsigs it is able to produce
  */
 struct ExcitCase {
-    const uint_t m_exsig;
+    const OpSig m_exsig;
     ExcitGen* m_excit_gen;
 };
 
@@ -93,7 +91,7 @@ public:
     void update_prob(uint_t icase, const mbf_t &src, prob_t &prob, const conn::from_field_t<mbf_t> &conn) {
         const auto exsig = m_excit_cases[icase].m_exsig;
         DEBUG_ASSERT_EQ(exsig, conn.exsig(), "exsig of case does not match with that of connection");
-        const auto& jcases = m_exsig_icases[exsig];
+        const auto& jcases = m_exsig_icases[exsig.to_int()];
         DEBUG_ASSERT_FALSE(jcases.empty(), "there should be at least one case associated with this exsig");
         prob *= m_probs[icase];
         if (jcases.size()==1) return;

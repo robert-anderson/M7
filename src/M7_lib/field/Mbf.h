@@ -43,11 +43,11 @@ namespace mbf {
 
     void set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, uint_t idef);
 
-    uint_t exsig(const field::FrmOnv &src, const field::FrmOnv &dst);
+    OpSig exsig(const field::FrmOnv &src, const field::FrmOnv &dst);
 
-    uint_t exsig(const field::BosOnv &src, const field::BosOnv &dst);
+    OpSig exsig(const field::BosOnv &src, const field::BosOnv &dst);
 
-    uint_t exsig(const field::FrmBosOnv &src, const field::FrmBosOnv &dst);
+    OpSig exsig(const field::FrmBosOnv &src, const field::FrmBosOnv &dst);
 
 };
 

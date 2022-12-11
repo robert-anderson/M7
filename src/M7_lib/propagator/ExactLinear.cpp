@@ -22,7 +22,7 @@ void ExactLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uin
     DEBUG_ASSERT_NE(weight, 0.0, "shouldn't be trying to propagate off-diagonal from zero weight");
     conn::Mbf conn(src_mbf);
     auto body = [&]() {
-        DEBUG_ASSERT_NE(conn.exsig(), 0ul, "diagonal connection generated");
+        DEBUG_ASSERT_NE(conn.exsig(), opsig::c_zero, "diagonal connection generated");
         auto helement = m_ham.get_element(src_mbf, conn);
         if (m_only_nonzero_h_spawns && ! ham::is_significant(helement)) return;
         auto& dst_mbf = m_dst[src_mbf];

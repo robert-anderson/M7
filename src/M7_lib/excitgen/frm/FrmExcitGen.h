@@ -12,18 +12,18 @@ struct FrmExcitGen : ExcitGen {
 
     const FrmHam& m_h;
 
-    FrmExcitGen(const FrmHam& h, PRNG& prng, uintv_t exsigs, str_t description);
+    FrmExcitGen(const FrmHam& h, PRNG& prng, v_t<OpSig> exsigs, str_t description);
 
-    bool draw_frmbos(uint_t exsig, const field::FrmBosOnv& src,
+    bool draw_frmbos(OpSig exsig, const field::FrmBosOnv& src,
                      prob_t& prob, conn::FrmBosOnv& conn) override;
 
-    bool draw_h_frm(uint_t exsig, const field::FrmOnv& src, prob_t& prob,
+    bool draw_h_frm(OpSig exsig, const field::FrmOnv& src, prob_t& prob,
                     ham_t& helem, conn::FrmOnv& conn) override;
 
-    bool draw_h_frmbos(uint_t exsig, const field::FrmBosOnv& src, prob_t& prob,
+    bool draw_h_frmbos(OpSig exsig, const field::FrmBosOnv& src, prob_t& prob,
                        ham_t& helem, conn::FrmBosOnv& conn) override;
 
-    bool draw_h_bos(uint_t /*exsig*/, const field::BosOnv& /*src*/, prob_t& prob,
+    bool draw_h_bos(OpSig /*exsig*/, const field::BosOnv& /*src*/, prob_t& prob,
                     ham_t& helem, conn::BosOnv& /*conn*/) override {
         prob = 0.0;
         helem = 0.0;
@@ -71,7 +71,7 @@ protected:
 
 
 public:
-    FrmLatticeExcitGen(const FrmHam& h, PRNG& prng, uintv_t exsigs, str_t description):
+    FrmLatticeExcitGen(const FrmHam& h, PRNG& prng, v_t<OpSig> exsigs, str_t description):
         FrmExcitGen(h, prng, exsigs, description){
         REQUIRE_TRUE(m_h.m_basis.m_lattice.get(), "Lattice excitation generator requires lattice definition in basis");
         const auto nadj_max = m_h.m_basis.m_lattice->m_nadj_max;

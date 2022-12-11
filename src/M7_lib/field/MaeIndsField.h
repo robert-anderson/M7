@@ -97,7 +97,7 @@ struct MaeIndsPair {
 struct MaeIndsField : NdNumberField<mev_ind_t, 1> {
     typedef NdNumberField<mev_ind_t, 1> base_t;
     using base_t::operator=;
-    const uint_t m_exsig;
+    const OpSig m_exsig;
     const uinta_t<4> m_nops;
     const uinta_t<4> m_nop_offsets;
     MaeIndsPair m_frm;
@@ -109,7 +109,7 @@ private:
     uinta_t<4> make_nop_offsets() const;
 
 public:
-    MaeIndsField(Row *row, uint_t exsig, str_t name = "indices");
+    MaeIndsField(Row *row, OpSig exsig, str_t name = "indices");
 
     MaeIndsField(const MaeIndsField& other);
 

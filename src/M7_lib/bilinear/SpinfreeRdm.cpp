@@ -64,7 +64,8 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
         /*
          * higher-body RDMs are more complicated to spin-trace: make use of precomputed arrays
          */
-        DEBUG_ASSERT_TRUE(m_rank_ind==2 || m_rank_ind==3, "unsupported RDM rank");
+        const auto rank_ind = m_indsig.nfrm_cre();
+        DEBUG_ASSERT_TRUE(rank_ind==2 || rank_ind==3, "unsupported RDM rank");
         /*
          * first, convert to spatial indices
          */
@@ -78,23 +79,23 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
          * also required is the pair spin signature, this is available from the original indices
          */
         const auto pair_spinsig = SpinFreeRdm::pair_spinsig(row.m_inds.m_frm, m_sector.m_frm.m_basis);
-        DEBUG_ASSERT_LT(pair_spinsig, m_rank_ind==2 ? c_npair_spinsig_2 : c_npair_spinsig_3, "pair spinsig OOB");
+        DEBUG_ASSERT_LT(pair_spinsig, rank_ind==2 ? c_npair_spinsig_2 : c_npair_spinsig_3, "pair spinsig OOB");
         /*
          * from the information extracted so far, we can obtain the spin-tracing case index
          */
-        const auto icase = m_rank_ind==2 ?
+        const auto icase = rank_ind==2 ?
                            c_case_map_2[pair_spinsig][spatsig_ann][spatsig_cre]:
                            c_case_map_3[pair_spinsig][spatsig_ann][spatsig_cre];
-        DEBUG_ASSERT_LT(icase, m_rank_ind==2 ? c_ncase_2 : c_ncase_3,
+        DEBUG_ASSERT_LT(icase, rank_ind==2 ? c_ncase_2 : c_ncase_3,
                    "invalid case, should not have arisen. perhaps spin non-conserving?");
         /*
          * each case has an associated slice of permutations it must handle, this slice is specified by the
          * permutation offset array
          */
-        const auto iperm_end = m_rank_ind==2 ? c_perm_end_offsets_2[icase]: c_perm_end_offsets_3[icase];
-        DEBUG_ASSERT_LE(iperm_end, m_rank_ind==2 ? c_nperm_2 : c_nperm_3, "permutation OOB");
-        const auto iperm_begin = icase ? (m_rank_ind==2 ? c_perm_end_offsets_2[icase-1]: c_perm_end_offsets_3[icase-1]) : 0ul;
-        DEBUG_ASSERT_LE(iperm_begin, m_rank_ind==2 ? c_nperm_2 : c_nperm_3, "permutation OOB");
+        const auto iperm_end = rank_ind==2 ? c_perm_end_offsets_2[icase]: c_perm_end_offsets_3[icase];
+        DEBUG_ASSERT_LE(iperm_end, rank_ind==2 ? c_nperm_2 : c_nperm_3, "permutation OOB");
+        const auto iperm_begin = icase ? (rank_ind==2 ? c_perm_end_offsets_2[icase-1]: c_perm_end_offsets_3[icase-1]) : 0ul;
+        DEBUG_ASSERT_LE(iperm_begin, rank_ind==2 ? c_nperm_2 : c_nperm_3, "permutation OOB");
         /*
          * then all that must be done is to loop over all required permutations of the spatial indices
          */
@@ -102,16 +103,16 @@ void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
             /*
              * get the factor by which the contribution must be multiplied
              */
-            const double factor = m_rank_ind==2 ? c_factors_2[iperm] : c_factors_3[iperm];
+            const double factor = rank_ind==2 ? c_factors_2[iperm] : c_factors_3[iperm];
             /*
              * get pointers to the current arrays of permutations
              */
-            const uint_t* cre_perm = m_rank_ind==2 ? c_cre_perms_2[iperm] : c_cre_perms_3[iperm];
-            const uint_t* ann_perm = m_rank_ind==2 ? c_ann_perms_2[iperm] : c_ann_perms_3[iperm];
+            const uint_t* cre_perm = rank_ind==2 ? c_cre_perms_2[iperm] : c_cre_perms_3[iperm];
+            const uint_t* ann_perm = rank_ind==2 ? c_ann_perms_2[iperm] : c_ann_perms_3[iperm];
             /*
              * execute the permutation of given_inds, storing the result in the insertion object
              */
-            for (uint_t i=0ul; i<m_rank_ind; ++i) {
+            for (uint_t i=0ul; i<rank_ind; ++i) {
                 m_insert_inds.m_frm.m_cre[i] = given_inds.m_frm.m_cre[cre_perm[i]];
                 m_insert_inds.m_frm.m_ann[i] = given_inds.m_frm.m_ann[ann_perm[i]];
             }

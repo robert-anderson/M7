@@ -8,8 +8,8 @@
 HeisenbergFrmHam::HeisenbergFrmHam(ham_comp_t j, const std::shared_ptr<lattice::Lattice>& basis_lattice,
                                    const std::shared_ptr<lattice::Lattice>& h_lattice) :
         SpinModelFrmHam(basis_lattice, h_lattice), m_j(j){
-    m_contribs_2200.set_nonzero(exsig::ex_double);
-    m_contribs_2200.set_nonzero(0);
+    m_contribs_2200.set_nonzero(opsig::c_doub);
+    m_contribs_2200.set_nonzero(opsig::c_zero);
     logging::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_lattice->m_info);
 }
 
@@ -73,7 +73,7 @@ ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv& onv) const {
 }
 
 ham_t HeisenbergFrmHam::get_element_2200(const field::FrmOnv& , const conn::FrmOnv& conn) const {
-    DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_double, "expected 2200 (aka fermion double) exsig");
+    DEBUG_ASSERT_EQ(conn.exsig(), opsig::c_doub, "expected 2200 (aka fermion double) exsig");
     if (!conn.kramers_conserve()) return 0;
     // fermi phase is always negative
     return -HeisenbergFrmHam::get_coeff_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[1], conn.m_ann[0]);

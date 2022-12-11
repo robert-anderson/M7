@@ -6,26 +6,24 @@
 #define M7_HAMILTONIANDATA_H
 
 
-#include "M7_lib/util/Exsig.h"
 #include <M7_lib/parallel/MPIAssert.h>
-
+#include <M7_lib/connection/OpSig.h>
 
 namespace ham {
-    using namespace exsig;
 
     class TermContribs {
 
-        const uint_t m_ranksig;
-        const uint_t m_basesig;
+        const OpSig m_ranksig;
+        const OpSig m_basesig;
         const uint_t m_nexsig_contrib_frm, m_nexsig_contrib_bos;
 
         v_t<unsigned char> m_exsig_nonzero;
 
-        uint_t ind(uint_t exsig) const;
+        uint_t ind(OpSig exsig) const;
 
 
     public:
-        TermContribs(uint_t ranksig);
+        TermContribs(OpSig ranksig);
 
         TermContribs(const TermContribs& other);
 
@@ -40,9 +38,9 @@ namespace ham {
          */
         TermContribs(const TermContribs& contribs_1, const TermContribs& contribs_2);
 
-        void set_nonzero(uint_t exsig);
+        void set_nonzero(OpSig exsig);
 
-        bool is_nonzero(uint_t exsig) const;
+        bool is_nonzero(OpSig exsig) const;
 
         bool any_nonzero() const;
 

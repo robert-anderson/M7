@@ -6,7 +6,7 @@
 
 
 
-excititers::LadderHopping::LadderHopping(const Hamiltonian &ham, uint_t exsig) :
+excititers::LadderHopping::LadderHopping(const Hamiltonian &ham, OpSig) :
         Ladder(ham, exsig) {}
 
 void excititers::LadderHopping::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {

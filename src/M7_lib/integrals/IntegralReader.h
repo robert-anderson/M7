@@ -6,7 +6,6 @@
 #define M7_INTEGRALREADER_H
 
 #include "M7_lib/hdf5/File.h"
-#include "M7_lib/util/Exsig.h"
 #include "M7_lib/io/FcidumpTextFileReader.h"
 #include "M7_lib/linalg/Dense.h"
 
@@ -14,8 +13,8 @@ struct IntegralReader {
     struct IterData {
         uintv_t m_inds = uintv_t(4ul, ~0ul);
         ham_t m_value {};
-        uint_t m_ranksig {};
-        uint_t m_exsig {};
+        OpSig m_ranksig {};
+        OpSig m_exsig {};
 
         /**
          * after setting m_inds, call this method to update the rank and excitation signatures

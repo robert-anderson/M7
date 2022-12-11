@@ -23,30 +23,29 @@ void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
 
 
 uint_t GeneralFrmHam::make_ints_(IntegralReader *reader, GeneralFrmHam::ints_1e_t *ints_1e, GeneralFrmHam::ints_2e_t *ints_2e) {
-    using namespace exsig;
     REQUIRE_TRUE(reader, "this method should not be called on a non-reading rank");
     IntegralReader::IterData d;
 
     while (reader->next(d)){
-        if (dtype::is_null(d.m_ranksig)){
+        if (d.m_ranksig == opsig::c_invalid){
             // non-coefficient entry
             continue;
         }
-        if (d.m_ranksig == 0ul) {
+        if (d.m_ranksig == opsig::c_0000) {
             m_e_core = d.m_value;
             continue;
         }
 
-        auto& rank_contrib = d.m_ranksig == ex_single ? m_contribs_1100 : m_contribs_2200;
+        auto& rank_contrib = d.m_ranksig == opsig::c_sing ? m_contribs_1100 : m_contribs_2200;
         rank_contrib.set_nonzero(d.m_exsig);
 
-        if (d.m_ranksig == ex_single) {
+        if (d.m_ranksig == opsig::c_sing) {
             if (!ints_1e->set(d.m_inds[0], d.m_inds[1], d.m_value)) {
                 logging::info_("integral < {} | h_core | {} > value {} is at odds with stored value {}",
                                d.m_inds[0], d.m_inds[1], d.m_value, ints_1e->get(d.m_inds[0], d.m_inds[1]));
                 return 1ul;
             }
-        } else if (d.m_ranksig == ex_double) {
+        } else if (d.m_ranksig == opsig::c_doub) {
             // FCIDUMP integral indices are in chemists' ordering
             if (!ints_2e->set(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3], d.m_value)) {
                 logging::info_("integral < {} {} | {} {} > value {} is at odds with stored value {}",
@@ -194,7 +193,7 @@ ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv& onv) const {
 }
 
 ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv& onv, const conn::FrmOnv& conn) const {
-    DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_single, "expected 1100 (aka fermion single) exsig");
+    DEBUG_ASSERT_EQ(conn.exsig(), opsig::c_sing, "expected 1100 (aka fermion single) exsig");
     const auto& ann = conn.m_ann[0];
     const auto& cre = conn.m_cre[0];
 
@@ -207,18 +206,17 @@ ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv& onv, const conn::FrmO
 }
 
 ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv& onv, const conn::FrmOnv& conn) const {
-    DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_double, "expected 2200 (aka fermion double) exsig");
+    DEBUG_ASSERT_EQ(conn.exsig(), opsig::c_doub, "expected 2200 (aka fermion double) exsig");
     const auto element = GeneralFrmHam::get_coeff_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
     return conn.phase(onv) ? -element : element;
 }
 
 HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
         PRNG& prng, const conf::Propagator& /*opts*/, const FrmHam& h) {
-    using namespace exsig;
     excit_gen_list_t list;
-    bool any_singles = h.m_contribs_1100.is_nonzero(ex_single) || h.m_contribs_2200.is_nonzero(ex_single);
+    bool any_singles = h.m_contribs_1100.is_nonzero(opsig::c_sing) || h.m_contribs_2200.is_nonzero(opsig::c_sing);
     if (any_singles) list.emplace_front(new exgen::UniformSingles(h, prng));
-    bool any_doubles = h.m_contribs_2200.is_nonzero(ex_double);
+    bool any_doubles = h.m_contribs_2200.is_nonzero(opsig::c_doub);
     if (any_doubles) list.emplace_front(new exgen::Pchb2200(h, prng));
     return list;
 }

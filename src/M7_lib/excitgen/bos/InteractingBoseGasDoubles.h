@@ -16,14 +16,14 @@ class InteractingBoseGasDoubles : BosExcitGen {
      */
     mutable v_t<int> m_ikpoints_i_work, m_ikpoints_j_work;//, m_ikpoints_k_work, m_ikpoints_l_work;
     InteractingBoseGasDoubles(const Hamiltonian& h, PRNG& prng) :
-        BosExcitGen(h, prng, exsig::ex_0022),
+        BosExcitGen(h, prng, opsig::c_0022),
         m_nbos_pair(utils::integer::combinatorial(h.nboson(), 2)){}
 
     const InteractingBoseGasBosHam* h_cast() const {
         return dynamic_cast<const InteractingBoseGasBosHam*>(m_h.m_bos.get());
     }
 
-    bool draw_h_bos(uint_t exsig, const BosOnv &src, CachedOrbs &orbs, prob_t &prob, ham_t &helem,
+    bool draw_h_bos(OpSig exsig, const BosOnv &src, CachedOrbs &orbs, prob_t &prob, ham_t &helem,
                     conn::BosOnv &conn) override {
         auto h = h_cast();
         DEBUG_ONLY(h);
@@ -50,7 +50,7 @@ class InteractingBoseGasDoubles : BosExcitGen {
         return true;
     }
 
-    bool draw_bos(uint_t exsig, const BosOnv &src, CachedOrbs &orbs, prob_t &prob,
+    bool draw_bos(OpSig exsig, const BosOnv &src, CachedOrbs &orbs, prob_t &prob,
                   conn::BosOnv &conn) override {
         ham_t helem;
         return draw_h_bos(exsig, src, orbs, prob, helem, conn);

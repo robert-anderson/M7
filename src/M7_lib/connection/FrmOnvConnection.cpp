@@ -3,7 +3,6 @@
 //
 
 #include "FrmOnvConnection.h"
-#include "M7_lib/util/Exsig.h"
 
 FrmOnvConnection::FrmOnvConnection(const sys::frm::Size& sites):
         m_ann(sites), m_cre(sites),
@@ -203,10 +202,10 @@ bool FrmOnvConnection::phase(const FrmOnvField &src) const {
     return out;
 }
 
-uint_t FrmOnvConnection::exsig() const {
-    return exsig::encode(m_cre.size(), m_ann.size(), 0ul, 0ul);
+OpSig FrmOnvConnection::exsig() const {
+    return opsig::frm(m_cre.size(), m_ann.size());
 }
 
-uint_t FrmOnvConnection::ranksig(uint_t nop_insert) const {
-    return exsig::encode(m_cre.size() + nop_insert, m_ann.size() + nop_insert, 0ul, 0ul);
+OpSig FrmOnvConnection::ranksig(uint_t nop_insert) const {
+    return opsig::frm(m_cre.size() + nop_insert, m_ann.size() + nop_insert);
 }

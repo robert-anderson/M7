@@ -5,7 +5,7 @@
 #include "Hubbard.h"
 
 exgen::HubbardBase::HubbardBase(const FrmHam &h, PRNG &prng, str_t description) :
-        FrmLatticeExcitGen(h, prng, {exsig::ex_single}, description) {
+        FrmLatticeExcitGen(h, prng, {opsig::c_sing}, description) {
     REQUIRE_TRUE(h.is<HubbardFrmHam>(), "given hamiltonian is not of HubbardFrmHam type");
 }
 
@@ -28,9 +28,9 @@ prob_t exgen::HubbardBase::prob_uniform(const field::FrmOnv& src, const conn::Fr
 }
 
 
-bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) {
+bool exgen::HubbardBase::draw_frm(OpSig exsig, const field::FrmOnv &src, prob_t &prob, conn::FrmOnv &conn) {
     DEBUG_ONLY(exsig);
-    DEBUG_ASSERT_EQ(exsig, exsig::ex_single, "this excitation generator is only suitable for exsig 1100");
+    DEBUG_ASSERT_EQ(exsig, opsig::c_sing, "this excitation generator is only suitable for exsig 1100");
     const auto& h = *m_h.as<HubbardFrmHam>();
     /*
      * the number of adjacent sites accessible is not decided till the occupied index has been chosen. If the integer
@@ -66,7 +66,7 @@ bool exgen::HubbardBase::draw_frm(uint_t exsig, const field::FrmOnv &src, prob_t
     return true;
 }
 
-uint_t exgen::HubbardBase::approx_nconn(uint_t, sys::Particles particles) const {
+uint_t exgen::HubbardBase::approx_nconn(OpSig, sys::Particles particles) const {
     return particles.m_frm;
 }
 
@@ -76,7 +76,7 @@ exgen::HubbardPreferDoubleOcc::HubbardPreferDoubleOcc(const FrmHam& h, PRNG& prn
 
 prob_t exgen::HubbardPreferDoubleOcc::combined_occ_prob(uint_t nelec, uint_t nelec_doub_occ) const {
     // prob = prob_uni + prob_pref
-    return (1.0 - m_prob_doub_occ)/nelec + m_prob_doub_occ/nelec_doub_occ;
+    return (1.0 - m_prob_doub_occ)/prob_t(nelec) + m_prob_doub_occ/prob_t(nelec_doub_occ);
 }
 
 uint_t exgen::HubbardPreferDoubleOcc::get_occ(uint32_t rand, const field::FrmOnv& src, prob_t& prob) const {
