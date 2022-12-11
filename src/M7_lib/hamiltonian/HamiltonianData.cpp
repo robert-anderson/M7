@@ -18,14 +18,17 @@ ham::TermContribs::TermContribs(uint_t ranksig) :
         m_nexsig_contrib_frm(ncontrib_frm(ranksig)), m_nexsig_contrib_bos(ncontrib_bos(ranksig)),
         m_exsig_nonzero(m_nexsig_contrib_frm * m_nexsig_contrib_bos, 0) {}
 
-ham::TermContribs::TermContribs(const ham::TermContribs &other) : TermContribs(other.m_ranksig){}
-
 ham::TermContribs &ham::TermContribs::operator=(const ham::TermContribs &other) {
     REQUIRE_EQ(other.m_ranksig, m_ranksig, "incompatible ranks");
     REQUIRE_EQ(other.m_basesig, m_basesig, "incompatible base signatures");
     m_exsig_nonzero = other.m_exsig_nonzero;
     return *this;
 }
+
+ham::TermContribs::TermContribs(const ham::TermContribs &other) : TermContribs(other.m_ranksig){
+    *this = other;
+}
+
 
 ham::TermContribs::TermContribs(const ham::TermContribs &contribs_1, const ham::TermContribs &contribs_2):
     TermContribs(contribs_1.m_ranksig){

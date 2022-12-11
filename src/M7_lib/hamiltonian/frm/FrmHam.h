@@ -83,10 +83,6 @@ struct FrmHam : HamOpTerm {
 
 public:
 
-    FrmHam(const FrmHam& other): FrmHam(other.m_basis){}
-
-    FrmHam& operator=(const FrmHam&){return *this;}
-
 	virtual ~FrmHam(){}
 
     /**
