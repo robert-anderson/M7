@@ -23,7 +23,7 @@ GeneralLadderHam::GeneralLadderHam(sys::Basis basis, const EbdumpInfo& info):
         if (!ham::is_significant(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
-        if (ranksig == opsig::c_1110 || ranksig == opsig::c_1101) {
+        if ((ranksig == opsig::c_1110) || (ranksig == opsig::c_1101)) {
             DEBUG_ASSERT_EQ(ranksig, opsig::c_1110, "ranksig should be either 0010 or 1110");
             m_contribs_1110.set_nonzero(exsig);
             m_contribs_1101.set_nonzero(exsig.conj());

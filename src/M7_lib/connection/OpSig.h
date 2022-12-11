@@ -260,7 +260,7 @@ public:
      *  the OpSig representing the hermitian conjugate of the operator represented by this OpSig
      */
     OpSig conj() const {
-        return {{nfrm_ann(), nfrm_cre()}, {nbos_cre(), nbos_ann()}};
+        return {{nfrm_ann(), nfrm_cre()}, {nbos_ann(), nbos_cre()}};
     }
 
     str_t to_string() const {
