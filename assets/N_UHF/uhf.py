@@ -163,16 +163,16 @@ with open(fname, 'w') as fout:
     fout.write(delimit_line)
 
     for ijkl, (i, j, k, l) in enumerate(eri_inds):
+        if abs(eri_bbbb[ijkl]) > tol:
+            fout.write(output_format % (eri_bbbb[ijkl], i+1, j+1, k+1, l+1))
+    fout.write(delimit_line)
+
+    for ijkl, (i, j, k, l) in enumerate(eri_inds):
         if abs(eri_aabb[ijkl]) > tol:
             fout.write(output_format % (eri_aabb[ijkl], i+1, j+1, k+1, l+1))
         if (i,j)!=(k,l):
             if abs(eri_bbaa[ijkl]) > tol:
                 fout.write(output_format % (eri_bbaa[ijkl], k+1, l+1, i+1, j+1))
-    fout.write(delimit_line)
-
-    for ijkl, (i, j, k, l) in enumerate(eri_inds):
-        if abs(eri_bbbb[ijkl]) > tol:
-            fout.write(output_format % (eri_bbbb[ijkl], i+1, j+1, k+1, l+1))
     fout.write(delimit_line)
 
     h_aa = h_aa.reshape(nmo,nmo)
