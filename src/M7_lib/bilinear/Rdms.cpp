@@ -72,11 +72,13 @@ Rdms::operator bool() const {
 }
 
 bool Rdms::takes_contribs_from(uint_t exsig) const {
+    if (exsig==~0ul) return false;
     return !m_exsig_to_rdms[exsig].empty();
 }
 
 void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_ops::Mbf& com, const wf_t& contrib) {
     auto exsig = conn.exsig();
+    if (exsig==~0ul) return;
     if (!exsig) m_total_norm.m_local+=contrib;
     for (auto& rdm: m_exsig_to_rdms[exsig]) rdm->make_contribs(src_onv, conn, com, contrib);
 }
