@@ -18,7 +18,7 @@ Rdms::exsig_to_rdms_t Rdms::make_exsig_to_rdms() const {
             auto nbos_ann = max_contrib_exsig.nbos_ann();
             while (nbos_cre != ~0ul && nbos_ann != ~0ul) {
                 OpSig exsig ({nfrm_cre, nfrm_ann}, {nbos_cre, nbos_ann});
-                DEBUG_ASSERT_TRUE(exsig.is_valid(), "exsig OOB");
+                DEBUG_ASSERT_NE(exsig, opsig::c_invalid, "exsig OOB");
                 exsig_to_rdms[exsig].push_front(rdm.get());
                 --nbos_cre;
                 --nbos_ann;
