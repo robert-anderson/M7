@@ -1,9 +1,13 @@
 target_sources(M7_lib
     PRIVATE
+        CommutingObservable.cpp
+        CommutingObservable.h
         KramersSectorOccupation.cpp
         KramersSectorOccupation.h
         HfExcits.cpp
         HfExcits.h
+        InstEsts.cpp
+        InstEsts.h
         SignProblemFreeTwf.cpp
         SignProblemFreeTwf.h
         TrialWavefunction.cpp

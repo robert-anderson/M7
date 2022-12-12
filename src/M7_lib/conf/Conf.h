@@ -222,6 +222,7 @@ namespace conf {
     struct InstEsts : Section {
         Param<bool> m_spf_uniform_twf;
         SpfWeightedTwf m_spf_weighted_twf;
+        Param<bool> m_spin_square;
 
         explicit InstEsts(Group *parent);
     };

@@ -47,15 +47,15 @@ struct HamiltonianTerms {
     /**
      * purely fermionic number-conserving terms in the Hamiltonian for traditional electronic structure calculations
      */
-    std::unique_ptr<FrmHam> m_frm = nullptr;
+    std::shared_ptr<FrmHam> m_frm = nullptr;
     /**
      * purely bosonic number-conserving and non-conserving terms in the Hamiltonian
      */
-    std::unique_ptr<BosHam> m_bos = nullptr;
+    std::shared_ptr<BosHam> m_bos = nullptr;
     /**
      * hamiltonian encapsulating all terms involving products of fermion and boson operators
      */
-    std::unique_ptr<FrmBosHam> m_frmbos = nullptr;
+    std::shared_ptr<FrmBosHam> m_frmbos = nullptr;
     /**
      * make the type of fermion Hamiltonian called for by the configuration, Then either return it directly, or combine
      * it with any modification specified in the options
@@ -67,7 +67,7 @@ struct HamiltonianTerms {
      *  unique pointer to the polymorphic base class, FrmHam
      */
     template<typename ham_t>
-    static std::unique_ptr<FrmHam> make_frm_modified(FrmHam::init_opts_t opts) {
+    static std::shared_ptr<FrmHam> make_frm_modified(FrmHam::init_opts_t opts) {
         using namespace ptr::smart;
         static_assert(std::is_base_of<FrmHam, ham_t>::value, "template arg must be derived from FrmHam");
         ham_t bare_ham(opts);
@@ -77,19 +77,19 @@ struct HamiltonianTerms {
             typedef SumFrmHam<ham_t, SpinSquareFrmHam> mod_ham_t;
             const FrmHam& base = bare_ham;
             const sys::frm::Sector sector(base.m_basis, base.electrons(opts.m_particles));
-            return make_poly_unique<FrmHam, mod_ham_t>(std::move(bare_ham), SpinSquareFrmHam(sector), spin_penalty_j);
+            return make_poly_shared<FrmHam, mod_ham_t>(std::move(bare_ham), SpinSquareFrmHam(sector), spin_penalty_j);
         }
         /*
          * if the configuration doc calls for no modification, just return the bare hamiltonian
          */
-        return make_poly_unique<FrmHam, ham_t>(std::move(bare_ham));
+        return make_poly_shared<FrmHam, ham_t>(std::move(bare_ham));
     }
 
-    std::unique_ptr<FrmHam> make_frm(FrmHam::init_opts_t opts) const;
+    std::shared_ptr<FrmHam> make_frm(FrmHam::init_opts_t opts) const;
 
-    std::unique_ptr<BosHam> make_bos(BosHam::init_opts_t opts) const;
+    std::shared_ptr<BosHam> make_bos(BosHam::init_opts_t opts) const;
 
-    std::unique_ptr<FrmBosHam> make_frmbos(FrmBosHam::init_opts_t opts) const;
+    std::shared_ptr<FrmBosHam> make_frmbos(FrmBosHam::init_opts_t opts) const;
 
     explicit HamiltonianTerms(init_opts_t opts);
 

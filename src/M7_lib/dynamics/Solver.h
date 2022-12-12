@@ -20,6 +20,7 @@
 #include <M7_lib/wavefunction/DeterministicSubspace.h>
 
 #include "M7_lib/propagator/Propagator.h"
+#include "M7_lib/observables/InstEsts.h"
 #include "Annihilator.h"
 
 /**
@@ -131,6 +132,11 @@ public:
      * Multidimensional averaging estimators i.e. reference connections, RDMs, spectral moments
      */
     Maes m_maes;
+
+    /**
+     * Instantaneous estimators. Optional stats that are linear in the wavefunction (e.g. S^2 operator)
+     */
+    InstEsts m_inst_ests;
 
 private:
     /**

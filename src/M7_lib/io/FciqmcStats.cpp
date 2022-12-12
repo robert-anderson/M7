@@ -4,7 +4,7 @@
 
 #include "FciqmcStats.h"
 
-FciqmcStatsRow::FciqmcStatsRow(Propagator& prop) :
+FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests) :
         m_wf_format(prop.m_wf_fmt),
         m_icycle(this, "Cycle number", false),
         m_tau(this, "Timestep"),
@@ -20,6 +20,8 @@ FciqmcStatsRow::FciqmcStatsRow(Propagator& prop) :
         m_ninitiator(this, m_wf_format, "Initiator MBFs"),
         m_nocc_mbf(this, m_wf_format, "Occupied MBFs"),
         m_delta_nocc_mbf(this, m_wf_format, "Change in number of occupied MBFs"),
+        m_spin_square_num(inst_ests.m_spin_square ? this : nullptr, m_wf_format,
+                          "Numerator of reference-projected spin square estimator"),
         m_exlvl_probs(prop.ncase_excit_gen() ? this : nullptr,
                       {{prop.ncase_excit_gen()}, {"excitation generator index"}},
                       "Probability of attempting to draw excitation level")

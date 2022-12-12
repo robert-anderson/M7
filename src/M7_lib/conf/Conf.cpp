@@ -192,7 +192,9 @@ conf::InstEsts::InstEsts(Group *parent) :
 
         m_spf_uniform_twf(this, "spf_uniform_twf", false,
                           "switch on estimation of energy by uniform TWF (applicable only in sign problem-free systems)"),
-        m_spf_weighted_twf(this) {}
+        m_spf_weighted_twf(this),
+        m_spin_square(this, "spin_square", c_enable_fermions, "estimate and output spin-square estimate"){
+}
 
 conf::HfExcits::HfExcits(Group *parent) :
         Section(parent, "hf_excits",

@@ -7,7 +7,7 @@
 #include "M7_lib/hamiltonian/frmbos/GeneralLadderHam.h"
 #include "M7_lib/hamiltonian/bos/InteractingBoseGasBosHam.h"
 
-std::unique_ptr<FrmHam> HamiltonianTerms::make_frm(FrmHam::init_opts_t opts) const {
+std::shared_ptr<FrmHam> HamiltonianTerms::make_frm(FrmHam::init_opts_t opts) const {
     using namespace ptr::smart;
     if (opts.m_ham.m_hubbard.m_enabled)
         return make_frm_modified<HubbardFrmHam>(opts);
@@ -15,27 +15,27 @@ std::unique_ptr<FrmHam> HamiltonianTerms::make_frm(FrmHam::init_opts_t opts) con
         return make_frm_modified<HeisenbergFrmHam>(opts);
     else if (opts.m_ham.m_fcidump.m_enabled)
         return make_frm_modified<GeneralFrmHam>(opts);
-    return make_poly_unique<FrmHam, NullFrmHam>();
+    return make_poly_shared<FrmHam, NullFrmHam>();
 }
 
-std::unique_ptr<BosHam> HamiltonianTerms::make_bos(BosHam::init_opts_t opts) const {
+std::shared_ptr<BosHam> HamiltonianTerms::make_bos(BosHam::init_opts_t opts) const {
     using namespace ptr::smart;
     if (opts.m_ham.m_num_op_weight) {
         const uint_t nsite = m_frm->m_basis.m_nsite;
         const sys::bos::Basis basis(nsite, opts.m_basis.m_bos_occ_cutoff);
         const auto omega = opts.m_ham.m_num_op_weight.m_value;
-        return make_poly_unique<BosHam, NumOpBosHam>(basis, omega);
+        return make_poly_shared<BosHam, NumOpBosHam>(basis, omega);
     }
     else if (opts.m_ham.m_interacting_bose_gas.m_enabled)
-        return make_poly_unique<BosHam, InteractingBoseGasBosHam>(opts);
+        return make_poly_shared<BosHam, InteractingBoseGasBosHam>(opts);
     else if (opts.m_ham.m_hubbard.m_enabled)
-        return make_poly_unique<BosHam, HubbardBosHam>(opts);
+        return make_poly_shared<BosHam, HubbardBosHam>(opts);
     else if (opts.m_ham.m_bosdump.m_enabled)
-        return make_poly_unique<BosHam, GeneralBosHam>(opts);
-    return make_poly_unique<BosHam, NullBosHam>();
+        return make_poly_shared<BosHam, GeneralBosHam>(opts);
+    return make_poly_shared<BosHam, NullBosHam>();
 }
 
-std::unique_ptr<FrmBosHam> HamiltonianTerms::make_frmbos(FrmBosHam::init_opts_t opts) const {
+std::shared_ptr<FrmBosHam> HamiltonianTerms::make_frmbos(FrmBosHam::init_opts_t opts) const {
     REQUIRE_TRUE(m_frm.get(), "fermion Hamiltonian unallocated");
     REQUIRE_TRUE(m_bos.get(), "boson Hamiltonian unallocated");
     const sys::Basis basis(m_frm->m_basis, m_bos->m_basis);
@@ -43,12 +43,12 @@ std::unique_ptr<FrmBosHam> HamiltonianTerms::make_frmbos(FrmBosHam::init_opts_t 
     using namespace ptr::smart;
     if (opts.m_ham.m_holstein_coupling.m_value != 0.0) {
         const auto g = opts.m_ham.m_holstein_coupling.m_value;
-        return make_poly_unique<FrmBosHam, HolsteinLadderHam>(basis, g);
+        return make_poly_shared<FrmBosHam, HolsteinLadderHam>(basis, g);
     }
     else if (opts.m_ham.m_ebdump.m_enabled) {
-        return make_poly_unique<FrmBosHam, GeneralLadderHam>(basis, opts);
+        return make_poly_shared<FrmBosHam, GeneralLadderHam>(basis, opts);
     }
-    return make_poly_unique<FrmBosHam, NullFrmBosHam>();
+    return make_poly_shared<FrmBosHam, NullFrmBosHam>();
 }
 
 HamiltonianTerms::HamiltonianTerms(HamiltonianTerms::init_opts_t opts) :

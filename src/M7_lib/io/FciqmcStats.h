@@ -9,6 +9,7 @@
 #include <M7_lib/field/Row.h>
 
 #include "StatsTable.h"
+#include "M7_lib/observables/InstEsts.h"
 
 struct FciqmcStatsRow : StatsRow {
 
@@ -28,9 +29,10 @@ struct FciqmcStatsRow : StatsRow {
     statistic::Numbers<uint_t, c_ndim_wf> m_ninitiator;
     statistic::Numbers<uint_t, c_ndim_wf> m_nocc_mbf;
     statistic::Numbers<int, c_ndim_wf> m_delta_nocc_mbf;
+    statistic::Numbers<wf_t, c_ndim_wf> m_spin_square_num;
     statistic::Numbers<prob_t, 1ul> m_exlvl_probs;
 
-    FciqmcStatsRow(Propagator& prop);
+    FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests);
 };
 
 typedef StatsTable<FciqmcStatsRow> FciqmcStats;

@@ -9,6 +9,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
         m_opts(opts), m_prop(prop), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_hf(make_hf()), m_exit("exit"), m_maes(opts.m_av_ests, m_wf.m_sector, m_wf.nroot()),
+        m_inst_ests(m_wf.m_sector, &m_refs, opts.m_inst_ests),
         m_annihilator(m_wf, m_prop, m_refs, m_hf.get(), m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_archive(opts), m_detsubs(opts.m_propagator.m_semistochastic) {
 
@@ -22,7 +23,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
 
     if (mpi::i_am_root()) {
         m_stats = ptr::smart::make_unique<FciqmcStats>(
-            "M7.stats", "FCIQMC", FciqmcStatsRow(m_prop), m_opts.m_stats.m_period);
+            "M7.stats", "FCIQMC", FciqmcStatsRow(m_prop, m_inst_ests), m_opts.m_stats.m_period);
         m_timing_stats = ptr::smart::make_unique<TimingStats>(
             "M7.timing", "FCIQMC Timings", TimingStatsRow(), m_opts.m_stats.m_period);
     }
@@ -170,6 +171,7 @@ void Solver::begin_cycle() {
                              "MAEs only beginning to be accumulated, but not all store tables are empty");
         }
     }
+    m_inst_ests.begin_cycle(m_icycle);
 
     if (m_opts.m_propagator.m_semistochastic.m_size && !m_detsubs) {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
@@ -227,6 +229,7 @@ void Solver::loop_over_occupied_mbfs() {
         }
 
         m_refs.contrib_row();
+        m_inst_ests.make_numerator_contribs(walker);
 
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
 
@@ -310,6 +313,7 @@ void Solver::end_cycle() {
     m_refs.end_cycle(m_icycle);
     m_wf.end_cycle();
     m_maes.end_cycle();
+    m_inst_ests.end_cycle(m_icycle);
 }
 
 void Solver::output_stats() {
@@ -334,6 +338,7 @@ void Solver::output_stats() {
         stats.m_nocc_mbf = m_wf.m_nocc_mbf.m_reduced;
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
+        if (m_inst_ests.m_spin_square) stats.m_spin_square_num = m_inst_ests.m_spin_square->m_est.m_proj_num.m_reduced;
         m_stats->commit();
 
         auto &timing_stats = m_timing_stats->m_row;
