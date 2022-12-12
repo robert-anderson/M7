@@ -46,15 +46,15 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn>, Archivable {
     ReductionSyndicate m_summables;
 
     /**
-     * number of initiator ONVs in each part of the WF
+     * number of initiator MBFs in each part of the WF
      */
     NdReduction<uint_t, c_ndim_wf> m_ninitiator;
     /**
-     * number of ONVs with any associated weight in any part
+     * number of MBFs with any associated weight in any part
      */
     Reduction<uint_t> m_nocc_mbf;
     /**
-     * change in the number of occupied ONVs
+     * change in the number of occupied MBFs
      */
     Reduction<int> m_delta_nocc_mbf;
     /**
@@ -180,17 +180,17 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn>, Archivable {
     void remove_row(Walker& walker);
 
     /**
-     * Only called on the rank assigned to the ONV by the RankAllocator
+     * Only called on the rank assigned to the MBF by the RankAllocator
      * @param icycle
-     *  MC cycle index on which ONV is being added
+     *  MC cycle index on which MBF is being added
      * @param mbf
-     *  ONV of row to be added
+     *  MBF of row to be added
      * @param hdiag
      *  diagonal matrix element is cached here
      * @return
      *  index of created row
      * @param refconn
-     *  element true if reference ONV of corresponding WF part is connected
+     *  element true if reference MBF of corresponding WF part is connected
      *  i.e. the connection to the reference has a non-zero H matrix element
      * @return
      */
