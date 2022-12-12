@@ -55,5 +55,6 @@ sys::frm::Electrons FrmHam::electrons(const conf::Particles& p) const {
     // if either of these are not set, fallback to defaults.
     if (!nelec) nelec = default_nelec();
     if (ms2_value==sys::frm::c_undefined_ms2) ms2_value = default_ms2_value();
+    if (ms2_value==sys::frm::c_undefined_ms2) ms2_value = sys::frm::Ms2::lowest_value(nelec);
     return {nelec, ms2_value};
 }

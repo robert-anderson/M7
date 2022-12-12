@@ -25,16 +25,23 @@ struct SumFrmHam : FrmHam {
      */
     ham_t m_weight;
 
+private:
+    /*
+     * convenient base-typed casts
+     */
+    const FrmHam &m_h1_base;
+    const FrmHam &m_h2_base;
+public:
+
     SumFrmHam(ham_t1&& h1, ham_t2&& h2, ham_t weight):
-            FrmHam(static_cast<const FrmHam&>(h1).m_basis), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){
+            FrmHam(static_cast<const FrmHam&>(h1).m_basis), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight),
+            m_h1_base(m_h1), m_h2_base(m_h2){
         /*
          * combine attributes of the components
          */
-        auto& h1_base = static_cast<const FrmHam&>(m_h1);
-        auto& h2_base = static_cast<const FrmHam&>(m_h2);
-        m_contribs_1100 = ham::TermContribs(h1_base.m_contribs_1100, h2_base.m_contribs_1100);
-        m_contribs_2200 = ham::TermContribs(h1_base.m_contribs_2200, h2_base.m_contribs_2200);
-        m_kramers_attrs = ham::KramersAttributes(h1_base.m_kramers_attrs, h2_base.m_kramers_attrs);
+        m_contribs_1100 = ham::TermContribs(m_h1_base.m_contribs_1100, m_h2_base.m_contribs_1100);
+        m_contribs_2200 = ham::TermContribs(m_h1_base.m_contribs_2200, m_h2_base.m_contribs_2200);
+        m_kramers_attrs = ham::KramersAttributes(m_h1_base.m_kramers_attrs, m_h2_base.m_kramers_attrs);
     }
 
     ham_t get_coeff_1100(uint_t a, uint_t i) const override {
@@ -97,16 +104,34 @@ public:
          * otherwise, simply concatenate the two lists
          */
         excit_gen_list_t list;
-        list.merge(static_cast<const FrmHam&>(m_h1).make_excit_gens(prng, opts));
-        list.merge(static_cast<const FrmHam&>(m_h2).make_excit_gens(prng, opts));
+        list.merge(m_h1_base.make_excit_gens(prng, opts));
+        list.merge(m_h2_base.make_excit_gens(prng, opts));
         return list;
     }
 
     conn_foreach::base_list_t make_foreach_iters() const override {
         conn_foreach::base_list_t list;
-        list.merge(static_cast<const FrmHam&>(m_h1).make_foreach_iters());
-        list.merge(static_cast<const FrmHam&>(m_h2).make_foreach_iters());
+        list.merge(m_h1_base.make_foreach_iters());
+        list.merge(m_h2_base.make_foreach_iters());
         return list;
+    }
+
+    bool is_hermitian() const override {
+        return m_h1_base.is_hermitian() && m_h2_base.is_hermitian();
+    }
+
+    uint_t default_nelec() const override {
+        const auto v1 = m_h1_base.default_nelec();
+        const auto v2 = m_h2_base.default_nelec();
+        REQUIRE_EQ(v1, v2, "conflicting default electron numbers");
+        return v1;
+    }
+
+    int default_ms2_value() const override {
+        const auto v1 = m_h1_base.default_ms2_value();
+        const auto v2 = m_h2_base.default_ms2_value();
+        REQUIRE_EQ(v1, v2, "conflicting default Ms2 values");
+        return v1;
     }
 };
 
