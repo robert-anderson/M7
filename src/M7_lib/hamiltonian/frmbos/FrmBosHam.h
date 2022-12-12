@@ -55,11 +55,11 @@ struct FrmBosHam : HamOpTerm {
     }
 
     ham_t get_element(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {
-        switch (conn.exsig().to_int()) {
-            case opsig::c_0001.to_int(): return get_element_0001(onv, conn);
-            case opsig::c_0010.to_int(): return get_element_0010(onv, conn);
-            case opsig::c_1101.to_int(): return get_element_1101(onv, conn);
-            case opsig::c_1110.to_int(): return get_element_1110(onv, conn);
+        switch (conn.exsig()) {
+            case opsig::c_0001: return get_element_0001(onv, conn);
+            case opsig::c_0010: return get_element_0010(onv, conn);
+            case opsig::c_1101: return get_element_1101(onv, conn);
+            case opsig::c_1110: return get_element_1110(onv, conn);
         }
         return 0.0;
     }

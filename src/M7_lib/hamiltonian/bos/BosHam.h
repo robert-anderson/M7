@@ -58,10 +58,10 @@ struct BosHam : HamOpTerm {
     }
 
     ham_t get_element(const field::BosOnv& src, const conn::BosOnv& conn) const {
-        switch (conn.exsig().to_int()) {
+        switch (conn.exsig()) {
             case 0: return get_element_0000(src);
-            case opsig::c_0011.to_int(): return get_element_0011(src, conn);
-            case opsig::c_0022.to_int(): return get_element_0022(src, conn);
+            case opsig::c_0011: return get_element_0011(src, conn);
+            case opsig::c_0022: return get_element_0022(src, conn);
         }
         return 0;
     }

@@ -36,7 +36,7 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian& ham, const conf::Propagator& opt
     m_exsig_icases.resize(opsig::c_ndistinct, uintv_t());
     // fill the map from exsigs to exgens
     for (uint_t icase=0ul; icase<m_excit_cases.size(); ++icase)
-        m_exsig_icases[m_excit_cases[icase].m_exsig.to_int()].push_back(icase);
+        m_exsig_icases[m_excit_cases[icase].m_exsig].push_back(icase);
     set_probs(m_probs);
     log();
 }

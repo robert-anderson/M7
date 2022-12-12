@@ -91,7 +91,7 @@ public:
     void update_prob(uint_t icase, const mbf_t &src, prob_t &prob, const conn::from_field_t<mbf_t> &conn) {
         const auto exsig = m_excit_cases[icase].m_exsig;
         DEBUG_ASSERT_EQ(exsig, conn.exsig(), "exsig of case does not match with that of connection");
-        const auto& jcases = m_exsig_icases[exsig.to_int()];
+        const auto& jcases = m_exsig_icases[exsig];
         DEBUG_ASSERT_FALSE(jcases.empty(), "there should be at least one case associated with this exsig");
         prob *= m_probs[icase];
         if (jcases.size()==1) return;

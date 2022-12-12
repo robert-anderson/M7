@@ -98,11 +98,11 @@ OpSig FcidumpTextFileReader::ranksig(const uintv_t &inds) const {
 }
 
 OpSig FcidumpTextFileReader::exsig(const uintv_t &inds, OpSig ranksig) const {
-    switch (ranksig.to_int()) {
-        case opsig::c_zero.to_int(): return opsig::c_zero;
-        case opsig::c_sing.to_int():
+    switch (ranksig) {
+        case opsig::c_zero: return opsig::c_zero;
+        case opsig::c_sing:
             return (inds[0]==inds[1]) ? opsig::c_zero : opsig::c_sing;
-            case opsig::c_doub.to_int():
+            case opsig::c_doub:
             return inds[0]==inds[2] ?
                 (inds[1]==inds[3] ? opsig::c_zero : opsig::c_sing):
                 (inds[1]==inds[3] ? opsig::c_sing : opsig::c_doub);

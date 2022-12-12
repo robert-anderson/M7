@@ -17,12 +17,12 @@ OpSig BosdumpFileReader::ranksig(const uintv_t &inds) const {
 
 OpSig BosdumpFileReader::exsig(const uintv_t &inds, OpSig ranksig) const {
     DEBUG_ASSERT_EQ(inds.size(), 4ul, "incorrect maximum number of SQ operator indices");
-    switch (ranksig.to_int()) {
-        case opsig::c_zero.to_int():
+    switch (ranksig) {
+        case opsig::c_zero:
             return opsig::c_zero;
-        case opsig::c_0011.to_int():
+        case opsig::c_0011:
             return inds[0] == inds[1] ? opsig::c_zero : opsig::c_0011;
-        case opsig::c_0022.to_int():
+        case opsig::c_0022:
             return inds[0] == inds[1] ?
                    (inds[2] == inds[3] ? opsig::c_zero : opsig::c_0011) :
                    (inds[2] == inds[3] ? opsig::c_0011 : opsig::c_0022);

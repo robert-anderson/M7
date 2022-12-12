@@ -17,14 +17,14 @@ void IntegralReader::IterData::update_ranksig_exsig() {
                       "if not core energy entry, at least the first index must be validly defined");
         m_ranksig = dtype::all_null(m_inds[2], m_inds[3]) ? opsig::c_sing : opsig::c_doub;
     }
-    switch (m_ranksig.to_int()) {
-        case opsig::c_zero.to_int():
+    switch (m_ranksig) {
+        case opsig::c_zero:
             m_exsig = opsig::c_zero;
             break;
-        case opsig::c_sing.to_int():
+        case opsig::c_sing:
             m_exsig = m_inds[0] == m_inds[1] ? opsig::c_zero : opsig::c_sing;
             break;
-        case opsig::c_doub.to_int():
+        case opsig::c_doub:
             m_exsig = m_inds[0] == m_inds[2] ?
                       (m_inds[1] == m_inds[3] ? opsig::c_zero : opsig::c_sing) :
                       (m_inds[1] == m_inds[3] ? opsig::c_sing : opsig::c_doub);

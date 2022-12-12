@@ -85,20 +85,9 @@ public:
         return other.m_i!=m_i;
     }
 
-    constexpr explicit operator const uint_t& () const {
+    constexpr operator const uint_t& () const {
         return m_i;
     }
-
-    /*
-     * TODO: delete after refactor
-     */
-    constexpr const uint_t& to_int() const {
-        return m_i;
-    }
-
-//    operator const bool ()  const {
-//        return m_i < c_ndistinct;
-//    }
 
     /**
      * @return
