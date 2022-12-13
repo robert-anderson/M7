@@ -130,6 +130,9 @@ public:
     int default_ms2_value() const override {
         const auto v1 = m_h1_base.default_ms2_value();
         const auto v2 = m_h2_base.default_ms2_value();
+        using namespace sys::frm;
+        if (v1==c_undefined_ms2) return v2;
+        if (v2==c_undefined_ms2) return v1;
         REQUIRE_EQ(v1, v2, "conflicting default Ms2 values");
         return v1;
     }
