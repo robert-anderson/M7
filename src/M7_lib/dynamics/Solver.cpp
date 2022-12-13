@@ -63,7 +63,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
             logging::info("Brillouin theorem condition not satisfied, but assuming {} as HF-like state", s);
     }
     else {
-        logging::info("Brillouin theorem condition not satisfied: no Hartree-Fock assumed");
+        logging::info("Brillouin theorem condition not satisfied: no Hartree-Fock state assumed");
     }
 
     /**
