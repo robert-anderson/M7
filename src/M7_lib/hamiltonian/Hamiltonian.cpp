@@ -78,6 +78,8 @@ Hamiltonian::Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosH
     if (m_bos && m_frmbos) REQUIRE_EQ(m_bos.m_basis, m_frmbos.m_basis.m_bos,
                                       "Bos and FrmBos H terms do not have the same bosonic basis definition");
     logging::info("Hamiltonian is {}hermitian", (is_hermitian() ? "" : "NON-"));
+    if (m_frm.m_e_core != 0.0) logging::info(
+        "Hamiltonian has a non-zero core energy {} which is included in all energy estimators", m_frm.m_e_core);
 }
 
 Hamiltonian::Hamiltonian(init_opts_t opts): Hamiltonian(HamiltonianTerms(opts), nullptr, nullptr, nullptr){}

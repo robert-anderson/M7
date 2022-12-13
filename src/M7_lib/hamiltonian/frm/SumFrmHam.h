@@ -42,6 +42,7 @@ public:
         m_contribs_1100 = ham::TermContribs(m_h1_base.m_contribs_1100, m_h2_base.m_contribs_1100);
         m_contribs_2200 = ham::TermContribs(m_h1_base.m_contribs_2200, m_h2_base.m_contribs_2200);
         m_kramers_attrs = ham::KramersAttributes(m_h1_base.m_kramers_attrs, m_h2_base.m_kramers_attrs);
+        m_e_core = m_h1_base.m_e_core + m_h2_base.m_e_core;
     }
 
     ham_t get_coeff_1100(uint_t a, uint_t i) const override {
@@ -130,6 +131,9 @@ public:
     int default_ms2_value() const override {
         const auto v1 = m_h1_base.default_ms2_value();
         const auto v2 = m_h2_base.default_ms2_value();
+        using namespace sys::frm;
+        if (v1==c_undefined_ms2) return v2;
+        if (v2==c_undefined_ms2) return v1;
         REQUIRE_EQ(v1, v2, "conflicting default Ms2 values");
         return v1;
     }

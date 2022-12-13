@@ -4,6 +4,22 @@
 
 #include "Solver.h"
 
+std::unique_ptr<shared_rows::Walker> Solver::make_hf() const {
+    /*
+     * even if there is no true HF determinant, we need to treat the initial ref as one for averaged excits or when
+     * this behaviour is explicitly requested in the configuration document
+     */
+    const bool force_hf = m_opts.m_reference.m_assume_hf_like.m_value || m_opts.m_av_ests.m_hf_excits.m_enabled;
+    /*
+     * assuming that if there exists a Hartree-Fock determinant, it will be the initial reference of the zero-th root
+     */
+    if (force_hf || m_prop.m_ham.has_brillouin_theorem(m_refs[0].mbf())) {
+        const TableBase::Loc loc(m_refs[0].irec());
+        return ptr::smart::make_unique<shared_rows::Walker>("Hartree-Fock ONV", m_wf.m_store, loc);
+    }
+    return nullptr;
+}
+
 Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
                v_t<TableBase::Loc> ref_locs) :
         m_opts(opts), m_prop(prop), m_wf(wf),
@@ -44,10 +60,10 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
         if (m_prop.m_ham.has_brillouin_theorem(m_hf->mbf()))
             logging::info("Brillouin theorem condition satisfied: assuming {} as HF state", s);
         else
-            logging::info("Brillouin-theorem condition not satisfied, but assuming {} as HF-like state", s);
+            logging::info("Brillouin theorem condition not satisfied, but assuming {} as HF-like state", s);
     }
     else {
-        logging::info("No Hartree-Fock state detected or assumed");
+        logging::info("Brillouin theorem condition not satisfied: no Hartree-Fock assumed");
     }
 
     /**
