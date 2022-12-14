@@ -51,6 +51,7 @@ void DeterministicSubspace::add_(Walker &row) {
 }
 
 void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears) {
+    logging::info("Determining upto {} globally extremal rows for deterministic subspace", m_opts.m_size);
     auto row = m_wf.m_store.m_row;
     Wavefunction::weights_gxr_t gxr(row, row.m_weight, true, true, m_iparts);
     gxr.find(m_opts.m_size);
