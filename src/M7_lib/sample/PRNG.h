@@ -46,9 +46,9 @@ public:
      * @param magnitude
      *  scalar about which to round v
      * @param prob
-     *  probability of the lower magnitude outcome
+     *  probability of the higher magnitude outcome
      * @return
-     *  the lower magnitude result with probability given by prob, or the higher magnitude result with probability given
+     *  the higher magnitude result with probability given by prob, or the lower magnitude result with probability given
      *  by 1-prob
      */
     template<typename T>

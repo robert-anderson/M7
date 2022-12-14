@@ -57,10 +57,10 @@ void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uin
     bool flag_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
 
     const wf_comp_t abs_weight = std::abs(weight);
-    prob_t prob_nattempt_floor, prob_gen, prob_thresh_accept;
+    prob_t prob_nattempt_ceil, prob_gen, prob_thresh_accept;
     ham_t helem;
 
-    auto nattempt = uint_t(m_prng.stochastic_round(abs_weight, 1.0, prob_nattempt_floor));
+    auto nattempt = uint_t(m_prng.stochastic_round(abs_weight, 1.0, prob_nattempt_ceil));
     if (!nattempt) return;
     /*
      * clear the cached-orbital representations of the current MBF
@@ -104,7 +104,7 @@ void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uin
              * we require the parent weights to be sent along with the spawned contributions, so the instantaneous
              * weight must be "unbiased" by the probability that this connection was sampled a non-zero number of times.
              * there are 3 stochastic processes involved:
-             *  1. number of attempts is either the *floor* or ceiling of the instantaneous weight (prob_nattempt_floor)
+             *  1. number of attempts is either the floor or ceiling of the instantaneous weight (prob_nattempt_ceil)
              *  2. generate a connected MBF (prob_gen)
              *  3. *accept* or reject based on the magnitude of the candidate walker (prob_thresh_accept)
              */
@@ -120,14 +120,14 @@ void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uin
             p_fail_one_attempt += prob_gen * (1.0 - prob_thresh_accept);
             /*
              * now, failure to generate this connection at all attempts could be due to either
-             *  1. deciding to draw the minimum number of attempts, only to fail on each attempt
+             *  1. deciding to draw the maximum number of attempts, only to fail on each attempt
              */
-            auto floor = std::floor(abs_weight);
-            p_fail_all_attempts = prob_nattempt_floor * std::pow(p_fail_one_attempt, floor);
+            auto ceil = std::ceil(abs_weight);
+            p_fail_all_attempts = prob_nattempt_ceil * std::pow(p_fail_one_attempt, ceil);
             /*
-             *  2. deciding to draw the maximum number of attempts, only to fail on each attempt
+             *  2. deciding to draw the minimum number of attempts, only to fail on each attempt
              */
-            p_fail_all_attempts += (1.0 - prob_nattempt_floor) * std::pow(p_fail_one_attempt, floor+1.0);
+            p_fail_all_attempts += (1.0 - prob_nattempt_ceil) * std::pow(p_fail_one_attempt, ceil - 1.0);
 
             p_succeed_at_least_once = 1.0 - p_fail_all_attempts;
         }

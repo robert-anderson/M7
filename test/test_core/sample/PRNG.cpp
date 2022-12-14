@@ -27,6 +27,17 @@ TEST(PRNG, StochasticRound) {
     ASSERT_LT(std::abs(tot/n-v), 1e-4);
 }
 
+TEST(PRNG, StochasticRoundProb) {
+    PRNG prng(0, 1000);
+    double v = 123.34;
+    double rounding_magnitude = 1.3;
+    prob_t prob;
+    prng.stochastic_round(v, rounding_magnitude, prob);
+    // probability of drawing high value is normalized difference between v and low value
+    const auto prob_hi = v/rounding_magnitude - uint_t(v / rounding_magnitude);
+    ASSERT_EQ(prob, prob_hi);
+}
+
 TEST(PRNG, NegativeStochasticRound) {
     PRNG prng(0, 1000);
     const uint_t n=10000000;
