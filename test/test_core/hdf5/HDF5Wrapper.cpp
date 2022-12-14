@@ -4,11 +4,11 @@
 
 #include "gtest/gtest.h"
 
-#include <M7_lib/util/Hash.h>
-#include <M7_lib/field/Row.h>
-#include <M7_lib/field/Fields.h>
-#include <M7_lib/table/BufferedTable.h>
-#include <M7_lib/hdf5/Dataset.h>
+#include "M7_lib/util/Hash.h"
+#include "M7_lib/field/Row.h"
+#include "M7_lib/field/Fields.h"
+#include "M7_lib/table/BufferedTable.h"
+#include "M7_lib/hdf5/Dataset.h"
 
 TEST(HDF5Wrapper, NativeTypes) {
     using namespace hdf5;
@@ -153,6 +153,39 @@ TEST(HDF5Wrapper, ComplexArray) {
 
 
 TEST(HDF5Wrapper, NumberDistributed) {
+    buffered::Table<SingleFieldRow<field::Number<hash::digest_t>>> write_table("test int table", {"integer_field"});
+    ASSERT_EQ(write_table.capacity(), 0ul);
+    auto read_table = write_table;
+    const auto nrow = hash::in_range(mpi::irank() + 1, 10, 20);
+    logging::debug_("number of local rows {}", nrow);
+    write_table.push_back(nrow);
+    auto row = write_table.m_row;
+    for (row.restart(); row; ++row){
+        row.m_field = hash::in_range((row.index() + 1) * (mpi::irank() + 1), 4, 123);
+        logging::debug_("writing value: {}", hash::digest_t(row.m_field));
+    }
+    {
+        hdf5::FileWriter fw("table_test.h5");
+        hdf5::GroupWriter gw(fw, "container");
+        write_table.save(gw, "table");
+    }
+    mpi::barrier();
+    {
+        hdf5::FileReader fr("table_test.h5");
+        hdf5::GroupReader gr(fr, "container");
+
+        ASSERT_EQ(gr.child_name(0), "table");
+        ASSERT_TRUE(gr.child_exists("table"));
+        ASSERT_FALSE(gr.child_exists("not_the_table"));
+        read_table.load(gr, "table");
+    }
+    for (row.restart(); row; ++row) {
+        ASSERT_EQ(row.m_field, hash::in_range((row.index() + 1) * (mpi::irank() + 1), 4, 123));
+    }
+}
+
+
+TEST(HDF5Wrapper, NumberDistributed2) {
     buffered::Table<SingleFieldRow<field::Number<hash::digest_t>>> write_table("test int table", {"integer_field"});
     ASSERT_EQ(write_table.capacity(), 0ul);
     auto read_table = write_table;

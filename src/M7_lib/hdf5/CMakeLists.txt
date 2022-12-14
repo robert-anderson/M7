@@ -10,6 +10,8 @@ target_sources(M7_lib
         File.h
         Group.cpp
         Group.h
+        IoManager.cpp
+        IoManager.h
         NdDistList.cpp
         NdDistList.h
         Node.cpp

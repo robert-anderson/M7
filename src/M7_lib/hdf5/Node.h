@@ -7,6 +7,7 @@
 
 #include "Attr.h"
 #include "Dataset.h"
+#include "IoManager.h"
 
 namespace hdf5 {
 
@@ -288,6 +289,64 @@ namespace hdf5 {
             attr.write(v.data()->c_str(), 1);
         }
 
+        void write_nondist(const str_t& name, WriteManager& wm, uint_t irank) {
+            const DataSpace space(wm.m_h5_shape, !mpi::i_am(irank));
+            const hid_t dset = H5Dcreate2(m_handle, name.c_str(), wm.m_type, space.m_handle,
+                                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            if (!wm.m_h5_dim_names.empty()) {
+                for (uint_t idim = 0ul; idim < space.m_shape.size(); ++idim) {
+                    auto status = H5DSset_label(m_handle, idim, wm.m_h5_dim_names[idim].c_str());
+                    REQUIRE_FALSE(status, "HDF5 Error on dimension label assignment");
+                }
+            }
+            uint_t nitem;
+            auto src = wm.transfer(nitem);
+            auto status = H5Dwrite(m_handle, wm.m_type, space, space, H5P_DEFAULT, src);
+            REQUIRE_FALSE(status, "HDF5 Error on multidimensional save");
+            REQUIRE_FALSE(wm.transfer(nitem), "Non-distributed dataset writes must be carried out in one operation");
+            H5Dclose(m_handle);
+        }
+
+        void write_dist(const str_t& name, WriteManager& wm) {
+            const DataSpace space(wm.m_h5_shape);
+            const hid_t dset = H5Dcreate2(m_handle, name.c_str(), wm.m_type, space.m_handle,
+                                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            if (!wm.m_h5_dim_names.empty()) {
+                for (uint_t idim = 0ul; idim < space.m_shape.size(); ++idim) {
+                    auto status = H5DSset_label(m_handle, idim, wm.m_h5_dim_names[idim].c_str());
+                    REQUIRE_FALSE(status, "HDF5 Error on dimension label assignment");
+                }
+            }
+            uint_t nitem;
+            auto src = wm.transfer(nitem);
+            auto status = H5Dwrite(m_handle, wm.m_type, space, space, H5P_DEFAULT, src);
+            REQUIRE_FALSE(status, "HDF5 Error on multidimensional save");
+            REQUIRE_FALSE(wm.transfer(nitem), "Non-distributed dataset writes must be carried out in one operation");
+            H5Dclose(m_handle);
+
+            char all_done = false;
+            uint_t nitem;
+            uint_t iitem = 0ul;
+            while (!all_done) {
+                select_hyperslab(iitem, nitem);
+                auto data = wm.transfer(nitem);
+                if (data) {
+                    auto status = H5Dwrite(m_dataset_handle, wm.m_type, m_memspace_handle,
+                                           m_filespace_handle, m_coll_plist, data);
+                    DEBUG_ONLY(status);
+                    DEBUG_ASSERT_FALSE(status, "HDF5 write failed");
+                } else {
+                    auto status = H5Dwrite(m_dataset_handle, wm.m_type, m_none_memspace_handle,
+                                           m_filespace_handle, m_coll_plist, data);
+                    DEBUG_ONLY(status);
+                    DEBUG_ASSERT_FALSE(status, "HDF5 write failed");
+                }
+                iitem += nitem;
+                all_done = bool(data);
+                all_done = mpi::all_land(all_done);
+            }
+        }
+
         /**
          * since this is a public method, the shape type is uintv_t, which is converted to the vector type used internally within the hdf5 namespace
          * @tparam T
@@ -298,8 +357,7 @@ namespace hdf5 {
          */
         template<typename T>
         void write_data(const str_t& name, const T *v, const uintv_t& shape, const strv_t& dim_names={}, uint_t irank=0) {
-            using namespace convert;
-            DatasetWriter(*this, name, vector<hsize_t>(shape), Type(v), dim_names, irank).write(v);
+            DatasetWriter(*this, name, convert::vector<hsize_t>(shape), Type(v), dim_names, irank).write(v);
         }
         template<typename T>
         void write_data(const str_t& name, const std::complex<T> *v, const uintv_t& shape, const strv_t& dim_names={}, uint_t irank=0) {
@@ -320,6 +378,12 @@ namespace hdf5 {
         template<typename T>
         void write_data(const str_t& name, const v_t<T> &v, uint_t irank=0) {
             write_data(name, v.data(), {v.size()}, {}, irank);
+        }
+
+        template<typename T>
+        void write_nd_dist_list(const str_t& name, const T *v, const uintv_t& shape, const strv_t& dim_names={}, uint_t irank=0) {
+            using namespace convert;
+            DatasetWriter(*this, name, convert::vector<hsize_t>(shape), Type(v), dim_names, irank).write(v);
         }
 
         /**

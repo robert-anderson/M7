@@ -1,0 +1,300 @@
+//
+// Created by rja on 06/12/22.
+//
+
+#ifndef M7_HDF5_BUFFERER_H
+#define M7_HDF5_BUFFERER_H
+
+#include "Type.h"
+#include "M7_lib/util/Vector.h"
+
+/**
+ *
+ */
+namespace hdf5 {
+
+    /**
+     * nomenclature:
+     *  type = an HDF5 native type (cannot be complex)
+     *  elem = single number as stored in the C++ program (real or complex)
+     *  h5_elem = single number as stored in the HDF5 archive (cannot be complex)
+     *  item = a shaped array of elems
+     *  h5_item = a shaped array of h5_elems
+     */
+    struct IoManager {
+        /**
+         * native type of the HDF5 dataset involved in the I/O
+         */
+        const Type m_type;
+        /**
+         * layout of an item in C++ terms
+         */
+        const uintv_t m_item_shape;
+        /**
+         * total number of items (locally held)
+         */
+        const uint_t m_nitem;
+        /**
+         * layout of an item in HDF5 terms
+         */
+        const uintv_t m_h5_item_shape;
+        /**
+         * size in bytes of each item
+         */
+        const uint_t m_item_size;
+        /**
+         * layout of all locally stored items in HDF5 terms in hsize_t type
+         */
+        const v_t<hsize_t> m_h5_shape;
+        /**
+         * maximum number of items to copy in each call to transfer()
+         */
+        const uint_t m_nitem_per_transfer;
+        /**
+         * maximum number of (real or complex) elements per call to transfer()
+         */
+        const uint_t m_nelem_per_transfer;
+        /**
+         * names of each dimension in the HDF5 metadata
+         */
+        const strv_t m_h5_dim_names;
+
+        IoManager(Type type, uintv_t item_shape, uint_t nitem,
+                  uint_t nitem_per_transfer, strv_t dim_names, bool complex):
+            m_type(type), m_item_shape(item_shape), m_nitem(nitem),
+            m_h5_item_shape(complex ? vector::appended(m_item_shape, 2ul) : m_item_shape),
+            m_item_size(nd::nelement(m_h5_item_shape) * m_type.m_size),
+            m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_h5_item_shape, m_nitem))),
+            m_nitem_per_transfer(nitem_per_transfer),
+            m_nelem_per_transfer(m_nitem_per_transfer * nd::nelement(m_item_shape)),
+            m_h5_dim_names((complex && !dim_names.empty()) ? vector::appended(dim_names, "real/imag") : dim_names){
+            REQUIRE_TRUE(m_h5_dim_names.empty() || m_h5_dim_names.size()==m_h5_item_shape.size(),
+                         "incorrect number of dimension names");
+        }
+    protected:
+        uint_t m_ncall_transfer = 0ul;
+
+        uint_t nitem_next() const {
+            const uint_t first_item = m_ncall_transfer * m_nitem_per_transfer;
+            if (first_item < m_nitem) return std::min(m_nitem_per_transfer, m_nitem-first_item);
+            return 0ul;
+        }
+    };
+
+    struct WriteManager: IoManager {
+        WriteManager(Type type, uintv_t item_shape, uint_t nitem, uint_t nitem_per_transfer, strv_t dim_names, bool complex):
+                IoManager(type, item_shape, nitem, nitem_per_transfer, dim_names, complex){}
+
+        virtual void* transfer(uint_t& nitem) = 0;
+    };
+
+    template<typename T>
+    struct VectorWriteManager : WriteManager {
+        const v_t<T>* m_vec;
+        VectorWriteManager(const v_t<T>* vec, uint_t nitem_per_transfer):
+                WriteManager(Type(vec->data()), {}, vec->size(), nitem_per_transfer, {}, dtype::is_complex<T>()){}
+
+        explicit VectorWriteManager(const v_t<T>* vec): VectorWriteManager(vec, vec->size()){}
+
+        void* transfer(uint_t& nitem) override {
+            nitem = nitem_next();
+            const auto ptr = m_vec->data() + m_ncall_transfer * m_nelem_per_transfer;
+            ++m_ncall_transfer;
+            if (!nitem) return nullptr;
+            return {reinterpret_cast<const void*>(ptr), nitem * m_item_size};
+        }
+    };
+
+    /**
+     * Base class for the serialization of a distributed list of N-dimensional data.
+     * Each rank handles (reads or writes) a number of items, and each item has a dimensionality which is constant
+     * across all ranks. The list item dimension increases the overall dimensionality of the dataset by 1.
+     */
+    struct Hyperslab {
+        /**
+         * HDF5 handle for the parent structure
+         */
+        const hid_t m_parent_handle;
+        /**
+         * shape of the list items
+         */
+        const v_t<hsize_t> m_item_dims;
+        /**
+         * length of the item shape
+         */
+        const hsize_t m_ndim_item;
+        /**
+         * length of the list shape
+         */
+        const hsize_t m_ndim_list;
+        /**
+         * number of items the local rank is responsible for handling (reading / writing)
+         */
+        const hsize_t m_nitem_local;
+        /**
+         * total number of items handled over all ranks by this object
+         */
+        const hsize_t m_nitem_global;
+        /**
+         * largest number of items across all MPI ranks
+         */
+        const hsize_t m_nitem_local_max;
+        /**
+         * local shape of the list
+         */
+        const v_t<hsize_t> m_list_dims_local;
+        /**
+         * global shape of the list
+         */
+        const v_t<hsize_t> m_list_dims_global;
+        /**
+         * sum of m_nitem_local for all MPI ranks with index less than this rank
+         */
+        const hsize_t m_item_offset;
+
+        /**
+         * extent of the currently selected hyperslab in the HDF5 dataset
+         */
+        v_t<hsize_t> m_hyperslab_counts;
+        /**
+         * multidimensional offset for the currently selected hyperslab
+         */
+        v_t<hsize_t> m_hyperslab_offsets;
+        /**
+         * HDF5 handles
+         */
+        hid_t m_filespace_handle;
+        hid_t m_dataset_handle;
+        hid_t m_memspace_handle;
+        /**
+         * We use collective i/o mode, so when a rank has no reading or writing to do, we must point to a dummy memspace
+         */
+        hid_t m_none_memspace_handle;
+        /**
+         * dtype as an integer
+         */
+        hid_t m_h5type;
+        /**
+         * instance of object wrapping an HDF5 property list
+         */
+        CollectivePList m_coll_plist;
+
+        /**
+         * stick the local number of items onto the front of the item shape
+         * @return
+         *  list dims aka the overall shape of the local dataset
+         */
+        v_t<hsize_t> get_list_dims_local();
+
+        /**
+         * stick the global number of items onto the front of the item shape
+         * @return
+         *  list dims aka the overall shape of the global dataset
+         */
+        v_t<hsize_t> get_list_dims_global();
+
+        /**
+         * @return
+         *  flat offset to the first item handled by this rank
+         */
+        hsize_t get_item_offset();
+
+        Hyperslab(hid_t parent_handle, str_t name, const uintv_t &item_dims, const uint_t &nitem,
+                  bool writemode, hid_t h5type);
+
+        Hyperslab(const IoManager& iom, str_t name, bool writemode);
+
+        /**
+         * sets the internal state to select the iitem-th item on this rank
+         * @param iitem
+         *  item index for selection
+         */
+        void select_hyperslab(uint_t iitem_begin, uint_t nitem);
+
+        ~Hyperslab();
+    };
+
+
+#if 0
+    struct WriteManager {
+        /**
+         * native type of the HDF5 dataset to which the data is to be written
+         */
+        const Type m_type;
+        /**
+         * elemental layout of an item. an element is either a single value of type m_type, or a pair (complex)
+         */
+        const uintv_t m_item_shape;
+        /**
+         * size in bytes of each item
+         */
+        const uint_t m_item_size;
+        /**
+         * total number of items (locally held)
+         */
+        const uint_t m_nitem;
+        /**
+         * native-typed layout of an item (takes a minor index of 2 into account if the data is complex valued)
+         */
+        const uintv_t m_native_item_shape;
+        /**
+         * native-typed layout of all locally stored items
+         */
+        const uintv_t m_native_shape;
+        /**
+         * maximum number of items to flush in each call to next()
+         */
+        const uint_t m_nitem_per_flush;
+        /**
+         * maximum number of (real or complex) elements per call to next()
+         */
+        const uint_t m_nelement_per_flush;
+    private:
+        uintv_t make_native_item_shape(bool complex) const {
+            auto shape = m_item_shape;
+            if (complex) shape.push_back(2);
+            return shape;
+        }
+        uintv_t make_native_shape() const {
+            auto shape = m_native_item_shape;
+            shape.insert(shape.begin(), m_nitem);
+            return shape;
+        }
+    protected:
+        uint_t m_nflush = 0ul;
+
+        uint_t nitem_next() const {
+            const uint_t first_item = m_nflush * m_nitem_per_flush;
+            if (first_item < m_nitem) return std::min(m_nitem_per_flush, m_nitem-first_item);
+            return 0ul;
+        }
+
+    public:
+        WriteManager(Type type, uintv_t item_shape, uint_t nitem, uint_t nitem_per_flush, bool complex):
+            m_type(type), m_item_shape(item_shape), m_nitem(nitem), m_native_item_shape(make_native_item_shape(complex)),
+            m_native_shape(make_native_shape()), m_nitem_per_flush(nitem_per_flush),
+            m_nelement_per_flush(m_nitem_per_flush * ) {}
+
+        WriteManager(const WriteManager& other):
+            WriteManager(other.m_type, other.m_nprim_per_item, other.m_nitem, other.m_nitem_per_flush){}
+
+        WriteManager& operator=(const WriteManager& other) = delete;
+
+        struct Selection {
+            const void* m_ptr;
+            const uint_t m_size;
+        };
+
+        virtual Selection next() = 0;
+    };
+
+
+
+//    struct WriteBufferer: WriteManager {
+//
+//    };
+#endif
+}
+
+
+#endif //M7_HDF5_BUFFERER_H

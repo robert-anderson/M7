@@ -10,6 +10,133 @@
 
 
 namespace hdf5 {
+
+
+
+    /**
+     * Base class for the serialization of a distributed list of N-dimensional data.
+     * Each rank handles (reads or writes) a number of items, and each item has a dimensionality which is constant
+     * across all ranks. The list item dimension increases the overall dimensionality of the dataset by 1.
+     */
+    struct DistBase {
+        /**
+         * HDF5 handle for the parent structure
+         */
+        const hid_t m_parent_handle;
+
+        /**
+         * shape of the list items
+         */
+        const v_t<hsize_t> m_item_dims;
+        /**
+         * length of the item shape
+         */
+        const hsize_t m_ndim_item;
+        /**
+         * length of the list shape
+         */
+        const hsize_t m_ndim_list;
+        /**
+         * number of items the local rank is responsible for handling (reading / writing)
+         */
+        const hsize_t m_nitem_local;
+        /**
+         * total number of items handled over all ranks by this object
+         */
+        const hsize_t m_nitem_global;
+        /**
+         * largest number of items across all MPI ranks
+         */
+        const hsize_t m_nitem_local_max;
+        /**
+         * local shape of the list
+         */
+        const v_t<hsize_t> m_list_dims_local;
+        /**
+         * global shape of the list
+         */
+        const v_t<hsize_t> m_list_dims_global;
+        /**
+         * sum of m_nitem_local for all MPI ranks with index less than this rank
+         */
+        const hsize_t m_item_offset;
+
+        /**
+         * extent of the currently selected hyperslab in the HDF5 dataset
+         */
+        v_t<hsize_t> m_hyperslab_counts;
+        /**
+         * multidimensional offset for the currently selected hyperslab
+         */
+        v_t<hsize_t> m_hyperslab_offsets;
+        /**
+         * HDF5 handles
+         */
+        hid_t m_filespace_handle;
+        hid_t m_dataset_handle;
+        hid_t m_memspace_handle;
+        /**
+         * We use collective i/o mode, so when a rank has no reading or writing to do, we must point to a dummy memspace
+         */
+        hid_t m_none_memspace_handle;
+        /**
+         * dtype as an integer
+         */
+        hid_t m_h5type;
+        /**
+         * instance of object wrapping an HDF5 property list
+         */
+        CollectivePList m_coll_plist;
+
+        /**
+         * stick the local number of items onto the front of the item shape
+         * @return
+         *  list dims aka the overall shape of the local dataset
+         */
+        v_t<hsize_t> get_list_dims_local();
+
+        /**
+         * stick the global number of items onto the front of the item shape
+         * @return
+         *  list dims aka the overall shape of the global dataset
+         */
+        v_t<hsize_t> get_list_dims_global();
+
+        /**
+         * @return
+         *  flat offset to the first item handled by this rank
+         */
+        hsize_t get_item_offset();
+
+        DistBase(hid_t parent_handle, str_t name, const uintv_t &item_dims, const uint_t &nitem,
+                       bool writemode, hid_t h5type);
+
+        /**
+         * sets the internal state to select the iitem-th item on this rank
+         * @param iitem
+         *  item index for selection
+         */
+        void select_hyperslab(const uint_t &iitem);
+
+        void select_hyperslab(uint_t iitem_begin, uint_t nitem);
+
+        ~DistBase();
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Base class for the serialization of a distributed list of N-dimensional data.
      * Each rank handles (reads or writes) a number of items, and each item has a dimensionality which is constant
@@ -115,6 +242,8 @@ namespace hdf5 {
          */
         void select_hyperslab(const uint_t &iitem);
 
+        void select_hyperslab(uint_t iitem_begin, uint_t nitem);
+
         ~NdDistListBase();
     };
 
@@ -140,6 +269,8 @@ namespace hdf5 {
          *  native type T corresponding to m_h5type are to be written. Thus the sizeof(T)*n bytes after data are copied
          */
         void write_h5item_bytes(const uint_t &iitem, const void *data);
+
+        void write(const void *data, uint_t iitem_begin, uint_t nitem);
 
     };
 
