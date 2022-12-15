@@ -291,7 +291,7 @@ namespace hdf5 {
 
         void write_nondist(const str_t& name, WriteManager& wm, uint_t irank) {
             const DataSpace space(wm.m_h5_shape, !mpi::i_am(irank));
-            const hid_t dset = H5Dcreate2(m_handle, name.c_str(), wm.m_type, space.m_handle,
+            const hid_t dset = H5Dcreate2(m_handle, name.c_str(), wm.m_h5_type, space.m_handle,
                                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             if (!wm.m_h5_dim_names.empty()) {
                 for (uint_t idim = 0ul; idim < space.m_shape.size(); ++idim) {
@@ -301,7 +301,7 @@ namespace hdf5 {
             }
             uint_t nitem;
             auto src = wm.transfer(nitem);
-            auto status = H5Dwrite(m_handle, wm.m_type, space, space, H5P_DEFAULT, src);
+            auto status = H5Dwrite(m_handle, wm.m_h5_type, space, space, H5P_DEFAULT, src);
             REQUIRE_FALSE(status, "HDF5 Error on multidimensional save");
             REQUIRE_FALSE(wm.transfer(nitem), "Non-distributed dataset writes must be carried out in one operation");
             H5Dclose(m_handle);
@@ -309,7 +309,7 @@ namespace hdf5 {
 
         void write_dist(const str_t& name, WriteManager& wm) {
             const DataSpace space(wm.m_h5_shape);
-            const hid_t dset = H5Dcreate2(m_handle, name.c_str(), wm.m_type, space.m_handle,
+            const hid_t dset = H5Dcreate2(m_handle, name.c_str(), wm.m_h5_type, space.m_handle,
                                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             if (!wm.m_h5_dim_names.empty()) {
                 for (uint_t idim = 0ul; idim < space.m_shape.size(); ++idim) {
@@ -319,7 +319,7 @@ namespace hdf5 {
             }
             uint_t nitem;
             auto src = wm.transfer(nitem);
-            auto status = H5Dwrite(m_handle, wm.m_type, space, space, H5P_DEFAULT, src);
+            auto status = H5Dwrite(m_handle, wm.m_h5_type, space, space, H5P_DEFAULT, src);
             REQUIRE_FALSE(status, "HDF5 Error on multidimensional save");
             REQUIRE_FALSE(wm.transfer(nitem), "Non-distributed dataset writes must be carried out in one operation");
             H5Dclose(m_handle);
@@ -331,12 +331,12 @@ namespace hdf5 {
                 select_hyperslab(iitem, nitem);
                 auto data = wm.transfer(nitem);
                 if (data) {
-                    auto status = H5Dwrite(m_dataset_handle, wm.m_type, m_memspace_handle,
+                    auto status = H5Dwrite(m_dataset_handle, wm.m_h5_type, m_memspace_handle,
                                            m_filespace_handle, m_coll_plist, data);
                     DEBUG_ONLY(status);
                     DEBUG_ASSERT_FALSE(status, "HDF5 write failed");
                 } else {
-                    auto status = H5Dwrite(m_dataset_handle, wm.m_type, m_none_memspace_handle,
+                    auto status = H5Dwrite(m_dataset_handle, wm.m_h5_type, m_none_memspace_handle,
                                            m_filespace_handle, m_coll_plist, data);
                     DEBUG_ONLY(status);
                     DEBUG_ASSERT_FALSE(status, "HDF5 write failed");

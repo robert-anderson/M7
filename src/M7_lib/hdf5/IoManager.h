@@ -5,8 +5,11 @@
 #ifndef M7_HDF5_BUFFERER_H
 #define M7_HDF5_BUFFERER_H
 
+#include <utility>
+
 #include "Type.h"
 #include "M7_lib/util/Vector.h"
+#include "M7_lib/util/Pointer.h"
 
 /**
  *
@@ -14,72 +17,150 @@
 namespace hdf5 {
 
     /**
-     * nomenclature:
-     *  type = an HDF5 native type (cannot be complex)
-     *  elem = single number as stored in the C++ program (real or complex)
-     *  h5_elem = single number as stored in the HDF5 archive (cannot be complex)
-     *  item = a shaped array of elems
-     *  h5_item = a shaped array of h5_elems
+     * we require a set of classes to abstract the process of dataset I/O
+     *
+     * write data from a single designated MPI rank callable:
+     *  - collectively
+     *  - independently (on the definitive rank only)
+     * write data from all ranks into the same dataset collectively
+     * read all data to a single designated rank
+     *  - collectively
+     *  - independently (on the designated rank only)
+     * read data to all ranks
      */
-    struct IoManager {
-        /**
-         * native type of the HDF5 dataset involved in the I/O
-         */
-        const Type m_type;
-        /**
-         * layout of an item in C++ terms
-         */
-        const uintv_t m_item_shape;
-        /**
-         * total number of items (locally held)
-         */
-        const uint_t m_nitem;
-        /**
-         * layout of an item in HDF5 terms
-         */
-        const uintv_t m_h5_item_shape;
-        /**
-         * size in bytes of each item
-         */
-        const uint_t m_item_size;
-        /**
-         * layout of all locally stored items in HDF5 terms in hsize_t type
-         */
-        const v_t<hsize_t> m_h5_shape;
-        /**
-         * maximum number of items to copy in each call to transfer()
-         */
-        const uint_t m_nitem_per_transfer;
-        /**
-         * maximum number of (real or complex) elements per call to transfer()
-         */
-        const uint_t m_nelem_per_transfer;
-        /**
-         * names of each dimension in the HDF5 metadata
-         */
-        const strv_t m_h5_dim_names;
 
-        IoManager(Type type, uintv_t item_shape, uint_t nitem,
-                  uint_t nitem_per_transfer, strv_t dim_names, bool complex):
-            m_type(type), m_item_shape(item_shape), m_nitem(nitem),
-            m_h5_item_shape(complex ? vector::appended(m_item_shape, 2ul) : m_item_shape),
-            m_item_size(nd::nelement(m_h5_item_shape) * m_type.m_size),
-            m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_h5_item_shape, m_nitem))),
-            m_nitem_per_transfer(nitem_per_transfer),
-            m_nelem_per_transfer(m_nitem_per_transfer * nd::nelement(m_item_shape)),
-            m_h5_dim_names((complex && !dim_names.empty()) ? vector::appended(dim_names, "real/imag") : dim_names){
-            REQUIRE_TRUE(m_h5_dim_names.empty() || m_h5_dim_names.size()==m_h5_item_shape.size(),
-                         "incorrect number of dimension names");
-        }
-    protected:
-        uint_t m_ncall_transfer = 0ul;
+//    enum IoPolicy {
+//        WriteFromAll,
+//        WriteFromOneColl,
+//        WriteFromOneIndep,
+//        ReadToAll,
+//        ReadToOneColl,
+//        ReadToOneIndep,
+//    };
 
-        uint_t nitem_next() const {
-            const uint_t first_item = m_ncall_transfer * m_nitem_per_transfer;
-            if (first_item < m_nitem) return std::min(m_nitem_per_transfer, m_nitem-first_item);
-            return 0ul;
-        }
-    };
+    namespace nd {
+
+        /**
+         * nomenclature:
+         *  type = an HDF5 native type (cannot be complex)
+         *  elem = single number as stored in the C++ program (real or complex)
+         *  h5_elem = single number as stored in the HDF5 archive (cannot be complex)
+         *  item = a shaped array of elems
+         *  h5_item = a shaped array of h5_elems
+         */
+        struct Format {
+            /**
+             * native type of the HDF5 dataset involved in the I/O
+             */
+            const Type m_h5_type;
+            /**
+             * layout of an item in C++ terms
+             */
+            const uintv_t m_item_shape;
+            /**
+             * total number of items (locally held)
+             */
+            const uint_t m_nitem;
+            /**
+             * layout of an item in HDF5 terms
+             */
+            const uintv_t m_h5_item_shape;
+            /**
+             * size in bytes of each item
+             */
+            const uint_t m_item_size;
+            /**
+             * layout of all locally stored items in HDF5 terms in hsize_t type
+             */
+            const v_t<hsize_t> m_h5_shape;
+            /**
+             * names of each dimension in the HDF5 metadata
+             */
+            const strv_t m_h5_dim_names;
+
+            Format(Type h5_type, uintv_t item_shape, uint_t nitem, strv_t dim_names, bool complex) :
+                m_h5_type(h5_type), m_item_shape(std::move(item_shape)), m_nitem(nitem),
+                m_h5_item_shape(complex ? vector::appended(m_item_shape, 2ul) : m_item_shape),
+                m_item_size(::nd::nelement(m_h5_item_shape) * m_h5_type.m_size),
+                m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_h5_item_shape, m_nitem))),
+                m_h5_dim_names(
+                    (complex && !dim_names.empty()) ? vector::appended(dim_names, "real/imag") : dim_names) {
+                REQUIRE_TRUE(m_h5_dim_names.empty() || m_h5_dim_names.size() == m_h5_item_shape.size(),
+                             "incorrect number of dimension names");
+                REQUIRE_TRUE((m_h5_item_shape.back()==2ul) || !complex,
+                             "last item in item shape must be 2 if data is complex-valued");
+            }
+        };
+
+        struct IoManager {
+            const Format m_format;
+            const uint_t m_max_nitem_per_op;
+        protected:
+            /**
+             * number of calls to next already made
+             */
+            uint_t m_nop = 0ul;
+            IoManager(Format format, uint_t max_nitem_per_op):
+                m_format(std::move(format)), m_max_nitem_per_op(max_nitem_per_op){}
+        };
+
+        struct WriteManager : IoManager {
+            WriteManager(Format format, uint_t max_nitem_per_op):
+                IoManager(std::move(format), max_nitem_per_op){}
+            /**
+             * prepare the buffer for the next write operation
+             * @return
+             *  pointer to the bytes to be written, null if there is no more data on this MPI rank
+             */
+            virtual void* const get_next() = 0;
+            void* const next() {
+                auto ptr = get_next();
+                ++m_nop;
+                return ptr;
+            }
+        };
+        struct ReadManager : IoManager {
+            ReadManager(Format format, uint_t max_nitem_per_op): IoManager(std::move(format), max_nitem_per_op){}
+            /**
+             * prepare the buffer for the next write operation
+             * @return
+             *  pointer to the bytes to be written, null if there is no more data on this MPI rank
+             */
+            virtual void* get_next() = 0;
+            void* next() {
+                auto ptr = get_next();
+                ++m_nop;
+                return ptr;
+            }
+        };
+
+        template<typename T>
+        struct VectorWriteManager : WriteManager {
+            const void* const m_begin;
+            const void* const m_end;
+            VectorWriteManager(const v_t<T>* v, uint_t max_nitem_per_op): WriteManager(
+                {hdf5::Type::make<T>(), {1ul}, v->size(), {"element"}, dtype::is_complex<T>()}, max_nitem_per_op),
+                m_begin(reinterpret_cast<void const*>(v->data())),
+                m_end(m_begin+m_format.m_item_size*m_format.m_nitem){}
+
+            VectorWriteManager(const v_t<T>* v): VectorWriteManager(v, v->size()){}
+
+            void *const get_next() override {
+                auto ptr = m_begin;
+                ptr += m_nop*m_format.m_item_size;
+                return ::ptr::in_range(ptr, m_begin, m_end) ? ptr : nullptr;
+            }
+        };
+
+//        struct DistFormat : Format {
+//            v_t
+//            DistFormat(Type h5_type, uintv_t item_shape, uint_t nitem, strv_t dim_names, bool complex) :
+//                Format(h5_type, std::move(item_shape), nitem, std::move(dim_names), complex){}
+//        };
+
+    }
+
+#if 0
 
     struct WriteManager: IoManager {
         WriteManager(Type type, uintv_t item_shape, uint_t nitem, uint_t nitem_per_transfer, strv_t dim_names, bool complex):
@@ -106,9 +187,7 @@ namespace hdf5 {
     };
 
     /**
-     * Base class for the serialization of a distributed list of N-dimensional data.
-     * Each rank handles (reads or writes) a number of items, and each item has a dimensionality which is constant
-     * across all ranks. The list item dimension increases the overall dimensionality of the dataset by 1.
+     * The chunk of data transacted in a single
      */
     struct Hyperslab {
         /**
@@ -220,9 +299,9 @@ namespace hdf5 {
         /**
          * native type of the HDF5 dataset to which the data is to be written
          */
-        const Type m_type;
+        const Type m_h5_type;
         /**
-         * elemental layout of an item. an element is either a single value of type m_type, or a pair (complex)
+         * elemental layout of an item. an element is either a single value of type m_h5_type, or a pair (complex)
          */
         const uintv_t m_item_shape;
         /**
@@ -271,12 +350,12 @@ namespace hdf5 {
 
     public:
         WriteManager(Type type, uintv_t item_shape, uint_t nitem, uint_t nitem_per_flush, bool complex):
-            m_type(type), m_item_shape(item_shape), m_nitem(nitem), m_native_item_shape(make_native_item_shape(complex)),
+            m_h5_type(type), m_item_shape(item_shape), m_nitem(nitem), m_native_item_shape(make_native_item_shape(complex)),
             m_native_shape(make_native_shape()), m_nitem_per_flush(nitem_per_flush),
             m_nelement_per_flush(m_nitem_per_flush * ) {}
 
         WriteManager(const WriteManager& other):
-            WriteManager(other.m_type, other.m_nprim_per_item, other.m_nitem, other.m_nitem_per_flush){}
+            WriteManager(other.m_h5_type, other.m_nprim_per_item, other.m_nitem, other.m_nitem_per_flush){}
 
         WriteManager& operator=(const WriteManager& other) = delete;
 
@@ -293,6 +372,7 @@ namespace hdf5 {
 //    struct WriteBufferer: WriteManager {
 //
 //    };
+#endif
 #endif
 }
 

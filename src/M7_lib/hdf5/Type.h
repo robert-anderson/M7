@@ -75,19 +75,8 @@ namespace hdf5 {
 
     public:
 
-        template<typename T>
-        static const hid_t &type() {
-            typedef arith::comp_t<T> comp_t;
-            static_assert(type_ind<comp_t>(), "type has no HDF5 native equivalent");
-            return c_types[type_ind<comp_t>()];
-        }
-
         Type(): m_handle(0), m_size(0ul), m_immutable(true){}
         explicit Type(hid_t handle): m_handle(handle), m_size(H5Tget_size(m_handle)), m_immutable(true){}
-
-        template<typename T>
-        Type(const T*): Type(type<T>()){}
-
 
         Type(const str_t* str);
 
@@ -104,6 +93,13 @@ namespace hdf5 {
         }
 
         operator hid_t () const;
+
+        template<typename T>
+        static Type make() {
+            typedef arith::comp_t<T> comp_t;
+            static_assert(type_ind<comp_t>(), "type has no HDF5 native equivalent");
+            return {c_types[type_ind<comp_t>()]};
+        }
 
     };
 }
