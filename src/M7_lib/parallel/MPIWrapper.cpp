@@ -3,6 +3,7 @@
 //
 
 #include "MPIWrapper.h"
+#include "M7_lib/util/Integer.h"
 
 #include <utility>
 #include <M7_lib/io/Logging.h>
@@ -16,8 +17,7 @@ void mpi::barrier_on_node() {
 }
 
 mpi::count_t mpi::evenly_shared_count(uint_t nitem_global, uint_t irank) {
-    auto remainder = nitem_global % nrank();
-    return nitem_global / nrank() + (irank < remainder);
+    return integer::evenly_shared_count(nitem_global, irank, nrank());
 }
 
 mpi::count_t mpi::evenly_shared_count(uint_t nitem_global) {
@@ -32,8 +32,7 @@ mpi::countv_t mpi::evenly_shared_counts(uint_t nitem_global) {
 }
 
 uint_t mpi::evenly_shared_displ(uint_t nitem_global, uint_t irank) {
-    auto ntb = std::min(irank, nitem_global % nrank());
-    return ntb + irank * (nitem_global / nrank());
+    return integer::evenly_shared_offset(nitem_global, irank, nrank());
 }
 
 uint_t mpi::evenly_shared_displ(uint_t nitem_global) {
@@ -135,6 +134,23 @@ void mpi::blocking_print(const str_t &str) {
         }
         mpi::barrier();
     }
+}
+
+void mpi::filter(bool cond, uintv_t& iranks) {
+    /*
+     * use v_t<unsigned char> as container, since the std::vector<bool> can't be used due to bitfield optimisation
+     */
+    v_t<unsigned char> gathered;
+    const unsigned char c = cond;
+    mpi::all_gather(c, gathered);
+    iranks.clear();
+    for (uint_t i = 0ul; i < gathered.size(); ++i) if (gathered[i]) iranks.push_back(i);
+}
+
+uintv_t mpi::filter(bool cond) {
+    uintv_t ranks;
+    filter(cond, ranks);
+    return ranks;
 }
 
 

@@ -126,7 +126,7 @@ TEST(MPIWrapper, RanksWithNonzero){
     for (uint_t irank=0ul; irank < mpi::nrank(); ++irank)
         if (hash::in_range(irank+123, 0, 2)) iranks_chk.push_back(irank);
     const bool i_have_nonzero = hash::in_range(mpi::irank()+123, 0, 2);
-    const auto iranks = mpi::ranks_with_nonzero(i_have_nonzero);
+    const auto iranks = mpi::filter(i_have_nonzero);
     ASSERT_EQ(iranks, iranks_chk);
 }
 

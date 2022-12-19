@@ -9,16 +9,36 @@
 #include "M7_lib/util/Hash.h"
 
 TEST(IoManager, ContiguousWriteManager) {
-
-    hdf5::FileWriter fw("tmp.h5");
-    const uint_t nitem = hash::in_range(19+mpi::irank(), 34, 54);
+    const uint_t nitem = hash::in_range(19 + mpi::irank(), 34, 54);
     const uint_t max_nitem_per_op = 7;
-    const auto vec = hash::in_range(123, nitem, 0, 100);
-    std::cout << vec << std::endl;
-    auto saver = hdf5::io_manager::make_saver(vec.data(), vec.size(), max_nitem_per_op);
-    fw.save_dataset("stuff", saver);
+    const auto save_vec = hash::in_range(123, nitem, 0, 100);
+    const auto save_vec_all = mpi::all_gatheredv(save_vec);
+    {
+        hdf5::FileWriter fw("tmp.h5");
+        fw.save_dataset("stuff", save_vec, max_nitem_per_op);
+    }
+    v_t<hash::digest_t> load_vec;
+    {
+        /*
+         * only reading on the root rank
+         */
+        hdf5::FileReader fr("tmp.h5");
+        fr.load_dataset("stuff", load_vec, max_nitem_per_op, mpi::i_am_root());
+        const auto load_vec_all = mpi::all_gatheredv(save_vec);
+        ASSERT_EQ(save_vec_all, load_vec_all);
+    }
+    load_vec.clear();
+    {
+        /*
+         * read on every rank
+         */
+        hdf5::FileReader fr("tmp.h5");
+        fr.load_dataset("stuff", load_vec, max_nitem_per_op, true);
+        const auto load_vec_all = mpi::all_gatheredv(save_vec);
+        ASSERT_EQ(save_vec_all, load_vec_all);
+    }
 
-    //hdf5::io_manager::VectorSaveManager<int> vsm();
+    //hdf5::dataset::VectorSaveManager<int> vsm();
 //    const uint_t nitem = 123;
 //    const uint_t nitem_per_transfer = 45;
 //    const auto ntransfer = integer::divceil(nitem, nitem_per_transfer);

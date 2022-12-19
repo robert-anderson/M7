@@ -71,7 +71,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader* reader) {
     m_complex_valued = false;
     if (reader) m_complex_valued = reader->complex_valued();
     // get a vector of all reading ranks
-    const auto reading_iranks = mpi::ranks_with_nonzero(bool(reader));
+    const auto reading_iranks = mpi::filter(bool(reader));
     // use the first one for the definitive value of the complex valued flag
     mpi::bcast(m_complex_valued, reading_iranks.front());
 

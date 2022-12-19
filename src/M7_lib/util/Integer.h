@@ -25,6 +25,34 @@ namespace integer {
     }
 
     /**
+     * @param nitem
+     *  total number of items to be distributed among nbin bins
+     * @param ibin
+     *  index of the specific bin
+     * @param nbin
+     *  number of bins
+     * @return
+     *  number of items in the ibin-indexed bin
+     */
+    static constexpr uint_t evenly_shared_count(uint_t nitem, uint_t ibin, uint_t nbin) {
+        return nitem / nbin + (ibin < (nitem % nbin));
+    }
+
+    /**
+     * @param nitem
+     *  total number of items to be distributed among nbin bins
+     * @param ibin
+     *  index of the specific bin
+     * @param nbin
+     *  number of bins
+     * @return
+     *  number of items in the bins with index less than ibin
+     */
+    static constexpr uint_t evenly_shared_offset(uint_t nitem, uint_t ibin, uint_t nbin) {
+        return min(ibin, nitem % nbin) + ibin * (nitem / nbin);
+    }
+
+    /**
      * the "ceiling" of an integral division. if the remainder is zero, return the quotient, else return quotient + 1
      */
     template<typename T>

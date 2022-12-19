@@ -38,7 +38,7 @@ namespace hdf5 {
 //        ReadToOneIndep,
 //    };
 
-    namespace io_manager {
+    namespace dataset {
 
         /**
          * nomenclature:
@@ -78,16 +78,17 @@ namespace hdf5 {
              */
             const strv_t m_h5_dim_names;
 
-            Format(Type h5_type, uintv_t item_shape, uint_t nitem, strv_t dim_names, bool complex) :
+            Format(Type h5_type, uintv_t item_shape, uint_t nitem, strv_t dim_names, bool add_complex_dim) :
                 m_h5_type(h5_type), m_item_shape(std::move(item_shape)), m_nitem(nitem),
-                m_h5_item_shape(convert::vector<hsize_t>(complex ? vector::appended(m_item_shape, 2ul) : m_item_shape)),
+                m_h5_item_shape(
+                        convert::vector<hsize_t>(add_complex_dim ? vector::appended(m_item_shape, 2ul) : m_item_shape)),
                 m_item_size(nd::nelement(m_h5_item_shape) * m_h5_type.m_size),
                 m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_h5_item_shape, m_nitem))),
-                m_h5_dim_names(complex && !dim_names.empty() ? vector::appended(dim_names, "real/imag") : dim_names) {
+                m_h5_dim_names(add_complex_dim && !dim_names.empty() ? vector::appended(dim_names, "real/imag") : dim_names) {
                 REQUIRE_TRUE(m_h5_dim_names.empty() || m_h5_dim_names.size() == m_h5_item_shape.size(),
                              "incorrect number of dimension names");
-                REQUIRE_TRUE((m_h5_item_shape.back()==2ul) || !complex,
-                             "last item in item shape must be 2 if data is complex-valued");
+                REQUIRE_TRUE((m_h5_item_shape.back()==2ul) || !add_complex_dim,
+                             "last item in item shape must be 2 if data is add_complex_dim-valued");
             }
         };
 
@@ -96,12 +97,15 @@ namespace hdf5 {
             const uintv_t m_nitem_all;
             const uintv_t m_nitem_offsets;
             const v_t<hsize_t> m_h5_shape_sum;
-            DistFormat(Type h5_type, uintv_t item_shape, uint_t nitem, strv_t dim_names, bool complex):
-                Format(h5_type, std::move(item_shape), nitem, std::move(dim_names), complex),
+            DistFormat(Type h5_type, uintv_t item_shape, uint_t nitem, strv_t dim_names, bool add_complex_dim):
+                Format(h5_type, std::move(item_shape), nitem, std::move(dim_names), add_complex_dim),
                 m_nitem_sum(mpi::all_sum(m_nitem)), m_nitem_all(mpi::all_gathered(m_nitem)),
                 m_nitem_offsets(mpi::counts_to_displs_consec(m_nitem_all)),
                 m_h5_shape_sum(vector::prepended(m_h5_item_shape, m_nitem_sum)){}
         };
+
+        typedef std::function<const void*(uint_t i, const dataset::DistFormat& format, uint_t max_nitem_per_op)> save_fn;
+        typedef std::function<void*(uint_t i, const dataset::DistFormat& format, uint_t max_nitem_per_op)> load_fn;
 
         struct SaveManager {
             const DistFormat m_format;

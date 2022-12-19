@@ -23,7 +23,23 @@ namespace hdf5 {
 
         NodeReader(hid_t handle) : Node(handle) {}
 
-        void load_dataset(const str_t& name, const io_manager::SaveManager& manager) const;
+        void load_dataset(const str_t& name, dataset::load_fn fn, uint_t max_nitem_per_op, bool this_rank) const;
+
+        template<typename T>
+        void load_dataset(const str_t& name, v_t<T>& dst, uint_t max_nitem_per_op, bool this_rank) const {
+            auto fn = [&](uint_t i, const dataset::DistFormat& format, uint_t max_nitem_per_op) {
+                if (dst.size() != format.m_nitem) dst.resize(format.m_nitem);
+                auto ptr = dst.begin().base() + i * max_nitem_per_op;
+                return ::ptr::in_range(ptr, dst.begin().base(), dst.cend().base()) ?
+                    reinterpret_cast<void*>(ptr) : nullptr;
+            };
+            return load_dataset(name, fn, max_nitem_per_op, this_rank);
+        }
+
+        template<typename T>
+        void load_dataset(const str_t& name, v_t<T>& dst, bool this_rank) const {
+            load_dataset(name, dst, this_rank);
+        }
 
     private:
         template<typename T>
@@ -116,7 +132,7 @@ namespace hdf5 {
         strv_t child_names(int type=-1) const;
 
 //
-//        void save_dataset(const io_manager::SaveManager& sm) const {
+//        void save_dataset(const dataset::SaveManager& sm) const {
 //
 //        }
 
@@ -275,7 +291,26 @@ namespace hdf5 {
     struct NodeWriter : Node {
         NodeWriter(hid_t handle): Node(handle){}
 
-        void save_dataset(const str_t& name, const io_manager::SaveManager& manager) const;
+        void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::DistFormat& format, uint_t max_nitem_per_op) const;
+
+        void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::DistFormat& format) const;
+
+        template<typename T>
+        void save_dataset(const str_t& name, const v_t<T>& src, uint_t max_nitem_per_op) const {
+            dataset::save_fn fn = [&](uint_t i, const dataset::DistFormat& /*format*/, uint_t max_nitem_per_op) {
+                const auto ptr = src.cbegin().base() + i * max_nitem_per_op;
+                return ::ptr::in_range(ptr, src.cbegin().base(), src.cend().base()) ?
+                    reinterpret_cast<const void*>(ptr) : nullptr;
+            };
+            return save_dataset(name, fn,
+                                {Type::make<T>(), {1}, src.size(), {"element"}, dtype::is_complex<T>()},
+                                max_nitem_per_op);
+        }
+
+        template<typename T>
+        void save_dataset(const str_t& name, const v_t<T>& src) const {
+            save_dataset(name, src, src.size());
+        }
 
         template<typename T>
         void write_attr(const str_t& name, const T& v) const {
