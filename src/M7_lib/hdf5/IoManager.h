@@ -38,7 +38,7 @@ namespace hdf5 {
 //        ReadToOneIndep,
 //    };
 
-    namespace nd {
+    namespace io_manager {
 
         /**
          * nomenclature:
@@ -62,9 +62,9 @@ namespace hdf5 {
              */
             const uint_t m_nitem;
             /**
-             * layout of an item in HDF5 terms
+             * layout of an item in HDF5 terms in hsize_t type
              */
-            const uintv_t m_h5_item_shape;
+            const v_t<hsize_t> m_h5_item_shape;
             /**
              * size in bytes of each item
              */
@@ -80,11 +80,10 @@ namespace hdf5 {
 
             Format(Type h5_type, uintv_t item_shape, uint_t nitem, strv_t dim_names, bool complex) :
                 m_h5_type(h5_type), m_item_shape(std::move(item_shape)), m_nitem(nitem),
-                m_h5_item_shape(complex ? vector::appended(m_item_shape, 2ul) : m_item_shape),
-                m_item_size(::nd::nelement(m_h5_item_shape) * m_h5_type.m_size),
+                m_h5_item_shape(convert::vector<hsize_t>(complex ? vector::appended(m_item_shape, 2ul) : m_item_shape)),
+                m_item_size(nd::nelement(m_h5_item_shape) * m_h5_type.m_size),
                 m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_h5_item_shape, m_nitem))),
-                m_h5_dim_names(
-                    (complex && !dim_names.empty()) ? vector::appended(dim_names, "real/imag") : dim_names) {
+                m_h5_dim_names(complex && !dim_names.empty() ? vector::appended(dim_names, "real/imag") : dim_names) {
                 REQUIRE_TRUE(m_h5_dim_names.empty() || m_h5_dim_names.size() == m_h5_item_shape.size(),
                              "incorrect number of dimension names");
                 REQUIRE_TRUE((m_h5_item_shape.back()==2ul) || !complex,
@@ -92,65 +91,90 @@ namespace hdf5 {
             }
         };
 
-        struct IoManager {
-            const Format m_format;
-            const uint_t m_max_nitem_per_op;
-        protected:
-            /**
-             * number of calls to next already made
-             */
-            uint_t m_nop = 0ul;
-            IoManager(Format format, uint_t max_nitem_per_op):
-                m_format(std::move(format)), m_max_nitem_per_op(max_nitem_per_op){}
+        struct DistFormat : Format{
+            const uint_t m_nitem_sum;
+            const uintv_t m_nitem_all;
+            const uintv_t m_nitem_offsets;
+            const v_t<hsize_t> m_h5_shape_sum;
+            DistFormat(Type h5_type, uintv_t item_shape, uint_t nitem, strv_t dim_names, bool complex):
+                Format(h5_type, std::move(item_shape), nitem, std::move(dim_names), complex),
+                m_nitem_sum(mpi::all_sum(m_nitem)), m_nitem_all(mpi::all_gathered(m_nitem)),
+                m_nitem_offsets(mpi::counts_to_displs_consec(m_nitem_all)),
+                m_h5_shape_sum(vector::prepended(m_h5_item_shape, m_nitem_sum)){}
         };
 
-        struct WriteManager : IoManager {
-            WriteManager(Format format, uint_t max_nitem_per_op):
-                IoManager(std::move(format), max_nitem_per_op){}
+        struct SaveManager {
+            const DistFormat m_format;
+            const uint_t m_max_nitem_per_write;
+            SaveManager(DistFormat format, uint_t max_nitem_per_write):
+                m_format(std::move(format)), m_max_nitem_per_write(max_nitem_per_write){}
             /**
              * prepare the buffer for the next write operation
              * @return
              *  pointer to the bytes to be written, null if there is no more data on this MPI rank
              */
-            virtual void* const get_next() = 0;
-            void* const next() {
-                auto ptr = get_next();
-                ++m_nop;
-                return ptr;
-            }
+            virtual const void* get(uint_t iblock) const = 0;
         };
-        struct ReadManager : IoManager {
-            ReadManager(Format format, uint_t max_nitem_per_op): IoManager(std::move(format), max_nitem_per_op){}
-            /**
-             * prepare the buffer for the next write operation
-             * @return
-             *  pointer to the bytes to be written, null if there is no more data on this MPI rank
-             */
-            virtual void* get_next() = 0;
-            void* next() {
-                auto ptr = get_next();
-                ++m_nop;
-                return ptr;
+        template<typename T>
+        struct ContiguousSaveManager : SaveManager {
+            const char* const m_begin;
+            const char* const m_end;
+            ContiguousSaveManager(const T* v, uint_t size, uint_t max_nitem_per_op): SaveManager(
+                {hdf5::Type::make<T>(), {1ul}, size, {"element"}, dtype::is_complex<T>()}, max_nitem_per_op),
+                m_begin(reinterpret_cast<const char*>(v)), m_end(m_begin + m_format.m_item_size * m_format.m_nitem){}
+
+            ContiguousSaveManager(const T* v, uint_t size): ContiguousSaveManager(v, size, size){}
+
+            ContiguousSaveManager(const v_t<T>* v): ContiguousSaveManager(v->data(), v->size()){}
+
+            const void* get(uint_t i) const override {
+                const auto ptr = m_begin + (i * m_max_nitem_per_write * m_format.m_item_size);
+                return ::ptr::in_range(ptr, m_begin, m_end) ? ptr : nullptr;
             }
         };
 
         template<typename T>
-        struct VectorWriteManager : WriteManager {
-            const void* const m_begin;
-            const void* const m_end;
-            VectorWriteManager(const v_t<T>* v, uint_t max_nitem_per_op): WriteManager(
-                {hdf5::Type::make<T>(), {1ul}, v->size(), {"element"}, dtype::is_complex<T>()}, max_nitem_per_op),
-                m_begin(reinterpret_cast<void const*>(v->data())),
-                m_end(m_begin+m_format.m_item_size*m_format.m_nitem){}
+        ContiguousSaveManager<T> make_saver(const T* v, uint_t size, uint_t max_nitem_per_op) {
+            return {v, size, max_nitem_per_op};
+        }
 
-            VectorWriteManager(const v_t<T>* v): VectorWriteManager(v, v->size()){}
+        template<typename T>
+        ContiguousSaveManager<T> make_saver(const T* v, uint_t size) {
+            return make_saver(v, size, size);
+        }
 
-            void *const get_next() override {
-                auto ptr = m_begin;
-                ptr += m_nop*m_format.m_item_size;
-                return ::ptr::in_range(ptr, m_begin, m_end) ? ptr : nullptr;
-            }
-        };
+        template<typename T>
+        ContiguousSaveManager<T> make_saver(const v_t<T>* v) {
+            return make_saver(v, v->size());
+        }
+
+//        struct LoadManager : IoManager {
+//            LoadManager(Format format, uint_t max_nitem_per_op): IoManager(std::move(format), max_nitem_per_op){}
+//            /**
+//             * prepare the buffer for the next write operation
+//             * @return
+//             *  pointer to the bytes to be written, null if there is no more data on this MPI rank
+//             */
+//            virtual void* get_next() = 0;
+//        };
+
+//        template<typename T>
+//        struct VectorLoadManager : LoadManager {
+//            const void* const m_begin;
+//            const void* const m_end;
+//            VectorLoadManager(v_t<T>* v, uint_t max_nitem_per_op): SaveManager(
+//                {hdf5::Type::make<T>(), {1ul}, v->size(), {"element"}, dtype::is_complex<T>()}, max_nitem_per_op),
+//                m_begin(reinterpret_cast<void const*>(v->data())),
+//                m_end(m_begin+m_format.m_item_size*m_format.m_nitem){}
+//
+//            VectorLoadManager(const v_t<T>* v): VectorSaveManager(v, v->size()){}
+//
+//            const void * get_next() override {
+//                auto ptr = m_begin;
+//                ptr += m_nop*m_max_nitem_per_op*m_format.m_item_size;
+//                return ::ptr::in_range(ptr, m_begin, m_end) ? ptr : nullptr;
+//            }
+//        };
 
 //        struct DistFormat : Format {
 //            v_t

@@ -108,7 +108,7 @@ void hdf5::DistBase::select_hyperslab(uint_t iitem_begin, uint_t nitem) {
          * nothing to write, so make a null selection instead of a hyperslab selection
          */
         logging::debug_("making null selection");
-        DEBUG_ASSERT_LT(iitem, m_nitem_local_max, "Item index exceeds global maximum");
+//        DEBUG_ASSERT_LT(iitem, m_nitem_local_max, "Item index exceeds global maximum");
         auto status = H5Sselect_none(m_filespace_handle);
         DEBUG_ONLY(status);
         DEBUG_ASSERT_FALSE(status, "HDF5 null selection failed");
@@ -296,7 +296,7 @@ void hdf5::NdDistListBase::select_hyperslab(uint_t iitem_begin, uint_t nitem) {
          * nothing to write, so make a null selection instead of a hyperslab selection
          */
         logging::debug_("making null selection");
-        DEBUG_ASSERT_LT(iitem, m_nitem_local_max, "Item index exceeds global maximum");
+//        DEBUG_ASSERT_LT(iitem, m_nitem_local_max, "Item index exceeds global maximum");
         auto status = H5Sselect_none(m_filespace_handle);
         DEBUG_ONLY(status);
         DEBUG_ASSERT_FALSE(status, "HDF5 null selection failed");

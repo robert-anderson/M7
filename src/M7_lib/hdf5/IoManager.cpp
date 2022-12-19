@@ -5,6 +5,7 @@
 #include "IoManager.h"
 
 
+#if 0
 v_t<hsize_t> hdf5::Hyperslab::get_list_dims_local() {
     v_t<hsize_t> out;
     out.reserve(m_ndim_list);
@@ -99,5 +100,4 @@ hdf5::Hyperslab::~Hyperslab() {
     H5Dclose(m_dataset_handle);
     H5Sclose(m_memspace_handle);
 }
-
-
+#endif

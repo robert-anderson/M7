@@ -5,8 +5,20 @@
 #include "gtest/gtest.h"
 #include "M7_lib/hdf5/IoManager.h"
 #include "M7_lib/util/Hash.h"
+#include "M7_lib/hdf5/File.h"
+#include "M7_lib/util/Hash.h"
 
-TEST(IoManager, VectorWriteManager) {
+TEST(IoManager, ContiguousWriteManager) {
+
+    hdf5::FileWriter fw("tmp.h5");
+    const uint_t nitem = hash::in_range(19+mpi::irank(), 34, 54);
+    const uint_t max_nitem_per_op = 7;
+    const auto vec = hash::in_range(123, nitem, 0, 100);
+    std::cout << vec << std::endl;
+    auto saver = hdf5::io_manager::make_saver(vec.data(), vec.size(), max_nitem_per_op);
+    fw.save_dataset("stuff", saver);
+
+    //hdf5::io_manager::VectorSaveManager<int> vsm();
 //    const uint_t nitem = 123;
 //    const uint_t nitem_per_transfer = 45;
 //    const auto ntransfer = integer::divceil(nitem, nitem_per_transfer);

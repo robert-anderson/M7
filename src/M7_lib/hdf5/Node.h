@@ -23,6 +23,8 @@ namespace hdf5 {
 
         NodeReader(hid_t handle) : Node(handle) {}
 
+        void load_dataset(const str_t& name, const io_manager::SaveManager& manager) const;
+
     private:
         template<typename T>
         void read_attr_fn(const str_t& name, T& v, T default_) const {
@@ -112,6 +114,12 @@ namespace hdf5 {
         int child_type(uint_t i) const;
 
         strv_t child_names(int type=-1) const;
+
+//
+//        void save_dataset(const io_manager::SaveManager& sm) const {
+//
+//        }
+
 
 
         /**
@@ -267,6 +275,8 @@ namespace hdf5 {
     struct NodeWriter : Node {
         NodeWriter(hid_t handle): Node(handle){}
 
+        void save_dataset(const str_t& name, const io_manager::SaveManager& manager) const;
+
         template<typename T>
         void write_attr(const str_t& name, const T& v) const {
             AttrWriter attr(m_handle, name, {1}, Type(&v));
@@ -289,6 +299,7 @@ namespace hdf5 {
             attr.write(v.data()->c_str(), 1);
         }
 
+#if 0
         void write_nondist(const str_t& name, WriteManager& wm, uint_t irank) {
             const DataSpace space(wm.m_h5_shape, !mpi::i_am(irank));
             const hid_t dset = H5Dcreate2(m_handle, name.c_str(), wm.m_h5_type, space.m_handle,
@@ -346,6 +357,8 @@ namespace hdf5 {
                 all_done = mpi::all_land(all_done);
             }
         }
+
+#endif
 
         /**
          * since this is a public method, the shape type is uintv_t, which is converted to the vector type used internally within the hdf5 namespace

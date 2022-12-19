@@ -81,3 +81,58 @@ uintv_t hdf5::NodeReader::get_dataset_shape(const str_t& name) const {
     for (const auto &i: dims) out.push_back(i);
     return out;
 }
+
+void hdf5::NodeWriter::save_dataset(const str_t& name, const hdf5::io_manager::SaveManager& manager) const {
+    const auto& format = manager.m_format;
+    auto filespace = H5Screate_simple(format.m_h5_shape_sum.size(), format.m_h5_shape_sum.data(), nullptr);
+
+    /*
+     * Create the dataset with default properties and close filespace.
+     */
+    auto dataset_handle = H5Dcreate(m_handle, name.c_str(), format.m_h5_type, filespace,
+                                    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+//                m_dataset_handle = H5Dopen1(m_parent_handle, name.c_str());
+
+    H5Sclose(filespace);
+
+    filespace = H5Dget_space(dataset_handle);
+
+    hid_t plist = H5Pcreate(H5P_DATASET_XFER);
+    H5Pset_dxpl_mpio(plist, H5FD_MPIO_COLLECTIVE);
+
+    const hsize_t ndim = format.m_h5_shape.size();
+    /*
+     * we require three different hyperslabs:
+     *  full: for writing a block of the maximum size
+     *  part: for writing a block of the final non-zero size
+     *  null: for writing nothing
+     */
+    const auto full_counts = vector::prepended(format.m_h5_item_shape, manager.m_max_nitem_per_write);
+    const auto part_counts = vector::prepended(format.m_h5_item_shape, format.m_nitem % manager.m_max_nitem_per_write);
+    const v_t<hsize_t> null_counts(ndim, 0);
+    auto file_hyperslab = H5Screate_simple(ndim, manager.m_format.m_h5_shape_sum.data(), nullptr);
+    auto mem_hyperslab = H5Screate_simple(ndim, manager.m_format.m_h5_shape_sum.data(), nullptr);
+
+    uint_t nitem_remaining = format.m_nitem;
+    v_t<hsize_t> offsets(ndim);
+    char all_done = false;
+    for (uint_t iblock=0ul; !all_done; ++iblock) {
+        offsets[0] = 0;
+        const hsize_t* counts = (nitem_remaining) ? (nitem_remaining < manager.m_max_nitem_per_write ? part_counts.data() : full_counts.data()) : null_counts.data();
+        H5Sselect_hyperslab(mem_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts, nullptr);
+        offsets[0] = std::min(iblock*manager.m_max_nitem_per_write, format.m_nitem) + format.m_nitem_offsets[mpi::irank()];
+        const auto src = manager.get(iblock);
+        REQUIRE_EQ(bool(src), bool(counts[0]), "count zero with non-null data or count non-zero with null data");
+        H5Sselect_hyperslab(file_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts, nullptr);
+        auto status = H5Dwrite(dataset_handle, format.m_h5_type, mem_hyperslab, file_hyperslab, plist, src);
+        REQUIRE_FALSE(status, "HDF5 Error on multidimensional save");
+        all_done = !src;
+        all_done = mpi::all_land(all_done);
+        nitem_remaining = (nitem_remaining > manager.m_max_nitem_per_write) ? nitem_remaining - manager.m_max_nitem_per_write : 0ul;
+    }
+
+    H5Sclose(filespace);
+    H5Sclose(file_hyperslab);
+    H5Sclose(mem_hyperslab);
+    H5Dclose(dataset_handle);
+}
