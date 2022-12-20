@@ -25,30 +25,35 @@ namespace hdf5 {
         NodeReader(hid_t handle) : Node(handle) {}
 
     private:
-//        Attr load_attr(const str_t& /*name*/) const {
-//            const auto& h5_shape = attr.m_format.m_h5_shape;
-//            auto dataspace = H5Screate_simple(h5_shape.size(), h5_shape.data(), nullptr);
-//
-//            auto attr_handle = H5Acreate(m_handle, name.c_str(), attr.m_format.m_h5_type, dataspace,
-//                                         H5P_DEFAULT, H5P_DEFAULT);
-//
-//            auto status = H5Awrite(attr_handle, attr.m_format.m_h5_type, attr.m_buf.data());
-//            DEBUG_ONLY(status);
-//            DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
-//            H5Aclose(attr_handle);
-//            H5Sclose(dataspace);
-//        }
+        Attr load_raw_attr(const str_t& name) const {
+            auto attr_handle = H5Aopen(m_handle, name.c_str(), H5P_DEFAULT);
+            auto dataspace = H5Aget_space(attr_handle);
+            auto ndim = H5Sget_simple_extent_ndims(dataspace);
+            v_t<hsize_t> shape(ndim);
+            H5Sget_simple_extent_dims(dataspace, shape.data(), nullptr);
+            Type h5_type(H5Aget_type(attr_handle));
+            dataset::Format format(h5_type, convert::vector<uint_t>(shape), {}, false);
+            v_t<buf_t> buf(format.m_size);
+            auto status = H5Aread(attr_handle, h5_type, buf.data());
+            DEBUG_ONLY(status);
+            DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
+            H5Aclose(attr_handle);
+            H5Sclose(dataspace);
+            return {buf, format};
+        }
 
     public:
-//        template<typename T>
-//        void load_attr(const str_t& name, const T& v) const {
-//            load_attr(name).parse(v);
-//        }
+        template<typename T>
+        void load_attr(const str_t& name, T& v) const {
+            load_raw_attr(name).parse(v);
+        }
 
-//        template<typename T>
-//        void load_attr(const str_t& name, const T& v) const {
-//            load_attr(name).parse(v);
-//        }
+        template<typename T>
+        T load_attr(const str_t& name) const {
+            T v;
+            load_attr(name, v);
+            return v;
+        }
 
         void load_dataset(const str_t& name, dataset::load_fn fn, uint_t max_nitem_per_op, bool this_rank) const;
 

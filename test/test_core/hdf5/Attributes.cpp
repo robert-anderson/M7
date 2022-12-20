@@ -12,17 +12,45 @@ TEST(Attributes, RealScalar) {
         fw.save_attr("example_attr", 5ul);
     }
     {
-//        hdf5::FileWriter fw("tmp.h5");
-//        fw.save_attr("example_attr", 5ul);
+        hdf5::FileReader fr("tmp.h5");
+        ASSERT_EQ(fr.load_attr<uint_t>("example_attr"), 5ul);
     }
 }
-//TEST(Attributes, RealScalar) {
-//    const uint_t nitem = hash::in_range(19 + mpi::irank(), 34, 54);
-//    const uint_t max_nitem_per_op = 7;
-//    const auto save_vec = hash::in_range(123, nitem, 0, 100);
-//    const auto save_vec_all = mpi::all_gatheredv(save_vec);
-//    {
-//        hdf5::FileWriter fw("tmp.h5");
-//        fw.save_dataset("stuff", save_vec, max_nitem_per_op);
-//    }
-//}
+
+TEST(Attributes, ComplexScalar) {
+    std::complex<double> z = {1.23, -4.56};
+    {
+        hdf5::FileWriter fw("tmp.h5");
+        fw.save_attr("example_attr", z);
+    }
+    {
+        hdf5::FileReader fr("tmp.h5");
+        ASSERT_EQ(fr.load_attr<std::complex<double>>("example_attr"), z);
+    }
+}
+
+TEST(Attributes, RealVector) {
+    const uint_t nitem = 23;
+    const auto vec = hash::in_range(123, nitem, 0, 100);
+    {
+        hdf5::FileWriter fw("tmp.h5");
+        fw.save_attr("example_attr", vec);
+    }
+    {
+        hdf5::FileReader fr("tmp.h5");
+        ASSERT_EQ(fr.load_attr<v_t<hash::digest_t>>("example_attr"), vec);
+    }
+}
+
+TEST(Attributes, ComplexVector) {
+    const uint_t nitem = 23;
+    const auto vec = arith::zip(hash::in_range(123, nitem, 0, 100), hash::in_range(567, nitem, 0, 100));
+    {
+        hdf5::FileWriter fw("tmp.h5");
+        fw.save_attr("example_attr", vec);
+    }
+    {
+        hdf5::FileReader fr("tmp.h5");
+        ASSERT_EQ(fr.load_attr<v_t<std::complex<hash::digest_t>>>("example_attr"), vec);
+    }
+}
