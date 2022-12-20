@@ -3,101 +3,25 @@
 //
 
 #include "IoManager.h"
+#include "M7_lib/util/Vector.h"
 
-
-#if 0
-v_t<hsize_t> hdf5::Hyperslab::get_list_dims_local() {
-    v_t<hsize_t> out;
-    out.reserve(m_ndim_list);
-    out.push_back(m_nitem_local);
-    out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
-    return out;
+hdf5::dataset::Format::Format(hdf5::Type h5_type, uintv_t shape, strv_t dim_names, bool add_complex_dim) :
+        m_h5_type(h5_type), m_shape(std::move(shape)),
+        m_h5_shape(convert::vector<hsize_t>(add_complex_dim ? vector::appended(m_shape, 2ul) : m_shape)),
+        m_size(nd::nelement(m_h5_shape) * m_h5_type.m_size),
+        m_dim_names(add_complex_dim && !dim_names.empty() ?
+                    vector::appended(dim_names, "real/imag") : dim_names) {
+    REQUIRE_TRUE(m_dim_names.empty() || m_dim_names.size() == m_h5_shape.size(),
+                 "incorrect number of dimension names");
+    REQUIRE_TRUE(m_size, "format is empty");
 }
 
-v_t<hsize_t> hdf5::Hyperslab::get_list_dims_global() {
-    v_t<hsize_t> out;
-    out.reserve(m_ndim_list);
-    out.push_back(m_nitem_global);
-    out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
-    return out;
-}
+hdf5::dataset::ListFormat::ListFormat(hdf5::dataset::Format item_format, uint_t nitem) :
+        m_item(item_format), m_nitem(nitem),
+        m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_item.m_h5_shape, m_nitem))),
+        m_dim_names(vector::prepended(m_item.m_dim_names, "item")) {}
 
-hsize_t hdf5::Hyperslab::get_item_offset() {
-    v_t<hsize_t> tmp(mpi::nrank());
-    mpi::all_gather(m_nitem_local, tmp);
-    hsize_t out = 0ul;
-    for (uint_t irank = 0ul; irank < mpi::irank(); ++irank) out += tmp[irank];
-    return out;
-}
-
-hdf5::Hyperslab::Hyperslab(hid_t parent_handle, str_t name, const uintv_t &item_dims, const uint_t &nitem,
-                           bool writemode, hid_t h5type) :
-        m_parent_handle(parent_handle),
-        m_item_dims(convert::vector<hsize_t>(item_dims)),
-        m_ndim_item(item_dims.size()),
-        m_ndim_list(item_dims.size() + 1),
-        m_nitem_local(nitem),
-        m_nitem_global(mpi::all_sum(m_nitem_local)),
-        m_nitem_local_max(mpi::all_max(m_nitem_local)),
-        m_list_dims_local(get_list_dims_local()),
-        m_list_dims_global(get_list_dims_global()),
-        m_item_offset(get_item_offset()),
-        m_hyperslab_counts(m_ndim_list, 0ul),
-        m_hyperslab_offsets(m_ndim_list, 0ul),
-        m_h5type(h5type) {
-    REQUIRE_TRUE(H5Tget_size(m_h5type), "Invalid HDF5 type specified");
-    m_filespace_handle = H5Screate_simple(m_ndim_list, m_list_dims_global.data(), nullptr);
-
-    /*
-     * Create the dataset with default properties and close filespace.
-     */
-    if (writemode)
-        m_dataset_handle = H5Dcreate(m_parent_handle, name.c_str(), m_h5type, m_filespace_handle,
-                                     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    else
-        m_dataset_handle = H5Dopen1(m_parent_handle, name.c_str());
-
-    H5Sclose(m_filespace_handle);
-
-    m_filespace_handle = H5Dget_space(m_dataset_handle);
-
-    m_hyperslab_counts = m_list_dims_local;
-    // select one item at a time
-    m_hyperslab_counts[0] = 1;
-    m_memspace_handle = H5Screate_simple(m_ndim_list, m_hyperslab_counts.data(), nullptr);
-    v_t<hsize_t> zeros(m_ndim_list, 0ul);
-    m_none_memspace_handle = H5Screate_simple(m_ndim_list, zeros.data(), nullptr);
-
-    logging::debug_("Opened HDF5 NdList with {} local items", m_nitem_local);
-}
-
-void hdf5::Hyperslab::select_hyperslab(uint_t iitem_begin, uint_t nitem) {
-    DEBUG_ASSERT_LE(iitem_begin+nitem, m_nitem_local, "last item OOB");
-    if (nitem) {
-        m_hyperslab_offsets[0] = m_item_offset + iitem_begin;
-        m_hyperslab_counts[0] = nitem;
-        logging::debug_("selecting hyperslab with offsets: {}", convert::to_string(m_hyperslab_offsets));
-        auto status = H5Sselect_hyperslab(m_filespace_handle, H5S_SELECT_SET, m_hyperslab_offsets.data(),
-                                          nullptr, m_hyperslab_counts.data(), nullptr);
-        DEBUG_ONLY(status);
-        DEBUG_ASSERT_FALSE(status, "HDF5 hyperslab selection failed");
-        logging::debug_("hyperslab selected");
-    } else {
-        /*
-         * nothing to write, so make a null selection instead of a hyperslab selection
-         */
-        logging::debug_("making null selection");
-        DEBUG_ASSERT_LT(iitem, m_nitem_local_max, "Item index exceeds global maximum");
-        auto status = H5Sselect_none(m_filespace_handle);
-        DEBUG_ONLY(status);
-        DEBUG_ASSERT_FALSE(status, "HDF5 null selection failed");
-    }
-}
-
-
-hdf5::Hyperslab::~Hyperslab() {
-    H5Sclose(m_filespace_handle);
-    H5Dclose(m_dataset_handle);
-    H5Sclose(m_memspace_handle);
-}
-#endif
+hdf5::dataset::DistListFormat::DistListFormat(hdf5::dataset::Format item_format, uint_t nitem) :
+        m_local(std::move(item_format), nitem), m_nitem(mpi::all_sum(m_local.m_nitem)),
+        m_nitem_displ(mpi::counts_to_displs_consec(mpi::all_gathered(m_local.m_nitem))[mpi::irank()]),
+        m_h5_shape(vector::prepended(m_local.m_item.m_h5_shape, m_nitem)) {}

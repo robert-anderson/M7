@@ -8,6 +8,7 @@
 #include "Attr.h"
 #include "Dataset.h"
 #include "IoManager.h"
+#include "M7_lib/util/Pointer.h"
 
 namespace hdf5 {
 
@@ -23,12 +24,38 @@ namespace hdf5 {
 
         NodeReader(hid_t handle) : Node(handle) {}
 
+    private:
+//        Attr load_attr(const str_t& /*name*/) const {
+//            const auto& h5_shape = attr.m_format.m_h5_shape;
+//            auto dataspace = H5Screate_simple(h5_shape.size(), h5_shape.data(), nullptr);
+//
+//            auto attr_handle = H5Acreate(m_handle, name.c_str(), attr.m_format.m_h5_type, dataspace,
+//                                         H5P_DEFAULT, H5P_DEFAULT);
+//
+//            auto status = H5Awrite(attr_handle, attr.m_format.m_h5_type, attr.m_buf.data());
+//            DEBUG_ONLY(status);
+//            DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
+//            H5Aclose(attr_handle);
+//            H5Sclose(dataspace);
+//        }
+
+    public:
+//        template<typename T>
+//        void load_attr(const str_t& name, const T& v) const {
+//            load_attr(name).parse(v);
+//        }
+
+//        template<typename T>
+//        void load_attr(const str_t& name, const T& v) const {
+//            load_attr(name).parse(v);
+//        }
+
         void load_dataset(const str_t& name, dataset::load_fn fn, uint_t max_nitem_per_op, bool this_rank) const;
 
         template<typename T>
         void load_dataset(const str_t& name, v_t<T>& dst, uint_t max_nitem_per_op, bool this_rank) const {
-            auto fn = [&](uint_t i, const dataset::DistFormat& format, uint_t max_nitem_per_op) {
-                if (dst.size() != format.m_nitem) dst.resize(format.m_nitem);
+            auto fn = [&](uint_t i, const dataset::DistListFormat& format, uint_t max_nitem_per_op) {
+                if (dst.size() != format.m_local.m_nitem) dst.resize(format.m_local.m_nitem);
                 auto ptr = dst.begin().base() + i * max_nitem_per_op;
                 return ::ptr::in_range(ptr, dst.begin().base(), dst.cend().base()) ?
                     reinterpret_cast<void*>(ptr) : nullptr;
@@ -291,20 +318,38 @@ namespace hdf5 {
     struct NodeWriter : Node {
         NodeWriter(hid_t handle): Node(handle){}
 
-        void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::DistFormat& format, uint_t max_nitem_per_op) const;
+        void save_attr(const str_t& name, const Attr& attr) const {
+            const auto& h5_shape = attr.m_format.m_h5_shape;
+            auto dataspace = H5Screate_simple(h5_shape.size(), h5_shape.data(), nullptr);
 
-        void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::DistFormat& format) const;
+            auto attr_handle = H5Acreate(m_handle, name.c_str(), attr.m_format.m_h5_type, dataspace,
+                                         H5P_DEFAULT, H5P_DEFAULT);
+
+            auto status = H5Awrite(attr_handle, attr.m_format.m_h5_type, attr.m_buf.data());
+            DEBUG_ONLY(status);
+            DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
+            H5Aclose(attr_handle);
+            H5Sclose(dataspace);
+        }
+
+        template<typename T>
+        void save_attr(const str_t& name, const T& v) const {
+            save_attr(name, {v});
+        }
+
+        void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::DistListFormat& format, uint_t max_nitem_per_op) const;
+
+        void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::DistListFormat& format) const;
 
         template<typename T>
         void save_dataset(const str_t& name, const v_t<T>& src, uint_t max_nitem_per_op) const {
-            dataset::save_fn fn = [&](uint_t i, const dataset::DistFormat& /*format*/, uint_t max_nitem_per_op) {
+            dataset::save_fn fn = [&](uint_t i, const dataset::DistListFormat& /*format*/, uint_t max_nitem_per_op) {
                 const auto ptr = src.cbegin().base() + i * max_nitem_per_op;
                 return ::ptr::in_range(ptr, src.cbegin().base(), src.cend().base()) ?
                     reinterpret_cast<const void*>(ptr) : nullptr;
             };
             return save_dataset(name, fn,
-                                {Type::make<T>(), {1}, src.size(), {"element"}, dtype::is_complex<T>()},
-                                max_nitem_per_op);
+                                {{Type::make<T>(), {}, {}, dtype::is_complex<T>()}, src.size()}, max_nitem_per_op);
         }
 
         template<typename T>
@@ -616,8 +661,6 @@ namespace hdf5 {
             save(name, vs, irank);
         }
     };
-
 }
-
 
 #endif //M7_HDF5_NODE_H
