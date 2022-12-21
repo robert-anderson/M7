@@ -79,7 +79,7 @@ void HfExcits::save_fn(const hdf5::NodeWriter& parent) {
     wf_t av_hf;
     av_hf = mpi::all_sum(m_av_hf[0]);
     hdf5::GroupWriter gw(parent, "hf_excits");
-    gw.save("0000", av_hf);
+    gw.save_dataset("0000", av_hf, mpi::i_am_root());
     for (const auto& exsig: m_active_exsigs) {
         DEBUG_ASSERT_TRUE(m_hf_excits[exsig].get(), "active exsig was not allocated!");
         m_hf_excits[exsig]->save(gw);

@@ -142,17 +142,17 @@ public:
         h5list.write_h5item_bytes(iitem, begin());
     }
 
-    virtual void save(hdf5::NodeWriter &nw, uint_t irank= 0ul) const {
-        nw.save(m_name, begin(), {m_size}, {"raw_data"}, irank);
-    }
-
-    virtual void load(hdf5::NdDistListReader &h5list, const uint_t &iitem) {
-        h5list.read_h5item_bytes(iitem, begin());
-    }
-
-    virtual void load(hdf5::NodeReader &nr) const {
-        nr.load(m_name, begin(), {m_size});
-    }
+//    virtual void save(hdf5::NodeWriter &nw, uint_t irank= 0ul) const {
+//        nw.save(m_name, begin(), {m_size}, {"raw_data"}, irank);
+//    }
+//
+//    virtual void load(hdf5::NdDistListReader &h5list, const uint_t &iitem) {
+//        h5list.read_h5item_bytes(iitem, begin());
+//    }
+//
+//    virtual void load(hdf5::NodeReader &nr) const {
+//        nr.load(m_name, begin(), {m_size});
+//    }
 
     virtual uintv_t h5_shape() const {
         return {};

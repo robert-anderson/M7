@@ -34,10 +34,10 @@ FcidumpInfo::FcidumpInfo(str_t fname, UnrestrictStyle ur_style) :
         hdf5::FileReader reader(m_fname);
         auto mult_to_ms2 = [](int mult){return mult==sys::frm::c_undefined_ms2 ? sys::frm::c_undefined_ms2 : mult-1;};
         set_metadata(
-            reader.read_attr<int>("UHF", 0), reader.read_attr<int>("TREL", 0),
-            reader.read_attr<int64_t>("NELEC", 0ul),  reader.read_attr<int64_t>("NORB", 0ul),
-            mult_to_ms2(reader.read_attr<int64_t>("MULTIPLICITY", sys::frm::c_undefined_ms2)),
-            integer::shifted(convert::vector<uint_t>(reader.read_attr<v_t<int64_t>>("ORBSYM", {})), false));
+            reader.load_attr<int>("UHF", 0), reader.load_attr<int>("TREL", 0),
+            reader.load_attr<int64_t>("NELEC", 0ul),  reader.load_attr<int64_t>("NORB", 0ul),
+            mult_to_ms2(reader.load_attr<int64_t>("MULTIPLICITY", sys::frm::c_undefined_ms2)),
+            integer::shifted(convert::vector<uint_t>(reader.load_attr<v_t<int64_t>>("ORBSYM")), false));
     }
 }
 

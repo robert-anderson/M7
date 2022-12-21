@@ -46,6 +46,8 @@ namespace hdf5 {
             const strv_t m_dim_names;
 
             Format(Type h5_type, uintv_t shape, strv_t dim_names, bool add_complex_dim);
+
+            Format() : Format(Type(), {}, {}, false){}
         };
 
         /**
@@ -60,6 +62,10 @@ namespace hdf5 {
              * total number of items (locally held)
              */
             const uint_t m_nitem;
+            /**
+             * total number of bytes (locally held)
+             */
+            const uint_t m_size;
             /**
              * layout of all locally stored items in HDF5 terms in hsize_t type
              */

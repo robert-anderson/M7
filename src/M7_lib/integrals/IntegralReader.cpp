@@ -77,10 +77,11 @@ bool CsvIntegralReader::spin_conserving(uint_t iex) const {
 
 Hdf5IntegralReader::Hdf5IntegralReader(const FcidumpInfo& info, Hdf5IntegralReader::KeyNames names) :
         m_reader(info.m_fname), m_names(std::move(names)),
-        m_indices_2e(m_reader, m_names.m_2e_inds),
-        m_values_2e(m_reader.read_data<v_t<ham_comp_t>>(m_names.m_2e_values)),
-        m_indices_1e(m_reader, m_names.m_1e_inds),
-        m_values_1e(m_reader.read_data<v_t<ham_comp_t>>(m_names.m_1e_values)){
+        // TODO: replace AllLoadAll with node-shared (mpi::on_node_i_am_root() ? PartialLoad : NoLoad)
+        m_indices_2e(m_reader, m_names.m_2e_inds, hdf5::AllLoadAll),
+        m_values_2e(m_reader.load_dataset<v_t<ham_comp_t>>(m_names.m_2e_values, hdf5::AllLoadAll)),
+        m_indices_1e(m_reader, m_names.m_1e_inds, hdf5::AllLoadAll),
+        m_values_1e(m_reader.load_dataset<v_t<ham_comp_t>>(m_names.m_1e_values, hdf5::AllLoadAll)){
     REQUIRE_EQ(m_indices_2e.nrow(), m_values_2e.size(),
                "number of 2e matrix index arrays should match the number of values");
     REQUIRE_EQ(m_indices_1e.nrow(), m_values_1e.size(),
@@ -117,7 +118,7 @@ void Hdf5IntegralReader::goto_first_2e() {
 }
 
 ham_t Hdf5IntegralReader::ecore() const {
-    return m_reader.read_attr<double>(m_names.m_ecore);
+    return m_reader.load_attr<double>(m_names.m_ecore);
 }
 
 bool Hdf5IntegralReader::complex_valued() const {

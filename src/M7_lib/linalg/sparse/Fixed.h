@@ -116,40 +116,41 @@ namespace sparse {
 
         private:
 
-            void write_column_inds(hdf5::NodeWriter& parent, const v_t<T>& entries, uint_t irank=0ul) const {
-                uintv_t inds;
-                inds.reserve(entries.size());
-                for (auto& entry : entries) inds.push_back(static_cast<const Element&>(entry).m_i);
-                parent.write_data("col_indices", inds, irank);
-            }
-
-            void write_values(hdf5::NodeWriter& parent, const v_t<Element>& entries, uint_t irank=0ul) const {
-                // Element base class has no values
-            }
-
-            template<typename U>
-            void write_values(hdf5::NodeWriter& parent, const v_t<MatrixElement<U>>& entries, uint_t irank=0ul) const {
-                v_t<U> values;
-                values.reserve(entries.size());
-                for (auto& entry : entries) values.push_back(entry.m_v);
-                parent.write_data("values", values, irank);
-            }
-
-        public:
-            void save(hdf5::NodeWriter& parent, uint_t irank=0ul) const {
-                v_t<uint_t> nentries;
-                nentries.reserve(m_nrow);
-                v_t<uint_t> icols;
-                icols.reserve(m_nentry);
-                v_t<T> values;
-                values.reserve(m_nentry);
-                for (uint_t irow=0ul; irow<m_nrow; ++irow) {
-                    nentries.push_back(nentry(irow));
-                }
-                parent.write_data("row_sizes", nentries, irank);
-                write_column_inds(parent, m_entries, irank);
-                write_values(parent, m_entries, irank);
-            }
+            // TODO: update with new HDF5 saves
+//            void write_column_inds(hdf5::NodeWriter& parent, const v_t<T>& entries, uint_t irank=0ul) const {
+//                uintv_t inds;
+//                inds.reserve(entries.size());
+//                for (auto& entry : entries) inds.push_back(static_cast<const Element&>(entry).m_i);
+//                parent.write_data("col_indices", inds, irank);
+//            }
+//
+//            void write_values(hdf5::NodeWriter& parent, const v_t<Element>& entries, uint_t irank=0ul) const {
+//                // Element base class has no values
+//            }
+//
+//            template<typename U>
+//            void write_values(hdf5::NodeWriter& parent, const v_t<MatrixElement<U>>& entries, uint_t irank=0ul) const {
+//                v_t<U> values;
+//                values.reserve(entries.size());
+//                for (auto& entry : entries) values.push_back(entry.m_v);
+//                parent.write_data("values", values, irank);
+//            }
+//
+//        public:
+//            void save(hdf5::NodeWriter& parent, uint_t irank=0ul) const {
+//                v_t<uint_t> nentries;
+//                nentries.reserve(m_nrow);
+//                v_t<uint_t> icols;
+//                icols.reserve(m_nentry);
+//                v_t<T> values;
+//                values.reserve(m_nentry);
+//                for (uint_t irow=0ul; irow<m_nrow; ++irow) {
+//                    nentries.push_back(nentry(irow));
+//                }
+//                parent.write_data("row_sizes", nentries, irank);
+//                write_column_inds(parent, m_entries, irank);
+//                write_values(parent, m_entries, irank);
+//            }
 
         protected:
             str_t row_to_string(uint_t irow) const override {

@@ -125,11 +125,11 @@ uint_t RowHdf5ReaderBase::get_nitem(const Row &row, const hdf5::NodeReader& pare
 }
 
 void RowHdf5ReaderBase::read_all_fields() {
-    for (uint_t ifield = 0ul; ifield < m_column_readers.size(); ++ifield) {
-        auto &reader = m_column_readers[ifield];
-        auto &field = m_row.m_fields[ifield];
-        field->load(reader, m_iitem);
-    }
+//    for (uint_t ifield = 0ul; ifield < m_column_readers.size(); ++ifield) {
+//        auto &reader = m_column_readers[ifield];
+//        auto &field = m_row.m_fields[ifield];
+//        field->load(reader, m_iitem);
+//    }
 }
 
 void RowHdf5ReaderBase::null_read_all_fields() {

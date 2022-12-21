@@ -17,7 +17,7 @@ hdf5::dataset::Format::Format(hdf5::Type h5_type, uintv_t shape, strv_t dim_name
 }
 
 hdf5::dataset::ListFormat::ListFormat(hdf5::dataset::Format item_format, uint_t nitem) :
-        m_item(item_format), m_nitem(nitem),
+        m_item(item_format), m_nitem(nitem), m_size(m_nitem*m_item.m_size),
         m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_item.m_h5_shape, m_nitem))),
         m_dim_names(vector::prepended(m_item.m_dim_names, "item")) {}
 

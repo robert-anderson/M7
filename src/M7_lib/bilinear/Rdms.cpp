@@ -218,7 +218,7 @@ void Rdms::save_fn(const hdf5::NodeWriter& parent) {
         return;
     }
     hdf5::GroupWriter gw(parent, "rdms");
-    gw.write_data("norm", m_total_norm.m_reduced);
+    gw.save_dataset("norm", m_total_norm.m_reduced, mpi::i_am_root());
     for (const auto& rdm: m_rdms) rdm->save(gw);
 
     if (m_spinfree) {
