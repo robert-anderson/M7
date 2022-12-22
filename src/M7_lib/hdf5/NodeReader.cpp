@@ -12,7 +12,7 @@ hdf5::Attr hdf5::NodeReader::load_raw_attr(const str_t& name) const {
     v_t<hsize_t> shape(ndim);
     H5Sget_simple_extent_dims(dataspace, shape.data(), nullptr);
     Type h5_type(H5Aget_type(attr_handle));
-    dataset::Format format(h5_type, convert::vector<uint_t>(shape), {}, false);
+    dataset::ItemFormat format(h5_type, convert::vector<uint_t>(shape), {}, false);
     v_t<buf_t> buf(format.m_size);
     auto status = H5Aread(attr_handle, h5_type, buf.data());
     DEBUG_ONLY(status);

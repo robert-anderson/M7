@@ -23,7 +23,7 @@ namespace hdf5 {
          *  h5_item = a shaped array of h5_elems
          */
 
-        struct Format {
+        struct ItemFormat {
             /**
              * native type of the HDF5 dataset involved in the I/O
              */
@@ -45,9 +45,9 @@ namespace hdf5 {
              */
             const strv_t m_dim_names;
 
-            Format(Type h5_type, uintv_t shape, strv_t dim_names, bool add_complex_dim);
+            ItemFormat(Type h5_type, uintv_t shape, strv_t dim_names, bool add_complex_dim);
 
-            Format() : Format(Type(), {}, {}, false){}
+            ItemFormat() : ItemFormat(Type(), {}, {}, false){}
         };
 
         /**
@@ -57,7 +57,7 @@ namespace hdf5 {
             /**
              * layout of a single item in the multidimensional list
              */
-            Format m_item;
+            ItemFormat m_item;
             /**
              * total number of items (locally held)
              */
@@ -75,7 +75,7 @@ namespace hdf5 {
              */
             const strv_t m_dim_names;
 
-            ListFormat(Format item_format, uint_t nitem);
+            ListFormat(ItemFormat item_format, uint_t nitem);
         };
         /**
          * the save-load functions only need access to the list format, not the details of the distribution
@@ -102,7 +102,7 @@ namespace hdf5 {
             /**
              * this is kept protected so that only its two subclasses can be instantiated
              */
-            DistListFormat(Format item_format, uint_t nitem_local, uint_t nitem, uint_t nitem_displ);
+            DistListFormat(ItemFormat item_format, uint_t nitem_local, uint_t nitem, uint_t nitem_displ);
         };
 
         /**
@@ -110,7 +110,7 @@ namespace hdf5 {
          * suitable for Load and Save
          */
         struct PartDistListFormat : DistListFormat {
-            PartDistListFormat(hdf5::dataset::Format item_format, uint_t nitem) :
+            PartDistListFormat(hdf5::dataset::ItemFormat item_format, uint_t nitem) :
                 DistListFormat(item_format, nitem, mpi::all_sum(nitem),
                     mpi::counts_to_displs_consec(mpi::all_gathered(nitem))[mpi::irank()]){}
         };
@@ -120,7 +120,7 @@ namespace hdf5 {
          * suitable for Load only
          */
         struct FullDistListFormat : DistListFormat {
-            FullDistListFormat(hdf5::dataset::Format item_format, uint_t nitem) :
+            FullDistListFormat(hdf5::dataset::ItemFormat item_format, uint_t nitem) :
                 DistListFormat(item_format, nitem, nitem, 0ul){}
         };
     }

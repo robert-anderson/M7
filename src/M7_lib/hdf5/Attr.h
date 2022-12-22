@@ -14,15 +14,15 @@ namespace hdf5 {
 
     struct Attr {
         const v_t<buf_t> m_buf;
-        const dataset::Format m_format;
-        Attr(v_t<buf_t> buf, dataset::Format format): m_buf(std::move(buf)), m_format(std::move(format)){
+        const dataset::ItemFormat m_format;
+        Attr(v_t<buf_t> buf, dataset::ItemFormat format): m_buf(std::move(buf)), m_format(std::move(format)){
             REQUIRE_EQ(m_buf.size(), m_format.m_size, "buffer size inconsistent with format");
         }
 
         template<typename T>
         Attr(const T* v, uint_t size):
             Attr({reinterpret_cast<const buf_t*>(v), reinterpret_cast<const buf_t*>(v + size)},
-                 dataset::Format(Type::make<T>(), {size}, {}, dtype::is_complex<T>())){}
+                 dataset::ItemFormat(Type::make<T>(), {size}, {}, dtype::is_complex<T>())){}
 
         template<typename T>
         Attr(const T& v): Attr(&v, 1ul){}
