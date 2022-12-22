@@ -6,7 +6,8 @@
 #define M7_HDF5_FILE_H
 
 #include "PropertyList.h"
-#include "Node.h"
+#include "NodeReader.h"
+#include "NodeWriter.h"
 
 namespace hdf5 {
     struct FileBase {

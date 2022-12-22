@@ -16,6 +16,10 @@ target_sources(M7_lib
         NdDistList.h
         Node.cpp
         Node.h
+        NodeReader.cpp
+        NodeReader.h
+        NodeWriter.cpp
+        NodeWriter.h
         PropertyList.cpp
         PropertyList.h
         Type.cpp

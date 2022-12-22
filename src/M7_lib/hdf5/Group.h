@@ -5,12 +5,11 @@
 #ifndef M7_HDF5_GROUP_H
 #define M7_HDF5_GROUP_H
 
-#include "Node.h"
+#include "NodeReader.h"
+#include "NodeWriter.h"
 
 namespace hdf5 {
-    /**
-     * carries out all creation of datasets and Groups
-     */
+
     struct GroupWriter : NodeWriter {
         GroupWriter(const NodeWriter &node, str_t name);
 

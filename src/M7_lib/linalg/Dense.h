@@ -14,8 +14,9 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/util/FpTol.h>
 #include <M7_lib/defs.h>
-#include <M7_lib/hdf5/Node.h>
 #include "M7_lib/linalg/sparse/Dynamic.h"
+#include "M7_lib/hdf5/NodeReader.h"
+#include "M7_lib/hdf5/NodeWriter.h"
 
 
 extern "C" void ssyev_(const char *jobz, const char *uplo, const int *n, float *a, const int *lda, float *w,
