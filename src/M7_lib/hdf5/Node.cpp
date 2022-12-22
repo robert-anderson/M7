@@ -98,22 +98,21 @@ uintv_t hdf5::NodeReader::get_dataset_shape(const str_t& name) const {
     return convert::vector<uint_t>(shape);
 }
 
-hdf5::dataset::DistListFormat hdf5::NodeReader::get_dataset_format(const str_t& name, LoadPolicy lp) const {
-    char lp_is_all_load_all = (lp==AllLoadAll);
-    REQUIRE_TRUE(mpi::all_land(lp_is_all_load_all) || mpi::all_land(!lp_is_all_load_all), "invalid LoadPolicy");
-
+hdf5::dataset::FullDistListFormat hdf5::NodeReader::get_full_dataset_format(const str_t& name, bool this_rank) const {
     REQUIRE_TRUE(child_exists(name), "dataset is missing from HDF5 node");
     auto dataset = H5Dopen1(m_handle, name.c_str());
 
     const auto shape = get_dataset_shape(name);
-    const uint_t nitem_sum = shape.front();
+    const uint_t nitem = shape.front();
     const uintv_t item_shape(shape.cbegin()+1, shape.cend());
     Type h5_type(H5Dget_type(dataset));
     H5Dclose(dataset);
+    return {{h5_type, item_shape, {}, false}, this_rank ? nitem : 0ul};
+}
 
-    if (lp_is_all_load_all) return {{h5_type, item_shape, {}, false}, nitem_sum};
-
-    const auto this_rank = (lp==PartialLoad);
+hdf5::dataset::PartDistListFormat hdf5::NodeReader::get_part_dataset_format(const str_t& name, bool this_rank) const {
+    const auto full_fmt = get_full_dataset_format(name, this_rank);
+    const auto& item = full_fmt.m_local.m_item;
     // reading is not required on all ranks, the boolean argument determines which ranks are involved in the read op
     auto reading_iranks = mpi::filter(this_rank);
     REQUIRE_FALSE(reading_iranks.empty(), "cannot read on zero MPI ranks: this_rank must be true on at least one rank");
@@ -123,18 +122,16 @@ hdf5::dataset::DistListFormat hdf5::NodeReader::get_dataset_format(const str_t& 
         DEBUG_ASSERT_EQ(it != reading_iranks.cend(), this_rank, "meant to be reading on this rank");
         const auto ibin = std::distance(reading_iranks.cbegin(), it);
         // share the reading workload evenly over the involved ranks
-        nitem = integer::evenly_shared_count(nitem_sum, ibin, reading_iranks.size());
+        nitem = integer::evenly_shared_count(nitem, ibin, reading_iranks.size());
     }
-    return {{h5_type, item_shape, {}, false}, nitem};
+    return {{item.m_h5_type, item.m_shape, item.m_dim_names, false}, nitem};
 }
 
-
-void hdf5::NodeReader::load_dataset(const str_t& name, dataset::load_fn fn, uint_t max_nitem_per_op, LoadPolicy lp) const {
+void hdf5::NodeReader::load_dataset(const str_t& name, hdf5::dataset::load_fn fn,
+                                    const hdf5::dataset::DistListFormat& format, uint_t max_nitem_per_op) const {
     REQUIRE_TRUE(child_exists(name), "dataset is missing from HDF5 node");
     auto dataset = H5Dopen1(m_handle, name.c_str());
     auto filespace = H5Dget_space(dataset);
-
-    const auto format = get_dataset_format(name, lp);
     const auto ndim = format.m_h5_shape.size();
 
     // datasets are always transacted in collective I/O mode
@@ -147,10 +144,6 @@ void hdf5::NodeReader::load_dataset(const str_t& name, dataset::load_fn fn, uint
     auto file_hyperslab = H5Screate_simple(ndim, format.m_h5_shape.data(), nullptr);
     auto mem_hyperslab = H5Screate_simple(ndim, format.m_h5_shape.data(), nullptr);
 
-    if (lp==AllLoadAll)
-        DEBUG_ASSERT_EQ(format.m_nitem, format.m_local.m_nitem,
-                        "all local item counts should be equal to total item count");
-
     // number of items yet to be transacted
     uint_t nitem_remaining = format.m_local.m_nitem;
     // first element of offset is incremented at each iteration
@@ -162,9 +155,8 @@ void hdf5::NodeReader::load_dataset(const str_t& name, dataset::load_fn fn, uint
         offsets[0] = 0;
         H5Sselect_hyperslab(mem_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
         offsets[0] = std::min(iblock * max_nitem_per_op, format.m_local.m_nitem);
-        // do not add offset if the policy is AllLoadAll
-        if (lp!=AllLoadAll) offsets[0] += format.m_nitem_displ;
-        const auto dst = fn(iblock, format, max_nitem_per_op);
+        offsets[0] += format.m_nitem_displ;
+        const auto dst = fn(iblock, format.m_local, max_nitem_per_op);
         REQUIRE_EQ(bool(dst), bool(counts[0]), "nitem zero with non-null data or nitem non-zero with null data");
         H5Sselect_hyperslab(file_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
         auto status = H5Dread(dataset, format.m_local.m_item.m_h5_type, mem_hyperslab, file_hyperslab, plist, dst);
@@ -183,6 +175,7 @@ void hdf5::NodeReader::load_dataset(const str_t& name, dataset::load_fn fn, uint
     H5Dclose(dataset);
 }
 
+
 void hdf5::NodeWriter::save_attr(const str_t& name, const hdf5::Attr& attr) const {
     const auto& h5_shape = attr.m_format.m_h5_shape;
     auto dataspace = H5Screate_simple(h5_shape.size(), h5_shape.data(), nullptr);
@@ -197,7 +190,8 @@ void hdf5::NodeWriter::save_attr(const str_t& name, const hdf5::Attr& attr) cons
     H5Sclose(dataspace);
 }
 
-void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn, const dataset::DistListFormat& format, uint_t max_nitem_per_op) const {
+void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn, const dataset::PartDistListFormat& format,
+                                    uint_t max_nitem_per_op) const {
     auto filespace = H5Screate_simple(format.m_h5_shape.size(), format.m_h5_shape.data(), nullptr);
 
     // specify format of the dataset
@@ -228,7 +222,7 @@ void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn, cons
         offsets[0] = 0;
         H5Sselect_hyperslab(mem_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
         offsets[0] = std::min(iblock * max_nitem_per_op, format.m_local.m_nitem) + format.m_nitem_displ;
-        const auto src = fn(iblock, format, max_nitem_per_op);
+        const auto src = fn(iblock, format.m_local, max_nitem_per_op);
         REQUIRE_EQ(bool(src), bool(counts[0]), "count zero with non-null data or count non-zero with null data");
         H5Sselect_hyperslab(file_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
         auto status = H5Dwrite(dataset, format.m_local.m_item.m_h5_type, mem_hyperslab, file_hyperslab, plist, src);
@@ -248,6 +242,7 @@ void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn, cons
 }
 
 
-void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn, const dataset::DistListFormat& format) const {
+void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn,
+                                    const dataset::PartDistListFormat& format) const {
     save_dataset(name, fn, format, format.m_nitem);
 }

@@ -22,7 +22,7 @@ TEST(Dataset, ContiguousSaveLoad) {
          * only reading on the root rank
          */
         hdf5::FileReader fr("tmp.h5");
-        fr.load_dataset("stuff", load_vec, max_nitem_per_op, mpi::i_am_root() ? hdf5::PartialLoad : hdf5::NoLoad);
+        fr.load_dataset("stuff", load_vec, max_nitem_per_op, true, mpi::i_am_root());
         const auto load_vec_all = mpi::all_gatheredv(save_vec);
         ASSERT_EQ(save_vec_all, load_vec_all);
     }
@@ -32,7 +32,7 @@ TEST(Dataset, ContiguousSaveLoad) {
          * read partially on every rank
          */
         hdf5::FileReader fr("tmp.h5");
-        fr.load_dataset("stuff", load_vec, max_nitem_per_op, hdf5::PartialLoad);
+        fr.load_dataset("stuff", load_vec, max_nitem_per_op, true, true);
         const auto load_vec_all = mpi::all_gatheredv(save_vec);
         ASSERT_EQ(save_vec_all, load_vec_all);
     }
@@ -42,8 +42,7 @@ TEST(Dataset, ContiguousSaveLoad) {
          * read partially on root and last rank if different
          */
         hdf5::FileReader fr("tmp.h5");
-        const hdf5::LoadPolicy lp = (mpi::i_am_root() || mpi::i_am(mpi::nrank()-1)) ? hdf5::PartialLoad : hdf5::NoLoad;
-        fr.load_dataset("stuff", load_vec, max_nitem_per_op, lp);
+        fr.load_dataset("stuff", load_vec, max_nitem_per_op, true, mpi::i_am_root() || mpi::i_am(mpi::nrank()-1));
         const auto load_vec_all = mpi::all_gatheredv(save_vec);
         ASSERT_EQ(save_vec_all, load_vec_all);
     }
@@ -52,7 +51,7 @@ TEST(Dataset, ContiguousSaveLoad) {
          * read all on every rank
          */
         hdf5::FileReader fr("tmp.h5");
-        fr.load_dataset("stuff", load_vec, max_nitem_per_op, hdf5::AllLoadAll);
+        fr.load_dataset("stuff", load_vec, max_nitem_per_op, false, true);
         // no need to gather: all ranks should have the same data
         ASSERT_EQ(save_vec_all, load_vec);
     }

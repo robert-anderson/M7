@@ -15,7 +15,7 @@ TEST(Hdf5FcidumpReader, Header) {
     auto shape = hdf5::DatasetReader::get_hdf5_shape(fr, "FOCK_INDEX");
     ASSERT_EQ(shape[0], 6ul);
     ASSERT_EQ(shape[1], 2ul);
-    auto inds = fr.load_dataset<v_t<int64_t>>("FOCK_INDEX");
+    auto inds = fr.load_dataset<v_t<int64_t>>("FOCK_INDEX", false, true);
 
     hdf5::FileWriter fw("rja.h5");
     fw.save_dataset("FOCK_INDEX", inds, mpi::i_am_root());

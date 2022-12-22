@@ -13,9 +13,9 @@ struct FockMatrix : dense::SquareMatrix<ham_t> {
         REQUIRE_TRUE(reader.child_exists("ACT_FOCK_INDEX"), "invalid fock matrix file contents");
         REQUIRE_TRUE(reader.child_exists("ACT_FOCK_VALUES"), "invalid fock matrix file contents");
         v_t<int64_t> inds;
-        reader.load_dataset("ACT_FOCK_INDEX", inds);
+        reader.load_dataset("ACT_FOCK_INDEX", inds, false, true);
         v_t<double> values;
-        reader.load_dataset("ACT_FOCK_VALUES", values);
+        reader.load_dataset("ACT_FOCK_VALUES", values, false, true);
         REQUIRE_EQ(inds.size(), values.size()*2, "incorrect number of indices");
         for (uint_t i = 0ul; i<values.size(); ++i) {
             // offset by one to account for the Fortran indices in the HDF5 format

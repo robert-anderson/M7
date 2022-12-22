@@ -21,7 +21,7 @@ hdf5::dataset::ListFormat::ListFormat(hdf5::dataset::Format item_format, uint_t 
         m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_item.m_h5_shape, m_nitem))),
         m_dim_names(vector::prepended(m_item.m_dim_names, "item")) {}
 
-hdf5::dataset::DistListFormat::DistListFormat(hdf5::dataset::Format item_format, uint_t nitem) :
-        m_local(std::move(item_format), nitem), m_nitem(mpi::all_sum(m_local.m_nitem)),
-        m_nitem_displ(mpi::counts_to_displs_consec(mpi::all_gathered(m_local.m_nitem))[mpi::irank()]),
-        m_h5_shape(vector::prepended(m_local.m_item.m_h5_shape, m_nitem)) {}
+hdf5::dataset::DistListFormat::DistListFormat(
+        hdf5::dataset::Format item_format, uint_t nitem_local, uint_t nitem, uint_t nitem_displ) :
+        m_local(item_format, nitem_local), m_nitem(nitem), m_nitem_displ(nitem_displ),
+        m_h5_shape(vector::prepended(m_local.m_item.m_h5_shape, m_nitem)){}

@@ -77,11 +77,16 @@ namespace hdf5 {
 
             ListFormat(Format item_format, uint_t nitem);
         };
+        /**
+         * the save-load functions only need access to the list format, not the details of the distribution
+         */
+        typedef std::function<const void*(uint_t i, const ListFormat& format, uint_t max_nitem_per_op)> save_fn;
+        typedef std::function<void*(uint_t i, const ListFormat& format, uint_t max_nitem_per_op)> load_fn;
 
         struct DistListFormat {
             const ListFormat m_local;
             /**
-             * sum of items across all ranks
+             * total number of items in the dataset
              */
             const uint_t m_nitem;
             /**
@@ -93,11 +98,31 @@ namespace hdf5 {
              */
             const v_t<hsize_t> m_h5_shape;
 
-            DistListFormat(Format item_format, uint_t nitem);
+        protected:
+            /**
+             * this is kept protected so that only its two subclasses can be instantiated
+             */
+            DistListFormat(Format item_format, uint_t nitem_local, uint_t nitem, uint_t nitem_displ);
         };
 
-        typedef std::function<const void*(uint_t i, const DistListFormat& format, uint_t max_nitem_per_op)> save_fn;
-        typedef std::function<void*(uint_t i, const DistListFormat& format, uint_t max_nitem_per_op)> load_fn;
+        /**
+         * use when the transaction involves non-overlapping ranges of items being allocated to each rank
+         * suitable for Load and Save
+         */
+        struct PartDistListFormat : DistListFormat {
+            PartDistListFormat(hdf5::dataset::Format item_format, uint_t nitem) :
+                DistListFormat(item_format, nitem, mpi::all_sum(nitem),
+                    mpi::counts_to_displs_consec(mpi::all_gathered(nitem))[mpi::irank()]){}
+        };
+
+        /**
+         * use when the transaction involves all items being handled on every rank
+         * suitable for Load only
+         */
+        struct FullDistListFormat : DistListFormat {
+            FullDistListFormat(hdf5::dataset::Format item_format, uint_t nitem) :
+                DistListFormat(item_format, nitem, nitem, 0ul){}
+        };
     }
 }
 

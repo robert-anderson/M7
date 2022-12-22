@@ -131,9 +131,9 @@ namespace dense {
             *this = rows;
         }
 
-        Matrix(const hdf5::NodeReader& nr, const str_t name, hdf5::LoadPolicy lp) :
+        Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank) :
             Matrix(nr.get_dataset_shape(name)[0], nr.get_dataset_shape(name)[1]) {
-            nr.load_dataset(name, m_buffer, lp);
+            nr.load_dataset(name, m_buffer, false, this_rank);
         }
         explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_col_ind() + 1){
             *this = sparse;
