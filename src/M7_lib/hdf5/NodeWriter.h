@@ -44,11 +44,14 @@ namespace hdf5 {
         template<typename T>
         void save_dataset(const str_t& name, const T* src, uintv_t item_shape,
                           strv_t dim_names, uint_t nitem, uint_t max_nitem_per_op) const {
-            auto fn = [&](uint_t i, const dataset::ListFormat& format, uint_t max_nitem_per_op) {
-                auto begin = reinterpret_cast<const char*>(src);
-                auto end = begin + format.m_size;
-                auto ptr = begin + i * max_nitem_per_op * format.m_item.m_size;
-                return ::ptr::in_range(ptr, begin, end) ? ptr : nullptr;
+            using namespace ::ptr;
+            const auto begin = reinterpret_cast<const char*>(src);
+            auto ptr = begin;
+            auto fn = [&](const dataset::ListFormat& format, uint_t max_nitem_per_op) {
+                const auto tmp = in_range(ptr, begin, format.m_size);
+                if (!tmp) return tmp;
+                ptr = in_range(ptr + max_nitem_per_op * format.m_item.m_size, begin, format.m_size);
+                return tmp;
             };
             return save_dataset(name, fn,
                     {{Type::make<T>(), item_shape, dim_names, dtype::is_complex<T>()}, nitem}, max_nitem_per_op);

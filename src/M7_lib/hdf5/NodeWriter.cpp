@@ -56,7 +56,7 @@ void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn, cons
         offsets[0] = 0;
         H5Sselect_hyperslab(mem_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
         offsets[0] = std::min(iblock * max_nitem_per_op, format.m_local.m_nitem) + format.m_nitem_displ;
-        const auto src = fn(iblock, format.m_local, max_nitem_per_op);
+        const auto src = fn(format.m_local, max_nitem_per_op);
         REQUIRE_EQ(bool(src), bool(counts[0]), "count zero with non-null data or count non-zero with null data");
         H5Sselect_hyperslab(file_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
         auto status = H5Dwrite(dataset, format.m_local.m_item.m_h5_type, mem_hyperslab, file_hyperslab, plist, src);

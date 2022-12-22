@@ -145,7 +145,7 @@ void hdf5::NodeReader::load_dataset(const str_t& name, hdf5::dataset::load_fn fn
         H5Sselect_hyperslab(mem_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
         offsets[0] = std::min(iblock * max_nitem_per_op, format.m_local.m_nitem);
         offsets[0] += format.m_nitem_displ;
-        const auto dst = fn(iblock, format.m_local, max_nitem_per_op);
+        const auto dst = fn(format.m_local, max_nitem_per_op);
         REQUIRE_EQ(bool(dst), bool(counts[0]), "nitem zero with non-null data or nitem non-zero with null data");
         H5Sselect_hyperslab(file_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
         auto status = H5Dread(dataset, format.m_local.m_item.m_h5_type, mem_hyperslab, file_hyperslab, plist, dst);

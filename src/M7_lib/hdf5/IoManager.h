@@ -80,8 +80,8 @@ namespace hdf5 {
         /**
          * the save-load functions only need access to the list format, not the details of the distribution
          */
-        typedef std::function<const void*(uint_t i, const ListFormat& format, uint_t max_nitem_per_op)> save_fn;
-        typedef std::function<void*(uint_t i, const ListFormat& format, uint_t max_nitem_per_op)> load_fn;
+        typedef std::function<const void*(const ListFormat& format, uint_t max_nitem_per_op)> save_fn;
+        typedef std::function<void*(const ListFormat& format, uint_t max_nitem_per_op)> load_fn;
 
         struct DistListFormat {
             const ListFormat m_local;

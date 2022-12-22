@@ -136,11 +136,60 @@ public:
 
     uint_t to_buffer(buf_t* buf, uint_t irow_begin, uint_t nitem_max, std::set<uint_t> irows_empty) const;
 
+    void to_buffer(buf_t* dst, uint_t irow) const {
+        DEBUG_ASSERT_LT(irow, m_row->m_table->nrow_in_use(), "row index OOB");
+        DEBUG_ASSERT_FALSE(m_row->m_table->is_freed(irow), "copying a freed row to buffer");
+        auto src = m_row->m_table->begin() + m_row->m_size * irow + m_row_offset;
+        std::memcpy(dst, src, m_size);
+    }
+
     virtual void h5_write_attrs(const hdf5::NodeWriter& /*node*/) const {}
 
     virtual void save(hdf5::NdDistListWriter &h5list, const uint_t &iitem) const {
         h5list.write_h5item_bytes(iitem, begin());
     }
+
+    /**
+     * save a entire field as raw bytes
+     * @param nw
+     *  NodeWriter instance (HDF5 group or file)
+     * @param name
+     *  desired name in the
+     */
+    virtual void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const {
+        // items are given by records, which are rows below the high water mark that have not been freed
+        const uint_t nitem = this_rank ? m_row->m_table->nrecord() : 0ul;
+        uint_t nitem_found = 0ul;
+        uint_t irow = 0ul;
+        v_t<buf_t> buf;
+        auto fn = [&](const hdf5::dataset::ListFormat& format, uint_t max_nitem_per_op) {
+            if (buf.empty()) buf.resize(max_nitem_per_op * format.m_item.m_size);
+            buf.clear();
+            buf_t* dst = nullptr;
+            const auto nitem_to_find = std::min(nitem_found + max_nitem_per_op, nitem);
+            if (nitem_to_find) {
+                dst = buf.data();
+                const auto next_nitem_found = nitem_found + nitem_to_find;
+                while (nitem_found != next_nitem_found) {
+                    if (!m_row->m_table->is_freed(irow)) {
+                        to_buffer(dst, irow);
+                        dst += m_size;
+                        ++nitem_found;
+                    }
+                    ++irow;
+                }
+            }
+            return dst;
+        };
+        hdf5::dataset::ItemFormat item_format(hdf5::Type::make<buf_t>(), {m_size}, {"bytes"}, false);
+        nw.save_dataset(name, fn, {item_format, nitem});
+    }
+
+
+    void save(const hdf5::NodeWriter& nw, bool this_rank) const {
+        save(nw, m_name, this_rank);
+    }
+
 
 //    virtual void save(hdf5::NodeWriter &nw, uint_t irank= 0ul) const {
 //        nw.save(m_name, begin(), {m_size}, {"raw_data"}, irank);

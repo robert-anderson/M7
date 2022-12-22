@@ -46,6 +46,7 @@ TEST(Dataset, ContiguousSaveLoad) {
         const auto load_vec_all = mpi::all_gatheredv(save_vec);
         ASSERT_EQ(save_vec_all, load_vec_all);
     }
+    load_vec.clear();
     {
         /*
          * read all on every rank

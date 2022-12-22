@@ -108,16 +108,21 @@ namespace hdf5 {
          *  pointer to beginning of the destination buffer
          * @param max_nitem_per_op
          *  maximum number of items to transfer in a single operation
-         * @param lp
-         *  determines loading behavior
+         * @param part
+         *  true if the each included rank only loads part of the HDF5 dataset
+         * @param this_rank
+         *  true if this rank is active in the load operation
          */
         template<typename T>
         void load_dataset(const str_t& name, T* dst, uint_t max_nitem_per_op, bool part, bool this_rank) const {
-            auto fn = [&](uint_t i, const dataset::ListFormat& format, uint_t max_nitem_per_op) {
-                auto begin = reinterpret_cast<char*>(dst);
-                auto end = begin + format.m_size;
-                auto ptr = begin + i * max_nitem_per_op * format.m_item.m_size;
-                return ::ptr::in_range(ptr, begin, end) ? ptr : nullptr;
+            using namespace ptr;
+            const auto begin = reinterpret_cast<char*>(dst);
+            auto ptr = begin;
+            auto fn = [&](const dataset::ListFormat& format, uint_t max_nitem_per_op) {
+                const auto tmp = in_range(ptr, begin, format.m_size);
+                if (!tmp) return tmp;
+                ptr = in_range(ptr + max_nitem_per_op * format.m_item.m_size, begin, format.m_size);
+                return tmp;
             };
             return load_dataset(name, fn, max_nitem_per_op, part, this_rank);
         }
