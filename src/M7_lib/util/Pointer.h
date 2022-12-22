@@ -10,28 +10,44 @@
 
 namespace ptr {
     template<typename T>
-    bool before_begin(const T* ptr, const T* begin) {
-        return std::distance(ptr, begin) > 0l;
+    const T* before_begin(const T* ptr, const T* begin) {
+        return (std::distance(ptr, begin) > 0l) ? ptr : nullptr;
+    }
+    template<typename T>
+    T* before_begin(T* ptr, const T* begin) {
+        return const_cast<T*>(before_begin(const_cast<const T*>(ptr), begin));
     }
 
     template<typename T>
-    bool after_begin(const T* ptr, const T* begin) {
-        return std::distance(ptr, begin) < 0l;
+    const T* after_begin(const T* ptr, const T* begin) {
+        return (std::distance(ptr, begin) < 0l) ? ptr : nullptr;
+    }
+    template<typename T>
+    T* after_begin(T* ptr, const T* begin) {
+        return const_cast<T*>(after_begin(const_cast<const T*>(ptr), begin));
     }
 
     template<typename T>
-    bool before_end(const T* ptr, const T* end) {
-        return std::distance(end, ptr) < 0l;
+    const T* before_end(const T* ptr, const T* end) {
+        return (std::distance(end, ptr) < 0l) ? ptr : nullptr;
+    }
+    template<typename T>
+    T* before_end(T* ptr, const T* end) {
+        return const_cast<T*>(before_end(const_cast<const T*>(ptr), end));
     }
 
     template<typename T>
-    bool after_end(const T* ptr, const T* end) {
-        return std::distance(end, ptr) > 0l;
+    const T* after_end(const T* ptr, const T* end) {
+        return (std::distance(end, ptr) > 0l) ? ptr : nullptr;
+    }
+    template<typename T>
+    T* after_end(T* ptr, const T* end) {
+        return const_cast<T*>(after_end(const_cast<const T*>(ptr), end));
     }
 
     /**
      * for a memory block defined by a "begin" pointer and a number of elements n. a pointer is dereferencable to a
-     * value within that block if it is equal to or posivitively offset from begin, and is strictly negatively offset
+     * value within that block if it is equal to or positively offset from begin, and is strictly negatively offset
      * from the end pointer: begin + n
      * @tparam T
      *  type of value stored in the block
@@ -42,16 +58,39 @@ namespace ptr {
      * @param end
      *  pointer to the memory just after the block
      * @return
-     *  true if ptr is in the range [begin, end)
+     *  ptr if ptr is in the range [begin, end), else nullptr
      */
     template<typename T>
-    bool in_range(const T* ptr, const T* begin, const T* end) {
-        return before_end(ptr, end) && !before_begin(ptr, begin);
+    T* in_range(T* ptr, const T* begin, const T* end) {
+        return (before_end(ptr, end) && !before_begin(ptr, begin)) ? ptr : nullptr;
+    }
+    template<typename T>
+    const T* in_range(const T* ptr, const T* begin, const T* end) {
+        return const_cast<const T*>(in_range(const_cast<T*>(ptr), begin, end));
     }
 
     template<typename T>
-    bool in_range(const T* ptr, const T* begin, uint_t n) {
-        return before_end(ptr, begin + n) && !before_begin(ptr, begin);
+    T* in_range(T* ptr, const T* begin, uint_t n) {
+        return in_range(ptr, begin, begin + n);
+    }
+    template<typename T>
+    const T* in_range(const T* ptr, const T* begin, uint_t n) {
+        return in_range(ptr, begin, begin + n);
+    }
+
+    /**
+     * update the pointer at ptr but return its pre-update value
+     */
+    template<typename T>
+    T* pre_update(T*& ptr, T* new_ptr) {
+        auto tmp = ptr;
+        ptr = new_ptr;
+        return tmp;
+    }
+
+    template<typename T>
+    const T* pre_update(const T*& ptr, const T* new_ptr) {
+        return const_cast<const T*>(pre_update(const_cast<T*&>(ptr), const_cast<T*>(new_ptr)));
     }
 
     /**
