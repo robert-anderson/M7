@@ -51,7 +51,7 @@ namespace hdf5 {
                 return ::ptr::in_range(ptr, begin, end) ? ptr : nullptr;
             };
             return save_dataset(name, fn,
-                                {{Type::make<T>(), item_shape, dim_names, dtype::is_complex<T>()}, nitem}, max_nitem_per_op);
+                    {{Type::make<T>(), item_shape, dim_names, dtype::is_complex<T>()}, nitem}, max_nitem_per_op);
         }
 
         template<typename T>

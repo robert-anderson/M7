@@ -26,6 +26,11 @@ void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn, cons
     // specify format of the dataset
     auto dataset = H5Dcreate(m_handle, name.c_str(), format.m_local.m_item.m_h5_type, filespace,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    {
+        // set dimension labels
+        uint_t i = 0ul;
+        for (auto& dim_name: format.m_local.m_dim_names) H5DSset_label(dataset, i++, dim_name.c_str());
+    }
     H5Sclose(filespace);
     filespace = H5Dget_space(dataset);
 
