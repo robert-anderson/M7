@@ -111,7 +111,7 @@ hdf5::dataset::PartDistListFormat hdf5::NodeReader::get_part_dataset_format(cons
         DEBUG_ASSERT_EQ(it != reading_iranks.cend(), this_rank, "meant to be reading on this rank");
         const auto ibin = std::distance(reading_iranks.cbegin(), it);
         // share the reading workload evenly over the involved ranks
-        nitem = integer::evenly_shared_count(nitem, ibin, reading_iranks.size());
+        nitem = integer::evenly_shared_count(full_fmt.m_nitem, ibin, reading_iranks.size());
     }
     return {{item.m_h5_type, item.m_shape, item.m_dim_names, false}, nitem};
 }
