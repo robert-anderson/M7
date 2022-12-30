@@ -26,7 +26,6 @@ struct FciInitializer {
     typedef SingleFieldRow<field::Mbf> mbf_order_row_t;
     buffered::MappedTable<mbf_order_row_t> m_mbf_order_table;
 
-
     FciInitializer(const Hamiltonian& h, sys::Particles particles, FciInitOptions opts={});
 
     explicit FciInitializer(const Hamiltonian& h, FciInitOptions opts={});

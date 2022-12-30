@@ -55,7 +55,8 @@ typedef std::pair<uint_t, uint_t> uintp_t;
 
 typedef std::string str_t;
 typedef v_t<str_t> strv_t;
-typedef std::map<str_t, str_t> strmap_t;
+typedef std::pair<str_t, str_t> strp_t;
+typedef std::map<str_t, str_t> strm_t;
 
 
 #ifndef NDEBUG

@@ -166,7 +166,7 @@ bool sys::frm::Basis::operator==(const sys::frm::Basis &other) const {
     return (m_nsite == other.m_nsite) && (m_abgrp_map == other.m_abgrp_map);
 }
 
-strmap_t sys::frm::Basis::info() const {
+strm_t sys::frm::Basis::info() const {
     return {
             {"nsite", convert::to_string(m_nsite)},
             {"point group irreps", convert::to_string(m_abgrp_map.m_site_irreps)},
@@ -203,7 +203,7 @@ bool sys::frm::Electrons::operator==(const sys::frm::Electrons &other) const {
     return m_n==other.m_n && m_ms2==other.m_ms2;
 }
 
-std::map<str_t, str_t> sys::frm::Electrons::info() const {
+strm_t sys::frm::Electrons::info() const {
     return {
             {"number", convert::to_string(m_n)},
             {"ms2", convert::to_string(m_ms2)}
@@ -251,7 +251,7 @@ sys::bos::Basis::Basis(const std::shared_ptr<lattice::Lattice>& lattice, uint_t 
 
 sys::bos::Basis::Basis(uint_t nmode, uint_t occ_cutoff) : Basis(nmode, lattice::make(), occ_cutoff){}
 
-strmap_t sys::bos::Basis::info() const {
+strm_t sys::bos::Basis::info() const {
     return {
             {"nmode",      convert::to_string(m_nmode)},
             {"occ_cutoff", convert::to_string(m_occ_cutoff)},

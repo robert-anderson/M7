@@ -8,7 +8,7 @@
 
 FciInitializer::FciInitializer(const Hamiltonian &h, sys::Particles particles, FciInitOptions opts):
         m_opts(opts), m_is_hermitian(h.is_hermitian()),
-        m_mbf_order_table("MBF order table", {mbf_order_row_t(h.m_basis)}){
+        m_mbf_order_table("MBF order table", {mbf_order_row_t(h.m_basis, "mbf")}){
     auto iters = FciIters::make(h, particles, false);
     const auto count = iters.niter_single();
     const uint_t count_local = mpi::evenly_shared_count(count);

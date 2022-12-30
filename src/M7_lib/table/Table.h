@@ -70,15 +70,36 @@ private:
     }
 
 public:
-    void save(const hdf5::NodeWriter& parent, str_t name, strv_t field_names, bool this_rank) const {
+    /**
+     * @param parent
+     *  HDF5 node within which to save this table's fields as datasets
+     * @param name
+     *  name to be given to the group in the parent node
+     * @param field_names
+     *  pairs of field names, first in pair is FieldBase::m_name of field selected for saving, second is intended
+     *  dataset name
+     * @param this_rank
+     *  true if this MPI rank participates in writing
+     */
+    virtual void save(const hdf5::NodeWriter& parent, str_t name, strm_t field_names, bool this_rank) const {
         hdf5::GroupWriter gw(parent, name);
-        auto row = static_cast<const Row&>(m_row);
-        for (auto field : row.m_fields) {
-            auto it = std::find(field_names.cbegin(), field_names.cend(), field->m_name);
-            if (it != field_names.cend()) field->save(gw, this_rank);
+        for (auto field : m_row.m_fields) {
+            auto it = std::find_if(field_names.cbegin(), field_names.cend(),
+                       [&field](const strp_t& pair){return field->m_name==pair.first;});
+            if (it != field_names.cend()) field->save(gw, it->second, this_rank);
         }
     }
-
+    /**
+     * overload in the case that the FieldBase::m_name is identical to the intended HDF5 dataset names
+     */
+    virtual void save(const hdf5::NodeWriter& parent, str_t name, strv_t field_names, bool this_rank) const {
+        strm_t pairs;
+        for (const auto& field_name : field_names) pairs.insert({field_name, field_name});
+        save(parent, name, pairs, this_rank);
+    }
+    /**
+     * overload in the case that all fields are to be saved with their FieldBase::m_name as dataset name
+     */
     void save(const hdf5::NodeWriter& parent, str_t name, bool this_rank) const {
         save(parent, name, m_row.all_field_names(), this_rank);
     }
