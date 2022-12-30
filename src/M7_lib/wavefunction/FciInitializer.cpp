@@ -7,7 +7,8 @@
 #include "M7_lib/foreach/ConnForeachGroup.h"
 
 FciInitializer::FciInitializer(const Hamiltonian &h, sys::Particles particles, FciInitOptions opts):
-        m_opts(opts), m_is_hermitian(h.is_hermitian()), m_mbf_order_table("MBF order table", {{h.m_basis}}){
+        m_opts(opts), m_is_hermitian(h.is_hermitian()),
+        m_mbf_order_table("MBF order table", {mbf_order_row_t(h.m_basis)}){
     auto iters = FciIters::make(h, particles, false);
     const auto count = iters.niter_single();
     const uint_t count_local = mpi::evenly_shared_count(count);
@@ -27,7 +28,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, sys::Particles particles, F
     ProgressMonitor pm(true, "building sparse H", "basis functions", count_local);
     auto& row = m_mbf_order_table.m_row;
     for (row.jump(displ_local); row.in_range(displ_local+count_local); ++row) {
-        const auto& src_mbf = row.m_mbf;
+        const auto& src_mbf = row.m_field;
         auto& dst_mbf = mbf;
         const auto irow = row.index()-displ_local;
 

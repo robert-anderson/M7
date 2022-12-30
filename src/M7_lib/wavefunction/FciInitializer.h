@@ -20,16 +20,12 @@ struct FciInitializer {
     const bool m_is_hermitian;
     sparse::dynamic::Matrix<ham_t> m_sparse_ham;
 
-    struct MbfOrderRow : Row {
-        field::Mbf m_mbf;
-        MbfOrderRow(sys::Basis basis): m_mbf(this, basis, "key"){}
-
-        field::Mbf &key_field(){return m_mbf;}
-    };
     /**
      * mapped list of basis functions to aid in the setup of sparse H, and retain the physical meaning of its rows
      */
-    buffered::MappedTable<MbfOrderRow> m_mbf_order_table;
+    typedef SingleFieldRow<field::Mbf> mbf_order_row_t;
+    buffered::MappedTable<mbf_order_row_t> m_mbf_order_table;
+
 
     FciInitializer(const Hamiltonian& h, sys::Particles particles, FciInitOptions opts={});
 

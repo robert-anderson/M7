@@ -15,5 +15,5 @@ TEST(FieldDataset, FrmOnvField) {
     FciInitializer init(ham);
 
     hdf5::FileWriter fw("tmp.h5");
-    init.m_mbf_order_table.m_row.m_mbf.save(fw, "frm_onv", mpi::i_am_root());
+    init.m_mbf_order_table.m_row.m_field.save(fw, "frm_onv", mpi::i_am_root());
 }

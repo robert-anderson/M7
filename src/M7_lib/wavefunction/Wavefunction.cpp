@@ -288,13 +288,14 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
     while (!mpi::all_land(done)) {
         if (mpi::i_am_root()) {
             auto& row = init.m_mbf_order_table.m_row;
+            auto& mbf = row.m_field;
             const auto irow_end = std::min(init.m_mbf_order_table.nrow_in_use(), irow + max_ncomm);
             for (row.jump(irow); row.in_range(irow_end); ++row) {
                 for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
                     for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
                         auto ipart = m_format.flatten({iroot, ireplica});
                         const auto weight = results.get_evec(iroot)[row.index()]*scale_facs[iroot];
-                        add_spawn(row.m_mbf, weight, true, false, ipart);
+                        add_spawn(mbf, weight, true, false, ipart);
                     }
                 }
             }
