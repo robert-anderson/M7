@@ -72,7 +72,7 @@ private:
 public:
     /**
      * @param parent
-     *  HDF5 node within which to save this table's fields as datasets
+     *  HDF5 node within which to save this Table's fields as datasets
      * @param name
      *  name to be given to the group in the parent node
      * @param field_names
@@ -104,7 +104,24 @@ public:
         save(parent, name, m_row.all_field_names(), this_rank);
     }
 
-    virtual void load(const hdf5::NodeReader& /*parent*/, str_t /*name*/) {
+    /**
+     * @param parent
+     *  HDF5 node from which to load this Table's fields as datasets
+     * @param name
+     *  name to be given to the group in the parent node
+     * @param field_names
+     *  pairs of field names, first in pair is FieldBase::m_name of field selected for saving, second is intended
+     *  dataset name
+     * @param this_rank
+     *  true if this MPI rank participates in writing
+     */
+    virtual void load(const hdf5::NodeReader& parent, str_t name, strm_t field_names, bool part, bool this_rank) {
+        hdf5::GroupReader gr(parent, name);
+        for (auto field : m_row.m_fields) {
+            auto it = std::find_if(field_names.cbegin(), field_names.cend(),
+                                   [&field](const strp_t& pair){return field->m_name==pair.first;});
+            if (it != field_names.cend()) field->load(gr, it->second, part, this_rank);
+        }
     }
 
 };

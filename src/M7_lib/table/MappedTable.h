@@ -335,7 +335,7 @@ public:
         attempt_remap();
     }
 
-    void load(const hdf5::NodeReader &/*parent*/, str_t /*name*/) override {
+//    void load(const hdf5::NodeReader &/*parent*/, str_t /*name*/) override {
 //        auto& row = m_row;
 //        RowHdf5Reader<row_t> row_reader(row, parent, name);
 //        uint_t iitem = 0ul;
@@ -345,7 +345,7 @@ public:
 //            row_reader.read(iitem++);
 //            post_insert(row_reader.index());
 //        }
-    }
+//    }
 
 };
 

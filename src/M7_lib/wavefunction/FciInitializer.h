@@ -24,7 +24,8 @@ struct FciInitializer {
      * mapped list of basis functions to aid in the setup of sparse H, and retain the physical meaning of its rows
      */
     typedef SingleFieldRow<field::Mbf> mbf_order_row_t;
-    buffered::MappedTable<mbf_order_row_t> m_mbf_order_table;
+    typedef buffered::MappedTable<mbf_order_row_t> mbf_order_table_t;
+    mbf_order_table_t m_mbf_order_table;
 
     FciInitializer(const Hamiltonian& h, sys::Particles particles, FciInitOptions opts={});
 

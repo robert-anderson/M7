@@ -135,12 +135,17 @@ public:
 
     virtual str_t to_string() const = 0;
 
-    uint_t to_buffer(buf_t* buf, uint_t irow_begin, uint_t nitem_max, std::set<uint_t> irows_empty) const;
-
     void to_buffer(buf_t* dst, uint_t irow) const {
         DEBUG_ASSERT_LT(irow, m_row->m_table->nrow_in_use(), "row index OOB");
         DEBUG_ASSERT_FALSE(m_row->m_table->is_freed(irow), "copying a freed row to buffer");
         auto src = m_row->m_table->begin() + m_row->m_size * irow + m_row_offset;
+        std::memcpy(dst, src, m_size);
+    }
+
+    void from_buffer(const buf_t* src, uint_t irow) {
+        DEBUG_ASSERT_LT(irow, m_row->m_table->nrow_in_use(), "row index OOB");
+        DEBUG_ASSERT_FALSE(m_row->m_table->is_freed(irow), "copying a freed row to buffer");
+        auto dst = m_row->m_table->begin() + m_row->m_size * irow + m_row_offset;
         std::memcpy(dst, src, m_size);
     }
 
@@ -157,17 +162,11 @@ public:
 
     void save(const hdf5::NodeWriter& nw, bool this_rank) const;
 
-    virtual uintv_t h5_shape() const {
-        return {};
+    void load(const hdf5::NodeReader&, const str_t&, bool, bool) const {
+
     }
 
-    virtual strv_t h5_dim_names() const {
-        return {};
-    }
 
-    virtual hdf5::Type h5_type() const {
-        return {};
-    }
 
 private:
 

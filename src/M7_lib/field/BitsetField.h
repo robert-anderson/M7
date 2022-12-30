@@ -267,22 +267,6 @@ struct BitsetField : FieldBase {
         attrs.emplace_back(m_format.m_shape, "shape");
         hdf5::field::save<T>(*this, nw, name, {m_dsize}, {"bitset"}, attrs, this_rank);
     }
-
-    uintv_t h5_shape() const override {
-        /*
-         * bitsets are stored flat
-         */
-        return {m_dsize};
-    }
-
-    strv_t h5_dim_names() const override {
-        if (!nind) return {};
-        return {};
-    }
-
-    hdf5::Type h5_type() const override {
-        return {static_cast<T*>(nullptr)};
-    }
 };
 
 template<typename T>

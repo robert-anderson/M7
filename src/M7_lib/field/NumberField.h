@@ -143,12 +143,6 @@ public:
         return tmp;
     }
 
-    void to_buffer(v_t<T>& buf, uint_t irow_begin, uint_t nitem_max, std::set<uint_t> irows_empty) const {
-        buf.resize(nitem_max);
-        const auto nitem = FieldBase::to_buffer(static_cast<buf_t*>(buf.data()), irow_begin, nitem_max, irows_empty);
-        buf.resize(m_nelement*nitem);
-    }
-
     /*
      * math ops
      */
@@ -310,21 +304,6 @@ public:
         return m_format.to_string() + (m_is_complex ? complex_dim_string : "");
     }
 
-    /*
-     * HDF5 related
-     */
-    uintv_t h5_shape() const override {
-        return {m_format.m_shape.cbegin(), m_format.m_shape.cend()};
-    }
-
-    strv_t h5_dim_names() const override {
-        if (!nind) return {};
-        return {m_format.m_dim_names.cbegin(), m_format.m_dim_names.cend()};
-    }
-
-    hdf5::Type h5_type() const override {
-        return {static_cast<T*>(nullptr)};
-    }
 
     void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const override {
         auto shape = convert::to_vector(m_format.m_shape.data(), nind);
