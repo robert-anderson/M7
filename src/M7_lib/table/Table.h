@@ -7,7 +7,6 @@
 
 #include <stack>
 
-#include <M7_lib/field/RowHdf5.h>
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/sort/ExtremalIndices.h>
 #include <M7_lib/field/Row.h>
@@ -70,19 +69,21 @@ private:
         return n;
     }
 
-
 public:
-
-    virtual void save(const hdf5::NodeWriter& parent, str_t name, strv_t field_names) const {
-        RowHdf5Writer<row_t>(m_row, parent, name, nrow_to_write(), field_names).write();
+    void save(const hdf5::NodeWriter& parent, str_t name, strv_t field_names, bool this_rank) const {
+        hdf5::GroupWriter gw(parent, name);
+        auto row = static_cast<const Row&>(m_row);
+        for (auto field : row.m_fields) {
+            auto it = std::find(field_names.cbegin(), field_names.cend(), field->m_name);
+            if (it != field_names.cend()) field->save(gw, this_rank);
+        }
     }
 
-    virtual void save(const hdf5::NodeWriter& parent, str_t name) const {
-        RowHdf5Writer<row_t>(m_row, parent, name, nrow_to_write()).write();
+    void save(const hdf5::NodeWriter& parent, str_t name, bool this_rank) const {
+        save(parent, name, m_row.all_field_names(), this_rank);
     }
 
-    virtual void load(const hdf5::NodeReader& parent, str_t name) {
-        RowHdf5Reader<row_t>(m_row, parent, name).read();
+    virtual void load(const hdf5::NodeReader& /*parent*/, str_t /*name*/) {
     }
 
 };

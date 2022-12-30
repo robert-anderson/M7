@@ -89,7 +89,7 @@ void Rdm::end_cycle() {
 }
 
 void Rdm::save(hdf5::NodeWriter& gw) const {
-    m_store.save(gw, this->name());
+    m_store.save(gw, this->name(), true);
 }
 
 void PureRdm::frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn, const FrmOps& com, wf_t contrib) {

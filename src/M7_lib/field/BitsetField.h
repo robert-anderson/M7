@@ -7,6 +7,7 @@
 
 #include <M7_lib/foreach/SetbitForeach.h>
 #include "FieldBase.h"
+#include "M7_lib/hdf5/Field.h"
 
 template<typename T, uint_t nind>
 struct BitsetField : FieldBase {
@@ -256,9 +257,15 @@ struct BitsetField : FieldBase {
         return res;
     }
 
-    void h5_write_attrs(const hdf5::NodeWriter& /*node*/) const override {
+//    void h5_write_attrs(const hdf5::NodeWriter& /*node*/) const override {
 //        node.write_attr("bitset shape", m_format.shape_vector());
 //        node.write_attr("bitset dim names", m_format.dim_names_vector());
+//    }
+
+    void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const override {
+        std::list<hdf5::Attr> attrs;
+        attrs.emplace_back(m_format.m_shape, "shape");
+        hdf5::field::save<T>(*this, nw, name, {m_dsize}, {"bitset"}, attrs, this_rank);
     }
 
     uintv_t h5_shape() const override {

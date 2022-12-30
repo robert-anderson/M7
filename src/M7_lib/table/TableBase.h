@@ -96,7 +96,7 @@ struct TableBase {
      */
     std::vector<bool> m_is_freed_row;
     /**
-     * save a buffer of zeros for fast memcmp to determine whether a row is clear
+     * retain a buffer of zeros for fast memcmp to determine whether a row is clear
      */
     const v_t<buf_t> m_null_row_string;
 
@@ -540,6 +540,7 @@ public:
     void rename(str_t name) const {
         m_bw.rename(name);
     }
+
 };
 
 

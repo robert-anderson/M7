@@ -12,15 +12,18 @@ namespace hdf5 {
     struct NodeWriter : Node {
         NodeWriter(hid_t handle): Node(handle){}
 
-        void save_attr(const str_t& name, const Attr& attr) const;
+        void save_attr(const Attr& attr) const;
 
         template<typename T>
         void save_attr(const str_t& name, const T& v) const {
-            save_attr(name, {v});
+            save_attr({v, name});
         }
 
         void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::PartDistListFormat& format,
-                          uint_t max_nitem_per_op) const;
+                          uint_t max_nitem_per_op, std::list<Attr> attrs) const;
+
+        void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::PartDistListFormat& format,
+                          std::list<Attr> attrs) const;
 
         void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::PartDistListFormat& format) const;
 
@@ -40,10 +43,12 @@ namespace hdf5 {
          *  number of items held on this rank
          * @param max_nitem_per_op
          *  maximum number of items in each transaction
+         * @param attrs
+         *  attributes to save as metadata inside the dataset
          */
         template<typename T>
         void save_dataset(const str_t& name, const T* src, uintv_t item_shape,
-                          strv_t dim_names, uint_t nitem, uint_t max_nitem_per_op) const {
+                          strv_t dim_names, uint_t nitem, uint_t max_nitem_per_op, std::list<Attr> attrs) const {
             using namespace ::ptr;
             const auto begin = reinterpret_cast<const char*>(src);
             auto ptr = begin;
@@ -54,33 +59,81 @@ namespace hdf5 {
                 return tmp;
             };
             return save_dataset(name, fn,
-                    {{Type::make<T>(), item_shape, dim_names, dtype::is_complex<T>()}, nitem}, max_nitem_per_op);
+                    {{Type::make<T>(), item_shape, dim_names, dtype::is_complex<T>()}, nitem},
+                    max_nitem_per_op, std::move(attrs));
         }
 
+        /**
+         * infer local nitem based on the length of the source vector and whether this MPI rank is involved in the save
+         */
+        template<typename T>
+        void save_dataset(const str_t& name, const v_t<T>& src, uintv_t item_shape,
+                          strv_t dim_names, uint_t max_nitem_per_op, std::list<Attr> attrs, bool this_rank) const {
+            const auto nitem = this_rank ? src.size() / nd::nelement(item_shape) : 0ul;
+            REQUIRE_FALSE(src.size() % nd::nelement(item_shape), "item shape inconsistent with size of data buffer");
+            save_dataset(name, src.data(), item_shape, dim_names, nitem, max_nitem_per_op, std::move(attrs));
+        }
+        /**
+         * as above, but without attributes
+         */
         template<typename T>
         void save_dataset(const str_t& name, const v_t<T>& src, uintv_t item_shape,
                           strv_t dim_names, uint_t max_nitem_per_op, bool this_rank) const {
-            const auto nitem = this_rank ? src.size() / nd::nelement(item_shape) : 0ul;
-            REQUIRE_FALSE(src.size() % nd::nelement(item_shape), "item shape inconsistent with size of data buffer");
-            save_dataset(name, src.data(), item_shape, dim_names, nitem, max_nitem_per_op);
+            save_dataset(name, src, item_shape, dim_names, max_nitem_per_op, {}, this_rank);
         }
 
+        /**
+         * assume all items are intended to be written in one operation
+         */
         template<typename T>
-        void save_dataset(const str_t& name, const v_t<T>& src, uintv_t item_shape, strv_t dim_names, bool this_rank) const {
+        void save_dataset(const str_t& name, const v_t<T>& src, uintv_t item_shape,
+                          strv_t dim_names, std::list<Attr> attrs, bool this_rank) const {
             const auto nitem = this_rank ? src.size() / nd::nelement(item_shape) : 0ul;
-            save_dataset(name, src.data(), item_shape, dim_names, nitem, nitem);
+            save_dataset(name, src.data(), item_shape, dim_names, nitem, nitem, std::move(attrs));
+        }
+        /**
+         * as above, but without attributes
+         */
+        template<typename T>
+        void save_dataset(const str_t& name, const v_t<T>& src, uintv_t item_shape,
+                          strv_t dim_names, bool this_rank) const {
+            save_dataset(name, src, item_shape, dim_names, {}, this_rank);
         }
 
+        /**
+         * assume scalar items
+         */
+        template<typename T>
+        void save_dataset(const str_t& name, const v_t<T>& src, uint_t max_nitem_per_op,
+                          std::list<Attr> attrs, bool this_rank) const {
+            save_dataset(name, src, {}, {}, max_nitem_per_op, std::move(attrs), this_rank);
+        }
+        /**
+         * as above, but without attributes
+         */
         template<typename T>
         void save_dataset(const str_t& name, const v_t<T>& src, uint_t max_nitem_per_op, bool this_rank) const {
-            save_dataset(name, src, {}, {}, max_nitem_per_op, this_rank);
+            save_dataset(name, src, max_nitem_per_op, {}, this_rank);
         }
 
+        /**
+         * assume scalar items written in one op
+         */
+        template<typename T>
+        void save_dataset(const str_t& name, const v_t<T>& src, std::list<Attr> attrs, bool this_rank) const {
+            save_dataset(name, src, src.size(), std::move(attrs), this_rank);
+        }
+        /**
+         * as above, but without attributes
+         */
         template<typename T>
         void save_dataset(const str_t& name, const v_t<T>& src, bool this_rank) const {
-            save_dataset(name, src, src.size(), this_rank);
+            save_dataset(name, src, src.size(), {}, this_rank);
         }
 
+        /**
+         * write a single scalar of any type
+         */
         template<typename T>
         void save_dataset(const str_t& name, T v, bool this_rank) const {
             v_t<T> src;

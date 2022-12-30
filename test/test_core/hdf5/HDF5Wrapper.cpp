@@ -131,6 +131,7 @@ TEST(HDF5Wrapper, ComplexArray) {
 //}
 
 
+#if 0
 TEST(HDF5Wrapper, NumberDistributed) {
     buffered::Table<SingleFieldRow<field::Number<hash::digest_t>>> write_table("test int table", {"integer_field"});
     ASSERT_EQ(write_table.capacity(), 0ul);
@@ -195,6 +196,7 @@ TEST(HDF5Wrapper, NumberDistributed2) {
         ASSERT_EQ(row.m_field, hash::in_range((row.index() + 1) * (mpi::irank() + 1), 4, 123));
     }
 }
+#endif
 
 //TEST(HDF5Wrapper, Table) {
 //

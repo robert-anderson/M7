@@ -29,15 +29,10 @@ namespace hdf5 {
 
         uintv_t get_dataset_shape(const str_t& name) const;
 
-    private:
-        Attr load_raw_attr(const str_t& name) const;
-
-    public:
-
         template<typename T>
         T load_attr(const str_t& name) const {
             T v;
-            auto success = load_raw_attr(name).parse(v);
+            auto success = Attr(m_handle, name).parse(v);
             REQUIRE_TRUE(success, "HDF5 attribute load failed without default value");
             return v;
         }
@@ -45,7 +40,7 @@ namespace hdf5 {
         template<typename T>
         T load_attr(const str_t& name, T default_) const {
             T v;
-            if (!load_raw_attr(name).parse(v)) v = default_;
+            Attr(m_handle, name).parse(v, default_);
             return v;
         }
 

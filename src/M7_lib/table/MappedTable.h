@@ -335,16 +335,16 @@ public:
         attempt_remap();
     }
 
-    void load(const hdf5::NodeReader &parent, str_t name) override {
-        auto& row = m_row;
-        RowHdf5Reader<row_t> row_reader(row, parent, name);
-        uint_t iitem = 0ul;
-        clear();
-        TableBase::push_back(row_reader.m_nitem);
-        for (row_reader.restart(); row_reader; ++row_reader) {
-            row_reader.read(iitem++);
-            post_insert(row_reader.index());
-        }
+    void load(const hdf5::NodeReader &/*parent*/, str_t /*name*/) override {
+//        auto& row = m_row;
+//        RowHdf5Reader<row_t> row_reader(row, parent, name);
+//        uint_t iitem = 0ul;
+//        clear();
+//        TableBase::push_back(row_reader.m_nitem);
+//        for (row_reader.restart(); row_reader; ++row_reader) {
+//            row_reader.read(iitem++);
+//            post_insert(row_reader.index());
+//        }
     }
 
 };

@@ -16,7 +16,6 @@ namespace hdf5 {
         const hid_t m_handle;
         Node(hid_t handle);
         operator hid_t() const;
-        bool attr_exists(const str_t& name) const;
     };
 }
 

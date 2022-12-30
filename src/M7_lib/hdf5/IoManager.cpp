@@ -5,10 +5,10 @@
 #include "IoManager.h"
 #include "M7_lib/util/Vector.h"
 
-hdf5::dataset::ItemFormat::ItemFormat(hdf5::Type h5_type, uintv_t shape, strv_t dim_names, bool add_complex_dim) :
-        m_h5_type(h5_type), m_shape(std::move(shape)),
+hdf5::dataset::ItemFormat::ItemFormat(hdf5::Type type, uintv_t shape, strv_t dim_names, bool add_complex_dim) :
+        m_type(type), m_shape(std::move(shape)),
         m_h5_shape(convert::vector<hsize_t>(add_complex_dim ? vector::appended(m_shape, 2ul) : m_shape)),
-        m_size(nd::nelement(m_h5_shape) * m_h5_type.m_size),
+        m_size(nd::nelement(m_h5_shape) * m_type.m_size),
         m_dim_names(add_complex_dim && !dim_names.empty() ?
                     vector::appended(dim_names, "real/imag") : dim_names) {
     REQUIRE_TRUE(m_dim_names.empty() || m_dim_names.size() == m_h5_shape.size(),

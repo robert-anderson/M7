@@ -27,7 +27,7 @@ namespace hdf5 {
             /**
              * native type of the HDF5 dataset involved in the I/O
              */
-            const Type m_h5_type;
+            const Type m_type;
             /**
              * layout of an item in C++ terms
              */
@@ -45,7 +45,7 @@ namespace hdf5 {
              */
             const strv_t m_dim_names;
 
-            ItemFormat(Type h5_type, uintv_t shape, strv_t dim_names, bool add_complex_dim);
+            ItemFormat(Type type, uintv_t shape, strv_t dim_names, bool add_complex_dim);
 
             ItemFormat() : ItemFormat(Type(), {}, {}, false){}
         };

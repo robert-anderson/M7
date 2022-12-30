@@ -20,8 +20,6 @@ target_sources(M7_lib
         NumberField.h
         Row.cpp
         Row.h
-        RowHdf5.cpp
-        RowHdf5.h
         SpecMomIndsField.cpp
         SpecMomIndsField.h
         XonvField.cpp

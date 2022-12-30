@@ -4,23 +4,6 @@
 #include "M7_lib/util/Vector.h"
 #include "NodeReader.h"
 
-hdf5::Attr hdf5::NodeReader::load_raw_attr(const str_t& name) const {
-    if (!attr_exists(name)) return {{}, {}};
-    auto attr_handle = H5Aopen(m_handle, name.c_str(), H5P_DEFAULT);
-    auto dataspace = H5Aget_space(attr_handle);
-    auto ndim = H5Sget_simple_extent_ndims(dataspace);
-    v_t<hsize_t> shape(ndim);
-    H5Sget_simple_extent_dims(dataspace, shape.data(), nullptr);
-    Type h5_type(H5Aget_type(attr_handle));
-    dataset::ItemFormat format(h5_type, convert::vector<uint_t>(shape), {}, false);
-    v_t<buf_t> buf(format.m_size);
-    auto status = H5Aread(attr_handle, h5_type, buf.data());
-    DEBUG_ONLY(status);
-    DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
-    H5Aclose(attr_handle);
-    H5Sclose(dataspace);
-    return {buf, format};
-}
 
 bool hdf5::NodeReader::child_exists(const str_t &name) const {
     for (uint_t i=0ul; i<nchild(); ++i) if (name==child_name(i)) return true;
@@ -94,9 +77,9 @@ hdf5::dataset::FullDistListFormat hdf5::NodeReader::get_full_dataset_format(cons
     const auto shape = get_dataset_shape(name);
     const uint_t nitem = shape.front();
     const uintv_t item_shape(shape.cbegin()+1, shape.cend());
-    Type h5_type(H5Dget_type(dataset));
+    Type type(H5Dget_type(dataset));
     H5Dclose(dataset);
-    return {{h5_type, item_shape, {}, false}, this_rank ? nitem : 0ul};
+    return {{type, item_shape, {}, false}, this_rank ? nitem : 0ul};
 }
 
 hdf5::dataset::PartDistListFormat hdf5::NodeReader::get_part_dataset_format(const str_t& name, bool this_rank) const {
@@ -113,7 +96,7 @@ hdf5::dataset::PartDistListFormat hdf5::NodeReader::get_part_dataset_format(cons
         // share the reading workload evenly over the involved ranks
         nitem = integer::evenly_shared_count(full_fmt.m_nitem, ibin, reading_iranks.size());
     }
-    return {{item.m_h5_type, item.m_shape, item.m_dim_names, false}, nitem};
+    return {{item.m_type, item.m_shape, item.m_dim_names, false}, nitem};
 }
 
 void hdf5::NodeReader::load_dataset(const str_t& name, hdf5::dataset::load_fn fn,
@@ -148,7 +131,7 @@ void hdf5::NodeReader::load_dataset(const str_t& name, hdf5::dataset::load_fn fn
         const auto dst = fn(format.m_local, max_nitem_per_op);
         REQUIRE_EQ(bool(dst), bool(counts[0]), "nitem zero with non-null data or nitem non-zero with null data");
         H5Sselect_hyperslab(file_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
-        auto status = H5Dread(dataset, format.m_local.m_item.m_h5_type, mem_hyperslab, file_hyperslab, plist, dst);
+        auto status = H5Dread(dataset, format.m_local.m_item.m_type, mem_hyperslab, file_hyperslab, plist, dst);
         REQUIRE_FALSE(status, "HDF5 Error on multidimensional load");
         all_done = !dst;
         // only allow the loop to terminate if all ranks have yielded a null pointer

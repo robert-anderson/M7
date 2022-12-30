@@ -30,11 +30,11 @@ void Propagator::load_fn(const hdf5::NodeReader& parent) {
                    "number of boson modes is not consistent with HDF5 archive");
 }
 
-void Propagator::save_fn(const hdf5::NodeWriter& parent) {
-    hdf5::GroupWriter gw(parent, "propagator");
-    gw.save_attr("nsite", uint_t(m_ham.m_frm.m_basis.m_nsite));
-    gw.save_attr("nmode", m_ham.m_bos.m_basis.m_nmode);
-    gw.save_attr("tau", m_tau);
+void Propagator::save_fn(const hdf5::NodeWriter& /*parent*/) {
+//    hdf5::GroupWriter gw(parent, "propagator");
+//    gw.save_attr("nsite", uint_t(m_ham.m_frm.m_basis.m_nsite));
+//    gw.save_attr("nmode", m_ham.m_bos.m_basis.m_nmode);
+//    gw.save_attr("tau", m_tau);
 }
 
 void Propagator::imp_samp_delta(wf_t& delta, ham_t src_ovlp, const Mbf& dst_mbf) const {

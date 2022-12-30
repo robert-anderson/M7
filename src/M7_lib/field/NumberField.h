@@ -6,6 +6,7 @@
 #define M7_NUMBERFIELD_H
 
 #include "FieldBase.h"
+#include "M7_lib/hdf5/Field.h"
 
 
 struct NumberFieldBase : FieldBase {
@@ -323,6 +324,12 @@ public:
 
     hdf5::Type h5_type() const override {
         return {static_cast<T*>(nullptr)};
+    }
+
+    void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const override {
+        auto shape = convert::to_vector(m_format.m_shape.data(), nind);
+        auto dim_names = convert::to_vector(m_format.m_dim_names.data(), nind);
+        hdf5::field::save<T>(*this, nw, name, shape, dim_names, this_rank);
     }
 };
 

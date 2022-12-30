@@ -47,8 +47,8 @@ void hdf5::DatasetReader::read(void *dst) const {
 hdf5::DatasetWriter::DatasetWriter(hid_t parent_handle, const str_t &name, const v_t<hsize_t> &shape,
                                    Type type, strv_t dim_names, uint_t irank) :
         m_space(DataSpace(shape, !mpi::i_am(irank))),
-        m_handle(H5Dcreate2(parent_handle, name.c_str(), type, m_space.m_handle, H5P_DEFAULT,
-                            H5P_DEFAULT, H5P_DEFAULT)), m_dim_names(std::move(dim_names)), m_type(H5Dget_type(m_handle)) {
+        m_handle(H5Dcreate2(parent_handle, name.c_str(), type, m_space.m_handle, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)),
+        m_dim_names(std::move(dim_names)), m_type(type) {
     if (!m_dim_names.empty()) {
         DEBUG_ASSERT_EQ(m_dim_names.size(), m_space.m_shape.size(),
                         "Number of dim labels does not match number of dims");

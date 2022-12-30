@@ -230,6 +230,8 @@ public:
 
     virtual bool is_h5_write_exempt() const;
 
+    strv_t all_field_names() const;
+
 };
 
 template<typename row_t>

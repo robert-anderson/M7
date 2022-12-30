@@ -5,43 +5,40 @@
 #include "Attr.h"
 
 
-hdf5::AttrReader::AttrReader(hid_t parent_handle, const str_t& name) :
-        m_handle(H5Aopen(parent_handle, name.c_str(), H5P_DEFAULT)),
-        m_space(H5Aget_space(m_handle)), m_type(H5Aget_type(m_handle)),
-        m_nelement(m_space.m_nelement){}
-
-hdf5::AttrReader::~AttrReader() {
-    H5Aclose(m_handle);
+hdf5::Attr::Attr(v_t<buf_t> buf, hdf5::dataset::ItemFormat format, str_t name) :
+        m_buf(std::move(buf)), m_format(std::move(format)), m_name(std::move(name)){
+    REQUIRE_EQ(m_buf.size(), m_format.m_size, "buffer size inconsistent with format");
 }
 
-void hdf5::AttrReader::read_bytes(char* dst) const {
-    auto status = H5Aread(m_handle, m_type, dst);
-    DEBUG_ONLY(status);
-    DEBUG_ASSERT_FALSE(status, "HDF5 attribute read failed");
-}
+hdf5::Attr::Attr(hid_t parent_handle, str_t name) : Attr(load(parent_handle, name)){}
 
-void hdf5::AttrReader::read(str_t* dst, size_t n) const {
-    REQUIRE_EQ(n, m_space.m_nelement, "number of elements read must be the number stored");
-    v_t<char> tmp(m_type.m_size*n);
-    auto status = H5Aread(m_handle, m_type, tmp.data());
-    DEBUG_ONLY(status);
-    DEBUG_ASSERT_FALSE(status, "HDF5 attribute read failed");
-    for (uint_t i=0; i<n; ++i) {
-        (dst++)->insert(0, tmp.data()+i*m_type.m_size, m_type.m_size);
-    }
-}
+void hdf5::Attr::save(hid_t parent_handle) const {
+    auto dataspace = H5Screate_simple(m_format.m_h5_shape.size(), m_format.m_h5_shape.data(), nullptr);
 
-hdf5::AttrWriter::AttrWriter(hid_t parent_handle, const str_t& name, const v_t<hsize_t>& shape,
-                             hid_t h5type) :
-        m_space(shape), m_h5type(h5type),
-        m_handle(H5Acreate(parent_handle, name.c_str(), m_h5type, m_space.m_handle, H5P_DEFAULT, H5P_DEFAULT)){}
+    auto attr_handle = H5Acreate(parent_handle, m_name.c_str(), m_format.m_type, dataspace,
+                                 H5P_DEFAULT, H5P_DEFAULT);
 
-hdf5::AttrWriter::~AttrWriter() {
-    H5Aclose(m_handle);
-}
-
-void hdf5::AttrWriter::write_bytes(const char* src) const {
-    auto status = H5Awrite(m_handle, m_h5type, src);
+    auto status = H5Awrite(attr_handle, m_format.m_type, m_buf.data());
     DEBUG_ONLY(status);
     DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
+    H5Aclose(attr_handle);
+    H5Sclose(dataspace);
+}
+
+hdf5::Attr hdf5::Attr::load(hid_t parent_handle, const str_t& name) {
+    if (!H5Aexists(parent_handle, name.c_str())) return {{}, {}, name};
+    auto attr_handle = H5Aopen(parent_handle, name.c_str(), H5P_DEFAULT);
+    auto dataspace = H5Aget_space(attr_handle);
+    auto ndim = H5Sget_simple_extent_ndims(dataspace);
+    v_t<hsize_t> shape(ndim);
+    H5Sget_simple_extent_dims(dataspace, shape.data(), nullptr);
+    Type type(H5Aget_type(attr_handle));
+    dataset::ItemFormat format(type, convert::vector<uint_t>(shape), {}, false);
+    v_t<buf_t> buf(format.m_size);
+    auto status = H5Aread(attr_handle, type, buf.data());
+    DEBUG_ONLY(status);
+    DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
+    H5Aclose(attr_handle);
+    H5Sclose(dataspace);
+    return {buf, format, name};
 }

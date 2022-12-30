@@ -6,6 +6,7 @@ target_sources(M7_lib
         Dataset.h
         Dataspace.cpp
         Dataspace.h
+        Field.h
         File.cpp
         File.h
         Group.cpp

@@ -52,6 +52,13 @@ bool Row::is_h5_write_exempt() const {
     return false;
 }
 
+strv_t Row::all_field_names() const {
+    strv_t names;
+    names.reserve(m_fields.size());
+    for (auto field : m_fields) names.emplace_back(field->m_name);
+    return names;
+}
+
 Row::Row(const Row &other) {
     m_table = other.m_table;
     m_begin = other.m_begin;
@@ -76,3 +83,4 @@ bool Row::is_protected() const {
 void Row::unprotect() {
     m_table->unprotect(index());
 }
+

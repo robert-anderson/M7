@@ -111,15 +111,13 @@ Wavefunction::~Wavefunction() {
     for (uint_t ipart=0ul; ipart<npart(); ++ipart) log_top_weighted(ipart);
 }
 
-strv_t Wavefunction::h5_field_names() {
-    if (!c_enable_bosons)
-        return {"mbf", "weight"};
-    else
-        return {"mbf (fermion)", "mbf (boson)", "weight"};
-}
-
 void Wavefunction::h5_write(const hdf5::NodeWriter& parent, str_t name) {
-    m_store.save(parent, name, h5_field_names());
+    auto field_names = []() -> strv_t {
+        if (c_enable_fermions != c_enable_bosons) return {"mbf", "weight"};
+        else if (c_enable_fermions != c_enable_bosons) return {"mbf (fermion)", "mbf (boson)", "weight"};
+        return {};
+    };
+    m_store.save(parent, name, field_names(), true);
 }
 
 void Wavefunction::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian& /*ham*/, const field::Mbf& /*ref*/,

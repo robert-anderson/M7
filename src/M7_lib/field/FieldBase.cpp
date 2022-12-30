@@ -3,6 +3,7 @@
 //
 
 #include <M7_lib/parallel/MPIAssert.h>
+#include <M7_lib/hdf5/Field.h>
 
 #include <utility>
 #include "FieldBase.h"
@@ -108,4 +109,12 @@ uint_t FieldBase::to_buffer(buf_t* buf, uint_t irow_begin, uint_t nitem_max, std
         std::memcpy(dst, src, m_size);
     }
     return nitem;
+}
+
+void FieldBase::save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const {
+    hdf5::field::save<buf_t>(*this, nw, name, {m_size}, {"bytes"}, this_rank);
+}
+
+void FieldBase::save(const hdf5::NodeWriter& nw, bool this_rank) const {
+    save(nw, m_name, this_rank);
 }

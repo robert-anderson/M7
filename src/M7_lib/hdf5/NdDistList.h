@@ -368,13 +368,13 @@ namespace hdf5 {
         }
 
     private:
-        NdDistListReader(hid_t parent_handle, str_t name, hid_t h5_type) :
+        NdDistListReader(hid_t parent_handle, str_t name, hid_t type) :
                 NdDistListBase(parent_handle, name, extract_item_dims(parent_handle, name),
-                               local_nitem(parent_handle, name), false, h5_type) {}
+                               local_nitem(parent_handle, name), false, type) {}
 
     public:
-        NdDistListReader(NodeReader &parent, str_t name, hid_t h5_type) :
-                NdDistListReader(parent.m_handle, name, h5_type) {}
+        NdDistListReader(NodeReader &parent, str_t name, hid_t type) :
+                NdDistListReader(parent.m_handle, name, type) {}
 
         /**
          * read the item stored at the iitem position into the data pointer

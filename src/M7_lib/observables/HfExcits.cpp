@@ -26,7 +26,7 @@ strv_t HfExcitsOneExsig::h5_field_names() const {
 }
 
 void HfExcitsOneExsig::save(const hdf5::NodeWriter& gw) const {
-    Table<MaeRow>::save(gw, m_working_inds.m_exsig.to_string(), h5_field_names());
+    Table<MaeRow>::save(gw, m_working_inds.m_exsig.to_string(), h5_field_names(), true);
 }
 
 void HfExcitsOneExsig::make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot) {

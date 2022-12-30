@@ -13,6 +13,8 @@ struct CompositeFieldBase {
 
     str_t prefix(str_t base, str_t prefix);
 
+    virtual void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const = 0;
+
     /*
      * functors for implementing the composite analogues of single-Field methods
      */
@@ -57,13 +59,21 @@ protected:
         void operator()(const T &v) { m_hash ^= v.hash(); }
     };
 
+    struct SaveFn {
+        const hdf5::NodeWriter& m_nw;
+        const str_t& m_name;
+        const bool m_this_rank;
+        template<typename T>
+        void operator()(const T &v) { v.save(m_nw, m_name, m_this_rank); }
+    };
+
 };
 
 
 template<typename ...Args>
 struct CompositeField : CompositeFieldBase {
     /**
-     * can be made up of FieldBase descendants or other CompositeFields
+     * can be made up of FieldBase subclasses or other CompositeFields
      */
     std::tuple<Args&...> m_refs;
     CompositeField(Args&... refs) : m_refs(refs...) {
@@ -143,6 +153,11 @@ struct CompositeField : CompositeFieldBase {
     template<uint_t ifield>
     typename std::tuple_element<ifield, std::tuple<Args...>>::type &get() {
         return std::get<ifield>(m_refs);
+    }
+
+    void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const override {
+        SaveFn fn {nw, name, this_rank};
+        tuple::foreach(m_refs, fn);
     }
 };
 
