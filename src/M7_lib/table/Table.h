@@ -123,6 +123,20 @@ public:
             if (it != field_names.cend()) field->load(gr, it->second, part, this_rank);
         }
     }
+    /**
+     * overload in the case that the FieldBase::m_name is identical to the intended HDF5 dataset names
+     */
+    virtual void load(const hdf5::NodeReader& parent, str_t name, strv_t field_names, bool part, bool this_rank) {
+        strm_t pairs;
+        for (const auto& field_name : field_names) pairs.insert({field_name, field_name});
+        load(parent, name, pairs, part, this_rank);
+    }
+    /**
+     * overload in the case that all fields are to be loaded with their FieldBase::m_name as dataset name
+     */
+    void load(const hdf5::NodeReader& parent, str_t name, bool part, bool this_rank) {
+        load(parent, name, m_row.all_field_names(), part, this_rank);
+    }
 
 };
 

@@ -12,7 +12,7 @@ namespace hdf5 {
     namespace field {
         template<typename T>
         static void save(const FieldBase& field, const hdf5::NodeWriter& nw, const str_t& name, uintv_t item_shape,
-                         strv_t dim_names, uint_t max_nitem_per_op, std::list<Attr> attrs, bool this_rank) {
+                         strv_t dim_names, uint_t max_nitem_per_op, const std::list<Attr>& attrs, bool this_rank) {
             // items are given by records, which are rows below the high water mark that have not been freed
             const uint_t nitem = this_rank ? field.m_row->m_table->nrecord() : 0ul;
             uint_t nitem_found = 0ul;

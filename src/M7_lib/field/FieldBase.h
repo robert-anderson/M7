@@ -76,6 +76,8 @@ private:
     uint_t m_row_index = ~0ul;
     friend Row;
 
+    static constexpr uint_t c_default_max_nitem_per_op = 16000000;
+
 public:
 
     /**
@@ -158,13 +160,13 @@ public:
      * @param this_rank
      *  true if data from this MPI rank is to be included in the saved set
      */
-    virtual void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const;
+    virtual void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const;
+
+    void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const;
 
     void save(const hdf5::NodeWriter& nw, bool this_rank) const;
 
-    void load(const hdf5::NodeReader&, const str_t&, bool, bool) const {
-
-    }
+    virtual void load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank);
 
 
 

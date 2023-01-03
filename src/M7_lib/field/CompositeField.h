@@ -13,7 +13,7 @@ struct CompositeFieldBase {
 
     str_t prefix(str_t base, str_t prefix);
 
-    virtual void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const = 0;
+    virtual void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const = 0;
 
     /*
      * functors for implementing the composite analogues of single-Field methods
@@ -62,9 +62,10 @@ protected:
     struct SaveFn {
         const hdf5::NodeWriter& m_nw;
         const str_t& m_name;
+        const uint_t m_max_nitem_per_op;
         const bool m_this_rank;
         template<typename T>
-        void operator()(const T &v) { v.save(m_nw, m_name, m_this_rank); }
+        void operator()(const T &v) { v.save(m_nw, m_name, m_max_nitem_per_op, m_this_rank); }
     };
 
 };
@@ -155,8 +156,8 @@ struct CompositeField : CompositeFieldBase {
         return std::get<ifield>(m_refs);
     }
 
-    void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const override {
-        SaveFn fn {nw, name, this_rank};
+    void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const override {
+        SaveFn fn {nw, name, max_nitem_per_op, this_rank};
         tuple::foreach(m_refs, fn);
     }
 };

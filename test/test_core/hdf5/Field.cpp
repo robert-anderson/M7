@@ -18,8 +18,9 @@ TEST(FieldDataset, FrmOnvField) {
         init.m_mbf_order_table.save(fw, "mbf_table", mpi::i_am_root());
     }
     FciInitializer::mbf_order_table_t table("mbf_table_load", init.m_mbf_order_table.m_row);
-//    {
-//        hdf5::FileReader fr("tmp.h5");
-//        table.load(fr, );
-//    }
+    {
+        hdf5::FileReader fr("tmp.h5");
+        table.load(fr, "mbf_table", false, true);
+        std::cout << table.to_string() << std::endl;
+    }
 }

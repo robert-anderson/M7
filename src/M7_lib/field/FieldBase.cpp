@@ -98,10 +98,18 @@ hash::digest_t FieldBase::hash() const {
     return hash::fnv(begin(), m_size);
 }
 
+void FieldBase::save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const {
+    hdf5::field::save<buf_t>(*this, nw, name, {m_size}, {"bytes"}, max_nitem_per_op, this_rank);
+}
+
 void FieldBase::save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const {
-    hdf5::field::save<buf_t>(*this, nw, name, {m_size}, {"bytes"}, this_rank);
+    save(nw, name, c_default_max_nitem_per_op, this_rank);
 }
 
 void FieldBase::save(const hdf5::NodeWriter& nw, bool this_rank) const {
-    save(nw, m_name, this_rank);
+    save(nw, m_name, c_default_max_nitem_per_op, this_rank);
+}
+
+void FieldBase::load(const hdf5::NodeReader& /*nr*/, const str_t& /*name*/, bool /*part*/, bool /*this_rank*/) {
+//    hdf5::field::load<buf_t>(*this, nr, name, {m_size}, {"bytes"}, part, this_rank);
 }
