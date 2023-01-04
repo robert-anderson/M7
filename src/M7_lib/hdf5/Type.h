@@ -84,7 +84,7 @@ namespace hdf5 {
 
         Type(const str_t* str);
 
-        Type(const strv_t* str_vec);
+        Type(const strv_t* strv);
 
         ~Type();
 

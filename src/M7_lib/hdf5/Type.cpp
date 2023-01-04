@@ -19,7 +19,7 @@ hdf5::Type::Type(hsize_t size, char) : m_handle(H5Tcopy(H5T_C_S1)), m_size(size)
 
 hdf5::Type::Type(const str_t* str) : Type(str->size(), 0) {}
 
-hdf5::Type::Type(const strv_t* str_vec) : Type(size_max(str_vec), 0) {}
+hdf5::Type::Type(const strv_t* strv) : Type(size_max(strv), 0) {}
 
 hdf5::Type::~Type() {
     if (m_immutable) return;
