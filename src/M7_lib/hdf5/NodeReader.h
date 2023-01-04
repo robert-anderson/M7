@@ -77,19 +77,19 @@ namespace hdf5 {
         }
 
         void load_dataset(const str_t& name, dataset::load_prep_fn prep_fn, dataset::load_fill_fn fill_fn,
-                          const dataset::DistListFormat& format, uint_t max_nitem_per_op) const;
+                          const dataset::DistListFormat& format, uint_t max_nitem_per_op, std::list<Attr>& attrs) const;
 
     public:
         void load_dataset(const str_t& name, dataset::load_prep_fn prep_fn, dataset::load_fill_fn fill_fn,
-                          uint_t max_nitem_per_op, bool part, bool this_rank) const {
+                          uint_t max_nitem_per_op, std::list<Attr>& attrs, bool part, bool this_rank) const {
             if (valid_part_flag(part)) {
                 const auto format = get_part_dataset_format(name, this_rank);
                 // dispatch the private method
-                load_dataset(name, prep_fn, fill_fn, format, max_nitem_per_op);
+                load_dataset(name, prep_fn, fill_fn, format, max_nitem_per_op, attrs);
             } else {
                 const auto format = get_full_dataset_format(name, this_rank);
                 // dispatch the private method
-                load_dataset(name, prep_fn, fill_fn, format, max_nitem_per_op);
+                load_dataset(name, prep_fn, fill_fn, format, max_nitem_per_op, attrs);
             }
         }
 
@@ -111,7 +111,8 @@ namespace hdf5 {
          *  true if this rank is active in the load operation
          */
         template<typename T>
-        void load_dataset(const str_t& name, T* dst, uint_t max_nitem_per_op, bool part, bool this_rank) const {
+        void load_dataset(const str_t& name, T* dst, uint_t max_nitem_per_op,
+                          std::list<Attr>& attrs, bool part, bool this_rank) const {
             using namespace ptr;
             const auto begin = reinterpret_cast<buf_t*>(dst);
             auto ptr = begin;
@@ -123,26 +124,63 @@ namespace hdf5 {
             };
             // don't need a fill function here: prep_fn puts all data where it is supposed to be
             auto fill_fn = [](const buf_t*, uint_t){};
-            return load_dataset(name, prep_fn, fill_fn, max_nitem_per_op, part, this_rank);
+            return load_dataset(name, prep_fn, fill_fn, max_nitem_per_op, attrs, part, this_rank);
+        }
+
+        template<typename T>
+        void load_dataset(const str_t& name, v_t<T>& dst, uint_t max_nitem_per_op,
+                          std::list<Attr>& attrs, bool part, bool this_rank) const {
+            dst.resize(local_nelement<T>(name, part, this_rank));
+            load_dataset(name, dst.data(), max_nitem_per_op, attrs, part, this_rank);
+        }
+
+        template<typename T>
+        void load_dataset(const str_t& name, v_t<T>& dst, std::list<Attr>& attrs, bool part, bool this_rank) const {
+            dst.resize(local_nelement<T>(name, part, this_rank));
+            load_dataset(name, dst.data(), dst.size(), attrs, part, this_rank);
+        }
+
+        template<typename T>
+        T load_dataset(const str_t& name, std::list<Attr>& attrs, bool part, bool this_rank) const {
+            T dst;
+            load_dataset(name, dst, attrs, part, this_rank);
+            return dst;
+        }
+
+
+
+        /*
+         * below all the above methods are repeated with attributes discarded
+         */
+
+        void load_dataset(const str_t& name, dataset::load_prep_fn prep_fn, dataset::load_fill_fn fill_fn,
+                          uint_t max_nitem_per_op, bool part, bool this_rank) const {
+            std::list<Attr> attrs;
+            load_dataset(name, prep_fn, fill_fn, max_nitem_per_op, attrs, part, this_rank);
+        }
+
+        template<typename T>
+        void load_dataset(const str_t& name, T* dst, uint_t max_nitem_per_op, bool part, bool this_rank) const {
+            std::list<Attr> attrs;
+            load_dataset(name, dst, max_nitem_per_op, attrs, part, this_rank);
         }
 
         template<typename T>
         void load_dataset(const str_t& name, v_t<T>& dst, uint_t max_nitem_per_op, bool part, bool this_rank) const {
-            dst.resize(local_nelement<T>(name, part, this_rank));
-            load_dataset(name, dst.data(), max_nitem_per_op, part, this_rank);
+            std::list<Attr> attrs;
+            load_dataset(name, dst, max_nitem_per_op, attrs, part, this_rank);
         }
 
         template<typename T>
         void load_dataset(const str_t& name, v_t<T>& dst, bool part, bool this_rank) const {
-            dst.resize(local_nelement<T>(name, part, this_rank));
-            load_dataset(name, dst.data(), dst.size(), part, this_rank);
+            std::list<Attr> attrs;
+            load_dataset(name, dst, attrs, part, this_rank);
         }
 
         template<typename T>
         T load_dataset(const str_t& name, bool part, bool this_rank) const {
-            T dst;
-            load_dataset(name, dst, part, this_rank);
-            return dst;
+            std::list<Attr> attrs;
+            return load_dataset<T>(name, attrs, part, this_rank);
         }
     };
 }

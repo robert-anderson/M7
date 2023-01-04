@@ -48,6 +48,10 @@ namespace hdf5 {
             ItemFormat(Type type, uintv_t shape, strv_t dim_names, bool add_complex_dim);
 
             ItemFormat() : ItemFormat(Type(), {}, {}, false){}
+
+            bool operator==(const ItemFormat& other) const;
+
+            bool operator!=(const ItemFormat& other) const;
         };
 
         /**

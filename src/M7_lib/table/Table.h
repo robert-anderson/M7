@@ -7,7 +7,6 @@
 
 #include <stack>
 
-#include <M7_lib/field/Fields.h>
 #include <M7_lib/sort/ExtremalIndices.h>
 #include <M7_lib/field/Row.h>
 

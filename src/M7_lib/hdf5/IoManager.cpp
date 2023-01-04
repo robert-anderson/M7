@@ -16,6 +16,14 @@ hdf5::dataset::ItemFormat::ItemFormat(hdf5::Type type, uintv_t shape, strv_t dim
     REQUIRE_TRUE(m_size, "format is empty");
 }
 
+bool hdf5::dataset::ItemFormat::operator==(const hdf5::dataset::ItemFormat& other) const {
+    return m_type==other.m_type && m_h5_shape==other.m_h5_shape && m_dim_names==other.m_dim_names;
+}
+
+bool hdf5::dataset::ItemFormat::operator!=(const hdf5::dataset::ItemFormat& other) const {
+    return !(*this==other);
+}
+
 hdf5::dataset::ListFormat::ListFormat(hdf5::dataset::ItemFormat item_format, uint_t nitem) :
         m_item(item_format), m_nitem(nitem), m_size(m_nitem*m_item.m_size),
         m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_item.m_h5_shape, m_nitem))),

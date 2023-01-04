@@ -99,10 +99,9 @@ hdf5::dataset::PartDistListFormat hdf5::NodeReader::get_part_dataset_format(cons
     return {{item.m_type, item.m_shape, item.m_dim_names, false}, nitem};
 }
 
-void hdf5::NodeReader::load_dataset(const str_t& name,
-                                    hdf5::dataset::load_prep_fn prep_fn,
-                                    hdf5::dataset::load_fill_fn fill_fn,
-                                    const hdf5::dataset::DistListFormat& format, uint_t max_nitem_per_op) const {
+void hdf5::NodeReader::load_dataset(
+        const str_t& name, hdf5::dataset::load_prep_fn prep_fn, hdf5::dataset::load_fill_fn fill_fn,
+        const hdf5::dataset::DistListFormat& format, uint_t max_nitem_per_op, std::list<Attr>& attrs) const {
     REQUIRE_TRUE(child_exists(name), "dataset is missing from HDF5 node");
     auto dataset = H5Dopen1(m_handle, name.c_str());
     auto filespace = H5Dget_space(dataset);
@@ -146,6 +145,19 @@ void hdf5::NodeReader::load_dataset(const str_t& name,
         all_done = mpi::all_land(all_done);
         // deplete number of remaining items by the number just transacted
         nitem_remaining -= counts[0];
+    }
+
+    // load any attributes associated with the open dataset
+    {
+        auto op = [](hid_t parent, const char* name, const H5A_info_t */*ainfo*/, void* attrs_cast) -> herr_t {
+            auto attrs = reinterpret_cast<std::list<Attr>*>(attrs_cast);
+            attrs->emplace_back(parent, name);
+            return 0;
+        };
+        hsize_t idx = 0ul;
+        // use creation order so that elementwise comparison between saved and loaded attr lists may be done
+        H5Aiterate2(dataset, H5_INDEX_CRT_ORDER, H5_ITER_INC, &idx, op, reinterpret_cast<void*>(&attrs));
+        REQUIRE_EQ(idx, attrs.size(), "number of attrs in list should match the final index");
     }
 
     H5Pclose(plist);

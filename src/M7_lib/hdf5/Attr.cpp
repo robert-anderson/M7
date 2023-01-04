@@ -12,12 +12,20 @@ hdf5::Attr::Attr(v_t<buf_t> buf, hdf5::dataset::ItemFormat format, str_t name) :
 
 hdf5::Attr::Attr(hid_t parent_handle, str_t name) : Attr(load(parent_handle, name)){}
 
+bool hdf5::Attr::operator==(const hdf5::Attr& other) const {
+    if (m_buf != other.m_buf) return false;
+    if (m_format!=other.m_format) return false;
+    if (m_name!=other.m_name) return false;
+    return true;
+}
+
+bool hdf5::Attr::operator!=(const hdf5::Attr& other) const {
+    return !(*this==other);
+}
+
 void hdf5::Attr::save(hid_t parent_handle) const {
     auto dataspace = H5Screate_simple(m_format.m_h5_shape.size(), m_format.m_h5_shape.data(), nullptr);
-
-    auto attr_handle = H5Acreate(parent_handle, m_name.c_str(), m_format.m_type, dataspace,
-                                 H5P_DEFAULT, H5P_DEFAULT);
-
+    auto attr_handle = H5Acreate(parent_handle, m_name.c_str(), m_format.m_type, dataspace, H5P_DEFAULT, H5P_DEFAULT);
     auto status = H5Awrite(attr_handle, m_format.m_type, m_buf.data());
     DEBUG_ONLY(status);
     DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");

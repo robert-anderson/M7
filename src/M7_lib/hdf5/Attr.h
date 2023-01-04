@@ -24,6 +24,12 @@ namespace hdf5 {
             Attr({reinterpret_cast<const buf_t*>(v), reinterpret_cast<const buf_t*>(v + size)},
                  dataset::ItemFormat(Type::make<T>(), {size}, {}, dtype::is_complex<T>()), std::move(name)){}
 
+        /*
+         * do not include the null terminator in the length of the stored string
+         */
+        Attr(const str_t& v, str_t name): m_buf(v.data(), v.data()+v.size()),
+            m_format(Type(&v), {1}, {}, false), m_name(std::move(name)){}
+
         template<typename T>
         Attr(const T& v, str_t name): Attr(&v, 1ul, std::move(name)){}
 
@@ -32,6 +38,10 @@ namespace hdf5 {
 
         template<typename T, uint_t nind>
         Attr(const std::array<T, nind>& a, str_t name): Attr(convert::to_vector(a.data(), nind), std::move(name)){}
+
+        bool operator==(const Attr& other) const;
+
+        bool operator!=(const Attr& other) const;
 
     private:
 

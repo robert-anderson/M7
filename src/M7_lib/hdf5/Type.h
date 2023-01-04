@@ -51,16 +51,6 @@ namespace hdf5 {
     template<> constexpr uint_t type_ind<double>() { return 13; }
 
 
-    /**
-     * @param h5type
-     *  type index
-     * @return
-     *  size in bytes of the type identified by the given HDF5 type index
-     */
-    hsize_t type_size(hid_t h5type);
-
-
-
     struct Type {
         const hid_t m_handle;
         const hsize_t m_size;
@@ -70,6 +60,7 @@ namespace hdf5 {
         static hsize_t size_max(const strv_t* vec);
         /*
          * use dummy arg so as not to have same prototype as public ctor in case hsize_t coincides with hid_t
+         * only delegated to when creating a string type
          */
         Type(hsize_t size, char /*dummy*/);
 
@@ -84,6 +75,9 @@ namespace hdf5 {
 
         Type(): m_handle(0), m_size(0ul), m_immutable(true){}
         explicit Type(hid_t handle): m_handle(handle), m_size(H5Tget_size(m_handle)), m_immutable(true){}
+
+        Type(const Type& other): m_handle(other.m_immutable ? other.m_handle : H5Tcopy(other.m_handle)),
+                                 m_size(other.m_size), m_immutable(other.m_immutable){}
 
         template<typename T>
         Type(const T*): Type(make<T>()){}
