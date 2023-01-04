@@ -76,9 +76,8 @@ private:
     uint_t m_row_index = ~0ul;
     friend Row;
 
-    static constexpr uint_t c_default_max_nitem_per_op = 16000000;
-
 public:
+    static constexpr uint_t c_default_max_nitem_per_op = 16000000;
 
     /**
      * @param row

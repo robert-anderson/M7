@@ -335,14 +335,15 @@ public:
         attempt_remap();
     }
 
-    void load_fn(const hdf5::NodeReader& parent, str_t name, strm_t field_names, bool part, bool this_rank) override {
+    void load_fn(const hdf5::NodeReader& parent, const str_t& name, uint_t max_nitem_per_op,
+                 strm_t field_names, bool part, bool this_rank) override {
         const auto key_name = m_row.key_field().m_name;
         auto it = std::find_if(field_names.cbegin(), field_names.cend(),
                                [&key_name](const strp_t& pair){return key_name == pair.first;});
         // the key field is not optional - it must be loaded
         if (it == field_names.cend()) field_names.insert({key_name, key_name});
         clear();
-        Table<row_t>::load_fn(parent, name, field_names, part, this_rank);
+        Table<row_t>::load_fn(parent, name, max_nitem_per_op, field_names, part, this_rank);
         // run through all the loaded rows and add their key fields into the hash map
         for (uint_t irow = 0ul; irow < this->nrow_in_use(); ++irow) post_insert(irow);
     }
