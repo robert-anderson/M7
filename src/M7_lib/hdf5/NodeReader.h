@@ -76,18 +76,20 @@ namespace hdf5 {
             return nitem * (item_size / sizeof(T));
         }
 
-        void load_dataset(const str_t& name, dataset::load_fn fn, const dataset::DistListFormat& format, uint_t max_nitem_per_op) const;
+        void load_dataset(const str_t& name, dataset::load_prep_fn prep_fn, dataset::load_fill_fn fill_fn,
+                          const dataset::DistListFormat& format, uint_t max_nitem_per_op) const;
 
     public:
-        void load_dataset(const str_t& name, dataset::load_fn fn, uint_t max_nitem_per_op, bool part, bool this_rank) const {
+        void load_dataset(const str_t& name, dataset::load_prep_fn prep_fn, dataset::load_fill_fn fill_fn,
+                          uint_t max_nitem_per_op, bool part, bool this_rank) const {
             if (valid_part_flag(part)) {
                 const auto format = get_part_dataset_format(name, this_rank);
                 // dispatch the private method
-                load_dataset(name, fn, format, max_nitem_per_op);
+                load_dataset(name, prep_fn, fill_fn, format, max_nitem_per_op);
             } else {
                 const auto format = get_full_dataset_format(name, this_rank);
                 // dispatch the private method
-                load_dataset(name, fn, format, max_nitem_per_op);
+                load_dataset(name, prep_fn, fill_fn, format, max_nitem_per_op);
             }
         }
 
@@ -111,15 +113,17 @@ namespace hdf5 {
         template<typename T>
         void load_dataset(const str_t& name, T* dst, uint_t max_nitem_per_op, bool part, bool this_rank) const {
             using namespace ptr;
-            const auto begin = reinterpret_cast<char*>(dst);
+            const auto begin = reinterpret_cast<buf_t*>(dst);
             auto ptr = begin;
-            auto fn = [&](const dataset::ListFormat& format, uint_t max_nitem_per_op) {
+            auto prep_fn = [&](const dataset::ListFormat& format, uint_t max_nitem_per_op) -> buf_t* {
                 const auto tmp = in_range(ptr, begin, format.m_size);
                 if (!tmp) return tmp;
                 ptr = in_range(ptr + max_nitem_per_op * format.m_item.m_size, begin, format.m_size);
                 return tmp;
             };
-            return load_dataset(name, fn, max_nitem_per_op, part, this_rank);
+            // don't need a fill function here: prep_fn puts all data where it is supposed to be
+            auto fill_fn = [](const buf_t*, uint_t){};
+            return load_dataset(name, prep_fn, fill_fn, max_nitem_per_op, part, this_rank);
         }
 
         template<typename T>

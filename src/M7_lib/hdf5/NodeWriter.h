@@ -50,9 +50,9 @@ namespace hdf5 {
         void save_dataset(const str_t& name, const T* src, uintv_t item_shape,
                           strv_t dim_names, uint_t nitem, uint_t max_nitem_per_op, std::list<Attr> attrs) const {
             using namespace ::ptr;
-            const auto begin = reinterpret_cast<const char*>(src);
+            const auto begin = reinterpret_cast<const buf_t*>(src);
             auto ptr = begin;
-            auto fn = [&](const dataset::ListFormat& format, uint_t max_nitem_per_op) {
+            auto fn = [&](const dataset::ListFormat& format, uint_t max_nitem_per_op) -> const buf_t* {
                 const auto tmp = in_range(ptr, begin, format.m_size);
                 if (!tmp) return tmp;
                 ptr = in_range(ptr + max_nitem_per_op * format.m_item.m_size, begin, format.m_size);

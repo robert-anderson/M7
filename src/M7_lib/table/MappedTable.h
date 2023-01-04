@@ -335,18 +335,17 @@ public:
         attempt_remap();
     }
 
-//    void load(const hdf5::NodeReader &/*parent*/, str_t /*name*/) override {
-//        auto& row = m_row;
-//        RowHdf5Reader<row_t> row_reader(row, parent, name);
-//        uint_t iitem = 0ul;
-//        clear();
-//        TableBase::push_back(row_reader.m_nitem);
-//        for (row_reader.restart(); row_reader; ++row_reader) {
-//            row_reader.read(iitem++);
-//            post_insert(row_reader.index());
-//        }
-//    }
-
+    void load_fn(const hdf5::NodeReader& parent, str_t name, strm_t field_names, bool part, bool this_rank) override {
+        const auto key_name = m_row.key_field().m_name;
+        auto it = std::find_if(field_names.cbegin(), field_names.cend(),
+                               [&key_name](const strp_t& pair){return key_name == pair.first;});
+        // the key field is not optional - it must be loaded
+        if (it == field_names.cend()) field_names.insert({key_name, key_name});
+        clear();
+        Table<row_t>::load_fn(parent, name, field_names, part, this_rank);
+        // run through all the loaded rows and add their key fields into the hash map
+        for (uint_t irow = 0ul; irow < this->nrow_in_use(); ++irow) post_insert(irow);
+    }
 };
 
 #endif //M7_MAPPEDTABLE_H

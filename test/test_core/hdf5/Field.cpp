@@ -21,6 +21,12 @@ TEST(FieldDataset, FrmOnvField) {
     {
         hdf5::FileReader fr("tmp.h5");
         table.load(fr, "mbf_table", false, true);
-        std::cout << table.to_string() << std::endl;
+    }
+    // check that the MappedTable has been correctly restored
+    auto row = table.m_row;
+    for (row.restart(); row; ++row){
+        auto res = table.lookup(row.m_field);
+        ASSERT_TRUE(res);
+        ASSERT_EQ(row.index(), res.index());
     }
 }

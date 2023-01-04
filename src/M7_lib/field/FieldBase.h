@@ -166,7 +166,11 @@ public:
 
     void save(const hdf5::NodeWriter& nw, bool this_rank) const;
 
-    virtual void load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank);
+    virtual void load(const hdf5::NodeReader& nr, const str_t& name, uint_t max_nitem_per_op, bool part, bool this_rank);
+
+    void load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank);
+
+    void load(const hdf5::NodeReader& nr, bool part, bool this_rank);
 
 
 

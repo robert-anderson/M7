@@ -60,16 +60,7 @@ struct Table : TableBase {
         return static_cast<const Row&>(row).m_table == this;
     }
 
-private:
-    uint_t nrow_to_write() const {
-        uint_t n = 0ul;
-        for (m_row.restart(); m_row; ++m_row) {
-            n += !static_cast<const Row&>(m_row).is_h5_write_exempt();
-        }
-        return n;
-    }
-
-public:
+protected:
     /**
      * @param parent
      *  HDF5 node within which to save this Table's fields as datasets
@@ -81,27 +72,13 @@ public:
      * @param this_rank
      *  true if this MPI rank participates in writing
      */
-    virtual void save(const hdf5::NodeWriter& parent, str_t name, strm_t field_names, bool this_rank) const {
+    virtual void save_fn(const hdf5::NodeWriter& parent, str_t name, strm_t field_names, bool this_rank) const {
         hdf5::GroupWriter gw(parent, name);
         for (auto field : m_row.m_fields) {
             auto it = std::find_if(field_names.cbegin(), field_names.cend(),
                        [&field](const strp_t& pair){return field->m_name==pair.first;});
             if (it != field_names.cend()) field->save(gw, it->second, this_rank);
         }
-    }
-    /**
-     * overload in the case that the FieldBase::m_name is identical to the intended HDF5 dataset names
-     */
-    virtual void save(const hdf5::NodeWriter& parent, str_t name, strv_t field_names, bool this_rank) const {
-        strm_t pairs;
-        for (const auto& field_name : field_names) pairs.insert({field_name, field_name});
-        save(parent, name, pairs, this_rank);
-    }
-    /**
-     * overload in the case that all fields are to be saved with their FieldBase::m_name as dataset name
-     */
-    void save(const hdf5::NodeWriter& parent, str_t name, bool this_rank) const {
-        save(parent, name, m_row.all_field_names(), this_rank);
     }
 
     /**
@@ -115,7 +92,8 @@ public:
      * @param this_rank
      *  true if this MPI rank participates in writing
      */
-    virtual void load(const hdf5::NodeReader& parent, str_t name, strm_t field_names, bool part, bool this_rank) {
+    virtual void load_fn(const hdf5::NodeReader& parent, str_t name, strm_t field_names, bool part, bool this_rank) {
+        clear();
         hdf5::GroupReader gr(parent, name);
         for (auto field : m_row.m_fields) {
             auto it = std::find_if(field_names.cbegin(), field_names.cend(),
@@ -123,14 +101,42 @@ public:
             if (it != field_names.cend()) field->load(gr, it->second, part, this_rank);
         }
     }
+
+
+public:
+    void save(const hdf5::NodeWriter& parent, str_t name, strm_t field_names, bool this_rank) const {
+        save_fn(parent, name, field_names, this_rank);
+    }
+
     /**
      * overload in the case that the FieldBase::m_name is identical to the intended HDF5 dataset names
      */
-    virtual void load(const hdf5::NodeReader& parent, str_t name, strv_t field_names, bool part, bool this_rank) {
+    void save(const hdf5::NodeWriter& parent, str_t name, strv_t field_names, bool this_rank) const {
+        strm_t pairs;
+        for (const auto& field_name : field_names) pairs.insert({field_name, field_name});
+        save(parent, name, pairs, this_rank);
+    }
+
+    /**
+     * overload in the case that all fields are to be saved with their FieldBase::m_name as dataset name
+     */
+    void save(const hdf5::NodeWriter& parent, str_t name, bool this_rank) const {
+        save(parent, name, m_row.all_field_names(), this_rank);
+    }
+
+    void load(const hdf5::NodeReader& parent, str_t name, strm_t field_names, bool part, bool this_rank) {
+        load_fn(parent, name, field_names, part, this_rank);
+    }
+
+    /**
+     * overload in the case that the FieldBase::m_name is identical to the intended HDF5 dataset names
+     */
+    void load(const hdf5::NodeReader& parent, str_t name, strv_t field_names, bool part, bool this_rank) {
         strm_t pairs;
         for (const auto& field_name : field_names) pairs.insert({field_name, field_name});
         load(parent, name, pairs, part, this_rank);
     }
+
     /**
      * overload in the case that all fields are to be loaded with their FieldBase::m_name as dataset name
      */

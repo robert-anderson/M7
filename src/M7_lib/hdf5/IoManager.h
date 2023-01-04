@@ -79,9 +79,18 @@ namespace hdf5 {
         };
         /**
          * the save-load functions only need access to the list format, not the details of the distribution
+         *
+         * save prepares a contiguous buffer representing the data to be saved. the caller of save_fn only needs to
+         * perform the write operation
+         *
+         * load requires two functions:
+         *  - one to prepare the pointer to the position in the buffer into which the next hyperslab from the HDF5
+         *    dataset should be loaded
+         *  - another to fill this buffered data into the target object
          */
-        typedef std::function<const void*(const ListFormat& format, uint_t max_nitem_per_op)> save_fn;
-        typedef std::function<void*(const ListFormat& format, uint_t max_nitem_per_op)> load_fn;
+        typedef std::function<const buf_t*(const ListFormat& format, uint_t max_nitem_per_op)> save_fn;
+        typedef std::function<buf_t*(const ListFormat& format, uint_t max_nitem_per_op)> load_prep_fn;
+        typedef std::function<void(const buf_t* src, uint_t nitem)> load_fill_fn;
 
         struct DistListFormat {
             const ListFormat m_local;

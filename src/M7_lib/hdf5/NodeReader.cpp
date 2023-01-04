@@ -99,7 +99,9 @@ hdf5::dataset::PartDistListFormat hdf5::NodeReader::get_part_dataset_format(cons
     return {{item.m_type, item.m_shape, item.m_dim_names, false}, nitem};
 }
 
-void hdf5::NodeReader::load_dataset(const str_t& name, hdf5::dataset::load_fn fn,
+void hdf5::NodeReader::load_dataset(const str_t& name,
+                                    hdf5::dataset::load_prep_fn prep_fn,
+                                    hdf5::dataset::load_fill_fn fill_fn,
                                     const hdf5::dataset::DistListFormat& format, uint_t max_nitem_per_op) const {
     REQUIRE_TRUE(child_exists(name), "dataset is missing from HDF5 node");
     auto dataset = H5Dopen1(m_handle, name.c_str());
@@ -128,11 +130,17 @@ void hdf5::NodeReader::load_dataset(const str_t& name, hdf5::dataset::load_fn fn
         H5Sselect_hyperslab(mem_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
         offsets[0] = std::min(iblock * max_nitem_per_op, format.m_local.m_nitem);
         offsets[0] += format.m_nitem_displ;
-        const auto dst = fn(format.m_local, max_nitem_per_op);
+        // get a pointer to which this portion of the dataset can be contiguously loaded
+        const auto dst = prep_fn(format.m_local, max_nitem_per_op);
         REQUIRE_EQ(bool(dst), bool(counts[0]), "nitem zero with non-null data or nitem non-zero with null data");
         H5Sselect_hyperslab(file_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
         auto status = H5Dread(dataset, format.m_local.m_item.m_type, mem_hyperslab, file_hyperslab, plist, dst);
         REQUIRE_FALSE(status, "HDF5 Error on multidimensional load");
+        /*
+         * now that the buffer has been filled, let the target object be populated (this may be a null operation in the
+         * case that the contiguous buffer is directly part of the target object e.g. loading a std::vector)
+         */
+        if (dst) fill_fn(dst, counts[0]);
         all_done = !dst;
         // only allow the loop to terminate if all ranks have yielded a null pointer
         all_done = mpi::all_land(all_done);
