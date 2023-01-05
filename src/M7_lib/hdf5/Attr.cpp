@@ -5,7 +5,7 @@
 #include "Attr.h"
 
 
-hdf5::Attr::Attr(v_t<buf_t> buf, hdf5::dataset::ItemFormat format, str_t name) :
+hdf5::Attr::Attr(v_t<buf_t> buf, hdf5::dataset::ItemFormat format, str_t name, char) :
         m_buf(std::move(buf)), m_format(std::move(format)), m_name(std::move(name)){
     REQUIRE_EQ(m_buf.size(), m_format.m_size, "buffer size inconsistent with format");
 }
@@ -34,7 +34,7 @@ void hdf5::Attr::save(hid_t parent_handle) const {
 }
 
 hdf5::Attr hdf5::Attr::load(hid_t parent_handle, const str_t& name) {
-    if (!H5Aexists(parent_handle, name.c_str())) return {{}, {}, name};
+    if (!H5Aexists(parent_handle, name.c_str())) return {{}, {}, name, 0};
     auto attr_handle = H5Aopen(parent_handle, name.c_str(), H5P_DEFAULT);
     auto dataspace = H5Aget_space(attr_handle);
     auto ndim = H5Sget_simple_extent_ndims(dataspace);
@@ -48,5 +48,5 @@ hdf5::Attr hdf5::Attr::load(hid_t parent_handle, const str_t& name) {
     DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
     H5Aclose(attr_handle);
     H5Sclose(dataspace);
-    return {buf, format, name};
+    return {buf, format, name, 0};
 }

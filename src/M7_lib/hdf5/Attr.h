@@ -16,13 +16,27 @@ namespace hdf5 {
         const v_t<buf_t> m_buf;
         const dataset::ItemFormat m_format;
         const str_t m_name;
-        Attr(v_t<buf_t> buf, dataset::ItemFormat format, str_t name);
+    private:
+        /*
+         * char arg is to resolve ambiguity between this ctor definition and the next in the case that T=buf_t
+         */
+        Attr(v_t<buf_t> buf, dataset::ItemFormat format, str_t name, char /*dummy*/);
+    public:
+
+        template<typename T>
+        Attr(const T* buf, dataset::ItemFormat format, str_t name):
+            Attr({reinterpret_cast<const buf_t*>(buf), reinterpret_cast<const buf_t*>(buf)+format.m_size}, format, name, 0){}
+
+        template<typename T>
+        Attr(const v_t<T>& buf, const uintv_t& shape, str_t name):
+                Attr(buf.data(), {Type::make<T>(), shape, {}, dtype::is_complex<T>()}, name){
+            REQUIRE_EQ(buf.size(), nd::nelement(shape), "format is not compatible with given vector");
+        }
+
         Attr(hid_t parent_handle, str_t name);
 
         template<typename T>
-        Attr(const T* v, uint_t size, str_t name):
-            Attr({reinterpret_cast<const buf_t*>(v), reinterpret_cast<const buf_t*>(v + size)},
-                 dataset::ItemFormat(Type::make<T>(), {size}, {}, dtype::is_complex<T>()), std::move(name)){}
+        Attr(const T* v, uint_t size, str_t name): Attr(v, {Type(v), {size}, {}, dtype::is_complex<T>()}, name){}
 
         /*
          * do not include the null terminator in the length of the stored string
