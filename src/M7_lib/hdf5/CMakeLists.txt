@@ -19,8 +19,6 @@ target_sources(M7_lib
         NodeReader.h
         NodeWriter.cpp
         NodeWriter.h
-        PropertyList.cpp
-        PropertyList.h
         Type.cpp
         Type.h
 )
