@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "IoManager.h"
+#include "DatasetFormat.h"
 
 namespace hdf5 {
 

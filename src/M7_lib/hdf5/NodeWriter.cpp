@@ -9,8 +9,9 @@ void hdf5::NodeWriter::save_attr(const hdf5::Attr& attr) const {
     attr.save(m_handle);
 }
 
-void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn, const dataset::PartDistListFormat& format,
-                                    uint_t max_nitem_per_op, std::list<Attr> attrs) const {
+void hdf5::NodeWriter::save_dataset(
+        const str_t& name, hdf5::dataset::save_fn fn, const hdf5::dataset::PartDistListFormat& format,
+        uint_t max_nitem_per_op, std::list<Attr> attrs) const {
     auto filespace = H5Screate_simple(format.m_h5_shape.size(), format.m_h5_shape.data(), nullptr);
 
     // specify format of the dataset
@@ -68,13 +69,12 @@ void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn, cons
     H5Dclose(dataset);
 }
 
-
-void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn,
-                                    const dataset::PartDistListFormat& format, std::list<Attr> attrs) const {
+void hdf5::NodeWriter::save_dataset(const str_t& name, hdf5::dataset::save_fn fn,
+                                    const hdf5::dataset::PartDistListFormat& format, std::list<Attr> attrs) const {
     save_dataset(name, fn, format, format.m_nitem, std::move(attrs));
 }
 
-void hdf5::NodeWriter::save_dataset(const str_t& name, dataset::save_fn fn,
-                                    const dataset::PartDistListFormat& format) const {
+void hdf5::NodeWriter::save_dataset(const str_t& name, hdf5::dataset::save_fn fn,
+                                    const hdf5::dataset::PartDistListFormat& format) const {
     save_dataset(name, fn, format, format.m_nitem, {});
 }

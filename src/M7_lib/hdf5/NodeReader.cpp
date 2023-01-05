@@ -99,9 +99,29 @@ hdf5::dataset::PartDistListFormat hdf5::NodeReader::get_part_dataset_format(cons
     return {{item.m_type, item.m_shape, item.m_dim_names, false}, nitem};
 }
 
-void hdf5::NodeReader::load_dataset(
-        const str_t& name, hdf5::dataset::load_prep_fn prep_fn, hdf5::dataset::load_fill_fn fill_fn,
-        const hdf5::dataset::DistListFormat& format, uint_t max_nitem_per_op, std::list<Attr>& attrs) const {
+bool hdf5::NodeReader::valid_part_flag(bool part) {
+    REQUIRE_TRUE(mpi::all_land(part) || mpi::all_land(!part),
+                 "no mixing of partial and full reading is allowed, each rank must pass the same part value");
+    return part;
+}
+
+void hdf5::NodeReader::get_local_sizes(const str_t& name, bool part, bool this_rank,
+                                       uint_t& nitem, uint_t& item_size) const {
+    if (valid_part_flag(part)) {
+        const auto format = get_part_dataset_format(name, this_rank);
+        nitem = format.m_local.m_nitem;
+        item_size = format.m_local.m_item.m_size;
+    } else {
+        const auto format = get_full_dataset_format(name, this_rank);
+        nitem = format.m_local.m_nitem;
+        item_size = format.m_local.m_item.m_size;
+    }
+}
+
+void hdf5::NodeReader::load_dataset(const str_t& name, hdf5::dataset::load_prep_fn prep_fn,
+                                    hdf5::dataset::load_fill_fn fill_fn, const hdf5::dataset::DistListFormat& format,
+                                    uint_t max_nitem_per_op, std::list<Attr>& attrs) const {
+
     REQUIRE_TRUE(child_exists(name), "dataset is missing from HDF5 node");
     auto dataset = H5Dopen1(m_handle, name.c_str());
     auto filespace = H5Dget_space(dataset);
@@ -165,4 +185,25 @@ void hdf5::NodeReader::load_dataset(
     H5Sclose(file_hyperslab);
     H5Sclose(mem_hyperslab);
     H5Dclose(dataset);
+}
+
+void hdf5::NodeReader::load_dataset(
+        const str_t& name, hdf5::dataset::load_prep_fn prep_fn, hdf5::dataset::load_fill_fn fill_fn,
+        uint_t max_nitem_per_op, std::list<Attr>& attrs, bool part, bool this_rank) const {
+    if (valid_part_flag(part)) {
+        const auto format = get_part_dataset_format(name, this_rank);
+        // dispatch the private method
+        load_dataset(name, prep_fn, fill_fn, format, max_nitem_per_op, attrs);
+    } else {
+        const auto format = get_full_dataset_format(name, this_rank);
+        // dispatch the private method
+        load_dataset(name, prep_fn, fill_fn, format, max_nitem_per_op, attrs);
+    }
+}
+
+void hdf5::NodeReader::load_dataset(
+        const str_t& name, hdf5::dataset::load_prep_fn prep_fn, hdf5::dataset::load_fill_fn fill_fn,
+        uint_t max_nitem_per_op, bool part, bool this_rank) const {
+    std::list<Attr> attrs;
+    load_dataset(name, prep_fn, fill_fn, max_nitem_per_op, attrs, part, this_rank);
 }

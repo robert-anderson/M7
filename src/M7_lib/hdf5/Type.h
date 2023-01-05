@@ -76,8 +76,7 @@ namespace hdf5 {
         Type(): m_handle(0), m_size(0ul), m_immutable(true){}
         explicit Type(hid_t handle): m_handle(handle), m_size(H5Tget_size(m_handle)), m_immutable(true){}
 
-        Type(const Type& other): m_handle(other.m_immutable ? other.m_handle : H5Tcopy(other.m_handle)),
-                                 m_size(other.m_size), m_immutable(other.m_immutable){}
+        Type(const Type& other);
 
         template<typename T>
         Type(const T*): Type(make<T>()){}

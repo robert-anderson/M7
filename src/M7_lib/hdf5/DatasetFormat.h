@@ -2,8 +2,8 @@
 // Created by rja on 06/12/22.
 //
 
-#ifndef M7_HDF5_BUFFERER_H
-#define M7_HDF5_BUFFERER_H
+#ifndef M7_DATASET_FORMAT_H
+#define M7_DATASET_FORMAT_H
 
 #include <utility>
 
@@ -139,4 +139,4 @@ namespace hdf5 {
     }
 }
 
-#endif //M7_HDF5_BUFFERER_H
+#endif //M7_DATASET_FORMAT_H

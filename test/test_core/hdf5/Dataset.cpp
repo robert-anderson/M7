@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "M7_lib/hdf5/IoManager.h"
+#include "M7_lib/hdf5/DatasetFormat.h"
 #include "M7_lib/util/Hash.h"
 #include "M7_lib/hdf5/File.h"
 

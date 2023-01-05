@@ -2,13 +2,13 @@ target_sources(M7_lib
     PRIVATE
         Attr.cpp
         Attr.h
+        DatasetFormat.cpp
+        DatasetFormat.h
         Field.h
         File.cpp
         File.h
         Group.cpp
         Group.h
-        IoManager.cpp
-        IoManager.h
         Node.cpp
         Node.h
         NodeReader.cpp

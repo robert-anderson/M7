@@ -21,6 +21,10 @@ hdf5::Type::Type(const str_t* str) : Type(str->size(), 0) {}
 
 hdf5::Type::Type(const strv_t* strv) : Type(size_max(strv), 0) {}
 
+hdf5::Type::Type(const hdf5::Type& other) :
+    m_handle(other.m_immutable ? other.m_handle : H5Tcopy(other.m_handle)),
+    m_size(other.m_size), m_immutable(other.m_immutable){}
+
 hdf5::Type::~Type() {
     if (m_immutable) return;
     auto status = H5Tclose(m_handle);

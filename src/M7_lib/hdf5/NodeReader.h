@@ -50,23 +50,9 @@ namespace hdf5 {
         dataset::PartDistListFormat get_part_dataset_format(const str_t& name, bool this_rank) const;
 
     private:
-        static bool valid_part_flag(bool part) {
-            REQUIRE_TRUE(mpi::all_land(part) || mpi::all_land(!part),
-                         "no mixing of partial and full reading is allowed, each rank must pass the same part value");
-            return part;
-        }
+        static bool valid_part_flag(bool part);
 
-        void get_local_sizes(const str_t& name, bool part, bool this_rank, uint_t& nitem, uint_t& item_size) const {
-            if (valid_part_flag(part)) {
-                const auto format = get_part_dataset_format(name, this_rank);
-                nitem = format.m_local.m_nitem;
-                item_size = format.m_local.m_item.m_size;
-            } else {
-                const auto format = get_full_dataset_format(name, this_rank);
-                nitem = format.m_local.m_nitem;
-                item_size = format.m_local.m_item.m_size;
-            }
-        }
+        void get_local_sizes(const str_t& name, bool part, bool this_rank, uint_t& nitem, uint_t& item_size) const;
 
         template<typename T>
         uint_t local_nelement(const str_t& name, bool part, bool this_rank) const {
@@ -82,17 +68,7 @@ namespace hdf5 {
 
     public:
         void load_dataset(const str_t& name, dataset::load_prep_fn prep_fn, dataset::load_fill_fn fill_fn,
-                          uint_t max_nitem_per_op, std::list<Attr>& attrs, bool part, bool this_rank) const {
-            if (valid_part_flag(part)) {
-                const auto format = get_part_dataset_format(name, this_rank);
-                // dispatch the private method
-                load_dataset(name, prep_fn, fill_fn, format, max_nitem_per_op, attrs);
-            } else {
-                const auto format = get_full_dataset_format(name, this_rank);
-                // dispatch the private method
-                load_dataset(name, prep_fn, fill_fn, format, max_nitem_per_op, attrs);
-            }
-        }
+                          uint_t max_nitem_per_op, std::list<Attr>& attrs, bool part, bool this_rank) const;
 
         /**
          * load a dataset into a simple contiguous buffer pointed to by dst. it is obviously the responsibility of the
@@ -148,17 +124,12 @@ namespace hdf5 {
             return dst;
         }
 
-
-
         /*
          * below all the above methods are repeated with attributes discarded
          */
 
         void load_dataset(const str_t& name, dataset::load_prep_fn prep_fn, dataset::load_fill_fn fill_fn,
-                          uint_t max_nitem_per_op, bool part, bool this_rank) const {
-            std::list<Attr> attrs;
-            load_dataset(name, prep_fn, fill_fn, max_nitem_per_op, attrs, part, this_rank);
-        }
+                          uint_t max_nitem_per_op, bool part, bool this_rank) const;
 
         template<typename T>
         void load_dataset(const str_t& name, T* dst, uint_t max_nitem_per_op, bool part, bool this_rank) const {
