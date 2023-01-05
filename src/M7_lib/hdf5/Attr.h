@@ -7,7 +7,6 @@
 
 #include <utility>
 
-#include "Dataspace.h"
 #include "IoManager.h"
 
 namespace hdf5 {

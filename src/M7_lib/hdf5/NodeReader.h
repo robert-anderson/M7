@@ -5,6 +5,7 @@
 #ifndef M7_NODEREADER_H
 #define M7_NODEREADER_H
 
+#include "M7_lib/util/Pointer.h"
 #include "Node.h"
 
 namespace hdf5 {
@@ -113,7 +114,7 @@ namespace hdf5 {
         template<typename T>
         void load_dataset(const str_t& name, T* dst, uint_t max_nitem_per_op,
                           std::list<Attr>& attrs, bool part, bool this_rank) const {
-            using namespace ptr;
+            using namespace ::ptr;
             const auto begin = reinterpret_cast<buf_t*>(dst);
             auto ptr = begin;
             auto prep_fn = [&](const dataset::ListFormat& format, uint_t max_nitem_per_op) -> buf_t* {

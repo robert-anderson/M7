@@ -6,9 +6,6 @@
 #define M7_HDF5_NODE_H
 
 #include "Attr.h"
-#include "Dataset.h"
-#include "IoManager.h"
-#include "M7_lib/util/Pointer.h"
 
 namespace hdf5 {
 

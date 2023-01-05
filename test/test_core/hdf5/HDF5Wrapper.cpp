@@ -8,7 +8,6 @@
 #include "M7_lib/field/Row.h"
 #include "M7_lib/field/Fields.h"
 #include "M7_lib/table/BufferedTable.h"
-#include "M7_lib/hdf5/Dataset.h"
 
 TEST(HDF5Wrapper, NativeTypes) {
     using namespace hdf5;

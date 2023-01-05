@@ -7,6 +7,7 @@
 
 #include <iterator>
 #include <memory>
+#include "M7_lib/defs.h"
 
 namespace ptr {
     template<typename T>

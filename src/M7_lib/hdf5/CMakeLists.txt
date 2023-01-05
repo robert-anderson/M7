@@ -2,10 +2,6 @@ target_sources(M7_lib
     PRIVATE
         Attr.cpp
         Attr.h
-        Dataset.cpp
-        Dataset.h
-        Dataspace.cpp
-        Dataspace.h
         Field.h
         File.cpp
         File.h

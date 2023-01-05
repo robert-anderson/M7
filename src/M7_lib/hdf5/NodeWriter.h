@@ -5,6 +5,7 @@
 #ifndef M7_NODEWRITER_H
 #define M7_NODEWRITER_H
 
+#include "M7_lib/util/Pointer.h"
 #include "Node.h"
 
 namespace hdf5 {
