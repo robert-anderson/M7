@@ -27,8 +27,6 @@ struct Walker : public Row {
 
     Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool average_weights);
 
-    bool is_h5_write_exempt() const override;
-
     /**
      * if the current cycle index is the cycle on which the row became occupied, then the occupied ncycle is 1, since
      * the instantaneous weight has been summed-into the average already, hence the "1+"

@@ -150,28 +150,48 @@ public:
         std::memcpy(dst, src, m_size);
     }
 
+protected:
     /**
-     * save a entire field as raw bytes
+     * save all entries of a field in a Table to an HDF5 dataset
      * @param nw
      *  NodeWriter instance (HDF5 group or file)
      * @param name
-     *  desired name in the
+     *  desired name in the dataset
+     * @param max_nitem_per_op
+     *  maximum number of items (rows of this Field) that can be saved to HDF5 archive in a single write call
      * @param this_rank
      *  true if data from this MPI rank is to be included in the saved set
      */
-    virtual void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const;
+    virtual void save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const;
+
+    /**
+     * load many entries of a field in a Table from an HDF5 dataset
+     * @param nr
+     *  NodeReader instance (HDF5 group or file)
+     * @param name
+     *  name in the dataset (which may differ from FieldBase::m_name)
+     * @param max_nitem_per_op
+     *  maximum number of items (rows of this Field) that can be loaded from HDF5 archive in a single read call
+     * @param part
+     *  true if the loading is to be done partially (each included MPI rank gets a portion of the dataset)
+     * @param this_rank
+     *  true if this MPI rank is to read (either partial or full) data from the HDF5 archive
+     */
+    virtual void load_fn(const hdf5::NodeReader& nr, const str_t& name, uint_t max_nitem_per_op, bool part, bool this_rank);
+
+public:
+
+    void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const;
 
     void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const;
 
     void save(const hdf5::NodeWriter& nw, bool this_rank) const;
 
-    virtual void load(const hdf5::NodeReader& nr, const str_t& name, uint_t max_nitem_per_op, bool part, bool this_rank);
+    void load(const hdf5::NodeReader& nr, const str_t& name, uint_t max_nitem_per_op, bool part, bool this_rank);
 
     void load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank);
 
     void load(const hdf5::NodeReader& nr, bool part, bool this_rank);
-
-
 
 private:
 

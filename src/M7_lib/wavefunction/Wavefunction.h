@@ -284,6 +284,13 @@ public:
         }
     }
 
+    void save(const hdf5::NodeWriter &parent) const {
+        (void)parent;
+        auto& row = m_store.m_row;
+        hdf5::GroupWriter gw(parent, "wf");
+        row.m_mbf.save(gw, true);
+        row.m_weight.save(gw, true);
+    }
 
 protected:
     void load_fn(const hdf5::NodeReader &parent) override;

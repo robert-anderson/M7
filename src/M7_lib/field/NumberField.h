@@ -304,8 +304,7 @@ public:
         return m_format.to_string() + (m_is_complex ? complex_dim_string : "");
     }
 
-
-    void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const override {
+    void save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const override {
         auto shape = convert::to_vector(m_format.m_shape.data(), nind);
         auto dim_names = convert::to_vector(m_format.m_dim_names.data(), nind);
         hdf5::field::save<T>(*this, nw, name, shape, dim_names, max_nitem_per_op, this_rank);

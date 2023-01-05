@@ -228,8 +228,6 @@ public:
         return m_table->is_freed(index());
     }
 
-    virtual bool is_h5_write_exempt() const;
-
     strv_t all_field_names() const;
 
 };

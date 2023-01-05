@@ -48,10 +48,6 @@ void Row::free() {
     m_table->free(index());
 }
 
-bool Row::is_h5_write_exempt() const {
-    return false;
-}
-
 strv_t Row::all_field_names() const {
     strv_t names;
     names.reserve(m_fields.size());

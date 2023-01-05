@@ -20,10 +20,6 @@ Walker::Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool aver
         m_icycle_occ(average_weights ? this : nullptr, "cycle index at row creation")
 {}
 
-bool Walker::is_h5_write_exempt() const {
-    return m_mbf.is_zero();
-}
-
 uint_t Walker::occupied_ncycle(uint_t icycle_current) const {
     return (1+icycle_current)-m_icycle_occ;
 }
