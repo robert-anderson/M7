@@ -13,8 +13,6 @@ target_sources(M7_lib
         Group.h
         IoManager.cpp
         IoManager.h
-        NdDistList.cpp
-        NdDistList.h
         Node.cpp
         Node.h
         NodeReader.cpp

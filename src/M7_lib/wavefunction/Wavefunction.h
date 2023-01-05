@@ -285,7 +285,6 @@ public:
     }
 
     void save(const hdf5::NodeWriter &parent) const {
-        (void)parent;
         auto& row = m_store.m_row;
         hdf5::GroupWriter gw(parent, "wf");
         row.m_mbf.save(gw, true);
