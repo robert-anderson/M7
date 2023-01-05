@@ -13,7 +13,6 @@ hdf5::dataset::ItemFormat::ItemFormat(hdf5::Type type, uintv_t shape, strv_t dim
                     vector::appended(dim_names, "real/imag") : dim_names) {
     REQUIRE_TRUE(m_dim_names.empty() || m_dim_names.size() == m_h5_shape.size(),
                  "incorrect number of dimension names");
-    REQUIRE_TRUE(m_size, "format is empty");
 }
 
 bool hdf5::dataset::ItemFormat::operator==(const hdf5::dataset::ItemFormat& other) const {

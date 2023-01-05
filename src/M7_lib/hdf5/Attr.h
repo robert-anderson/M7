@@ -60,6 +60,8 @@ namespace hdf5 {
 
         template<typename T>
         bool parsable_as() {
+            // an attribute is not parseable at all if it has zero size
+            if (!m_buf.size()) return false;
             if (dtype::is_complex<T>() && (m_format.m_h5_shape.back()!=2ul))
                 // minor dimension must be 2, for the real/imag components
                 return false;
@@ -85,7 +87,8 @@ namespace hdf5 {
 
         template<typename T>
         bool parse(T& v) {
-            REQUIRE_EQ(sizeof(T), m_buf.size(), "buffer size is equal to that of a single word of the parsing type");
+            if (!parsable_as<T>()) return false;
+            REQUIRE_EQ(sizeof(T), m_buf.size(), "buffer size is not equal to that of a single word of the parsing type");
             return parse(&v);
         }
 
