@@ -107,16 +107,16 @@ uint_t integer::sqrt(uint_t n) {
     /*
      * iterate Newton's method until the candidate root is found
      */
-    unsigned int x0 = n / 2;
-    unsigned int x1 = ( x0 + n / x0 ) / 2;
-    while ( x1 < x0 ) {
+    uint_t x0 = n / 2;
+    uint_t x1 = ( x0 + n / x0 ) / 2;
+    while (x1 < x0) {
         x0 = x1;
         x1 = ( x0 + n / x0 ) / 2;
     }
     /*
      * if the candidate root does not square to n, then n is not a square number
      */
-    if (x0*x0 != n) return ~0ul;
+    if (x0 * x0 != n) return ~0ul;
     return x0;
 }
 

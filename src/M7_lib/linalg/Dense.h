@@ -112,7 +112,7 @@ namespace dense {
     class Matrix {
         v_t<T> m_buffer;
 
-        uint_t index(const uint_t &irow, const uint_t &icol) const {
+        uint_t index(uint_t irow, uint_t icol) const {
             DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
             DEBUG_ASSERT_LT(icol, m_ncol, "column index OOB");
             return irow * m_ncol + icol;
@@ -121,21 +121,41 @@ namespace dense {
          * these can't be const because of the need to swap them in the inplace transpose, so instead they are made
          * private and read-only access is provided by a getter method for each
          */
-        uint_t m_nrow, m_ncol;
+        uint_t m_nrow = 0ul;
+        uint_t m_ncol = 0ul;
     public:
-        Matrix(uint_t nrow, uint_t ncol) : m_buffer(nrow * ncol, T(0)), m_nrow(nrow), m_ncol(ncol) {
-            REQUIRE_TRUE(m_nrow, "matrix must have a non-zero number of rows");
-            REQUIRE_TRUE(m_ncol, "matrix must have a non-zero number of columns");
+
+        bool compatible(const Matrix<T>& other) const {
+            return (m_nrow==other.m_nrow) && (m_ncol==other.m_ncol);
+        }
+
+        void resize(uint_t nrow, uint_t ncol) {
+            const auto old = *this;
+            m_nrow = nrow;
+            m_ncol = ncol;
+            m_buffer.resize(nrow * ncol, T(0));
+            m_buffer.clear();
+            nrow = std::min(m_nrow, old.m_nrow);
+            ncol = std::min(m_ncol, old.m_ncol);
+            for (uint_t irow = 0ul; irow < nrow; ++irow) std::copy(old.ptr(irow), old.ptr(irow) + ncol, ptr(irow));
+        }
+
+        Matrix(uint_t nrow, uint_t ncol) {
+            resize(nrow, ncol);
         }
 
         Matrix(uint_t nrow, const v_t<T>& rows): Matrix(nrow, rows.size()/nrow) {
             *this = rows;
         }
 
-        Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank) :
-            Matrix(nr.get_dataset_shape(name)[0], nr.get_dataset_shape(name)[1]) {
-            nr.load_dataset(name, m_buffer, false, this_rank);
+        Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank) {
+            if (this_rank) {
+                auto shape = nr.get_dataset_shape(name);
+                resize(shape[0], shape[1]);
+                nr.load_dataset(name, m_buffer, false, this_rank);
+            }
         }
+
         explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_col_ind() + 1){
             *this = sparse;
         }
@@ -143,7 +163,10 @@ namespace dense {
         Matrix(const Matrix& other): Matrix(other.m_nrow, other.m_ncol){
             m_buffer = other.m_buffer;
         }
+
         Matrix& operator=(const Matrix& other) {
+            m_nrow = other.m_nrow;
+            m_ncol = other.m_ncol;
             m_buffer = other.m_buffer;
             return *this;
         }
@@ -156,8 +179,9 @@ namespace dense {
         }
 
         Matrix& operator=(const sparse::dynamic::Matrix<T>& sparse){
-            REQUIRE_GE(m_nrow, sparse.nrow(), "not enough rows in dense matrix to store contents of source");
-            REQUIRE_GT(m_ncol, sparse.max_col_ind(), "not enough columns in dense matrix store contents of source");
+            const auto nrow = std::max(m_nrow, sparse.nrow());
+            const auto ncol = std::max(m_ncol, sparse.max_col_ind()+1);
+            if ((nrow != m_nrow) || (ncol != m_ncol)) resize(nrow, ncol);
             for (uint_t irow = 0ul; irow < sparse.nrow(); ++irow) {
                 for (auto& elem : sparse[irow]) (*this)(irow, elem.m_i) = elem.m_v;
             }
@@ -175,33 +199,33 @@ namespace dense {
             return !std::memcmp(ptr(), other.ptr(), sizeof(T)*m_ncol*m_nrow);
         }
 
-        const uint_t& nrow() const {return m_nrow;}
-        const uint_t& ncol() const {return m_ncol;}
+        uint_t nrow() const {return m_nrow;}
+        uint_t ncol() const {return m_ncol;}
         std::pair<uint_t, uint_t> dims() const {return {nrow(), ncol()};}
 
-        T* ptr(const uint_t &irow=0) {
+        T* ptr(uint_t irow=0) {
             return m_buffer.data()+index(irow, 0);
         }
 
-        const T* ptr(const uint_t &irow=0) const {
+        const T* ptr(uint_t irow=0) const {
             return m_buffer.data()+index(irow, 0);
         }
 
-        T &operator[](const uint_t &iflat) {
+        T &operator[](uint_t iflat) {
             DEBUG_ASSERT_LT(iflat, m_buffer.size(), "index OOB");
             return m_buffer[iflat];
         }
 
-        const T &operator[](const uint_t &iflat) const {
+        const T &operator[](uint_t iflat) const {
             DEBUG_ASSERT_LT(iflat, m_buffer.size(), "index OOB");
             return m_buffer[iflat];
         }
 
-        T &operator()(const uint_t &irow, const uint_t &icol) {
+        T &operator()(uint_t irow, uint_t icol) {
             return m_buffer[index(irow, icol)];
         }
 
-        const T &operator()(const uint_t &irow, const uint_t &icol) const {
+        const T &operator()(uint_t irow, uint_t icol) const {
             return m_buffer[index(irow, icol)];
         }
 
@@ -210,27 +234,23 @@ namespace dense {
         }
 
         bool nearly_equal(const Matrix<T>& other, arith::comp_t<T> rtol, arith::comp_t<T> atol) const {
-            REQUIRE_TRUE(m_buffer.size()==other.m_buffer.size(),
-                         "matrices must have same number of elements to be compared");
+            REQUIRE_TRUE(compatible(other), "matrices must be compatible to be compared");
             return dense::nearly_equal(ptr(), other.ptr(), m_buffer.size(), rtol, atol);
         }
 
         bool nearly_equal(const Matrix<T>& other) const {
-            REQUIRE_TRUE(m_buffer.size()==other.m_buffer.size(),
-                         "matrices must have same number of elements to be compared");
+            REQUIRE_TRUE(compatible(other), "matrices must be compatible to be compared");
             return dense::nearly_equal(ptr(), other.ptr(), m_buffer.size());
         }
 
         Matrix<T>& operator +=(Matrix<T>& other) {
-            DEBUG_ASSERT_EQ(m_nrow, other.m_nrow, "incompatible number of rows");
-            DEBUG_ASSERT_EQ(m_ncol, other.m_ncol, "incompatible number of columns");
+            REQUIRE_TRUE(compatible(other), "matrices must be compatible to be added");
             for (uint_t ielem = 0ul; ielem < m_buffer.size(); ++ielem) m_buffer[ielem] += other.m_buffer[ielem];
             return *this;
         }
 
         Matrix<T>& operator -=(Matrix<T>& other) {
-            DEBUG_ASSERT_EQ(m_nrow, other.m_nrow, "incompatible number of rows");
-            DEBUG_ASSERT_EQ(m_ncol, other.m_ncol, "incompatible number of columns");
+            REQUIRE_TRUE(compatible(other), "matrices must be compatible to be subtracted");
             for (uint_t ielem = 0ul; ielem < m_buffer.size(); ++ielem) m_buffer[ielem] -= other.m_buffer[ielem];
             return *this;
         }
@@ -240,17 +260,12 @@ namespace dense {
          * for bounds safety, we keep these set-from and get-to pointer methods protected
          */
 
-
         /**
          * non-converting copy-in
-         * @tparam U
-         *  U (==T)
          * @param src
          *  data source
          */
-        template<typename U>
-        typename std::enable_if<std::is_same<U, T>::value, void>::type
-        set(const U* src) {
+        void set(const T* src, tag::Int<0> /*convert*/) {
             memcpy(m_buffer.data(), src, m_buffer.size() * sizeof(T));
         }
 
@@ -262,25 +277,27 @@ namespace dense {
          *  data source
          */
         template<typename U>
-        typename std::enable_if<!std::is_same<U, T>::value, void>::type
-        set_row(const U* src) {
+        void set(const U* src, tag::Int<1> /*convert*/) {
             static_assert(std::is_convertible<U, T>::value, "invalid conversion");
             for (uint_t ielem = 0ul; ielem < m_buffer.size(); ++ielem) m_buffer[ielem] = src[ielem];
         }
 
+        /*
+         * dispatch the appropriate tagged method
+         */
+        template<typename U>
+        void set(const U* src) {
+            set(src, tag::Int<!std::is_same<U, T>::value>());
+        }
 
         /**
          * non-converting copy-in
-         * @tparam U
-         *  U (==T)
          * @param irow
          *  row index
          * @param src
          *  data source
          */
-        template<typename U>
-        typename std::enable_if<std::is_same<U, T>::value, void>::type
-        set_row(const uint_t &irow, const U* src) {
+        void set_row(uint_t irow, const T* src, tag::Int<0> /*convert*/) {
             memcpy(m_buffer.data() + index(irow, 0ul), src, m_ncol * sizeof(T));
         }
 
@@ -294,24 +311,27 @@ namespace dense {
          *  data source
          */
         template<typename U>
-        typename std::enable_if<!std::is_same<U, T>::value, void>::type
-        set_row(const uint_t &irow, const U* src) {
+        void set_row(uint_t irow, const U* src, tag::Int<1> /*convert*/) {
             static_assert(std::is_convertible<U, T>::value, "invalid conversion");
             for (uint_t icol = 0ul; icol<m_ncol; ++icol) (*this)(irow, icol) = src[icol];
         }
 
+        /*
+         * dispatch the appropriate tagged method
+         */
+        template<typename U>
+        void set_row(uint_t irow, const U* src) {
+            set_row(irow, src, tag::Int<!std::is_same<U, T>::value>());
+        }
+
         /**
          * non-converting copy-out
-         * @tparam U
-         *  U (==T)
          * @param irow
          *  row index
          * @param dst
          *  data destination
          */
-        template<typename U>
-        typename std::enable_if<std::is_same<U, T>::value, void>::type
-        get_row(const uint_t &irow, U* dst) const {
+        void get_row(uint_t irow, T* dst, tag::Int<0> /*convert*/) const {
             memcpy(dst, m_buffer.data() + index(irow, 0ul), m_ncol * sizeof(T));
         }
 
@@ -325,20 +345,30 @@ namespace dense {
          *  data destination
          */
         template<typename U>
-        typename std::enable_if<!std::is_same<U, T>::value, void>::type
-        get_row(const uint_t &irow, U* dst) const {
+        void get_row(uint_t irow, U* dst, tag::Int<1> /*convert*/) const {
             static_assert(std::is_convertible<T, U>::value, "invalid conversion");
             for (uint_t icol = 0ul; icol<m_ncol; ++icol) dst[icol] = (*this)(irow, icol);
         }
 
+        /*
+         * dispatch the appropriate tagged method
+         */
         template<typename U>
-        void set_col(const uint_t &icol, const U* src) {
+        void get_row(uint_t irow, U* dst) const {
+            get_row(irow, dst, tag::Int<!std::is_same<U, T>::value>());
+        }
+
+        /*
+         * non-contiguous columns means there is no point in differentiating between converting and non-converting ops
+         */
+        template<typename U>
+        void set_col(uint_t icol, const U* src) {
             static_assert(std::is_convertible<U, T>::value, "invalid conversion");
             for (uint_t irow = 0ul; irow<m_nrow; ++irow) (*this)(irow, icol) = src[irow];
         }
 
         template<typename U>
-        void get_col(const uint_t &icol, U* dst) const {
+        void get_col(uint_t icol, U* dst) const {
             static_assert(std::is_convertible<T, U>::value, "invalid conversion");
             for (uint_t irow = 0ul; irow<m_nrow; ++irow) dst[irow] = (*this)(irow, icol);
         }
@@ -374,28 +404,27 @@ namespace dense {
         }
 
         template<typename U>
-        void set_row(const uint_t &irow, const v_t<U> &v) {
+        void set_row(uint_t irow, const v_t<U> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
             // copies byte wise if U==T, else converts element wise
             set_row(irow, v.data());
         }
 
         template<typename U>
-        void set_col(const uint_t &icol, const v_t<U> &v) {
+        void set_col(uint_t icol, const v_t<U> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
             // copies element wise if U==T, else converts element wise
             set_col(icol, v.data());
         }
 
         template<typename U>
-        void get_row(const uint_t &irow, v_t<U> &v) const {
+        void get_row(uint_t irow, v_t<U> &v) const {
             v.resize(m_ncol);
-            // copies byte wise if U==T, else converts element wise
             get_row(irow, v.data());
         }
 
         template<typename U>
-        void get_col(const uint_t &icol, v_t<U> &v) const {
+        void get_col(uint_t icol, v_t<U> &v) const {
             v.resize(m_nrow);
             // copies element wise if U==T, else converts element wise
             get_col(icol, v.data());
@@ -428,6 +457,11 @@ namespace dense {
             return nrow;
         }
     public:
+
+        void resize(uint_t n) {
+            Matrix<T>::resize(n, n);
+        }
+
         using Matrix<T>::operator=;
         SquareMatrix(uint_t n): Matrix<T>(n, n){}
         SquareMatrix(const v_t<T>& v): Matrix<T>(nrow_from_flat_size(v.size()), v){}
