@@ -61,7 +61,7 @@ uint_t hdf5::NodeReader::get_dataset_ndim(const str_t& name) const {
 uintv_t hdf5::NodeReader::get_dataset_shape(const str_t& name) const {
     auto ndim = get_dataset_ndim(name);
     auto dataset = H5Dopen1(m_handle, name.c_str());
-    REQUIRE_GT_ALL(dataset, 0, logging::format("no such dataset \"{}\"", name));
+    REQUIRE_GT(dataset, 0, logging::format("no such dataset \"{}\"", name));
     auto dataspace = H5Dget_space(dataset);
     v_t<hsize_t> shape(ndim, 0ul);
     H5Sget_simple_extent_dims(dataspace, shape.data(), nullptr);

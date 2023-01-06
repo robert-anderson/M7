@@ -130,11 +130,18 @@ namespace dense {
         }
 
         void resize(uint_t nrow, uint_t ncol) {
+            auto no_copy_resize = [&](){
+                m_buffer.resize(nrow * ncol, T(0));
+                m_buffer.clear();
+                m_nrow = nrow;
+                m_ncol = ncol;
+            };
+            if (m_buffer.empty()) {
+                no_copy_resize();
+                return;
+            }
             const auto old = *this;
-            m_nrow = nrow;
-            m_ncol = ncol;
-            m_buffer.resize(nrow * ncol, T(0));
-            m_buffer.clear();
+            no_copy_resize();
             nrow = std::min(m_nrow, old.m_nrow);
             ncol = std::min(m_ncol, old.m_ncol);
             for (uint_t irow = 0ul; irow < nrow; ++irow) std::copy(old.ptr(irow), old.ptr(irow) + ncol, ptr(irow));
@@ -152,8 +159,8 @@ namespace dense {
             if (this_rank) {
                 auto shape = nr.get_dataset_shape(name);
                 resize(shape[0], shape[1]);
-                nr.load_dataset(name, m_buffer, false, this_rank);
             }
+            nr.load_dataset(name, m_buffer, false, this_rank);
         }
 
         explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_col_ind() + 1){
