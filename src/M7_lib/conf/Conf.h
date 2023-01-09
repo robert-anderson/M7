@@ -6,6 +6,8 @@
 #define M7_CONF_H
 
 
+#include <utility>
+
 #include "ConfComponents.h"
 #include "HamiltonianConf.h"
 #include "M7_lib/basis/BasisData.h"
@@ -14,6 +16,48 @@
 namespace conf {
     
     using namespace conf_components;
+
+    struct OptionalFile : Section {
+        Param<str_t> m_path;
+        explicit OptionalFile(Group *parent, str_t name, str_t short_desc, str_t default_path, EnablePolicy ep) :
+                Section(parent, name, logging::format("{} file", short_desc), ep),
+                m_path(this, "path", std::move(default_path), "relative or absolute path"){}
+    };
+
+    struct OptionalFileSeries : Section {
+        Param<str_t> m_path_fmt;
+        SingleChoice<str_t> m_mode;
+        Param<uint_t> m_period;
+        explicit OptionalFileSeries(Group *parent, str_t name, str_t short_desc, str_t default_path_fmt, EnablePolicy ep) :
+            Section(parent, name, logging::format("{} file series", short_desc), ep),
+            m_path_fmt(this, "path_fmt", std::move(default_path_fmt),
+                "relative or absolute path format into which calculation data is to be dumped periodically during "
+                "the calculation: can include \"{}\" token (non-clobbering) or not include such a token (clobbering)"),
+            m_mode(this, "mode",
+                {
+                    {"cycle", "the number of MC cycles between file creations"},
+                    {"minute", "the number of minutes of wall time between file creations"}
+                }, "choose between the two interpretations of the \"period\" parameter"),
+            m_period(this, "period", 1000ul, "interval between file creations: either in cycles or minutes"){}
+
+
+    protected:
+        void validate_node_contents() override {
+            auto& str = m_path_fmt.m_value;
+            uint_t token_count = std::count(str.cbegin(), str.cend(), '{');
+            REQUIRE_LE(token_count, 1ul, "path formats can have at most one {} token");
+            if (token_count) {
+                auto it_open = std::find(str.cbegin(), str.cend(), '{');
+                auto it_close = std::find(str.cbegin(), str.cend(), '}');
+                REQUIRE_EQ(std::distance(it_open, it_close), 1l,
+                           "path format for file series should contain at most one {} token");
+                logging::info("formatting token found in {} path format, successive write operations will not overwrite"
+                              " previously written files from the same run", m_path_fmt.m_value);
+            } else
+                logging::info("formatting token not found in path, "
+                              "successive checkpoints will overwrite previous checkpoints from the same run");
+        }
+    };
 
     struct HashMapping : Section {
         static constexpr double c_default_remap_ratio = 2.0;
@@ -31,43 +75,6 @@ namespace conf {
         Param<double> m_comm_exp_fac;
 
         explicit Buffers(Group *parent);
-    };
-
-    struct Archive : Section {
-        Param<str_t> m_load_path;
-        Param<str_t> m_save_path;
-        Param<str_t> m_chkpt_path;
-        /**
-         * the period options are not mutually exclusive, the Archive class will make sure that a checkpoint file does
-         * not get dumped twice on the same MC cycle
-         */
-        Param<uint_t> m_period;
-        Param<uint_t> m_period_mins;
-
-        explicit Archive(Group *parent);
-
-        bool do_load() const {
-            return !m_load_path.m_value.empty();
-        }
-
-        bool do_save() const {
-            return !m_save_path.m_value.empty();
-        }
-
-        bool do_chkpts() const {
-            return !m_chkpt_path.m_value.empty() && (m_period_mins || m_period);
-        }
-
-    protected:
-        void validate_node_contents() override;
-    };
-
-    struct Archivable : Section {
-        Param<bool> m_load;
-        Param<bool> m_save;
-        Param<bool> m_chkpt;
-
-        explicit Archivable(Group *parent);
     };
 
     struct Prng : Section {
@@ -137,8 +144,9 @@ namespace conf {
         Param<bool> m_fci_init;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
-        Archivable m_archivable;
         Distribution m_distribution;
+        OptionalFile m_save;
+        OptionalFile m_load;
 
         explicit Wavefunction(Group *parent);
     };
@@ -192,7 +200,8 @@ namespace conf {
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Distribution m_distribution;
-        Archivable m_archivable;
+        OptionalFile m_save;
+        OptionalFile m_load;
 
         explicit Bilinears(Group *parent, str_t name, str_t description);
 
@@ -230,7 +239,8 @@ namespace conf {
     struct HfExcits : Section {
         Param<uint_t> m_max_exlvl;
         Buffers m_buffers;
-        Archivable m_archivable;
+        OptionalFile m_save;
+        OptionalFile m_load;
 
         explicit HfExcits(Group *parent);
     };
@@ -329,7 +339,6 @@ namespace conf {
 
     struct Document : conf_components::Document {
         Prng m_prng;
-        Archive m_archive;
         Basis m_basis;
         Particles m_particles;
         Wavefunction m_wavefunction;

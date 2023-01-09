@@ -18,7 +18,7 @@
  * if an archive is being loaded, the propagator data must be read and verified against the data on file to ensure
  * compatibility with any objects reinstated from disk
  */
-class Propagator : public Archivable {
+class Propagator {
 protected:
     double m_tau;
 public:
@@ -40,7 +40,6 @@ public:
     std::unique_ptr<guide::Wavefunction> make_imp_samp_guide(const conf::GuideWavefunction& opts) const;
 
     Propagator(const conf::Document &opts, const Hamiltonian &ham, const Wavefunction &wf) :
-            Archivable("propagator", opts.m_archive),
             m_tau(opts.m_propagator.m_tau_init),
             m_nadd_initiator(opts.m_propagator.m_nadd),
             m_wf_fmt(wf.m_format),
@@ -91,10 +90,6 @@ public:
     virtual hash::digest_t checksum_() const {return 0;}
     hash::digest_t checksum() const;
 
-private:
-    void load_fn(const hdf5::NodeReader &parent) override;
-
-    void save_fn(const hdf5::NodeWriter &parent) override;
 };
 
 #endif //M7_PROPAGATOR_H

@@ -31,8 +31,7 @@ Rdms::exsig_to_rdms_t Rdms::make_exsig_to_rdms() const {
 }
 
 Rdms::Rdms(const conf::Rdms& opts, v_t<OpSig> ranksigs, sys::Sector sector, const Epoch& accum_epoch) :
-        Archivable("rdms", opts.m_archivable),
-        m_spinfree(opts.m_spinfree), m_work_conns(sector.size()),
+        m_opts(opts), m_spinfree(opts.m_spinfree), m_work_conns(sector.size()),
         m_work_com_ops(sector.size()),
         m_accum_epoch(accum_epoch) {
     for (const auto& ranksig: ranksigs) {
@@ -212,19 +211,23 @@ ham_comp_t Rdms::get_energy(const BosHam& ham) const {
     return arith::real(e);
 }
 
-void Rdms::save_fn(const hdf5::NodeWriter& parent) {
+void Rdms::save(const hdf5::NodeWriter& parent) {
     if (!m_accum_epoch) {
         logging::warn("MAE accumulation epoch was not reached in this calculation: omitting RDM save");
         return;
     }
-    hdf5::GroupWriter gw(parent, "rdms");
-    gw.save_dataset("norm", m_total_norm.m_reduced, mpi::i_am_root());
-    for (const auto& rdm: m_rdms) rdm->save(gw);
+    {
+        // unnormalized RDMs, suitable for restarts
+        hdf5::GroupWriter gw(parent, "archive");
+        gw.save_dataset("norm", m_total_norm.m_reduced, mpi::i_am_root());
+        for (const auto& rdm: m_rdms) rdm->save(gw);
+    }
 
     if (m_spinfree) {
         /*
          * create and save the spinfree versions of all RDMs and intermediates
          */
+        hdf5::GroupWriter gw(parent, "spinfree");
         for (const auto& rdm: m_rdms) SpinFreeRdm(*rdm, m_total_norm.m_reduced).save(gw);
     }
 }

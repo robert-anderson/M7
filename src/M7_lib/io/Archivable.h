@@ -10,6 +10,7 @@
 #include <M7_lib/hdf5/File.h>
 
 
+#if 0
 struct Archivable {
     const str_t m_name;
     /**
@@ -111,4 +112,5 @@ public:
 
 };
 
+#endif //M7_ARCHIVABLE_H
 #endif //M7_ARCHIVABLE_H

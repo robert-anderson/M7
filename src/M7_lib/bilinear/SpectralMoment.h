@@ -20,11 +20,11 @@ struct SpectralMoment {
     }
 };
 
-class SpecMoms : public Archivable {
+class SpecMoms {
 
 public:
 
-    SpecMoms(const conf::SpecMoms& opts): Archivable("spec_moms", opts.m_archivable){}
+    SpecMoms(const conf::SpecMoms& /*opts*/) {}
 
     operator bool() const {
         return false;//!m_active_ranksigs.empty();
@@ -36,16 +36,6 @@ public:
 //                return false;
             return true;
     }
-
-protected:
-    void load_fn(const hdf5::NodeReader& /*parent*/) override {
-
-    }
-
-    void save_fn(const hdf5::NodeWriter& /*parent*/) override {
-
-    }
-
 };
 
 #endif //M7_SPECTRALMOMENT_H

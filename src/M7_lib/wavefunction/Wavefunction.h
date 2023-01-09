@@ -29,7 +29,7 @@
  * This m_store is often called the "main walker list", and the SendRecv tables
  * are the called the "spawning lists"
  */
-struct Wavefunction : communicator::BasicSend<Walker, Spawn>, Archivable {
+struct Wavefunction : communicator::BasicSend<Walker, Spawn> {
     typedef GlobalExtremalRows<Walker, wf_t, c_ndim_wf> weights_gxr_t;
 
     const conf::Document &m_opts;
@@ -290,12 +290,6 @@ public:
         row.m_mbf.save(gw, true);
         row.m_weight.save(gw, true);
     }
-
-protected:
-    void load_fn(const hdf5::NodeReader &parent) override;
-
-    void save_fn(const hdf5::NodeWriter &parent) override;
-
 };
 
 #endif //M7_WAVEFUNCTION_H

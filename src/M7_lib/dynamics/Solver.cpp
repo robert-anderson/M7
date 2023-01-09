@@ -27,7 +27,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
         m_hf(make_hf()), m_exit("exit"), m_maes(opts.m_av_ests, m_wf.m_sector, m_wf.nroot()),
         m_inst_ests(m_wf.m_sector, &m_refs, opts.m_inst_ests),
         m_annihilator(m_wf, m_prop, m_refs, m_hf.get(), m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
-        m_archive(opts), m_detsubs(opts.m_propagator.m_semistochastic) {
+        m_detsubs(opts.m_propagator.m_semistochastic) {
 
     logging::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
     if (m_wf.nreplica() == 2 && !m_prop.ncase_excit_gen())
@@ -69,12 +69,16 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
     /**
      * setup archive members
      */
+    /*
     m_archive.add_member(m_prop);
     if (m_maes.m_hf_excits) m_archive.add_member(m_maes.m_hf_excits);
     if (m_maes.m_bilinears) {
         if (m_maes.m_bilinears.m_rdms) m_archive.add_member(m_maes.m_bilinears.m_rdms);
         if (m_maes.m_bilinears.m_spec_moms) m_archive.add_member(m_maes.m_bilinears.m_spec_moms);
     }
+    */
+
+
     if (m_maes.m_bilinears.m_rdms) {
         if (m_maes.m_bilinears.m_rdms.is_energy_sufficient(m_prop.m_ham))
             logging::info("Specified RDM rank signatures are sufficient for variational energy estimation");
@@ -91,11 +95,6 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
         fci_init_opts.m_nroot = m_wf.nroot();
         m_wf.fci_init(m_prop.m_ham, fci_init_opts);
     }
-
-    /**
-     * read previous calculation data into archivable objects if archive loading is enabled
-     */
-    m_archive.load();
 
     // TODO: activate load balancing
     //m_wf.m_dist.activate(m_icycle);

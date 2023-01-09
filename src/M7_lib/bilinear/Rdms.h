@@ -8,7 +8,11 @@
 #include "Rdm.h"
 #include "FockRdm4.h"
 
-class Rdms : public Archivable {
+class Rdms {
+    /**
+     * reference to the section in the configuration document that controls the behavior of RDM estimation
+     */
+    const conf::Rdms& m_opts;
     /**
      * RDM objects managed by this instance
      */
@@ -42,6 +46,10 @@ public:
     Reduction<wf_t> m_total_norm;
 
     Rdms(const conf::Rdms& opts, v_t<OpSig> ranksigs, sys::Sector sector, const Epoch& accum_epoch);
+
+    ~Rdms() {
+        if (m_opts.m_save.m_enabled) save();
+    }
 
     operator bool() const;
 
@@ -108,12 +116,13 @@ public:
         return get_energy(ham.m_frm) + get_energy(ham.m_frmbos) + get_energy(ham.m_bos);
     }
 
-private:
-    void load_fn(const hdf5::NodeReader& /*parent*/) override {
+    void save(const hdf5::NodeWriter& parent);
 
+    void save() {
+        REQUIRE_TRUE(m_opts.m_save.m_enabled, "save() called on Rdms object but saving was not enabled");
+        save(hdf5::FileWriter(m_opts.m_save.m_path));
     }
 
-    void save_fn(const hdf5::NodeWriter& parent) override;
 };
 
 #endif //M7_RDMS_H

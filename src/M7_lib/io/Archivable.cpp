@@ -5,6 +5,7 @@
 #include <M7_lib/hdf5/Group.h>
 #include "Archivable.h"
 
+#if 0
 Archivable::Archivable(str_t name, bool load, bool save, bool chkpt) :
         m_name(std::move(name)), m_load(load), m_save(save), m_chkpt(chkpt) {}
 
@@ -105,3 +106,4 @@ void Archive::chkpt(uint_t icycle) {
 void Archive::add_member(Archivable& item) {
     m_members.push_back(&item);
 }
+#endif

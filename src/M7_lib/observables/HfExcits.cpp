@@ -36,7 +36,6 @@ void HfExcitsOneExsig::make_contribs(const conn::FrmOnv& conn, const wf_t& contr
 }
 
 HfExcits::HfExcits(const conf::HfExcits& opts, sys::Size extents, uint_t nroot) :
-        Archivable("hf_excits", opts.m_archivable),
         m_opts(opts), m_av_hf({nroot}), m_conn(extents) {
     REQUIRE_EQ_ALL(nroot, 1ul, "HF excitation averaging currently only implemented for a single root");
     for (uint_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
@@ -75,6 +74,7 @@ HfExcits::operator bool() const {
     return !m_active_exsigs.empty();
 }
 
+#if 0
 void HfExcits::save_fn(const hdf5::NodeWriter& parent) {
     wf_t av_hf;
     av_hf = mpi::all_sum(m_av_hf[0]);
@@ -85,3 +85,4 @@ void HfExcits::save_fn(const hdf5::NodeWriter& parent) {
         m_hf_excits[exsig]->save(gw);
     }
 }
+#endif

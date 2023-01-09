@@ -74,7 +74,7 @@ class Solver {
      */
     References m_refs;
     /**
-     * Hartree-Fock basis function, allocated only when H has a Brillouin theorem wrt the initial reference
+     * Hartree-Fock basis function, allocated only when H satisfies the Brillouin theorem wrt the initial reference
      */
     const std::unique_ptr<shared_rows::Walker> m_hf = nullptr;
     /**
@@ -143,10 +143,6 @@ private:
      * instance of helper class to handle annihilation of received spawns with each other and the existing walkers
      */
     Annihilator m_annihilator;
-    /**
-     * a store of calculation data between runs
-     */
-    Archive m_archive;
     /**
      * selections of MBF in which semi-stochastic propagation is performed
      */

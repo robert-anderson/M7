@@ -42,7 +42,7 @@ public:
 };
 
 
-struct HfExcits : Archivable {
+struct HfExcits {
     /**
      * relevant section of configuration document
      */
@@ -82,9 +82,13 @@ struct HfExcits : Archivable {
 
 private:
 
+#if 0
+
     void load_fn(const hdf5::NodeReader& /*parent*/) override {}
 
     void save_fn(const hdf5::NodeWriter& parent) override;
+
+#endif
 };
 
 #endif //M7_HFEXCITS_H

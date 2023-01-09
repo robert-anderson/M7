@@ -48,7 +48,6 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
             opts.m_wavefunction.m_buffers.m_comm_exp_fac
         }
     ),
-    Archivable("wavefunction", opts.m_wavefunction.m_archivable),
     m_opts(opts),
     m_sector(sector),
     m_format(m_store.m_row.m_weight.m_format),
@@ -315,12 +314,4 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
             m_store.m_insert_row.m_weight = recv_row.m_delta_weight;
         }
     }
-}
-
-void Wavefunction::load_fn(const hdf5::NodeReader& /*parent*/) {
-
-}
-
-void Wavefunction::save_fn(const hdf5::NodeWriter& /*parent*/) {
-
 }

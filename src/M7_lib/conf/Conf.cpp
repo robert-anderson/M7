@@ -16,57 +16,19 @@ conf::HashMapping::HashMapping(Group *parent) :
 
 conf::Buffers::Buffers(Group *parent) :
         Section(parent, "buffers",
-                        "options relating to the allocation and reallocation behavior of a Communicator"),
+            "options relating to the allocation and reallocation behavior of a Communicator"),
         m_store_fac_init(this, "store_fac_init", 1.0,
-                         "a crude estimate for the number of rows ultimately required by the store buffer is computed, then that estimate is multiplied by this parameter to determine the initial row allocation"),
+            "a crude estimate for the number of rows ultimately required by the store buffer is computed, then that "
+            "estimate is multiplied by this parameter to determine the initial row allocation"),
         m_store_exp_fac(this, "store_expand_fac", 0.5,
-                        "additional number of rows that should be added to the store buffer's capacity as a fraction of the required number of additional rows"),
+            "additional number of rows that should be added to the store buffer's capacity as a fraction of the "
+            "required number of additional rows"),
         m_comm_fac_init(this, "comm_fac_init", 1.0,
-                        "a crude estimate for the number of rows per rank ultimately required by the send buffer is computed, then that estimate is multiplied by this parameter to determine the initial row allocation"),
+            "a crude estimate for the number of rows per rank ultimately required by the send buffer is computed, then "
+            "that estimate is multiplied by this parameter to determine the initial row allocation"),
         m_comm_exp_fac(this, "comm_expand_fac", 0.5,
-                       "additional number of rows that should be added to the communicating buffers' capacities as a fraction of the required number of additional rows") {}
-
-
-conf::Archive::Archive(Group *parent) :
-        Section(parent, "archive",
-                        "options relating to archives: HDF5 binary storage of calculation data"),
-        m_load_path(this, "load_path", "",
-                    "path to the HDF5 file from which the calculation is to be restarted"),
-        m_save_path(this, "save_path", "M7.h5",
-                    "path to the HDF5 file into which calculation data is to be dumped at the end of the calculation"),
-        m_chkpt_path(this, "chkpt_path", "",
-                     "path to the HDF5 file (or file name format) into which calculation data is to be dumped periodically during the calculation"),
-        m_period(this, "period", 0ul, "number of MC cycles between checkpoint dumps"),
-        m_period_mins(this, "period_mins", 0ul, "time in minutes between checkpoint dumps") {}
-        
-void conf::Archive::validate_node_contents() {
-    if (bool(m_period) && bool(m_period_mins))
-        logging::warn("both cycle number and time periods are defined for checkpointing");
-
-    auto &str = m_chkpt_path.m_value;
-    uint_t token_count = std::count(str.cbegin(), str.cend(), '{');
-    REQUIRE_LE(token_count, 1ul, "checkpoint paths can have at most one {} token");
-    if (token_count) {
-        auto it_open = std::find(str.cbegin(), str.cend(), '{');
-        auto it_close = std::find(str.cbegin(), str.cend(), '}');
-        REQUIRE_EQ(std::distance(it_open, it_close), 1l,
-                   "checkpoint path for periodic output should contain at most one {} formatting point");
-        logging::info("formatting token found in path, "
-                  "successive checkpoints will not overwrite previous checkpoints from the same run");
-    } else
-        logging::info("formatting token not found in path, "
-                  "successive checkpoints will overwrite previous checkpoints from the same run");
-}
-
-conf::Archivable::Archivable(Group *parent) :
-        Section(parent, "archive", "options relating to archiving behavior", conf_components::Explicit),
-        m_load(this, "load", false,
-               "attempt to load the object from the archive at the beginning of the calculation"),
-        m_save(this, "save", false,
-               "save the object to the archive at the end of the calculation"),
-        m_chkpt(this, "chkpt", false,
-                "attempt to save the object to the checkpoint archive at each checkpointing period") {}
-
+            "additional number of rows that should be added to the communicating buffers' capacities as a fraction of "
+            "the required number of additional rows") {}
 
 conf::Prng::Prng(Group *parent) :
         Section(parent, "prng",
@@ -102,7 +64,9 @@ conf::Wavefunction::Wavefunction(Group *parent) :
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
         m_fci_init(this, "fci_init", false, "call the ARPACK interface to initialize the required roots to their exact values"),
-        m_buffers(this), m_hash_mapping(this), m_archivable(this), m_distribution(this) {}
+        m_buffers(this), m_hash_mapping(this), m_distribution(this),
+        m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
+        m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit){}
 
 conf::Shift::Shift(Group *parent) :
         Section(parent, "shift",
@@ -161,7 +125,9 @@ void conf::SpfWeightedTwf::validate_node_contents() {
 conf::Bilinears::Bilinears(Group *parent, str_t name, str_t description) :
         Section(parent, name, description, Explicit),
         m_ranks(this, "ranks", {}, "Ranks to accumulate"),
-        m_buffers(this), m_hash_mapping(this), m_distribution(this), m_archivable(this) {}
+        m_buffers(this), m_hash_mapping(this), m_distribution(this),
+        m_save(this, "save", "bilinear estimators save", "M7.rdm.h5", Explicit),
+        m_load(this, "load", "bilinear estimators load", "M7.rdm.h5", Explicit){}
 
 void conf::Bilinears::validate_node_contents() {
     for (const auto &rank: m_ranks.m_value)
@@ -201,7 +167,9 @@ conf::HfExcits::HfExcits(Group *parent) :
                         "options relating to averaged amplitudes of MBFs connected to a Hartree-Fock-like MBF", Explicit),
         m_max_exlvl(this, "max_exlvl", 0ul,
                     "maximum excitation level from the HF MBF for which to accumulate average amplitudes"),
-        m_buffers(this), m_archivable(this) {}
+        m_buffers(this),
+        m_save(this, "save", "average HF-connected amplitudes save", "M7.hf_excit.h5", Explicit),
+        m_load(this, "load", "average HF-connected amplitudes load", "M7.hf_excit.h5", Explicit) {}
 
 conf::Mae::Mae(Group *parent) :
         Section(parent, "mae",
@@ -286,7 +254,7 @@ void conf::Propagator::validate_node_contents() {
 
 conf::Document::Document(const str_t& fname) :
         conf_components::Document(fname, "a calculation in M7"),
-        m_prng(this), m_archive(this), m_basis(this), m_particles(this),
+        m_prng(this), m_basis(this), m_particles(this),
         m_wavefunction(this), m_reference(this), m_shift(this), m_propagator(this),
         m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this) {}
 

@@ -23,8 +23,7 @@ hamiltonian:
 mae:
   delay: 1000
   rdm:
-    archive:
-      save: yes
+    save: yes
     ranks: [1, 2, 3]
   ncycle: 1000
 

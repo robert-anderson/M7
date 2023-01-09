@@ -214,19 +214,21 @@ def check_ninit(fname='M7.stats'):
     run, bench = stats_columns('Initiator', fname)
     if not np.allclose(run, bench): fail('initiator number trajectories do not agree')
 
-def check_rdm_archives(fname='M7.h5'):
+def check_rdm_archives(fname='M7.rdm.h5'):
     if benchmarking: return
     run, bench = instance.rdms(fname)
-    run = run['archive']['rdms']
-    bench = bench['archive']['rdms']
-    keys = tuple(map(str, bench.keys()))
-    assert set(run.keys())==set(bench.keys()), 'different ranks of RDM accumulated than in benchmark'
-    for key in keys:
-        if key=='norm': continue
-        if not np.array_equal(run[key]['indices'], bench[key]['indices']):
-            fail(f'index array of RDM {key} does not agree with benchmark')
-        if not np.allclose(np.array(run[key]['values']), np.array(bench[key]['values'])): 
-            fail(f'value array of RDM {key} does not agree with benchmark')
+    for section in ('archive', 'spinfree'):
+        if not section in bench.keys(): continue
+        b = bench[section]
+        r = run[section]
+        keys = tuple(map(str, b.keys()))
+        assert set(r.keys())==set(b.keys()), 'different ranks of RDM accumulated than in benchmark'
+        for key in keys:
+            if key=='norm': continue
+            if not np.array_equal(r[key]['indices'], b[key]['indices']):
+                fail(f'index array of RDM {key} does not agree with benchmark')
+            if not np.allclose(np.array(r[key]['values']), np.array(b[key]['values'])): 
+                fail(f'value array of RDM {key} does not agree with benchmark')
 
 '''
 perform crude removal of serial correlation
