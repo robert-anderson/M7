@@ -231,3 +231,12 @@ void Rdms::save(const hdf5::NodeWriter& parent) {
         for (const auto& rdm: m_rdms) SpinFreeRdm(*rdm, m_total_norm.m_reduced).save(gw);
     }
 }
+
+void Rdms::save() {
+    if (!m_accum_epoch) {
+        logging::warn("MAE accumulation epoch was not reached in this calculation: omitting RDM save");
+        return;
+    }
+    REQUIRE_TRUE(m_opts.m_save.m_enabled, "save() called on Rdms object but saving was not enabled");
+    save(hdf5::FileWriter(m_opts.m_save.m_path));
+}

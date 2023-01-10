@@ -118,10 +118,7 @@ public:
 
     void save(const hdf5::NodeWriter& parent);
 
-    void save() {
-        REQUIRE_TRUE(m_opts.m_save.m_enabled, "save() called on Rdms object but saving was not enabled");
-        save(hdf5::FileWriter(m_opts.m_save.m_path));
-    }
+    void save();
 
 };
 
