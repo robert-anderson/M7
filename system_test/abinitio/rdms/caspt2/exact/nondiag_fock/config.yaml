@@ -21,8 +21,7 @@ hamiltonian:
       path: FCIDUMP
 mae:
   rdm:
-    archive:
-      save: yes
+    save: yes
     ranks: [1, 2, 3]
     fock_4rdm:
       fock_path: fock.h5

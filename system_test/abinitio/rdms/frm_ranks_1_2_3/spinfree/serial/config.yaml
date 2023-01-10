@@ -22,8 +22,7 @@ hamiltonian:
       path: FCIDUMP
 mae:
   rdm:
-    archive:
-      save: yes
+    save: yes
     ranks: [1, 2, 3]
     spinfree: yes
   delay: 10000
