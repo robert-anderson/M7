@@ -5,6 +5,8 @@ stats:
   period: 5
 wavefunction:
   nw_init: 100
+reference:
+  assume_hf_like: yes
 propagator:
   tau_init: 0.1
   stochastic: no
@@ -19,8 +21,7 @@ hamiltonian:
       path: FCIDUMP
 mae:
   rdm:
-    archive:
-      save: yes
+    save: yes
     ranks: [1, 2, 3]
     fock_4rdm:
       fock_path: fock.h5
