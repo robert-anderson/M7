@@ -92,11 +92,11 @@ fockdump(np.diag(cas_fock_mo.diagonal()), 'fock_diag.h5')
 
 # transpose higher-rank arrays such that the creation inds are first, then the annihilations
 dms = {
-    'sf_1100' : np.array(dm1),
-    'sf_2200' : np.array(dm2).transpose(0, 2, 1, 3),
-    'sf_3300' : np.array(dm3).transpose(0, 2, 4, 1, 3, 5),
-    'sf_4400f': np.array(dm4f).transpose(0, 2, 4, 1, 3, 5),
-    'sf_4400fd': np.array(dm4fd).transpose(0, 2, 4, 1, 3, 5),
+    '1100' : np.array(dm1),
+    '2200' : np.array(dm2).transpose(0, 2, 1, 3),
+    '3300' : np.array(dm3).transpose(0, 2, 4, 1, 3, 5),
+    '4400f': np.array(dm4f).transpose(0, 2, 4, 1, 3, 5),
+    '4400fd': np.array(dm4fd).transpose(0, 2, 4, 1, 3, 5),
 }
 
 import pickle as pkl
@@ -107,7 +107,7 @@ with open('exact_rdms.pkl', 'wb') as f: pkl.dump(dms, f)
 System: uname_result(system='Linux', node='pcal011', release='5.3.18-lp152.106-default', version='#1 SMP Mon Nov 22 08:38:17 UTC 2021 (52078fe)', machine='x86_64', processor='x86_64')  Threads 8
 Python 3.6.12 (default, Dec 02 2020, 09:44:23) [GCC]
 numpy 1.19.5  scipy 1.5.4
-Date: Thu Nov  3 10:50:55 2022
+Date: Tue Jan 10 14:49:07 2023
 PySCF version 2.0.1
 PySCF path  /scratch/anderson/opt/pyscf-2.0.1/pyscf
 
@@ -133,7 +133,7 @@ number of NR pGTOs = 33
 number of NR cGTOs = 19
 basis = {'H': 'cc-pvdz', 'F': 'cc-pvdz'}
 ecp = {}
-CPU time:         0.39
+CPU time:         0.58
 
 
 ******** <class 'pyscf.scf.hf_symm.SymAdaptedROHF'> ********
@@ -149,37 +149,37 @@ SCF conv_tol_grad = None
 SCF max_cycles = 50
 direct_scf = True
 direct_scf_tol = 1e-13
-chkfile to save SCF result = /home/anderson/CLionProjects/M7/assets/HF_RDMs/tmpstivtwvb
-max_memory 4000 MB (current use 84 MB)
+chkfile to save SCF result = /home/anderson/CLionProjects/M7/assets/HF_RDMs/tmpl2ym93wp
+max_memory 4000 MB (current use 83 MB)
 num. doubly occ = 5  num. singly occ = 0
 Freeze 0 electrons in irreps []
     10 free electrons in irreps A1 A2 B1 B2
 Set gradient conv threshold to 3.16228e-05
 init E= -99.4736608092962
-HOMO (B2) = -0.622836761526106  LUMO (A1) = -0.0671283112376685
-cycle= 1 E= -99.8167374576534  delta_E= -0.343  |g|= 0.568  |ddm|= 0.54
-HOMO (B2) = -0.400219308423748  LUMO (A1) = 0.0235185423814383
-cycle= 2 E= -99.8660687139547  delta_E= -0.0493  |g|= 0.481  |ddm|= 0.418
-HOMO (B1) = -0.577893050897683  LUMO (A1) = 0.0201152440866858
+HOMO (B1) = -0.622836761526106  LUMO (A1) = -0.0671283112376646
+cycle= 1 E= -99.8167374576533  delta_E= -0.343  |g|= 0.568  |ddm|= 0.54
+HOMO (B2) = -0.400219308423754  LUMO (A1) = 0.0235185423814385
+cycle= 2 E= -99.8660687139546  delta_E= -0.0493  |g|= 0.481  |ddm|= 0.418
+HOMO (B1) = -0.577893050897686  LUMO (A1) = 0.0201152440866822
 cycle= 3 E= -99.8992273107931  delta_E= -0.0332  |g|= 0.0467  |ddm|= 0.169
-HOMO (B2) = -0.588582089065227  LUMO (A1) = 0.0433746557935449
+HOMO (B2) = -0.588582089065231  LUMO (A1) = 0.0433746557935405
 cycle= 4 E= -99.9006606814955  delta_E= -0.00143  |g|= 0.0146  |ddm|= 0.0421
-HOMO (A1) = -0.589138577166339  LUMO (A1) = 0.0456183283857525
+HOMO (A1) = -0.589138577166338  LUMO (A1) = 0.0456183283857546
 cycle= 5 E= -99.9007877828254  delta_E= -0.000127  |g|= 0.00218  |ddm|= 0.0162
-HOMO (A1) = -0.588792336740396  LUMO (A1) = 0.0450098228040045
+HOMO (A1) = -0.588792336740398  LUMO (A1) = 0.0450098228040001
 cycle= 6 E= -99.9007897297422  delta_E= -1.95e-06  |g|= 0.000387  |ddm|= 0.00206
-HOMO (A1) = -0.588913354290591  LUMO (A1) = 0.045143060758908
+HOMO (A1) = -0.588913354290595  LUMO (A1) = 0.0451430607589076
 cycle= 7 E= -99.9007897926557  delta_E= -6.29e-08  |g|= 3.14e-05  |ddm|= 0.000405
-HOMO (A1) = -0.588883963052479  LUMO (A1) = 0.0451310615031435
-cycle= 8 E= -99.9007897928924  delta_E= -2.37e-10  |g|= 5.33e-06  |ddm|= 1.62e-05
-HOMO (A1) = -0.588887403751201  LUMO (A1) = 0.0451328406727189
-Extra cycle  E= -99.9007897928981  delta_E= -5.64e-12  |g|= 1.81e-06  |ddm|= 2.98e-06
+HOMO (A1) = -0.588883963052473  LUMO (A1) = 0.0451310615031435
+cycle= 8 E= -99.9007897928925  delta_E= -2.37e-10  |g|= 5.33e-06  |ddm|= 1.62e-05
+HOMO (A1) = -0.588887403751196  LUMO (A1) = 0.0451328406727257
+Extra cycle  E= -99.9007897928981  delta_E= -5.58e-12  |g|= 1.81e-06  |ddm|= 2.98e-06
 converged SCF energy = -99.9007897928981
 **** SCF Summaries ****
-Total Energy =                         -99.900789792898081
+Total Energy =                         -99.900789792898095
 Nuclear Repulsion Energy =               3.401853498771429
-One-electron Energy =                 -147.491624143051610
-Two-electron Energy =                   44.188980851382105
+One-electron Energy =                 -147.491624143051581
+Two-electron Energy =                   44.188980851382055
 Wave-function symmetry = A1
 occupancy for each irrep:     A1   A2   B1   B2
 double occ                     3    0    1    1
@@ -187,24 +187,24 @@ single occ                     0    0    0    0
 **** MO energy ****
                           Roothaan           | alpha              | beta
 MO #1   (A1  #1 ) energy= -26.2801705445606  | -26.2801705445606  | -26.2801705445606  occ= 2
-MO #2   (A1  #2 ) energy= -1.49251855868617  | -1.49251855868617  | -1.49251855868617  occ= 2
-MO #3   (B1  #1 ) energy= -0.59763074721533  | -0.59763074721533  | -0.59763074721533  occ= 2
-MO #4   (B2  #1 ) energy= -0.597630747215331 | -0.597630747215331 | -0.597630747215331 occ= 2
-MO #5   (A1  #3 ) energy= -0.588887403751201 | -0.588887403751202 | -0.588887403751202 occ= 2
-MO #6   (A1  #4 ) energy= 0.0451328406727189 | 0.0451328406727207 | 0.0451328406727207 occ= 0
-MO #7   (A1  #5 ) energy= 0.585884083939445  | 0.585884083939443  | 0.585884083939443  occ= 0
+MO #2   (A1  #2 ) energy= -1.49251855868616  | -1.49251855868616  | -1.49251855868616  occ= 2
+MO #3   (B1  #1 ) energy= -0.597630747215325 | -0.597630747215325 | -0.597630747215325 occ= 2
+MO #4   (B2  #1 ) energy= -0.597630747215325 | -0.597630747215326 | -0.597630747215326 occ= 2
+MO #5   (A1  #3 ) energy= -0.588887403751196 | -0.588887403751196 | -0.588887403751196 occ= 2
+MO #6   (A1  #4 ) energy= 0.0451328406727257 | 0.0451328406727236 | 0.0451328406727236 occ= 0
+MO #7   (A1  #5 ) energy= 0.585884083939447  | 0.585884083939445  | 0.585884083939445  occ= 0
 MO #8   (B1  #2 ) energy= 1.31425679099996   | 1.31425679099996   | 1.31425679099996   occ= 0
-MO #9   (B2  #2 ) energy= 1.31425679099995   | 1.31425679099995   | 1.31425679099995   occ= 0
+MO #9   (B2  #2 ) energy= 1.31425679099996   | 1.31425679099996   | 1.31425679099996   occ= 0
 MO #10  (A1  #6 ) energy= 1.56743306088792   | 1.56743306088791   | 1.56743306088791   occ= 0
-MO #11  (A1  #7 ) energy= 1.60737055187225   | 1.60737055187225   | 1.60737055187225   occ= 0
+MO #11  (A1  #7 ) energy= 1.60737055187226   | 1.60737055187226   | 1.60737055187226   occ= 0
 MO #12  (B1  #3 ) energy= 1.6163482071078    | 1.6163482071078    | 1.6163482071078    occ= 0
 MO #13  (B2  #3 ) energy= 1.6163482071078    | 1.6163482071078    | 1.6163482071078    occ= 0
-MO #14  (A1  #8 ) energy= 2.30051769941309   | 2.30051769941309   | 2.30051769941309   occ= 0
+MO #14  (A1  #8 ) energy= 2.30051769941311   | 2.3005176994131    | 2.3005176994131    occ= 0
 MO #15  (A1  #9 ) energy= 4.03722626034272   | 4.03722626034272   | 4.03722626034272   occ= 0
 MO #16  (A2  #1 ) energy= 4.03722626034271   | 4.03722626034271   | 4.03722626034271   occ= 0
-MO #17  (B1  #4 ) energy= 4.04590855836415   | 4.04590855836415   | 4.04590855836415   occ= 0
-MO #18  (B2  #4 ) energy= 4.04590855836415   | 4.04590855836415   | 4.04590855836415   occ= 0
-MO #19  (A1  #10) energy= 4.33267983139734   | 4.33267983139734   | 4.33267983139734   occ= 0
+MO #17  (B1  #4 ) energy= 4.04590855836415   | 4.04590855836416   | 4.04590855836416   occ= 0
+MO #18  (B2  #4 ) energy= 4.04590855836416   | 4.04590855836416   | 4.04590855836416   occ= 0
+MO #19  (A1  #10) energy= 4.33267983139734   | 4.33267983139735   | 4.33267983139735   occ= 0
  ** Mulliken pop on meta-lowdin orthogonal AOs  **
  ** Mulliken pop  **
 pop of  0 H 1s        0.61296

@@ -91,11 +91,11 @@ fockdump(np.diag(cas_fock_mo.diagonal()), 'fock_diag.h5')
 
 # transpose higher-rank arrays such that the creation inds are first, then the annihilations
 dms = {
-    'sf_1100' : np.array(dm1),
-    'sf_2200' : np.array(dm2).transpose(0, 2, 1, 3),
-    'sf_3300' : np.array(dm3).transpose(0, 2, 4, 1, 3, 5),
-    'sf_4400f': np.array(dm4f).transpose(0, 2, 4, 1, 3, 5),
-    'sf_4400fd': np.array(dm4fd).transpose(0, 2, 4, 1, 3, 5),
+    '1100' : np.array(dm1),
+    '2200' : np.array(dm2).transpose(0, 2, 1, 3),
+    '3300' : np.array(dm3).transpose(0, 2, 4, 1, 3, 5),
+    '4400f': np.array(dm4f).transpose(0, 2, 4, 1, 3, 5),
+    '4400fd': np.array(dm4fd).transpose(0, 2, 4, 1, 3, 5),
 }
 
 import pickle as pkl

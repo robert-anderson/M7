@@ -16,14 +16,14 @@ def load_hdf5_rdm(group):
     for i, row in enumerate(inds): rdm[tuple(row)] = values[i]
     return rdm
 
-h5_fname = make_local_name('M7.h5')
+h5_fname = make_local_name('M7.rdm.h5')
 pkl_fname = make_local_name('exact_rdms.pkl')
 h5_file = h5py.File(h5_fname, 'r')
 
-h5_rdms = h5_file['archive']['rdms']
+h5_rdms = h5_file['spinfree']
 with open(pkl_fname, 'rb') as f: py_rdms = pkl.load(f)
 
-for key in ('sf_1100', 'sf_2200', 'sf_3300'):
+for key in ('1100', '2200', '3300'):
     h5_rdm = load_hdf5_rdm(h5_rdms[key])
     py_rdm = py_rdms[key]
     max_diff = max(np.abs(h5_rdm-py_rdm).flatten())
