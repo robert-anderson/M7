@@ -131,8 +131,7 @@ namespace dense {
 
         void resize(uint_t nrow, uint_t ncol) {
             auto no_copy_resize = [&](){
-                m_buffer.resize(nrow * ncol, T(0));
-                m_buffer.clear();
+                m_buffer.assign(nrow * ncol, T(0));
                 m_nrow = nrow;
                 m_ncol = ncol;
             };

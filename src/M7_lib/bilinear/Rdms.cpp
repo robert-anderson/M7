@@ -45,7 +45,7 @@ Rdms::Rdms(const conf::Rdms& opts, v_t<OpSig> ranksigs, sys::Sector sector, cons
     }
     if (opts.m_fock_4rdm.m_enabled) {
         logging::info("Loading generalized Fock matrix for accumulation of its contraction with the 4RDM");
-        FockMatrix fock(sector.m_frm.size(), opts.m_fock_4rdm.m_fock_path);
+        FockMatrix fock(sector.m_frm.m_basis.m_nsite, opts.m_fock_4rdm.m_fock_path);
         const auto diag = fock.is_diagonal();
         logging::info("The given Fock matrix was found to be {}diagonal", (diag ? "" : "non-"));
 

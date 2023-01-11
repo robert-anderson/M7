@@ -11,7 +11,7 @@ FockRdm4::FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector 
 
 NonDiagFockRdm4::NonDiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue) :
         FockRdm4(opts, opsig::c_4400, sector, nvalue), m_fock(fock){
-    REQUIRE_EQ(fock.nrow(), sector.m_frm.size(), "Incorrectly-sized Fock matrix given");
+    REQUIRE_EQ(fock.nrow(), sector.m_frm.m_basis.m_nsite, "Incorrectly-sized Fock matrix given");
     if (m_fock.is_diagonal())
         logging::warn("Performing 4RDM contraction of a diagonal Fock matrix without exploiting diagonality");
 }
