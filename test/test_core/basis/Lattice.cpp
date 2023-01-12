@@ -18,6 +18,7 @@ namespace lattice_test {
         if (lattice.m_nsite != rows.size()) return false;
         for (uint_t isite=0ul; isite < lattice.m_nsite; ++isite){
             auto row = make_row(adj.cbegin(isite), adj.cend(isite));
+            std::cout << row << std::endl;
             if (row != rows[isite]) return false;
         }
         return true;
@@ -42,12 +43,12 @@ TEST(SubLattice, OrthoApbc1d) {
     using namespace lattice_test;
     auto lattice = lattice::make("ortho", {6}, {-1});
     rows_t chk_rows = {
-            {{5ul, -1}, {1ul, 1}},
+            {{1ul, 1}, {5ul, -1}},
             {{0ul, 1}, {2ul, 1}},
             {{1ul, 1}, {3ul, 1}},
             {{2ul, 1}, {4ul, 1}},
             {{3ul, 1}, {5ul, 1}},
-            {{4ul, 1}, {0ul, -1}}
+            {{0ul, -1}, {4ul, 1}}
     };
     ASSERT_TRUE(verify_rows(*lattice, chk_rows));
 }
@@ -62,14 +63,14 @@ TEST(SubLattice, OrthoObc2d) {
     using namespace lattice_test;
     auto lattice = lattice::make("ortho", {3, 4}, {0, 0});
     rows_t chk_rows = {
-            {{4ul, 1}, {1ul, 1}},
-            {{5ul, 1}, {0ul, 1}, {2ul, 1}},
-            {{6ul, 1}, {1ul, 1}, {3ul, 1}},
-            {{7ul, 1}, {2ul, 1}},
-            {{0ul, 1}, {8ul, 1}, {5ul, 1}},
-            {{1ul, 1}, {9ul, 1}, {4ul, 1}, {6ul, 1}},
-            {{2ul, 1}, {10ul, 1}, {5ul, 1}, {7ul, 1}},
-            {{3ul, 1}, {11ul, 1}, {6ul, 1}},
+            {{1ul, 1}, {4ul, 1}},
+            {{0ul, 1}, {2ul, 1}, {5ul, 1}},
+            {{1ul, 1}, {3ul, 1}, {6ul, 1}},
+            {{2ul, 1}, {7ul, 1}},
+            {{0ul, 1}, {5ul, 1}, {8ul, 1}},
+            {{1ul, 1}, {4ul, 1}, {6ul, 1}, {9ul, 1}},
+            {{2ul, 1}, {5ul, 1}, {7ul, 1}, {10ul, 1}},
+            {{3ul, 1}, {6ul, 1}, {11ul, 1}},
             {{4ul, 1}, {9ul, 1}},
             {{5ul, 1}, {8ul, 1}, {10ul, 1}},
             {{6ul, 1}, {9ul, 1}, {11ul, 1}},
