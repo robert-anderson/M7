@@ -62,6 +62,18 @@ namespace sparse {
         str_t to_string() const override {
             return logging::format("({} -> {})", m_i, convert::to_string(m_v));
         }
+
+        operator str_t () const {
+            return to_string();
+        }
+
+        bool operator==(const MatrixElement<T>& other) const {
+            return m_i==other.m_i && m_v==other.m_v;
+        }
+
+        bool operator!=(const MatrixElement<T>& other) const {
+            return !(*this==other);
+        }
     };
 }
 
