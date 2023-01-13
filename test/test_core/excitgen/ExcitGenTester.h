@@ -76,7 +76,7 @@ namespace excit_gen_tester {
                 if (!ham::is_significant(helem)) return;
                 work_inds = conn;
                 // if this key is already in the table then the iterator is emitting duplicate connections!
-                DEBUG_ASSERT_TRUE(m_results.lookup(work_inds), "row should not already be mapped");
+                DEBUG_ASSERT_FALSE(m_results.lookup(work_inds), "row should not already be mapped");
                 auto irow = m_results.insert(work_inds);
                 auto &row = m_results.m_row;
                 row.jump(irow);
