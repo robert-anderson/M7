@@ -56,7 +56,7 @@ namespace sparse {
             typedef T elem_t;
             static_assert(std::is_base_of<Element, T>::value, "template arg must be derived from Element");
         protected:
-            typedef v_t<T> row_t;
+            typedef std::list<T> row_t;
             typedef v_t<row_t> rows_t;
             rows_t m_rows;
 
@@ -166,7 +166,7 @@ namespace sparse {
                     return static_cast<const Element&>(v).m_i == icol;
                 };
                 auto it = std::find_if(row.begin(), row.end(), pred);
-                return it == row.end() ? nullptr : it.base();
+                return it == row.end() ? nullptr : &(*it);
             }
 
         public:
