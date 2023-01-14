@@ -22,8 +22,14 @@ namespace dtype {
 
     template<typename T>
     struct remove_const_ref_t {
-        typedef typename std::remove_reference<typename std::remove_const<T>::type>::type type;
+        typedef typename std::remove_const<typename std::remove_reference<T>::type>::type type;
     };
+
+    static_assert(std::is_same<remove_const_ref_t<char>::type, char>::value, "remove const ref failed");
+    static_assert(std::is_same<remove_const_ref_t<const char>::type, char>::value, "remove const ref failed");
+    static_assert(std::is_same<remove_const_ref_t<const char&>::type, char>::value, "remove const ref failed");
+    static_assert(std::is_same<remove_const_ref_t<char&>::type, char>::value, "remove const ref failed");
+    static_assert(std::is_same<remove_const_ref_t<char&&>::type, char>::value, "remove const ref failed");
 
     /**
      * @return

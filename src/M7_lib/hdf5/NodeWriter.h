@@ -21,7 +21,7 @@ namespace hdf5 {
         }
 
         void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::PartDistListFormat& format,
-                          uint_t max_nitem_per_op, std::list<Attr> attrs) const;
+                          uint_t max_nitem_per_op, const std::list<Attr>& attrs) const;
 
         void save_dataset(const str_t& name, dataset::save_fn fn, const dataset::PartDistListFormat& format,
                           std::list<Attr> attrs) const;
@@ -49,7 +49,7 @@ namespace hdf5 {
          */
         template<typename T>
         void save_dataset(const str_t& name, const T* src, uintv_t item_shape,
-                          strv_t dim_names, uint_t nitem, uint_t max_nitem_per_op, std::list<Attr> attrs) const {
+                          strv_t dim_names, uint_t nitem, uint_t max_nitem_per_op, const std::list<Attr>& attrs) const {
             using namespace ::ptr;
             const auto begin = reinterpret_cast<const buf_t*>(src);
             auto ptr = begin;
@@ -98,7 +98,8 @@ namespace hdf5 {
         template<typename T>
         void save_dataset(const str_t& name, const v_t<T>& src, uintv_t item_shape,
                           strv_t dim_names, bool this_rank) const {
-            save_dataset(name, src, item_shape, dim_names, {}, this_rank);
+            std::list<Attr> attrs;
+            save_dataset(name, src, item_shape, dim_names, attrs, this_rank);
         }
 
         /**
