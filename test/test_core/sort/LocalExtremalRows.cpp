@@ -48,8 +48,9 @@ namespace local_extremal_rows_test {
 TEST(LocalExtremalRows, EmptyTable) {
     using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {});
-    auto &row = table.m_row;
-    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
+    auto row = table.m_row;
+    auto row_cmp = row;
+    LocalExtremalRows<int> lxv(row.m_field, row_cmp.m_field, false, false, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), 0ul);
 }
@@ -58,8 +59,9 @@ TEST(LocalExtremalRows, Ascending) {
     using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {});
     setup(table);
-    auto &row = table.m_row;
-    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
+    auto row = table.m_row;
+    auto row_cmp = row;
+    LocalExtremalRows<int> lxv(row.m_field, row_cmp.m_field, false, false, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), c_nfind);
     row.jump(lxv[0]);
@@ -76,8 +78,9 @@ TEST(LocalExtremalRows, AscendingAbs) {
     using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {});
     setup(table);
-    auto &row = table.m_row;
-    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, true, 0);
+    auto row = table.m_row;
+    auto row_cmp = row;
+    LocalExtremalRows<int> lxv(row.m_field, row_cmp.m_field, false, true, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), c_nfind);
     row.jump(lxv[0]);
@@ -94,8 +97,9 @@ TEST(LocalExtremalRows, Descending) {
     using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {});
     setup(table);
-    auto &row = table.m_row;
-    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, true, false, 0);
+    auto row = table.m_row;
+    auto row_cmp = row;
+    LocalExtremalRows<int> lxv(row.m_field, row_cmp.m_field, true, false, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), c_nfind);
     row.jump(lxv[0]);
@@ -112,8 +116,9 @@ TEST(LocalExtremalRows, DescendingAbs) {
     using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {});
     setup(table);
-    auto &row = table.m_row;
-    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, true, true, 0);
+    auto row = table.m_row;
+    auto row_cmp = row;
+    LocalExtremalRows<int> lxv(row.m_field, row_cmp.m_field, true, true, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), c_nfind);
     row.jump(lxv[0]);
@@ -130,8 +135,9 @@ TEST(LocalExtremalRows, AscendingComplex) {
     using namespace local_extremal_rows_test;
     complex_scalar_table_t table("test", {});
     setup(table);
-    auto &row = table.m_row;
-    LocalExtremalRows<complex_scalar_row_t, std::complex<float>> lxv(row, row.m_field, false, true, 0);
+    auto row = table.m_row;
+    auto row_cmp = row;
+    LocalExtremalRows<std::complex<float>> lxv(row.m_field, row_cmp.m_field, false, true, 0);
     lxv.find(c_nfind);
     // prepare verification data
     auto complex_data = get_complex_data();
@@ -149,8 +155,9 @@ TEST(LocalExtremalRows, DescendingComplex) {
     using namespace local_extremal_rows_test;
     complex_scalar_table_t table("test", {});
     setup(table);
-    auto &row = table.m_row;
-    LocalExtremalRows<complex_scalar_row_t, std::complex<float>> lxv(row, row.m_field, true, true, 0);
+    auto row = table.m_row;
+    auto row_cmp = row;
+    LocalExtremalRows<std::complex<float>> lxv(row.m_field, row_cmp.m_field, true, true, 0);
     lxv.find(c_nfind);
     // prepare verification data
     auto complex_data = get_complex_data();
@@ -176,8 +183,9 @@ TEST(LocalExtremalRows, WithClearedRows) {
     table.free(7); // -7
     ASSERT_EQ(table.nrecord(), 7ul);
     ASSERT_EQ(table.nfreed_row(), 2ul);
-    auto &row = table.m_row;
-    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
+    auto row = table.m_row;
+    auto row_cmp = row;
+    LocalExtremalRows< int> lxv(row.m_field, row_cmp.m_field, false, false, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), c_nfind);
     row.jump(lxv[0]);

@@ -25,14 +25,13 @@ struct GlobalSortingRow : Row {
 };
 
 /**
- * applies the LocalExtremalRows class to
- * @tparam row_t
+ * applies the LocalExtremalRows class to find extreme Rows of distributed Tables based on the specified criterion
  * @tparam T
  * @tparam nind
  */
-template<typename row_t, typename T, uint_t nind = 0>
+template<typename T, uint_t nind = 0>
 struct GlobalExtremalRows {
-    typedef LocalExtremalRows<row_t, T, nind> lxr_t;
+    typedef LocalExtremalRows<T, nind> lxr_t;
     typedef GlobalSortingRow<T> global_sort_row_t;
     typedef buffered::Table<global_sort_row_t> global_sort_table_t;
     /**
@@ -57,14 +56,16 @@ struct GlobalExtremalRows {
      */
     global_sort_table_t m_global_sorter;
 
-    GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, uintv_t inds_to_cmp) :
-            m_lxr(row, field, largest, absval, inds_to_cmp),
+    GlobalExtremalRows(field::Numbers<T, nind> &field, field::Numbers<T, nind> &field_cmp,
+                       bool largest, bool absval, uintv_t inds_to_cmp) :
+            m_lxr(field, field_cmp, largest, absval, inds_to_cmp),
             m_global_sorter("Global extremal rows sorter", {}) {
         reset();
     }
 
-    GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, uint_t ind_to_cmp) :
-            GlobalExtremalRows(row, field, largest, absval, uintv_t{ind_to_cmp}){}
+    GlobalExtremalRows(field::Numbers<T, nind> &field, field::Numbers<T, nind> &field_cmp,
+                       bool largest, bool absval, uint_t ind_to_cmp) :
+            GlobalExtremalRows(field, field_cmp, largest, absval, uintv_t{ind_to_cmp}){}
 
     /**
      * @return
@@ -195,16 +196,18 @@ private:
         REQUIRE_NE_ALL(m_ninclude.m_reduced, ~0ul, "required local row reduction hasn't been performed");
         REQUIRE_TRUE_ALL(m_ninclude.m_reduced, "required local rows haven't been found yet");
         global_sort_table_t local_loader("Local loader for global extremal rows sorter", {});
+        logging::debug_("{}  {}", __FILE__, __LINE__);
         static_cast<TableBase &>(local_loader).resize(m_ninclude.m_local);
-        auto &source_row = m_lxr.m_work_row;
-        auto &source_field = m_lxr.m_work_row_field;
+        auto &source_field = m_lxr.m_field;
+        Row &source_row = *source_field.m_row;
         auto &loader_row = local_loader.m_row;
         for (uint_t i = 0ul; i < m_ninclude.m_local; ++i) {
-            static_cast<Row &>(source_row).jump(m_lxr[i]);
-            static_cast<Row &>(loader_row).push_back_jump();
+            source_row.jump(m_lxr[i]);
+            loader_row.push_back_jump();
             loader_row.m_irank = mpi::irank();
             loader_row.m_value = source_field.sum_over(m_lxr.m_inds_to_cmp);
         }
+        logging::debug_("{}  {}", __FILE__, __LINE__);
         if (mpi::i_am_root())
             static_cast<TableBase &>(m_global_sorter).resize(m_ninclude.m_reduced);
         static_cast<TableBase &>(m_global_sorter).gatherv(local_loader);
@@ -226,8 +229,7 @@ private:
             /*
              * values are averaged into one in the global_sort_table_t tables, so just one index to compare;
              */
-            auto cmp_fn = comparators::make_num_field_row_cmp_fn(
-                    row1, row1.m_value, row2, row2.m_value, m_lxr.m_value_cmp_fn, {0ul});
+            auto cmp_fn = comparators::make_num_field_cmp_fn(row1.m_value, row2.m_value, m_lxr.m_value_cmp_fn, {0ul});
             quicksort::Sorter qs(cmp_fn);
             qs.reorder_sort(m_global_sorter);
             for (uint_t irow = 0ul; irow < nrow; ++irow) {
@@ -248,7 +250,7 @@ public:
      */
     void find(uint_t nrow) {
         update_ninclude();
-        if (!mpi::all_sum(m_lxr.m_table.nrecord())) return;
+        if (!mpi::all_sum(m_lxr.m_field.m_row->m_table->nrecord())) return;
         find_required_local_rows(nrow);
         load_values_for_sorting();
         sort(nrow);
@@ -261,18 +263,20 @@ public:
      * @return
      *  the row index associated with the ordinal index
      */
-    const uint_t& operator[](const uint_t& i) const {
+    uint_t operator[](uint_t i) const {
         DEBUG_ASSERT_LT(i, m_ninclude.m_local, "the specified index was not included in the globally extremal set");
         return m_lxr[i];
     }
 
-    void gatherv(Table<row_t>& dst, uint_t iroot=0ul) const {
-        buffered::Table<row_t> m_local("locally included globally extreme rows", m_lxr.m_work_row);
-        m_local.push_back(m_ninclude.m_local);
+    void gatherv(TableBase& dst, uint_t iroot=0ul) const {
+        REQUIRE_EQ(dst.m_bw.m_row_size, m_lxr.m_field.m_row->m_size, "incompatible gathering Table");
+        TableBase local(m_lxr.m_field.m_row->m_size);
+        local.push_back(m_ninclude.m_local);
+        const auto src = *m_lxr.m_field.m_row->m_table;
         for (uint_t iinclude=0ul; iinclude<m_ninclude.m_local; ++iinclude){
-            m_local.copy_record_in(m_lxr.m_table, (*this)[iinclude], iinclude);
+            local.copy_record_in(src, (*this)[iinclude], iinclude);
         }
-        dst.gatherv(m_local, iroot);
+        dst.gatherv(local, iroot);
     }
 };
 

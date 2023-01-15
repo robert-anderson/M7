@@ -28,7 +28,7 @@ namespace comparators {
     /**
      * all row index comparators take a pair of indices and return their relative order as boolean
      */
-    typedef std::function<bool(const uint_t &, const uint_t &)> index_cmp_fn_t;
+    typedef std::function<bool(uint_t , uint_t )> index_cmp_fn_t;
     /**
      * templated function definition for scalar value comparisons.
      * returns true if the first argument is "better" than the second
@@ -113,19 +113,13 @@ namespace comparators {
 
     /**
      * make a function which orders table row indices based on the given comparator
-     * @tparam row_t
-     *  Row-derived type
      * @tparam T
      *  numeric type stored in the fields of the compared rows
      * @tparam nind
      *  number of elements in the shape of the compared fields
-     * @param row1
-     *  a row reference which sorting algorithms can regard as a cursor to move around between data elements to compare
-     * @param field1
+     * @param field
      *  the field on which the position of row1 relative to row2 is determined
-     * @param row2
-     *  another row reference to enable comparisons
-     * @param field2
+     * @param field_cmp
      *  the field on which the position of row2 relative to row1 is determined
      * @param value_cmp_fn
      *  the function which determines the relative ordering of values
@@ -134,21 +128,21 @@ namespace comparators {
      * @return
      *  a comparator which determines the relative ordering of two row indices in a Table
      */
-    template<typename row_t, typename T, uint_t nind = 0ul>
-    static index_cmp_fn_t make_num_field_row_cmp_fn(
-            row_t &row1, field::Numbers<T, nind> &field1,
-            row_t &row2, field::Numbers<T, nind> &field2,
+    template<typename T, uint_t nind = 0ul>
+    static index_cmp_fn_t make_num_field_cmp_fn(
+            field::Numbers<T, nind> &field, field::Numbers<T, nind> &field_cmp,
             value_cmp_fn_t<T> value_cmp_fn, uintv_t inds_to_cmp) {
-        REQUIRE_TRUE(static_cast<FieldBase &>(field1).belongs_to_row(row1), "specified row-field pair must correspond");
-        REQUIRE_TRUE(static_cast<FieldBase &>(field2).belongs_to_row(row2), "specified row-field pair must correspond");
+        auto row_ptr = field.m_row;
+        auto row_cmp_ptr = field_cmp.m_row;
+        REQUIRE_NE(row_ptr, row_cmp_ptr, "specified field pair must correspond to different Rows");
+        REQUIRE_EQ(row_ptr->m_table, row_cmp_ptr->m_table, "specified field pair must correspond to the same Table");
         DEBUG_ASSERT_FALSE(inds_to_cmp.empty(), "need at least one numeric field index for comparison");
         DEBUG_ASSERT_TRUE(std::all_of(inds_to_cmp.cbegin(), inds_to_cmp.cend(),
-                                      [&field1](uint_t i) { return i < field1.nelement(); }), "compared field index OOB");
-        return [&row1, &field1, &row2, &field2, value_cmp_fn, inds_to_cmp]
-                (const uint_t &irow, const uint_t &irow_cmp) -> bool {
-            static_cast<const Row &>(row1).jump(irow);
-            static_cast<const Row &>(row2).jump(irow_cmp);
-            return value_cmp_fn(field1.sum_over(inds_to_cmp), field2.sum_over(inds_to_cmp));
+                                      [&field](uint_t i) { return i < field.nelement(); }), "compared field index OOB");
+        return [&field, &field_cmp, value_cmp_fn, inds_to_cmp] (uint_t irow, uint_t irow_cmp) -> bool {
+            field.m_row->jump(irow);
+            field_cmp.m_row->jump(irow_cmp);
+            return value_cmp_fn(field.sum_over(inds_to_cmp), field_cmp.sum_over(inds_to_cmp));
         };
     }
 };

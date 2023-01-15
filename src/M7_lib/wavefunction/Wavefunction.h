@@ -30,7 +30,7 @@
  * are the called the "spawning lists"
  */
 struct Wavefunction : communicator::BasicSend<Walker, Spawn> {
-    typedef GlobalExtremalRows<Walker, wf_t, c_ndim_wf> weights_gxr_t;
+    typedef GlobalExtremalRows<wf_t, c_ndim_wf> weights_gxr_t;
 
     const conf::Document &m_opts;
     const sys::Sector m_sector;

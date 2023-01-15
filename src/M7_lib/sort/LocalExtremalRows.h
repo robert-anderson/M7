@@ -11,36 +11,21 @@
 
 /**
  * Applies the ExtremalIndices class to Table-derived types with numeric fields
- * @tparam row_t
- *  row template argument
  * @tparam T
  *  numerical type of data
  * @tparam nind
  *  number of elements in the shape of the numerical field (0 for scalar)
  */
-template<typename row_t, typename T, uint_t nind=0>
+template<typename T, uint_t nind=0ul>
 struct LocalExtremalRows {
-    static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
     /**
-     * once-initialized, frequently assigned working row
+     * reference to order-determining field in a working row;
      */
-    row_t m_work_row;
+    field::Numbers<T, nind> &m_field;
     /**
-     * reference to order-determining field in m_work_row;
+     * reference to order-determining field in a different working row
      */
-    field::Numbers <T, nind> &m_work_row_field;
-    /**
-     * once-initialized, frequently assigned working row for comparisons
-     */
-    row_t m_work_row_cmp;
-    /**
-     * reference to order-determining field in m_work_row_cmp;
-     */
-    field::Numbers <T, nind> &m_work_row_cmp_field;
-    /**
-     * base class reference to the table associated with the work rows
-     */
-    TableBase& m_table;
+    field::Numbers<T, nind> &m_cmp_field;
     /**
      * the element indices of the number field to compare (via arithmetic mean)
      */
@@ -54,31 +39,22 @@ struct LocalExtremalRows {
      */
     ExtremalIndices m_xinds;
 
-    LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, uintv_t inds_to_cmp) :
-            m_work_row(row),
-            m_work_row_field(field::identify(m_work_row, row, field)),
-            m_work_row_cmp(row),
-            m_work_row_cmp_field(field::identify(m_work_row_cmp, row, field)),
-            m_table(*static_cast<const Row &>(m_work_row).m_table),
-            m_inds_to_cmp(inds_to_cmp),
+    LocalExtremalRows(field::Numbers<T, nind> &field, field::Numbers<T, nind> &cmp_field,
+                       bool largest, bool absval, uintv_t inds_to_cmp) :
+            m_field(field), m_cmp_field(cmp_field), m_inds_to_cmp(inds_to_cmp),
             m_value_cmp_fn(comparators::make_value_cmp_fn<T>(absval, largest)),
-            m_xinds(comparators::make_num_field_row_cmp_fn(
-                    m_work_row, m_work_row_field,
-                    m_work_row_cmp, m_work_row_cmp_field, m_value_cmp_fn, inds_to_cmp)) {
-        REQUIRE_TRUE_ALL(static_cast<const FieldBase&>(m_work_row_field).belongs_to_row(m_work_row),
-                              "the work row and work field must correspond");
-        REQUIRE_TRUE_ALL(static_cast<const FieldBase&>(m_work_row_cmp_field).belongs_to_row(m_work_row_cmp),
-                              "the work row and work field must correspond");
-        REQUIRE_EQ_ALL(static_cast<const Row &>(m_work_row).m_table, static_cast<const Row &>(m_work_row_cmp).m_table,
+            m_xinds(comparators::make_num_field_cmp_fn(m_field, m_cmp_field, m_value_cmp_fn, inds_to_cmp)) {
+        REQUIRE_EQ_ALL(m_field.m_row->m_table, m_cmp_field.m_row->m_table,
                        "both work rows must point to the same table");
         reset();
     }
 
-    LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, uint_t ind_to_cmp):
-            LocalExtremalRows(row, field, largest, absval, uintv_t{ind_to_cmp}){}
+    LocalExtremalRows(field::Numbers<T, nind> &field, field::Numbers<T, nind> &cmp_field,
+                      bool largest, bool absval, uint_t ind_to_cmp):
+            LocalExtremalRows(field, cmp_field, largest, absval, uintv_t{ind_to_cmp}){}
 
     void reset() {
-        m_xinds.reset(m_table);
+        m_xinds.reset(*m_field.m_row->m_table);
     }
 
     /**
@@ -89,11 +65,11 @@ struct LocalExtremalRows {
         m_xinds.find(nfind);
     }
 
-    const uint_t& operator[](const uint_t& i) const {
+    const uint_t& operator[](uint_t i) const {
         return m_xinds[i];
     }
 
-    const uint_t &nfound() const {
+    uint_t nfound() const {
         return m_xinds.nfound();
     }
 
@@ -102,21 +78,20 @@ struct LocalExtremalRows {
     }
 
     uint_t nrow_nonzero() const {
-        DEBUG_ASSERT_EQ(m_xinds.m_nind, m_table.nrecord(), "inconsistent number of indices");
+        DEBUG_ASSERT_EQ(m_xinds.m_nind, m_field.m_row->m_table->nrecord(), "inconsistent number of indices");
         return m_xinds.m_nind;
     }
 
-    T get_value(const uint_t& i) const {
+    T get_value(uint_t i) const {
         DEBUG_ASSERT_LT(i, nrow_nonzero(), "row index is OOB wrt number of non-zero rows");
         DEBUG_ASSERT_LT(i, nfound(), "row index is OOB wrt number of found extremal rows");
-        m_work_row.jump(m_xinds[i]);
-        return m_work_row_field.sum_over(m_inds_to_cmp);
+        m_field.m_row->jump(m_xinds[i]);
+        return m_field.sum_over(m_inds_to_cmp);
     }
 
-    bool cmp_values (const T& v1, const T& v2) const {
+    bool cmp_values(const T& v1, const T& v2) const {
         return m_value_cmp_fn(v1, v2);
     }
-
 };
 
 
