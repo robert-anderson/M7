@@ -10,15 +10,15 @@
 
 
 namespace functor {
-    template<typename signature_t, typename T>
+    template<typename signature_t, typename fn_t>
     void assert_prototype() {
-        static_assert(std::is_convertible<T, std::function<signature_t>>::value,
-                      "body function does not conform to required prototype");
+        static_assert(std::is_convertible<fn_t, std::function<signature_t>>::value,
+                      "function does not conform to required prototype");
     }
 
-    template<typename signature_t, typename T>
-    void assert_prototype(const T &) {
-        assert_prototype<signature_t, T>();
+    template<typename signature_t, typename fn_t>
+    void assert_prototype(const fn_t &) {
+        assert_prototype<signature_t, fn_t>();
     }
 }
 

@@ -48,9 +48,9 @@ namespace comparators {
     template<typename T>
     static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, Int<true> /*absval*/) {
         if (largest)
-            return [](const T &v, const T &v_cmp) { return std::abs(v) > std::abs(v_cmp); };
+            return [](const T &v, const T &v_cmp) -> bool { return std::abs(v) > std::abs(v_cmp); };
         else
-            return [](const T &v, const T &v_cmp) { return std::abs(v) < std::abs(v_cmp); };
+            return [](const T &v, const T &v_cmp) -> bool { return std::abs(v) < std::abs(v_cmp); };
     }
 
     /**
@@ -65,9 +65,9 @@ namespace comparators {
     template<typename T>
     static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, Int<false> /*absval*/) {
         if (largest)
-            return [](const T &v, const T &v_cmp) { return v > v_cmp; };
+            return [](const T &v, const T &v_cmp) -> bool { return v > v_cmp; };
         else
-            return [](const T &v, const T &v_cmp) { return v < v_cmp; };
+            return [](const T &v, const T &v_cmp) -> bool { return v < v_cmp; };
     }
 
     /**
@@ -145,7 +145,7 @@ namespace comparators {
         DEBUG_ASSERT_TRUE(std::all_of(inds_to_cmp.cbegin(), inds_to_cmp.cend(),
                                       [&field1](uint_t i) { return i < field1.nelement(); }), "compared field index OOB");
         return [&row1, &field1, &row2, &field2, value_cmp_fn, inds_to_cmp]
-                (const uint_t &irow, const uint_t &irow_cmp) {
+                (const uint_t &irow, const uint_t &irow_cmp) -> bool {
             static_cast<const Row &>(row1).jump(irow);
             static_cast<const Row &>(row2).jump(irow_cmp);
             return value_cmp_fn(field1.sum_over(inds_to_cmp), field2.sum_over(inds_to_cmp));

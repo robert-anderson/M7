@@ -5,8 +5,6 @@ target_sources(M7_lib
         ExtremalIndices.h
         GlobalExtremalRows.cpp
         GlobalExtremalRows.h
-        LambdaQuickSorter.cpp
-        LambdaQuickSorter.h
         LocalExtremalRows.h
-        QuickSorter.h
+        QuickSort.h
 )

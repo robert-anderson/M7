@@ -5,7 +5,7 @@
 #include <M7_lib/basis/Suites.h>
 #include "Wavefunction.h"
 #include "M7_lib/linalg/FciIters.h"
-#include "M7_lib/sort/QuickSorter.h"
+#include "M7_lib/sort/QuickSort.h"
 #include "FciInitializer.h"
 #include "M7_lib/util/Math.h"
 
@@ -87,7 +87,7 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
         return std::abs(row1.m_weight[ipart]) > std::abs(row2.m_weight[ipart]);
     };
 
-    LambdaQuickSorter2 qs(cmp_fn);
+    quicksort::Sorter qs(cmp_fn);
     qs.reorder_sort(xr_gathered);
 
     auto& row = xr_gathered.m_row;

@@ -12,7 +12,7 @@
 #include <M7_lib/communication/Communicator.h>
 #include <M7_lib/parallel/RankAllocator.h>
 #include <M7_lib/field/Fields.h>
-#include <M7_lib/sort/LambdaQuickSorter.h>
+#include <M7_lib/sort/QuickSort.h>
 #include <M7_lib/sort/GlobalExtremalRows.h>
 
 #include "WalkerTable.h"

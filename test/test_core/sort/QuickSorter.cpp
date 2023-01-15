@@ -4,8 +4,7 @@
 
 #include "M7_lib/table/BufferedFields.h"
 #include "M7_lib/table/BufferedTable.h"
-#include "M7_lib/sort/LambdaQuickSorter.h"
-#include "M7_lib/sort/QuickSorter.h"
+#include "M7_lib/sort/QuickSort.h"
 #include "gtest/gtest.h"
 
 namespace quick_sorter_test {
@@ -53,9 +52,9 @@ namespace quick_sorter_test {
 
 /*
  * test that the sorter works when the comparison behaviour is specified through statically dispatched code
- *  (should be faster than the Lambda equivalent)
+ *  (should be faster than the std::function-based equivalent)
  */
-TEST(QuickSorter, FunctorSort){
+TEST(QuickSorter, StaticDispatchSort){
     using namespace quick_sorter_test;
     const uint_t nchar = 9;
 
@@ -66,7 +65,7 @@ TEST(QuickSorter, FunctorSort){
     /*
      * sorting in ascending lexical order without physically reordering rows
      */
-    LambdaQuickSorter2 qs(comp_fn);
+    quicksort::SorterFn<AscOrderFn> qs(comp_fn);
     qs.preserve_sort(table);
 
     auto& row1 = comp_fn.m_row1;
@@ -112,7 +111,7 @@ TEST(QuickSorter, FunctorSort){
 /*
  * test that the sorter also works when the functor specified is actually a wrapper for dynamically dispatched code
  */
-TEST(QuickSorter, LambdaSort){
+TEST(QuickSorter, DynamicDispatchSort){
     using namespace quick_sorter_test;
     const uint_t nchar = 9;
 
@@ -130,7 +129,7 @@ TEST(QuickSorter, LambdaSort){
     /*
      * sorting in ascending lexical order without physically reordering rows
      */
-    LambdaQuickSorter2 qs(comp_fn);
+    quicksort::Sorter qs(comp_fn);
     qs.preserve_sort(table);
 
     /*
