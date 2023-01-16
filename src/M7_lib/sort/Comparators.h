@@ -117,10 +117,10 @@ namespace comparators {
      *  numeric type stored in the fields of the compared rows
      * @tparam nind
      *  number of elements in the shape of the compared fields
-     * @param field
-     *  the field on which the position of row1 relative to row2 is determined
-     * @param field_cmp
-     *  the field on which the position of row2 relative to row1 is determined
+     * @param field1
+     *  the field whose value is superior if value_cmp_fn is true
+     * @param field2
+     *  the field whose value is superior if value_cmp_fn is false
      * @param value_cmp_fn
      *  the function which determines the relative ordering of values
      * @param inds_to_cmp
@@ -130,19 +130,19 @@ namespace comparators {
      */
     template<typename T, uint_t nind = 0ul>
     static index_cmp_fn_t make_num_field_cmp_fn(
-            field::Numbers<T, nind> &field, field::Numbers<T, nind> &field_cmp,
+            field::Numbers<T, nind> &field1, field::Numbers<T, nind> &field2,
             value_cmp_fn_t<T> value_cmp_fn, uintv_t inds_to_cmp) {
-        auto row_ptr = field.m_row;
-        auto row_cmp_ptr = field_cmp.m_row;
-        REQUIRE_NE(row_ptr, row_cmp_ptr, "specified field pair must correspond to different Rows");
-        REQUIRE_EQ(row_ptr->m_table, row_cmp_ptr->m_table, "specified field pair must correspond to the same Table");
+        auto row1 = field1.m_row;
+        auto row2 = field2.m_row;
+        REQUIRE_NE(row1, row2, "specified field pair must correspond to different Rows");
+        REQUIRE_EQ(row1->m_table, row2->m_table, "specified field pair must correspond to the same Table");
         DEBUG_ASSERT_FALSE(inds_to_cmp.empty(), "need at least one numeric field index for comparison");
         DEBUG_ASSERT_TRUE(std::all_of(inds_to_cmp.cbegin(), inds_to_cmp.cend(),
-                                      [&field](uint_t i) { return i < field.nelement(); }), "compared field index OOB");
-        return [&field, &field_cmp, value_cmp_fn, inds_to_cmp] (uint_t irow, uint_t irow_cmp) -> bool {
-            field.m_row->jump(irow);
-            field_cmp.m_row->jump(irow_cmp);
-            return value_cmp_fn(field.sum_over(inds_to_cmp), field_cmp.sum_over(inds_to_cmp));
+              [&field1](uint_t i) { return i < field1.nelement(); }), "compared field index OOB");
+        return [&field1, &field2, value_cmp_fn, inds_to_cmp] (uint_t irow1, uint_t irow2) -> bool {
+            field1.m_row->jump(irow1);
+            field2.m_row->jump(irow2);
+            return value_cmp_fn(field1.sum_over(inds_to_cmp), field2.sum_over(inds_to_cmp));
         };
     }
 };

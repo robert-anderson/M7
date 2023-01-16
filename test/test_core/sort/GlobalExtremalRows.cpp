@@ -122,9 +122,9 @@ TEST(GlobalExtremalRows, FindAsc) {
     scalar_table_t table("test", {});
     setup(table);
 
-    auto row = table.m_row;
-    auto row_cmp = row;
-    GlobalExtremalRows<int> gxr(row.m_field, row_cmp.m_field, false, false, 0ul);
+    auto row1 = table.m_row;
+    auto row2 = row1;
+    GlobalExtremalRows<int> gxr(row1.m_field, row2.m_field, false, false, 0ul);
 
     auto nrow_to_find = nfind();
     gxr.find(nrow_to_find);
@@ -160,9 +160,9 @@ TEST(GlobalExtremalRows, FindDesc) {
     scalar_table_t table("test", {});
     setup(table);
 
-    auto row = table.m_row;
-    auto row_cmp = row;
-    GlobalExtremalRows<int> gxr(row.m_field, row_cmp.m_field, true, false, 0ul);
+    auto row1 = table.m_row;
+    auto row2 = row1;
+    GlobalExtremalRows<int> gxr(row1.m_field, row2.m_field, true, false, 0ul);
 
     auto nrow_to_find = nfind();
     gxr.find(nrow_to_find);

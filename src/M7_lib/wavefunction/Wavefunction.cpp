@@ -71,9 +71,9 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
 void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
     buffered::Table<Walker> xr_gathered("global top weighted", m_store.m_row);
     {
-        auto work_row = m_store.m_row;
-        auto work_row_cmp = work_row;
-        weights_gxr_t gxr(work_row.m_weight, work_row_cmp.m_weight, true, true, ipart);
+        auto row1 = m_store.m_row;
+        auto row2 = row1;
+        weights_gxr_t gxr(row1.m_weight, row2.m_weight, true, true, ipart);
         gxr.find(nrow);
         gxr.gatherv(xr_gathered);
     }

@@ -56,16 +56,16 @@ struct GlobalExtremalRows {
      */
     global_sort_table_t m_global_sorter;
 
-    GlobalExtremalRows(field::Numbers<T, nind> &field, field::Numbers<T, nind> &field_cmp,
+    GlobalExtremalRows(field::Numbers<T, nind> &field1, field::Numbers<T, nind> &field2,
                        bool largest, bool absval, uintv_t inds_to_cmp) :
-            m_lxr(field, field_cmp, largest, absval, inds_to_cmp),
+            m_lxr(field1, field2, largest, absval, inds_to_cmp),
             m_global_sorter("Global extremal rows sorter", {}) {
         reset();
     }
 
-    GlobalExtremalRows(field::Numbers<T, nind> &field, field::Numbers<T, nind> &field_cmp,
+    GlobalExtremalRows(field::Numbers<T, nind> &field1, field::Numbers<T, nind> &field2,
                        bool largest, bool absval, uint_t ind_to_cmp) :
-            GlobalExtremalRows(field, field_cmp, largest, absval, uintv_t{ind_to_cmp}){}
+            GlobalExtremalRows(field1, field2, largest, absval, uintv_t{ind_to_cmp}){}
 
     /**
      * @return
@@ -198,7 +198,7 @@ private:
         global_sort_table_t local_loader("Local loader for global extremal rows sorter", {});
         logging::debug_("{}  {}", __FILE__, __LINE__);
         static_cast<TableBase &>(local_loader).resize(m_ninclude.m_local);
-        auto &source_field = m_lxr.m_field;
+        auto &source_field = m_lxr.m_field1;
         Row &source_row = *source_field.m_row;
         auto &loader_row = local_loader.m_row;
         for (uint_t i = 0ul; i < m_ninclude.m_local; ++i) {
@@ -250,7 +250,7 @@ public:
      */
     void find(uint_t nrow) {
         update_ninclude();
-        if (!mpi::all_sum(m_lxr.m_field.m_row->m_table->nrecord())) return;
+        if (!mpi::all_sum(m_lxr.m_field1.m_row->m_table->nrecord())) return;
         find_required_local_rows(nrow);
         load_values_for_sorting();
         sort(nrow);
@@ -269,10 +269,10 @@ public:
     }
 
     void gatherv(TableBase& dst, uint_t iroot=0ul) const {
-        REQUIRE_EQ(dst.m_bw.m_row_size, m_lxr.m_field.m_row->m_size, "incompatible gathering Table");
-        TableBase local(m_lxr.m_field.m_row->m_size);
+        REQUIRE_EQ(dst.m_bw.m_row_size, m_lxr.m_field1.m_row->m_size, "incompatible gathering Table");
+        TableBase local(m_lxr.m_field1.m_row->m_size);
         local.push_back(m_ninclude.m_local);
-        const auto src = *m_lxr.m_field.m_row->m_table;
+        const auto src = *m_lxr.m_field1.m_row->m_table;
         for (uint_t iinclude=0ul; iinclude<m_ninclude.m_local; ++iinclude){
             local.copy_record_in(src, (*this)[iinclude], iinclude);
         }
