@@ -6,6 +6,40 @@
 
 using namespace conf_components;
 
+
+conf::OptionalFile::OptionalFile(Group* parent, str_t name, str_t short_desc, str_t default_path, EnablePolicy ep) :
+        Section(parent, name, logging::format("{} file", short_desc), ep),
+        m_path(this, "path", std::move(default_path), "relative or absolute path"){}
+
+conf::OptionalFileSeries::OptionalFileSeries(Group* parent, str_t name, str_t short_desc, str_t default_path_fmt,
+                                             EnablePolicy ep) :
+        Section(parent, name, logging::format("{} file series", short_desc), ep),
+        m_path_fmt(this, "path_fmt", std::move(default_path_fmt),
+                   "relative or absolute path format into which calculation data is to be dumped periodically during "
+                   "the calculation: can include \"{}\" token (non-clobbering) or not include such a token (clobbering)"),
+        m_mode(this, "mode",
+               {
+                   {"cycle", "the number of MC cycles between file creations"},
+                   {"minute", "the number of minutes of wall time between file creations"}
+               }, "choose between the two interpretations of the \"period\" parameter"),
+        m_period(this, "period", 1000ul, "interval between file creations: either in cycles or minutes"){}
+
+void conf::OptionalFileSeries::validate_node_contents() {
+    auto& str = m_path_fmt.m_value;
+    uint_t token_count = std::count(str.cbegin(), str.cend(), '{');
+    REQUIRE_LE(token_count, 1ul, "path formats can have at most one {} token");
+    if (token_count) {
+        auto it_open = std::find(str.cbegin(), str.cend(), '{');
+        auto it_close = std::find(str.cbegin(), str.cend(), '}');
+        REQUIRE_EQ(std::distance(it_open, it_close), 1l,
+                   "path format for file series should contain at most one {} token");
+        logging::info("formatting token found in {} path format, successive write operations will not overwrite"
+                      " previously written files from the same run", m_path_fmt.m_value);
+    } else
+        logging::info("formatting token not found in path, "
+                      "successive checkpoints will overwrite previous checkpoints from the same run");
+}
+
 conf::HashMapping::HashMapping(Group *parent) :
         Section(parent, "hash_mapping", "options relating to the behavior of hash-mapped tables"),
         m_remap_ratio(this, "remap_ratio", c_default_remap_ratio,
@@ -58,6 +92,22 @@ conf::Reference::Reference(Group *parent) :
              "as a HF-like state anyway. Some features require a fixed HF-like state (e.g. hf_excits), others may"
              "simply stochastically benefit from it (e.g. explicit HF connections in RDMs)"){}
 
+conf::Basis::Basis(Group* parent) :
+        Section(parent, "basis", "options relating to the single particle basis functions and subsets thereof"),
+        m_bos_occ_cutoff(this, "bos_occ_cutoff", sys::bos::c_max_occ,
+                         "maximum allowed occupation of each boson mode"){}
+
+void conf::Basis::validate_node_contents() {
+    REQUIRE_LE(m_bos_occ_cutoff, sys::bos::c_max_occ,
+               logging::format("given nboson_max exceeds limit of {}", sys::bos::c_max_occ));
+}
+
+conf::Particles::Particles(Group* parent) :
+        Section(parent, "particles", "options relating to the particle number sector"),
+        m_nelec(this, "nelec", 0ul, "number of electrons in the system (conserved)"),
+        m_ms2(this, "ms2", sys::frm::c_undefined_ms2, "2*Ms sector in which the system is to be restricted (taken as reference hint if H does not conserve Sz"),
+        m_nboson(this, "nboson", 0ul, "number of bosons in the system (taken as reference hint if H does not conserve boson number"){}
+
 conf::Wavefunction::Wavefunction(Group *parent) :
         Section(parent, "wavefunction",
                         "options relating to the storage and update of a distributed many-body wavefunction"),
@@ -84,7 +134,8 @@ conf::Semistochastic::Semistochastic(Group *parent) :
         Section(parent, "semistochastic", "options related to semi-stochastic propagation", Explicit),
         m_size(this, "size", 0ul, "number of MBFs selected to comprise the semi-stochastic space"),
         m_l1_fraction_cutoff(this, "l1_fraction_cutoff", 1.0,
-                             "requisite fraction of the total number of walkers required to reside on an MBF for inclusion in the semistochastic space"),
+            "requisite fraction of the total number of walkers required to reside on an MBF for inclusion in the "
+            "semistochastic space"),
         m_delay(this, "delay", 0ul,
                 "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space") {}
 
