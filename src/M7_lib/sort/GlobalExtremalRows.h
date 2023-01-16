@@ -196,8 +196,7 @@ private:
         REQUIRE_NE_ALL(m_ninclude.m_reduced, ~0ul, "required local row reduction hasn't been performed");
         REQUIRE_TRUE_ALL(m_ninclude.m_reduced, "required local rows haven't been found yet");
         global_sort_table_t local_loader("Local loader for global extremal rows sorter", {});
-        logging::debug_("{}  {}", __FILE__, __LINE__);
-        static_cast<TableBase &>(local_loader).resize(m_ninclude.m_local);
+        if (m_ninclude.m_local) local_loader.resize(m_ninclude.m_local);
         auto &source_field = m_lxr.m_field1;
         Row &source_row = *source_field.m_row;
         auto &loader_row = local_loader.m_row;
@@ -207,7 +206,6 @@ private:
             loader_row.m_irank = mpi::irank();
             loader_row.m_value = source_field.sum_over(m_lxr.m_inds_to_cmp);
         }
-        logging::debug_("{}  {}", __FILE__, __LINE__);
         if (mpi::i_am_root())
             static_cast<TableBase &>(m_global_sorter).resize(m_ninclude.m_reduced);
         static_cast<TableBase &>(m_global_sorter).gatherv(local_loader);
@@ -225,7 +223,7 @@ private:
             REQUIRE_EQ(m_global_sorter.nrow_in_use(), m_ninclude.m_reduced,
                        "global sorting table should have as many filled rows as total found rows across all ranks");
             auto row1 = m_global_sorter.m_row;
-            auto row2 = m_global_sorter.m_row;
+            auto row2 = row1;
             /*
              * values are averaged into one in the global_sort_table_t tables, so just one index to compare;
              */
