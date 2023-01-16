@@ -37,7 +37,17 @@ namespace comparators {
     using value_cmp_fn_t = bool(*)(const T &, const T &);
 
     /**
-     * make a function which orders values based on their magnitudes
+     * basic value comparators
+     */
+    namespace value {
+        template<typename T> static bool abs_gt(const T &v1, const T &v2) { return std::abs(v1) > std::abs(v2); };
+        template<typename T> static bool abs_lt(const T &v1, const T &v2) { return std::abs(v1) < std::abs(v2); };
+        template<typename T> static bool gt(const T &v1, const T &v2) { return v1 > v2; };
+        template<typename T> static bool lt(const T &v1, const T &v2) { return v1 < v2; };
+    }
+
+    /**
+     * return a function which orders values based on their magnitudes
      * @tparam T
      *  type to sort (signed primitive or complex)
      * @param largest
@@ -47,14 +57,11 @@ namespace comparators {
      */
     template<typename T>
     static value_cmp_fn_t<T> get_value_cmp_fn(bool largest, Int<true> /*absval*/) {
-        if (largest)
-            return [](const T &v, const T &v_cmp) -> bool { return std::abs(v) > std::abs(v_cmp); };
-        else
-            return [](const T &v, const T &v_cmp) -> bool { return std::abs(v) < std::abs(v_cmp); };
+        return largest ? &value::abs_gt<T> : &value::abs_lt<T>;
     }
 
     /**
-     * make a function which orders values directly
+     * return a function which orders values directly
      * @tparam T
      *  type to sort (signed or unsigned primitive)
      * @param largest
@@ -64,10 +71,7 @@ namespace comparators {
      */
     template<typename T>
     static value_cmp_fn_t<T> get_value_cmp_fn(bool largest, Int<false> /*absval*/) {
-        if (largest)
-            return [](const T &v, const T &v_cmp) -> bool { return v > v_cmp; };
-        else
-            return [](const T &v, const T &v_cmp) -> bool { return v < v_cmp; };
+        return largest ? &value::gt<T> : &value::lt<T>;
     }
 
     /**
