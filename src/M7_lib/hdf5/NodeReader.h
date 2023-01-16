@@ -10,6 +10,94 @@
 
 namespace hdf5 {
 
+    /**
+     * Whereas saving an application object to one or more HDF5 datasets is a simple case of marshalling the data into a
+     * contiguous buffer, loading datasets into application structures can be more complicated. This class manages this
+     * process
+     */
+    struct DatasetLoader {
+        const str_t m_name;
+        const uint_t m_max_nitem_per_op;
+        std::list<Attr> m_attrs;
+
+        DatasetLoader(hid_t parent_handle, str_t name, const dataset::DistListFormat& format, uint_t max_nitem_per_op):
+            m_name(std::move(name)) {
+
+
+            REQUIRE_TRUE(H5Oexists_by_name(parent_handle, name.c_str(), )child_exists(name), "dataset is missing from HDF5 node");
+            auto dataset = H5Dopen1(parent_handle, name.c_str());
+            auto filespace = H5Dget_space(dataset);
+            const auto ndim = format.m_h5_shape.size();
+
+            // datasets are always transacted in collective I/O mode
+            hid_t plist = H5Pcreate(H5P_DATASET_XFER);
+            H5Pset_dxpl_mpio(plist, H5FD_MPIO_COLLECTIVE);
+
+            // initialize an array to specify the counts of data transacted. this only changes in the first element
+            auto counts = vector::prepended(format.m_local.m_item.m_h5_shape, 0ul);
+            // hyperslabs for the offsets and counts associated with the file and memory layout respectively
+            auto file_hyperslab = H5Screate_simple(ndim, format.m_h5_shape.data(), nullptr);
+            auto mem_hyperslab = H5Screate_simple(ndim, format.m_h5_shape.data(), nullptr);
+
+            // number of items yet to be transacted
+            uint_t nitem_remaining = format.m_local.m_nitem;
+            // first element of offset is incremented at each iteration
+            v_t<hsize_t> offsets(ndim);
+            char all_done = false;
+            for (uint_t iblock = 0ul; !all_done; ++iblock) {
+                // the number of items transacted may not be larger than the cutoff
+                counts[0] = std::min(max_nitem_per_op, nitem_remaining);
+                offsets[0] = 0;
+                H5Sselect_hyperslab(mem_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
+                offsets[0] = std::min(iblock * max_nitem_per_op, format.m_local.m_nitem);
+                offsets[0] += format.m_nitem_displ;
+                // get a pointer to which this portion of the dataset can be contiguously loaded
+                const auto dst = prep_fn(format.m_local, max_nitem_per_op);
+                REQUIRE_EQ(bool(dst), bool(counts[0]), "nitem zero with non-null data or nitem non-zero with null data");
+                H5Sselect_hyperslab(file_hyperslab, H5S_SELECT_SET, offsets.data(), nullptr, counts.data(), nullptr);
+                auto status = H5Dread(dataset, format.m_local.m_item.m_type, mem_hyperslab, file_hyperslab, plist, dst);
+                REQUIRE_FALSE(status, "HDF5 Error on multidimensional load");
+                /*
+                 * now that the buffer has been filled, let the target object be populated (this may be a null operation in the
+                 * case that the contiguous buffer is directly part of the target object e.g. loading a std::vector)
+                 */
+                if (dst) fill_fn(dst, counts[0]);
+                all_done = !dst;
+                // only allow the loop to terminate if all ranks have yielded a null pointer
+                all_done = mpi::all_land(all_done);
+                // deplete number of remaining items by the number just transacted
+                nitem_remaining -= counts[0];
+            }
+
+            // load any attributes associated with the open dataset
+            {
+                auto op = [](hid_t parent, const char* name, const H5A_info_t */*ainfo*/, void* attrs_cast) -> herr_t {
+                    auto attrs = reinterpret_cast<std::list<Attr>*>(attrs_cast);
+                    attrs->emplace_back(parent, name);
+                    return 0;
+                };
+                hsize_t idx = 0ul;
+                // use creation order so that elementwise comparison between saved and loaded attr lists may be done
+                H5Aiterate2(dataset, H5_INDEX_CRT_ORDER, H5_ITER_INC, &idx, op, reinterpret_cast<void*>(&attrs));
+                REQUIRE_EQ(idx, attrs.size(), "number of attrs in list should match the final index");
+            }
+
+            H5Pclose(plist);
+            H5Sclose(filespace);
+            H5Sclose(file_hyperslab);
+            H5Sclose(mem_hyperslab);
+            H5Dclose(dataset);
+
+        }
+
+        void hdf5::NodeReader::load_dataset(const str_t& name, hdf5::dataset::load_prep_fn prep_fn,
+                                            hdf5::dataset::load_fill_fn fill_fn,
+                                            uint_t max_nitem_per_op, ) const {
+
+        }
+
+    };
+
     struct NodeReader : Node {
 
         NodeReader(hid_t handle) : Node(handle) {}
