@@ -137,7 +137,9 @@ conf::Semistochastic::Semistochastic(Group *parent) :
             "requisite fraction of the total number of walkers required to reside on an MBF for inclusion in the "
             "semistochastic space"),
         m_delay(this, "delay", 0ul,
-                "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space") {}
+                "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space"),
+        m_save(this, "save", "deterministic subspace save", "M7.detsub.h5", Explicit),
+        m_load(this, "load", "deterministic subspace load", "M7.detsub.h5", Explicit){}
 
 void conf::Semistochastic::validate_node_contents() {
     REQUIRE_FALSE(bool(m_size) && (m_l1_fraction_cutoff != 1.0), "incompatible methods of subspace selection specified");

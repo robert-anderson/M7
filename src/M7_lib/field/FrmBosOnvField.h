@@ -13,6 +13,7 @@
 
 struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
     typedef CompositeField<FrmOnvField, BosOnvField> base_t;
+    const str_t m_name;
     FrmOnvField m_frm;
     BosOnvField m_bos;
     /**
@@ -30,6 +31,8 @@ struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
      * a common interface is realised by implementing a ctor of the following form in all MBFs
      */
     FrmBosOnvField(Row* row, const sys::Sector& sector, str_t name="");
+
+    FrmBosOnvField(Row* row, const FrmBosOnvField& other);
 
     FrmBosOnvField(const FrmBosOnvField& other);
 

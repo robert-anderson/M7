@@ -18,7 +18,9 @@ FrmOnvField::FrmOnvField(Row *row, const sys::frm::Sector& sector, str_t name) :
     FrmOnvField(row, sector.m_basis, name) {}
 
 FrmOnvField::FrmOnvField(Row *row, const sys::Sector& sector, str_t name) :
-    FrmOnvField(row, sector.m_frm, name){}
+        FrmOnvField(row, sector.m_frm, name){}
+
+FrmOnvField::FrmOnvField(Row *row, const FrmOnvField &other): FrmOnvField(row, other.m_basis, other.m_name){}
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
         base_t(other), m_basis(other.m_basis), m_decoded(*this),

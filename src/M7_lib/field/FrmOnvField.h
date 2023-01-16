@@ -44,6 +44,7 @@ public:
      */
     FrmOnvField(Row* row, const sys::frm::Sector& sector, str_t name="");
     FrmOnvField(Row* row, const sys::Sector& sector, str_t name="");
+    FrmOnvField(Row* row, const FrmOnvField& other);
     FrmOnvField(const FrmOnvField& other);
 
     FrmOnvField& operator=(const FrmOnvField& other) {

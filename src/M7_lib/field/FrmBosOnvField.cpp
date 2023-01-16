@@ -8,7 +8,7 @@
 
 FrmBosOnvField::FrmBosOnvField(
         Row *row, const sys::frm::Basis &frm_basis, const sys::bos::Basis &bos_basis, str_t name):
-        base_t(m_frm, m_bos),
+        base_t(m_frm, m_bos), m_name(name),
         m_frm(row, frm_basis, prefix("fermions", name)),
         m_bos(row, bos_basis, prefix("bosons", name)),
         m_decoded(*this) {
@@ -21,6 +21,9 @@ FrmBosOnvField::FrmBosOnvField(Row *row, const sys::Basis &basis, str_t name) :
 
 FrmBosOnvField::FrmBosOnvField(Row *row, const sys::Sector& sector, str_t name) :
         FrmBosOnvField(row, sector.basis(), std::move(name)){}
+
+FrmBosOnvField::FrmBosOnvField(Row* row, const FrmBosOnvField& other) :
+        FrmBosOnvField(row, other.m_frm.m_basis, other.m_bos.m_basis, other.m_name){}
 
 FrmBosOnvField::FrmBosOnvField(const FrmBosOnvField &other) :
     base_t(m_frm, m_bos), m_frm(other.m_frm), m_bos(other.m_bos), m_decoded(*this){}

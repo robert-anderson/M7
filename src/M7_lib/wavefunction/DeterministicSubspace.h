@@ -88,9 +88,11 @@ public:
      */
     void add_(Walker &row);
 
-    void build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears);
+    void select_highest_weighted();
 
-    void build_connections(const Hamiltonian &ham, const Bilinears &bilinears);
+    void select_l1_norm_fraction();
+
+    void make_connections(const Hamiltonian &ham, const Bilinears &bilinears);
 
     void make_rdm_contribs(Rdms &rdms, const shared_rows::Walker* hf);
 
@@ -100,6 +102,32 @@ public:
       *  timestep
       */
     void project(double tau);
+
+    void save(const hdf5::NodeWriter& nw) const {
+        m_all.m_row.m_mbf.save(nw,  logging::format("root_{}", m_iroot), true);
+    }
+
+    void load(const hdf5::NodeReader& nr) const {
+//        using namespace hdf5::dataset;
+//        buffered::Table<SingleFieldRow<Mbf>> load_table("detsub loader", SingleFieldRow<Mbf>(m_all.m_row.m_mbf));
+//        /*
+//         *
+//        typedef std::function<buf_t*(const ListFormat& format, uint_t max_nitem_per_op)> load_prep_fn;
+//        typedef std::function<void(const buf_t* src, uint_t nitem)> load_fill_fn;
+//         */
+//        auto load_prep_fn = [&](const ListFormat& format, uint_t max_nitem_per_op) -> buf_t* {
+//
+//        };
+//        auto load_fill_fn = [&](const ListFormat& format, uint_t max_nitem_per_op) -> buf_t* {
+//
+//        };
+//
+//
+//        nr.load_dataset(logging::format("root_{}", m_iroot), hdf5::dataset::load_prep_fn);
+//        load_table.m_row.m_field.load()
+//        load_table.load()
+//        m_all.m_row.m_mbf.save(nw,  logging::format("root_{}", m_iroot), true);
+    }
 };
 
 struct DeterministicSubspaces {
@@ -120,7 +148,10 @@ struct DeterministicSubspaces {
 
     operator bool() const;
 
-    void build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears, Wavefunction &wf, uint_t icycle);
+    /**
+     * create subspaces, perform the relevant selections, and call make_connections on each
+     */
+    void init(const Hamiltonian &ham, const Bilinears &bilinears, Wavefunction &wf, uint_t icycle);
 
     void update();
 

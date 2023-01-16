@@ -50,8 +50,7 @@ void DeterministicSubspace::add_(Walker &row) {
     logging::debug_("adding MBF {} to the deterministic subspace", row.m_mbf.to_string());
 }
 
-void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears) {
-    logging::info("Determining upto {} globally extremal rows for deterministic subspace", m_opts.m_size);
+void DeterministicSubspace::select_highest_weighted() {
     auto row1 = m_wf.m_store.m_row;
     auto row2 = row1;
     Wavefunction::weights_gxr_t gxr(row1.m_weight, row2.m_weight, true, true, m_iparts);
@@ -60,10 +59,19 @@ void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, con
         row1.jump(gxr[i]);
         add_(row1);
     }
-    build_connections(ham, bilinears);
 }
 
-void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
+void DeterministicSubspace::select_l1_norm_fraction() {
+    auto av_l1_norm = m_wf.m_nwalker.m_reduced.sum_over(m_iparts) / m_iparts.size();
+    const auto cutoff = av_l1_norm * m_opts.m_l1_fraction_cutoff.m_value;
+    auto row = m_wf.m_store.m_row;
+    for (row.restart(); row; ++row){
+        av_l1_norm = row.m_weight.sum_over(m_iparts) / m_iparts.size();
+        if (av_l1_norm >= cutoff) add_(row);
+    }
+}
+
+void DeterministicSubspace::make_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
     full_update();
     logging::info("Forming a deterministic subspace with {} MBFs", m_all.nrow_in_use());
     suite::Conns conns_work(m_wf.m_sector.size());
@@ -151,15 +159,34 @@ DeterministicSubspaces::operator bool() const {
     return m_opts.m_size && m_epoch;
 }
 
-void DeterministicSubspaces::build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears,
-                                                 Wavefunction &wf, uint_t icycle) {
+void DeterministicSubspaces::init(const Hamiltonian &ham, const Bilinears &bilinears,
+                                  Wavefunction &wf, uint_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
+
+
     for (uint_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {
-        REQUIRE_TRUE_ALL(m_detsubs[iroot] == nullptr, "detsubs should not already be allocated");
-        m_detsubs[iroot] = ptr::smart::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
-        m_detsubs[iroot]->build_from_most_occupied(ham, bilinears);
+        auto& detsub = m_detsubs[iroot];
+        REQUIRE_TRUE_ALL(detsub == nullptr, "detsubs should not already be allocated");
+        detsub = ptr::smart::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
+        if (m_opts.m_l1_fraction_cutoff.m_value < 1.0) {
+            logging::info("Selecting walkers with magnitude >= {:.2f}% of the current global population "
+                          "for root {} deterministic subspace", m_opts.m_l1_fraction_cutoff, iroot);
+            detsub->select_l1_norm_fraction();
+        } else {
+            logging::info("Selecting upto {} largest-magnitude walkers for root {} deterministic subspace",
+                          m_opts.m_size, iroot);
+            detsub->select_highest_weighted();
+        }
+        detsub->make_connections(ham, bilinears);
     }
+
+    if (m_opts.m_save.m_enabled) {
+        // the subspaces are not going to change, so might as well dump them to archive now
+        hdf5::FileWriter fw(m_opts.m_save.m_path);
+        for (auto& detsub: m_detsubs) detsub->save(fw);
+    }
+
     m_epoch.update(icycle, true);
 }
 

@@ -131,6 +131,8 @@ namespace conf {
         Param<uint_t> m_size;
         Param<double> m_l1_fraction_cutoff;
         Param<uint_t> m_delay;
+        OptionalFile m_save;
+        OptionalFile m_load;
 
         explicit Semistochastic(Group *parent);
 

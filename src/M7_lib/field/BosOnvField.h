@@ -42,6 +42,7 @@ struct BosOnvField : NdNumberField<bos_occ_t, 1> {
      */
     BosOnvField(Row *row, const sys::bos::Sector &sector, str_t name = "");
     BosOnvField(Row *row, const sys::Sector &sector, str_t name = "");
+    BosOnvField(Row *row, const BosOnvField &other);
 
     BosOnvField(const BosOnvField &other);
 

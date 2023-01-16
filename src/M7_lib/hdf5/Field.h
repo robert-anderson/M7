@@ -75,9 +75,7 @@ namespace hdf5 {
                                       nr.get_full_dataset_format(name, this_rank).m_local;
             // unlike the save case, there is no need to consider empty rows in the table
             const uint_t nitem = local_format.m_nitem;
-            // make sure the table has an adequate number of "in use" rows
-            auto& table = field.m_row->m_table;
-            if (table->nrow_in_use() < nitem) table->push_back(nitem);
+
             v_t<buf_t> buf;
             uint_t iitem = 0ul;
             auto prep_fn = [&iitem, &nitem, &buf](const hdf5::dataset::ListFormat& format, uint_t max_nitem_per_op) -> buf_t* {
@@ -87,6 +85,10 @@ namespace hdf5 {
                 return buf.data();
             };
 
+            // make sure the table has an adequate number of "in use" rows
+            auto& table = field.m_row->m_table;
+            // if there are not enough "in use" rows, make room
+            if (table->nrow_in_use() < nitem) table->push_back(nitem-table->nrow_in_use());
             uint_t irow = 0ul;
             auto fill_fn = [&irow, &field](const buf_t* src, uint_t nitem) -> void {
                 const auto next_irow = irow + nitem;

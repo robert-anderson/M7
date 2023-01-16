@@ -22,6 +22,8 @@ BosOnvField::BosOnvField(Row *row, const sys::bos::Sector &sector, str_t name) :
 BosOnvField::BosOnvField(Row *row, const sys::Sector &sector, str_t name) :
     BosOnvField(row, sector.m_bos, name){}
 
+BosOnvField::BosOnvField(Row* row, const BosOnvField& other) : BosOnvField(row, other.m_basis, other.m_name){}
+
 BosOnvField::BosOnvField(const BosOnvField &other) :
     base_t(other), m_basis(other.m_basis), m_decoded(*this) {}
 
