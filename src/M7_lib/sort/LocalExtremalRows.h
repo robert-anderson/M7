@@ -39,7 +39,7 @@ struct LocalExtremalRows {
     LocalExtremalRows(field::Numbers<T, nind> &field1, field::Numbers<T, nind> &field2,
                        bool largest, bool absval, uintv_t inds_to_cmp) :
             m_field1(field1), m_field2(field2),
-            m_value_cmp_fn(comparators::make_value_cmp_fn<T>(absval, largest)), m_inds_to_cmp(inds_to_cmp),
+            m_value_cmp_fn(comparators::get_value_cmp_fn<T>(absval, largest)), m_inds_to_cmp(inds_to_cmp),
             m_xinds(comparators::make_num_field_cmp_fn(field1, field2, m_value_cmp_fn, inds_to_cmp)) {
         REQUIRE_NE(field1.m_row, field2.m_row, "work fields rows must point to different rows");
         REQUIRE_EQ(field1.m_row->m_table, field2.m_row->m_table, "both work rows must point to the same table");

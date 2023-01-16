@@ -28,13 +28,13 @@ namespace comparators {
     /**
      * all row index comparators take a pair of indices and return their relative order as boolean
      */
-    typedef std::function<bool(uint_t , uint_t )> index_cmp_fn_t;
+    typedef std::function<bool(uint_t, uint_t)> index_cmp_fn_t;
     /**
-     * templated function definition for scalar value comparisons.
-     * returns true if the first argument is "better" than the second
+     * templated function pointer definition for scalar value comparisons.
+     * returns true if the first argument is superior to the second
      */
     template<typename T>
-    using value_cmp_fn_t = std::function<bool(const T &, const T &)>;
+    using value_cmp_fn_t = bool(*)(const T &, const T &);
 
     /**
      * make a function which orders values based on their magnitudes
@@ -46,7 +46,7 @@ namespace comparators {
      *  value comparator
      */
     template<typename T>
-    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, Int<true> /*absval*/) {
+    static value_cmp_fn_t<T> get_value_cmp_fn(bool largest, Int<true> /*absval*/) {
         if (largest)
             return [](const T &v, const T &v_cmp) -> bool { return std::abs(v) > std::abs(v_cmp); };
         else
@@ -63,7 +63,7 @@ namespace comparators {
      *  value comparator
      */
     template<typename T>
-    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, Int<false> /*absval*/) {
+    static value_cmp_fn_t<T> get_value_cmp_fn(bool largest, Int<false> /*absval*/) {
         if (largest)
             return [](const T &v, const T &v_cmp) -> bool { return v > v_cmp; };
         else
@@ -74,22 +74,22 @@ namespace comparators {
      * make a value comparison function for each of the three absval categories
      */
     template<typename T>
-    static std::function<bool(const T &, const T &)>
-    make_value_cmp_fn(bool absval, bool largest, Int<Any> /*category*/) {
-        if (absval) return make_value_cmp_fn<T>(largest, Int<true>());
-        else return make_value_cmp_fn<T>(largest, Int<false>());
+    static value_cmp_fn_t<T>
+    get_value_cmp_fn(bool absval, bool largest, Int<Any> /*category*/) {
+        if (absval) return get_value_cmp_fn<T>(largest, Int<true>());
+        else return get_value_cmp_fn<T>(largest, Int<false>());
     }
 
     template<typename T>
-    static std::function<bool(const T &, const T &)>
-    make_value_cmp_fn(bool /*absval*/, bool largest, Int<Only> /*category*/) {
-        return make_value_cmp_fn<T>(largest, Int<true>());
+    static value_cmp_fn_t<T>
+    get_value_cmp_fn(bool /*absval*/, bool largest, Int<Only> /*category*/) {
+        return get_value_cmp_fn<T>(largest, Int<true>());
     }
 
     template<typename T>
-    static std::function<bool(const T &, const T &)>
-    make_value_cmp_fn(bool /*absval*/, bool largest, Int<Invalid> /*category*/) {
-        return make_value_cmp_fn<T>(largest, Int<false>());
+    static value_cmp_fn_t<T>
+    get_value_cmp_fn(bool /*absval*/, bool largest, Int<Invalid> /*category*/) {
+        return get_value_cmp_fn<T>(largest, Int<false>());
     }
 
     /**
@@ -104,11 +104,11 @@ namespace comparators {
      *  value comparator
      */
     template<typename T>
-    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool absval, bool largest) {
+    static value_cmp_fn_t<T> get_value_cmp_fn(bool absval, bool largest) {
         // decide category of the given type:
         constexpr uint_t category = dtype::is_complex<T>() ? Only : (std::is_unsigned<T>::value ? Invalid : Any);
         // use this category for tagged dispatch
-        return make_value_cmp_fn<T>(absval, largest, Int<category>());
+        return get_value_cmp_fn<T>(absval, largest, Int<category>());
     }
 
     /**
