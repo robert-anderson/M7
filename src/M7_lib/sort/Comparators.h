@@ -104,8 +104,6 @@ namespace comparators {
      */
     template<typename T>
     value_cmp_fn_t<T> get_value_cmp_fn(bool absval, bool largest) {
-        auto tmp = gt(T{}, T{}) || lt(T{}, T{}) || abs_gt(T{}, T{}) || abs_lt(T{}, T{});
-        (void) tmp;
         // decide category of the given type:
         constexpr uint_t category = dtype::is_complex<T>() ? Only : (std::is_unsigned<T>::value ? Invalid : Any);
         // use this category for tagged dispatch
