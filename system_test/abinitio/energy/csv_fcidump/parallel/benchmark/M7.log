@@ -1,168 +1,165 @@
-[1665070226] [info] +----------------------------+-------------------------+
-[1665070226] [info] |                 compile definitions                  |
-[1665070226] [info] +----------------------------+-------------------------+
-[1665070226] [info] |  git revision              |  #9bbf1cfa              |
-[1665070226] [info] +----------------------------+-------------------------+
-[1665070226] [info] |  build mode                |  RELEASE                |
-[1665070226] [info] +----------------------------+-------------------------+
-[1665070226] [info] |  compilation timestamp     |  2022-10-06 17:03:04    |
-[1665070226] [info] +----------------------------+-------------------------+
-[1665070226] [info] |  many-body basis function  |  fermion (determinant)  |
-[1665070226] [info] +----------------------------+-------------------------+
-[1665070226] [info] |  walker arithmetic         |  real                   |
-[1665070226] [info] +----------------------------+-------------------------+
-[1665070226] [info] |  Hamiltonian arithmetic    |  real                   |
-[1665070226] [info] +----------------------------+-------------------------+
-[1665070226] [info] |  TCHINT interface          |  disabled               |
-[1665070226] [info] +----------------------------+-------------------------+
-[1665070226] [info] |  rank-resolved logging     |  enabled                |
-[1665070226] [info] +----------------------------+-------------------------+
-[1665070226] [info] Number of MPI ranks in world communicator: 2
-[1665070226] [info] Number of MPI ranks per node: 2
-[1665070226] [info] formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run
-[1665070226] [warning] propagator.min_death_mag was zero, defaulting to the specified value of propagator.min_spawn_mag
-[1665070226] [warning] propagator.max_bloom was zero, defaulting to the specified value of propagator.nadd
-[1665070226] [info] prng (enabled)
-[1665070226] [info] prng.seed                                         | 123
-[1665070226] [info] prng.ngen_block                                   | 10000
-[1665070226] [info] archive (enabled)
-[1665070226] [info] archive.load_path                                 | ""
-[1665070226] [info] archive.save_path                                 | "M7.h5"
-[1665070226] [info] archive.chkpt_path                                | ""
-[1665070226] [info] archive.period                                    | 0
-[1665070226] [info] archive.period_mins                               | 0
-[1665070226] [info] basis (enabled)
-[1665070226] [info] basis.bos_occ_cutoff                              | 255
-[1665070226] [info] particles (enabled)
-[1665070226] [info] particles.nelec                                   | 0
-[1665070226] [info] particles.ms2                                     | inf
-[1665070226] [info] particles.nboson                                  | 0
-[1665070226] [info] wavefunction (enabled)
-[1665070226] [info] wavefunction.nw_init                              | 1.000000e+02
-[1665070226] [info] wavefunction.nroot                                | 1
-[1665070226] [info] wavefunction.fci_init                             | false
-[1665070226] [info] wavefunction.buffers (enabled)
-[1665070226] [info] wavefunction.buffers.store_fac_init               | 1.000000e+00
-[1665070226] [info] wavefunction.buffers.store_expand_fac             | 5.000000e-01
-[1665070226] [info] wavefunction.buffers.comm_fac_init                | 1.000000e+00
-[1665070226] [info] wavefunction.buffers.comm_expand_fac              | 5.000000e-01
-[1665070226] [info] wavefunction.hash_mapping (enabled)
-[1665070226] [info] wavefunction.hash_mapping.remap_ratio             | 2.000000e+00
-[1665070226] [info] wavefunction.hash_mapping.remap_nlookup           | 500
-[1665070226] [info] wavefunction.archive (disabled)
-[1665070226] [info] wavefunction.distribution (enabled)
-[1665070226] [info] wavefunction.distribution.nblock_per_rank         | 6
-[1665070226] [info] wavefunction.distribution.period                  | 10
-[1665070226] [info] wavefunction.distribution.imbalance_thresh        | 5.000000e-02
-[1665070226] [info] reference (enabled)
-[1665070226] [info] reference.mbf_init (disabled)
-[1665070226] [info] reference.redef_thresh                            | 2.000000e+00
-[1665070226] [info] shift (enabled)
-[1665070226] [info] shift.init                                        | 0.000000e+00
-[1665070226] [info] shift.damp                                        | 5.000000e-01
-[1665070226] [info] shift.target_damp                                 | 0.000000e+00
-[1665070226] [info] shift.period                                      | 5
-[1665070226] [info] shift.ncycle_av                                   | 100
-[1665070226] [info] shift.jump                                        | false
-[1665070226] [info] propagator (enabled)
-[1665070226] [info] propagator.ncycle                                 | 400000
-[1665070226] [info] propagator.stochastic                             | true
-[1665070226] [info] propagator.excit_gen (enabled)
-[1665070226] [info] propagator.excit_gen.hubbard_prefer_double_occ (disabled)
-[1665070226] [info] propagator.nw_target                              | 1.000000e+03
-[1665070226] [info] propagator.max_bloom                              | 3.000000e+00
-[1665070226] [info] propagator.nadd                                   | 3.000000e+00
-[1665070226] [info] propagator.tau_init                               | 1.000000e-03
-[1665070226] [info] propagator.tau_min                                | 1.000000e-05
-[1665070226] [info] propagator.tau_max                                | 1.000000e-02
-[1665070226] [info] propagator.static_tau                             | true
-[1665070226] [info] propagator.static_probs                           | true
-[1665070226] [info] propagator.min_spawn_mag                          | 4.000000e-01
-[1665070226] [info] propagator.min_death_mag                          | 4.000000e-01
-[1665070226] [info] propagator.min_exlvl_prob                         | 1.000000e-03
-[1665070226] [info] propagator.exlvl_probs_init                       | []
-[1665070226] [info] propagator.ndraw_min_for_dynamic                  | 1000
-[1665070226] [info] propagator.period                                 | 10
-[1665070226] [info] propagator.imp_samp_guide.gutzwiller_like (disabled)
-[1665070226] [info] propagator.imp_samp_guide.suppress_multi_occ (disabled)
-[1665070226] [info] propagator.semistochastic (disabled)
-[1665070226] [info] hamiltonian (enabled)
-[1665070226] [info] hamiltonian.fermion (enabled)
-[1665070226] [info] hamiltonian.fermion.fcidump (enabled)
-[1665070226] [info] hamiltonian.fermion.fcidump.path                  | "FCIDUMP"
-[1665070226] [info] hamiltonian.fermion.fcidump.spin_major            | false
-[1665070226] [info] hamiltonian.fermion.hubbard (disabled)
-[1665070226] [info] hamiltonian.fermion.heisenberg (disabled)
-[1665070226] [info] hamiltonian.fermion.spin_penalty_j                | 0.000000e+00
-[1665070226] [info] hamiltonian.ladder (disabled)
-[1665070226] [info] hamiltonian.boson (disabled)
-[1665070226] [info] stats (enabled)
-[1665070226] [info] stats.path                                        | "M7.stats"
-[1665070226] [info] stats.period                                      | 5
-[1665070226] [info] stats.parallel                                    | false
-[1665070226] [info] inst_ests (disabled)
-[1665070226] [info] mae (disabled)
-[1665070226] [info] Reading fermion Hamiltonian coefficients from plain text CSV file "FCIDUMP"...
-[1665070226] [info] FCIDUMP file conserves spin in 1 particle integrals
-[1665070226] [info] FCIDUMP file conserves spin in 2 particle integrals
-[1665070226] [info] initially assuming hermitian permutational symmetry for 1e integrals
-[1665070226] [info] initially assuming 8-fold permutational symmetry for 2e integrals
-[1665070226] [info] this storage scheme assumes that ["<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>", "<aj|ib>", "<ab|ij>", "<bi|ja>", "<ji|ba>"] integrals are equivalent
-[1665070226] [info] FCIDUMP loading complete.
-[1665070226] [info] Initially allocating 64.000000KB per rank for each communicating buffer of "" (send and recv)
-[1665070226] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
-[1665070226] [info] Initially allocating 16.000000KB per rank for "wavefunction" buffer
-[1665070226] [info] Initially allocating 480B per rank for each communicating buffer of "wavefunction" (send and recv)
-[1665070226] [info] Distributing wavefunction rows in 12 blocks
-[1665070226] [info] Listening for changes to interactive variable "nwalker_target" in file "nwalker_target.var"
-[1665070226] [info] Initializing pre-computed heat bath sampling weights for doubles...
-[1665070226] [info] +------------------------+-----------------------------------------+----------------+
-[1665070226] [info] |                          Excitation generation breakdown                          |
-[1665070226] [info] +------------------------+-----------------------------------------+----------------+
-[1665070226] [info] |  Excitation Signature  |  Description                            |  Probability   |
-[1665070226] [info] +========================+=========================================+================+
-[1665070226] [info] |  2200                  |  precomputed heat-bath fermion doubles  |  5.000000e-01  |
-[1665070226] [info] +------------------------+-----------------------------------------+----------------+
-[1665070226] [info] |  1100                  |  uniform                                |  5.000000e-01  |
-[1665070226] [info] +------------------------+-----------------------------------------+----------------+
-[1665070226] [info] Initializing magnitude logger with max_bloom 3 for 2 excitation levels
-[1665070226] [info] Dynamic tau optimization: false
-[1665070226] [info] Dynamic excitation level probability optimization: false
-[1665070226] [info] Initial reference ONV for WF part 0 is (11100,11100) with energy -9.990079e+01 
-[1665070226] [info] Listening for changes to interactive variable "exit" in file "exit.var"
-[1665070226] [info] not reading archive from file
-[1665070226] [info] saving archive to file "M7.h5" upon termination of the solver loop
-[1665070226] [info] not dumping checkpoint archives
-[1665070226] [info] Replicating walker populations: false
-[1665070226] [info] Global PRNG state checksum of stochastic propagator: 3cb10c1fc3537728
-[1665070226] [info] Beginning solver loop...
-[1665070229] [info] Entering "variable shift mode (WF part 0)" epoch on cycle 47435 
-[1665070229] [info] Variable shift triggered for WF part 0. Cycle 47434 nw: 999.9999999999817, cycle 47435 nw: 1000.3999999999817
-[1665070266] [info] maximum cycle number (400000) reached
-[1665070266] [info] saving "propagator" to archive
-[1665070266] [info] +----+--------------------------+---------------+-----------+-----------+----------+
-[1665070266] [info] |                       Top-weighted WF elements for part 0                        |
-[1665070266] [info] +----+--------------------------+---------------+-----------+-----------+----------+
-[1665070266] [info] |    | many-body basis function | walker number | initiator | semistoch | MPI rank |
-[1665070266] [info] +====+==========================+===============+===========+===========+==========+
-[1665070266] [info] | 0  | (11100,11100)            |  6.332000e+02 | true      | false     | 1        |
-[1665070266] [info] | 1  | (11010,11010)            | -1.304000e+02 | true      | false     | 0        |
-[1665070266] [info] | 2  | (11001,11010)            | -4.880000e+01 | true      | false     | 0        |
-[1665070266] [info] | 3  | (11100,11010)            | -3.880000e+01 | true      | false     | 1        |
-[1665070266] [info] | 4  | (11010,11100)            | -3.680000e+01 | true      | false     | 0        |
-[1665070266] [info] | 5  | (11010,11001)            | -3.560000e+01 | true      | false     | 0        |
-[1665070266] [info] | 6  | (11001,11001)            | -2.200000e+01 | true      | false     | 0        |
-[1665070266] [info] | 7  | (11100,11001)            | -1.640000e+01 | true      | false     | 1        |
-[1665070266] [info] | 8  | (11001,11100)            | -1.600000e+01 | true      | false     | 1        |
-[1665070266] [info] | 9  | (10110,10110)            | -8.000000e+00 | true      | false     | 1        |
-[1665070266] [info] | 10 | (01110,01110)            | -5.600000e+00 | true      | false     | 0        |
-[1665070266] [info] | 11 | (01101,01110)            | -1.600000e+00 | false     | false     | 1        |
-[1665070266] [info] | 12 | (01110,01101)            | -1.600000e+00 | false     | false     | 0        |
-[1665070266] [info] | 13 | (10110,10101)            | -1.200000e+00 | false     | false     | 1        |
-[1665070266] [info] | 14 | (10110,10011)            |  1.200000e+00 | false     | false     | 1        |
-[1665070266] [info] | 15 | (10011,10011)            |  4.000000e-01 | false     | false     | 1        |
-[1665070266] [info] | 16 | (10101,10101)            | -4.000000e-01 | false     | false     | 0        |
-[1665070266] [info] | 17 | (01011,01110)            |  4.000000e-01 | false     | false     | 0        |
-[1665070266] [info] | 18 | (10101,10011)            |  4.000000e-01 | false     | false     | 0        |
-[1665070266] [info] | 19 | (01110,01011)            | -4.000000e-01 | false     | false     | 1        |
-[1665070266] [info] +----+--------------------------+---------------+-----------+-----------+----------+
+[1673919636] [info] +----------------------------+-------------------------+
+[1673919636] [info] |                 compile definitions                  |
+[1673919636] [info] +----------------------------+-------------------------+
+[1673919636] [info] |  git revision              |  #2974e7f3              |
+[1673919636] [info] +----------------------------+-------------------------+
+[1673919636] [info] |  build mode                |  RELEASE                |
+[1673919636] [info] +----------------------------+-------------------------+
+[1673919636] [info] |  compilation timestamp     |  2023-01-16 19:21:47    |
+[1673919636] [info] +----------------------------+-------------------------+
+[1673919636] [info] |  many-body basis function  |  fermion (determinant)  |
+[1673919636] [info] +----------------------------+-------------------------+
+[1673919636] [info] |  walker arithmetic         |  real                   |
+[1673919636] [info] +----------------------------+-------------------------+
+[1673919636] [info] |  Hamiltonian arithmetic    |  real                   |
+[1673919636] [info] +----------------------------+-------------------------+
+[1673919636] [info] |  TCHINT interface          |  disabled               |
+[1673919636] [info] +----------------------------+-------------------------+
+[1673919636] [info] |  rank-resolved logging     |  enabled                |
+[1673919636] [info] +----------------------------+-------------------------+
+[1673919636] [info] Number of MPI ranks in world communicator: 2
+[1673919636] [info] Number of MPI ranks per node: 2
+[1673919636] [warning] propagator.min_death_mag was zero, defaulting to the specified value of propagator.min_spawn_mag
+[1673919636] [warning] propagator.max_bloom was zero, defaulting to the specified value of propagator.nadd
+[1673919636] [info] prng (enabled)
+[1673919636] [info] prng.seed                                         | 123
+[1673919636] [info] prng.ngen_block                                   | 10000
+[1673919636] [info] basis (enabled)
+[1673919636] [info] basis.bos_occ_cutoff                              | 255
+[1673919636] [info] particles (enabled)
+[1673919636] [info] particles.nelec                                   | 0
+[1673919636] [info] particles.ms2                                     | inf
+[1673919636] [info] particles.nboson                                  | 0
+[1673919636] [info] wavefunction (enabled)
+[1673919636] [info] wavefunction.nw_init                              | 1.000000e+02
+[1673919636] [info] wavefunction.nroot                                | 1
+[1673919636] [info] wavefunction.fci_init                             | false
+[1673919636] [info] wavefunction.buffers (enabled)
+[1673919636] [info] wavefunction.buffers.store_fac_init               | 1.000000e+00
+[1673919636] [info] wavefunction.buffers.store_expand_fac             | 5.000000e-01
+[1673919636] [info] wavefunction.buffers.comm_fac_init                | 1.000000e+00
+[1673919636] [info] wavefunction.buffers.comm_expand_fac              | 5.000000e-01
+[1673919636] [info] wavefunction.hash_mapping (enabled)
+[1673919636] [info] wavefunction.hash_mapping.remap_ratio             | 2.000000e+00
+[1673919636] [info] wavefunction.hash_mapping.remap_nlookup           | 500
+[1673919636] [info] wavefunction.distribution (enabled)
+[1673919636] [info] wavefunction.distribution.nblock_per_rank         | 6
+[1673919636] [info] wavefunction.distribution.period                  | 10
+[1673919636] [info] wavefunction.distribution.imbalance_thresh        | 5.000000e-02
+[1673919636] [info] wavefunction.save (disabled)
+[1673919636] [info] wavefunction.load (disabled)
+[1673919636] [info] reference (enabled)
+[1673919636] [info] reference.mbf_init (disabled)
+[1673919636] [info] reference.redef_thresh                            | 2.000000e+00
+[1673919636] [info] reference.assume_hf_like                          | false
+[1673919636] [info] shift (enabled)
+[1673919636] [info] shift.init                                        | 0.000000e+00
+[1673919636] [info] shift.damp                                        | 5.000000e-01
+[1673919636] [info] shift.target_damp                                 | 0.000000e+00
+[1673919636] [info] shift.period                                      | 5
+[1673919636] [info] shift.ncycle_av                                   | 100
+[1673919636] [info] shift.jump                                        | false
+[1673919636] [info] propagator (enabled)
+[1673919636] [info] propagator.ncycle                                 | 400000
+[1673919636] [info] propagator.stochastic                             | true
+[1673919636] [info] propagator.excit_gen (enabled)
+[1673919636] [info] propagator.excit_gen.hubbard_prefer_double_occ (disabled)
+[1673919636] [info] propagator.nw_target                              | 1.000000e+03
+[1673919636] [info] propagator.max_bloom                              | 3.000000e+00
+[1673919636] [info] propagator.nadd                                   | 3.000000e+00
+[1673919636] [info] propagator.tau_init                               | 1.000000e-03
+[1673919636] [info] propagator.tau_min                                | 1.000000e-05
+[1673919636] [info] propagator.tau_max                                | 1.000000e-02
+[1673919636] [info] propagator.static_tau                             | true
+[1673919636] [info] propagator.static_probs                           | true
+[1673919636] [info] propagator.min_spawn_mag                          | 4.000000e-01
+[1673919636] [info] propagator.min_death_mag                          | 4.000000e-01
+[1673919636] [info] propagator.min_exlvl_prob                         | 1.000000e-03
+[1673919636] [info] propagator.exlvl_probs_init                       | []
+[1673919636] [info] propagator.ndraw_min_for_dynamic                  | 1000
+[1673919636] [info] propagator.period                                 | 10
+[1673919636] [info] propagator.imp_samp_guide.gutzwiller_like (disabled)
+[1673919636] [info] propagator.imp_samp_guide.suppress_multi_occ (disabled)
+[1673919636] [info] propagator.semistochastic (disabled)
+[1673919636] [info] hamiltonian (enabled)
+[1673919636] [info] hamiltonian.fermion (enabled)
+[1673919636] [info] hamiltonian.fermion.fcidump (enabled)
+[1673919636] [info] hamiltonian.fermion.fcidump.path                  | "FCIDUMP"
+[1673919636] [info] hamiltonian.fermion.fcidump.unrestrict_style      | "minor"
+[1673919636] [info] hamiltonian.fermion.hubbard (disabled)
+[1673919636] [info] hamiltonian.fermion.heisenberg (disabled)
+[1673919636] [info] hamiltonian.fermion.spin_penalty_j                | 0.000000e+00
+[1673919636] [info] hamiltonian.ladder (disabled)
+[1673919636] [info] hamiltonian.boson (disabled)
+[1673919636] [info] stats (enabled)
+[1673919636] [info] stats.path                                        | "M7.stats"
+[1673919636] [info] stats.period                                      | 5
+[1673919636] [info] stats.parallel                                    | false
+[1673919636] [info] inst_ests (disabled)
+[1673919636] [info] mae (disabled)
+[1673919636] [info] Reading fermion Hamiltonian coefficients from plain text CSV file "FCIDUMP"...
+[1673919636] [info] FCIDUMP file is not spin resolved (e.g. RHF)
+[1673919636] [info] FCIDUMP file conserves spin in 1 particle integrals
+[1673919636] [info] FCIDUMP file conserves spin in 2 particle integrals
+[1673919636] [info] initially assuming hermitian permutational symmetry for 1e integrals
+[1673919636] [info] initially assuming 8-fold permutational symmetry for 2e integrals
+[1673919636] [info] this storage scheme assumes that ["<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>", "<aj|ib>", "<ab|ij>", "<bi|ja>", "<ji|ba>"] integrals are equivalent
+[1673919636] [info] FCIDUMP loading complete.
+[1673919636] [info] Hamiltonian is hermitian
+[1673919636] [info] Hamiltonian has a non-zero core energy -85.47957429018834 which is included in all energy estimators
+[1673919636] [info] Initially allocating 64.000000KB per rank for each communicating buffer of "" (send and recv)
+[1673919636] [info] Initially allocating 16.000000KB per rank for each communicating buffer of "" (send and recv)
+[1673919636] [info] Initially allocating 16.000000KB per rank for "wavefunction" buffer
+[1673919636] [info] Initially allocating 480B per rank for each communicating buffer of "wavefunction" (send and recv)
+[1673919636] [info] Distributing wavefunction rows in 12 blocks
+[1673919636] [info] Listening for changes to interactive variable "nwalker_target" in file "nwalker_target.var"
+[1673919636] [info] Initializing pre-computed heat bath sampling weights for doubles...
+[1673919636] [info] +------------------------+-----------------------------------------+----------------+
+[1673919636] [info] |                          Excitation generation breakdown                          |
+[1673919636] [info] +------------------------+-----------------------------------------+----------------+
+[1673919636] [info] |  Excitation Signature  |  Description                            |  Probability   |
+[1673919636] [info] +========================+=========================================+================+
+[1673919636] [info] |  2200                  |  precomputed heat-bath fermion doubles  |  5.000000e-01  |
+[1673919636] [info] +------------------------+-----------------------------------------+----------------+
+[1673919636] [info] |  1100                  |  uniform                                |  5.000000e-01  |
+[1673919636] [info] +------------------------+-----------------------------------------+----------------+
+[1673919636] [info] Initializing magnitude logger with max_bloom 3 for 2 excitation levels
+[1673919636] [info] Dynamic tau optimization: false
+[1673919636] [info] Dynamic excitation level probability optimization: false
+[1673919636] [info] Initial reference MBF for WF part 0 is (11100,11100) with energy -9.990079e+01 
+[1673919636] [info] Listening for changes to interactive variable "exit" in file "exit.var"
+[1673919636] [info] Excitation signatures contributing to the sampled RDMs: []
+[1673919636] [info] Hamiltonian is hermitian
+[1673919636] [info] Replicating walker populations: false
+[1673919636] [info] Global PRNG state checksum of stochastic propagator: 3cb10c1fc3537728
+[1673919636] [info] Brillouin theorem condition not satisfied: no Hartree-Fock state assumed
+[1673919636] [info] Beginning solver loop...
+[1673919638] [info] Entering "variable shift mode (WF part 0)" epoch on cycle 47435 
+[1673919638] [info] Variable shift triggered for WF part 0. Cycle 47434 nw: 999.9999999999817, cycle 47435 nw: 1000.3999999999817
+[1673919672] [info] maximum cycle number (400000) reached
+[1673919672] [info] +----+--------------------------+---------------+-----------+-----------+----------+
+[1673919672] [info] |                       Top-weighted WF elements for part 0                        |
+[1673919672] [info] +----+--------------------------+---------------+-----------+-----------+----------+
+[1673919672] [info] |    | many-body basis function | walker number | initiator | semistoch | MPI rank |
+[1673919672] [info] +====+==========================+===============+===========+===========+==========+
+[1673919672] [info] | 0  | (11100,11100)            | 6.332000e+02  | true      | false     | 1        |
+[1673919672] [info] | 1  | (11010,11010)            | -1.304000e+02 | true      | false     | 0        |
+[1673919672] [info] | 2  | (11001,11010)            | -4.880000e+01 | true      | false     | 0        |
+[1673919672] [info] | 3  | (11100,11010)            | -3.880000e+01 | true      | false     | 1        |
+[1673919672] [info] | 4  | (11010,11100)            | -3.680000e+01 | true      | false     | 0        |
+[1673919672] [info] | 5  | (11010,11001)            | -3.560000e+01 | true      | false     | 0        |
+[1673919672] [info] | 6  | (11001,11001)            | -2.200000e+01 | true      | false     | 0        |
+[1673919672] [info] | 7  | (11100,11001)            | -1.640000e+01 | true      | false     | 1        |
+[1673919672] [info] | 8  | (11001,11100)            | -1.600000e+01 | true      | false     | 1        |
+[1673919672] [info] | 9  | (10110,10110)            | -8.000000e+00 | true      | false     | 1        |
+[1673919672] [info] | 10 | (01110,01110)            | -5.600000e+00 | true      | false     | 0        |
+[1673919672] [info] | 11 | (01101,01110)            | -1.600000e+00 | false     | false     | 1        |
+[1673919672] [info] | 12 | (01110,01101)            | -1.600000e+00 | false     | false     | 0        |
+[1673919672] [info] | 13 | (10110,10101)            | -1.200000e+00 | false     | false     | 1        |
+[1673919672] [info] | 14 | (10110,10011)            | 1.200000e+00  | false     | false     | 1        |
+[1673919672] [info] | 15 | (10011,10011)            | 4.000000e-01  | false     | false     | 1        |
+[1673919672] [info] | 16 | (10101,10101)            | -4.000000e-01 | false     | false     | 0        |
+[1673919672] [info] | 17 | (01011,01110)            | 4.000000e-01  | false     | false     | 0        |
+[1673919672] [info] | 18 | (10101,10011)            | 4.000000e-01  | false     | false     | 0        |
+[1673919672] [info] | 19 | (01110,01011)            | -4.000000e-01 | false     | false     | 1        |
+[1673919672] [info] +----+--------------------------+---------------+-----------+-----------+----------+
