@@ -40,7 +40,6 @@ void hdf5::NodeWriter::save_dataset(
 
     // number of items yet to be transacted
     uint_t nitem_remaining = format.m_local.m_nitem;
-    REQUIRE_EQ_ALL(bool(max_nitem_per_op), bool(nitem_remaining), "must write at least one item per transaction");
     // first element of offset is incremented at each iteration
     v_t<hsize_t> offsets(ndim);
 
