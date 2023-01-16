@@ -133,13 +133,13 @@ namespace comparators {
     index_cmp_fn_t make_num_field_cmp_fn(
             field::Numbers<T, nind> &field1, field::Numbers<T, nind> &field2,
             value_cmp_fn_t<T> value_cmp_fn, uintv_t inds_to_cmp) {
-//        auto row1 = field1.m_row;
-//        auto row2 = field2.m_row;
-//        REQUIRE_NE(row1, row2, "specified field pair must correspond to different Rows");
-//        REQUIRE_EQ(row1->m_table, row2->m_table, "specified field pair must correspond to the same Table");
-//        DEBUG_ASSERT_FALSE(inds_to_cmp.empty(), "need at least one numeric field index for comparison");
-//        DEBUG_ASSERT_TRUE(std::all_of(inds_to_cmp.cbegin(), inds_to_cmp.cend(),
-//              [&field1](uint_t i) { return i < field1.nelement(); }), "compared field index OOB");
+        auto row1 = field1.m_row;
+        auto row2 = field2.m_row;
+        REQUIRE_NE(row1, row2, "specified field pair must correspond to different Rows");
+        REQUIRE_EQ(row1->m_table, row2->m_table, "specified field pair must correspond to the same Table");
+        DEBUG_ASSERT_FALSE(inds_to_cmp.empty(), "need at least one numeric field index for comparison");
+        DEBUG_ASSERT_TRUE(std::all_of(inds_to_cmp.cbegin(), inds_to_cmp.cend(),
+              [&field1](uint_t i) { return i < field1.nelement(); }), "compared field index OOB");
         return [&field1, &field2, value_cmp_fn, inds_to_cmp] (uint_t irow1, uint_t irow2) -> bool {
             field1.m_row->jump(irow1);
             field2.m_row->jump(irow2);
