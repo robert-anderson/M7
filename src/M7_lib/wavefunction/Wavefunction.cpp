@@ -84,8 +84,8 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
      * together by the gathering operation, and are not sorted internally. Here, that sorting operation is done
      */
     auto row1 = xr_gathered.m_row;
-    auto row2 = xr_gathered.m_row;
-    auto cmp_fn = [&](const uint_t &irow1, const uint_t &irow2){
+    auto row2 = row1;
+    auto cmp_fn = [&](uint_t irow1, uint_t irow2){
         row1.jump(irow1);
         row2.jump(irow2);
         return std::abs(row1.m_weight[ipart]) > std::abs(row2.m_weight[ipart]);

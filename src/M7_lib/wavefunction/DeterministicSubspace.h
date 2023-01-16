@@ -107,7 +107,7 @@ public:
         m_all.m_row.m_mbf.save(nw,  logging::format("root_{}", m_iroot), true);
     }
 
-    void load(const hdf5::NodeReader& nr) const {
+    void load(const hdf5::NodeReader& /*nr*/) const {
 //        using namespace hdf5::dataset;
 //        buffered::Table<SingleFieldRow<Mbf>> load_table("detsub loader", SingleFieldRow<Mbf>(m_all.m_row.m_mbf));
 //        /*

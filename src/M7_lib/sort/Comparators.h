@@ -37,7 +37,15 @@ namespace comparators {
     using value_cmp_fn_t = bool(*)(const T &, const T &);
 
     /**
-     * make a function which orders values based on their magnitudes
+     * basic value comparators
+     */
+    template<typename T> bool abs_gt(const T &v1, const T &v2) { return std::abs(v1) > std::abs(v2); };
+    template<typename T> bool abs_lt(const T &v1, const T &v2) { return std::abs(v1) < std::abs(v2); };
+    template<typename T> bool gt(const T &v1, const T &v2) { return v1 > v2; };
+    template<typename T> bool lt(const T &v1, const T &v2) { return v1 < v2; };
+
+    /**
+     * return a function which orders values based on their magnitudes
      * @tparam T
      *  type to sort (signed primitive or complex)
      * @param largest
@@ -46,15 +54,12 @@ namespace comparators {
      *  value comparator
      */
     template<typename T>
-    static value_cmp_fn_t<T> get_value_cmp_fn(bool largest, Int<true> /*absval*/) {
-        if (largest)
-            return [](const T &v, const T &v_cmp) -> bool { return std::abs(v) > std::abs(v_cmp); };
-        else
-            return [](const T &v, const T &v_cmp) -> bool { return std::abs(v) < std::abs(v_cmp); };
+    value_cmp_fn_t<T> get_value_cmp_fn(bool largest, Int<true> /*absval*/) {
+        return largest ? abs_gt<T> : abs_lt<T>;
     }
 
     /**
-     * make a function which orders values directly
+     * return a function which orders values directly
      * @tparam T
      *  type to sort (signed or unsigned primitive)
      * @param largest
@@ -63,32 +68,26 @@ namespace comparators {
      *  value comparator
      */
     template<typename T>
-    static value_cmp_fn_t<T> get_value_cmp_fn(bool largest, Int<false> /*absval*/) {
-        if (largest)
-            return [](const T &v, const T &v_cmp) -> bool { return v > v_cmp; };
-        else
-            return [](const T &v, const T &v_cmp) -> bool { return v < v_cmp; };
+    value_cmp_fn_t<T> get_value_cmp_fn(bool largest, Int<false> /*absval*/) {
+        return largest ? gt<T> : lt<T>;
     }
 
     /**
      * make a value comparison function for each of the three absval categories
      */
     template<typename T>
-    static value_cmp_fn_t<T>
-    get_value_cmp_fn(bool absval, bool largest, Int<Any> /*category*/) {
+    value_cmp_fn_t<T> get_value_cmp_fn(bool absval, bool largest, Int<Any> /*category*/) {
         if (absval) return get_value_cmp_fn<T>(largest, Int<true>());
         else return get_value_cmp_fn<T>(largest, Int<false>());
     }
 
     template<typename T>
-    static value_cmp_fn_t<T>
-    get_value_cmp_fn(bool /*absval*/, bool largest, Int<Only> /*category*/) {
+    value_cmp_fn_t<T> get_value_cmp_fn(bool /*absval*/, bool largest, Int<Only> /*category*/) {
         return get_value_cmp_fn<T>(largest, Int<true>());
     }
 
     template<typename T>
-    static value_cmp_fn_t<T>
-    get_value_cmp_fn(bool /*absval*/, bool largest, Int<Invalid> /*category*/) {
+    value_cmp_fn_t<T> get_value_cmp_fn(bool /*absval*/, bool largest, Int<Invalid> /*category*/) {
         return get_value_cmp_fn<T>(largest, Int<false>());
     }
 
@@ -104,7 +103,9 @@ namespace comparators {
      *  value comparator
      */
     template<typename T>
-    static value_cmp_fn_t<T> get_value_cmp_fn(bool absval, bool largest) {
+    value_cmp_fn_t<T> get_value_cmp_fn(bool absval, bool largest) {
+        auto tmp = gt(T{}, T{}) || lt(T{}, T{}) || abs_gt(T{}, T{}) || abs_lt(T{}, T{});
+        (void) tmp;
         // decide category of the given type:
         constexpr uint_t category = dtype::is_complex<T>() ? Only : (std::is_unsigned<T>::value ? Invalid : Any);
         // use this category for tagged dispatch
@@ -129,16 +130,16 @@ namespace comparators {
      *  a comparator which determines the relative ordering of two row indices in a Table
      */
     template<typename T, uint_t nind = 0ul>
-    static index_cmp_fn_t make_num_field_cmp_fn(
+    index_cmp_fn_t make_num_field_cmp_fn(
             field::Numbers<T, nind> &field1, field::Numbers<T, nind> &field2,
             value_cmp_fn_t<T> value_cmp_fn, uintv_t inds_to_cmp) {
-        auto row1 = field1.m_row;
-        auto row2 = field2.m_row;
-        REQUIRE_NE(row1, row2, "specified field pair must correspond to different Rows");
-        REQUIRE_EQ(row1->m_table, row2->m_table, "specified field pair must correspond to the same Table");
-        DEBUG_ASSERT_FALSE(inds_to_cmp.empty(), "need at least one numeric field index for comparison");
-        DEBUG_ASSERT_TRUE(std::all_of(inds_to_cmp.cbegin(), inds_to_cmp.cend(),
-              [&field1](uint_t i) { return i < field1.nelement(); }), "compared field index OOB");
+//        auto row1 = field1.m_row;
+//        auto row2 = field2.m_row;
+//        REQUIRE_NE(row1, row2, "specified field pair must correspond to different Rows");
+//        REQUIRE_EQ(row1->m_table, row2->m_table, "specified field pair must correspond to the same Table");
+//        DEBUG_ASSERT_FALSE(inds_to_cmp.empty(), "need at least one numeric field index for comparison");
+//        DEBUG_ASSERT_TRUE(std::all_of(inds_to_cmp.cbegin(), inds_to_cmp.cend(),
+//              [&field1](uint_t i) { return i < field1.nelement(); }), "compared field index OOB");
         return [&field1, &field2, value_cmp_fn, inds_to_cmp] (uint_t irow1, uint_t irow2) -> bool {
             field1.m_row->jump(irow1);
             field2.m_row->jump(irow2);
