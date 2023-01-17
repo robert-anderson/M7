@@ -102,7 +102,7 @@ void DeterministicSubspace::make_connections(const Hamiltonian &ham, const Bilin
             }
         }
     }
-    logging::info_("Size of local deterministic subspace: {}", m_irecs.size());
+    logging::info_("Size of local deterministic subspace: {}", nrec_());
     nconn_ham = mpi::all_sum(nconn_ham);
     nconn_rdm = mpi::all_sum(nconn_rdm);
     logging::info("Number of H-connected pairs of MBFs in the deterministic subspace: {}", nconn_ham);
