@@ -58,6 +58,7 @@ void TableBase::set_buffer(Buffer *buffer) {
 }
 
 uint_t TableBase::push_back(uint_t n) {
+    DEBUG_ASSERT_TRUE(n, "cannot push_back by zero rows");
     DEBUG_ASSERT_TRUE(row_size(), "cannot resize a table with zero record size");
     const auto nbyte_add = n * m_bw.m_row_size;
     if (!m_bw.m_hwm || ptr::after_end(m_bw.m_hwm + nbyte_add, m_bw.m_end)) expand(n);
