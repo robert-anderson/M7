@@ -60,6 +60,7 @@ namespace shared_rows {
          * direct buffer copy, no rows have changed locations so no need to treat m_all as a mapped table
          */
         void update() {
+            if (m_gather_send.nrecord() < nrec_()) m_gather_send.resize(nrec_());
             m_gather_send.clear();
             for (auto irec: m_irecs) {
                 m_src_row.jump(irec);

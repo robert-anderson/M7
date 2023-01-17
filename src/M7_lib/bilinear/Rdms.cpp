@@ -62,7 +62,8 @@ Rdms::Rdms(const conf::Rdms& opts, v_t<OpSig> ranksigs, sys::Sector sector, cons
         const OpSig exsig(iexsig);
         if (takes_contribs_from(exsig)) exsigs.push_back(exsig.to_string());
     }
-    logging::info("Excitation signatures contributing to the sampled RDMs: {}", convert::to_string(exsigs));
+    if (!exsigs.empty())
+        logging::info("Excitation signatures contributing to the sampled RDMs: {}", convert::to_string(exsigs));
 
 }
 

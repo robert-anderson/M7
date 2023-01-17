@@ -243,7 +243,7 @@ void Solver::loop_over_occupied_mbfs() {
             m_maes.make_average_contribs(walker, m_hf.get(), m_icycle);
         }
 
-        m_refs.contrib_row();
+        m_refs.contrib_row(walker);
         m_inst_ests.make_numerator_contribs(walker);
 
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
@@ -305,7 +305,7 @@ void Solver::loop_over_spawned() {
     m_wf.recv().clear();
 }
 
-void Solver::propagate_row(Walker& walker, const uint_t &ipart) {
+void Solver::propagate_row(Walker& walker, uint_t ipart) {
     if (walker.is_freed()) return;
     if (walker.m_weight[ipart] == 0.0) return;
     m_prop.off_diagonal(m_wf, walker, ipart);

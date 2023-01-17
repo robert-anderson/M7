@@ -50,11 +50,13 @@ void Annihilator::lookup_dst(const Mbf &dst_mbf, uint_t ipart_dst, bool &determi
      * if the current walker is valid and has MBF equal to dst_mbf, then this is not the first part being
      * contributed to in this annihilation loop, and so m_dst_walker and m_dst_weight should be left as-is
      */
-    if (m_dst_walker && (m_dst_walker.m_mbf == dst_mbf)) return;
-    auto success = m_wf.m_store.lookup(dst_mbf, m_dst_walker);
-    deterministic = success && m_dst_walker.m_deterministic.get(m_wf.iroot_part(ipart_dst));
-    if (success) m_dst_walker.m_weight.copy_to(m_dst_weight);
-    else m_dst_weight.assign(m_dst_weight.size(), dtype::null(m_dst_weight[0]));
+    const auto same_dst_again = m_dst_walker && (m_dst_walker.m_mbf == dst_mbf);
+    if (!same_dst_again) {
+        const auto success = m_wf.m_store.lookup(dst_mbf, m_dst_walker);
+        deterministic = success && m_dst_walker.m_deterministic.get(m_wf.iroot_part(ipart_dst));
+        if (success) m_dst_walker.m_weight.copy_to(m_dst_weight);
+        else m_dst_weight.assign(m_dst_weight.size(), dtype::null(m_dst_weight[0]));
+    }
 }
 
 void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
@@ -202,6 +204,7 @@ void Annihilator::loop_over_dst_mbfs() {
 
     bool dst_deterministic = false;
     wf_t total_delta = 0.0;
+    m_dst_walker.select_null();
 
     /*
      * set m_dst_walker to the record corresponding to the child walker if it exists, and set the replica weights if the
