@@ -26,7 +26,7 @@ TableBase::TableBase(uint_t row_size) : m_bw(row_size), m_null_row_string(row_si
 TableBase::TableBase(const TableBase &other) : TableBase(other.m_bw.m_row_size){}
 
 void TableBase::clear() {
-    DEBUG_ASSERT_FALSE(is_protected(), "cannot clear a table with protected records");
+    REQUIRE_FALSE(is_protected(), "cannot clear a table with protected records");
     m_bw.clear();
 }
 
@@ -103,9 +103,9 @@ uint_t TableBase::bw_size() const {
 }
 
 void TableBase::resize(uint_t nrec, double factor) {
-    DEBUG_ASSERT_TRUE(nrec, "new size should be non-zero");
-    DEBUG_ASSERT_TRUE(row_size(), "cannot resize, row size is zero");
-    DEBUG_ASSERT_GE(nrec, nrow_in_use(), "resize would discard uncleared data");
+    REQUIRE_TRUE(nrec, "new size should be non-zero");
+    REQUIRE_TRUE(row_size(), "cannot resize, row size is zero");
+    REQUIRE_GE(nrec, nrow_in_use(), "resize would discard uncleared data");
     m_bw.resize(nrec * row_size(), factor);
     DEBUG_ASSERT_LT(this->nrow_in_use(), m_bw.m_size / row_size(), "resize has discarded uncleared data");
     m_is_freed_row.resize(capacity(), false);
@@ -204,7 +204,7 @@ void TableBase::all_gatherv(const TableBase &src) {
     uintv_t nrecs(mpi::nrank());
     uintv_t counts(mpi::nrank());
     uintv_t displs(mpi::nrank());
-    DEBUG_ASSERT_EQ(src.row_size(), row_size(),
+    REQUIRE_EQ_ALL(src.row_size(), row_size(),
                     "the size of records being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.nrow_in_use(), nrecs);
     counts = nrecs;
@@ -222,7 +222,7 @@ void TableBase::gatherv(const TableBase &src, uint_t irank) {
     uintv_t nrecs(mpi::nrank());
     uintv_t counts(mpi::nrank());
     uintv_t displs(mpi::nrank());
-    DEBUG_ASSERT_EQ(src.row_size(), row_size(),
+    REQUIRE_EQ_ALL(src.row_size(), row_size(),
                     "the size of records being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.nrow_in_use(), nrecs);
     counts = nrecs;
