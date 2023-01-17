@@ -72,11 +72,6 @@ protected:
     virtual void bos_make_contribs(const field::BosOnv& /*src_onv*/, const conn::BosOnv& /*conn*/,
                                    const com_ops::Bos& /*com*/, wf_t /*contrib*/) {}
 
-    static uint_t nrec_est(sys::Size basis_size, OpSig indsig) {
-        const auto nrec_frm = integer::combinatorial(basis_size.m_frm.m_nspinorb, indsig.nfrm_cre());
-        return nrec_frm * integer::combinatorial_with_repetition(basis_size.m_bos.m_nmode, indsig.nbos());
-    }
-
 public:
 
     str_t name() const {
