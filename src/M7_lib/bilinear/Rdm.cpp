@@ -10,8 +10,8 @@ uint_t Rdm::nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uin
     double nrow = 1.0;
     nrow *= integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_cre);
     nrow *= integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_ann);
-    nrow *= integer::combinatorial(basis_size.m_bos, nbos_cre);
-    nrow *= integer::combinatorial(basis_size.m_bos, nbos_ann);
+    nrow *= integer::combinatorial_with_repetition(basis_size.m_bos, nbos_cre);
+    nrow *= integer::combinatorial_with_repetition(basis_size.m_bos, nbos_ann);
     nrow /= integer::factorial(nfrm_cre + nfrm_ann);
     nrow /= integer::factorial(nbos_cre + nbos_ann);
     return nrow;
@@ -71,10 +71,10 @@ Rdm::Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue,
 
 Rdm::Rdm(const conf::Rdms& opts, OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue, str_t name) :
         Rdm(ranksig, indsig, sector, nvalue, opts.m_distribution,
-                // store sizing
-            Sizing{nrec_est(sector.size(), indsig), opts.m_buffers.m_store_exp_fac},
-                // send/recv sizing
-            Sizing{nrec_est(sector.size(), indsig), opts.m_buffers.m_comm_exp_fac}, name){}
+            // store sizing
+            Sizing{nrow_estimate(indsig, sector.size()), opts.m_buffers.m_store_exp_fac},
+            // send/recv sizing
+            Sizing{nrow_estimate(indsig, sector.size()), opts.m_buffers.m_comm_exp_fac}, name){}
 
 void Rdm::end_cycle() {
     if (!send().buffer_size()) return;

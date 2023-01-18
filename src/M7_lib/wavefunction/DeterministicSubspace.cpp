@@ -76,8 +76,8 @@ void DeterministicSubspace::make_connections(const Hamiltonian &ham, const Bilin
     logging::info("Forming a deterministic subspace with {} MBFs", m_all.nrow_in_use());
     suite::Conns conns_work(m_wf.m_sector.size());
     auto &conn_work = conns_work[m_local_row.m_mbf];
-    uint_t n_hconn = 0ul;
-    uint_t n_rdm_conn = 0ul;
+    uint_t nconn_ham = 0ul;
+    uint_t nconn_rdm = 0ul;
     m_ham_matrix.resize(nrec_());
     m_rdm_network.resize(nrec_());
     uint_t iirow = ~0ul;
@@ -95,16 +95,19 @@ void DeterministicSubspace::make_connections(const Hamiltonian &ham, const Bilin
             auto helem = ham.get_element(m_local_row.m_mbf, conn_work);
             if (ham::is_significant(helem)) {
                 m_ham_matrix.add(iirow, {all_row.index(), helem});
-                ++n_hconn;
+                ++nconn_ham;
             } else if (bilinears.m_rdms.takes_contribs_from(conn_work.exsig())) {
                 m_rdm_network.add(iirow, all_row.index());
-                ++n_rdm_conn;
+                ++nconn_rdm;
             }
         }
     }
-    logging::info("Number of H-connected pairs of MBFs in the deterministic subspace: {}", n_hconn);
+    logging::info_("Size of local deterministic subspace: {}", nrec_());
+    nconn_ham = mpi::all_sum(nconn_ham);
+    nconn_rdm = mpi::all_sum(nconn_rdm);
+    logging::info("Number of H-connected pairs of MBFs in the deterministic subspace: {}", nconn_ham);
     if (bilinears.m_rdms)
-        logging::info("Number of H-unconnected, but RDM-contributing pairs of MBFs: {}", n_rdm_conn);
+        logging::info("Number of H-unconnected, but RDM-contributing pairs of MBFs: {}", nconn_rdm);
 }
 
 void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf) {

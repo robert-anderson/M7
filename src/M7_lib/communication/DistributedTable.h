@@ -171,7 +171,8 @@ namespace buffered {
         DistributedTable(str_t name, const row_t& row, DistribOptions dist_opts, Sizing sizing) :
                 DistributedTable(row, dist_opts){
             rename(name);
-            const auto nrec_per_rank = sizing.m_nrec_est / mpi::nrank();
+            // must allocate for at least one record
+            const auto nrec_per_rank = std::max(1ul, sizing.m_nrec_est / mpi::nrank());
             const auto nbyte_per_rank = nrec_per_rank * row_size();
             logging::info("Initially allocating {} per rank for \"{}\" buffer", string::memsize(nbyte_per_rank), name);
             resize(nrec_per_rank, 0.0);

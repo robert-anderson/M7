@@ -71,7 +71,7 @@ public:
     /**
      * add contributions from the current m_wf.m_store.m_row
      */
-    void contrib_row();
+    void contrib_row(const ::Walker& walker);
 
     /**
      * reset variables to begin a fresh MC cycle
@@ -117,7 +117,7 @@ struct References {
 
     void end_cycle(uint_t icycle);
 
-    void contrib_row();
+    void contrib_row(const Walker& walker);
 
     v_t<bool> is_connected(const field::Mbf &onv) const;
 

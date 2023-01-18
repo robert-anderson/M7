@@ -53,16 +53,14 @@ void Reference::accept_candidate(uint_t icycle) {
     }
 }
 
-void Reference::contrib_row() {
-    // TODO: pass in walker, don't assume current row of wavefunction
-    auto &row = m_wf.m_store.m_row;
-    auto weight = 0.5*(row.m_weight[m_ipart]+row.m_weight[m_wf.ipart_replica(m_ipart)]);
+void Reference::contrib_row(const ::Walker& walker) {
+    auto weight = 0.5*(walker.m_weight[m_ipart]+walker.m_weight[m_wf.ipart_replica(m_ipart)]);
     if (std::abs(weight) > std::abs(m_candidate_weight)) {
         m_candidate_weight = std::abs(weight);
-        m_irow_candidate = row.index();
+        m_irow_candidate = walker.index();
     }
-    if (row.m_ref_conn.get(m_ipart)) {
-        make_numerator_contribs(row.m_mbf, row.m_weight[m_ipart]);
+    if (walker.m_ref_conn.get(m_ipart)) {
+        make_numerator_contribs(walker.m_mbf, walker.m_weight[m_ipart]);
     }
 }
 
@@ -118,8 +116,8 @@ void References::end_cycle(uint_t icycle) {
     for (auto& ref: m_refs) ref.end_cycle(icycle);
 }
 
-void References::contrib_row() {
-    for (auto& ref: m_refs) ref.contrib_row();
+void References::contrib_row(const Walker& walker) {
+    for (auto& ref: m_refs) ref.contrib_row(walker);
 }
 
 v_t<bool> References::is_connected(const field::Mbf &mbf) const {

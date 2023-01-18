@@ -271,10 +271,12 @@ public:
         TableBase local(m_lxr.m_field1.m_row->m_size);
         Buffer buffer("Included local rows", 1ul);
         local.set_buffer(&buffer);
-        local.push_back(m_ninclude.m_local);
-        const auto& src = *m_lxr.m_field1.m_row->m_table;
-        for (uint_t iinclude=0ul; iinclude<m_ninclude.m_local; ++iinclude){
-            local.copy_record_in(src, (*this)[iinclude], iinclude);
+        if (m_ninclude.m_local) {
+            local.push_back(m_ninclude.m_local);
+            const auto& src = *m_lxr.m_field1.m_row->m_table;
+            for (uint_t iinclude = 0ul; iinclude < m_ninclude.m_local; ++iinclude) {
+                local.copy_record_in(src, (*this)[iinclude], iinclude);
+            }
         }
         dst.gatherv(local, iroot);
     }
