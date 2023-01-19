@@ -67,16 +67,16 @@ void DeterministicSubspace::select_l1_norm_fraction() {
     auto row = m_wf.m_store.m_row;
     for (row.restart(); row; ++row){
         av_l1_norm = row.m_weight.sum_over(m_iparts) / m_iparts.size();
-        if (av_l1_norm >= cutoff) add_(row);
+        if (std::abs(av_l1_norm) >= cutoff) add_(row);
     }
 }
 
 void DeterministicSubspace::make_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
+    full_update();
     if (!m_all.nrow_in_use()) {
-        logging::info("No MBFs were selected to form a deterministic subspace");
+        logging::info("No MBFs were selected to form a deterministic subspace for root {}", m_iroot);
         return;
     }
-    full_update();
     logging::info("Forming a deterministic subspace with {} MBFs", m_all.nrow_in_use());
     suite::Conns conns_work(m_wf.m_sector.size());
     auto &conn_work = conns_work[m_local_row.m_mbf];
@@ -177,8 +177,8 @@ void DeterministicSubspaces::init(const Hamiltonian &ham, const Bilinears &bilin
         REQUIRE_TRUE_ALL(detsub == nullptr, "detsubs should not already be allocated");
         detsub = ptr::smart::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
         if (m_opts.m_l1_fraction_cutoff.m_value < 1.0) {
-            logging::info("Selecting walkers with magnitude >= {:.2f}% of the current global population "
-                          "for root {} deterministic subspace", m_opts.m_l1_fraction_cutoff, iroot);
+            logging::info("Selecting walkers with magnitude >= {:.5f}% of the current global population "
+                          "for root {} deterministic subspace", 100.0*m_opts.m_l1_fraction_cutoff.m_value, iroot);
             detsub->select_l1_norm_fraction();
         } else {
             logging::info("Selecting upto {} largest-magnitude walkers for root {} deterministic subspace",
