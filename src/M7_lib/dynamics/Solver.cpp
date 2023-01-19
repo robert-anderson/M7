@@ -188,7 +188,7 @@ void Solver::begin_cycle() {
     }
     m_inst_ests.begin_cycle(m_icycle);
 
-    if (m_opts.m_propagator.m_semistochastic.m_size && !m_detsubs) {
+    if (m_opts.m_propagator.m_semistochastic.m_enabled && !m_detsubs) {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
             m_detsubs.init(m_prop.m_ham, m_maes.m_bilinears, m_wf, m_icycle);
             logging::info("Initialized deterministic subspace");

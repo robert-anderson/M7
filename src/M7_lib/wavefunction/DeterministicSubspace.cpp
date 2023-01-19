@@ -72,6 +72,10 @@ void DeterministicSubspace::select_l1_norm_fraction() {
 }
 
 void DeterministicSubspace::make_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
+    if (!m_all.nrow_in_use()) {
+        logging::info("No MBFs were selected to form a deterministic subspace");
+        return;
+    }
     full_update();
     logging::info("Forming a deterministic subspace with {} MBFs", m_all.nrow_in_use());
     suite::Conns conns_work(m_wf.m_sector.size());
@@ -159,7 +163,7 @@ DeterministicSubspaces::DeterministicSubspaces(const conf::Semistochastic &opts)
 }
 
 DeterministicSubspaces::operator bool() const {
-    return m_opts.m_size && m_epoch;
+    return m_opts.m_enabled && m_epoch;
 }
 
 void DeterministicSubspaces::init(const Hamiltonian &ham, const Bilinears &bilinears,
