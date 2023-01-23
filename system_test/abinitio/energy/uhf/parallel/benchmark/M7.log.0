@@ -1,0 +1,29 @@
+[1674466751] [info] Reallocating buffer " send" 0B -> 32.000000KB
+[1674466751] [info] Reallocating buffer " recv" 0B -> 32.000000KB
+[1674466751] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1674466751] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1674466751] [info] Reallocating buffer " recv" 0B -> 32.000000KB
+[1674466751] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1674466751] [info] Reallocating buffer "wavefunction" 0B -> 128.000000KB
+[1674466751] [info] Reallocating buffer "wavefunction send" 0B -> 240B
+[1674466751] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
+[1674466751] [info] Reallocating buffer "reference gather send" 0B -> 32B
+[1674466751] [info] Reallocating buffer "reference all rows" 0B -> 32B
+[1674466751] [info] Reallocating buffer "M7.stats" 0B -> 136B
+[1674466751] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1674466751] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
+[1674466754] [info] Reallocating buffer "wavefunction send" 240B -> 400B
+[1674466754] [info] Reallocating buffer "wavefunction recv" 240B -> 400B
+[1674466761] [info] Reallocating buffer "wavefunction send" 400B -> 616B
+[1674466761] [info] Reallocating buffer "wavefunction recv" 400B -> 616B
+[1674466765] [info] Reallocating buffer "wavefunction send" 616B -> 936B
+[1674466765] [info] Reallocating buffer "wavefunction recv" 616B -> 1.080000KB
+[1674466772] [info] Reallocating buffer "wavefunction send" 936B -> 1.440000KB
+[1674466784] [info] Reallocating buffer "wavefunction recv" 1.080000KB -> 1.656000KB
+[1674466786] [info] remapping hash table for "wavefunction"
+[1674466786] [info] current ratio of skips to total lookups (2.0000275535472083) exceeds set limit (2)
+[1674466786] [info] replacing current bucket vector of size 100 with a new one of size 150
+[1674466921] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1674466921] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1674466921] [info] Reallocating buffer "Included local rows" 0B -> 640B
+[1674466921] [info] Reallocating buffer "global top weighted" 0B -> 640B
