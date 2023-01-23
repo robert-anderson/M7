@@ -55,11 +55,8 @@ namespace shared_rows {
 
         virtual ~Set() {}
 
-        /**
-         * bring all rows into m_all
-         * direct buffer copy, no rows have changed locations so no need to treat m_all as a mapped table
-         */
-        void update() {
+    private:
+        void prepare_gather() {
             if (m_gather_send.nrecord() < nrec_()) m_gather_send.resize(nrec_());
             m_gather_send.clear();
             for (auto irec: m_irecs) {
@@ -67,7 +64,17 @@ namespace shared_rows {
                 m_send_row.push_back_jump();
                 m_send_row.copy_in(m_src_row);
             }
-            static_cast<TableBase&>(m_all).all_gatherv(m_gather_send);
+        }
+
+    public:
+
+        /**
+         * bring all rows into m_all
+         * direct buffer copy, no rows have changed locations so no need to treat m_all as a mapped table
+         */
+        void update() {
+            prepare_gather();
+            m_all.TableBase::all_gatherv(m_gather_send);
         }
 
         void row_index_update() {
@@ -88,10 +95,8 @@ namespace shared_rows {
          * include possible changes in basis order in the update
          */
         void full_update() {
-            m_all.clear();
-            update();
-            auto& row = m_all.m_row;
-            for (row.restart(); row; ++row) m_all.post_insert(row.index());
+            prepare_gather();
+            m_all.all_gatherv(m_gather_send);
         }
 
         uint_t nrec_() const {
@@ -103,12 +108,12 @@ namespace shared_rows {
 //        }
 
         void clear() {
-            for (const auto& irow: m_irecs) static_cast<const TableBase&>(m_src).unprotect(irow);
+            for (const auto& irow: m_irecs) m_src.unprotect(irow);
             m_irecs.clear();
         }
 
         void add_(uint_t irow) {
-            static_cast<const TableBase&>(m_src).protect(irow);
+            m_src.protect(irow);
             m_irecs.insert(irow);
         }
 

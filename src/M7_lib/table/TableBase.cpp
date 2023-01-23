@@ -120,6 +120,7 @@ void TableBase::free_many(const uintv_t &irows) {
     for (auto irec : irows) free(irec);
 }
 
+#if 0
 void TableBase::insert_records(const Buffer::Window &recv, uint_t nrec, const std::list<recv_cb_t> &callbacks) {
     for (uint_t irec_recv = 0; irec_recv < nrec; ++irec_recv) {
         auto irec = get_free_row();
@@ -130,48 +131,49 @@ void TableBase::insert_records(const Buffer::Window &recv, uint_t nrec, const st
 }
 void TableBase::transfer_records(const uintv_t &/*irecs*/, uint_t /*irank_send*/,
                                  uint_t /*irank_recv*/, const std::list<recv_cb_t>& /*callbacks*/){
-//    DEBUG_ASSERT_NE_ALL(irank_recv, irank_send, "sending and recving ranks should never be the same");
-//    if (!m_transfer) m_transfer = ptr::smart::make_unique<RowTransfer>(m_bw.name());
-//    uint_t nrec = 0;
-//    if (mpi::i_am(irank_send)){
-//        auto& send_bw = m_transfer->m_send_bw;
-//        nrec = irecs.size();
-//        mpi::send(&nrec, 1, irank_recv, m_transfer->m_nrec_p2p_tag);
-//        if (!nrec){
-//            logging::debug_("Sending rank notifying recving rank that no records are transferred");
-//            return;
-//        }
-//        logging::info_("Transferring {} records outward to rank {}", nrec, irank_recv);
-//
-//        auto size_required = nrec * row_size();
-//        if (send_bw.m_size < size_required) send_bw.resize(size_required);
-//        for (auto iirec = 0ul; iirec < nrec; ++iirec) {
-//            const auto &irec = irecs[iirec];
-//            std::memcpy(send_bw.m_begin + iirec * row_size(), begin(irec), row_size());
-//        }
-//        mpi::send(send_bw.m_begin, row_size() * nrec, irank_recv, m_transfer->m_irecs_p2p_tag);
-//        /*
-//         * sent records can now be erased
-//         */
-//        free_many(irecs);
-//    }
-//    if (mpi::i_am(irank_recv)){
-//        auto& recv_bw = m_transfer->m_send_bw;
-//        mpi::recv(&nrec, 1, irank_send, m_transfer->m_nrec_p2p_tag);
-//        if (!nrec){
-//            logging::debug_("Recving rank notified by sending rank that no records are transferred");
-//            return;
-//        }
-//        auto size_required = nrec * row_size();
-//        if (recv_bw.m_size<size_required) recv_bw.resize(size_required);
-//        logging::info_("Transferring {} records inward from rank {}", nrec, irank_send);
-//        mpi::recv(recv_bw.m_begin, row_size() * nrec, irank_send, m_transfer->m_irecs_p2p_tag);
-//        /*
-//         * now emplace received records in TableBase buffer window, and call all callbacks for each
-//         */
-//        insert_records(recv_bw, nrec, callbacks);
-//    }
+    DEBUG_ASSERT_NE_ALL(irank_recv, irank_send, "sending and recving ranks should never be the same");
+    if (!m_transfer) m_transfer = ptr::smart::make_unique<RowTransfer>(m_bw.name());
+    uint_t nrec = 0;
+    if (mpi::i_am(irank_send)){
+        auto& send_bw = m_transfer->m_send_bw;
+        nrec = irecs.size();
+        mpi::send(&nrec, 1, irank_recv, m_transfer->m_nrec_p2p_tag);
+        if (!nrec){
+            logging::debug_("Sending rank notifying recving rank that no records are transferred");
+            return;
+        }
+        logging::info_("Transferring {} records outward to rank {}", nrec, irank_recv);
+
+        auto size_required = nrec * row_size();
+        if (send_bw.m_size < size_required) send_bw.resize(size_required);
+        for (auto iirec = 0ul; iirec < nrec; ++iirec) {
+            const auto &irec = irecs[iirec];
+            std::memcpy(send_bw.m_begin + iirec * row_size(), begin(irec), row_size());
+        }
+        mpi::send(send_bw.m_begin, row_size() * nrec, irank_recv, m_transfer->m_irecs_p2p_tag);
+        /*
+         * sent records can now be erased
+         */
+        free_many(irecs);
+    }
+    if (mpi::i_am(irank_recv)){
+        auto& recv_bw = m_transfer->m_send_bw;
+        mpi::recv(&nrec, 1, irank_send, m_transfer->m_nrec_p2p_tag);
+        if (!nrec){
+            logging::debug_("Recving rank notified by sending rank that no records are transferred");
+            return;
+        }
+        auto size_required = nrec * row_size();
+        if (recv_bw.m_size<size_required) recv_bw.resize(size_required);
+        logging::info_("Transferring {} records inward from rank {}", nrec, irank_send);
+        mpi::recv(recv_bw.m_begin, row_size() * nrec, irank_send, m_transfer->m_irecs_p2p_tag);
+        /*
+         * now emplace received records in TableBase buffer window, and call all callbacks for each
+         */
+        insert_records(recv_bw, nrec, callbacks);
+    }
 }
+#endif
 
 void TableBase::copy_record_in(const TableBase &src, uint_t isrc, uint_t idst) {
     DEBUG_ASSERT_LT(isrc, src.nrow_in_use(), "src record index OOB");
@@ -201,7 +203,7 @@ str_t TableBase::to_string(const uintv_t *ordering) const {
 }
 
 void TableBase::all_gatherv(const TableBase &src) {
-    clear();
+    TableBase::clear();
     uintv_t nrecs(mpi::nrank());
     uintv_t counts(mpi::nrank());
     uintv_t displs(mpi::nrank());
@@ -215,11 +217,10 @@ void TableBase::all_gatherv(const TableBase &src) {
     if (!nrec_total) return;
     push_back(nrec_total);
     mpi::all_gatherv(src.begin(), src.m_bw.size_in_use(), begin(), counts, displs);
-    post_insert_range(0, nrec_total);
 }
 
 void TableBase::gatherv(const TableBase &src, uint_t irank) {
-    if (mpi::i_am(irank)) clear();
+    if (mpi::i_am(irank)) TableBase::clear();
     uintv_t nrecs(mpi::nrank());
     uintv_t counts(mpi::nrank());
     uintv_t displs(mpi::nrank());
@@ -233,8 +234,6 @@ void TableBase::gatherv(const TableBase &src, uint_t irank) {
     if (mpi::i_am(irank))
         push_back(nrec_total);
     mpi::gatherv(src.begin(), src.m_bw.size_in_use(), begin(), counts, displs, irank);
-    if (mpi::i_am(irank))
-        post_insert_range(0, nrec_total);
 }
 
 bool TableBase::is_protected() const {
