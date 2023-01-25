@@ -10,6 +10,7 @@
 #include <M7_lib/defs.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/parallel/MPIWrapper.h>
+#include <M7_lib/parallel/SharedArray.h>
 
 struct TableBase;
 
@@ -113,7 +114,6 @@ public:
         }
 
         double get_expansion_factor() const;
-
     };
 
 
@@ -124,13 +124,36 @@ public:
     str_t m_name = "";
 private:
     const uint_t m_nwindow_max;
-    v_t<buf_t> m_data;
+    /**
+     * determines whether the buffer is held in node-shared or rank-private memory
+     */
+    const bool m_shared;
+    /**
+     * begin pointer of the allocated memory
+     */
+    buf_t* m_data = nullptr;
+    /**
+     * size of the memory pointed to by m_data
+     */
+    uint_t m_size = 0ul;
+    /**
+     * in the case that the buffer is initialized with m_shared=false
+     */
+    v_t<buf_t> m_data_priv;
+    /**
+     * in the case that the buffer is initialized with m_shared=true
+     */
+    SharedArrayBase m_data_shared;
+    /**
+     * a buffer can provide the underlying data requirement of multiple Tables, whose allocations are specified by
+     * instances of the Window class
+     */
     v_t<Window *> m_windows;
 
 public:
-    Buffer(str_t name, uint_t nwindow_max);
+    Buffer(str_t name, uint_t nwindow_max, bool shared=false);
 
-    Buffer(uint_t nwindow_max) : Buffer("", nwindow_max){}
+    Buffer(uint_t nwindow_max, bool shared=false) : Buffer("", nwindow_max, shared){}
 
     uint_t size() const;
 
@@ -140,12 +163,12 @@ public:
 
     /**
      * allocate a new data vector and call move method of all associated windows
-     * @param size
-     *  new size of the entire buffer in bytes
+     * @param new_size
+     *  new new_size of the entire buffer in bytes
      * @param factor
      *  optional expansion factor
      */
-    void resize(uint_t size, double factor=-1.0);
+    void resize(uint_t new_size, double factor=-1.0);
     /**
      * @param size
      *  size in bytes

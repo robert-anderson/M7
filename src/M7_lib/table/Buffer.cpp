@@ -75,15 +75,16 @@ double Buffer::Window::get_expansion_factor() const {
     return m_buffer->m_expansion_factor;
 }
 
-Buffer::Buffer(str_t name, uint_t nwindow_max) :
-        m_name(std::move(name)), m_nwindow_max(nwindow_max) {
-    if (!name.empty()) logging::info_("Creating \"{}\" buffer", name);
+Buffer::Buffer(str_t name, uint_t nwindow_max, bool shared) :
+        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_shared(shared) {
+    if (!name.empty()) logging::info_("Creating {} buffer \"{}\"",
+                                      shared ? "node-shared" : "rank-private", name);
     REQUIRE_TRUE(nwindow_max, "A buffer must allow at least one window");
     m_windows.reserve(m_nwindow_max);
 }
 
 uint_t Buffer::size() const {
-    return m_data.size();
+    return m_size;
 }
 
 uint_t Buffer::window_size() const {
@@ -93,15 +94,15 @@ uint_t Buffer::window_size() const {
 void Buffer::append_window(Buffer::Window *window) {
     REQUIRE_LT(m_windows.size(), m_nwindow_max, "Buffer is over-subscribed");
     if (size()) {
-        window->m_begin = m_data.data() + window_size() * m_windows.size();
+        window->m_begin = m_data + window_size() * m_windows.size();
         window->m_size = window_size();
     }
     window->m_buffer = this;
     m_windows.push_back(window);
 }
 
-void Buffer::resize(uint_t size, double factor) {
-    if (size >= this->size()) {
+void Buffer::resize(uint_t new_size, double factor) {
+    if (new_size >= this->size()) {
         // expanding the buffer
         if (factor < 0.0) factor = m_expansion_factor;
     }
@@ -109,42 +110,60 @@ void Buffer::resize(uint_t size, double factor) {
         // shrinking the buffer
         factor = 0.0;
     }
-    size*=1.0+factor;
+    new_size*= 1.0 + factor;
     // always allocate an integral number of words
-    size = integer::divceil(size, Buffer::c_nbyte_word)*Buffer::c_nbyte_word;
-    // quit if the new buffer size is the same as the old buffer size
-    if (size == this->size()) return;
-    DEBUG_ASSERT_TRUE(size, "New size must be non-zero");
+    new_size = integer::divceil(new_size, Buffer::c_nbyte_word) * Buffer::c_nbyte_word;
+    // quit if the new buffer new_size is the same as the old buffer new_size
+    if (new_size == this->size()) return;
+    DEBUG_ASSERT_TRUE(new_size, "New size must be non-zero");
     if (!m_name.empty()) {
         logging::info_("Reallocating buffer \"{}\" {} -> {}",
-                   m_name, capacity_string(), capacity_string(size));
+                   m_name, capacity_string(), capacity_string(new_size));
     }
-    v_t<buf_t> tmp;
-    try {
-        tmp.resize(size, 0);
-    }
-    catch (const std::bad_alloc& e){
-        logging::error_("bad allocation");
-        ABORT(logging::format("could not allocate sufficient memory to resize buffer \"{}\"", m_name));
-    }
-    auto new_window_size = tmp.size() / m_nwindow_max;
 
-    for (uint_t iwindow = 0ul; iwindow < m_windows.size(); ++iwindow) {
-        // work forwards for shrinking, backwards for enlargement
-        auto jwindow = size < this->size() ? iwindow : (m_windows.size() - iwindow - 1);
-        auto window = m_windows[jwindow];
-        DEBUG_ASSERT_FALSE(window->m_buffer==nullptr, "window is not associated with any buffer");
-        DEBUG_ASSERT_TRUE(window->m_buffer==this, "window is not associated with this buffer");
-        auto new_dbegin = tmp.data() + jwindow * new_window_size;
-        window->move(new_dbegin, new_window_size);
+    auto move_windows_fn = [&](buf_t* new_data) {
+        auto new_window_size = new_size / m_windows.size();
+        for (uint_t iwindow = 0ul; iwindow < m_windows.size(); ++iwindow) {
+            // work forwards for shrinking, backwards for enlargement
+            auto jwindow = new_size < this->size() ? iwindow : (m_windows.size() - iwindow - 1);
+            auto window = m_windows[jwindow];
+            DEBUG_ASSERT_FALSE(window->m_buffer == nullptr, "window is not associated with any buffer");
+            DEBUG_ASSERT_TRUE(window->m_buffer == this, "window is not associated with this buffer");
+            auto new_dbegin = new_data + jwindow * new_window_size;
+            window->move(new_dbegin, new_window_size);
+        }
+    };
+
+    buf_t* tmp_ptr = nullptr;
+    /*
+     * handle the shared and private cases separately
+     */
+    if (m_shared) {
+        SharedArrayBase tmp(new_size, 1);
+        tmp_ptr = tmp.m_data;
+        move_windows_fn(tmp_ptr);
+        m_data_shared = std::move(tmp);
+        m_data = m_data_shared.m_data;
     }
-    auto tmp_ptr = tmp.data();
-    DEBUG_ONLY(tmp_ptr);
-    m_data = std::move(tmp);
-    DEBUG_ASSERT_FALSE(m_data.empty(), "new data buffer should be non-empty");
-    DEBUG_ASSERT_EQ(m_data.data(), tmp_ptr, "new base ptr was not preserved in move");
-    DEBUG_ASSERT_EQ(m_data.size(), this->size(), "new size is incorrect");
-    DEBUG_ASSERT_EQ(m_data.data(), m_windows[0]->m_begin, "first window not pointing at begin of buffer");
+    else {
+        v_t<buf_t> tmp;
+        try {
+            tmp.resize(new_size, 0);
+        }
+        catch (const std::bad_alloc &e) {
+            logging::error_("bad allocation");
+            ABORT(logging::format("could not allocate sufficient memory to resize buffer \"{}\"", m_name));
+        }
+        tmp_ptr = tmp.data();
+        move_windows_fn(tmp_ptr);
+        m_data_priv = std::move(tmp);
+        m_data = m_data_priv.data();
+        DEBUG_ASSERT_FALSE(m_data_priv.empty(), "new data buffer should be non-empty");
+    }
+    DEBUG_ASSERT_TRUE(m_data, "new data pointer should be non-null");
+    m_size = new_size;
+    DEBUG_ASSERT_EQ(m_data, tmp_ptr, "new base ptr was not preserved in move");
+    DEBUG_ASSERT_EQ(m_data, m_windows[0]->m_begin, "first window not pointing at begin of buffer");
 }
 
 str_t Buffer::capacity_string(uint_t size) const {
