@@ -11,18 +11,36 @@
 
 class SharedArrayBase {
 public:
-    const uint_t m_nelement;
+    uint_t m_nelement = 0;
     const uint_t m_element_size;
-    const uint_t m_nbyte;
+    uint_t m_nbyte = 0;
     void *m_data = nullptr;
+private:
+
+    SharedArrayBase(uint_t element_size);
+
+    static void alloc(uint_t nelement, uint_t element_size, MPI_Win* win, void** data);
+
+    static void free(MPI_Win* win, void** data);
+
+    void alloc(uint_t nelement, uint_t element_size);
+
+    void free();
+
+
+
 protected:
     MPI_Win m_win;
 public:
     SharedArrayBase(uint_t nelement, uint_t element_size);
 
-    SharedArrayBase(SharedArrayBase &&rhs);
+    SharedArrayBase& operator=(const SharedArrayBase& other);
 
-    SharedArrayBase(const SharedArrayBase &rhs) : SharedArrayBase(rhs.m_nelement, rhs.m_element_size) {}
+    SharedArrayBase& operator=(SharedArrayBase&& other);
+
+    SharedArrayBase(const SharedArrayBase &other);
+
+    SharedArrayBase(SharedArrayBase &&other);
 
     ~SharedArrayBase();
 };
