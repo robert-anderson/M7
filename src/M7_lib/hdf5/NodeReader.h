@@ -10,6 +10,7 @@
 
 namespace hdf5 {
 
+#if 0
     /**
      * Whereas saving an application object to one or more HDF5 datasets is a simple case of marshalling the data into a
      * contiguous buffer, loading datasets into application structures can be more complicated. This class manages this
@@ -97,6 +98,7 @@ namespace hdf5 {
         }
 
     };
+#endif
 
     struct NodeReader : Node {
 
