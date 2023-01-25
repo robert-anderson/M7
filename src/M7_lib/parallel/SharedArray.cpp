@@ -11,6 +11,7 @@ void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, 
     const auto local_nbyte = mpi::on_node_i_am_root() ? nbyte : 0ul;
     auto ierr = MPI_Win_allocate_shared(local_nbyte, element_size, MPI_INFO_NULL, g_node_comm, data, win);
     REQUIRE_EQ(ierr, MPI_SUCCESS, "MPI Shared memory error");
+    DEBUG_ASSERT_TRUE(*data, "data pointer not set");
     MPI_Win_lock_all(0, *win);
     MPI_Win_sync(*win);
     mpi::barrier_on_node();
@@ -33,22 +34,26 @@ void SharedArrayBase::free(MPI_Win *win, void **data) {
     // otherwise, assume that the resource is still in use (has been moved)
 }
 
-void SharedArrayBase::alloc(uint_t nelement, uint_t element_size) {
-    alloc(nelement, element_size, &m_win, &m_data);
+void SharedArrayBase::alloc(uint_t nelement) {
+    m_nelement = nelement;
+    m_nbyte = nelement * m_element_size;
+    alloc(nelement, m_element_size, &m_win, reinterpret_cast<void**>(&m_data));
+    DEBUG_ASSERT_TRUE(m_data, "data pointer not set");
 }
 
 void SharedArrayBase::free() {
-    free(&m_win, &m_data);
+    auto data = reinterpret_cast<void*>(m_data);
+    free(&m_win, &data);
 }
 
 SharedArrayBase::SharedArrayBase(uint_t nelement, uint_t element_size) : SharedArrayBase(element_size) {
-    alloc(nelement, element_size);
+    alloc(nelement);
 }
 
 SharedArrayBase &SharedArrayBase::operator=(const SharedArrayBase &other) {
     if (m_nbyte < other.m_nbyte) {
         free();
-        alloc(other.m_nelement, other.m_element_size);
+        alloc(other.m_nelement);
     }
     if (mpi::on_node_i_am_root()) std::memcpy(m_data, other.m_data, m_nbyte);
     return *this;
@@ -75,5 +80,5 @@ SharedArrayBase::SharedArrayBase(SharedArrayBase &&other) : SharedArrayBase(othe
 }
 
 SharedArrayBase::~SharedArrayBase() {
-    free(&m_win, &m_data);
+    free();
 }

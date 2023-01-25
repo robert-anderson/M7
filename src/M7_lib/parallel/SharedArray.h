@@ -14,7 +14,7 @@ public:
     uint_t m_nelement = 0;
     const uint_t m_element_size;
     uint_t m_nbyte = 0;
-    void *m_data = nullptr;
+    buf_t *m_data = nullptr;
 private:
 
     SharedArrayBase(uint_t element_size);
@@ -23,11 +23,9 @@ private:
 
     static void free(MPI_Win* win, void** data);
 
-    void alloc(uint_t nelement, uint_t element_size);
+    void alloc(uint_t nelement);
 
     void free();
-
-
 
 protected:
     MPI_Win m_win;
@@ -43,6 +41,42 @@ public:
     SharedArrayBase(SharedArrayBase &&other);
 
     ~SharedArrayBase();
+
+protected:
+    void set(uint_t i, uint_t n, const void* src) {
+        DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
+        DEBUG_ASSERT_LE(i+n, m_nelement, "end OOB");
+        // element-modifying access should only take place on the root rank
+        if (mpi::on_node_i_am_root()) std::memcpy(m_data+(i*m_element_size), src, n*m_element_size);
+
+    }
+
+    void set(uint_t i, const void* src) {
+        DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
+        // element-modifying access should only take place on the root rank
+        if (mpi::on_node_i_am_root()) std::memcpy(m_data+(i*m_element_size), src, m_element_size);
+    }
+
+    void set(const void* src) {
+        // element-modifying access should only take place on the root rank
+        if (mpi::on_node_i_am_root()) std::memcpy(m_data, src, m_nbyte);
+    }
+
+    void get(uint_t i, uint_t n, void* dst) {
+        DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
+        DEBUG_ASSERT_LE(i+n, m_nelement, "end OOB");
+        std::memcpy(dst, m_data+(i*m_element_size), n*m_element_size);
+
+    }
+
+    void get(uint_t i, void* dst) {
+        DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
+        std::memcpy(dst, m_data+(i*m_element_size), m_element_size);
+    }
+
+    void get(void* dst) {
+        std::memcpy(dst, m_data, m_nbyte);
+    }
 };
 
 template<typename T>
@@ -55,11 +89,25 @@ public:
     }
 
     void set(uint_t i, const T &v) {
-        // element-modifying access should only take place on the root rank
-        if (mpi::on_node_i_am_root()) {
-            DEBUG_ASSERT_LT(i, size(), "SharedArray element OOB");
-            reinterpret_cast<T*>(m_data)[i] = v;
-        }
+        SharedArrayBase::set(i, &v);
+    }
+
+    void set(uint_t i, const v_t<T> &v) {
+        SharedArrayBase::set(i, v.size(), v.data());
+    }
+
+    void set(const v_t<T> &v) {
+        DEBUG_ASSERT_TRUE(!mpi::on_node_i_am_root() || (v.size()==m_nelement), "incompatible source");
+        SharedArrayBase::set(v.data());
+    }
+
+    void get(uint_t i, v_t<T> &v) {
+        SharedArrayBase::get(i, v.size(), v.data());
+    }
+
+    void get(v_t<T> &v) {
+        if (v.size() < m_nelement) v.resize(m_nelement);
+        SharedArrayBase::get(v.data());
     }
 
     const T &operator[](uint_t i) const {

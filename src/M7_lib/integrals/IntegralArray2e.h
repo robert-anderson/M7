@@ -211,8 +211,7 @@ namespace integrals_2e {
         indexer_t m_indexer;
         SharedIntegralStorage<T> m_data;
 
-        IndexedArray(uint_t norb) :
-            Array<T>(norb), m_indexer(norb), m_data(static_cast<const IntegralIndexer &>(m_indexer).m_size) {}
+        IndexedArray(uint_t norb) : Array<T>(norb), m_indexer(norb), m_data(m_indexer.m_size) {}
 
         bool set(uint_t a, uint_t b, uint_t i, uint_t j, T elem) override {
             // any compiler should statically execute this conditional
