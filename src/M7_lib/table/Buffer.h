@@ -86,7 +86,7 @@ public:
         void clear();
 
         /**
-         * moves data if there's any in the window currently, and redefines the stored m_size, m_nrow, and m_begin
+         * moves data if there's any in the window currently, and redefines the stored m_nbyte, m_nrow, and m_begin
          * @param begin
          *  new begin buffer pointer
          * @param new_size

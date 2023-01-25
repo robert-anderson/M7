@@ -188,7 +188,7 @@ void Solver::begin_cycle() {
     }
     m_inst_ests.begin_cycle(m_icycle);
 
-    if (m_opts.m_propagator.m_semistochastic.m_size && !m_detsubs) {
+    if (m_opts.m_propagator.m_semistochastic.m_enabled && !m_detsubs) {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
             m_detsubs.init(m_prop.m_ham, m_maes.m_bilinears, m_wf, m_icycle);
             logging::info("Initialized deterministic subspace");
@@ -246,6 +246,7 @@ void Solver::loop_over_occupied_mbfs() {
         m_refs.contrib_row(walker);
         m_inst_ests.make_numerator_contribs(walker);
 
+        m_wf.m_nocc_mbf.m_local++;
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
 
             DEBUG_ASSERT_TRUE(!m_wf.m_store.m_row.m_mbf.is_zero(),
@@ -255,7 +256,6 @@ void Solver::loop_over_occupied_mbfs() {
 
             const auto &weight = walker.m_weight[ipart];
 
-            m_wf.m_nocc_mbf.m_local++;
             if (walker.is_initiator(ipart, m_opts.m_propagator.m_nadd)) m_wf.m_ninitiator.m_local[ipart]++;
 
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);

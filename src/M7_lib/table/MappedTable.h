@@ -266,6 +266,7 @@ public:
         return m_insert_row;
     }
 
+private:
     /**
      * for an already-inserted row, map it to the hash table defined by the buckets arg
      * @param irow
@@ -289,9 +290,23 @@ public:
      * @param irow
      *  index of the row to be mapped
      */
-    void post_insert(uint_t irow) override {
+    void post_insert(uint_t irow) {
         post_insert_buckets(irow, m_buckets);
     }
+
+    /**
+     * If a block of records was copied contiguously into a table with non-trivial post-insert obligations, a call to
+     * post_insert is needed for each copied record
+     * @param ibegin
+     *  record index of beginning of the already-inserted data
+     * @param iend
+     *  record index of end of the already-inserted data
+     */
+    void post_insert_range(uint_t ibegin = 0ul, uint_t iend = ~0ul) {
+        if (iend == ~0ul) iend = this->nrow_in_use();
+        for (uint_t i = ibegin; i < iend; ++i) post_insert(i);
+    }
+public:
     /**
      * construct a new vector of buckets with a different size
      */
@@ -333,6 +348,18 @@ public:
     void resize(uint_t nrec, double factor=-1.0) override {
         TableBase::resize(nrec, factor);
         attempt_remap();
+    }
+
+    void all_gatherv(const TableBase& src) override {
+        clear();
+        TableBase::all_gatherv(src);
+        post_insert_range();
+    }
+
+    void gatherv(const TableBase& src, uint_t irank) override {
+        clear();
+        TableBase::gatherv(src);
+        if (mpi::i_am(irank)) post_insert_range();
     }
 
     void load_fn(const hdf5::NodeReader& parent, const str_t& name, uint_t max_nitem_per_op,

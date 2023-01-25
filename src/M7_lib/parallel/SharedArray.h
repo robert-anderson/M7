@@ -9,72 +9,110 @@
 #include "MPIWrapper.h"
 #include "MPIAssert.h"
 
-template<typename T>
-class SharedArray {
-    const uint_t m_size;
-    MPI_Win m_win;
-    T *m_data = nullptr;
+class SharedArrayBase {
 public:
-    SharedArray(uint_t size) : m_size(size) {
-        auto baseptr = reinterpret_cast<void *>(&m_data);
-        if (mpi::on_node_i_am_root()) {
-            auto ierr = MPI_Win_allocate_shared(size * sizeof(T), sizeof(T), MPI_INFO_NULL, g_node_comm,
-                                                baseptr, &m_win);
-            if (ierr) throw std::runtime_error("MPI Shared memory error");
-        } else {
-            auto ierr = MPI_Win_allocate_shared(0, sizeof(T), MPI_INFO_NULL, g_node_comm, baseptr, &m_win);
-            if (ierr) throw std::runtime_error("MPI Shared memory error");
-        }
-        MPI_Win_lock_all(0, m_win);
-        MPI_Win_sync(m_win);
-        mpi::barrier_on_node();
-        int disp_unit;
-        MPI_Aint alloc_size;
-        /*
-         * MPI_Aint window_size0; int window_unit; double *win0_addr;
-         * MPI_Win_shared_query(node_window, 0, &window_size0, &window_unit, &win0_addr);
-         */
-        auto ierr = MPI_Win_shared_query(m_win, 0, &alloc_size, &disp_unit, baseptr);
-        if (ierr != MPI_SUCCESS) throw std::runtime_error("MPI Memory Window query failed");
-        ASSERT(disp_unit == sizeof(T))
-        ASSERT((uint_t) alloc_size == size * sizeof(T))
-        MPI_Win_unlock_all(m_win);
-        if (mpi::on_node_i_am_root()) std::memset(reinterpret_cast<char*>(m_data), 0, size * sizeof(T));
-        mpi::barrier_on_node();
-    }
+    uint_t m_nelement = 0;
+    const uint_t m_element_size;
+    uint_t m_nbyte = 0;
+    buf_t *m_data = nullptr;
+private:
 
-    SharedArray(SharedArray &&rhs) : m_size(rhs.m_size) {
-        m_data = rhs.m_data;
-        m_win = rhs.m_win;
-        /*
-         * nullify memory window handle in rhs so that the destructor does not
-         * free memory still in use here
-         */
-        rhs.m_win = MPI_WIN_NULL;
-    }
+    SharedArrayBase(uint_t element_size);
 
-    SharedArray(const SharedArray &rhs) : SharedArray(rhs.m_size) {}
+    static void alloc(uint_t nelement, uint_t element_size, MPI_Win* win, void** data);
 
-    ~SharedArray() {
-        ASSERT(m_data)
-        if (m_win != MPI_WIN_NULL) MPI_Win_free(&m_win);
-    }
+    static void free(MPI_Win* win, void** data);
 
-    const uint_t &size() {
-        return m_size;
-    }
+    void alloc(uint_t nelement);
 
-    void set(const uint_t &i, const T &v) {
+    void free();
+
+protected:
+    MPI_Win m_win;
+public:
+    SharedArrayBase(uint_t nelement, uint_t element_size);
+
+    SharedArrayBase& operator=(const SharedArrayBase& other);
+
+    SharedArrayBase& operator=(SharedArrayBase&& other);
+
+    SharedArrayBase(const SharedArrayBase &other);
+
+    SharedArrayBase(SharedArrayBase &&other);
+
+    ~SharedArrayBase();
+
+protected:
+    void set(uint_t i, uint_t n, const void* src) {
+        DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
+        DEBUG_ASSERT_LE(i+n, m_nelement, "end OOB");
         // element-modifying access should only take place on the root rank
-        if (mpi::on_node_i_am_root()) {
-            DEBUG_ASSERT_LT(i, m_size, "SharedArray element OOB");
-            m_data[i] = v;
-        }
+        if (mpi::on_node_i_am_root()) std::memcpy(m_data+(i*m_element_size), src, n*m_element_size);
+
     }
 
-    const T &operator[](const uint_t &i) const {
-        DEBUG_ASSERT_LT(i, m_size, "SharedArray element OOB");
-        return m_data[i];
+    void set(uint_t i, const void* src) {
+        DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
+        // element-modifying access should only take place on the root rank
+        if (mpi::on_node_i_am_root()) std::memcpy(m_data+(i*m_element_size), src, m_element_size);
+    }
+
+    void set(const void* src) {
+        // element-modifying access should only take place on the root rank
+        if (mpi::on_node_i_am_root()) std::memcpy(m_data, src, m_nbyte);
+    }
+
+    void get(uint_t i, uint_t n, void* dst) {
+        DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
+        DEBUG_ASSERT_LE(i+n, m_nelement, "end OOB");
+        std::memcpy(dst, m_data+(i*m_element_size), n*m_element_size);
+
+    }
+
+    void get(uint_t i, void* dst) {
+        DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
+        std::memcpy(dst, m_data+(i*m_element_size), m_element_size);
+    }
+
+    void get(void* dst) {
+        std::memcpy(dst, m_data, m_nbyte);
+    }
+};
+
+template<typename T>
+class SharedArray : public SharedArrayBase {
+public:
+    SharedArray(uint_t size) : SharedArrayBase(size, sizeof(T)) {}
+
+    uint_t size() const {
+        return m_nelement;
+    }
+
+    void set(uint_t i, const T &v) {
+        SharedArrayBase::set(i, &v);
+    }
+
+    void set(uint_t i, const v_t<T> &v) {
+        SharedArrayBase::set(i, v.size(), v.data());
+    }
+
+    void set(const v_t<T> &v) {
+        DEBUG_ASSERT_TRUE(!mpi::on_node_i_am_root() || (v.size()==m_nelement), "incompatible source");
+        SharedArrayBase::set(v.data());
+    }
+
+    void get(uint_t i, v_t<T> &v) {
+        SharedArrayBase::get(i, v.size(), v.data());
+    }
+
+    void get(v_t<T> &v) {
+        if (v.size() < m_nelement) v.resize(m_nelement);
+        SharedArrayBase::get(v.data());
+    }
+
+    const T &operator[](uint_t i) const {
+        DEBUG_ASSERT_LT(i, size(), "SharedArray element OOB");
+        return reinterpret_cast<const T*>(m_data)[i];
     }
 };
 

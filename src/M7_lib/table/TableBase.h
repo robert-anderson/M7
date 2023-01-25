@@ -326,28 +326,6 @@ public:
     void free_many(const uintv_t& irows);
 
     /**
-     * in some derived classes, there is more to adding new records than simply copying their contents into the hwm. In
-     * these cases we need to call a method after the copy in order to maintain the integrity of those data structures
-     * see MappedTable.h for more details
-     * @param iinsert
-     *  record index of the already-inserted data
-     */
-    virtual void post_insert(uint_t /*iinsert*/){}
-
-    /**
-     * If we have copied a block of records contiguously into a table with non-trivial post-insert obligations, we need
-     * to call post_insert for each copied record
-     * @param ibegin
-     *  record index of beginning of the already-inserted data
-     * @param iend
-     *  record index of end of the already-inserted data
-     */
-    void post_insert_range(uint_t ibegin = 0ul, uint_t iend = ~0ul) {
-        if (iend == ~0ul) iend = nrow_in_use();
-        for (uint_t i = ibegin; i < iend; ++i) post_insert(i);
-    }
-
-    /**
      * function pointer type for the callback associated with row transfers.
      * see RankAllocator.h
      */
@@ -358,6 +336,7 @@ public:
      */
     typedef std::function<void(uint_t)> recv_cb_t;
 
+#if 0
     /**
      * insert all records held in the buffer window into this Table, then call all callbacks if any.
      * @param recv
@@ -383,6 +362,7 @@ public:
      */
     void transfer_records(const uintv_t& irecs, uint_t irank_send, uint_t irank_recv,
                           const std::list<recv_cb_t>& callbacks = {});
+#endif
 
     /**
      * copy a single record from another "source" table
