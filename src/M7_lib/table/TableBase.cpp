@@ -36,6 +36,8 @@ bool TableBase::is_clear() const {
 }
 
 buf_t *TableBase::begin() {
+    DEBUG_ASSERT_TRUE(!m_bw.m_buffer->m_shared || mpi::on_node_i_am_root(),
+                      "modifiable pointer to node-shared buffer is only allowed on node root MPI rank");
     return m_bw.m_begin;
 }
 
@@ -44,6 +46,8 @@ const buf_t *TableBase::begin() const {
 }
 
 buf_t *TableBase::begin(uint_t irec) {
+    DEBUG_ASSERT_TRUE(!m_bw.m_buffer->m_shared || mpi::on_node_i_am_root(),
+                      "modifiable pointer to node-shared buffer is only allowed on node root MPI rank");
     return m_bw.m_begin + irec * row_size();
 }
 

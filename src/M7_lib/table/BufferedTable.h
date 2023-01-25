@@ -5,6 +5,7 @@
 #ifndef M7_BUFFEREDTABLE_H
 #define M7_BUFFEREDTABLE_H
 
+#include <utility>
 #include "MappedTable.h"
 
 template<typename row_t, typename table_impl_t>
@@ -15,12 +16,13 @@ public:
     typedef table_impl_t table_t;
     using TableBase::m_bw;
 
-    BufferedTable(str_t name, const table_t& table): table_t(table), m_buffer(name, 1ul) {
+    BufferedTable(str_t name, const table_t& table, bool shared): table_t(table),
+        m_buffer(std::move(name), 1ul, shared) {
         TableBase::set_buffer(&m_buffer);
         ASSERT(static_cast<const Row&>(Table<row_t>::m_row).m_table);
     }
 
-    BufferedTable(const table_t& table): BufferedTable("", table){}
+    BufferedTable(const table_t& table, bool shared): BufferedTable("", table, shared){}
 
     BufferedTable& operator=(const BufferedTable<row_t, table_t> &other) {
         table_t::operator=(other);
@@ -31,7 +33,8 @@ public:
         return static_cast<const table_t&>(*this) == static_cast<const table_t&>(other);
     }
 
-    BufferedTable(const BufferedTable<row_t, table_t> &other) : BufferedTable(other.m_buffer.m_name, other){
+    BufferedTable(const BufferedTable<row_t, table_t> &other) :
+        BufferedTable(other.m_buffer.m_name, other, other.m_buffer.m_shared){
         *this = other;
         table_t::m_row.restart();
     }
@@ -48,16 +51,17 @@ public:
 namespace buffered {
     template <typename row_t>
     struct Table : BufferedTable<row_t, ::Table<row_t>> {
-        Table(str_t name, const row_t &row): BufferedTable<row_t, ::Table<row_t>>(name, ::Table<row_t>(row)){}
-        Table(const row_t &row): Table("", row){}
+        Table(str_t name, const row_t &row, bool shared=false):
+            BufferedTable<row_t, ::Table<row_t>>(name, ::Table<row_t>(row), shared){}
+        Table(const row_t &row, bool shared=false): Table("", row, shared){}
     };
     template <typename row_t>
     struct MappedTable : BufferedTable<row_t, ::MappedTable<row_t>> {
-        MappedTable(str_t name, const row_t &row, MappedTableOptions opts):
-            BufferedTable<row_t, ::MappedTable<row_t>>(name, ::MappedTable<row_t>(row, opts)){}
-        MappedTable(const row_t &row): MappedTable("", row){}
-        MappedTable(str_t name, const row_t &row): MappedTable(name, row, {}){}
-        MappedTable(const row_t &row, MappedTableOptions opts): MappedTable("", row, opts){}
+        MappedTable(str_t name, const row_t &row, MappedTableOptions opts, bool shared=false):
+            BufferedTable<row_t, ::MappedTable<row_t>>(name, ::MappedTable<row_t>(row, opts), shared){}
+        MappedTable(const row_t &row, bool shared=false): MappedTable("", row, shared){}
+        MappedTable(str_t name, const row_t &row, bool shared=false): MappedTable(name, row, {}, shared){}
+        MappedTable(const row_t &row, MappedTableOptions opts, bool shared=false): MappedTable("", row, opts, shared){}
     };
 }
 

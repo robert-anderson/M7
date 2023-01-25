@@ -158,8 +158,9 @@ public:
 namespace buffered {
     template <typename row_t>
     struct DistributedTable : BufferedTable<row_t, ::DistributedTable<row_t>> {
+        // shared is always false for Distributed tables. each instance is rank-private
         DistributedTable(const row_t &row, DistribOptions dist_opts):
-            BufferedTable<row_t, ::DistributedTable<row_t>>(::DistributedTable<row_t>(row, dist_opts)){}
+            BufferedTable<row_t, ::DistributedTable<row_t>>(::DistributedTable<row_t>(row, dist_opts), false){}
 
         using TableBase::rename;
         using TableBase::row_size;

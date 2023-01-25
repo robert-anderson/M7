@@ -122,12 +122,12 @@ public:
      * if the buffer is given a name, its resizing events will be appear in the logs
      */
     str_t m_name = "";
-private:
     const uint_t m_nwindow_max;
     /**
      * determines whether the buffer is held in node-shared or rank-private memory
      */
     const bool m_shared;
+private:
     /**
      * begin pointer of the allocated memory
      */
