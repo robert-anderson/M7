@@ -205,15 +205,7 @@ public:
      */
     void propagate_row(Walker& walker, uint_t ipart, bool initiator);
 
-    bool is_initiator(const Walker& walker, uint_t ipart) {
-        if (walker.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd)) return true;
-        if (m_hf && m_opts.m_propagator.m_c2_c4_initiator.m_value) {
-            auto c4_predict = m_hf->m_accum.predict(walker.m_mbf);
-            if (!c4_predict) return false;
-            if ((c4_predict>0)==(walker.m_weight[0]>0)) return true;
-        }
-        return false;
-    }
+    bool is_initiator(const Walker& walker, uint_t ipart);
 
     /**
      * Loop over all rows in m_wf.m_store which have a non-zero MBF field
