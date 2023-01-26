@@ -19,7 +19,11 @@ class GlobalAccumulation {
 
 public:
     GlobalAccumulation(str_t name, const row_t& row):
-        m_current(name+" current", row), m_deltas(name+" deltas", row), m_all_deltas(name+" gathered deltas", row){}
+        m_current(name+" current", row), m_deltas(name+" deltas", row), m_all_deltas(name+" gathered deltas", row){
+        m_current.resize(1000ul);
+        m_deltas.resize(100ul);
+        m_all_deltas.resize(m_deltas.capacity()*mpi::nrank());
+    }
 
     void add(const key_field_t& key, const value_field_t& value) {
         static_cast<Row&>(m_deltas.m_row).push_back_jump();

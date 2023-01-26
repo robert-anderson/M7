@@ -29,7 +29,7 @@ namespace hf_excit_coeffs{
         mutable conn::Mbf m_work_conn;
         mutable buffered::MaeInds m_work_key;
         HfExcitCoeffs(const shared_rows::Walker* hf):
-            GlobalAccumulation<Row>("HF excit coeffs", {hf->gathered().m_row.m_mbf.m_format}), m_hf(hf),
+            GlobalAccumulation<Row>("HF excit coeffs", {hf->gathered().m_row.m_weight.m_format}), m_hf(hf),
             m_work_conn(hf->mbf().m_basis), m_work_key(opsig::c_doub){}
 
         void add(const Walker& walker) {
