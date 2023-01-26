@@ -101,6 +101,10 @@ public:
         return *this;
     }
 
+    bool i_can_modify() const {
+        return m_row && m_row->i_can_modify();
+    }
+
     bool is_comparable(const FieldBase &other) const;
 
     bool belongs_to_row() const;
@@ -109,9 +113,24 @@ public:
 
     bool belongs_to_row(const Row& row) const;
 
-    buf_t *begin() const;
+    buf_t* begin() const {
+        DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
+        return m_row->begin() + m_row_offset;
+    }
 
-    buf_t *end() const;
+    buf_t* end() const {
+        DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
+        return begin() + m_size;
+    }
+
+    buf_t* begin() {
+        DEBUG_ASSERT_TRUE(i_can_modify(), "if buffer is node-shared, only the node root may modify");
+        return const_cast<const FieldBase*>(this)->begin();
+    }
+
+    buf_t* end() {
+        return begin() + m_size;
+    }
 
     const Row *row() const;
 
@@ -140,15 +159,15 @@ public:
     void to_buffer(buf_t* dst, uint_t irow) const {
         DEBUG_ASSERT_LT(irow, m_row->m_table->nrow_in_use(), "row index OOB");
         DEBUG_ASSERT_FALSE(m_row->m_table->is_freed(irow), "copying a freed row to buffer");
-        auto src = m_row->m_table->begin() + m_row->m_size * irow + m_row_offset;
+        auto src = m_row->m_table->m_bw.m_begin + m_row->m_size * irow + m_row_offset;
         std::memcpy(dst, src, m_size);
     }
 
     void from_buffer(const buf_t* src, uint_t irow) {
         DEBUG_ASSERT_LT(irow, m_row->m_table->nrow_in_use(), "row index OOB");
         DEBUG_ASSERT_FALSE(m_row->m_table->is_freed(irow), "copying a freed row to buffer");
-        auto dst = m_row->m_table->begin() + m_row->m_size * irow + m_row_offset;
-        std::memcpy(dst, src, m_size);
+        auto dst = m_row->m_table->m_bw.m_begin + m_row->m_size * irow + m_row_offset;
+        if (i_can_modify()) std::memcpy(dst, src, m_size);
     }
 
 protected:

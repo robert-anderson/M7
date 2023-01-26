@@ -27,15 +27,16 @@ uintv_t DeterministicSubspace::make_iparts() {
 }
 
 void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const shared_rows::Walker *hf, const sparse::Element& elem) {
-    m_all.m_row.jump(elem);
-    if (hf && (m_all.m_row.m_mbf == hf->mbf())) return;
+    const auto& row = this->gathered().m_row;
+    row.jump(elem);
+    if (hf && (row.m_mbf == hf->mbf())) return;
     if (m_wf.nreplica() == 2) {
-        rdms.make_contribs(m_local_row.m_mbf, m_all.m_row.m_mbf,
-                           m_local_row.m_weight[0] * m_all.m_row.m_weight[1]);
-        rdms.make_contribs(m_local_row.m_mbf, m_all.m_row.m_mbf,
-                           m_local_row.m_weight[1] * m_all.m_row.m_weight[0]);
+        rdms.make_contribs(m_local_row.m_mbf, row.m_mbf,
+                           m_local_row.m_weight[0] * row.m_weight[1]);
+        rdms.make_contribs(m_local_row.m_mbf, row.m_mbf,
+                           m_local_row.m_weight[1] * row.m_weight[0]);
     } else {
-        rdms.make_contribs(m_local_row.m_mbf, m_all.m_row.m_mbf, m_local_row.m_weight[0] * m_all.m_row.m_weight[0]);
+        rdms.make_contribs(m_local_row.m_mbf, row.m_mbf, m_local_row.m_weight[0] * row.m_weight[0]);
     }
 }
 
@@ -72,12 +73,13 @@ void DeterministicSubspace::select_l1_norm_fraction() {
 }
 
 void DeterministicSubspace::make_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
+    const auto& gathered = this->gathered();
     full_update();
-    if (!m_all.nrow_in_use()) {
+    if (!gathered.nrow_in_use()) {
         logging::info("No MBFs were selected to form a deterministic subspace for root {}", m_iroot);
         return;
     }
-    logging::info("Forming a deterministic subspace with {} MBFs", m_all.nrow_in_use());
+    logging::info("Forming a deterministic subspace with {} MBFs", gathered.nrow_in_use());
     suite::Conns conns_work(m_wf.m_sector.size());
     auto &conn_work = conns_work[m_local_row.m_mbf];
     uint_t nconn_ham = 0ul;
@@ -89,7 +91,7 @@ void DeterministicSubspace::make_connections(const Hamiltonian &ham, const Bilin
         ++iirow;
         m_local_row.jump(irec);
         // loop over local subspace (H rows)
-        auto& all_row = m_all.m_row;
+        auto& all_row = gathered.m_row;
         for (all_row.restart(); all_row; ++all_row) {
             // loop over full subspace (H columns)
             // only add to sparse H if dets are connected
@@ -137,7 +139,7 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const shared_rows::Wal
 }
 
 void DeterministicSubspace::project(double tau) {
-    auto &all_row = m_all.m_row;
+    auto &row = gathered().m_row;
     uint_t iirec = ~0ul;
     // loop over row indices in the portion of the wavefunction stored on this rank
     for (auto irec: m_irecs) {
@@ -146,11 +148,11 @@ void DeterministicSubspace::project(double tau) {
         walker.jump(irec);
         v_t<wf_t> delta(m_wf.npart(), 0.0);
         for (const auto& elem: m_ham_matrix[iirec]){
-            all_row.jump(elem.m_i);
+            row.jump(elem.m_i);
             // one replica or two
             for (const auto &ipart: m_iparts) {
                 // update the walker population locally due to coeffs from all connected deterministic MBFs
-                const auto coeff = all_row.m_weight[ipart];
+                const auto coeff = row.m_weight[ipart];
                 delta[ipart] -= tau * elem.m_v * coeff;
             }
         }

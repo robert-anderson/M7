@@ -26,7 +26,7 @@ public:
     static constexpr uint_t c_nbit_word = CHAR_BIT * c_nbyte_word;
 
     /**
-     * class representing the portion of a buffer alloted to a single table
+     * class representing the portion of a buffer allotted to a single table
      */
     class Window {
         friend class Buffer;
@@ -60,6 +60,10 @@ public:
          * number of bytes currently allotted to the window
          */
         uint_t m_size = 0ul;
+
+        bool node_shared() const {return m_buffer->m_node_shared;}
+
+        bool i_can_modify() const {return !node_shared() || mpi::on_node_i_am_root();}
 
         Window(uint_t row_size=1): m_row_size(row_size) {}
 
@@ -126,7 +130,7 @@ public:
     /**
      * determines whether the buffer is held in node-shared or rank-private memory
      */
-    const bool m_shared;
+    const bool m_node_shared;
 private:
     /**
      * begin pointer of the allocated memory
@@ -151,9 +155,9 @@ private:
     v_t<Window *> m_windows;
 
 public:
-    Buffer(str_t name, uint_t nwindow_max, bool shared=false);
+    Buffer(str_t name, uint_t nwindow_max, bool node_shared=false);
 
-    Buffer(uint_t nwindow_max, bool shared=false) : Buffer("", nwindow_max, shared){}
+    Buffer(uint_t nwindow_max, bool node_shared=false) : Buffer("", nwindow_max, node_shared){}
 
     uint_t size() const;
 

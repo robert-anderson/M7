@@ -87,6 +87,10 @@ public:
         return is_deref_valid();
     }
 
+    bool i_can_modify() const {
+        return m_table && m_table->m_bw.i_can_modify();
+    }
+
     /**
      * @return
      * record position within Table
@@ -183,8 +187,8 @@ public:
     }
 
     void copy_in(const Row &other) {
-        ASSERT(other.m_size == m_size);
-        std::copy(other.begin(), other.begin() + m_size, begin());
+        DEBUG_ASSERT_EQ(other.m_size, m_size, "incompatible row sizes for copy");
+        if (i_can_modify()) std::copy(other.begin(), other.begin() + m_size, begin());
     }
 
     Row() {}

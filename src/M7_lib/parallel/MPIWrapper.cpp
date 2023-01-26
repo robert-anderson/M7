@@ -71,7 +71,7 @@ void mpi::finalize() {
     }
 }
 
-bool mpi::i_am(const uint_t& i) {
+bool mpi::i_am(uint_t i) {
     return irank() == i;
 }
 
@@ -79,12 +79,16 @@ bool mpi::i_am_root() {
     return i_am(0);
 }
 
-bool mpi::on_node_i_am(const uint_t& i) {
+bool mpi::on_node_i_am(uint_t i) {
     return irank_on_node() == i;
 }
 
 bool mpi::on_node_i_am_root() {
     return on_node_i_am(0);
+}
+
+bool mpi::is_node_root(uint_t irank) {
+    return g_root_on_node[irank];
 }
 
 void mpi::abort_(str_t message) {
@@ -125,6 +129,7 @@ void mpi::setup_mpi_globals() {
     g_nrank_on_node = tmp;
     MPI_Comm_rank(g_node_comm, &tmp);
     g_irank_on_node = tmp;
+    mpi::all_gather(char(on_node_i_am_root()), g_root_on_node);
 }
 
 void mpi::blocking_print(const str_t &str) {
@@ -153,11 +158,11 @@ uintv_t mpi::filter(bool cond) {
     return ranks;
 }
 
-
 uint_t g_irank = 0;
 uint_t g_nrank = 1;
 str_t g_processor_name = "";
 MPI_Comm g_node_comm;
 uint_t g_irank_on_node = 0;
 uint_t g_nrank_on_node = 1;
+v_t<char> g_root_on_node = {};
 int g_p2p_tag = 0;

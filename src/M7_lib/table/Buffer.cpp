@@ -26,7 +26,7 @@ Buffer::Window &Buffer::Window::operator=(const Buffer::Window &other) {
      * allocate enough memory for the copied records if needed
      */
     if (m_size < nbyte_cpy) Buffer::Window::resize(nbyte_cpy);
-    std::memcpy(m_begin, other.m_begin, nbyte_cpy);
+    if (i_can_modify()) std::memcpy(m_begin, other.m_begin, nbyte_cpy);
     m_size = nbyte_cpy;
     m_end = m_begin + m_size;
     m_nrow = m_size / m_row_size;
@@ -46,14 +46,14 @@ bool Buffer::Window::allocated() const {
 
 void Buffer::Window::clear() {
     if (!allocated()) return;
-    std::memset(m_begin, 0, size_in_use());
+    if (i_can_modify()) std::memset(m_begin, 0, size_in_use());
     m_hwm = m_begin;
 }
 
 void Buffer::Window::move(buf_t *begin, uint_t new_size) {
     DEBUG_ASSERT_TRUE(begin, "moving to invalid buffer pointer");
     const auto nbyte_hwm = std::distance(m_begin, m_hwm);
-    if (m_begin) std::memmove(begin, m_begin, std::min(new_size, m_size));
+    if (m_begin && i_can_modify()) std::memmove(begin, m_begin, std::min(new_size, m_size));
     m_begin = begin;
     m_size = new_size;
     m_hwm = m_begin + nbyte_hwm;
@@ -75,10 +75,10 @@ double Buffer::Window::get_expansion_factor() const {
     return m_buffer->m_expansion_factor;
 }
 
-Buffer::Buffer(str_t name, uint_t nwindow_max, bool shared) :
-        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_shared(shared) {
+Buffer::Buffer(str_t name, uint_t nwindow_max, bool node_shared) :
+        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_node_shared(node_shared) {
     if (!name.empty()) logging::info_("Creating {} buffer \"{}\"",
-                                      shared ? "node-shared" : "rank-private", name);
+                                      node_shared ? "node-shared" : "rank-private", name);
     REQUIRE_TRUE(nwindow_max, "A buffer must allow at least one window");
     m_windows.reserve(m_nwindow_max);
 }
@@ -138,7 +138,7 @@ void Buffer::resize(uint_t new_size, double factor) {
     /*
      * handle the shared and private cases separately
      */
-    if (m_shared) {
+    if (m_node_shared) {
         SharedArrayBase tmp(new_size, 1);
         tmp_ptr = tmp.m_data;
         move_windows_fn(tmp_ptr);

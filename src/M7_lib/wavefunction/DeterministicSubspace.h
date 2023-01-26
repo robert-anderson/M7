@@ -104,12 +104,12 @@ public:
     void project(double tau);
 
     void save(const hdf5::NodeWriter& nw) const {
-        m_all.m_row.m_mbf.save(nw,  logging::format("root_{}", m_iroot), true);
+        gathered().m_row.m_mbf.save(nw,  logging::format("root_{}", m_iroot), true);
     }
 
     void load(const hdf5::NodeReader& /*nr*/) const {
 //        using namespace hdf5::dataset;
-//        buffered::Table<SingleFieldRow<Mbf>> load_table("detsub loader", SingleFieldRow<Mbf>(m_all.m_row.m_mbf));
+//        buffered::Table<SingleFieldRow<Mbf>> load_table("detsub loader", SingleFieldRow<Mbf>(all().m_row.m_mbf));
 //        /*
 //         *
 //        typedef std::function<buf_t*(const ListFormat& format, uint_t max_nitem_per_op)> load_prep_fn;
@@ -126,7 +126,7 @@ public:
 //        nr.load_dataset(logging::format("root_{}", m_iroot), hdf5::dataset::load_prep_fn);
 //        load_table.m_row.m_field.load()
 //        load_table.load()
-//        m_all.m_row.m_mbf.save(nw,  logging::format("root_{}", m_iroot), true);
+//        m_gathered.m_row.m_mbf.save(nw,  logging::format("root_{}", m_iroot), true);
     }
 };
 

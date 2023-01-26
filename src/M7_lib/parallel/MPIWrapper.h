@@ -163,6 +163,7 @@ extern str_t g_processor_name;
 extern MPI_Comm g_node_comm;
 extern uint_t g_irank_on_node;
 extern uint_t g_nrank_on_node;
+extern v_t<char> g_root_on_node;
 extern int g_p2p_tag;
 
 namespace mpi {
@@ -172,19 +173,19 @@ namespace mpi {
 
     void setup_mpi_globals();
 
-    static const uint_t &nrank() {
+    static uint_t nrank() {
         return g_nrank;
     }
 
-    static const uint_t &irank() {
+    static uint_t irank() {
         return g_irank;
     }
 
-    static const uint_t &nrank_on_node() {
+    static uint_t nrank_on_node() {
         return g_nrank_on_node;
     }
 
-    static const uint_t &irank_on_node() {
+    static uint_t irank_on_node() {
         return g_irank_on_node;
     }
 
@@ -200,13 +201,15 @@ namespace mpi {
      * NODE INDEXING
      */
 
-    bool i_am(const uint_t &i);
+    bool i_am(uint_t irank);
 
-    bool on_node_i_am(const uint_t &i);
+    bool on_node_i_am(uint_t irank);
 
     bool i_am_root();
 
     bool on_node_i_am_root();
+
+    bool is_node_root(uint_t irank);
 
     void barrier();
 
@@ -575,7 +578,7 @@ namespace mpi {
 
     template<typename T>
     static bool gather(
-            const T *send, uint_t sendcount, T *recv, uint_t recvcount, const uint_t &iroot) {
+            const T *send, uint_t sendcount, T *recv, uint_t recvcount, uint_t iroot) {
         auto send_ptr = reinterpret_cast<void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Gather(send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr,
@@ -606,7 +609,7 @@ namespace mpi {
     template<typename T>
     static bool gatherv(
             const T *send, const count_t &sendcount,
-            T *recv, const count_t *recvcounts, const count_t *recvdispls, const uint_t &iroot) {
+            T *recv, const count_t *recvcounts, const count_t *recvdispls, uint_t iroot) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Gatherv(
@@ -627,7 +630,7 @@ namespace mpi {
 
     template<typename T>
     static bool gatherv(const T *send, uint_t sendcount, T *recv,
-                        const uintv_t &recvcounts, const uintv_t &recvdispls, const uint_t &iroot) {
+                        const uintv_t &recvcounts, const uintv_t &recvdispls, uint_t iroot) {
         auto tmp_recvcounts = snrw(recvcounts);
         auto tmp_recvdispls = snrw(recvdispls);
         return gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data(), iroot);
@@ -682,7 +685,7 @@ namespace mpi {
 
     template<typename T>
     static bool scatter(
-            const T *send, uint_t sendcount, T *recv, uint_t recvcount, const uint_t &iroot) {
+            const T *send, uint_t sendcount, T *recv, uint_t recvcount, uint_t iroot) {
         auto send_ptr = reinterpret_cast<void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Scatter(send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr,
@@ -692,7 +695,7 @@ namespace mpi {
     template<typename T>
     static bool scatterv(
             const T *send, const count_t *sendcounts, const count_t *senddispls,
-            T *recv, const count_t &recvcount, const uint_t &iroot) {
+            T *recv, const count_t &recvcount, uint_t iroot) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Scatterv(
@@ -702,7 +705,7 @@ namespace mpi {
 
     template<typename T>
     static bool scatterv(const T *send, const uintv_t sendcounts, const uintv_t &senddispls,
-                         T *recv, const uint_t &recvcount, const uint_t &iroot) {
+                         T *recv, uint_t recvcount, uint_t iroot) {
         auto tmp_sendcounts = snrw(sendcounts);
         auto tmp_senddispls = snrw(senddispls);
         return gatherv(send, tmp_sendcounts, tmp_senddispls, recv, snrw(recvcount), iroot);

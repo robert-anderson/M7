@@ -51,7 +51,7 @@ public:
               const Wavefunction &wf, uint_t ipart, TableBase::Loc loc);
 
     uint_t occupied_ncycle(const uint_t& icycle) const {
-        return m_all.m_row.occupied_ncycle(icycle);
+        return gathered().m_row.occupied_ncycle(icycle);
     }
 
     /**

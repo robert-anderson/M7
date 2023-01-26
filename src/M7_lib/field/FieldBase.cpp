@@ -38,15 +38,6 @@ bool FieldBase::belongs_to_row(const Row& row) const {
     return belongs_to_row(&row);
 }
 
-buf_t *FieldBase::begin() const {
-    DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
-    return m_row->begin() + m_row_offset;
-}
-
-buf_t *FieldBase::end() const {
-    return begin() + m_size;
-}
-
 const Row *FieldBase::row() const {
     return m_row;
 }
