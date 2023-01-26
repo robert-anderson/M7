@@ -46,7 +46,7 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
     /**
      * the key field of the store table determines the block, and therefore MPI rank index, to which the row belongs
      */
-    typedef typename KeyField<row_t>::type key_field_t;
+    typedef typename row_fields::Key<row_t>::type key_field_t;
     /**
      * current allocation of load balancing blocks to MPI rank indices
      */

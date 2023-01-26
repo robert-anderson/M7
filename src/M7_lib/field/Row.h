@@ -236,16 +236,43 @@ public:
 
 };
 
-template<typename row_t>
-struct KeyField {
-    static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
-    typedef typename std::remove_reference<typename std::result_of<decltype(&row_t::key_field)(
-            row_t)>::type>::type type;
+/**
+ * structs and methods for extracting types and references of special fields in a Row definition
+ */
+namespace row_fields {
 
-    static type &get(row_t &row) { return row.key_field(); }
+    template<typename row_t>
+    struct Key {
+        static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
+        typedef typename std::remove_reference<
+                typename std::result_of<decltype(&row_t::key_field)(row_t)>::type>::type type;
 
-    static const type &get(const row_t &row) { return const_cast<row_t &>(row).key_field(); }
-};
+        static type& get(row_t& row) { return row.key_field(); }
+
+        static const type& get(const row_t& row) { return const_cast<row_t&>(row).key_field(); }
+    };
+
+    template<typename row_t>
+    struct Value {
+        static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
+        typedef typename std::remove_reference<
+                typename std::result_of<decltype(&row_t::value_field)(row_t)>::type>::type type;
+
+        static type& get(row_t& row) { return row.value_field(); }
+
+        static const type& get(const row_t& row) { return const_cast<row_t&>(row).value_field(); }
+    };
+
+    template<typename row_t>
+    const typename Key<row_t>::type& key(const row_t& row) {
+        return Key<row_t>::get(row);
+    }
+
+    template<typename row_t>
+    const typename Value<row_t>::type& value(const row_t& row) {
+        return Value<row_t>::get(row);
+    }
+}
 
 
 template<typename field_t>

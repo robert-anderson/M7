@@ -7,6 +7,7 @@ target_sources(unittest
         Communicator.cpp
         CommuniatorNew.cpp
         DynamicRowSet.cpp
+        GlobalAccumulation.cpp
         MappedTable.cpp
         Table.cpp
         TableTest.h

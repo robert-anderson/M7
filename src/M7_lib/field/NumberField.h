@@ -315,6 +315,7 @@ public:
  * no practical use for this class - included only for testing
  */
 struct StringField : NdNumberField<char, 1ul> {
+    using NdNumberField<char, 1ul>::operator==;
     typedef NdNumberField<char, 1ul> base_t;
     StringField(Row *row, uint_t length, const str_t& name = "", bool force_own_words=false);
 

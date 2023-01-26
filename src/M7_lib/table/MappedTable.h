@@ -106,7 +106,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
     /**
      * won't compile unless the row defines a key_field_t;
      */
-    typedef typename KeyField<row_t>::type key_field_t;
+    typedef typename row_fields::Key<row_t>::type key_field_t;
 
     using Table<row_t>::to_string;
     using Table<row_t>::m_row;
@@ -150,7 +150,7 @@ private:
         Lookup res = {bucket, bucket.cbefore_begin()};
         for (auto current = std::next(res.m_prev); current != bucket.cend(); current++) {
             row.jump(*current);
-            if (KeyField<row_t>::get(row) == key) return res;
+            if (row_fields::key(row) == key) return res;
             res.m_prev++;
             m_nskip_total++;
         }
@@ -204,7 +204,7 @@ public:
 
     void clear_row(row_t& row) {
         DEBUG_ASSERT_TRUE(Table<row_t>::associated(row), "row object not associated with this table");
-        auto lookup = this->lookup(KeyField<row_t>::get(row), row);
+        auto lookup = this->lookup(row_fields::key(row), row);
         erase(lookup);
     }
 
@@ -256,8 +256,7 @@ public:
     }
 
     void insert(const row_t& src, row_t& row) {
-        auto& key = KeyField<row_t>::get(src);
-        insert(key, row);
+        insert(row_fields::key(src), row);
         row.copy_in(src);
     }
 
@@ -278,7 +277,7 @@ private:
         DEBUG_ASSERT_FALSE(TableBase::m_is_freed_row[irow], "cannot map to a freed slot");
         auto& row = m_insert_row;
         row.jump(irow);
-        const auto& key = KeyField<row_t>::get(row);
+        const auto& key = row_fields::key(row);
         // row mustn't have already been added
         DEBUG_ASSERT_FALSE(uncounted_lookup(key, buckets, m_row),
                            "cannot map to a row which is already in the hash table");
