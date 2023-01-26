@@ -295,6 +295,7 @@ namespace conf {
         Param<uint_t> m_ndraw_min_for_dynamic;
         Param<uint_t> m_period;
         GuideWavefunction m_imp_samp_guide;
+        Param<bool> m_c2_c4_initiator;
         Semistochastic m_semistochastic;
 
         explicit Propagator(Group *parent);

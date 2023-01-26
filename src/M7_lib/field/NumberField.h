@@ -339,6 +339,7 @@ template<typename T>
 struct NumberField : NdNumberField<T, 0ul> {
     typedef NdNumberField<T, 0ul> base_t;
     using base_t::operator=;
+    using base_t::operator+=;
 
     NumberField(Row *row, str_t name = "", bool force_own_words=false) :
         base_t(row, {}, name, force_own_words) {}

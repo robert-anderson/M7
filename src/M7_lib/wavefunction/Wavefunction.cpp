@@ -102,7 +102,7 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
             std::to_string(row.index()),
             row.m_mbf.to_string(),
             convert::to_string(row.m_weight[ipart], 6),
-            convert::to_string(row.is_initiator(ipart, m_opts.m_propagator.m_nadd)),
+            "TODO", //convert::to_string(row.is_initiator(ipart, m_opts.m_propagator.m_nadd)),
             convert::to_string(bool(row.m_deterministic[iroot_part(ipart)])),
             convert::to_string(m_dist.irank(row.m_mbf))
         });

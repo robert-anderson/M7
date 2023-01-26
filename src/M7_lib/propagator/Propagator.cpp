@@ -19,7 +19,7 @@ std::unique_ptr<guide::Wavefunction> Propagator::make_imp_samp_guide(const conf:
     return nullptr;
 }
 
-void Propagator::update(const uint_t& icycle, const Wavefunction& wf) {
+void Propagator::update(uint_t icycle, const Wavefunction& wf) {
     m_shift.update(wf, icycle, tau());
 }
 

@@ -246,10 +246,12 @@ namespace row_fields {
         static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
         typedef typename std::remove_reference<
                 typename std::result_of<decltype(&row_t::key_field)(row_t)>::type>::type type;
+        // remove const from row type if needed
+        typedef typename dtype::remove_const_ref_t<row_t>::type clean_row_t;
 
-        static type& get(row_t& row) { return row.key_field(); }
+        static type& get(clean_row_t& row) { return row.key_field(); }
 
-        static const type& get(const row_t& row) { return const_cast<row_t&>(row).key_field(); }
+        static const type& get(const clean_row_t& row) { return const_cast<row_t&>(row).key_field(); }
     };
 
     template<typename row_t>
@@ -257,10 +259,12 @@ namespace row_fields {
         static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
         typedef typename std::remove_reference<
                 typename std::result_of<decltype(&row_t::value_field)(row_t)>::type>::type type;
+        // remove const from row type if needed
+        typedef typename dtype::remove_const_ref_t<row_t>::type clean_row_t;
 
-        static type& get(row_t& row) { return row.value_field(); }
+        static type& get(clean_row_t& row) { return row.value_field(); }
 
-        static const type& get(const row_t& row) { return const_cast<row_t&>(row).value_field(); }
+        static const type& get(const clean_row_t& row) { return const_cast<row_t&>(row).value_field(); }
     };
 
     template<typename row_t>
@@ -269,7 +273,17 @@ namespace row_fields {
     }
 
     template<typename row_t>
+    typename Key<row_t>::type& key(row_t& row) {
+        return Key<row_t>::get(row);
+    }
+
+    template<typename row_t>
     const typename Value<row_t>::type& value(const row_t& row) {
+        return Value<row_t>::get(row);
+    }
+
+    template<typename row_t>
+    typename Value<row_t>::type& value(row_t& row) {
         return Value<row_t>::get(row);
     }
 }

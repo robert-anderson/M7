@@ -4,6 +4,8 @@ target_sources(M7_lib
         DeterministicSubspace.h
         FciInitializer.cpp
         FciInitializer.h
+        HartreeFock.cpp
+        HartreeFock.h
         HfC2Accumulation.cpp
         HfC2Accumulation.h
         Reference.cpp

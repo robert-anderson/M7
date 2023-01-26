@@ -22,7 +22,7 @@ StochLinear::StochLinear(const Hamiltonian& ham, const conf::Document& opts,
 }
 
 
-void StochLinear::diagonal(Wavefunction& wf, Walker& walker, const uint_t& ipart) {
+void StochLinear::diagonal(Wavefunction& wf, Walker& walker, uint_t ipart) {
     bool flag_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
     const ham_comp_t& hdiag = walker.m_hdiag;
     if (flag_deterministic) {
@@ -42,7 +42,7 @@ void StochLinear::diagonal(Wavefunction& wf, Walker& walker, const uint_t& ipart
     }
 }
 
-void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uint_t& ipart) {
+void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, uint_t ipart, bool initiator) {
     const wf_t& weight = walker.m_weight[ipart];
     /*
      * for bilinear estimators based on the consolidated annihilation of spawned contributions
@@ -53,7 +53,6 @@ void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uin
     DEBUG_ASSERT_TRUE(m_ham.complex_valued() || fptol::near_real(weight),
                       "real-valued hamiltonian should never result in non-zero imaginary walker component")
     const auto& src_mbf = walker.m_mbf;
-    bool is_initiator = walker.is_initiator(ipart, m_nadd_initiator);
     bool flag_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
 
     const wf_comp_t abs_weight = std::abs(weight);
@@ -131,7 +130,7 @@ void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uin
 
             p_succeed_at_least_once = 1.0 - p_fail_all_attempts;
         }
-        wf.add_spawn(dst_mbf, thresh_delta, is_initiator, flag_deterministic,
+        wf.add_spawn(dst_mbf, thresh_delta, initiator, flag_deterministic,
                      ipart, src_mbf, weight / p_succeed_at_least_once);
     }
 }
@@ -144,7 +143,7 @@ v_t<prob_t> StochLinear::excit_gen_case_probs() const {
     return m_excit_gen_group.get_probs();
 }
 
-void StochLinear::update(const uint_t& icycle, const Wavefunction& wf) {
+void StochLinear::update(uint_t icycle, const Wavefunction& wf) {
     Propagator::update(icycle, wf);
     m_mag_log.update(icycle, m_tau, m_excit_gen_group);
 }

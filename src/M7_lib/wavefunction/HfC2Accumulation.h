@@ -12,12 +12,13 @@
 namespace hf_excit_coeffs{
     struct Row : ::Row {
         field::MaeInds m_excit_inds;
-        field::Number<wf_t> m_weight;
-        Row(): m_excit_inds(this, opsig::c_doub, "excit_indices"), m_weight(this){}
+        field::Numbers<wf_t, c_ndim_wf> m_weight;
+        Row(NdFormat<c_ndim_wf> format):
+            m_excit_inds(this, opsig::c_doub, "excit_indices"), m_weight(this, format){}
         field::MaeInds &key_field() {
             return m_excit_inds;
         };
-        field::Number<wf_t> &value_field() {
+        field::Numbers<wf_t, c_ndim_wf> &value_field() {
             return m_weight;
         };
     };
@@ -28,8 +29,15 @@ namespace hf_excit_coeffs{
         mutable conn::Mbf m_work_conn;
         mutable buffered::MaeInds m_work_key;
         HfExcitCoeffs(const shared_rows::Walker* hf):
-            GlobalAccumulation<Row>("HF excit coeffs", {}), m_hf(hf),
+            GlobalAccumulation<Row>("HF excit coeffs", {hf->gathered().m_row.m_mbf.m_format}), m_hf(hf),
             m_work_conn(hf->mbf().m_basis), m_work_key(opsig::c_doub){}
+
+        void add(const Walker& walker) {
+            m_work_conn.connect(m_hf->mbf(), walker.m_mbf);
+            if (m_work_conn.exsig()!=opsig::c_doub) return;
+            m_work_key = m_work_conn;
+            GlobalAccumulation<Row>::add(m_work_key, walker.m_weight);
+        }
 
     private:
         template<typename fn_t>
@@ -93,7 +101,7 @@ namespace hf_excit_coeffs{
                 tot += par ? -prod : prod;
             };
             predict_loop(fn);
-            return 0.5*tot;
+            return tot / (2*naccum()*naccum());
         }
 
         wf_t predict(const field::BosOnv&) const {

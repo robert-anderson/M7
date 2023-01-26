@@ -23,8 +23,8 @@ public:
 
     void add(const key_field_t& key, const value_field_t& value) {
         static_cast<Row&>(m_deltas.m_row).push_back_jump();
-        m_deltas.m_row.m_key = key;
-        m_deltas.m_row.m_value = value;
+        row_fields::key(m_deltas.m_row) = key;
+        row_fields::value(m_deltas.m_row) = value;
     }
 
     void update() {
@@ -36,7 +36,7 @@ public:
         for (delta.restart(); delta; ++delta){
             auto& row = m_current.lookup(key);
             if (!row) m_current.insert(key, row);
-            row.m_value += value;
+            row_fields::value(row) += value;
         }
         ++m_naccum;
     }

@@ -52,9 +52,9 @@ public:
 
     virtual ~Propagator() {}
 
-    virtual void diagonal(Wavefunction &wf, Walker& walker, const uint_t &ipart) = 0;
+    virtual void diagonal(Wavefunction &wf, Walker& walker, uint_t ipart) = 0;
 
-    virtual void off_diagonal(Wavefunction &wf, const Walker& walker, const uint_t &ipart) = 0;
+    virtual void off_diagonal(Wavefunction &wf, const Walker& walker, uint_t ipart, bool initiator) = 0;
 
     virtual ham_t round(const ham_t &weight) {
         return weight;
@@ -64,7 +64,7 @@ public:
         return m_tau;
     }
 
-    virtual void update(const uint_t &icycle, const Wavefunction &wf);
+    virtual void update(uint_t icycle, const Wavefunction &wf);
 
     virtual uint_t ncase_excit_gen() const {
         return 0;

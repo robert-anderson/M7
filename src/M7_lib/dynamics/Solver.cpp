@@ -4,7 +4,7 @@
 
 #include "Solver.h"
 
-std::unique_ptr<shared_rows::Walker> Solver::make_hf() const {
+std::unique_ptr<HartreeFock> Solver::make_hf() const {
     /*
      * even if there is no true HF determinant, we need to treat the initial ref as one for averaged excits or when
      * this behaviour is explicitly requested in the configuration document
@@ -15,7 +15,7 @@ std::unique_ptr<shared_rows::Walker> Solver::make_hf() const {
      */
     if (force_hf || m_prop.m_ham.has_brillouin_theorem(m_refs[0].mbf())) {
         const TableBase::Loc loc(m_refs[0].irec());
-        return ptr::smart::make_unique<shared_rows::Walker>("Hartree-Fock ONV", m_wf.m_store, loc);
+        return ptr::smart::make_unique<HartreeFock>(m_wf.m_store, loc);
     }
     return nullptr;
 }
@@ -245,6 +245,7 @@ void Solver::loop_over_occupied_mbfs() {
 
         m_refs.contrib_row(walker);
         m_inst_ests.make_numerator_contribs(walker);
+        if (m_hf && m_opts.m_propagator.m_c2_c4_initiator.m_value) m_hf->m_accum.add(walker);
 
         m_wf.m_nocc_mbf.m_local++;
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
@@ -256,7 +257,8 @@ void Solver::loop_over_occupied_mbfs() {
 
             const auto &weight = walker.m_weight[ipart];
 
-            if (walker.is_initiator(ipart, m_opts.m_propagator.m_nadd)) m_wf.m_ninitiator.m_local[ipart]++;
+            bool initiator = is_initiator(walker, ipart);
+            if (initiator) m_wf.m_ninitiator.m_local[ipart]++;
 
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
@@ -266,7 +268,7 @@ void Solver::loop_over_occupied_mbfs() {
 //                m_spawning_timer.reset();
 //                m_spawning_timer.unpause();
 //            }
-            propagate_row(walker, ipart);
+            propagate_row(walker, ipart, initiator);
 //            if (m_wf.m_ra.is_active()) {
 //                m_spawning_timer.pause();
 //                m_wf.m_ra.record_work_time(row, m_spawning_timer);
@@ -305,10 +307,10 @@ void Solver::loop_over_spawned() {
     m_wf.recv().clear();
 }
 
-void Solver::propagate_row(Walker& walker, uint_t ipart) {
+void Solver::propagate_row(Walker& walker, uint_t ipart, bool initiator) {
     if (walker.is_freed()) return;
     if (walker.m_weight[ipart] == 0.0) return;
-    m_prop.off_diagonal(m_wf, walker, ipart);
+    m_prop.off_diagonal(m_wf, walker, ipart, initiator);
     m_prop.diagonal(m_wf, walker, ipart);
 }
 
