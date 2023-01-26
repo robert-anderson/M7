@@ -245,7 +245,7 @@ void Solver::loop_over_occupied_mbfs() {
 
         m_refs.contrib_row(walker);
         m_inst_ests.make_numerator_contribs(walker);
-        if (m_hf && m_opts.m_propagator.m_c2_c4_initiator.m_value) m_hf->m_accum.add(walker);
+        if (m_hf && m_opts.m_propagator.m_c2_c4_initiator.m_enabled) m_hf->m_accum.add(walker);
 
         m_wf.m_nocc_mbf.m_local++;
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
@@ -316,8 +316,9 @@ void Solver::propagate_row(Walker& walker, uint_t ipart, bool initiator) {
 
 bool Solver::is_initiator(const Walker& walker, uint_t ipart) {
     if (walker.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd)) return true;
-    if (m_hf && m_opts.m_propagator.m_c2_c4_initiator.m_value) {
-        return m_hf->m_accum.is_initiator(ipart, walker);
+    const auto& c2_c4_section = m_opts.m_propagator.m_c2_c4_initiator;
+    if (m_hf && c2_c4_section.m_enabled) {
+        return m_hf->m_accum.is_initiator(ipart, walker, c2_c4_section.m_fac);
     }
     return false;
 }

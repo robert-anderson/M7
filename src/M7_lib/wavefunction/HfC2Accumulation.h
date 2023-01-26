@@ -71,13 +71,13 @@ namespace hf_excit_coeffs{
         }
 
     public:
-        bool predict(const field::FrmOnv& mbf, wf_t& c4) const {
+        bool predict(const field::FrmOnv& mbf, wf_t& v) const {
             m_work_conn.connect(m_hf->mbf(), mbf);
             const auto exsig = m_work_conn.exsig();
             if (exsig != opsig::c_quad) return false;
             auto& conn = m_work_conn;
             auto& key = m_work_key.m_frm;
-            c4 = 0.0;
+            v = 0.0;
             auto fn = [&](uinta_t<8> inds, bool par) {
                 wf_t prod;
                 // first pair of inds are creation
@@ -101,10 +101,25 @@ namespace hf_excit_coeffs{
                     auto lookup_row = current().lookup(m_work_key);
                     prod *= lookup_row ? lookup_row.m_weight[0] : 0.0;
                 }
-                c4 += par ? -prod : prod;
+                v += par ? -prod : prod;
             };
             predict_loop(fn);
-            c4 /= (2*naccum()*naccum());
+            /*
+             * in intermediate normalization:
+             * c4 ~= 0.5 * c2^2
+             * let nk be the number of walkers arrays for an excitation level k
+             * v contains (n2 x naccum)^2 (naccum is number of samples)
+             */
+            v /= naccum() * naccum();
+            /*
+             * v now contains n2^2
+             * ck = nk / n0
+             * nk = n0 * ck
+             *
+             * n4 ~= 0.5 * n0 * (n2 / n0)^2
+             * n4 ~= n2^2 / (2*n0)
+             */
+            v /= m_hf->weight(0);
             return true;
         }
 
@@ -115,16 +130,18 @@ namespace hf_excit_coeffs{
             return 0.0;
         }
 
-        bool is_initiator(uint_t ipart, const Walker& walker) {
+        bool is_initiator(uint_t ipart, const Walker& walker, double fac) {
             wf_t p;
             auto is_c4 = predict(walker.m_mbf, p);
-            const auto weight = walker.m_weight[ipart];
             if (!is_c4) return false;
+            const auto weight = walker.m_weight[ipart];
             m_total_c4_l1.m_local += std::abs(weight);
             if (!p) return false;
             const auto coherent = (p>0)==(weight>0);
             if (coherent) m_coherent_c4_l1.m_local += std::abs(weight);
-            return coherent;
+            else return false;
+            // if the weight is larger than the prediction by fac, let walker be initiator
+            return std::abs(weight) >= fac * std::abs(p);
         }
 
         void update() {
