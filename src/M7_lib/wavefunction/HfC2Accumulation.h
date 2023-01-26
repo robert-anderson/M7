@@ -58,7 +58,7 @@ namespace hf_excit_coeffs{
                 uinta_t<8> inds;
                 std::copy(cre_inds.cbegin(), cre_inds.cend(), inds.begin());
                 auto fn_inner = [&](uinta_t<4> ann_inds, bool ann_par) {
-                    auto par = cre_par==ann_par;
+                    auto par = (cre_par!=ann_par);
                     std::copy(ann_inds.cbegin(), ann_inds.cend(), inds.begin()+4);
                     fn(inds, par);
                 };
