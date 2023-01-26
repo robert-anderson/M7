@@ -150,7 +150,6 @@ namespace hf_excit_coeffs{
             else return false;
             // if the weight is larger than the prediction by fac, let walker be initiator
             return std::abs(weight) >= fac * std::abs(p);
-#endif
         }
 
         void update() {
