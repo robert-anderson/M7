@@ -72,12 +72,12 @@ namespace hf_excit_coeffs{
 
     public:
         bool predict(const field::FrmOnv& mbf, wf_t& v) const {
+            v = 0.0;
             m_work_conn.connect(m_hf->mbf(), mbf);
             const auto exsig = m_work_conn.exsig();
             if (exsig != opsig::c_quad) return false;
             auto& conn = m_work_conn;
             auto& key = m_work_key.m_frm;
-            v = 0.0;
             auto fn = [&](uinta_t<8> inds, bool par) {
                 wf_t prod;
                 // first pair of inds are creation
@@ -130,10 +130,12 @@ namespace hf_excit_coeffs{
             return 0.0;
         }
 
-        bool is_initiator(uint_t ipart, const Walker& walker, double fac) {
+        bool is_initiator(const Walker& walker, double fac) {
             wf_t p;
             auto is_c4 = predict(walker.m_mbf, p);
             if (!is_c4) return false;
+            return std::abs(p) >= fac;
+#if 0
             const auto weight = walker.m_weight[ipart];
             m_total_c4_l1.m_local += std::abs(weight);
             if (!p) return false;
@@ -142,6 +144,7 @@ namespace hf_excit_coeffs{
             else return false;
             // if the weight is larger than the prediction by fac, let walker be initiator
             return std::abs(weight) >= fac * std::abs(p);
+#endif
         }
 
         void update() {
