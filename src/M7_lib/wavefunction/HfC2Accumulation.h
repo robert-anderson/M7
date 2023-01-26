@@ -8,6 +8,7 @@
 #include "M7_lib/table/GlobalAccumulation.h"
 #include "M7_lib/connection/Connections.h"
 #include "M7_lib/communication/SharedRows.h"
+#include "M7_lib/parallel/Reduction.h"
 
 namespace hf_excit_coeffs{
     struct Row : ::Row {
@@ -25,6 +26,8 @@ namespace hf_excit_coeffs{
 
     class HfExcitCoeffs : public GlobalAccumulation<Row> {
     public:
+        Reduction<wf_t> m_coherent_c4_l1;
+        Reduction<wf_t> m_total_c4_l1;
         const shared_rows::Walker* m_hf;
         mutable conn::Mbf m_work_conn;
         mutable buffered::MaeInds m_work_key;
@@ -68,13 +71,13 @@ namespace hf_excit_coeffs{
         }
 
     public:
-        wf_t predict(const field::FrmOnv& mbf) const {
+        bool predict(const field::FrmOnv& mbf, wf_t& c4) const {
             m_work_conn.connect(m_hf->mbf(), mbf);
             const auto exsig = m_work_conn.exsig();
-            if (exsig != opsig::c_quad) return 0.0;
+            if (exsig != opsig::c_quad) return false;
             auto& conn = m_work_conn;
             auto& key = m_work_key.m_frm;
-            wf_t tot = 0.0;
+            c4 = 0.0;
             auto fn = [&](uinta_t<8> inds, bool par) {
                 wf_t prod;
                 // first pair of inds are creation
@@ -98,10 +101,11 @@ namespace hf_excit_coeffs{
                     auto lookup_row = current().lookup(m_work_key);
                     prod *= lookup_row ? lookup_row.m_weight[0] : 0.0;
                 }
-                tot += par ? -prod : prod;
+                c4 += par ? -prod : prod;
             };
             predict_loop(fn);
-            return tot / (2*naccum()*naccum());
+            c4 /= (2*naccum()*naccum());
+            return true;
         }
 
         wf_t predict(const field::BosOnv&) const {
@@ -110,6 +114,25 @@ namespace hf_excit_coeffs{
         wf_t predict(const field::FrmBosOnv&) const {
             return 0.0;
         }
+
+        bool is_initiator(uint_t ipart, const Walker& walker) {
+            wf_t p;
+            auto is_c4 = predict(walker.m_mbf, p);
+            const auto weight = walker.m_weight[ipart];
+            if (!is_c4) return false;
+            m_total_c4_l1.m_local += std::abs(weight);
+            if (!p) return false;
+            const auto coherent = (p>0)==(weight>0);
+            if (coherent) m_coherent_c4_l1.m_local += std::abs(weight);
+            return coherent;
+        }
+
+        void update() {
+            m_coherent_c4_l1.all_sum();
+            m_total_c4_l1.all_sum();
+            GlobalAccumulation<Row>::update();
+        }
+
     };
 
 }

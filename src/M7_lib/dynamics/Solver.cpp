@@ -317,9 +317,7 @@ void Solver::propagate_row(Walker& walker, uint_t ipart, bool initiator) {
 bool Solver::is_initiator(const Walker& walker, uint_t ipart) {
     if (walker.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd)) return true;
     if (m_hf && m_opts.m_propagator.m_c2_c4_initiator.m_value) {
-        auto c4_predict = m_hf->m_accum.predict(walker.m_mbf);
-        if (!c4_predict) return false;
-        if ((c4_predict>0)==(walker.m_weight[0]>0)) return true;
+        return m_hf->m_accum.is_initiator(ipart, walker);
     }
     return false;
 }
@@ -366,6 +364,7 @@ void Solver::output_stats() {
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         if (m_inst_ests.m_spin_square) stats.m_spin_square_num = m_inst_ests.m_spin_square->m_est.m_proj_num.m_reduced;
+        if (m_hf) stats.m_coherent_c4 = m_hf->m_accum.m_coherent_c4_l1.m_reduced/m_hf->m_accum.m_total_c4_l1.m_reduced;
         m_stats->commit();
 
         auto &timing_stats = m_timing_stats->m_row;
