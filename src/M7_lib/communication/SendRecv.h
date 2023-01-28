@@ -151,7 +151,7 @@ public:
                            recv().begin() + recvdispls[mpi::irank()], recvcounts[mpi::irank()]) == 0);
 
         REQUIRE_TRUE_ALL(tmp, "MPI AllToAllV failed");
-        recv().m_bw.m_hwm = recv().begin(m_last_recv_count);
+        recv().m_bw.set_end(m_last_recv_count);
         m_send.clear();
     }
 

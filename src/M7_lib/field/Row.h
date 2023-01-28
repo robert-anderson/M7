@@ -61,15 +61,30 @@ public:
      */
     mutable Row *m_child = nullptr;
 
+    buf_t *begin() {
+        DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
+        DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
+        return m_begin;
+    }
+
+    const buf_t *cbegin() const {
+        DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
+        DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
+        return m_begin;
+    }
+
+    const buf_t* cend() const {return cbegin()+m_size;}
+
     /**
      * the m_begin pointer must be in the range [table begin, table hwm) for valid dereferencing (field access)
      * @return
      *  true if the m_begin pointer is valid with respect to the "in use" range of the table object
      */
     bool is_deref_valid() const {
-        if (!m_table->m_bw.m_begin) return false;
-        DEBUG_ASSERT_TRUE(m_table->m_bw.m_hwm, "buffer window has null HWM pointer");
-        return ptr::in_range(m_begin, m_table->m_bw.m_begin, m_table->m_bw.m_hwm);
+        const auto table_cbegin = m_table->cbegin();
+        if (!table_cbegin) return false;
+        const auto table_cend = m_table->cend();
+        return ptr::in_range(m_begin, table_cbegin, table_cend);
     }
 
     /**
@@ -80,15 +95,11 @@ public:
      *  high water mark) the latter condition is typically fulfilled at the end of a loop over rows
      */
     bool is_valid() const {
-        return (m_begin==m_table->m_bw.m_begin) || is_deref_valid() || m_begin == m_table->m_bw.m_hwm;
+        return (m_begin==m_table->cbegin()) || is_deref_valid() || (m_begin == m_table->cend());
     }
 
     operator bool () const {
         return is_deref_valid();
-    }
-
-    bool i_can_modify() const {
-        return m_table && m_table->m_bw.i_can_modify();
     }
 
     /**
@@ -97,8 +108,7 @@ public:
      */
     uint_t index() const {
         DEBUG_ASSERT_TRUE(is_valid(), "the row is not pointing to memory in the permitted range");
-        const auto begin_offset = std::distance(m_table->m_bw.m_begin, m_begin);
-        return begin_offset / m_size;
+        return std::distance(m_table->cbegin(), cbegin()) / m_size;
     }
 
     /**
@@ -110,7 +120,7 @@ public:
      */
     unsigned long offset(const Row& other) const {
         DEBUG_ASSERT_EQ(m_table, other.m_table, "offset rows must be associated with the same table");
-        const unsigned long n = std::distance(m_begin, other.m_begin)/m_size;
+        const unsigned long n = std::distance(cbegin(), other.cbegin())/m_size;
         DEBUG_ASSERT_EQ(n, other.index() - index(), "incorrect offset");
         return n;
     }
@@ -123,19 +133,7 @@ public:
      */
     bool in_range(uint_t irow_end) const {
         DEBUG_ASSERT_TRUE(is_valid(), "invalid range end given");
-        return ptr::in_range(m_begin, m_table->m_bw.m_begin, m_table->begin(irow_end));
-    }
-
-    buf_t *begin() {
-        DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
-        DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
-        return m_begin;
-    }
-
-    const buf_t *begin() const {
-        DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
-        DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
-        return m_begin;
+        return ptr::in_range(cbegin(), m_table->cbegin(), m_table->cbegin(irow_end));
     }
 
     /*
@@ -144,7 +142,7 @@ public:
     void restart(uint_t irow_begin) const {
         DEBUG_ASSERT_LE(irow_begin, m_table->nrow_in_use(), "Cannot restart to an out-of-range row index");
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
-        if (!m_table->m_bw.m_hwm && !irow_begin){
+        if (!m_table->cend() && !irow_begin){
             m_begin = nullptr;
         } else {
             DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
@@ -188,7 +186,7 @@ public:
 
     void copy_in(const Row &other) {
         DEBUG_ASSERT_EQ(other.m_size, m_size, "incompatible row sizes for copy");
-        if (i_can_modify()) std::copy(other.begin(), other.begin() + m_size, begin());
+        std::copy(other.cbegin(), other.cbegin() + m_size, begin());
     }
 
     Row() {}

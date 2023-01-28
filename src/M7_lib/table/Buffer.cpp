@@ -19,25 +19,37 @@ Buffer::Window::Window(Buffer *buffer, uint_t row_size): Window(row_size) {
 
 Buffer::Window &Buffer::Window::operator=(const Buffer::Window &other) {
     DEBUG_ASSERT_EQ(other.m_row_size, m_row_size, "can't assign to incompatible window");
-    DEBUG_ASSERT_TRUE(m_begin, "this is an unallocated buffer window");
-    DEBUG_ASSERT_TRUE(other.m_begin, "can't assign to an unallocated buffer window");
+    DEBUG_ASSERT_TRUE(cbegin(), "this is an unallocated buffer window");
+    DEBUG_ASSERT_TRUE(other.cbegin(), "can't assign to an unallocated buffer window");
     const auto nbyte_cpy = std::min(other.m_size, m_size);
     /*
      * allocate enough memory for the copied records if needed
      */
     if (m_size < nbyte_cpy) Buffer::Window::resize(nbyte_cpy);
-    if (i_can_modify()) std::memcpy(m_begin, other.m_begin, nbyte_cpy);
+    if (i_can_modify()) std::memcpy(m_begin_ptr, other.cbegin(), nbyte_cpy);
     m_size = nbyte_cpy;
-    m_end = m_begin + m_size;
     m_nrow = m_size / m_row_size;
-    m_hwm = m_begin + other.size_in_use();
+    m_hwm_ptr = m_begin_ptr + other.size_in_use();
     return *this;
 }
 
 bool Buffer::Window::operator==(const Buffer::Window& other) const {
     if (m_size != other.m_size) return false;
     if (size_in_use() != other.size_in_use()) return false;
-    return std::memcmp(m_begin, other.m_begin, size_in_use()) == 0;
+    return std::memcmp(cbegin(), other.cbegin(), size_in_use()) == 0;
+}
+
+void Buffer::Window::set_end(uint_t irow) {
+    DEBUG_ASSERT_LT(irow, m_nrow, "high water mark may not exceed end of allocated memory");
+    m_hwm_ptr = m_begin_ptr + irow * m_row_size;
+}
+
+bool Buffer::Window::node_shared() const {
+    return m_buffer->m_node_shared;
+}
+
+bool Buffer::Window::i_can_modify() const {
+    return m_buffer && (!node_shared() || mpi::on_node_i_am_root());
 }
 
 bool Buffer::Window::allocated() const {
@@ -46,18 +58,17 @@ bool Buffer::Window::allocated() const {
 
 void Buffer::Window::clear() {
     if (!allocated()) return;
-    if (i_can_modify()) std::memset(m_begin, 0, size_in_use());
-    m_hwm = m_begin;
+    if (i_can_modify()) std::memset(begin(), 0, size_in_use());
+    m_hwm_ptr = m_begin_ptr;
 }
 
 void Buffer::Window::move(buf_t *begin, uint_t new_size) {
     DEBUG_ASSERT_TRUE(begin, "moving to invalid buffer pointer");
-    const auto nbyte_hwm = std::distance(m_begin, m_hwm);
-    if (m_begin && i_can_modify()) std::memmove(begin, m_begin, std::min(new_size, m_size));
-    m_begin = begin;
+    const auto nbyte_hwm = std::distance(cbegin(), cend());
+    if (cbegin() && i_can_modify()) std::memmove(begin, m_begin_ptr, std::min(new_size, m_size));
+    m_begin_ptr = begin;
     m_size = new_size;
-    m_hwm = m_begin + nbyte_hwm;
-    m_end = m_begin + m_size;
+    m_hwm_ptr = m_begin_ptr + nbyte_hwm;
     m_nrow = m_size / m_row_size;
 }
 
@@ -94,7 +105,7 @@ uint_t Buffer::window_size() const {
 void Buffer::append_window(Buffer::Window *window) {
     REQUIRE_LT(m_windows.size(), m_nwindow_max, "Buffer is over-subscribed");
     if (size()) {
-        window->m_begin = m_data + window_size() * m_windows.size();
+        window->m_begin_ptr = m_data + window_size() * m_windows.size();
         window->m_size = window_size();
     }
     window->m_buffer = this;
@@ -163,7 +174,7 @@ void Buffer::resize(uint_t new_size, double factor) {
     DEBUG_ASSERT_TRUE(m_data, "new data pointer should be non-null");
     m_size = new_size;
     DEBUG_ASSERT_EQ(m_data, tmp_ptr, "new base ptr was not preserved in move");
-    DEBUG_ASSERT_EQ(m_data, m_windows[0]->m_begin, "first window not pointing at begin of buffer");
+    DEBUG_ASSERT_EQ(m_data, m_windows[0]->cbegin(), "first window not pointing at begin of buffer");
 }
 
 str_t Buffer::capacity_string(uint_t size) const {

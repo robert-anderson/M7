@@ -267,7 +267,7 @@ public:
     }
 
     void gatherv(TableBase& dst, uint_t iroot=0ul) const {
-        REQUIRE_EQ(dst.m_bw.m_row_size, m_lxr.m_field1.m_row->m_size, "incompatible gathering Table");
+        REQUIRE_EQ(dst.row_size(), m_lxr.m_field1.m_row->m_size, "incompatible gathering Table");
         TableBase local(m_lxr.m_field1.m_row->m_size);
         Buffer buffer("Included local rows", 1ul);
         local.set_buffer(&buffer);

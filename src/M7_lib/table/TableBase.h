@@ -10,28 +10,11 @@
 #include <numeric>
 #include "Buffer.h"
 
-//struct RowTransfer {
-//    /**
-//     * make rows to be sent contiguous in memory
-//     */
-//    Buffer m_send_buffer, m_recv_buffer;
-//    Buffer::Window m_send_bw, m_recv_bw;
-//    /**
-//     * need to get a unique pair of P2P tag from global variables
-//     */
-//    const int m_nrec_p2p_tag = mpi::new_p2p_tag();
-//    const int m_irecs_p2p_tag = mpi::new_p2p_tag();
-//
-//    RowTransfer(str_t name) :
-//            m_send_buffer("Outward transfer buffer", 1),
-//            m_recv_buffer("Inward transfer buffer", 1) {
-//        logging::info("Initializing row send/recv buffers for table \"{}\"", name);
-//        logging::debug("P2P tag for number of row indices to transfer for \"{}\": {}", name, m_nrec_p2p_tag);
-//        logging::debug("P2P tag for array of row indices to transfer for \"{}\": {}", name, m_irecs_p2p_tag);
-//        m_send_buffer.append_window(&m_send_bw);
-//        m_recv_buffer.append_window(&m_recv_bw);
-//    }
-//};
+/**
+ * this forward declaration is needed so that SendRecv can be declared a friend and can therefore modify the size of the
+ * usable portion of a Table
+ */
+template<typename row_t, typename send_table_t> class SendRecv;
 
 /**
  * Base class for all row-contiguous data in the program.
@@ -83,6 +66,11 @@
  * this is always an integer multiple of the system word length
  */
 struct TableBase {
+
+    template<typename row_t, typename send_table_t>
+    friend class SendRecv;
+
+protected:
     /**
      * this Table's portion of the raw data buffer possibly shared by many Tables
      */
@@ -115,13 +103,9 @@ struct TableBase {
      */
     mutable std::map<uint_t, uint_t> m_protected_rows;
 
-    TableBase(uint_t row_size);
-
-protected:
-
     uint_t row_index(const buf_t* row_ptr) const {
         DEBUG_ASSERT_TRUE(row_ptr, "row pointer is undefined");
-        const auto nbyte = std::distance<const buf_t*>(m_bw.m_begin, row_ptr);
+        const auto nbyte = std::distance<const buf_t*>(m_bw.cbegin(), row_ptr);
         DEBUG_ASSERT_GE(nbyte, 0l, "pointer is before the table beginning");
         DEBUG_ASSERT_FALSE(nbyte % m_bw.m_row_size, "pointer does not point to beginning of a row");
         return uint_t(nbyte / m_bw.m_row_size);
@@ -162,8 +146,9 @@ protected:
      */
     bool is_clear(uint_t i) const;
 
-
 public:
+    TableBase(uint_t row_size);
+
     TableBase(const TableBase& other);
 
     /**
@@ -174,9 +159,9 @@ public:
     }
 
     uint_t nrow_in_use() const {
-        DEBUG_ASSERT_EQ(bool(m_bw.m_hwm), bool(m_bw.m_begin),
+        DEBUG_ASSERT_EQ(bool(m_bw.cend()), bool(m_bw.cbegin()),
                         "if buffer is set, the HWM should be set, else the HWM should not be set");
-        return m_bw.m_hwm ? row_index(m_bw.m_hwm) : 0ul;
+        return m_bw.cend() ? row_index(m_bw.cend()) : 0ul;
     }
 
     /**
@@ -218,13 +203,20 @@ public:
      * @return
      *  pointer to the first data word of the BufferWindow
      */
-    buf_t *begin();
+    buf_t *begin() {return m_bw.begin();}
 
     /**
      * @return
      * const pointer to the first data word of the BufferWindow
      */
-    const buf_t *begin() const;
+    const buf_t *cbegin() const {return m_bw.cbegin();}
+
+    /**
+     * no end() method, since it is never deferencable
+     * @return
+     *  pointer to the first byte beyond the usable range of the BufferWindow
+     */
+    const buf_t *cend() const {return m_bw.cend();}
 
     /**
      * @param i
@@ -232,7 +224,9 @@ public:
      * @return
      *  pointer to the beginning of the indexed row
      */
-    buf_t *begin(uint_t i);
+    buf_t *begin(uint_t i) {
+        return m_bw.begin() + i * row_size();
+    }
 
     /**
      * @param i
@@ -240,7 +234,9 @@ public:
      * @return
      *  const pointer to the beginning of the indexed record
      */
-    const buf_t *begin(uint_t i) const;
+    const buf_t *cbegin(uint_t i) const {
+        return m_bw.cbegin() + i * row_size();
+    }
 
     /**
      * Associate the table with a buffer by assigning the table an available BufferWindow
@@ -277,6 +273,9 @@ public:
 
     bool empty() const;
 
+    const std::stack<uint_t>& freed_rows() const {
+        return m_freed_rows;
+    }
 
     uint_t nfreed_row() const {
         DEBUG_ASSERT_TRUE(freed_rows_consistent(), "inconsistent freed row indices");
@@ -329,7 +328,7 @@ public:
      * function pointer type for the callback associated with row transfers.
      * see RankAllocator.h
      */
-    typedef std::function<void(const uintv_t& , uint_t, uint_t)> transfer_cb_t;
+    typedef std::function<void(const uintv_t&, uint_t, uint_t)> transfer_cb_t;
     /**
      * function pointer type for the callback associated with receipt of a single row in a transfer operation
      * see RankAllocator.h

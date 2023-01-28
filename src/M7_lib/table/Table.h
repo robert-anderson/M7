@@ -37,7 +37,7 @@ struct Table : TableBase {
 
     str_t to_string(const uintv_t *ordering = nullptr) const override {
         str_t tmp = m_row.field_names_string();
-        if (m_bw.m_hwm == m_bw.m_begin) return tmp;
+        if (m_bw.cend() == m_bw.cbegin()) return tmp;
         const auto n = ordering ? std::min(ordering->size(), nrow_in_use()) : nrow_in_use();
         for (uint_t iirow = 0ul; iirow < n; ++iirow) {
             auto irow = ordering ? (*ordering)[iirow] : iirow;

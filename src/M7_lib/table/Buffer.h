@@ -44,26 +44,21 @@ public:
          * Current number of whole rows that can be stored in the window
          */
         uint_t m_nrow = 0ul;
+
+    private:
         /**
          * pointer to the beginning of the window
          */
-        buf_t *m_begin = nullptr;
-        /**
-         * pointer to the end of the window
-         */
-        buf_t *m_end = nullptr;
+        buf_t *m_begin_ptr = nullptr;
         /**
          * "high water mark" is a pointer to the highest-index in-use row
          */
-        buf_t* m_hwm = nullptr;
+        buf_t* m_hwm_ptr = nullptr;
+    public:
         /**
          * number of bytes currently allotted to the window
          */
         uint_t m_size = 0ul;
-
-        bool node_shared() const {return m_buffer->m_node_shared;}
-
-        bool i_can_modify() const {return !node_shared() || mpi::on_node_i_am_root();}
 
         Window(uint_t row_size=1): m_row_size(row_size) {}
 
@@ -73,6 +68,16 @@ public:
 
         Window(Buffer *buffer, uint_t row_size=1);
 
+        buf_t* begin() {return m_begin_ptr;}
+        const buf_t* cbegin() const {return m_begin_ptr;}
+        const buf_t* cend() const {return m_hwm_ptr;}
+
+        void set_end(uint_t irow);
+
+        bool node_shared() const;
+
+        bool i_can_modify() const;
+
         bool operator==(const Window& other) const;
         /**
          * @return
@@ -80,12 +85,16 @@ public:
          */
         bool allocated() const;
 
+        /**
+         * @return
+         *  number of bytes in the usable range
+         */
         uint_t size_in_use() const {
-            return std::distance(m_begin, m_hwm);
+            return std::distance(cbegin(), cend());
         }
 
         bool empty() const {
-            return m_hwm == m_begin;
+            return cend() == cbegin();
         }
 
         void clear();

@@ -247,7 +247,6 @@ public:
         auto &bucket = m_buckets[key.hash() % nbucket()];
         bucket.insert_after(bucket.before_begin(), irow);
         row.jump(irow);
-        if (m_bw.i_can_modify()) row.key_field() = key;
     }
 
     row_t& insert(const key_field_t &key) {

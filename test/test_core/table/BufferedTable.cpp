@@ -12,14 +12,14 @@ TEST(BufferedTable, Empty) {
     ASSERT_EQ(table.capacity(), 0);
     ASSERT_EQ(table.nrow_in_use(), 0);
     ASSERT_EQ(table.m_bw.m_size, 0);
-    ASSERT_EQ(table.m_bw.m_begin, nullptr);
+    ASSERT_EQ(table.cbegin(), nullptr);
     table.m_row.restart();
     ASSERT_FALSE(table.m_row.is_deref_valid());
     auto cpy = table;
     ASSERT_EQ(cpy.capacity(), 0);
     ASSERT_EQ(cpy.nrow_in_use(), 0);
     ASSERT_EQ(cpy.m_bw.m_size, 0);
-    ASSERT_EQ(cpy.m_bw.m_begin, nullptr);
+    ASSERT_EQ(cpy.cbegin(), nullptr);
     cpy.m_row.restart();
     ASSERT_FALSE(cpy.m_row.is_deref_valid());
     ASSERT_NE(&cpy.m_row, &table.m_row);
