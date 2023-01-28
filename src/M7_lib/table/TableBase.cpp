@@ -47,7 +47,7 @@ uint_t TableBase::push_back(uint_t n) {
     const auto nbyte_add = n * m_bw.m_row_size;
     if (!m_bw.cend() || ptr::after_end(m_bw.cend() + nbyte_add, m_bw.cbegin()+m_bw.m_size)) expand(n);
     const auto tmp = nrow_in_use();
-    m_bw.set_end(m_bw.m_nrow + n);
+    m_bw.set_end(tmp + n);
     return tmp;
 }
 
@@ -223,7 +223,7 @@ void TableBase::all_gatherv(const TableBase &src) {
         mpi::all_to_allv(src.cbegin(), sendcounts, senddispls, begin(), recvcounts, recvdispls);
     }
     else {
-        mpi::all_gatherv(cbegin(), src.m_bw.size_in_use(), begin(), counts, displs);
+        mpi::all_gatherv(src.cbegin(), src.m_bw.size_in_use(), begin(), counts, displs);
     }
 }
 

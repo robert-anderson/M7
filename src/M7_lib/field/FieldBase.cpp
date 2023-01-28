@@ -53,7 +53,7 @@ void FieldBase::zero() {
 }
 
 bool FieldBase::is_zero() const {
-    ASSERT(!m_null_string.empty());
+    DEBUG_ASSERT_EQ(m_null_string.size(), m_size, "comparison-with-zero string is incorrect length");
     return std::memcmp(cbegin(), m_null_string.data(), m_size) == 0;
 }
 

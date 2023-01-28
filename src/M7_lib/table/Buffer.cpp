@@ -40,7 +40,7 @@ bool Buffer::Window::operator==(const Buffer::Window& other) const {
 }
 
 void Buffer::Window::set_end(uint_t irow) {
-    DEBUG_ASSERT_LT(irow, m_nrow, "high water mark may not exceed end of allocated memory");
+    DEBUG_ASSERT_LE(irow, m_nrow, "high water mark may not exceed end of allocated memory");
     m_hwm_ptr = m_begin_ptr + irow * m_row_size;
 }
 

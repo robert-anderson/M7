@@ -77,6 +77,7 @@ namespace shared_rows {
         void update() {
             prepare_gather();
             m_gathered.TableBase::all_gatherv(m_gather_send);
+            m_gathered.m_row.restart();
         }
 
         /**
@@ -106,6 +107,7 @@ namespace shared_rows {
         void full_update() {
             prepare_gather();
             m_gathered.all_gatherv(m_gather_send);
+            m_gathered.m_row.restart();
         }
 
         uint_t nrec_() const {

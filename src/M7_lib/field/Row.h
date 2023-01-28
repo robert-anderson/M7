@@ -84,7 +84,7 @@ public:
         const auto table_cbegin = m_table->cbegin();
         if (!table_cbegin) return false;
         const auto table_cend = m_table->cend();
-        return ptr::in_range(cbegin(), table_cbegin, table_cend);
+        return ptr::in_range(m_begin_ptr, table_cbegin, table_cend);
     }
 
     /**
@@ -95,7 +95,7 @@ public:
      *  high water mark) the latter condition is typically fulfilled at the end of a loop over rows
      */
     bool is_valid() const {
-        return (cbegin()==m_table->cbegin()) || is_deref_valid() || (cbegin() == m_table->cend());
+        return (m_begin_ptr==m_table->cbegin()) || is_deref_valid() || (m_begin_ptr == m_table->cend());
     }
 
     operator bool () const {
@@ -104,11 +104,12 @@ public:
 
     /**
      * @return
-     * record position within Table
+     *  record position within Table
      */
     uint_t index() const {
         DEBUG_ASSERT_TRUE(is_valid(), "the row is not pointing to memory in the permitted range");
-        return std::distance(m_table->cbegin(), cbegin()) / m_size;
+        // can't call cbegin() here because it contains a debug check for is_deref_valid, so cast to const
+        return std::distance(m_table->cbegin(), const_cast<const buf_t*>(m_begin_ptr)) / m_size;
     }
 
     /**
@@ -120,7 +121,9 @@ public:
      */
     unsigned long offset(const Row& other) const {
         DEBUG_ASSERT_EQ(m_table, other.m_table, "offset rows must be associated with the same table");
-        const unsigned long n = std::distance(cbegin(), other.cbegin())/m_size;
+        DEBUG_ASSERT_TRUE(is_valid(), "row OOB");
+        DEBUG_ASSERT_TRUE(other.is_valid(), "other row OOB");
+        const unsigned long n = std::distance(m_begin_ptr, other.m_begin_ptr)/m_size;
         DEBUG_ASSERT_EQ(n, other.index() - index(), "incorrect offset");
         return n;
     }
@@ -133,7 +136,7 @@ public:
      */
     bool in_range(uint_t irow_end) const {
         DEBUG_ASSERT_TRUE(is_valid(), "invalid range end given");
-        return ptr::in_range(cbegin(), m_table->cbegin(), m_table->cbegin(irow_end));
+        return ptr::in_range(m_begin_ptr, m_table->cbegin(), m_table->cbegin(irow_end));
     }
 
     /*
