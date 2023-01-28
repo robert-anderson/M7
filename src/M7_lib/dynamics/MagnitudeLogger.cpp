@@ -4,6 +4,7 @@
 
 #include "M7_lib/util/Probability.h"
 #include "MagnitudeLogger.h"
+#include "M7_lib/util/Math.h"
 
 MagnitudeLogger::MagnitudeLogger(ham_comp_t max_bloom, uint_t ndraw_min, uint_t nexcase, bool static_tau,
                                  bool static_probs, double tau_min, double tau_max, double prob_min, uint_t period) :
@@ -30,8 +31,7 @@ void MagnitudeLogger::log(uint_t icase, const ham_t &helem, const prob_t &prob) 
 void MagnitudeLogger::update_tau(double &tau, const ham_comp_t &gamma_sum) {
     if (m_static_tau) return;
     tau = m_max_bloom / gamma_sum;
-    if (tau < m_tau_min) tau = m_tau_min;
-    if (tau > m_tau_max) tau = m_tau_max;
+    tau = math::clamp(tau, m_tau_min, m_tau_max);
 }
 
 void MagnitudeLogger::update(uint_t icycle, double &tau) {
