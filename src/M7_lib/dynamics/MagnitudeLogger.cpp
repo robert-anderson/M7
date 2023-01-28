@@ -48,7 +48,7 @@ void MagnitudeLogger::update(uint_t icycle, double &tau, ExcitGenGroup &excit_ge
     if (fptol::near_zero(gamma_sum)) return;
     update_tau(tau, gamma_sum);
     if (!m_static_probs){
-        m_new_probs.assign(m_gamma.m_reduced.dbegin(), m_gamma.m_reduced.dend());
+        m_new_probs.assign(m_gamma.m_reduced.ctbegin(), m_gamma.m_reduced.ctend());
         for (auto& new_prob : m_new_probs) new_prob /= gamma_sum;
         prob::rectify(m_new_probs, m_prob_min);
         excit_gens.set_probs(m_new_probs);

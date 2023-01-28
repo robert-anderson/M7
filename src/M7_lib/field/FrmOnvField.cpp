@@ -121,8 +121,8 @@ void FrmOnvField::clr(const uint_t &site_offset, const uintv_t &clrbits_alpha, c
 uint_t FrmOnvField::get_alpha_dataword(uint_t idataword) const {
     DEBUG_ASSERT_LT(idataword, m_dsize_spin_channel, "dataword index OOB");
     const auto nsite = m_format.m_shape[1];
-    auto dptr = reinterpret_cast<uint_t *>(begin());
-    auto tmp = dptr[idataword];
+    auto tptr = ctbegin();
+    auto tmp = tptr[idataword];
     if (idataword + 1 == m_dsize_spin_channel) {
         auto n = nsite-(idataword)*Buffer::c_nbit_word;
         tmp = bit::truncate(tmp, n);
@@ -140,17 +140,17 @@ uint_t FrmOnvField::get_beta_dataword(uint_t idataword) const {
     const auto ibit_in_word_begin = ibit_begin-iword_begin*c_nbit_word;
     const auto iword_end = ibit_end/c_nbit_word;
     const auto ibit_in_word_end = ibit_end-iword_end*c_nbit_word;
-    auto dptr = reinterpret_cast<uint_t *>(begin());
+    auto tptr = ctbegin();
     if (iword_begin==iword_end){
         auto mask = bit::make_range_mask<uint_t>(ibit_in_word_begin, ibit_in_word_end);
-        return (dptr[iword_begin] & mask) >> ibit_in_word_begin;
+        return (tptr[iword_begin] & mask) >> ibit_in_word_begin;
     }
     else {
         auto mask1 = bit::make_range_mask<uint_t>(ibit_in_word_begin, c_nbit_word);
         auto mask2 = bit::make_range_mask<uint_t>(0, ibit_in_word_end);
         auto shift1 = ibit_in_word_begin;
         auto shift2 = c_nbit_word-ibit_in_word_begin;
-        return ((dptr[iword_begin] & mask1) >> shift1) | ((dptr[iword_end] & mask2) << shift2);
+        return ((tptr[iword_begin] & mask1) >> shift1) | ((tptr[iword_end] & mask2) << shift2);
     }
 }
 

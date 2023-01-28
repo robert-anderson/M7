@@ -97,7 +97,7 @@ public:
     FieldBase &operator=(const FieldBase &other){
         if (&other == this) return *this;
         DEBUG_ASSERT_TRUE(is_comparable(other), "can't compare to incompatible field");
-        std::memcpy(begin(), other.begin(), m_size);
+        std::memcpy(begin(), other.cbegin(), m_size);
         return *this;
     }
 
@@ -109,22 +109,33 @@ public:
 
     bool belongs_to_row(const Row& row) const;
 
-    buf_t* begin() const {
+    buf_t* begin() {
         DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
         return m_row->begin() + m_row_offset;
     }
 
-    buf_t* end() const {
+    template<typename T>
+    T* begin_as() {
+        return reinterpret_cast<T*>(begin());
+    }
+
+    const buf_t* cbegin() const {
         DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
-        return begin() + m_size;
+        return m_row->cbegin() + m_row_offset;
     }
 
-    buf_t* begin() {
-        return const_cast<const FieldBase*>(this)->begin();
+    template<typename T>
+    const T* cbegin_as() const {
+        return reinterpret_cast<const T*>(cbegin());
     }
 
-    buf_t* end() {
-        return begin() + m_size;
+    const buf_t* cend() const {
+        return cbegin() + m_size;
+    }
+
+    template<typename T>
+    const T* cend_as() const {
+        return reinterpret_cast<const T*>(cend());
     }
 
     const Row *row() const;

@@ -31,7 +31,7 @@ public:
 
     bool operator==(const MaeIndsPartition& other) const {
         DEBUG_ASSERT_EQ(m_size, other.m_size, "comparing incompatible partitions");
-        return std::memcmp(m_field.dbegin()+m_offset, other.m_field.dbegin()+m_offset, m_size)==0;
+        return std::memcmp(m_field.ctbegin()+m_offset, other.m_field.ctbegin()+m_offset, m_size)==0;
     }
 
     const uint_t &size() const {

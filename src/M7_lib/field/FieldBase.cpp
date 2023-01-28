@@ -54,11 +54,11 @@ void FieldBase::zero() {
 
 bool FieldBase::is_zero() const {
     ASSERT(!m_null_string.empty());
-    return std::memcmp(begin(), m_null_string.data(), m_size) == 0;
+    return std::memcmp(cbegin(), m_null_string.data(), m_size) == 0;
 }
 
 int FieldBase::cmp(const FieldBase &other) const {
-    return std::memcmp(begin(), other.begin(), m_size);
+    return std::memcmp(cbegin(), other.cbegin(), m_size);
 }
 
 bool FieldBase::operator==(const FieldBase &other) const {
@@ -86,7 +86,7 @@ bool FieldBase::operator>=(const FieldBase &other) const {
 }
 
 hash::digest_t FieldBase::hash() const {
-    return hash::fnv(begin(), m_size);
+    return hash::fnv(cbegin(), m_size);
 }
 
 void FieldBase::save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const {

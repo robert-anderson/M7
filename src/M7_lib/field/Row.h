@@ -45,7 +45,7 @@ private:
     /**
      * the position of the currently selected record in the
      */
-    mutable buf_t *m_begin = nullptr;
+    mutable buf_t *m_begin_ptr = nullptr;
 
 public:
     /**
@@ -62,15 +62,15 @@ public:
     mutable Row *m_child = nullptr;
 
     buf_t *begin() {
-        DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
+        DEBUG_ASSERT_TRUE(m_begin_ptr, "the row pointer is not set")
         DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
-        return m_begin;
+        return m_begin_ptr;
     }
 
     const buf_t *cbegin() const {
-        DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
+        DEBUG_ASSERT_TRUE(m_begin_ptr, "the row pointer is not set")
         DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
-        return m_begin;
+        return m_begin_ptr;
     }
 
     const buf_t* cend() const {return cbegin()+m_size;}
@@ -84,7 +84,7 @@ public:
         const auto table_cbegin = m_table->cbegin();
         if (!table_cbegin) return false;
         const auto table_cend = m_table->cend();
-        return ptr::in_range(m_begin, table_cbegin, table_cend);
+        return ptr::in_range(cbegin(), table_cbegin, table_cend);
     }
 
     /**
@@ -95,7 +95,7 @@ public:
      *  high water mark) the latter condition is typically fulfilled at the end of a loop over rows
      */
     bool is_valid() const {
-        return (m_begin==m_table->cbegin()) || is_deref_valid() || (m_begin == m_table->cend());
+        return (cbegin()==m_table->cbegin()) || is_deref_valid() || (cbegin() == m_table->cend());
     }
 
     operator bool () const {
@@ -143,10 +143,10 @@ public:
         DEBUG_ASSERT_LE(irow_begin, m_table->nrow_in_use(), "Cannot restart to an out-of-range row index");
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         if (!m_table->cend() && !irow_begin){
-            m_begin = nullptr;
+            m_begin_ptr = nullptr;
         } else {
             DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
-            m_begin = m_table->begin(irow_begin);
+            m_begin_ptr = m_table->begin(irow_begin);
         }
     }
 
@@ -161,7 +161,7 @@ public:
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
         DEBUG_ASSERT_TRUE(is_valid(), "Row is out of table bounds");
-        m_begin += m_size;
+        m_begin_ptr += m_size;
         return *this;
     }
 
@@ -169,7 +169,7 @@ public:
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
         DEBUG_ASSERT_LE(i, m_table->nrow_in_use(), "Row is out of table bounds");
-        m_begin = m_table->begin(i);
+        m_begin_ptr = m_table->begin(i);
     }
 
     void jump(const Row &other) const {
@@ -181,7 +181,7 @@ public:
     }
 
     void select_null() const {
-        m_begin = nullptr;
+        m_begin_ptr = nullptr;
     }
 
     void copy_in(const Row &other) {
