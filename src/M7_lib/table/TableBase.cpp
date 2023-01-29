@@ -162,8 +162,7 @@ void TableBase::transfer_records(const uintv_t &/*irecs*/, uint_t /*irank_send*/
 void TableBase::copy_record_in(const TableBase &src, uint_t isrc, uint_t idst) {
     DEBUG_ASSERT_LT(isrc, src.nrow_in_use(), "src record index OOB");
     DEBUG_ASSERT_LT(idst, nrow_in_use(), "dst record index OOB");
-    if (!m_bw.i_can_modify()) return;
-    std::memcpy(begin(idst), src.cbegin(isrc), row_size());
+    if (m_bw.i_can_modify()) std::memcpy(begin(idst), src.cbegin(isrc), row_size());
 }
 
 void TableBase::swap_records(uint_t i, uint_t j) {

@@ -157,13 +157,41 @@ enum MpiPairOp {
     MpiMaxLoc, MpiMinLoc
 };
 
+/**
+ * rank index in the world communicator
+ */
 extern uint_t g_irank;
+/**
+ * number of ranks in the world communicator
+ */
 extern uint_t g_nrank;
+/**
+ * name of this rank
+ */
 extern str_t g_processor_name;
+/**
+ * communicator among ranks on the same node, where a "node" is a group of ranks with access to the same main memory
+ */
 extern MPI_Comm g_node_comm;
+/**
+ * rank index within this node
+ */
 extern uint_t g_irank_on_node;
+/**
+ * number of ranks on this node
+ */
 extern uint_t g_nrank_on_node;
-extern v_t<char> g_root_on_node;
+/**
+ * list of world communicator rank indices of the node roots
+ */
+extern v_t<char> g_node_roots;
+/**
+ * world communicator rank index of the node root of this rank
+ */
+extern uint_t g_my_node_root_irank;
+/**
+ * todo: delete - point to point comms no longer used
+ */
 extern int g_p2p_tag;
 
 namespace mpi {
@@ -187,6 +215,10 @@ namespace mpi {
 
     static uint_t irank_on_node() {
         return g_irank_on_node;
+    }
+
+    static uint_t my_node_root_irank() {
+        return g_my_node_root_irank;
     }
 
     static const str_t &processor_name() {

@@ -43,7 +43,7 @@ struct Row {
     v_t<FieldBase *> m_fields;
 private:
     /**
-     * the position of the currently selected record in the
+     * the position of the currently selected record in the associated Table's buffer window
      */
     mutable buf_t *m_begin_ptr = nullptr;
 
@@ -61,10 +61,14 @@ public:
      */
     mutable Row *m_child = nullptr;
 
+    /**
+     * @return
+     *  pointer to the byte at the beginning of the current row with modifying intent
+     */
     buf_t *begin() {
         DEBUG_ASSERT_TRUE(m_begin_ptr, "the row pointer is not set")
         DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
-        return m_begin_ptr;
+        return m_table->i_can_modify() ? m_begin_ptr : m_table->trash_dst();
     }
 
     const buf_t *cbegin() const {
@@ -168,6 +172,11 @@ public:
         return *this;
     }
 
+    /**
+     * random access to the indexed record
+     * @param i
+     *  record index to jump to
+     */
     void jump(uint_t i) const {
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
@@ -175,10 +184,16 @@ public:
         m_begin_ptr = m_table->begin(i);
     }
 
+    /**
+     * jump to table position of another Row
+     */
     void jump(const Row &other) const {
         jump(other.index());
     }
 
+    /**
+     * get a new record in the table (reallocating if needed), and jump this Row to it
+     */
     void push_back_jump() {
         jump(m_table->push_back());
     }

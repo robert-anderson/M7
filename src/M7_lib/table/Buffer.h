@@ -54,13 +54,21 @@ public:
          * "high water mark" is a pointer to the highest-index in-use row
          */
         buf_t* m_hwm_ptr = nullptr;
+        /**
+         * while a window on a node-shared Buffer can be read (at the same pointer) across all MPI ranks on a node, it
+         * must not be written to simultaneously by multiple MPI ranks on the same node because this would result in a
+         * race condition. to prevent such situations, this "trash" buffer is provided for the non-root-on-node ranks to
+         * write on, so that there is no need for the writing operations of Fields to be done within a conditional of
+         * the form "if (mpi::on_node_i_am()) {...}"
+         */
+        v_t<buf_t> m_trash_buf;
     public:
         /**
          * number of bytes currently allotted to the window
          */
         uint_t m_size = 0ul;
 
-        Window(uint_t row_size=1): m_row_size(row_size) {}
+        Window(uint_t row_size=1): m_row_size(row_size), m_trash_buf(m_row_size) {}
 
         Window(const Window& other): Window(other.m_row_size) {}
 
@@ -68,17 +76,49 @@ public:
 
         Window(Buffer *buffer, uint_t row_size=1);
 
+        /**
+         * @return
+         *  pointer to the byte at the beginning of the buffer window with modifying intent
+         */
         buf_t* begin() {return m_begin_ptr;}
+        /**
+         * @return
+         *  pointer to the byte at the beginning of the buffer window with read-only intent
+         */
         const buf_t* cbegin() const {return m_begin_ptr;}
+        /**
+         * @return
+         *  pointer to the byte after the end of the buffer window with read-only intent
+         */
         const buf_t* cend() const {return m_hwm_ptr;}
 
+        /**
+         * redefine the "high water mark"
+         * @param irow
+         *  index of the new "high water mark", must be no larger than the current number of allocated rows
+         */
         void set_end(uint_t irow);
 
+        /**
+         * @return
+         *  true if the buffer's underlying memory is shared over the MPI node
+         */
         bool node_shared() const;
 
+        /**
+         * @return
+         *  true if the memory is not node-shared, or if this is a node-root MPI rank
+         */
         bool i_can_modify() const;
 
+        /**
+         * @return
+         *  pointer to beginning of trash memory
+         */
+        buf_t* trash_dst() {return m_trash_buf.data();}
+
         bool operator==(const Window& other) const;
+
         /**
          * @return
          *  true if this window has an associated Buffer and it has an allocated data vector

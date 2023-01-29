@@ -199,6 +199,14 @@ public:
         return m_bw.m_row_size;
     }
 
+    bool i_can_modify() const {
+        return m_bw.i_can_modify();
+    }
+
+    buf_t* trash_dst() {
+        return m_bw.trash_dst();
+    }
+
     /**
      * @return
      *  pointer to the first data word of the BufferWindow

@@ -120,4 +120,27 @@ public:
 };
 
 
+template<typename T>
+class SharedScalar : protected SharedArray<T> {
+    /**
+     * written to if this MPI rank is not the root
+     */
+    T m_trash;
+public:
+    SharedScalar() : SharedArray<T>(1ul){}
+
+    SharedScalar(const T& v) : SharedScalar() {
+        *this = v;
+    }
+
+    SharedScalar& operator=(const T& v){
+        SharedArray<T>::set(0, v);
+        return *this;
+    }
+
+    operator const T& () const {
+        return reinterpret_cast<const T&>(*SharedArrayBase::m_data);
+    }
+};
+
 #endif //M7_SHAREDARRAY_H
