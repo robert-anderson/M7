@@ -17,6 +17,7 @@
 #include "M7_lib/linalg/sparse/Dynamic.h"
 #include "M7_lib/hdf5/NodeReader.h"
 #include "M7_lib/hdf5/NodeWriter.h"
+#include "M7_lib/hdf5/DatasetSaver.h"
 
 
 extern "C" void ssyev_(const char *jobz, const char *uplo, const int *n, float *a, const int *lda, float *w,
@@ -451,7 +452,7 @@ namespace dense {
             uintv_t shape;
             shape.push_back(m_nrow);
             shape.push_back(m_ncol);
-            nw.save_dataset(name, m_buffer, shape, {"nrecord", "ncol"}, irank);
+            hdf5::DatasetSaver::save_array(nw, name, m_buffer.data(), shape, {"row", "col"}, irank);
         }
     };
 

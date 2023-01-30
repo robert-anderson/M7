@@ -23,12 +23,13 @@ bool hdf5::dataset::ItemFormat::operator!=(const hdf5::dataset::ItemFormat& othe
     return !(*this==other);
 }
 
-hdf5::dataset::ListFormat::ListFormat(hdf5::dataset::ItemFormat item_format, uint_t nitem) :
+hdf5::dataset::ListFormat::ListFormat(hdf5::dataset::ItemFormat item_format, uint_t nitem, str_t leading_dim_name) :
         m_item(item_format), m_nitem(nitem), m_size(m_nitem*m_item.m_size),
         m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_item.m_h5_shape, m_nitem))),
-        m_dim_names(vector::prepended(m_item.m_dim_names, "item")) {}
+        m_dim_names(vector::prepended(m_item.m_dim_names, leading_dim_name)) {}
 
 hdf5::dataset::DistListFormat::DistListFormat(
-        hdf5::dataset::ItemFormat item_format, uint_t nitem_local, uint_t nitem, uint_t nitem_displ) :
-        m_local(item_format, nitem_local), m_nitem(nitem), m_nitem_displ(nitem_displ),
+        hdf5::dataset::ItemFormat item_format, uint_t nitem_local,
+        uint_t nitem, uint_t nitem_displ, str_t leading_dim_name) :
+        m_local(item_format, nitem_local, leading_dim_name), m_nitem(nitem), m_nitem_displ(nitem_displ),
         m_h5_shape(vector::prepended(m_local.m_item.m_h5_shape, m_nitem)){}
