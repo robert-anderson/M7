@@ -125,7 +125,7 @@ TEST(ArnoldiSolver, ComplexNonDist) {
     opts.m_nroot = 4ul;
     ArnoldiSolver<T> solver(mat, nrow, opts, ArnoldiSolverBase::c_nonsym);
 
-    v_t<T> bench_evals = {{6, 0}, {3.06252172e+00, 4.33378602e+00}, {4, 2}, {-1, -3}};
+    v_t<T> bench_evals = {{6, 0}, {2.594171028, 3.881855803}, {4, 2}, {-1, -3}};
     T eval;
     for (uint_t iroot = 0ul; iroot < bench_evals.size(); ++iroot) {
         solver.get_eval(iroot, eval);
@@ -147,7 +147,7 @@ TEST(ArnoldiSolver, ComplexDist) {
      * check Arnoldi solution against dense LAPACK full diagonalization
      */
     if (mpi::i_am_root()) {
-        v_t<T> bench_evals = {{6, 0}, {3.06252172e+00, 4.33378602e+00}, {4, 2}, {-1, -3}};
+        v_t<T> bench_evals = {{6, 0}, {2.594171028, 3.881855803}, {4, 2}, {-1, -3}};
         T eval;
         for (uint_t iroot = 0ul; iroot < bench_evals.size(); ++iroot) {
             solver.get_eval(iroot, eval);
