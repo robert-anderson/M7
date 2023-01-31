@@ -37,6 +37,23 @@ namespace hdf5 {
         DatasetSaver(const NodeWriter& nw, const str_t& name, hdf5::dataset::PartDistListFormat format);
 
         /**
+         * to keep cut down on the number of optional arguments to the save_* methods
+         */
+        struct Options {
+            uint_t m_max_nitem_per_op;
+            std::list<Attr> m_attrs;
+            str_t m_leading_dim_name;
+
+            Options(uint_t max_nitem_per_op = 0, std::list<Attr> attrs={}, str_t leading_dim_name="item"):
+                m_max_nitem_per_op(max_nitem_per_op), m_attrs(std::move(attrs)),
+                m_leading_dim_name(std::move(leading_dim_name)){}
+
+            uint_t max_nitem_per_op(uint_t fallback) const {
+                return m_max_nitem_per_op ? m_max_nitem_per_op : fallback;
+            }
+        };
+
+        /**
          * save distributed data formatted as contiguous raw buffers in one write operation
          * @param nw
          *  node writer object of the dataset's parent
@@ -60,17 +77,15 @@ namespace hdf5 {
          *  name to give to the distributed dimension
          */
         static void save_dist_list(const NodeWriter& nw, const str_t& name, const void* src, Type type, bool is_complex,
-                         uintv_t item_shape, strv_t item_dim_names, uint_t nitem,
-                         std::list<Attr> attrs = {}, str_t leading_dim_name="item");
+                         uintv_t item_shape, strv_t item_dim_names, uint_t nitem, const Options& opts);
 
         /**
          * type-templated wrapper of the above, raw-data function
          */
         template<typename T>
         static void save_dist_list(const NodeWriter& nw, const str_t& name, const T* src, uintv_t item_shape,
-                         strv_t item_dim_names, uint_t nitem, std::list<Attr> attrs = {}, str_t leading_dim_name="item"){
-            save_dist_list(nw, name, src, Type::make<T>(), dtype::is_complex<T>(),
-                    item_shape, item_dim_names, nitem, attrs, leading_dim_name);
+                         strv_t item_dim_names, uint_t nitem, const Options& opts){
+            save_dist_list(nw, name, src, Type::make<T>(), dtype::is_complex<T>(), item_shape, item_dim_names, nitem, opts);
         }
 
         /**
@@ -78,10 +93,10 @@ namespace hdf5 {
          */
         template<typename T>
         static void save_dist_list(const NodeWriter& nw, const str_t& name, const v_t<T>& src, uintv_t item_shape,
-                                   strv_t item_dim_names, bool this_rank, std::list<Attr> attrs = {}, str_t leading_dim_name="item"){
+                strv_t item_dim_names, bool this_rank, const Options& opts){
             const auto nitem = this_rank ? src.size() / nd::nelement(item_shape) : 0ul;
             REQUIRE_FALSE(src.size() % nd::nelement(item_shape), "item shape inconsistent with size of data buffer");
-            save_dist_list(nw, name, src.data(), item_shape, item_dim_names, nitem, attrs, leading_dim_name);
+            save_dist_list(nw, name, src.data(), item_shape, item_dim_names, nitem, opts);
         }
 
         /**
@@ -89,15 +104,39 @@ namespace hdf5 {
          * the save_dist_list method
          */
         template<typename T>
-        static void save_array(const NodeWriter& nw, const str_t& name, const T* src, uintv_t shape,
-                               strv_t dim_names, uint_t irank=0ul, std::list<Attr> attrs = {}){
+        static void save_array(const NodeWriter& nw, const str_t& name, const T* src, uintv_t shape, strv_t dim_names,
+                uint_t irank=0ul, const Options& opts={}){
             auto nitem = mpi::i_am(irank) ? shape.front() : 0ul;
             uintv_t item_shape(shape.cbegin()+1, shape.cend());
             auto leading_dim_name = dim_names.empty() ? "" : dim_names.front();
             strv_t item_dim_names(dim_names.cbegin()+1, dim_names.cend());
-            save_dist_list(nw, name, src, Type::make<T>(), dtype::is_complex<T>(), item_shape, item_dim_names, nitem, attrs, leading_dim_name);
+            save_dist_list(nw, name, src, Type::make<T>(), dtype::is_complex<T>(), item_shape, item_dim_names, nitem, opts);
         }
 
+        template<typename T>
+        static void save_array(const NodeWriter& nw, const str_t& name, const v_t<T>& src, uintv_t shape,
+                strv_t dim_names, uint_t irank=0ul, const Options& opts={}){
+            if (mpi::i_am(irank)) {
+                REQUIRE_EQ(nd::nelement(shape), src.size(), "number of elements in array is incompatible with given shape");
+            }
+            save_array(nw, name, src.data(), shape, dim_names, irank, opts);
+        }
+
+        template<typename T>
+        static void save_vector(const NodeWriter& nw, const str_t& name, const v_t<T>& src,
+                                uint_t irank=0ul, const Options& opts={}){
+            save_array(nw, name, src, {src.size()}, {"elements"}, irank, opts);
+        }
+
+        template<typename T>
+        static void save_scalar(const NodeWriter& nw, const str_t& name, const T& src,
+                                uint_t irank=0ul, const Options& opts={}){
+            save_array(nw, name, &src, {1ul}, {"scalar"}, irank, opts);
+        }
+
+        uint_t nitem_remaining() const {
+            return m_format.m_local.m_nitem - m_nitem_saved;
+        }
 
         /**
          * write raw data collectively

@@ -5,6 +5,7 @@
 
 #include "test_core/defs.h"
 #include "M7_lib/io/FcidumpTextFileReader.h"
+#include "M7_lib/hdf5/DatasetSaver.h"
 
 using namespace hdf5;
 
@@ -16,5 +17,5 @@ TEST(Hdf5FcidumpReader, Header) {
     auto inds = fr.load_dataset<v_t<int64_t>>("FOCK_INDEX", false, true);
 
     hdf5::FileWriter fw("rja.h5");
-    fw.save_dataset("FOCK_INDEX", inds, mpi::i_am_root());
+    hdf5::DatasetSaver::save_vector(fw, "FOCK_INDEX", inds, 0ul);
 }

@@ -63,14 +63,14 @@ TEST(HDF5Wrapper, StringType) {
 }
 
 TEST(HDF5Wrapper, FloatArray) {
-    const auto i_am_definitive = mpi::i_am(hash::in_range(99, 0, mpi::nrank()));
+    const auto irank = hash::in_range(99, 0, mpi::nrank());
     uintv_t shape = {2, 3};
     v_t<float> v = {0.1, 4.5, 1.2, 3, 2.3, 4};
     // make each rank's v differ by one element
     v[2] = hash::in_range(mpi::irank(), 4, 18);
     {
         hdf5::FileWriter fw("table_test.h5");
-        fw.save_dataset("a_float_array", v, shape, {}, i_am_definitive);
+        hdf5::DatasetSaver::save_array(fw, "a_float_array", v, shape, {}, irank);
     }
     mpi::barrier();
     {
@@ -86,14 +86,14 @@ TEST(HDF5Wrapper, FloatArray) {
 }
 
 TEST(HDF5Wrapper, ComplexArray) {
-    const auto i_am_definitive = mpi::i_am(hash::in_range(99, 0, mpi::nrank()));
+    const auto irank = hash::in_range(99, 0, mpi::nrank());
     uintv_t shape = {2, 3};
     v_t<std::complex<float>> v = {{0.1, 1}, {4.5, 2}, {1.2, 3}, {3, 4}, {2.3, 5}, {4, 6}};
     // make each rank's v differ by one element
     v[2].imag(hash::in_range(mpi::irank(), 4, 18));
     {
         hdf5::FileWriter fw("table_test.h5");
-        fw.save_dataset("a_complex_array", v, shape, {"dim0", "dim1"}, i_am_definitive);
+        hdf5::DatasetSaver::save_array(fw, "a_complex_array", v, shape, {"dim0", "dim1"}, irank);
     }
     mpi::barrier();
     {

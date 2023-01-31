@@ -78,8 +78,6 @@ private:
     friend Row;
 
 public:
-    static constexpr uint_t c_default_max_nitem_per_op = 16000000;
-
     /**
      * @param row
      *  row object to which the new field should be added
@@ -183,12 +181,12 @@ protected:
      *  NodeWriter instance (HDF5 group or file)
      * @param name
      *  desired name in the dataset
-     * @param max_nitem_per_op
-     *  maximum number of items (rows of this Field) that can be saved to HDF5 archive in a single write call
      * @param this_rank
      *  true if data from this MPI rank is to be included in the saved set
+     * @param max_nitem_per_op
+     *  maximum number of items (rows of this Field) that can be saved to HDF5 archive in a single write call
      */
-    virtual void save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const;
+    virtual void save_fn(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const;
 
     /**
      * load many entries of a field in a Table from an HDF5 dataset

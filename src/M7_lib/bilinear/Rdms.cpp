@@ -220,7 +220,7 @@ void Rdms::save(const hdf5::NodeWriter& parent) {
     {
         // unnormalized RDMs, suitable for restarts
         hdf5::GroupWriter gw(parent, "archive");
-        gw.save_dataset("norm", m_total_norm.m_reduced, mpi::i_am_root());
+        hdf5::DatasetSaver::save_scalar(gw, "norm", m_total_norm.m_reduced);
         for (const auto& rdm: m_rdms) rdm->save(gw);
     }
 

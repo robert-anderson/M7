@@ -41,12 +41,13 @@ hdf5::DatasetSaver::DatasetSaver(
 
 void hdf5::DatasetSaver::save_dist_list(
         const hdf5::NodeWriter& nw, const str_t& name, const void* src, hdf5::Type type, bool is_complex,
-        uintv_t item_shape, strv_t item_dim_names, uint_t nitem, std::list<Attr> attrs, str_t leading_dim_name) {
+        uintv_t item_shape, strv_t item_dim_names, uint_t nitem, const Options& opts) {
     const dataset::ItemFormat item_format(type, std::move(item_shape), std::move(item_dim_names), is_complex);
-    const dataset::PartDistListFormat format(item_format, nitem, std::move(leading_dim_name));
+    const dataset::PartDistListFormat format(item_format, nitem, opts.m_leading_dim_name);
     DatasetSaver ds(nw, name, format);
+
     ds.write(src, nitem);
-    ds.save_attrs(attrs);
+    ds.save_attrs(opts.m_attrs);
 }
 
 bool hdf5::DatasetSaver::write(const void* src, uint_t nitem) {

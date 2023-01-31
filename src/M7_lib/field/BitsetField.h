@@ -266,10 +266,10 @@ struct BitsetField : FieldBase {
         return res;
     }
 
-    void save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const override {
+    void save_fn(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const override {
         std::list<hdf5::Attr> attrs;
         attrs.emplace_back(m_format.m_shape, "shape");
-        hdf5::field::save<T>(*this, nw, name, {m_dsize}, {"bitset"}, max_nitem_per_op, attrs, this_rank);
+        hdf5::field::save<T>(*this, nw, name, {m_dsize}, {"bitset"}, this_rank, max_nitem_per_op, attrs);
     }
 };
 

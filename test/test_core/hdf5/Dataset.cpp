@@ -6,24 +6,25 @@
 #include "M7_lib/hdf5/DatasetFormat.h"
 #include "M7_lib/util/Hash.h"
 #include "M7_lib/hdf5/File.h"
+#include "M7_lib/hdf5/DatasetSaver.h"
 
 TEST(Dataset, RealContiguousSaveLoad) {
     const uint_t nitem = hash::in_range(19 + mpi::irank(), 34, 54);
     const uint_t max_nitem_per_op = 7;
     const auto save_vec = hash::in_range(123, nitem, 0, 100);
     const auto save_vec_all = mpi::all_gatheredv(save_vec);
-    std::list<hdf5::Attr> save_attrs;
-    save_attrs.emplace_back(5ul, "some_numeric_attr");
-    save_attrs.emplace_back(str_t("blahblah"), "some_string_attr");
-    save_attrs.emplace_back(v_t<double>({1.3, -0.2, 0.4, 1.0, -3.9, 0.1}), uintv_t({2ul, 3ul}), "some_multidimensional_attr");
+    hdf5::DatasetSaver::Options save_opts;
+    save_opts.m_attrs.emplace_back(5ul, "some_numeric_attr");
+    save_opts.m_attrs.emplace_back(str_t("blahblah"), "some_string_attr");
+    save_opts.m_attrs.emplace_back(v_t<double>({1.3, -0.2, 0.4, 1.0, -3.9, 0.1}), uintv_t({2ul, 3ul}), "some_multidimensional_attr");
     {
         hdf5::FileWriter fw("tmp.h5");
-        fw.save_dataset("stuff", save_vec, save_attrs, max_nitem_per_op);
+        hdf5::DatasetSaver::save_vector(fw, "stuff", save_vec, 0ul, save_opts);
     }
     v_t<hash::digest_t> load_vec;
     std::list<hdf5::Attr> load_attrs;
     auto attrs_correct = [&]() -> bool {
-        for (auto save_it: save_attrs) {
+        for (auto save_it: save_opts.m_attrs) {
             auto load_it = std::find_if(load_attrs.cbegin(), load_attrs.cend(),
                          [&save_it](const hdf5::Attr& attr){return attr.m_name==save_it.m_name;});
             if (load_it == load_attrs.cend() || save_it != *load_it) return false;
@@ -87,7 +88,7 @@ TEST(Dataset, ComplexContiguousSaveLoad) {
     const auto save_vec_all = mpi::all_gatheredv(save_vec);
     {
         hdf5::FileWriter fw("tmp.h5");
-        fw.save_dataset("stuff", save_vec, max_nitem_per_op);
+        hdf5::DatasetSaver::save_vector(fw, "stuff", save_vec, max_nitem_per_op);
     }
     v_t<std::complex<double>> load_vec;
     {
