@@ -139,9 +139,14 @@ namespace hf_excit_coeffs{
             if (!p) return false;
             const auto coherent = (p>0)==(weight>0);
             if (coherent) m_coherent_c4_l1.m_local += std::abs(weight);
-            else return false;
-            // if the weight is larger than the prediction by fac, let walker be initiator
-            return std::abs(weight) >= fac * std::abs(p);
+            if (fac==0.0) {
+                // with no fac set, assume we allow walkers of the correct predicted sign to become initiators
+                return coherent;
+            }
+            else {
+                // if the absolute predicted weight is larger than fac, let walker be initiator
+                return std::abs(p) > fac;
+            }
         }
 
         void update() {
