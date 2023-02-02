@@ -8,15 +8,23 @@
 FcidumpTextFileReader::FcidumpTextFileReader(const FcidumpInfo& info) :
         HamTextFileReader(info.m_fname, 4), m_info(info){
     auto nsite = m_info.m_nsite;
+    auto spin = [&nsite](uint_t ispinorb) -> bool {return sys::frm::Size::ispin(ispinorb, nsite);};
     if (m_info.m_spin_resolved && (m_info.m_ur_style!=FcidumpInfo::SpinBlocks)) {
         uintv_t inds(4);
         ham_t v;
         while (next(inds, v)) {
             if (fptol::near_zero(v)) continue;
-            if (((inds[0] < nsite) != (inds[1] < nsite)) || ((inds[2] < nsite) != (inds[3] < nsite))) {
-                // spin non-conserving example found
-                if (nset_ind(inds)==2) m_spin_conserving_1e = false;
-                else m_spin_conserving_2e = false;
+            if (nset_ind(inds)==2) {
+                if (spin(inds[0]) != spin(inds[1])) {
+                    // spin non-conserving example found
+                    m_spin_conserving_1e = false;
+                }
+            }
+            else if (nset_ind(inds)==4) {
+                if (spin(inds[0]) != spin(inds[1]) || spin(inds[2]) != spin(inds[3])) {
+                    // spin non-conserving example found
+                    m_spin_conserving_2e = false;
+                }
             }
         }
         reset(); // go back to beginning of entries
