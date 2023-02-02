@@ -318,7 +318,7 @@ bool Solver::is_initiator(const Walker& walker, uint_t ipart) {
     if (walker.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd)) return true;
     const auto& c2_c4_section = m_opts.m_propagator.m_c2_c4_initiator;
     if (m_hf && c2_c4_section.m_enabled) {
-        return m_hf->m_accum.is_initiator(ipart, walker, c2_c4_section.m_fac);
+        return m_hf->m_accum.is_initiator(walker, c2_c4_section.m_fac);
     }
     return false;
 }
