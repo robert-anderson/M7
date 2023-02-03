@@ -14,6 +14,7 @@ TEST(Dataset, RealContiguousSaveLoad) {
     const auto save_vec = hash::in_range(123, nitem, 0, 100);
     const auto save_vec_all = mpi::all_gatheredv(save_vec);
     hdf5::DatasetSaver::Options save_opts;
+    save_opts.m_max_nitem_per_op = max_nitem_per_op;
     save_opts.m_attrs.emplace_back(5ul, "some_numeric_attr");
     save_opts.m_attrs.emplace_back(str_t("blahblah"), "some_string_attr");
     save_opts.m_attrs.emplace_back(v_t<double>({1.3, -0.2, 0.4, 1.0, -3.9, 0.1}), uintv_t({2ul, 3ul}), "some_multidimensional_attr");

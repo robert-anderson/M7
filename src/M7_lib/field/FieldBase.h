@@ -205,13 +205,13 @@ protected:
 
 public:
 
-    void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const;
+    void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const;
 
     void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const;
 
     void save(const hdf5::NodeWriter& nw, bool this_rank) const;
 
-    void load(const hdf5::NodeReader& nr, const str_t& name, uint_t max_nitem_per_op, bool part, bool this_rank);
+    void load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank, uint_t max_nitem_per_op);
 
     void load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank);
 
