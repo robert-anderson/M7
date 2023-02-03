@@ -14,6 +14,8 @@ namespace hdf5 {
         Node(hid_t handle);
         operator hid_t() const;
     };
+
+    static constexpr uint_t c_default_max_nitem_per_op = 16000000;
 }
 
 #endif //M7_HDF5_NODE_H

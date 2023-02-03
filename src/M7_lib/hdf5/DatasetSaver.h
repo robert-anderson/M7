@@ -43,14 +43,7 @@ namespace hdf5 {
             uint_t m_max_nitem_per_op;
             std::list<Attr> m_attrs;
             str_t m_leading_dim_name;
-
-            Options(uint_t max_nitem_per_op = 0, std::list<Attr> attrs={}, str_t leading_dim_name="item"):
-                m_max_nitem_per_op(max_nitem_per_op), m_attrs(std::move(attrs)),
-                m_leading_dim_name(std::move(leading_dim_name)){}
-
-            uint_t max_nitem_per_op(uint_t fallback) const {
-                return m_max_nitem_per_op ? m_max_nitem_per_op : fallback;
-            }
+            Options(): m_max_nitem_per_op(c_default_max_nitem_per_op), m_attrs(), m_leading_dim_name("item"){}
         };
 
         /**
@@ -136,6 +129,14 @@ namespace hdf5 {
 
         uint_t nitem_remaining() const {
             return m_format.m_local.m_nitem - m_nitem_saved;
+        }
+
+        uint_t nitem_next(uint_t max_nitem_per_op) const {
+            return std::min(nitem_remaining(), max_nitem_per_op);
+        }
+
+        uint_t nbyte_next(uint_t max_nitem_per_op) const {
+            return nitem_next(max_nitem_per_op) * m_format.m_local.m_item.m_size;
         }
 
         /**

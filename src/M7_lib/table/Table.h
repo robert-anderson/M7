@@ -160,27 +160,27 @@ public:
      */
 
     void save(const hdf5::NodeWriter& parent, const str_t& name, strm_t field_names, bool this_rank) const {
-        save(parent, name, field_names, this_rank, hdf5::field::c_default_max_nitem_per_op);
+        save(parent, name, field_names, this_rank, hdf5::c_default_max_nitem_per_op);
     }
 
     void save(const hdf5::NodeWriter& parent, const str_t& name, const strv_t &field_names, bool this_rank) const {
-        save(parent, name, field_names, this_rank, hdf5::field::c_default_max_nitem_per_op);
+        save(parent, name, field_names, this_rank, hdf5::c_default_max_nitem_per_op);
     }
 
     void save(const hdf5::NodeWriter& parent, const str_t& name, bool this_rank) const {
-        save(parent, name, this_rank, hdf5::field::c_default_max_nitem_per_op);
+        save(parent, name, this_rank, hdf5::c_default_max_nitem_per_op);
     }
 
     void load(const hdf5::NodeReader& parent, const str_t& name, strm_t field_names, bool part, bool this_rank) {
-        load(parent, name, hdf5::field::c_default_max_nitem_per_op, field_names, part, this_rank);
+        load(parent, name, hdf5::c_default_max_nitem_per_op, field_names, part, this_rank);
     }
 
     void load(const hdf5::NodeReader& parent, const str_t& name, const strv_t &field_names, bool part, bool this_rank) {
-        load(parent, name, hdf5::field::c_default_max_nitem_per_op, field_names, part, this_rank);
+        load(parent, name, hdf5::c_default_max_nitem_per_op, field_names, part, this_rank);
     }
 
     void load(const hdf5::NodeReader& parent, const str_t& name, bool part, bool this_rank) {
-        load(parent, name, hdf5::field::c_default_max_nitem_per_op, part, this_rank);
+        load(parent, name, hdf5::c_default_max_nitem_per_op, part, this_rank);
     }
 };
 

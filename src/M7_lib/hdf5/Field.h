@@ -13,7 +13,6 @@
 
 namespace hdf5 {
     namespace field {
-        static constexpr uint_t c_default_max_nitem_per_op = 16000000;
         void save(const FieldBase& field, const hdf5::NodeWriter& nw, const str_t& name,
                          Type type, bool is_complex, uintv_t item_shape, strv_t item_dim_names, bool this_rank,
                          uint_t max_nitem_per_op = c_default_max_nitem_per_op, std::list<Attr> attrs = {});

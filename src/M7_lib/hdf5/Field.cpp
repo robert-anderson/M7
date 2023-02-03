@@ -36,7 +36,7 @@ void hdf5::field::save(const FieldBase &field, const hdf5::NodeWriter &nw, const
             }
             src = buf.data();
         }
-        all_done = ds.write(src, std::min(ds.nitem_remaining(), max_nitem_per_op));
+        all_done = ds.write(src, ds.nitem_next(max_nitem_per_op));
     }
     ds.save_attrs(attrs);
 }

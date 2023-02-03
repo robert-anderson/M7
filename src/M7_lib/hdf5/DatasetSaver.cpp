@@ -45,8 +45,14 @@ void hdf5::DatasetSaver::save_dist_list(
     const dataset::ItemFormat item_format(type, std::move(item_shape), std::move(item_dim_names), is_complex);
     const dataset::PartDistListFormat format(item_format, nitem, opts.m_leading_dim_name);
     DatasetSaver ds(nw, name, format);
-
-    ds.write(src, nitem);
+    // reinterpret ptr as byte so arithmetic can be performed on it
+    auto ptr = reinterpret_cast<const char*>(src);
+    char all_done = false;
+    while (!all_done) {
+        const auto nitem_this_op = ds.nitem_next(opts.m_max_nitem_per_op);
+        all_done = ds.write(nitem_this_op ? ptr : nullptr, nitem_this_op);
+        ptr += nitem_this_op * format.m_local.m_item.m_size;
+    }
     ds.save_attrs(opts.m_attrs);
 }
 
