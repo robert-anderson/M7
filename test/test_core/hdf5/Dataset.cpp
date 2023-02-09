@@ -6,7 +6,7 @@
 #include "M7_lib/hdf5/DatasetFormat.h"
 #include "M7_lib/util/Hash.h"
 #include "M7_lib/hdf5/File.h"
-#include "M7_lib/hdf5/DatasetSaver.h"
+#include "M7_lib/hdf5/DatasetTransaction.h"
 
 TEST(Dataset, RealContiguousSaveLoad) {
     const uint_t nitem = hash::in_range(19 + mpi::irank(), 34, 54);

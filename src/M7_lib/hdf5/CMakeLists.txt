@@ -4,8 +4,10 @@ target_sources(M7_lib
         Attr.h
         DatasetFormat.cpp
         DatasetFormat.h
-        DatasetSaver.cpp
-        DatasetSaver.h
+        DatasetLoader.cpp
+        DatasetLoader.h
+        DatasetTransaction.cpp
+        DatasetTransaction.h
         Field.cpp
         Field.h
         File.cpp

@@ -1,31 +1,33 @@
 //
-// Created by rja on 30/01/23.
+// Created by rja on 04/02/23.
 //
 
-#ifndef M7_DATASETSAVER_H
-#define M7_DATASETSAVER_H
+#ifndef M7_DATASETTRANSACTION_H
+#define M7_DATASETTRANSACTION_H
 
-#include <utility>
-
+#include "DatasetFormat.h"
 #include "NodeWriter.h"
-#include "M7_lib/util/Vector.h"
+#include "NodeReader.h"
 
 namespace hdf5 {
-    struct DatasetSaver {
-        const hdf5::dataset::PartDistListFormat m_format;
-
-    private:
+    static constexpr uint_t c_default_max_nitem_per_op = 16000000;
+    /**
+     * common members between dataset saver and loader
+     */
+    struct DatasetTransaction {
+    protected:
+        const hdf5::dataset::DistListFormat m_format;
         /**
          * counter for the number of items already transacted
          */
-        uint_t m_nitem_saved = 0ul;
+        uint_t m_nitem_done = 0ul;
         /**
          * working vectors for determining hyperslabs
          */
         v_t<hsize_t> m_counts, m_offsets;
 
         /**
-         * HDF5 asset handles
+         * HDF5 object handles
          */
         hid_t m_plist;
         hid_t m_filespace;
@@ -33,7 +35,24 @@ namespace hdf5 {
         hid_t m_mem_hyperslab;
         hid_t m_dataset;
     public:
+        DatasetTransaction(dataset::DistListFormat format):
+            m_format(std::move(format)), m_counts(m_format.m_local.ndim(), 0), m_offsets(m_format.m_local.ndim(), 0){}
 
+
+        uint_t nitem_done() const {
+            return m_nitem_done;
+        }
+
+        uint_t nitem_remaining() const {
+            return m_format.m_local.m_nitem - m_nitem_done;
+        }
+
+        uint_t nitem_next(uint_t max_nitem_per_op) const {
+            return std::min(nitem_remaining(), max_nitem_per_op);
+        }
+    };
+
+    struct DatasetSaver : public DatasetTransaction {
         DatasetSaver(const NodeWriter& nw, const str_t& name, hdf5::dataset::PartDistListFormat format);
 
         /**
@@ -70,14 +89,14 @@ namespace hdf5 {
          *  name to give to the distributed dimension
          */
         static void save_dist_list(const NodeWriter& nw, const str_t& name, const void* src, Type type, bool is_complex,
-                         uintv_t item_shape, strv_t item_dim_names, uint_t nitem, const Options& opts);
+                                   uintv_t item_shape, strv_t item_dim_names, uint_t nitem, const Options& opts);
 
         /**
          * type-templated wrapper of the above, raw-data function
          */
         template<typename T>
         static void save_dist_list(const NodeWriter& nw, const str_t& name, const T* src, uintv_t item_shape,
-                         strv_t item_dim_names, uint_t nitem, const Options& opts){
+                                   strv_t item_dim_names, uint_t nitem, const Options& opts){
             save_dist_list(nw, name, src, Type::make<T>(), dtype::is_complex<T>(), item_shape, item_dim_names, nitem, opts);
         }
 
@@ -86,7 +105,7 @@ namespace hdf5 {
          */
         template<typename T>
         static void save_dist_list(const NodeWriter& nw, const str_t& name, const v_t<T>& src, uintv_t item_shape,
-                strv_t item_dim_names, bool this_rank, const Options& opts){
+                                   strv_t item_dim_names, bool this_rank, const Options& opts){
             const auto nitem = this_rank ? src.size() / nd::nelement(item_shape) : 0ul;
             REQUIRE_FALSE(src.size() % nd::nelement(item_shape), "item shape inconsistent with size of data buffer");
             save_dist_list(nw, name, src.data(), item_shape, item_dim_names, nitem, opts);
@@ -98,7 +117,7 @@ namespace hdf5 {
          */
         template<typename T>
         static void save_array(const NodeWriter& nw, const str_t& name, const T* src, uintv_t shape, strv_t dim_names,
-                uint_t irank=0ul, const Options& opts={}){
+                               uint_t irank=0ul, const Options& opts={}){
             auto nitem = mpi::i_am(irank) ? shape.front() : 0ul;
             uintv_t item_shape(shape.cbegin()+1, shape.cend());
             auto leading_dim_name = dim_names.empty() ? "" : dim_names.front();
@@ -108,7 +127,7 @@ namespace hdf5 {
 
         template<typename T>
         static void save_array(const NodeWriter& nw, const str_t& name, const v_t<T>& src, uintv_t shape,
-                strv_t dim_names, uint_t irank=0ul, const Options& opts={}){
+                               strv_t dim_names, uint_t irank=0ul, const Options& opts={}){
             if (mpi::i_am(irank)) {
                 REQUIRE_EQ(nd::nelement(shape), src.size(), "number of elements in array is incompatible with given shape");
             }
@@ -127,18 +146,6 @@ namespace hdf5 {
             save_array(nw, name, &src, {1ul}, {"scalar"}, irank, opts);
         }
 
-        uint_t nitem_remaining() const {
-            return m_format.m_local.m_nitem - m_nitem_saved;
-        }
-
-        uint_t nitem_next(uint_t max_nitem_per_op) const {
-            return std::min(nitem_remaining(), max_nitem_per_op);
-        }
-
-        uint_t nbyte_next(uint_t max_nitem_per_op) const {
-            return nitem_next(max_nitem_per_op) * m_format.m_local.m_item.m_size;
-        }
-
         /**
          * write raw data collectively
          * @param src
@@ -154,7 +161,7 @@ namespace hdf5 {
 
         ~DatasetSaver();
     };
-}
+};
 
 
-#endif //M7_DATASETSAVER_H
+#endif //M7_DATASETTRANSACTION_H

@@ -1,12 +1,13 @@
 //
-// Created by rja on 30/01/23.
+// Created by rja on 04/02/23.
 //
 
-#include "DatasetSaver.h"
+#include "DatasetTransaction.h"
+
 
 hdf5::DatasetSaver::DatasetSaver(
         const hdf5::NodeWriter& nw, const str_t& name, hdf5::dataset::PartDistListFormat format) :
-        m_format(std::move(format)){
+        DatasetTransaction(format){
     REQUIRE_FALSE_ALL(name.empty(), "HDF5 dataset must be given a name")
     m_filespace = H5Screate_simple(format.m_h5_shape.size(), format.m_h5_shape.data(), nullptr);
 
@@ -27,14 +28,9 @@ hdf5::DatasetSaver::DatasetSaver(
     H5Pset_dxpl_mpio(m_plist, H5FD_MPIO_COLLECTIVE);
 
     const hsize_t ndim = format.m_h5_shape.size();
-    // initialize an array to specify the counts of data transacted. this only changes in the first element
-    m_counts = vector::prepended(format.m_local.m_item.m_h5_shape, 0ul);
     // hyperslabs for the offsets and counts associated with the file and memory layout respectively
     m_file_hyperslab = H5Screate_simple(ndim, format.m_h5_shape.data(), nullptr);
     m_mem_hyperslab = H5Screate_simple(ndim, format.m_h5_shape.data(), nullptr);
-
-    // first element of offset is incremented at each iteration
-    m_offsets = v_t<hsize_t>(ndim);
 
     if (!m_format.m_nitem) logging::warn("Saving empty dataset \"{}\"", name);
 }
@@ -62,11 +58,11 @@ bool hdf5::DatasetSaver::write(const void* src, uint_t nitem) {
      */
     if (!m_format.m_nitem) return true;
     // the number of items transacted may not be larger than the number of items remaining
-    REQUIRE_LE(m_nitem_saved + nitem, m_format.m_local.m_nitem, "too many items");
+    REQUIRE_LE(m_nitem_done + nitem, m_format.m_local.m_nitem, "too many items");
     m_counts[0] = nitem;
     m_offsets[0] = 0;
     H5Sselect_hyperslab(m_mem_hyperslab, H5S_SELECT_SET, m_offsets.data(), nullptr, m_counts.data(), nullptr);
-    m_offsets[0] = m_format.m_nitem_displ + m_nitem_saved;
+    m_offsets[0] = m_format.m_nitem_displ + m_nitem_done;
     REQUIRE_EQ(bool(src), bool(m_counts[0]), "count zero with non-null data or count non-zero with null data");
     H5Sselect_hyperslab(m_file_hyperslab, H5S_SELECT_SET, m_offsets.data(), nullptr, m_counts.data(), nullptr);
     auto status = H5Dwrite(m_dataset, m_format.m_local.m_item.m_type, m_mem_hyperslab, m_file_hyperslab, m_plist, src);
@@ -74,7 +70,7 @@ bool hdf5::DatasetSaver::write(const void* src, uint_t nitem) {
     bool all_done = !src;
     all_done = mpi::all_land(all_done);
     // deplete number of remaining items by the number just transacted
-    m_nitem_saved += m_counts[0];
+    m_nitem_done += m_counts[0];
     return all_done;
 }
 

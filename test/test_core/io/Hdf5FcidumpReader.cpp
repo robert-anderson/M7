@@ -5,7 +5,7 @@
 
 #include "test_core/defs.h"
 #include "M7_lib/io/FcidumpTextFileReader.h"
-#include "M7_lib/hdf5/DatasetSaver.h"
+#include "M7_lib/hdf5/DatasetTransaction.h"
 
 using namespace hdf5;
 

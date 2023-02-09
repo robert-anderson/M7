@@ -23,10 +23,15 @@ bool hdf5::dataset::ItemFormat::operator!=(const hdf5::dataset::ItemFormat& othe
     return !(*this==other);
 }
 
+uint_t hdf5::dataset::ListFormat::ndim() const {
+    return m_h5_shape.size();
+}
+
 hdf5::dataset::ListFormat::ListFormat(hdf5::dataset::ItemFormat item_format, uint_t nitem, str_t leading_dim_name) :
         m_item(item_format), m_nitem(nitem), m_size(m_nitem*m_item.m_size),
         m_h5_shape(convert::vector<hsize_t>(vector::prepended(m_item.m_h5_shape, m_nitem))),
         m_dim_names(vector::prepended(m_item.m_dim_names, leading_dim_name)) {}
+
 
 hdf5::dataset::DistListFormat::DistListFormat(
         hdf5::dataset::ItemFormat item_format, uint_t nitem_local,

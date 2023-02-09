@@ -79,6 +79,12 @@ namespace hdf5 {
              */
             const strv_t m_dim_names;
 
+            /**
+             * @return
+             *  number of dimensions including the list dimension (dimensionality of item format + 1)
+             */
+            uint_t ndim() const;
+
             ListFormat(ItemFormat item_format, uint_t nitem, str_t leading_dim_name="item");
         };
         /**
