@@ -13,22 +13,44 @@
 
 namespace hdf5 {
     namespace field {
-        void save(const FieldBase& field, const hdf5::NodeWriter& nw, const str_t& name,
-                         Type type, bool is_complex, uintv_t item_shape, strv_t item_dim_names, bool this_rank,
-                         uint_t max_nitem_per_op = c_default_max_nitem_per_op, std::list<Attr> attrs = {});
+        void save(
+            const FieldBase& field,
+            const hdf5::NodeWriter& nw,
+            const str_t& name,
+            Type type,
+            bool is_complex,
+            uintv_t item_shape,
+            strv_t item_dim_names,
+            bool this_rank,
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op,
+            std::list<Attr> attrs = {});
 
         template<typename T>
-        static void save(const FieldBase& field, const hdf5::NodeWriter& nw, const str_t& name,
-                         uintv_t item_shape, strv_t item_dim_names, bool this_rank,
-                         uint_t max_nitem_per_op = c_default_max_nitem_per_op, std::list<Attr> attrs = {}) {
-            save(field, nw, name, Type::make<T>(), dtype::is_complex<T>(), item_shape,
-                    item_dim_names, this_rank, max_nitem_per_op, attrs);
+        static void save(
+            const FieldBase& field,
+            const hdf5::NodeWriter& nw,
+            const str_t& name,
+            uintv_t item_shape,
+            strv_t item_dim_names,
+            bool this_rank,
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op,
+            std::list<Attr> attrs = {})
+        {
+            save(field, nw, name, Type::make<T>(), dtype::is_complex<T>(), item_shape, item_dim_names,
+                 this_rank, max_nitem_per_op, attrs);
         }
 
 
         template<typename T>
-        static void load(FieldBase& field, const hdf5::NodeReader& nr, const str_t& name,
-                         uint_t max_nitem_per_op, std::list<Attr>& /*attrs*/, bool part, bool this_rank) {
+        static void load(
+            FieldBase& field,
+            const hdf5::NodeReader& nr,
+            const str_t& name,
+            uint_t max_nitem_per_op,
+            std::list<Attr>& /*attrs*/,
+            bool part,
+            bool this_rank)
+        {
             const auto local_format = part ? nr.get_part_dataset_format(name, this_rank).m_local :
                                       nr.get_full_dataset_format(name, this_rank).m_local;
             // unlike the save case, there is no need to consider empty rows in the table
@@ -62,8 +84,14 @@ namespace hdf5 {
          * assume all items are loaded in one op
          */
         template<typename T>
-        static void load(FieldBase& field, const hdf5::NodeReader& nr, const str_t& name,
-                         std::list<Attr>& attrs, bool part, bool this_rank) {
+        static void load(
+            FieldBase& field,
+            const hdf5::NodeReader& nr,
+            const str_t& name,
+            std::list<Attr>& attrs,
+            bool part,
+            bool this_rank)
+        {
             const auto local_format = part ? nr.get_part_dataset_format(name, this_rank).m_local :
                                       nr.get_full_dataset_format(name, this_rank).m_local;
             load<T>(field, nr, name, local_format.m_nitem, attrs, part, this_rank);
@@ -74,8 +102,14 @@ namespace hdf5 {
          */
 
         template<typename T>
-        static void load(FieldBase& field, const hdf5::NodeReader& nr, const str_t& name,
-                         uint_t max_nitem_per_op, bool part, bool this_rank) {
+        static void load(
+            FieldBase& field,
+            const hdf5::NodeReader& nr,
+            const str_t& name,
+            uint_t max_nitem_per_op,
+            bool part,
+            bool this_rank)
+        {
             std::list<Attr> attrs;
             load<T>(field, nr, name, max_nitem_per_op, attrs, part, this_rank);
         }
