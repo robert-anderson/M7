@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "M7_lib/field/FieldBase.h"
-#include "Group.h"
+#include "Node.h"
 #include "DatasetTransaction.h"
 
 namespace hdf5 {
@@ -51,6 +51,7 @@ namespace hdf5 {
             bool part,
             bool this_rank)
         {
+            DatasetLoader dl(nr, name, part, this_rank)
             const auto local_format = part ? nr.get_part_dataset_format(name, this_rank).m_local :
                                       nr.get_full_dataset_format(name, this_rank).m_local;
             // unlike the save case, there is no need to consider empty rows in the table

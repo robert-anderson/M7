@@ -5,8 +5,7 @@
 #ifndef M7_HDF5_FILE_H
 #define M7_HDF5_FILE_H
 
-#include "NodeReader.h"
-#include "NodeWriter.h"
+#include "Node.h"
 
 namespace hdf5 {
     struct FileBase {

@@ -11,7 +11,7 @@
 #include <M7_lib/mae/MaeTable.h>
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/io/Archivable.h>
-#include <M7_lib/hdf5/Group.h>
+#include <M7_lib/hdf5/Node.h>
 
 #include "FermionPromoter.h"
 

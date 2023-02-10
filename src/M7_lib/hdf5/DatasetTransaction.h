@@ -6,8 +6,7 @@
 #define M7_DATASETTRANSACTION_H
 
 #include "DatasetFormat.h"
-#include "NodeWriter.h"
-#include "NodeReader.h"
+#include "Node.h"
 
 namespace hdf5 {
     static constexpr uint_t c_default_max_nitem_per_op = 16000000;
@@ -15,8 +14,8 @@ namespace hdf5 {
      * common members between dataset saver and loader
      */
     struct DatasetTransaction {
-    protected:
         const hdf5::dataset::DistListFormat m_format;
+    protected:
         /**
          * counter for the number of items already transacted
          */

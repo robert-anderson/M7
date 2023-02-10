@@ -15,8 +15,7 @@
 #include <M7_lib/util/FpTol.h>
 #include <M7_lib/defs.h>
 #include "M7_lib/linalg/sparse/Dynamic.h"
-#include "M7_lib/hdf5/NodeReader.h"
-#include "M7_lib/hdf5/NodeWriter.h"
+#include "M7_lib/hdf5/Node.h"
 #include "M7_lib/hdf5/DatasetTransaction.h"
 
 
@@ -156,11 +155,11 @@ namespace dense {
         }
 
         Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank) {
-            if (this_rank) {
-                auto shape = nr.get_dataset_shape(name);
-                resize(shape[0], shape[1]);
-            }
-            nr.load_dataset(name, m_buffer, false, this_rank);
+            hdf5::DatasetLoader dl(nr, name, false, this_rank);
+            const auto& shape = dl.m_format.m_local.m_item.m_h5_shape;
+            if (this_rank) resize(shape[0], shape[1]);
+            hdf5::DatasetLoader::Options opts(false, this_rank);
+            dl.load_dist_list(nr, name, m_buffer.data(), m_buffer.size(), opts);
         }
 
         explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_col_ind() + 1){

@@ -10,14 +10,8 @@ target_sources(M7_lib
         Field.h
         File.cpp
         File.h
-        Group.cpp
-        Group.h
         Node.cpp
         Node.h
-        NodeReader.cpp
-        NodeReader.h
-        NodeWriter.cpp
-        NodeWriter.h
         Type.cpp
         Type.h
 )
