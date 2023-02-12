@@ -13,7 +13,7 @@ TEST(Hdf5FcidumpReader, Header) {
     auto shape = DatasetLoader::read_format(fr, "FOCK_INDEX", false, true).m_h5_shape;
     ASSERT_EQ(shape[0], 6ul);
     ASSERT_EQ(shape[1], 2ul);
-    auto inds = DatasetLoader::load_vector<int64_t>(fr, "FOCK_INDEX", DatasetLoader::Options());
+    auto inds = DatasetLoader::load_vector<int64_t>(fr, "FOCK_INDEX");
 
     hdf5::FileWriter fw("rja.h5");
     hdf5::DatasetSaver::save_vector(fw, "FOCK_INDEX", inds, 0ul);

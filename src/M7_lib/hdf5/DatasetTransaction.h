@@ -10,6 +10,7 @@
 
 namespace hdf5 {
     static constexpr uint_t c_default_max_nitem_per_op = 16000000;
+    static constexpr char c_default_leading_dim_name[] = "item";
     /**
      * common members between dataset saver and loader
      */
@@ -89,16 +90,6 @@ namespace hdf5 {
         void save_attrs(const std::list<Attr>& attrs);
 
         /**
-         * to keep down on the number of optional arguments to the save_* methods
-         */
-        struct Options {
-            uint_t m_max_nitem_per_op;
-            std::list<Attr> m_attrs;
-            str_t m_leading_dim_name;
-            Options(): m_max_nitem_per_op(c_default_max_nitem_per_op), m_attrs(), m_leading_dim_name("item"){}
-        };
-
-        /**
          * save distributed data formatted as contiguous raw buffers in one write operation
          * @param nw
          *  node writer object of the dataset's parent
@@ -118,6 +109,8 @@ namespace hdf5 {
          *  number of items stored on this MPI rank
          * @param attrs
          *  attributes to save inside the dataset HDF5 node
+         * @param max_nitem_per_op
+         *  maximum number of items to transact in a single write call
          * @param leading_dim_name
          *  name to give to the distributed dimension
          */
@@ -130,7 +123,9 @@ namespace hdf5 {
             uintv_t item_shape,
             strv_t item_dim_names,
             uint_t nitem,
-            const Options& opts);
+            std::list<Attr> attrs = {},
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op,
+            str_t leading_dim_name = c_default_leading_dim_name);
 
         /**
          * type-templated wrapper of the above, raw-data function
@@ -143,9 +138,12 @@ namespace hdf5 {
             uintv_t item_shape,
             strv_t item_dim_names,
             uint_t nitem,
-            const Options& opts)
+            std::list<Attr> attrs = {},
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op,
+            str_t leading_dim_name = c_default_leading_dim_name)
         {
-            save_dist_list(nw, name, src, Type::make<T>(), dtype::is_complex<T>(), item_shape, item_dim_names, nitem, opts);
+            save_dist_list(nw, name, src, Type::make<T>(), dtype::is_complex<T>(), item_shape, item_dim_names, nitem,
+                           attrs, max_nitem_per_op, leading_dim_name);
         }
 
         /**
@@ -159,11 +157,14 @@ namespace hdf5 {
             uintv_t item_shape,
             strv_t item_dim_names,
             bool this_rank,
-            const Options& opts)
+            std::list<Attr> attrs = {},
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op,
+            str_t leading_dim_name = c_default_leading_dim_name)
         {
             const auto nitem = this_rank ? src.size() / nd::nelement(item_shape) : 0ul;
             REQUIRE_FALSE(src.size() % nd::nelement(item_shape), "item shape inconsistent with size of data buffer");
-            save_dist_list(nw, name, src.data(), item_shape, item_dim_names, nitem, opts);
+            save_dist_list(nw, name, src.data(), item_shape, item_dim_names, nitem,
+                           attrs, max_nitem_per_op, leading_dim_name);
         }
 
         /**
@@ -178,13 +179,15 @@ namespace hdf5 {
             uintv_t shape,
             strv_t dim_names,
             uint_t irank=0ul,
-            const Options& opts={})
+            std::list<Attr> attrs = {},
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op)
         {
             auto nitem = mpi::i_am(irank) ? shape.front() : 0ul;
             uintv_t item_shape(shape.cbegin()+1, shape.cend());
             auto leading_dim_name = dim_names.empty() ? "" : dim_names.front();
             strv_t item_dim_names(dim_names.cbegin()+1, dim_names.cend());
-            save_dist_list(nw, name, src, Type::make<T>(), dtype::is_complex<T>(), item_shape, item_dim_names, nitem, opts);
+            save_dist_list(nw, name, src, Type::make<T>(), dtype::is_complex<T>(), item_shape, item_dim_names, nitem,
+                           attrs, max_nitem_per_op);
         }
 
         template<typename T>
@@ -195,12 +198,13 @@ namespace hdf5 {
             uintv_t shape,
             strv_t dim_names,
             uint_t irank=0ul,
-            const Options& opts={})
+            std::list<Attr> attrs = {},
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op)
         {
             if (mpi::i_am(irank)) {
                 REQUIRE_EQ(nd::nelement(shape), src.size(), "number of elements in array is incompatible with given shape");
             }
-            save_array(nw, name, src.data(), shape, dim_names, irank, opts);
+            save_array(nw, name, src.data(), shape, dim_names, irank, attrs, max_nitem_per_op);
         }
 
         template<typename T>
@@ -209,14 +213,15 @@ namespace hdf5 {
             const str_t& name,
             const v_t<T>& src,
             uint_t irank=0ul,
-            const Options& opts={})
+            std::list<Attr> attrs = {},
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op)
         {
-            save_array(nw, name, src, {src.size()}, {"elements"}, irank, opts);
+            save_array(nw, name, src, {src.size()}, {"elements"}, irank, attrs, max_nitem_per_op);
         }
 
         template<typename T>
-        static void save_scalar(const NodeWriter& nw, const str_t& name, const T& src, uint_t irank=0ul, const Options& opts={}){
-            save_array(nw, name, &src, {1ul}, {"scalar"}, irank, opts);
+        static void save_scalar(const NodeWriter& nw, const str_t& name, const T& src, uint_t irank=0ul){
+            save_array(nw, name, &src, {1ul}, {"scalar"}, irank);
         }
     };
 
@@ -262,17 +267,6 @@ namespace hdf5 {
         ~DatasetLoader();
 
         /**
-         * to keep down on the number of optional arguments to the load_* methods
-         */
-        struct Options {
-            uint_t m_max_nitem_per_op;
-            bool m_part;
-            bool m_this_rank;
-            Options(bool part=false, bool this_rank=true):
-                m_max_nitem_per_op(c_default_max_nitem_per_op), m_part(part), m_this_rank(this_rank){}
-        };
-
-        /**
          * load data from hdf5 dataset into distributed, contiguous raw buffers
          * @param nr
          *  node reader object of the dataset's parent
@@ -287,10 +281,14 @@ namespace hdf5 {
          *  native type of data stored at dst
          * @param is_complex
          *  true if the data stored at dst is of std::complex<T> type
-         * @param opts
-         *  passed as mutable reference so that
+         * @param part
+         *  true if the loading is to be split up equally among MPI ranks, false if all ranks read all data
+         * @param this_rank
+         *  true if this MPI rank participates in the load operation (reads partial or full dataset from file)
          * @param attrs
          *  all attributes linked to the dataset
+         * @param max_nitem_per_op
+         *  maximum number of items to transfer in a single read operation
          */
         static void load_dist_list(
             const NodeReader& nr,
@@ -299,8 +297,10 @@ namespace hdf5 {
             uint_t size,
             hdf5::Type type,
             bool is_complex,
-            const Options& opts,
-            std::list<Attr>& attrs);
+            bool part,
+            bool this_rank,
+            std::list<Attr>& attrs,
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op);
 
         /**
          * type-templated wrapper of the above, raw-data function
@@ -311,10 +311,13 @@ namespace hdf5 {
             const str_t& name,
             T* dst,
             uint_t size,
-            const Options& opts,
-            std::list<Attr>& attrs)
+            bool part,
+            bool this_rank,
+            std::list<Attr>& attrs,
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op)
         {
-            load_dist_list(nr, name, dst, size*sizeof(T), Type::make<T>(), dtype::is_complex<T>(), opts, attrs);
+            load_dist_list(nr, name, dst, size*sizeof(T), Type::make<T>(), dtype::is_complex<T>(),
+                part, this_rank, attrs, max_nitem_per_op);
         }
 
         /**
@@ -326,10 +329,12 @@ namespace hdf5 {
             const str_t& name,
             T* dst,
             uint_t size,
-            const Options& opts)
+            bool part,
+            bool this_rank,
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op)
         {
             std::list<Attr> attrs;
-            load_dist_list(nr, name, dst, size, opts, attrs);
+            load_dist_list(nr, name, dst, size, part, this_rank, attrs, max_nitem_per_op);
         }
 
         /**
@@ -337,25 +342,42 @@ namespace hdf5 {
          */
         template<typename T>
         static void load_dist_list(
-                const NodeReader& nr, const str_t& name, v_t<T>& dst, const Options& opts, std::list<Attr>& attrs){
-            const auto size = read_format(nr.m_handle, name, opts.m_part, opts.m_this_rank).m_local.m_size;
+            const NodeReader& nr,
+            const str_t& name,
+            v_t<T>& dst,
+            bool part,
+            bool this_rank,
+            std::list<Attr>& attrs,
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op)
+        {
+            const auto size = read_format(nr.m_handle, name, part, this_rank).m_local.m_size;
             dst.resize(size / sizeof(T));
-            load_dist_list(nr, name, dst.data(), dst.size(), opts, attrs);
+            load_dist_list(nr, name, dst.data(), dst.size(), part, this_rank, attrs, max_nitem_per_op);
         }
 
         /**
          * as above, but discarding attrs
          */
         template<typename T>
-        static void load_dist_list(const NodeReader& nr, const str_t& name, v_t<T>& dst, const Options& opts){
+        static void load_dist_list(
+            const NodeReader& nr,
+            const str_t& name,
+            v_t<T>& dst,
+            bool part,
+            bool this_rank,
+            uint_t max_nitem_per_op = c_default_max_nitem_per_op)
+        {
             std::list<Attr> attrs;
-            load_dist_list(nr, name, dst, opts, attrs);
+            load_dist_list(nr, name, dst, part, this_rank, attrs, max_nitem_per_op);
         }
 
+        /**
+         * convenience function for reading into and returning a std::vector
+         */
         template<typename T>
-        static v_t<T> load_vector(const NodeReader& nr, const str_t& name, const Options& opts){
+        static v_t<T> load_vector(const NodeReader& nr, const str_t& name, bool part=false, bool this_rank=true){
             v_t<T> tmp;
-            load_dist_list(nr, name, tmp, opts);
+            load_dist_list(nr, name, tmp, part, this_rank);
             return tmp;
         }
     };

@@ -58,28 +58,30 @@ bool hdf5::DatasetSaver::write(const void* src, uint_t nitem) {
 }
 
 void hdf5::DatasetSaver::save_dist_list(
-        const hdf5::NodeWriter& nw,
-        const str_t& name,
-        const void* src,
-        hdf5::Type type,
-        bool is_complex,
-        uintv_t item_shape,
-        strv_t item_dim_names,
-        uint_t nitem,
-        const Options& opts)
+    const NodeWriter& nw,
+    const str_t& name,
+    const void* src,
+    Type type,
+    bool is_complex,
+    uintv_t item_shape,
+    strv_t item_dim_names,
+    uint_t nitem,
+    std::list<Attr> attrs,
+    uint_t max_nitem_per_op,
+    str_t leading_dim_name)
 {
     const dataset::ItemFormat item_format(type, std::move(item_shape), std::move(item_dim_names), is_complex);
-    const dataset::PartDistListFormat format(item_format, nitem, opts.m_leading_dim_name);
+    const dataset::PartDistListFormat format(item_format, nitem, leading_dim_name);
     DatasetSaver ds(nw, name, format);
     // reinterpret ptr as byte so arithmetic can be performed on it
     auto ptr = reinterpret_cast<const char*>(src);
     char all_done = false;
     while (!all_done) {
-        const auto nitem_this_op = ds.nitem_next(opts.m_max_nitem_per_op);
+        const auto nitem_this_op = ds.nitem_next(max_nitem_per_op);
         all_done = ds.write(nitem_this_op ? ptr : nullptr, nitem_this_op);
         ptr += nitem_this_op * format.m_local.m_item.m_size;
     }
-    ds.save_attrs(opts.m_attrs);
+    ds.save_attrs(attrs);
 }
 
 
@@ -223,16 +225,18 @@ hdf5::DatasetLoader::~DatasetLoader() {
 }
 
 void hdf5::DatasetLoader::load_dist_list(
-    const hdf5::NodeReader &nr,
-    const str_t &name,
-    void *dst,
+    const NodeReader& nr,
+    const str_t& name,
+    void* dst,
     uint_t size,
     hdf5::Type type,
     bool is_complex,
-    const hdf5::DatasetLoader::Options &opts,
-    std::list<Attr> &attrs)
+    bool part,
+    bool this_rank,
+    std::list<Attr>& attrs,
+    uint_t max_nitem_per_op)
 {
-    DatasetLoader dl(nr, name, opts.m_part, opts.m_this_rank);
+    DatasetLoader dl(nr, name, part, this_rank);
     REQUIRE_GE_ALL(dl.m_format.m_local.m_size, size,
                    logging::format("buffer is not large enough to read dataset \"{}\"", name));
     if (dl.m_format.m_local.m_size < size)
@@ -245,7 +249,7 @@ void hdf5::DatasetLoader::load_dist_list(
     auto ptr = reinterpret_cast<char*>(dst);
     char all_done = false;
     while (!all_done) {
-        const auto nitem_this_op = dl.nitem_next(opts.m_max_nitem_per_op);
+        const auto nitem_this_op = dl.nitem_next(max_nitem_per_op);
         all_done = dl.read(nitem_this_op ? ptr : nullptr, nitem_this_op);
         ptr += nitem_this_op * dl.m_format.m_local.m_item.m_size;
     }
