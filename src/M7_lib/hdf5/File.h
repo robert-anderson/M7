@@ -5,6 +5,7 @@
 #ifndef M7_HDF5_FILE_H
 #define M7_HDF5_FILE_H
 
+#include <utility>
 #include "Node.h"
 
 namespace hdf5 {
@@ -15,7 +16,7 @@ namespace hdf5 {
 
         static void require_is_hdf5(const str_t &fname);
 
-        FileBase(const str_t &fname) : m_fname(fname) {}
+        FileBase(str_t fname) : m_fname(std::move(fname)) {}
     };
 
     struct FileReader : NodeReader, FileBase {

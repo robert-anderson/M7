@@ -13,6 +13,10 @@ namespace hdf5 {
         const hid_t m_handle;
         Node(hid_t handle);
         operator hid_t() const;
+
+        bool child_exists(const str_t& name) const {
+            return H5Oexists_by_name(m_handle, name.c_str(), H5P_DEFAULT);
+        }
     };
 
     H5O_info_t get_object_info(hid_t obj_handle);

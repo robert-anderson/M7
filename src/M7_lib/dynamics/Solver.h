@@ -11,7 +11,6 @@
 #include <M7_lib/observables/HfExcits.h>
 #include <M7_lib/bilinear/Bilinears.h>
 #include <M7_lib/io/FciqmcStats.h>
-#include <M7_lib/io/Archivable.h>
 #include <M7_lib/io/TimingStats.h>
 #include <M7_lib/io/FciqmcStats.h>
 #include <M7_lib/io/ParallelStats.h>

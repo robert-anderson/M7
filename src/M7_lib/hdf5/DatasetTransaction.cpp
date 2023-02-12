@@ -166,8 +166,8 @@ hdf5::DatasetLoader::DatasetLoader(const hdf5::NodeReader &nr, const str_t &name
     const auto ndim = m_format.m_h5_shape.size();
 
     // datasets are always transacted in collective I/O mode
-    hid_t plist = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plist, H5FD_MPIO_COLLECTIVE);
+    m_plist = H5Pcreate(H5P_DATASET_XFER);
+    H5Pset_dxpl_mpio(m_plist, H5FD_MPIO_COLLECTIVE);
 
     // hyperslabs for the offsets and counts associated with the file and memory layout respectively
     m_file_hyperslab = H5Screate_simple(ndim, m_format.m_h5_shape.data(), nullptr);
@@ -177,6 +177,7 @@ hdf5::DatasetLoader::DatasetLoader(const hdf5::NodeReader &nr, const str_t &name
 }
 
 void hdf5::DatasetLoader::load_attrs(std::list<Attr> &attrs) const {
+    attrs.clear();
     // load any attributes associated with the open dataset
     auto op = [](hid_t parent, const char *name, const H5A_info_t */*ainfo*/, void *attrs_cast) -> herr_t {
         auto attrs = reinterpret_cast<std::list<Attr> *>(attrs_cast);
@@ -194,6 +195,8 @@ bool hdf5::DatasetLoader::read(void *dst, uint_t nitem) {
      * only call H5Dread if there is any data across all MPI ranks
      */
     if (!m_format.m_nitem) return true;
+    // every MPI rank must call read, since the I/O is done in collective mode
+    mpi::barrier();
     // the number of items transacted may not be larger than the number of items remaining
     REQUIRE_LE(m_nitem_done + nitem, m_format.m_local.m_nitem, "too many items");
     m_counts[0] = nitem;

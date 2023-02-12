@@ -236,6 +236,8 @@ namespace hdf5 {
 
         static bool valid_part_flag(bool part);
 
+    public:
+
         /**
          * @param parent
          *  Node (group or file) open for reading
@@ -250,8 +252,6 @@ namespace hdf5 {
          *  pair of integers specifying the size of the locally-read data: nitem and item_size
          */
         static dataset::DistListFormat read_format(hid_t parent, const str_t &name, bool part, bool this_rank);
-
-    public:
 
         DatasetLoader(const NodeReader &nr, const str_t &name, bool part, bool this_rank);
 
@@ -268,7 +268,7 @@ namespace hdf5 {
             uint_t m_max_nitem_per_op;
             bool m_part;
             bool m_this_rank;
-            Options(bool part, bool this_rank):
+            Options(bool part=false, bool this_rank=true):
                 m_max_nitem_per_op(c_default_max_nitem_per_op), m_part(part), m_this_rank(this_rank){}
         };
 
@@ -340,7 +340,7 @@ namespace hdf5 {
                 const NodeReader& nr, const str_t& name, v_t<T>& dst, const Options& opts, std::list<Attr>& attrs){
             const auto size = read_format(nr.m_handle, name, opts.m_part, opts.m_this_rank).m_local.m_size;
             dst.resize(size / sizeof(T));
-            load_dist_list(nr, name, dst, dst.size(), opts, attrs);
+            load_dist_list(nr, name, dst.data(), dst.size(), opts, attrs);
         }
 
         /**
@@ -350,6 +350,13 @@ namespace hdf5 {
         static void load_dist_list(const NodeReader& nr, const str_t& name, v_t<T>& dst, const Options& opts){
             std::list<Attr> attrs;
             load_dist_list(nr, name, dst, opts, attrs);
+        }
+
+        template<typename T>
+        static v_t<T> load_vector(const NodeReader& nr, const str_t& name, const Options& opts){
+            v_t<T> tmp;
+            load_dist_list(nr, name, tmp, opts);
+            return tmp;
         }
     };
 }

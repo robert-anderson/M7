@@ -6,7 +6,7 @@
 #define M7_SPECTRALMOMENT_H
 
 #include <M7_lib/mae/MaeTable.h>
-#include <M7_lib/io/Archivable.h>
+#include <M7_lib/conf/Conf.h>
 #include <M7_lib/field/Fields.h>
 
 

@@ -1,7 +1,5 @@
 target_sources(M7_lib
     PRIVATE
-        Archivable.cpp
-        Archivable.h
         BosdumpFileReader.cpp
         BosdumpFileReader.h
         CsvFileReader.cpp
