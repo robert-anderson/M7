@@ -35,22 +35,9 @@ namespace hdf5 {
         hid_t m_mem_hyperslab = 0;
         hid_t m_dataset = 0;
     public:
-        DatasetTransaction(dataset::DistListFormat format):
-            m_format(std::move(format)), m_counts(m_format.m_local.ndim(), 0), m_offsets(m_format.m_local.ndim(), 0){}
+        explicit DatasetTransaction(dataset::DistListFormat format);
 
-        ~DatasetTransaction() {
-            // free all HDF5 handles if they have been opened (set non-zero) by the subclasses
-            if (m_plist) H5Pclose(m_plist);
-            else logging::warn("property list was not opened in transaction");
-            if(m_filespace) H5Sclose(m_filespace);
-            else logging::warn("filespace was not opened in transaction");
-            if (m_file_hyperslab) H5Sclose(m_file_hyperslab);
-            else logging::warn("file hyperslab was not opened in transaction");
-            if (m_mem_hyperslab) H5Sclose(m_mem_hyperslab);
-            else logging::warn("application memory hyperslab was not opened in transaction");
-            if (m_dataset) H5Dclose(m_dataset);
-            else logging::warn("dataset was not opened in transaction");
-        }
+        ~DatasetTransaction();
 
         /*
          * since we have a non-default dtor, follow the rule of three...
@@ -375,9 +362,9 @@ namespace hdf5 {
          * convenience function for reading into and returning a std::vector
          */
         template<typename T>
-        static v_t<T> load_vector(const NodeReader& nr, const str_t& name, bool part=false, bool this_rank=true){
+        static v_t<T> load_vector(const NodeReader& nr, const str_t& name, bool this_rank=true){
             v_t<T> tmp;
-            load_dist_list(nr, name, tmp, part, this_rank);
+            load_dist_list(nr, name, tmp, false, this_rank);
             return tmp;
         }
     };

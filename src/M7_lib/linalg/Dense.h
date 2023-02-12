@@ -156,11 +156,10 @@ namespace dense {
 
         Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank) {
             hdf5::DatasetLoader dl(nr, name, false, this_rank);
-            const auto& shape = dl.m_format.m_local.m_item.m_h5_shape;
+            const auto& shape = dl.m_format.m_h5_shape;
             if (this_rank) resize(shape[0], shape[1]);
             std::list<hdf5::Attr> attrs;
-            dl.load_dist_list(nr, name, m_buffer.data(), m_buffer.size(), hdf5::Type::make<T>(), dtype::is_complex<T>(),
-                false, this_rank, attrs);
+            dl.load_dist_list(nr, name, m_buffer.data(), m_buffer.size(), false, this_rank, attrs);
         }
 
         explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_col_ind() + 1){

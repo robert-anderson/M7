@@ -5,6 +5,27 @@
 #include "DatasetTransaction.h"
 
 
+hdf5::DatasetTransaction::DatasetTransaction(hdf5::dataset::DistListFormat format) :
+        m_format(std::move(format)), m_counts(m_format.m_h5_shape), m_offsets(m_format.m_local.ndim(), 0){
+    // set number of transacted items to 0 - subclasses should set the initial element to the appropriate value
+    // before each transaction (read/write call)
+    m_counts[0] = 0;
+}
+
+hdf5::DatasetTransaction::~DatasetTransaction() {
+    // free all HDF5 handles if they have been opened (set non-zero) by the subclasses
+    if (m_plist) H5Pclose(m_plist);
+    else logging::warn("property list was not opened in transaction");
+    if(m_filespace) H5Sclose(m_filespace);
+    else logging::warn("filespace was not opened in transaction");
+    if (m_file_hyperslab) H5Sclose(m_file_hyperslab);
+    else logging::warn("file hyperslab was not opened in transaction");
+    if (m_mem_hyperslab) H5Sclose(m_mem_hyperslab);
+    else logging::warn("application memory hyperslab was not opened in transaction");
+    if (m_dataset) H5Dclose(m_dataset);
+    else logging::warn("dataset was not opened in transaction");
+}
+
 hdf5::DatasetSaver::DatasetSaver(
         const hdf5::NodeWriter& nw, const str_t& name, hdf5::dataset::PartDistListFormat format) :
         DatasetTransaction(format){
