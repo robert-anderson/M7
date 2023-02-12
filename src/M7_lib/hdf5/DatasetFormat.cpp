@@ -38,3 +38,15 @@ hdf5::dataset::DistListFormat::DistListFormat(
         uint_t nitem, uint_t nitem_displ, str_t leading_dim_name) :
         m_local(item_format, nitem_local, leading_dim_name), m_nitem(nitem), m_nitem_displ(nitem_displ),
         m_h5_shape(vector::prepended(m_local.m_item.m_h5_shape, m_nitem)){}
+
+hdf5::dataset::PartDistListFormat::PartDistListFormat(
+        hdf5::dataset::ItemFormat item_format, uint_t nitem, str_t leading_dim_name) :
+        DistListFormat(item_format, nitem, mpi::all_sum(nitem),
+            mpi::counts_to_displs_consec(mpi::all_gathered(nitem))[mpi::irank()], leading_dim_name){}
+
+hdf5::dataset::FullDistListFormat::FullDistListFormat(
+        hdf5::dataset::ItemFormat item_format, uint_t nitem, str_t leading_dim_name) :
+        DistListFormat(item_format, nitem, mpi::all_max(nitem), 0ul, leading_dim_name){
+    if (m_local.m_nitem) REQUIRE_EQ(m_nitem, m_local.m_nitem,
+                            "full distributed list requires that participating ranks read all items");
+}
