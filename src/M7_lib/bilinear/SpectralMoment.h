@@ -9,6 +9,7 @@
 #include <M7_lib/conf/Conf.h>
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/util/Vector.h>
+#include <M7_lib/wavefunction/DeterministicSubspace.h>
 #include "M7_lib/propagator/ExactLinear.h"
 
 
@@ -26,9 +27,25 @@
 /**
  * the classes defined here relate to the estimation of the following kinds of expectation values:
  * order-n spectral moment of the hole kind:
- *  <Psi | p+ H^n q | Psi>
+ *  An(-1)[p, q] = <Psi | p+ H^n q | Psi>
  * order-n spectral moment of the particle kind:
- *  <Psi | p H^n q+ | Psi>
+ *  An(+1)[p, q] = <Psi | p H^n q+ | Psi>
+ *
+ * contributions to An(+/-1)[p, q] come from a source (bra) N-electron MBF "src", a destination (ket) N-electron MBF "dst"
+ * via a chain of n (N+/-1)-electron MBFs (k0, k1, k2, ..., k_n)
+ *
+ * these are categorised according to the following scheme:
+ *  - DIAGONAL: p == q, dst == src, ki == q |src> if hole kind, q+ |src> if particle kind => accounted for by walker
+ *      death and block averaging
+ *  - OFF-DIAGONAL: all other contributions. note that contribution diagonality refers to the walkers, Hamiltonian
+ *      matrix elements, *and* moment indices involved, so even when p == q, dst == src but the k-chain involves
+ *      off-diagonal elements, the contributions are considered to be off-diagonal
+ *      - DETERMINISTIC-OFF-DIAGONAL:
+ *         when src and dst are in the deterministic subspace, and all ki are in the deterministic hole / particle bases
+ *      - NON-DETERMINISTIC-OFF-DIAGONAL:
+ *         all other non-diagonal contributions
+ *
+ * the shorthand used for these categories is Diag, DetermOffDiag, NonDetermOffDiag
  */
 namespace spec_mom {
     /**
@@ -49,6 +66,31 @@ namespace spec_mom {
             m_ipart_dst(this, "WF part index of destination"),
             m_icre(this, "index of the spin orbital created in the expectation value"),
             m_iann(this, "index of the spin orbital annihilated in the expectation value"){}
+    };
+
+    struct DetermBasis {
+        struct Row : ::Row {
+            field::Mbf m_mbf;
+        };
+        DetermBasis(const DeterministicSubspace& detsub){
+            detsub.gathered().m_row.m_mbf.
+
+        }
+    };
+
+    /**
+     * the spectral moment analogue of the Propagator class - responsible for generating contributions of the
+     * non-deterministic off-diagonal kind, discarding all those values of (p, q, src, dst, ki) which do not conform to
+     * this kind of contribution
+     */
+    struct NonDetermOffDiags {
+
+    };
+    /**
+     *
+     */
+    struct ExactNonDetermOffDiags {
+
     };
 
     typedef SendRecv<CommRow, Table<CommRow>> comm_t;
