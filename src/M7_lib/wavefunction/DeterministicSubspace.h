@@ -13,22 +13,6 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
-#if 0
-/**
- * captures only the data from Walker relevant to semistochastic propagation
- */
-struct DeterministicDataRow : Row {
-    field::Mbf m_mbf;
-    field::Numbers<wf_t, c_ndim_wf> m_weight;
-
-    field::Mbf &key_field();
-
-    DeterministicDataRow(const Wavefunction &wf);
-
-    static void load_fn(const Walker &source, DeterministicDataRow &local);
-};
-#endif
-
 /**
  * the implementation of the semistochastic adaptation calls for a subspace of many-body basis functions to be
  * designated as a deterministic subspace within which the exact propagator is applied to update the CI coefficients

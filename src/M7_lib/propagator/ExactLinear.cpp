@@ -44,3 +44,7 @@ void ExactLinear::update(uint_t icycle, const Wavefunction &wf) {
     Propagator::update(icycle, wf);
     m_mag_log.update(icycle, m_tau);
 }
+
+const ConnForeachGroup& ExactLinear::conn_iters() const {
+    return m_conn_iters;
+}

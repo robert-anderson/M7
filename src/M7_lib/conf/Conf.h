@@ -190,6 +190,7 @@ namespace conf {
     struct SpecMoms : Bilinears {
         Param<bool> m_stochastic;
         Param<double> m_nattempt_per_walker;
+        Param<uint_t> m_max_order;
 
         explicit SpecMoms(Group *parent, str_t name, str_t description);
     };
