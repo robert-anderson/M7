@@ -20,13 +20,13 @@ void DeterministicDataRow::load_fn(const Walker &source, DeterministicDataRow &l
 }
 #endif
 
-uintv_t DeterministicSubspace::make_iparts() {
+uintv_t deterministic::Subspace::make_iparts() {
     if (m_wf.nreplica() == 1) return {m_iroot};
     auto ipart = m_wf.m_format.flatten({m_iroot, 0});
     return {ipart, ipart + 1};
 }
 
-void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const shared_rows::Walker *hf, const sparse::Element& elem) {
+void deterministic::Subspace::make_rdm_contrib(Rdms &rdms, const shared_rows::Walker *hf, const sparse::Element& elem) {
     const auto& row = this->gathered().m_row;
     row.jump(elem);
     if (hf && (row.m_mbf == hf->mbf())) return;
@@ -40,18 +40,18 @@ void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const shared_rows::Walk
     }
 }
 
-DeterministicSubspace::DeterministicSubspace(
+deterministic::Subspace::Subspace(
         const conf::Semistochastic &opts, Wavefunction &wf, uint_t iroot) :
         shared_rows::Set<Walker>("semistochastic", wf.m_store),
         m_opts(opts), m_wf(wf), m_iroot(iroot), m_local_row(wf.m_store.m_row), m_iparts(make_iparts()){}
 
-void DeterministicSubspace::add_(Walker &row) {
+void deterministic::Subspace::add_(Walker &row) {
     base_t::add_(row.index());
     row.m_deterministic.set(m_iroot);
     logging::debug_("adding MBF {} to the deterministic subspace", row.m_mbf.to_string());
 }
 
-void DeterministicSubspace::select_highest_weighted() {
+void deterministic::Subspace::select_highest_weighted() {
     auto row1 = m_wf.m_store.m_row;
     auto row2 = row1;
     Wavefunction::weights_gxr_t gxr(row1.m_weight, row2.m_weight, true, true, m_iparts);
@@ -62,7 +62,7 @@ void DeterministicSubspace::select_highest_weighted() {
     }
 }
 
-void DeterministicSubspace::select_l1_norm_fraction() {
+void deterministic::Subspace::select_l1_norm_fraction() {
     auto av_l1_norm = m_wf.m_nwalker.m_reduced.sum_over(m_iparts) / m_iparts.size();
     const auto cutoff = av_l1_norm * m_opts.m_l1_fraction_cutoff.m_value;
     auto row = m_wf.m_store.m_row;
@@ -72,7 +72,7 @@ void DeterministicSubspace::select_l1_norm_fraction() {
     }
 }
 
-void DeterministicSubspace::make_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
+void deterministic::Subspace::make_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
     const auto& gathered = this->gathered();
     full_update();
     if (!gathered.nrow_in_use()) {
@@ -116,7 +116,7 @@ void DeterministicSubspace::make_connections(const Hamiltonian &ham, const Bilin
         logging::info("Number of H-unconnected, but RDM-contributing pairs of MBFs: {}", nconn_rdm);
 }
 
-void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf) {
+void deterministic::Subspace::make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf) {
     if (!rdms || !rdms.m_accum_epoch) return;
     uint_t iirec = ~0ul;
     for (auto irec: m_irecs) {
@@ -138,7 +138,8 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const shared_rows::Wal
     }
 }
 
-void DeterministicSubspace::project(double tau) {
+void deterministic::Subspace::project(double tau) {
+    // all required communication has already been done: the entire semistochastic vector is available on all ranks
     auto &row = gathered().m_row;
     uint_t iirec = ~0ul;
     // loop over row indices in the portion of the wavefunction stored on this rank
@@ -160,15 +161,15 @@ void DeterministicSubspace::project(double tau) {
     }
 }
 
-DeterministicSubspaces::DeterministicSubspaces(const conf::Semistochastic &opts) :
+deterministic::Subspaces::Subspaces(const conf::Semistochastic &opts) :
         m_opts(opts), m_epoch("semistochastic") {
 }
 
-DeterministicSubspaces::operator bool() const {
+deterministic::Subspaces::operator bool() const {
     return m_opts.m_enabled && m_epoch;
 }
 
-void DeterministicSubspaces::init(const Hamiltonian &ham, const Bilinears &bilinears,
+void deterministic::Subspaces::init(const Hamiltonian &ham, const Bilinears &bilinears,
                                   Wavefunction &wf, uint_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
@@ -177,7 +178,7 @@ void DeterministicSubspaces::init(const Hamiltonian &ham, const Bilinears &bilin
     for (uint_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {
         auto& detsub = m_detsubs[iroot];
         REQUIRE_TRUE_ALL(detsub == nullptr, "detsubs should not already be allocated");
-        detsub = ptr::smart::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
+        detsub = ptr::smart::make_unique<Subspace>(m_opts, wf, iroot);
         if (m_opts.m_l1_fraction_cutoff.m_value < 1.0) {
             logging::info("Selecting walkers with magnitude >= {:.5f}% of the current global population "
                           "for root {} deterministic subspace", 100.0*m_opts.m_l1_fraction_cutoff.m_value, iroot);
@@ -199,17 +200,17 @@ void DeterministicSubspaces::init(const Hamiltonian &ham, const Bilinears &bilin
     m_epoch.update(icycle, true);
 }
 
-void DeterministicSubspaces::update() {
+void deterministic::Subspaces::update() {
     if (!*this) return;
     for (auto &detsub: m_detsubs) detsub->update();
 }
 
-void DeterministicSubspaces::project(double tau) {
+void deterministic::Subspaces::project(double tau) {
     if (!*this) return;
     for (auto &detsub: m_detsubs) detsub->project(tau);
 }
 
-void DeterministicSubspaces::make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf) {
+void deterministic::Subspaces::make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf) {
     if (!*this) return;
     for (auto &detsub: m_detsubs) detsub->make_rdm_contribs(rdms, hf);
 }

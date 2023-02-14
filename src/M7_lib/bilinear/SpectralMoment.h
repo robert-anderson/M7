@@ -9,10 +9,10 @@
 #include <M7_lib/conf/Conf.h>
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/util/Vector.h>
-#include <M7_lib/wavefunction/DeterministicSubspace.h>
 #include "M7_lib/propagator/ExactLinear.h"
 
 
+#if 0
 
 //Communicator<MaeRow<wf_t>, MaeRow<wf_t>, true>
 //struct SpecMom {
@@ -294,4 +294,5 @@ public:
     }
 };
 
+#endif //M7_SPECTRALMOMENT_H
 #endif //M7_SPECTRALMOMENT_H

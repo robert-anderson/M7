@@ -146,7 +146,7 @@ private:
     /**
      * selections of MBF in which semi-stochastic propagation is performed
      */
-    DeterministicSubspaces m_detsubs;
+    deterministic::Subspaces m_detsubs;
 
     std::unique_ptr<HartreeFock> make_hf() const;
 
