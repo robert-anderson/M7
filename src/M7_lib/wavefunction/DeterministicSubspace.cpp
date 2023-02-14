@@ -214,3 +214,124 @@ void deterministic::Subspaces::make_rdm_contribs(Rdms &rdms, const shared_rows::
     if (!*this) return;
     for (auto &detsub: m_detsubs) detsub->make_rdm_contribs(rdms, hf);
 }
+
+deterministic::FrmOpPerturbed::FrmOpPerturbed(sys::Sector sector, bool hole, uintv_t select_pert_inds, uint_t iroot) :
+        m_frm_basis(sector.m_frm.m_basis), m_ms2_conserve(sector.m_frm.m_elecs.m_ms2.conserve()), m_hole(hole),
+        m_pert_basis_table(logging::format("Perturbed ({}) deterministic subspace for root {}",
+                                           hole ? "hole" : "particle", iroot), {pert_basis_row_t(sector, "mbf")}),
+        m_select_pert_inds(std::move(select_pert_inds)){
+    /*
+     * initialise map entries to empty
+     */
+    for (auto ispinorb: m_select_pert_inds) m_basis_maps.insert({ispinorb, {}});
+}
+
+bool deterministic::FrmOpPerturbed::is_selected_pertuber(uint_t ispinorb) const {
+    auto it = std::find(m_select_pert_inds.cbegin(), m_select_pert_inds.cend(), ispinorb);
+    return it != m_select_pert_inds.cend();
+}
+
+void deterministic::FrmOpPerturbed::setup_basis(const MappedTable<Walker>& walker_subspace, const Hamiltonian& ham,
+                                                uint_t ispinorb) {
+    // don't keep m_pert_basis_table rows for spin orbital indices which have not been selected as pertubers
+    const auto is_selected = is_selected_pertuber(ispinorb);
+    auto& basis_map_row = m_basis_maps[ispinorb];
+    // need to modify MBF, so copy into a working object
+    buffered::Mbf work_mbf(walker_subspace.m_row.m_mbf);
+    // row in the walker deterministic subspace
+    auto walker = walker_subspace.m_row;
+    for (walker.restart(); walker; ++walker) {
+        // ignore this N-electron state if it would be destroyed by application of the perturber
+        if (!has_required_occ(walker.m_mbf, ispinorb)) continue;
+        work_mbf = walker.m_mbf;
+        modify_occ(work_mbf, ispinorb);
+        // index in the walker deterministic subspace
+        const auto ici = walker.index();
+        // see if this perturber has already been generated
+        auto& lookup = m_pert_basis_table.lookup(work_mbf);
+        const auto ipert = lookup ? lookup.index() : m_pert_basis_table.insert(work_mbf).index();
+        if (is_selected) basis_map_row.emplace_back(ici, ipert);
+    }
+    // m_pert_basis_table now contains the union of all perturbers
+    // m_basis_map now contains correspondences between walker deterministic subspace and perturber basis
+}
+
+void deterministic::FrmOpPerturbed::setup_ham(const Hamiltonian& h) {
+    // share out the perturbed-space Hamiltonian rows evenly
+    const auto count_local = mpi::evenly_shared_count(full_basis_size());
+    m_pert_basis_displ = mpi::evenly_shared_displ(full_basis_size());
+    auto row = m_pert_basis_table.m_row;
+    const auto& src = row.m_field;
+    for (row.jump(m_pert_basis_displ); row.in_range(m_pert_basis_displ + count_local); ++row) {
+        const auto helem_diag = h.get_element(src);
+        const auto irow = row.index() - m_pert_basis_displ;
+        DEBUG_ASSERT_TRUE(m_ham_pert[irow].empty(), "sparse Hamiltonian row should be empty");
+        if (ham::is_significant(helem_diag)) m_ham_pert.insert(irow, {row.index(), helem_diag});
+        auto& col = m_pert_basis_table.m_row;
+        const auto& dst = col.m_field;
+        for (col.restart(); col; ++col) {
+            const auto icol = col.index();
+            const auto helem = h.get_element(src, dst);
+            if (ham::is_significant(helem)) m_ham_pert.insert(irow, {icol, helem});
+        }
+    }
+    // m_perm_ham now contains the Hamiltonian projected into the perturbed space
+}
+
+void deterministic::FrmOpPerturbed::fill_full_vec(const MappedTable<Walker>& walker_subspace, uint_t ispinorb_right,
+                                                  uint_t ipart_right) {
+    auto& walker = walker_subspace.m_row;
+    m_full_work_vec.assign(full_basis_size(), 0.0);
+    for (auto& pair : m_basis_maps[ispinorb_right]) {
+        const auto& ici = pair.first;
+        const auto& iperm = pair.second;
+        walker.jump(ici);
+        m_full_work_vec[iperm] += walker.m_weight[ipart_right];
+    }
+    // m_full_work_vec now contains the perturbed walker deterministic subspace with perturber ispinorb
+}
+
+wf_t deterministic::FrmOpPerturbed::contract(const MappedTable<Walker>& walker_subspace, uint_t ispinorb_left,
+                                             uint_t ipart_left) {
+    wf_t inner_product = 0.0;
+    auto& walker = walker_subspace.m_row;
+    for (auto& pair : m_basis_maps[ispinorb_left]) {
+        const auto& ici = pair.first;
+        const auto& iperm = pair.second;
+        walker.jump(ici);
+        inner_product += m_full_work_vec[iperm] * walker.m_weight[ipart_left];
+    }
+    return inner_product;
+}
+
+void deterministic::FrmOpPerturbed::project_ham() {
+    m_part_work_vec.assign(part_basis_size(), 0.0);
+    for (uint_t irow = 0ul; irow < part_basis_size(); ++irow){
+        const auto& row = m_ham_pert.get(irow);
+        for (auto& entry: row) {
+            m_part_work_vec[irow] += m_full_work_vec[entry.m_i] * entry.m_v;
+        }
+    }
+    // bring all the parts together, overwriting the full vector
+    mpi::all_gatherv(m_part_work_vec, m_full_work_vec);
+}
+
+void deterministic::FrmOpPerturbed::make_contribs(SpecMoms& spec_moms, const MappedTable<Walker>& walker_subspace,
+                                                  uint_t ipart, uint_t ipart_replica) {
+    for (auto ispinorb_right : m_select_pert_inds) {
+        // get spin so we can skip non-conserving left perturbers H is Ms2 conserving
+        const auto spin = m_frm_basis.ispin(ispinorb_right);
+        fill_full_vec(walker_subspace, ispinorb_right, ipart);
+        for (uint_t ih=0ul; ih <= spec_moms.m_max_order; ++ih) {
+            for (auto ispinorb_left : m_select_pert_inds) {
+                // use hermiticity: skip
+                if (ispinorb_left < ispinorb_right) continue;
+                // skip if spin-conservation would be violated
+                if (m_ms2_conserve && m_frm_basis.ispin(ispinorb_left)!=spin) continue;
+                auto inner_product = contract(walker_subspace, ispinorb_left, ipart_replica);
+                // contrib contract(walker_subspace, ipart_replica);
+            }
+            project_ham();
+        }
+    }
+}
