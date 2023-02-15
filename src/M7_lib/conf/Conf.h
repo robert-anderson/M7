@@ -191,6 +191,7 @@ namespace conf {
         Param<bool> m_stochastic;
         Param<double> m_nattempt_per_walker;
         Param<uint_t> m_max_order;
+        Param<uintv_t> m_spinorbs;
 
         explicit SpecMoms(Group *parent, str_t name, str_t description);
     };

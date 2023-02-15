@@ -13,18 +13,18 @@
  * accesses an operator-type specific partition of a field containing all indices of the MAE element
  */
 class MaeIndsPartition {
-    NdNumberField<mev_ind_t, 1> &m_field;
+    NdNumberField<mae_ind_t, 1> &m_field;
     const uint_t m_offset, m_size;
 public:
-    MaeIndsPartition(NdNumberField<mev_ind_t, 1> &field, uint_t offset, uint_t size) :
+    MaeIndsPartition(NdNumberField<mae_ind_t, 1> &field, uint_t offset, uint_t size) :
         m_field(field), m_offset(offset), m_size(size) {}
 
-    const mev_ind_t &operator[](const uint_t &iind) const {
+    const mae_ind_t &operator[](const uint_t &iind) const {
         DEBUG_ASSERT_LT(iind, m_size, "operator index OOB in partition");
         return m_field[m_offset + iind];
     };
 
-    mev_ind_t &operator[](const uint_t &iind) {
+    mae_ind_t &operator[](const uint_t &iind) {
         DEBUG_ASSERT_LT(iind, m_size, "operator index OOB in partition");
         return m_field[m_offset + iind];
     };
@@ -43,7 +43,7 @@ public:
     }
 
     /**
-     * can't simply copy uintv_t since the mev_ind_t is not the same as uint_t in general, so must do a narrowing loop
+     * can't simply copy uintv_t since the mae_ind_t is not the same as uint_t in general, so must do a narrowing loop
      * @param inds
      *  indices in unsigned system words
      * @return
@@ -64,7 +64,7 @@ struct MaeIndsPair {
     MaeIndsPartition m_cre;
     MaeIndsPartition m_ann;
 
-    MaeIndsPair(NdNumberField<mev_ind_t, 1> &field, uint_t cre_offset,
+    MaeIndsPair(NdNumberField<mae_ind_t, 1> &field, uint_t cre_offset,
                 uint_t cre_size, uint_t ann_offset, uint_t ann_size) :
             m_cre(field, cre_offset, cre_size),
             m_ann(field, ann_offset, ann_size) {}
@@ -94,8 +94,8 @@ struct MaeIndsPair {
  * will simply not be accessed, since neither view is considered in hashing and comparison operations, the underlying
  * field is.
  */
-struct MaeIndsField : NdNumberField<mev_ind_t, 1> {
-    typedef NdNumberField<mev_ind_t, 1> base_t;
+struct MaeIndsField : NdNumberField<mae_ind_t, 1> {
+    typedef NdNumberField<mae_ind_t, 1> base_t;
     using base_t::operator=;
     const OpSig m_exsig;
     const uinta_t<4> m_nops;

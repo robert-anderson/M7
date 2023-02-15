@@ -15,15 +15,15 @@ uinta_t<4> MaeIndsField::make_nop_offsets() const {
 }
 
 MaeIndsField::MaeIndsField(Row *row, OpSig exsig, str_t name) :
-    NdNumberField<mev_ind_t, 1>(row, {exsig.nop()}, name),
+    NdNumberField<mae_ind_t, 1>(row, {exsig.nop()}, name),
     m_exsig(exsig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
     m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
     m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}
 
 MaeIndsField::MaeIndsField(const MaeIndsField &other) :
-    NdNumberField<mev_ind_t, 1>(other), m_exsig(other.m_exsig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
-    m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
-    m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}
+        NdNumberField<mae_ind_t, 1>(other), m_exsig(other.m_exsig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
+        m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
+        m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}
 
 MaeIndsField &MaeIndsField::operator=(const MaeIndsField &other) {
     *this = static_cast<const base_t &>(other);

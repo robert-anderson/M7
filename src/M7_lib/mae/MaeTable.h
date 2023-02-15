@@ -22,7 +22,7 @@ struct SpecMomsRow : public Row {
 
     field::SpecMomInds &key_field();
 
-    SpecMomsRow(OpSig exsig, uint_t nvalue);
+    SpecMomsRow(uint_t nvalue);
 };
 
 

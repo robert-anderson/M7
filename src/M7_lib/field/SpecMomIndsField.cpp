@@ -4,6 +4,5 @@
 
 #include "SpecMomIndsField.h"
 
-SpecMomIndsField::SpecMomIndsField(Row *row, OpSig exsig, str_t name) :
-    base_t(m_left, m_right), m_exsig(exsig),
-    m_left(row, exsig, "left " + name), m_right(row, exsig, "right " + name) {}
+SpecMomIndsField::SpecMomIndsField(Row *row, str_t name) :
+    base_t(m_left, m_right), m_left(row, "left " + name), m_right(row, "right " + name) {}

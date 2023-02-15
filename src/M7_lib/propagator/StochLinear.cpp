@@ -71,8 +71,8 @@ void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, uint_t ip
     for (uint_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
 
         conn.clear();
-        auto icase = m_excit_gen_group.draw_icase();
-        if (!m_excit_gen_group.draw(icase, src_mbf, prob_gen, helem, conn)) {
+        uint_t icase;
+        if (!m_excit_gen_group.draw(src_mbf, prob_gen, helem, conn, icase)) {
             // null excitation generated
             continue;
         }

@@ -204,7 +204,8 @@ conf::SpecMoms::SpecMoms(Group *parent, str_t name, str_t description) :
                      "if false, perform exact evaluation of contributing connections"),
         m_nattempt_per_walker(this, "nattempt_per_walker", 1.0,
                               "number of attempts to generate contributions per integerized walker on the source MBF"),
-        m_max_order(this, "max_order", 1, "maximum order (power of H) of one-particle moment to estimate"){}
+        m_max_order(this, "max_order", 1, "maximum order (power of H) of one-particle moment to estimate"),
+        m_spinorbs(this, "spinorbs", {}, "selected perturbing spin orbitals, none specified implies all will be estimated"){}
 
 conf::InstEsts::InstEsts(Group *parent) :
         Section(parent, "inst_ests",

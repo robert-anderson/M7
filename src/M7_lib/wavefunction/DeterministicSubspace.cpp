@@ -231,8 +231,7 @@ bool deterministic::FrmOpPerturbed::is_selected_pertuber(uint_t ispinorb) const 
     return it != m_select_pert_inds.cend();
 }
 
-void deterministic::FrmOpPerturbed::setup_basis(const MappedTable<Walker>& walker_subspace, const Hamiltonian& ham,
-                                                uint_t ispinorb) {
+void deterministic::FrmOpPerturbed::setup_basis(const MappedTable<Walker>& walker_subspace, uint_t ispinorb) {
     // don't keep m_pert_basis_table rows for spin orbital indices which have not been selected as pertubers
     const auto is_selected = is_selected_pertuber(ispinorb);
     auto& basis_map_row = m_basis_maps[ispinorb];
@@ -298,8 +297,9 @@ wf_t deterministic::FrmOpPerturbed::contract(const MappedTable<Walker>& walker_s
     for (auto& pair : m_basis_maps[ispinorb_left]) {
         const auto& ici = pair.first;
         const auto& iperm = pair.second;
+        const auto full_vec_elem = m_full_work_vec[iperm];
         walker.jump(ici);
-        inner_product += m_full_work_vec[iperm] * walker.m_weight[ipart_left];
+        inner_product += full_vec_elem * walker.m_weight[ipart_left];
     }
     return inner_product;
 }
@@ -316,6 +316,7 @@ void deterministic::FrmOpPerturbed::project_ham() {
     mpi::all_gatherv(m_part_work_vec, m_full_work_vec);
 }
 
+#if 0
 void deterministic::FrmOpPerturbed::make_contribs(SpecMoms& spec_moms, const MappedTable<Walker>& walker_subspace,
                                                   uint_t ipart, uint_t ipart_replica) {
     for (auto ispinorb_right : m_select_pert_inds) {
@@ -335,3 +336,4 @@ void deterministic::FrmOpPerturbed::make_contribs(SpecMoms& spec_moms, const Map
         }
     }
 }
+#endif

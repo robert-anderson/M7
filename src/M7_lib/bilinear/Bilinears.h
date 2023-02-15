@@ -93,7 +93,7 @@ public:
                       parse_exsigs(opts.m_spec_mom.m_ranks), sector, epoch) {}
 
     bool all_stores_empty() const {
-        return m_rdms.all_stores_empty() && m_spec_moms.all_stores_empty();
+        return m_rdms.all_stores_empty();
     }
 
     void end_cycle() {

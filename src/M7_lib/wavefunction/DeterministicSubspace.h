@@ -169,7 +169,7 @@ namespace deterministic {
         bool has_required_occ(const field::FrmOnv& onv, uint_t ispinorb) {
             return m_hole ? onv.get(ispinorb) : !onv.get(ispinorb);
         }
-        bool has_required_occ(const field::BosOnv&, uint_t ispinorb) {
+        bool has_required_occ(const field::BosOnv&, uint_t) {
             return false;
         }
         bool has_required_occ(const field::FrmBosOnv& onv, uint_t ispinorb) {
@@ -184,15 +184,15 @@ namespace deterministic {
             if (m_hole) onv.clr(ispinorb);
             else onv.set(ispinorb);
         }
-        void modify_occ(field::BosOnv& onv, uint_t ispinorb) {}
-        bool modify_occ(field::FrmBosOnv& onv, uint_t ispinorb) {
+        void modify_occ(field::BosOnv&, uint_t) {}
+        void modify_occ(field::FrmBosOnv& onv, uint_t ispinorb) {
             modify_occ(onv.m_frm, ispinorb);
         }
 
         /**
          * initialize the perturbed basis and the maps from walker D-space to perturbed space indices
          */
-        void setup_basis(const MappedTable<Walker>& walker_subspace, const Hamiltonian& ham, uint_t ispinorb);
+        void setup_basis(const MappedTable<Walker>& walker_subspace, uint_t ispinorb);
 
         /**
          * initialize sparse Hamiltonian representing the projection of full H into the perturbed deterministic space
@@ -220,7 +220,7 @@ namespace deterministic {
          * make all contributions (diagonal and off-diagonal) to all orders of hole and particle spectral moments
          * given a pair of replica indices
          */
-        void make_contribs(SpecMoms& spec_moms, const MappedTable<Walker>& walker_subspace, uint_t ipart, uint_t ipart_replica);
+//        void make_contribs(SpecMoms& spec_moms, const MappedTable<Walker>& walker_subspace, uint_t ipart, uint_t ipart_replica);
     };
 
     /**

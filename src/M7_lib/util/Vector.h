@@ -13,7 +13,7 @@
 namespace vector {
 
     template<typename T>
-    v_t<T> range(T begin, T end, T interval){
+    v_t<T> range(T begin, T end, T interval=T(1)){
         v_t<T> tmp;
         tmp.reserve((begin - end) / interval);
         for (T v = begin; v < end; v+=interval) tmp.emplace_back(v);
