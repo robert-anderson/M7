@@ -4,9 +4,9 @@
 
 #include "MaeStats.h"
 
-MaeStatsRow::MaeStatsRow(bool rdms, bool spec_moms) :
+MaeStatsRow::MaeStatsRow(bool rdms) :
         m_icycle(this, "Cycle number", false),
-        m_total_norm((rdms || spec_moms ? this : nullptr), "Total WF norm estimate"),
+        m_total_norm((rdms ? this : nullptr), "Total WF norm estimate"),
         m_rdm_energy((rdms ? this : nullptr), "Energy estimate from RDMs"){
     DEBUG_ASSERT_TRUE(m_size, "row should have non-zero size");
 }

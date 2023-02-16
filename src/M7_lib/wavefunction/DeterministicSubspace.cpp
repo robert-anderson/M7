@@ -240,10 +240,16 @@ void deterministic::FrmOpPerturbed::setup_basis(const MappedTable<Walker>& walke
     // row in the walker deterministic subspace
     auto walker = walker_subspace.m_row;
     for (walker.restart(); walker; ++walker) {
-        // ignore this N-electron state if it would be destroyed by application of the perturber
-        if (!has_required_occ(walker.m_mbf, ispinorb)) continue;
+        /*
+         * ignore this N-electron state if it would be destroyed by application of the perturber:
+         * if hole, ispinorb must be occupied, else, ispinorb must be vacant
+         */
+        if (!mbf::spinorb_status(walker.m_mbf, ispinorb, m_hole)) continue;
         work_mbf = walker.m_mbf;
-        modify_occ(work_mbf, ispinorb);
+        /*
+         * if hole, put 0, else, put 1
+         */
+        mbf::put_spinorb(work_mbf, ispinorb, !m_hole);
         // index in the walker deterministic subspace
         const auto ici = walker.index();
         // see if this perturber has already been generated

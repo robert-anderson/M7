@@ -7,7 +7,7 @@
 
 #include <M7_lib/sample/PRNG.h>
 #include <M7_lib/excitgen/ExcitGenGroup.h>
-#include "M7_lib/propagator/Propagators.h"
+#include "M7_lib/propagator/Propagator.h"
 
 class StochLinear : public Propagator {
 protected:

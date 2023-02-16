@@ -11,7 +11,6 @@
 #include <M7_lib/field/Fields.h>
 
 #include "Rdms.h"
-#include "SpectralMoment.h"
 
 /**
  * Projection onto a trial wavefunction is sufficient for the estimation of many-body expectation values if the operator
@@ -37,7 +36,6 @@
  */
 struct Bilinears {
     Rdms m_rdms;
-    SpecMoms m_spec_moms;
     buffered::Numbers<wf_t, c_ndim_root> m_total_norm;
 
     //std::array<std::unique_ptr<SpectralMoment>, c_ndistinct> m_specmoms;
@@ -62,7 +60,7 @@ private:
 public:
 
     operator bool() const {
-        return m_rdms || m_spec_moms;
+        return m_rdms;
     }
 
     /**
@@ -74,7 +72,7 @@ public:
      */
     bool need_replication(bool stoch) const {
         if (!stoch) return false;
-        return m_rdms || m_spec_moms;
+        return m_rdms;
     }
 
     /**
@@ -86,7 +84,7 @@ public:
 
     Bilinears(const conf::Mae &opts, v_t<OpSig> rdm_ranksigs, v_t<OpSig> /*specmom_exsigs*/,
               sys::Sector sector, const Epoch &epoch) :
-            m_rdms(opts.m_rdm, rdm_ranksigs, sector, epoch), m_spec_moms(opts.m_spec_mom), m_total_norm({1}) {}
+            m_rdms(opts.m_rdm, rdm_ranksigs, sector, epoch), m_total_norm({1}) {}
 
     Bilinears(const conf::Mae &opts, sys::Sector sector, const Epoch &epoch) :
             Bilinears(opts, parse_exsigs(opts.m_rdm.m_ranks),

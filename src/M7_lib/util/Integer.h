@@ -6,7 +6,7 @@
 #define M7_UTIL_INTEGER_H
 
 #include "M7_lib/defs.h"
-
+#include "M7_lib/parallel/MPIAssert.h"
 
 namespace integer {
 
@@ -75,14 +75,14 @@ namespace integer {
      * 0 1 2 3   0,0 0,1 0,2 0,3
      * 4 5 6 7   1,0 1,1 1,2 1,3
      */
-    uint_t rectmap(uint_t irow, uint_t icol, uint_t ncol) {
+    static uint_t rectmap(uint_t irow, uint_t icol, uint_t ncol) {
         return irow * ncol + icol;
     }
 
     /**
      * inverse of the rectangular map
      */
-    void inv_rectmap(uint_t &irow, uint_t &icol, uint_t ncol, uint_t flat) {
+    static void inv_rectmap(uint_t &irow, uint_t &icol, uint_t ncol, uint_t flat) {
         irow = flat / ncol;
         icol = flat - irow * ncol;
     }
@@ -96,7 +96,7 @@ namespace integer {
      * 3 4 5    2,0 2,1 2,2
      * 6 7 8 9  3,0 3,1 3,2 3,3
      */
-    uint_t trigmap(uint_t i, uint_t j) {
+    static uint_t trigmap(uint_t i, uint_t j) {
         DEBUG_ASSERT_GE(i, j, "incorrectly ordered args");
         return (i * (i + 1)) / 2 + j;
     }
@@ -104,7 +104,7 @@ namespace integer {
     /**
      * reorders args if necessary before delegating trigmap
      */
-    uint_t trigmap_unordered(uint_t i, uint_t j) {
+    static uint_t trigmap_unordered(uint_t i, uint_t j) {
         return i >= j ? trigmap(i, j) : trigmap(j, i);
     }
 
@@ -113,7 +113,7 @@ namespace integer {
     /**
      * inverse of the triangular map
      */
-    void inv_trigmap(uint_t &i, uint_t &j, uint_t n) {
+    static void inv_trigmap(uint_t &i, uint_t &j, uint_t n) {
         i = (uint_t) ((std::sqrt(1 + 8 * (double) n) - 1) / 2);
         j = n - (i * (i + 1)) / 2;
     }
@@ -127,7 +127,7 @@ namespace integer {
      * 3 4 5    3,0 3,1 3,2
      * 6 7 8 9  4,0 4,1 4,2 4,3
      */
-    uint_t strigmap(uint_t i, uint_t j) {
+    static uint_t strigmap(uint_t i, uint_t j) {
         DEBUG_ASSERT_GT(i, j, "incorrectly ordered args");
         return (i * (i - 1)) / 2 + j;
     }
@@ -135,14 +135,14 @@ namespace integer {
     /**
      * reorders args if necessary before delegating strigmap
      */
-    uint_t strigmap_unordered(uint_t i, uint_t j) {
+    static uint_t strigmap_unordered(uint_t i, uint_t j) {
         return i >= j ? strigmap(i, j) : strigmap(j, i);
     }
 
     /**
      * inverse of the strict triangular map
      */
-    void inv_strigmap(uint_t &i, uint_t &j, uint_t n) {
+    static void inv_strigmap(uint_t &i, uint_t &j, uint_t n) {
         i = (uint_t) ((std::sqrt(1 + 8 * (double) n) + 1) / 2);
         j = n - (i * (i - 1)) / 2;
     }

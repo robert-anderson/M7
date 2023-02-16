@@ -10,7 +10,7 @@ Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t nroot) :
     if (*this) {
         m_stats = ptr::smart::make_unique<MaeStats>(
                 opts.m_stats_path, "FCIQMC Multidimensional Averaged Estimators",
-                MaeStatsRow(m_bilinears.m_rdms, m_bilinears.m_spec_moms), 1ul);
+                MaeStatsRow(m_bilinears.m_rdms), 1ul);
     }
 }
 

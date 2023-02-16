@@ -163,33 +163,6 @@ namespace deterministic {
         bool is_selected_pertuber(uint_t ispinorb) const;
 
         /**
-         * @return
-         *  true if the given spin orbital has the correct occupation/vacancy status with respect to the perturber kind
-         */
-        bool has_required_occ(const field::FrmOnv& onv, uint_t ispinorb) {
-            return m_hole ? onv.get(ispinorb) : !onv.get(ispinorb);
-        }
-        bool has_required_occ(const field::BosOnv&, uint_t) {
-            return false;
-        }
-        bool has_required_occ(const field::FrmBosOnv& onv, uint_t ispinorb) {
-            return has_required_occ(onv.m_frm, ispinorb);
-        }
-
-        /**
-         * if hole kind, clear the ispinorb bit, else set it
-         */
-        void modify_occ(field::FrmOnv& onv, uint_t ispinorb) {
-            DEBUG_ASSERT_TRUE(has_required_occ(onv), ispinorb);
-            if (m_hole) onv.clr(ispinorb);
-            else onv.set(ispinorb);
-        }
-        void modify_occ(field::BosOnv&, uint_t) {}
-        void modify_occ(field::FrmBosOnv& onv, uint_t ispinorb) {
-            modify_occ(onv.m_frm, ispinorb);
-        }
-
-        /**
          * initialize the perturbed basis and the maps from walker D-space to perturbed space indices
          */
         void setup_basis(const MappedTable<Walker>& walker_subspace, uint_t ispinorb);
