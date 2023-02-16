@@ -72,7 +72,7 @@ void deterministic::Subspace::select_l1_norm_fraction() {
     }
 }
 
-void deterministic::Subspace::make_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
+void deterministic::Subspace::make_connections(const Hamiltonian &ham, const Rdms &rdms){
     const auto& gathered = this->gathered();
     full_update();
     if (!gathered.nrow_in_use()) {
@@ -102,7 +102,7 @@ void deterministic::Subspace::make_connections(const Hamiltonian &ham, const Bil
             if (ham::is_significant(helem)) {
                 m_ham_matrix.add(iirow, {all_row.index(), helem});
                 ++nconn_ham;
-            } else if (bilinears.m_rdms.takes_contribs_from(conn_work.exsig())) {
+            } else if (rdms.takes_contribs_from(conn_work.exsig())) {
                 m_rdm_network.add(iirow, all_row.index());
                 ++nconn_rdm;
             }
@@ -112,8 +112,7 @@ void deterministic::Subspace::make_connections(const Hamiltonian &ham, const Bil
     nconn_ham = mpi::all_sum(nconn_ham);
     nconn_rdm = mpi::all_sum(nconn_rdm);
     logging::info("Number of H-connected pairs of MBFs in the deterministic subspace: {}", nconn_ham);
-    if (bilinears.m_rdms)
-        logging::info("Number of H-unconnected, but RDM-contributing pairs of MBFs: {}", nconn_rdm);
+    if (rdms) logging::info("Number of H-unconnected, but RDM-contributing pairs of MBFs: {}", nconn_rdm);
 }
 
 void deterministic::Subspace::make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf) {
@@ -169,11 +168,9 @@ deterministic::Subspaces::operator bool() const {
     return m_opts.m_enabled && m_epoch;
 }
 
-void deterministic::Subspaces::init(const Hamiltonian &ham, const Bilinears &bilinears,
-                                  Wavefunction &wf, uint_t icycle) {
+void deterministic::Subspaces::init(const Hamiltonian &ham, const Rdms &rdms, Wavefunction &wf, uint_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
-
 
     for (uint_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {
         auto& detsub = m_detsubs[iroot];
@@ -188,7 +185,7 @@ void deterministic::Subspaces::init(const Hamiltonian &ham, const Bilinears &bil
                           m_opts.m_size, iroot);
             detsub->select_highest_weighted();
         }
-        detsub->make_connections(ham, bilinears);
+        detsub->make_connections(ham, rdms);
     }
 
     if (m_opts.m_save.m_enabled) {

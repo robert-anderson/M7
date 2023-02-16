@@ -5,7 +5,7 @@
 #include "Bilinears.h"
 #include "M7_lib/connection/OpSig.h"
 
-OpSig Bilinears::parse_exsig(const str_t& string) {
+OpSig bilinears::parse_exsig(const str_t& string) {
     REQUIRE_TRUE_ALL(string.size() == 1 || string.size() == 4, "invalid exsig string specification");
     if (string.size() == 1) {
         uint_t rank = string::parse_decimal_digit(string.c_str());
@@ -23,7 +23,7 @@ OpSig Bilinears::parse_exsig(const str_t& string) {
     return {{nfrm_cre, nfrm_ann}, {nbos_cre, nbos_ann}};
 }
 
-v_t<OpSig> Bilinears::parse_exsigs(const strv_t& strings) {
+v_t<OpSig> bilinears::parse_exsigs(const strv_t& strings) {
     v_t<OpSig> out;
     for (auto &string: strings) out.push_back(parse_exsig(string));
     DEBUG_ASSERT_EQ(out.size(), strings.size(),

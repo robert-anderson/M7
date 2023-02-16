@@ -18,9 +18,9 @@ struct Maes {
      */
     Epoch m_accum_epoch;
     /**
-     * group of MAEs that are bilinear in the wavefunction (e.g. RDMs, MPRT2 intermediates, spectral moments)
+     * RDMs and MPRT2 intermediates
      */
-    Bilinears m_bilinears;
+    Rdms m_rdms;
     /**
      * averaged amplitudes of MBFs that are excitations of the HF-like MBF
      */

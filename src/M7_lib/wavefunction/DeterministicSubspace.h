@@ -259,7 +259,7 @@ namespace deterministic {
 
         void select_l1_norm_fraction();
 
-        void make_connections(const Hamiltonian& ham, const Bilinears& bilinears);
+        void make_connections(const Hamiltonian& ham, const Rdms& rdms);
 
         void make_rdm_contribs(Rdms& rdms, const shared_rows::Walker* hf);
 
@@ -297,7 +297,7 @@ namespace deterministic {
         /**
          * create subspaces, perform the relevant selections, and call make_connections on each
          */
-        void init(const Hamiltonian& ham, const Bilinears& bilinears, Wavefunction& wf, uint_t icycle);
+        void init(const Hamiltonian& ham, const Rdms& rdms, Wavefunction& wf, uint_t icycle);
 
         void update();
 

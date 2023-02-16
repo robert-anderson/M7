@@ -34,86 +34,21 @@
  * SpecMoms are defined as matrix elements of some power of the Hamiltonian between perturbed wavefunctions, where the
  * perturbing operators have arbitrary rank but are limited to fermionic spin orbital indices.
  */
-struct Bilinears {
-    Rdms m_rdms;
-    buffered::Numbers<wf_t, c_ndim_root> m_total_norm;
 
-    //std::array<std::unique_ptr<SpectralMoment>, c_ndistinct> m_specmoms;
-    //const uintv_t m_specmom_exsigs;
-
-private:
+namespace bilinears {
     /**
      * @param string
      *  excitation signature or fermion operator rank defined in the configuration document
      * @return
      *  integer excitation signature
      */
-    static OpSig parse_exsig(const str_t &string);
+    OpSig parse_exsig(const str_t &string);
     /**
      * @param strings
      *  excitation signatures or fermion operator ranks defined in the configuration document
      * @return
      *  integer excitation signatures
      */
-    static v_t<OpSig> parse_exsigs(const strv_t &strings);
+    v_t<OpSig> parse_exsigs(const strv_t &strings);
 
-public:
-
-    operator bool() const {
-        return m_rdms;
-    }
-
-    /**
-     * replication is needed if we are estimating any bilinears stochastically
-     * @param stoch
-     *  true if the wavefunction is propagated by a stochastic process
-     * @return
-     *  true if replication of the walker populations is a statistical necessity
-     */
-    bool need_replication(bool stoch) const {
-        if (!stoch) return false;
-        return m_rdms;
-    }
-
-    /**
-     * parents only need to be sent in WF spawning table if we're going to be accumulating RDMs at some point
-     */
-    bool need_send_parents() const {
-        return m_rdms;
-    }
-
-    Bilinears(const conf::Mae &opts, v_t<OpSig> rdm_ranksigs, v_t<OpSig> /*specmom_exsigs*/,
-              sys::Sector sector, const Epoch &epoch) :
-            m_rdms(opts.m_rdm, rdm_ranksigs, sector, epoch), m_total_norm({1}) {}
-
-    Bilinears(const conf::Mae &opts, sys::Sector sector, const Epoch &epoch) :
-            Bilinears(opts, parse_exsigs(opts.m_rdm.m_ranks),
-                      parse_exsigs(opts.m_spec_mom.m_ranks), sector, epoch) {}
-
-    bool all_stores_empty() const {
-        return m_rdms.all_stores_empty();
-    }
-
-    void end_cycle() {
-        m_rdms.end_cycle();
-    }
-
-    /**
-     * Make all "diagonal" contributions
-     * should only be called if:
-     *  the WF row is about to be removed
-     *  the end of a sampling period has been reached
-     *  the end of the calculation has been reached (all WF rows are about to be removed)
-     * @param mbf
-     */
-    void make_contribs(const field::Mbf &onv, const wf_t &ci_product) {
-        m_total_norm[0] += ci_product;
-        m_rdms.make_contribs(onv, onv, ci_product);
-    }
-
-    ham_comp_t estimate_energy(const Hamiltonian &ham) {
-        return m_rdms.get_energy(ham);
-    }
-};
-
-#endif //M7_BILINEARS_H
+}
