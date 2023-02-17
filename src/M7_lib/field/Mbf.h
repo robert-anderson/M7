@@ -49,14 +49,14 @@ namespace mbf {
 
     OpSig exsig(const field::FrmBosOnv &src, const field::FrmBosOnv &dst);
 
-    static bool spinorb_status(const field::FrmOnv& onv, uint_t ispinorb, bool occ) {
-        return !(occ ^ onv.get(ispinorb));
+    static bool get_spinorb(const field::FrmOnv& onv, uint_t ispinorb) {
+        return onv.get(ispinorb);
     }
-    static bool spinorb_status(const field::BosOnv&, uint_t, bool) {
+    static bool get_spinorb(const field::BosOnv&, uint_t) {
         return false;
     }
-    static bool spinorb_status(const field::FrmBosOnv& onv, uint_t ispinorb, bool occ) {
-        return spinorb_status(onv.m_frm, ispinorb, occ);
+    static bool get_spinorb(const field::FrmBosOnv& onv, uint_t ispinorb) {
+        return get_spinorb(onv.m_frm, ispinorb);
     }
 
     static void put_spinorb(field::FrmOnv& onv, uint_t ispinorb, bool v) {

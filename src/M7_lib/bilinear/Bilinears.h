@@ -5,13 +5,7 @@
 #ifndef M7_BILINEARS_H
 #define M7_BILINEARS_H
 
-#include <utility>
-
-#include <M7_lib/hamiltonian/Hamiltonian.h>
-#include <M7_lib/field/Fields.h>
-
-#include "Rdms.h"
-
+#include "M7_lib/connection/OpSig.h"
 /**
  * Projection onto a trial wavefunction is sufficient for the estimation of many-body expectation values if the operator
  * in question commutes with the Hamiltonian. When the operator does not commute with the Hamiltonian, the projection
@@ -52,3 +46,5 @@ namespace bilinears {
     v_t<OpSig> parse_exsigs(const strv_t &strings);
 
 }
+
+#endif //M7_BILINEARS_H

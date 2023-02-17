@@ -241,7 +241,7 @@ void deterministic::FrmOpPerturbed::setup_basis(const MappedTable<Walker>& walke
          * ignore this N-electron state if it would be destroyed by application of the perturber:
          * if hole, ispinorb must be occupied, else, ispinorb must be vacant
          */
-        if (!mbf::spinorb_status(walker.m_mbf, ispinorb, m_hole)) continue;
+        if (mbf::get_spinorb(walker.m_mbf, ispinorb) != m_hole) continue;
         work_mbf = walker.m_mbf;
         /*
          * if hole, put 0, else, put 1

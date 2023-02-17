@@ -5,7 +5,7 @@
 #ifndef M7_DETERMINISTICSUBSPACE_H
 #define M7_DETERMINISTICSUBSPACE_H
 
-#include <M7_lib/bilinear/Bilinears.h>
+#include <M7_lib/bilinear/Rdms.h>
 #include "M7_lib/linalg/sparse/Sparse.h"
 #include "M7_lib/hamiltonian/frm/FrmHam.h"
 #include <M7_lib/field/Fields.h>

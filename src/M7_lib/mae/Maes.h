@@ -6,7 +6,7 @@
 #define M7_MAES_H
 
 #include <M7_lib/io/MaeStats.h>
-#include <M7_lib/bilinear/Bilinears.h>
+#include <M7_lib/bilinear/Rdms.h>
 #include <M7_lib/observables/HfExcits.h>
 
 /**
@@ -21,6 +21,7 @@ struct Maes {
      * RDMs and MPRT2 intermediates
      */
     Rdms m_rdms;
+
     /**
      * averaged amplitudes of MBFs that are excitations of the HF-like MBF
      */

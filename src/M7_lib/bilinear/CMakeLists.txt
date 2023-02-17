@@ -10,8 +10,10 @@ target_sources(M7_lib
         Rdm.h
         Rdms.cpp
         Rdms.h
-        SpectralMoment.cpp
-        SpectralMoment.h
+        SpecMom.cpp
+        SpecMom.h
+        SpecMoms.cpp
+        SpecMoms.h
         SpinfreeRdm.cpp
         SpinfreeRdm.h
         SpinFreeRdmArrays.h
