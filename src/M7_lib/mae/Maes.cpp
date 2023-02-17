@@ -5,7 +5,9 @@
 #include "Maes.h"
 
 Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t nroot) :
-        m_accum_epoch("MAE accumulation"), m_rdms(opts.m_rdm, sector, m_accum_epoch),
+        m_accum_epoch("MAE accumulation"),
+        m_rdms(opts.m_rdm, sector, m_accum_epoch),
+        m_spec_moms(opts.m_spec_mom, sector, m_accum_epoch),
         m_hf_excits(opts.m_hf_excits, sector.size(), nroot), m_period(opts.m_stats_period) {
     if (*this) {
         m_stats = ptr::smart::make_unique<MaeStats>(
@@ -15,7 +17,7 @@ Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t nroot) :
 }
 
 Maes::operator bool() const {
-    return m_rdms || m_hf_excits;
+    return m_rdms || m_spec_moms || m_hf_excits;
 }
 
 bool Maes::all_stores_empty() const {

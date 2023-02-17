@@ -10,15 +10,17 @@
 
 struct SpecMoms {
 
+    const conf::SpecMoms& m_opts;
+
     typedef SendRecv<DstFinderRow, Table<DstFinderRow>> dst_finder_comm_t;
     /**
-     * const ref to wavefunction class so we can lookup dst walker weights
+     * const pointer to wavefunction class so we can lookup dst walker weights
      */
-    const Wavefunction& m_wf;
+    const Wavefunction* m_wf = nullptr;
     /**
-     * ref to propagator class which is used to generate connections in the perturbed many-body basis
+     * pointer to propagator class which is used to generate connections in the perturbed many-body basis
      */
-    Propagator& m_prop;
+    Propagator* m_prop = nullptr;
     /**
      * maximum power of the Hamiltonian for which to compute the moments
      */
@@ -38,42 +40,44 @@ struct SpecMoms {
     v_t<SpecMom> m_hole_spec_moms;
     v_t<SpecMom> m_particle_spec_moms;
 
+    const Epoch& m_accum_epoch;
+
+
+//    DstFinderRow& add_send_contrib(
+//            bool hole,
+//            const Mbf& dst_mbf,
+//            uint_t irank_dst,
+//            ham_t hnci,
+//            uint_t ham_order,
+//            uint_t ipart_dst,
+//            uint_t ispinorb_left,
+//            uint_t ispinorb_right) {
+//        // if this is a hole moment contribution, the creation operator must be occupied in dst MBF
+//        DEBUG_ASSERT_FALSE(hole && !mbf::get_spinorb(dst_mbf, ispinorb_left),
+//                           "this contrib is zero since creation op destroys the bra");
+//        // if this is a particle moment contribution, the annihilation operator must be vacant in dst MBF
+//        DEBUG_ASSERT_FALSE(!hole && mbf::get_spinorb(dst_mbf, ispinorb_left),
+//                           "this contrib is zero since creation op destroys the bra");
+//
+//        auto& dst_finder = hole ? m_hole_dst_finder_table : m_particle_dst_finder_table;
+//        auto& dst_table = dst_finder.send(irank_dst);
+//
+//        auto& send_row = dst_table.m_row;
+//        send_row.push_back_jump();
+//
+//        send_row.m_dst_mbf = dst_mbf;
+//        send_row.m_hnci = hnci;
+//        send_row.m_ham_order = ham_order;
+//        send_row.m_ipart_dst = ipart_dst;
+//        send_row.m_ispinorb_left = ispinorb_left;
+//        send_row.m_ispinorb_right = ispinorb_right;
+//        return send_row;
+//    }
 
 private:
     static uintv_t make_selected_spinorbs(const conf::SpecMoms& opts, uint_t nspinorb) {
         if (opts.m_spinorbs.m_value.empty()) return vector::range(0ul, nspinorb);
         return opts.m_spinorbs;
-    }
-
-    DstFinderRow& add_send_contrib(
-            bool hole,
-            const Mbf& dst_mbf,
-            ham_t hnci,
-            uint_t ham_order,
-            uint_t ipart_dst,
-            uint_t ispinorb_left,
-            uint_t ispinorb_right) {
-        // if this is a hole moment contribution, the creation operator must be occupied in dst MBF
-        DEBUG_ASSERT_FALSE(hole && !mbf::get_spinorb(dst_mbf, ispinorb_left),
-                           "this contrib is zero since creation op destroys the bra");
-        // if this is a particle moment contribution, the annihilation operator must be vacant in dst MBF
-        DEBUG_ASSERT_FALSE(!hole && mbf::get_spinorb(dst_mbf, ispinorb_left),
-                           "this contrib is zero since creation op destroys the bra");
-
-        auto& dst_finder = hole ? m_hole_dst_finder_table : m_particle_dst_finder_table;
-
-        auto& dst_table = dst_finder.send(m_wf.m_dist.irank(dst_mbf));
-
-        auto& send_row = dst_table.m_row;
-        send_row.push_back_jump();
-
-        send_row.m_dst_mbf = dst_mbf;
-        send_row.m_hnci = hnci;
-        send_row.m_ham_order = ham_order;
-        send_row.m_ipart_dst = ipart_dst;
-        send_row.m_ispinorb_left = ispinorb_left;
-        send_row.m_ispinorb_right = ispinorb_right;
-        return send_row;
     }
 
     /**
@@ -125,19 +129,50 @@ private:
     }
 
 public:
-    SpecMoms(const Wavefunction& wf, Propagator& prop, const conf::SpecMoms& opts, sys::Basis basis) :
-            m_wf(wf), m_prop(prop), m_max_order(opts.m_max_order),
-            m_hole_dst_finder_table("hole moment dst finder", DstFinderRow(basis), {1000, 1.0}),
-            m_particle_dst_finder_table("particle moment dst finder", DstFinderRow(basis), {1000, 1.0}),
-            m_selected_spinorbs(make_selected_spinorbs(opts, basis.m_frm.m_nspinorb)) {
-        for (uint_t ih = 0ul; ih < m_max_order; ++ih) {
-            m_hole_spec_moms.emplace_back(m_selected_spinorbs, basis.m_frm.m_nspinorb);
-            m_particle_spec_moms.emplace_back(m_selected_spinorbs, basis.m_frm.m_nspinorb);
+    SpecMoms(const conf::SpecMoms& opts, sys::Sector sector, const Epoch& accum_epoch):
+        m_opts(opts), m_max_order(opts.m_max_order),
+        m_hole_dst_finder_table("hole moment dst finder", DstFinderRow(sector.basis()), {1000, 1.0}),
+        m_particle_dst_finder_table("particle moment dst finder", DstFinderRow(sector.basis()), {1000, 1.0}),
+        m_selected_spinorbs(make_selected_spinorbs(opts, sector.basis().m_frm.m_nspinorb)),
+        m_accum_epoch(accum_epoch) {
+        for (uint_t order = 0ul; order <= m_max_order; ++order) {
+            m_hole_spec_moms.emplace_back(order, m_selected_spinorbs, sector.m_frm.m_basis.m_nspinorb);
+            m_particle_spec_moms.emplace_back(order, m_selected_spinorbs, sector.m_frm.m_basis.m_nspinorb);
         }
     }
+
+    ~SpecMoms() {
+        if (m_opts.m_save.m_enabled) save();
+    }
+
     operator bool() const {
         return !m_hole_spec_moms.empty() || !m_particle_spec_moms.empty();
     }
+
+    void save(const hdf5::NodeWriter& parent) {
+        if (!m_accum_epoch) {
+            logging::warn("MAE accumulation epoch was not reached in this calculation: omitting spectral moment save");
+            return;
+        }
+        hdf5::GroupWriter archive(parent, "archive");
+        hdf5::GroupWriter hole_group(archive, "hole");
+        hdf5::GroupWriter particle_group(archive, "particle");
+        {
+            // unnormalized SpecMoms, suitable for restarts
+            for (const auto& specmom: m_hole_spec_moms) specmom.save(hole_group);
+            for (const auto& specmom: m_particle_spec_moms) specmom.save(particle_group);
+        }
+    }
+
+    void save() {
+        if (!m_accum_epoch) {
+            logging::warn("MAE accumulation epoch was not reached in this calculation: omitting SpecMoms save");
+            return;
+        }
+        REQUIRE_TRUE(m_opts.m_save.m_enabled, "save() called on SpecMoms object but saving was not enabled");
+        save(hdf5::FileWriter("M7.spec_mom.h5"));
+    }
+
 };
 
 

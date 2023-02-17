@@ -409,6 +409,11 @@ namespace dense {
             conj();
         }
 
+        void all_sum() {
+            auto tmp = *this;
+            mpi::all_sum(tmp.m_buffer.data(), m_buffer.data(), m_buffer.size());
+        }
+
         template<typename U>
         void set_row(uint_t irow, const v_t<U> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");

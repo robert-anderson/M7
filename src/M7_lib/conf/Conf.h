@@ -225,7 +225,7 @@ namespace conf {
         explicit Mae(Group *parent);
 
         bool any_bilinears() const {
-            return !(m_rdm.m_ranks.m_value.empty() && m_spec_mom.m_ranks.m_value.empty());
+            return !m_rdm.m_ranks.m_value.empty() || m_spec_mom.m_enabled;
         }
     };
 

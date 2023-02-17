@@ -13,14 +13,15 @@
 #include "M7_lib/communication/SendRecv.h"
 
 struct SpecMom {
+    const uint_t m_order;
     /**
      * spin-orbital indices indexing the perturbers (a subset of all spinorbs)
      */
     const uintv_t m_selected_spinorbs;
     /**
-     * the sampled quantities only have a memory requirement of creation values
+     * the sampled quantities only have a memory requirement of creation values, so dense storage is fine
      */
-    v_t<ham_t> m_store;
+    dense::Matrix<ham_t> m_store;
     /**
      * nspinorb element vector mapping perturber spinorbs gaplessly on [0, number of selected spinorbs)
      */
@@ -34,29 +35,27 @@ private:
         return tmp;
     }
 
-    uint_t store_ind(uint_t ispinorb_left, uint_t ispinorb_right) const {
-        auto ileft = m_spinorb_to_store_ind[ispinorb_left];
-        DEBUG_ASSERT_NE(ileft, ~0ul, "this spinorb is not a selected perturber");
-        auto iright = m_spinorb_to_store_ind[ispinorb_right];
-        DEBUG_ASSERT_NE(iright, ~0ul, "this spinorb is not a selected perturber");
-        return integer::trigmap_unordered(ileft, iright);
-    }
-
 public:
 
-    SpecMom(uintv_t selected_spinorbs, uint_t nspinorb) :
-            m_selected_spinorbs(std::move(selected_spinorbs)),
-            m_spinorb_to_store_ind(make_spinorb_to_store_ind(m_selected_spinorbs, nspinorb)) {}
-
-    void average() {
-        auto recv = m_store;
-        mpi::all_sum(m_store.data(), recv.data(), recv.size());
-        m_store = recv;
-    }
+    SpecMom(uint_t order, uintv_t selected_spinorbs, uint_t nspinorb) :
+        m_order(order), m_selected_spinorbs(std::move(selected_spinorbs)),
+        m_store(m_selected_spinorbs.size(), m_selected_spinorbs.size()),
+        m_spinorb_to_store_ind(make_spinorb_to_store_ind(m_selected_spinorbs, nspinorb)) {}
 
     void make_contrib(uint_t ispinorb_left, uint_t ispinorb_right, ham_t contrib) {
-        m_store[store_ind(ispinorb_left, ispinorb_right)] += contrib;
+        const auto ileft = m_spinorb_to_store_ind[ispinorb_left];
+        DEBUG_ASSERT_LT(ileft, m_store.nrow(), "left spin-orbital is not a selected perturber");
+        const auto iright = m_spinorb_to_store_ind[ispinorb_right];
+        DEBUG_ASSERT_LT(iright, m_store.nrow(), "right spin-orbital is not a selected perturber");
+        m_store(ileft, iright) += contrib;
     }
+
+    void save(hdf5::NodeWriter& gw) const {
+        auto averaged = m_store;
+        averaged.all_sum();
+        averaged.save(convert::to_string(m_order), gw);
+    }
+
 };
 
 /**

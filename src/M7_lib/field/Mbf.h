@@ -58,14 +58,6 @@ namespace mbf {
     static bool get_spinorb(const field::FrmBosOnv& onv, uint_t ispinorb) {
         return get_spinorb(onv.m_frm, ispinorb);
     }
-
-    static void put_spinorb(field::FrmOnv& onv, uint_t ispinorb, bool v) {
-        onv.put(ispinorb, v);
-    }
-    static void put_spinorb(field::BosOnv&, uint_t, bool){}
-    static void put_spinorb(field::FrmBosOnv& onv, uint_t ispinorb, bool v) {
-        put_spinorb(onv.m_frm, ispinorb, v);
-    }
 };
 
 

@@ -112,6 +112,7 @@ void Solver::execute(uint_t ncycle) {
         if (m_detsubs) {
             m_detsubs.update();
             m_detsubs.make_rdm_contribs(m_maes.m_rdms, m_hf.get());
+            m_detsubs.make_spec_mom_contribs(m_maes.m_spec_moms);
         }
         loop_over_occupied_mbfs();
         m_propagate_timer.pause();
@@ -190,7 +191,7 @@ void Solver::begin_cycle() {
 
     if (m_opts.m_propagator.m_semistochastic.m_enabled && !m_detsubs) {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
-            m_detsubs.init(m_prop.m_ham, m_maes.m_rdms, m_wf, m_icycle);
+            m_detsubs.init(m_prop.m_ham, m_maes, m_wf, m_icycle);
             logging::info("Initialized deterministic subspace");
         }
     }

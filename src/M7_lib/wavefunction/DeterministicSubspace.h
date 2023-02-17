@@ -5,7 +5,7 @@
 #ifndef M7_DETERMINISTICSUBSPACE_H
 #define M7_DETERMINISTICSUBSPACE_H
 
-#include <M7_lib/bilinear/Rdms.h>
+#include "M7_lib/mae/Maes.h"
 #include "M7_lib/linalg/sparse/Sparse.h"
 #include "M7_lib/hamiltonian/frm/FrmHam.h"
 #include <M7_lib/field/Fields.h>
@@ -58,7 +58,7 @@ namespace deterministic {
      *       // we have found a new basis state
      *       insert qd into pert_basis
      *     // else we are revisiting a previously generated element of the union
-     *     append (index of d in D, index of qd in pert_basis) pair to basis_maps[q]
+     *     append (index of d in D, index of qd in pert_basis, fermi phase of perturber application) to basis_maps[q]
      *
      * this algorithm is implemented in the setup_basis method
      *
@@ -133,7 +133,12 @@ namespace deterministic {
          * pairs of indices linking the walker basis to the pertuber basis. keys are given by m_select_pert_inds see
          * class commentary above for details
          */
-        std::map<uint_t, std::list<uintp_t>> m_basis_maps;
+        struct BasisMapEntry {
+            uint_t m_iwalker;
+            uint_t m_iperturbed;
+            bool m_phase;
+        };
+        std::map<uint_t, std::list<BasisMapEntry>> m_basis_maps;
         /**
          * working vector that extends over entire perturbed space
          */
@@ -162,10 +167,24 @@ namespace deterministic {
          */
         bool is_selected_pertuber(uint_t ispinorb) const;
 
+        static void set_conn(conn::FrmOnv& conn, uint_t ispinorb, bool hole) {
+            conn.clear();
+            auto& ops = hole ? conn.m_ann : conn.m_cre;
+            ops.add(ispinorb);
+        }
+        static void set_conn(conn::BosOnv&, uint_t, bool) {}
+        static void set_conn(conn::FrmBosOnv& conn, uint_t ispinorb, bool hole) {
+            set_conn(conn.m_frm, ispinorb, hole);
+        }
+
         /**
          * initialize the perturbed basis and the maps from walker D-space to perturbed space indices
          */
         void setup_basis(const MappedTable<Walker>& walker_subspace, uint_t ispinorb);
+
+        void setup_basis(const MappedTable<Walker>& walker_subspace) {
+            for (auto& ispinorb: m_select_pert_inds) setup_basis(walker_subspace, ispinorb);
+        }
 
         /**
          * initialize sparse Hamiltonian representing the projection of full H into the perturbed deterministic space
@@ -189,11 +208,17 @@ namespace deterministic {
         void project_ham();
 
     public:
+
+        void setup(const Hamiltonian& h, const MappedTable<Walker>& walker_subspace) {
+            setup_basis(walker_subspace);
+            setup_ham(h);
+        }
+
         /**
          * make all contributions (diagonal and off-diagonal) to all orders of hole and particle spectral moments
          * given a pair of replica indices
          */
-//        void make_contribs(SpecMoms& spec_moms, const MappedTable<Walker>& walker_subspace, uint_t ipart, uint_t ipart_replica);
+        void make_contribs(SpecMoms& spec_moms, const MappedTable<Walker>& walker_subspace, uint_t ipart, uint_t ipart_replica);
     };
 
     /**
@@ -224,6 +249,9 @@ namespace deterministic {
          * contribute to RDM elements, but which are H-unconnected
          */
         sparse::dynamic::Network m_rdm_network;
+
+        std::unique_ptr<FrmOpPerturbed> m_frm_hole_perturbed;
+        std::unique_ptr<FrmOpPerturbed> m_frm_particle_perturbed;
         /**
          * associated WF root index
          */
@@ -260,8 +288,19 @@ namespace deterministic {
         void select_l1_norm_fraction();
 
         void make_connections(const Hamiltonian& ham, const Rdms& rdms);
+        void make_connections(const Hamiltonian& ham, const SpecMoms& rdms);
 
         void make_rdm_contribs(Rdms& rdms, const shared_rows::Walker* hf);
+
+        void make_spec_mom_contribs(SpecMoms& spec_moms) {
+            if (!spec_moms || !spec_moms.m_accum_epoch) return;
+            REQUIRE_TRUE(m_frm_hole_perturbed.get(), "uninitialized");
+            REQUIRE_TRUE(m_frm_particle_perturbed.get(), "uninitialized");
+            m_frm_hole_perturbed->make_contribs(spec_moms, gathered(), 0, 1);
+            m_frm_hole_perturbed->make_contribs(spec_moms, gathered(), 1, 0);
+            m_frm_particle_perturbed->make_contribs(spec_moms, gathered(), 0, 1);
+            m_frm_particle_perturbed->make_contribs(spec_moms, gathered(), 1, 0);
+        }
 
         /**
           * for every deterministically-propagated row on this MPI rank, update its value.
@@ -297,13 +336,15 @@ namespace deterministic {
         /**
          * create subspaces, perform the relevant selections, and call make_connections on each
          */
-        void init(const Hamiltonian& ham, const Rdms& rdms, Wavefunction& wf, uint_t icycle);
+        void init(const Hamiltonian& ham, const Maes& maes, Wavefunction& wf, uint_t icycle);
 
         void update();
 
         void project(double tau);
 
         void make_rdm_contribs(Rdms& rdms, const shared_rows::Walker* hf);
+
+        void make_spec_mom_contribs(SpecMoms& spec_moms);
     };
 }
 
