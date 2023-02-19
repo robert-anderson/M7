@@ -17,7 +17,7 @@ TEST(UtilConvert, IntVectorVectorToString){
 
 TEST(UtilConvert, FloatVectorToString) {
     v_t<float> v = {1.0/11.0, -1.234, 5.3, 3.01, 1.0/7.0};
-    ASSERT_EQ(convert::to_string(v, 6), "[9.090909e-02, -1.234000e+00, 5.300000e+00, 3.010000e+00, 1.428571e-01]");
-    ASSERT_EQ(convert::to_string(v, 1), "[9.1e-02, -1.2e+00, 5.3e+00, 3.0e+00, 1.4e-01]");
-    ASSERT_EQ(convert::to_string(v, 0), "[9e-02, -1e+00, 5e+00, 3e+00, 1e-01]");
+    ASSERT_EQ(convert::to_string(v, {true, 6}), "[9.090909e-02, -1.234000e+00, 5.300000e+00, 3.010000e+00, 1.428571e-01]");
+    ASSERT_EQ(convert::to_string(v, {true, 1}), "[9.1e-02, -1.2e+00, 5.3e+00, 3.0e+00, 1.4e-01]");
+    ASSERT_EQ(convert::to_string(v, {true, 0}), "[9e-02, -1e+00, 5e+00, 3e+00, 1e-01]");
 }

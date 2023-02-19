@@ -8,6 +8,8 @@ target_sources(M7_lib
         HartreeFock.h
         HfC2Accumulation.cpp
         HfC2Accumulation.h
+        HfExcitHists.cpp
+        HfExcitHists.h
         Reference.cpp
         Reference.h
         SpawnTable.cpp
