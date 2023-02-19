@@ -112,3 +112,60 @@ TEST(UtilInteger, Sqrt) {
         ASSERT_EQ(integer::sqrt(isq), iroot);
     }
 }
+
+TEST(UtilInteger, Partition) {
+    {
+        auto parts = partitions(1);
+        v_t<uintv_t> chk = {
+            {1}
+        };
+        ASSERT_EQ(parts, chk);
+    }
+    {
+        auto parts = partitions(2);
+        v_t<uintv_t> chk = {
+            {2},
+            {1, 1}
+        };
+        ASSERT_EQ(parts, chk);
+    }
+    {
+        auto parts = partitions(3);
+        v_t<uintv_t> chk = {
+            {3},
+            {2, 1},
+            {1, 1, 1}
+        };
+        ASSERT_EQ(parts, chk);
+    }
+    {
+        auto parts = partitions(6);
+        v_t<uintv_t> chk = {
+            {6},
+            {5, 1},
+            {4, 2},
+            {4, 1, 1},
+            {3, 3},
+            {3, 2, 1},
+            {3, 1, 1, 1},
+            {2, 2, 2},
+            {2, 2, 1, 1},
+            {2, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1}
+        };
+        ASSERT_EQ(parts, chk);
+    }
+    {
+        auto parts = partitions(6, 3);
+        v_t<uintv_t> chk = {
+            {3, 3},
+            {3, 2, 1},
+            {3, 1, 1, 1},
+            {2, 2, 2},
+            {2, 2, 1, 1},
+            {2, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1}
+        };
+        ASSERT_EQ(parts, chk);
+    }
+}

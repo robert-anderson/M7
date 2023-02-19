@@ -175,6 +175,18 @@ namespace integer {
      */
     uint_t lcm_le(uint_t n);
 
+    /**
+     * @param n
+     *  integer to partition
+     * @param max_part
+     *  maximum value of any element of the partition
+     * @return
+     *  all unique descending-order lists of whole numbers which sum to n
+     */
+    v_t<uintv_t> partitions(uint_t n, uint_t max_part);
+
+    v_t<uintv_t> partitions(uint_t n);
+
     template<uint_t n>
     static typename std::enable_if<n == 0ul, uint_t>::type ntup_num(uint_t /*extent*/) {
         return 1ul;
