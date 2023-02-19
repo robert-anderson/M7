@@ -17,7 +17,7 @@
  * communication invoked in the communicate method.
  * @tparam row_t
  *  Derived type of Row defining the data layout of both send and recv tables
- * @tparam mapped
+ * @tparam send_table_t
  *  The send table is optionally mapped allowing rows with the same value in the
  *  mapped field to be accumulated together instead of occupying separate rows.
  *  This is a trade-off at the expense of more costly access (via hash tables)

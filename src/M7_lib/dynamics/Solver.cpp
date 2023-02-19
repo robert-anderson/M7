@@ -26,14 +26,14 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_hf(make_hf()), m_exit("exit"), m_maes(opts.m_av_ests, m_wf.m_sector, m_wf.nroot()),
         m_inst_ests(m_wf.m_sector, &m_refs, opts.m_inst_ests),
-        m_annihilator(m_wf, m_prop, m_refs, m_hf.get(), m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
+        m_annihilator(m_wf, m_prop, m_refs, m_hf.get(), m_maes.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_detsubs(opts.m_propagator.m_semistochastic) {
 
     logging::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
     if (m_wf.nreplica() == 2 && !m_prop.ncase_excit_gen())
         logging::warn("Replica populations are redundant when doing exact propagation");
 
-    if (m_maes.m_bilinears && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
+    if (m_maes.m_rdms && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
         logging::warn("Attempting a stochastic propagation estimation of bilinear MAEs without replication, "
                   "this is biased");
 
@@ -79,8 +79,8 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
     */
 
 
-    if (m_maes.m_bilinears.m_rdms) {
-        if (m_maes.m_bilinears.m_rdms.is_energy_sufficient(m_prop.m_ham))
+    if (m_maes.m_rdms) {
+        if (m_maes.m_rdms.is_energy_sufficient(m_prop.m_ham))
             logging::info("Specified RDM rank signatures are sufficient for variational energy estimation");
         else
             logging::warn("Specified RDM rank signatures are insufficient for variational energy estimation");
@@ -111,7 +111,8 @@ void Solver::execute(uint_t ncycle) {
         m_propagate_timer.unpause();
         if (m_detsubs) {
             m_detsubs.update();
-            m_detsubs.make_rdm_contribs(m_maes.m_bilinears.m_rdms, m_hf.get());
+            m_detsubs.make_rdm_contribs(m_maes.m_rdms, m_hf.get());
+            m_detsubs.make_spec_mom_contribs(m_maes.m_spec_moms);
         }
         loop_over_occupied_mbfs();
         m_propagate_timer.pause();
@@ -190,7 +191,7 @@ void Solver::begin_cycle() {
 
     if (m_opts.m_propagator.m_semistochastic.m_enabled && !m_detsubs) {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
-            m_detsubs.init(m_prop.m_ham, m_maes.m_bilinears, m_wf, m_icycle);
+            m_detsubs.init(m_prop.m_ham, m_maes, m_wf, m_icycle);
             logging::info("Initialized deterministic subspace");
         }
     }
@@ -318,7 +319,7 @@ bool Solver::is_initiator(const Walker& walker, uint_t ipart) {
     if (walker.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd)) return true;
     const auto& c2_c4_section = m_opts.m_propagator.m_c2_c4_initiator;
     if (m_hf && c2_c4_section.m_enabled) {
-        return m_hf->m_accum.is_initiator(ipart, walker, c2_c4_section.m_fac);
+        return m_hf->m_accum.is_initiator(walker, c2_c4_section.m_fac);
     }
     return false;
 }

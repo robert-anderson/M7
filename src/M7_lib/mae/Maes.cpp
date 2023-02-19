@@ -5,21 +5,23 @@
 #include "Maes.h"
 
 Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t nroot) :
-        m_accum_epoch("MAE accumulation"), m_bilinears(opts, sector, m_accum_epoch),
+        m_accum_epoch("MAE accumulation"),
+        m_rdms(opts.m_rdm, sector, m_accum_epoch),
+        m_spec_moms(opts.m_spec_mom, sector, m_accum_epoch),
         m_hf_excits(opts.m_hf_excits, sector.size(), nroot), m_period(opts.m_stats_period) {
     if (*this) {
         m_stats = ptr::smart::make_unique<MaeStats>(
                 opts.m_stats_path, "FCIQMC Multidimensional Averaged Estimators",
-                MaeStatsRow(m_bilinears.m_rdms, m_bilinears.m_spec_moms), 1ul);
+                MaeStatsRow(m_rdms), 1ul);
     }
 }
 
 Maes::operator bool() const {
-    return m_bilinears || m_hf_excits;
+    return m_rdms || m_spec_moms || m_hf_excits;
 }
 
 bool Maes::all_stores_empty() const {
-    return m_bilinears.all_stores_empty() && m_hf_excits.all_stores_empty();
+    return m_rdms.all_stores_empty() && m_hf_excits.all_stores_empty();
 }
 
 bool Maes::is_period_cycle(uint_t icycle) {
@@ -33,7 +35,7 @@ bool Maes::is_period_cycle(uint_t icycle) {
 }
 
 void Maes::end_cycle() {
-    m_bilinears.end_cycle();
+    m_rdms.end_cycle();
 }
 
 void Maes::make_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle) {
@@ -59,22 +61,22 @@ void Maes::make_average_contribs(Walker &row, const shared_rows::Walker* hf, uin
          */
         if (hf) m_hf_excits.make_contribs(row.m_mbf, hf->mbf(), ncycle_occ * av_weight, iroot);
 
-        if (m_bilinears.m_rdms) {
+        if (m_rdms) {
             auto av_weight_rep = row.m_average_weight[ipart_replica] / ncycle_occ;
             /*
              * scale up the product by a factor of the number of instantaneous contributions being accounted for in this
              * single averaged contribution (ncycle_occ)
              */
-            m_bilinears.make_contribs(row.m_mbf, ncycle_occ * av_weight * av_weight_rep);
+            m_rdms.make_contribs(row.m_mbf, row.m_mbf, ncycle_occ * av_weight * av_weight_rep);
 
             if (hf) {
                 auto exsig_from_hf = mbf::exsig(hf->mbf(), row.m_mbf);
-                if ((exsig_from_hf != opsig::c_zero) && m_bilinears.m_rdms.takes_contribs_from(exsig_from_hf)) {
+                if ((exsig_from_hf != opsig::c_zero) && m_rdms.takes_contribs_from(exsig_from_hf)) {
                     const auto av_weight_hf = hf->norm_average_weight(icycle, ipart);
                     const auto av_weight_hf_rep = hf->norm_average_weight(icycle, ipart_replica);
-                    m_bilinears.m_rdms.make_contribs(hf->mbf(), row.m_mbf,
+                    m_rdms.make_contribs(hf->mbf(), row.m_mbf,
                                                      ncycle_occ * av_weight_hf * av_weight_rep);
-                    m_bilinears.m_rdms.make_contribs(row.m_mbf, hf->mbf(),
+                    m_rdms.make_contribs(row.m_mbf, hf->mbf(),
                                                      ncycle_occ * av_weight * av_weight_hf_rep);
                 }
             }
@@ -90,12 +92,12 @@ void Maes::output(uint_t icycle, const Hamiltonian &ham, bool final) {
     auto& stats_row = m_stats->m_row;
 
     ham_comp_t rdm_energy = 0.0;
-    if (m_bilinears.m_rdms.is_energy_sufficient(ham)) rdm_energy = m_bilinears.m_rdms.get_energy(ham);
+    if (m_rdms.is_energy_sufficient(ham)) rdm_energy = m_rdms.get_energy(ham);
 
     if (mpi::i_am_root()) {
         stats_row.m_icycle = icycle;
-        if (m_bilinears.m_rdms) {
-            stats_row.m_total_norm = m_bilinears.m_rdms.m_total_norm.m_reduced;
+        if (m_rdms) {
+            stats_row.m_total_norm = m_rdms.m_total_norm.m_reduced;
             stats_row.m_rdm_energy = rdm_energy;
         }
         m_stats->commit();

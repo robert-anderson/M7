@@ -15,9 +15,8 @@
 #include <M7_lib/util/FpTol.h>
 #include <M7_lib/defs.h>
 #include "M7_lib/linalg/sparse/Dynamic.h"
-#include "M7_lib/hdf5/NodeReader.h"
-#include "M7_lib/hdf5/NodeWriter.h"
-#include "M7_lib/hdf5/DatasetSaver.h"
+#include "M7_lib/hdf5/Node.h"
+#include "M7_lib/hdf5/DatasetTransaction.h"
 
 
 extern "C" void ssyev_(const char *jobz, const char *uplo, const int *n, float *a, const int *lda, float *w,
@@ -156,11 +155,11 @@ namespace dense {
         }
 
         Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank) {
-            if (this_rank) {
-                auto shape = nr.get_dataset_shape(name);
-                resize(shape[0], shape[1]);
-            }
-            nr.load_dataset(name, m_buffer, false, this_rank);
+            hdf5::DatasetLoader dl(nr, name, false, this_rank);
+            const auto& shape = dl.m_format.m_h5_shape;
+            if (this_rank) resize(shape[0], shape[1]);
+            std::list<hdf5::Attr> attrs;
+            dl.load_dist_list(nr, name, m_buffer.data(), m_buffer.size(), false, this_rank, attrs);
         }
 
         explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_col_ind() + 1){
@@ -408,6 +407,11 @@ namespace dense {
         void dagger() {
             transpose();
             conj();
+        }
+
+        void all_sum() {
+            auto tmp = *this;
+            mpi::all_sum(tmp.m_buffer.data(), m_buffer.data(), m_buffer.size());
         }
 
         template<typename U>

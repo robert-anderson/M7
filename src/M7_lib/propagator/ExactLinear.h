@@ -28,6 +28,8 @@ public:
     void off_diagonal(Wavefunction &wf, const Walker& walker, uint_t dst_mbf, bool initiator) override;
 
     void update(uint_t icycle, const Wavefunction &wf) override;
+
+    const ConnForeachGroup& conn_iters() const;
 };
 
 #endif //M7_EXACT_LINEAR_PROPAGATOR_H

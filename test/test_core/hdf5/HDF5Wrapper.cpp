@@ -78,7 +78,7 @@ TEST(HDF5Wrapper, FloatArray) {
         auto nelement = nd::nelement(shape);
         ASSERT_EQ(nelement, v.size());
         ASSERT_TRUE(fr.child_exists("a_float_array"));
-        auto v_read = fr.load_dataset<v_t<float>>("a_float_array", false, true);
+        auto v_read = hdf5::DatasetLoader::load_vector<float>(fr, "a_float_array");
         auto v_def = v;
         v_def[2] = hash::in_range(0, 4, 18);
         ASSERT_EQ(v_read, v_def);
@@ -98,7 +98,7 @@ TEST(HDF5Wrapper, ComplexArray) {
     mpi::barrier();
     {
         hdf5::FileReader fr("table_test.h5");
-        const auto v_read = fr.load_dataset<v_t<std::complex<float>>>("a_complex_array", false, true);
+        auto v_read = hdf5::DatasetLoader::load_vector<std::complex<float>>(fr, "a_complex_array");
         auto v_def = v;
         v_def[2].imag(hash::in_range(0, 4, 18));
         ASSERT_EQ(v_read, v_def);

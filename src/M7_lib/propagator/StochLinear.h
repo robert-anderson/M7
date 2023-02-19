@@ -7,7 +7,6 @@
 
 #include <M7_lib/sample/PRNG.h>
 #include <M7_lib/excitgen/ExcitGenGroup.h>
-
 #include "M7_lib/propagator/Propagator.h"
 
 class StochLinear : public Propagator {
@@ -49,6 +48,10 @@ public:
     uint_t ncase_excit_gen() const override;
 
     v_t<prob_t> excit_gen_case_probs() const override;
+
+    const ExcitGenGroup& excit_gen_group() const {
+        return m_excit_gen_group;
+    }
 
     void update(uint_t icycle, const Wavefunction &wf) override;
 

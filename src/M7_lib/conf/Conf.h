@@ -190,6 +190,8 @@ namespace conf {
     struct SpecMoms : Bilinears {
         Param<bool> m_stochastic;
         Param<double> m_nattempt_per_walker;
+        Param<uint_t> m_max_order;
+        Param<uintv_t> m_spinorbs;
 
         explicit SpecMoms(Group *parent, str_t name, str_t description);
     };
@@ -223,7 +225,7 @@ namespace conf {
         explicit Mae(Group *parent);
 
         bool any_bilinears() const {
-            return !(m_rdm.m_ranks.m_value.empty() && m_spec_mom.m_ranks.m_value.empty());
+            return !m_rdm.m_ranks.m_value.empty() || m_spec_mom.m_enabled;
         }
     };
 

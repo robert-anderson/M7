@@ -6,8 +6,9 @@
 #define M7_MAES_H
 
 #include <M7_lib/io/MaeStats.h>
-#include <M7_lib/bilinear/Bilinears.h>
+#include <M7_lib/bilinear/Rdms.h>
 #include <M7_lib/observables/HfExcits.h>
+#include "M7_lib/bilinear/SpecMoms.h"
 
 /**
  * A group of all Multidimensional Averaging Estimators needed for a calculation
@@ -18,9 +19,13 @@ struct Maes {
      */
     Epoch m_accum_epoch;
     /**
-     * group of MAEs that are bilinear in the wavefunction (e.g. RDMs, MPRT2 intermediates, spectral moments)
+     * RDMs and MPRT2 intermediates
      */
-    Bilinears m_bilinears;
+    Rdms m_rdms;
+    /**
+     * moments of the 1-body hole and particle Green's functions
+     */
+    SpecMoms m_spec_moms;
     /**
      * averaged amplitudes of MBFs that are excitations of the HF-like MBF
      */

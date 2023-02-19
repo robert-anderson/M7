@@ -13,6 +13,14 @@
 namespace vector {
 
     template<typename T>
+    v_t<T> range(T begin, T end, T interval=T(1)){
+        v_t<T> tmp;
+        tmp.reserve(uint_t((end - begin) / interval));
+        for (T v = begin; v < end; v+=interval) tmp.emplace_back(v);
+        return tmp;
+    }
+
+    template<typename T>
     v_t<T> inserted(const v_t<T>& vec, const v_t<T>& insertion, uint_t pos){
         auto tmp = vec;
         tmp.insert(tmp.begin()+pos, insertion.cbegin(), insertion.cend());

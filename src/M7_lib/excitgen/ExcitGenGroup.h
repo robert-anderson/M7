@@ -102,9 +102,15 @@ public:
     }
 
     template<typename mbf_t>
-    bool draw(uint_t icase, const mbf_t &src, prob_t &prob, ham_t &helem, conn::from_field_t<mbf_t> &conn) {
+    bool draw_given_case(uint_t icase, const mbf_t &src, prob_t &prob, ham_t &helem, conn::from_field_t<mbf_t> &conn) {
         auto& excase = m_excit_cases[icase];
         return excase.m_excit_gen->draw(excase.m_exsig, src, prob, helem, conn);
+    }
+
+    template<typename mbf_t>
+    bool draw(const mbf_t &src, prob_t &prob, ham_t &helem, conn::from_field_t<mbf_t> &conn, uint_t& icase) {
+        icase = draw_icase();
+        return draw_given_case(icase, src, prob, helem, conn);
     }
 
     void log() const;

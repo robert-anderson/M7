@@ -27,7 +27,7 @@ TEST(FieldDataset, FrmOnvField) {
     const uint_t max_nitem_per_op = 12ul;
     {
         hdf5::FileWriter fw("tmp.h5");
-        init.m_mbf_order_table.save(fw, "mbf_table", max_nitem_per_op, mpi::i_am_root());
+        init.m_mbf_order_table.save(fw, "mbf_table", mpi::i_am_root(), max_nitem_per_op);
     }
     FciInitializer::mbf_order_table_t table("mbf_table_load", init.m_mbf_order_table.m_row);
     {

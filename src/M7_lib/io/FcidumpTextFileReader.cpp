@@ -110,10 +110,15 @@ OpSig FcidumpTextFileReader::exsig(const uintv_t &inds, OpSig ranksig) const {
         case opsig::c_zero: return opsig::c_zero;
         case opsig::c_sing:
             return (inds[0]==inds[1]) ? opsig::c_zero : opsig::c_sing;
-            case opsig::c_doub:
-            return inds[0]==inds[2] ?
-                (inds[1]==inds[3] ? opsig::c_zero : opsig::c_sing):
-                (inds[1]==inds[3] ? opsig::c_sing : opsig::c_doub);
+        case opsig::c_doub: {
+            const bool same_01 = inds[0] == inds[1];
+            const bool same_23 = inds[2] == inds[3];
+            const bool same_03 = inds[0] == inds[3];
+            const bool same_12 = inds[1] == inds[2];
+            if ((same_01 && same_12) || (same_03 && same_12)) return opsig::c_zero;
+            else if (same_01 || same_23 || same_03 || same_12) return opsig::c_sing;
+            return opsig::c_doub;
+        }
         default:
             return opsig::c_invalid;
     }

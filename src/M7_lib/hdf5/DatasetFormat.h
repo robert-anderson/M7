@@ -79,6 +79,12 @@ namespace hdf5 {
              */
             const strv_t m_dim_names;
 
+            /**
+             * @return
+             *  number of dimensions including the list dimension (dimensionality of item format + 1)
+             */
+            uint_t ndim() const;
+
             ListFormat(ItemFormat item_format, uint_t nitem, str_t leading_dim_name="item");
         };
         /**
@@ -124,9 +130,7 @@ namespace hdf5 {
          * suitable for Load and Save
          */
         struct PartDistListFormat : DistListFormat {
-            PartDistListFormat(hdf5::dataset::ItemFormat item_format, uint_t nitem, str_t leading_dim_name="item") :
-                DistListFormat(item_format, nitem, mpi::all_sum(nitem),
-                    mpi::counts_to_displs_consec(mpi::all_gathered(nitem))[mpi::irank()], leading_dim_name){}
+            PartDistListFormat(hdf5::dataset::ItemFormat item_format, uint_t nitem, str_t leading_dim_name="item");
         };
 
         /**
@@ -134,8 +138,7 @@ namespace hdf5 {
          * suitable for Load only
          */
         struct FullDistListFormat : DistListFormat {
-            FullDistListFormat(hdf5::dataset::ItemFormat item_format, uint_t nitem, str_t leading_dim_name="item") :
-                DistListFormat(item_format, nitem, nitem, 0ul, leading_dim_name){}
+            FullDistListFormat(hdf5::dataset::ItemFormat item_format, uint_t nitem, str_t leading_dim_name="item");
         };
     }
 }

@@ -5,17 +5,14 @@
 #ifndef M7_FIELDBASE_H
 #define M7_FIELDBASE_H
 
-#include <M7_lib/defs.h>
 #include <cstring>
 #include <utility>
+#include <M7_lib/defs.h>
 #include <M7_lib/util/Hash.h>
 #include <M7_lib/nd/NdArrayList.h>
 #include <M7_lib/hdf5/Node.h>
 
 #include "Row.h"
-#include "M7_lib/hdf5/NodeWriter.h"
-#include "M7_lib/hdf5/NodeReader.h"
-
 
 /**
  * Base class for the basic containers of data within Rows, which in turn reference locations within a Buffer via Table.
@@ -205,13 +202,13 @@ protected:
 
 public:
 
-    void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const;
+    void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const;
 
     void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const;
 
     void save(const hdf5::NodeWriter& nw, bool this_rank) const;
 
-    void load(const hdf5::NodeReader& nr, const str_t& name, uint_t max_nitem_per_op, bool part, bool this_rank);
+    void load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank, uint_t max_nitem_per_op);
 
     void load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank);
 

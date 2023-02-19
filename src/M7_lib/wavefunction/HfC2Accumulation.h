@@ -25,21 +25,28 @@ namespace hf_excit_coeffs{
     };
 
     class HfExcitCoeffs : public GlobalAccumulation<Row> {
+        static const NdFormat<c_ndim_wf>& fmt(const shared_rows::Walker* hf) {
+            return hf->gathered().m_row.m_weight.m_format;
+        }
     public:
         Reduction<wf_t> m_coherent_c4_l1;
         Reduction<wf_t> m_total_c4_l1;
         const shared_rows::Walker* m_hf;
         mutable conn::Mbf m_work_conn;
         mutable buffered::MaeInds m_work_key;
+        mutable buffered::Numbers<wf_t, c_ndim_wf> m_work_weight;
         HfExcitCoeffs(const shared_rows::Walker* hf):
-            GlobalAccumulation<Row>("HF excit coeffs", {hf->gathered().m_row.m_weight.m_format}), m_hf(hf),
-            m_work_conn(hf->mbf().m_basis), m_work_key(opsig::c_doub){}
+            GlobalAccumulation<Row>("HF excit coeffs", {fmt(hf)}), m_hf(hf),
+            m_work_conn(hf->mbf().m_basis), m_work_key(opsig::c_doub), m_work_weight(fmt(hf)){}
 
         void add(const Walker& walker) {
             m_work_conn.connect(m_hf->mbf(), walker.m_mbf);
             if (m_work_conn.exsig()!=opsig::c_doub) return;
+            auto phase = m_work_conn.phase(m_hf->mbf());
             m_work_key = m_work_conn;
-            GlobalAccumulation<Row>::add(m_work_key, walker.m_weight);
+            m_work_weight = walker.m_weight;
+            if (phase) m_work_weight*=-1.0;
+            GlobalAccumulation<Row>::add(m_work_key, m_work_weight);
         }
 
     private:
@@ -72,12 +79,12 @@ namespace hf_excit_coeffs{
 
     public:
         bool predict(const field::FrmOnv& mbf, wf_t& v) const {
+            v = 0.0;
             m_work_conn.connect(m_hf->mbf(), mbf);
             const auto exsig = m_work_conn.exsig();
             if (exsig != opsig::c_quad) return false;
             auto& conn = m_work_conn;
             auto& key = m_work_key.m_frm;
-            v = 0.0;
             auto fn = [&](uinta_t<8> inds, bool par) {
                 wf_t prod;
                 // first pair of inds are creation
@@ -120,6 +127,7 @@ namespace hf_excit_coeffs{
              * n4 ~= n2^2 / (2*n0)
              */
             v /= m_hf->weight(0);
+            if (m_work_conn.phase(m_hf->mbf())) v *= -1;
             return true;
         }
 
@@ -130,18 +138,23 @@ namespace hf_excit_coeffs{
             return 0.0;
         }
 
-        bool is_initiator(uint_t ipart, const Walker& walker, double fac) {
+        bool is_initiator(const Walker& walker, double fac) {
             wf_t p;
             auto is_c4 = predict(walker.m_mbf, p);
             if (!is_c4) return false;
-            const auto weight = walker.m_weight[ipart];
+            const auto weight = walker.m_weight[0];
             m_total_c4_l1.m_local += std::abs(weight);
             if (!p) return false;
             const auto coherent = (p>0)==(weight>0);
             if (coherent) m_coherent_c4_l1.m_local += std::abs(weight);
-            else return false;
-            // if the weight is larger than the prediction by fac, let walker be initiator
-            return std::abs(weight) >= fac * std::abs(p);
+            if (fac==0.0) {
+                // with no fac set, assume we allow walkers of the correct predicted sign to become initiators
+                return coherent;
+            }
+            else {
+                // if the absolute predicted weight is larger than fac, let walker be initiator
+                return std::abs(p) > fac;
+            }
         }
 
         void update() {
