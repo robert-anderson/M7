@@ -95,11 +95,11 @@ void logging::error_backtrace_(uint_t depth) {
 
 strv_t logging::make_table(const v_t<strv_t> &rows, bool header, bool hlines, uint_t padding) {
     if (rows.empty()) return {};
-    auto fn = [](const strv_t& row1, const strv_t& row2){
+    auto cmp_fn = [](const strv_t& row1, const strv_t& row2){
         return row1.size() < row2.size();
     };
+    auto max_it = std::max_element(rows.cbegin(), rows.cend(), cmp_fn);
 
-    auto max_it = std::max_element(rows.cbegin(), rows.cend(), fn);
     const uint_t ncol = max_it->size();
     uintv_t max_sizes(ncol, 0ul);
     for (auto& row: rows) {

@@ -19,7 +19,11 @@ struct StatsRow : Row {};
 namespace statistic {
 
     struct Base {
-        static constexpr uint_t c_default_fp = 8ul;
+        static constexpr bool default_float_scientific() {return true;}
+        static constexpr uint_t default_float_precision() {return 8ul;}
+        static constexpr convert::FloatFmt default_fmt() {
+            return {default_float_scientific(), default_float_precision()};
+        };
         virtual void commit() = 0;
 
         virtual void reset() = 0;
@@ -27,14 +31,14 @@ namespace statistic {
         virtual str_t stats_string() const = 0;
 
         template<typename T>
-        static str_t stats_string_element(T v, uint_t denom, uint_t fp=c_default_fp) {
-            return convert::to_string(v / T(denom), fp);
+        static str_t stats_string_element(T v, uint_t denom, convert::FloatFmt fmt=default_fmt()) {
+            return convert::to_string(v / T(denom), fmt);
         }
 
         template<typename T>
-        static str_t stats_string_element(std::complex<T> v, uint_t denom, uint_t fp=c_default_fp) {
+        static str_t stats_string_element(std::complex<T> v, uint_t denom, convert::FloatFmt fmt=default_fmt()) {
             const arith::comp_t<T> d = denom;
-            return convert::to_string(v.real() / d, fp) + " " + convert::to_string(v.imag() / d, fp);
+            return convert::to_string(v.real() / d, fmt) + " " + convert::to_string(v.imag() / d, fmt);
         }
     };
 
@@ -47,19 +51,21 @@ namespace statistic {
 
         const bool m_mean;
         /**
-         * floating point precision
+         * floating point format
          */
-        const uint_t m_fp;
+        const convert::FloatFmt m_fmt;
         uint_t m_ncommit_this_period = 0ul;
 
         v_t<T> m_reduced;
 
-        Numbers(StatsRow *row, NdFormat<nind> format, str_t name = "", bool mean = true, uint_t fp=c_default_fp) :
-                NdNumberField<T, nind>(row, format, name), m_mean(mean), m_fp(fp), m_reduced(this->m_nelement) {}
+        Numbers(StatsRow *row, NdFormat<nind> format, str_t name = "",
+                bool mean = true, convert::FloatFmt fmt=default_fmt()) :
+                NdNumberField<T, nind>(row, format, name),
+                m_mean(mean), m_fmt(fmt), m_reduced(this->m_nelement) {}
 
         Numbers(const Numbers& other):
                 NdNumberField<T, nind>(other), m_mean(other.m_mean),
-                m_fp(other.m_fp), m_reduced(other.m_nelement){}
+                m_fmt(other.m_fmt), m_reduced(other.m_nelement){}
 
         void commit() override {
             if (m_mean) this->add_to(m_reduced);
@@ -76,7 +82,7 @@ namespace statistic {
         str_t stats_string() const override {
             str_t tmp;
             for (uint_t ielement = 0ul; ielement < nelement(); ++ielement)
-                tmp += stats_string_element(m_reduced[ielement], m_mean ? m_ncommit_this_period : 1ul, m_fp) + " ";
+                tmp += stats_string_element(m_reduced[ielement], m_mean ? m_ncommit_this_period : 1ul, m_fmt) + " ";
             return tmp;
         }
 
@@ -90,7 +96,8 @@ namespace statistic {
     struct Number : Numbers<T, 0ul> {
         typedef Numbers<T, 0ul> base_t;
         using base_t::operator=;
-        Number(StatsRow *row, str_t name = "", bool mean=true) : base_t(row, {}, name, mean) {}
+        Number(StatsRow *row, str_t name = "", bool mean = true, convert::FloatFmt fmt=base_t::default_fmt()) :
+            base_t(row, {}, name, mean, fmt) {}
 
         Number(const Number& other): base_t(other){}
         Number& operator=(const Number<T>& other) {return *this;}
