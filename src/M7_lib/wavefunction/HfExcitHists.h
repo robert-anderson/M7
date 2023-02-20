@@ -103,7 +103,7 @@ namespace hf_excit_hist {
             // if the excitation is already in the table, it is added regardless of current weight
             if (lookup) lookup.m_values[0] += weight;
             // if it's not already histogrammed, it can be added only if the instantaneous weight is sufficient
-            else if (weight >= m_hf->weight(0)*m_thresh) {
+            else if (std::abs(weight) >= std::abs(m_hf->weight(0)*m_thresh)) {
                 auto& insert_row = table.insert(key);
                 insert_row.m_values += weight;
             }

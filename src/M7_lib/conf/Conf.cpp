@@ -114,6 +114,7 @@ conf::Wavefunction::Wavefunction(Group *parent) :
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
         m_fci_init(this, "fci_init", false, "call the ARPACK interface to initialize the required roots to their exact values"),
+        m_permanitiator_source(this, "permanitiator_source", "C2 coeffs file for permanitiator setup", "", conf_components::Explicit),
         m_buffers(this), m_hash_mapping(this), m_distribution(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
         m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit){}

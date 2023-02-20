@@ -106,6 +106,7 @@ namespace conf {
         Param<double> m_nw_init;
         Param<uint_t> m_nroot;
         Param<bool> m_fci_init;
+        OptionalFile m_permanitiator_source;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Distribution m_distribution;
