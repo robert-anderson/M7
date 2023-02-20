@@ -10,14 +10,6 @@
 
 namespace hf_excit_hist {
 
-    struct Initializer {
-
-    };
-
-    struct Initializers {
-
-    };
-
 //    struct Accumulator {
 //        buffered::MappedTable<RdmRow> m_table;
 //        void save(const hdf5::NodeWriter& nw) const {
@@ -50,13 +42,32 @@ namespace hf_excit_hist {
         wf_t m_norm;
         const str_t m_save_file_name;
 
-        Accumulators(const shared_rows::Walker* hf, uint_t nexcit_max, wf_t thresh, str_t save_file_name):
-            m_hf(hf), m_thresh(thresh), m_work_conn(hf->mbf()), m_save_file_name(std::move(save_file_name)){
-            if (!nexcit_max) return;
+        const uintv_t m_nexcits;
+        const uintv_t m_accumulated_nexcit_inds;
+
+    private:
+        static uintv_t make_nexcit_is_accumulated(const uintv_t& nexcits) {
+            if (nexcits.empty()) return {};
+            auto nmax = *std::max_element(nexcits.cbegin(), nexcits.cend());
+            uintv_t out(nmax+1, ~0ul);
+            uint_t i = 0;
+            for (auto& n: nexcits) out[n] = i++;
+            return out;
+        }
+
+        uint_t ind(uint_t nexcit) const {
+            return nexcit < m_accumulated_nexcit_inds.size() ? m_accumulated_nexcit_inds[nexcit] : ~0ul;
+        }
+
+    public:
+        Accumulators(const shared_rows::Walker* hf, uintv_t nexcits, wf_t thresh, str_t save_file_name):
+            m_hf(hf), m_thresh(thresh), m_work_conn(hf->mbf()), m_save_file_name(std::move(save_file_name)),
+            m_nexcits(std::move(nexcits)), m_accumulated_nexcit_inds(make_nexcit_is_accumulated(m_nexcits)) {
+            if (m_nexcits.empty()) return;
             REQUIRE_TRUE(m_hf, "HF state must be defined for HF excitation accumulation");
-            m_tables.reserve(nexcit_max);
-            m_lookup_keys.reserve(nexcit_max);
-            for (uint_t nexcit = 1ul; nexcit < nexcit_max + 1; ++nexcit) {
+            m_tables.reserve(m_nexcits.size());
+            m_lookup_keys.reserve(m_nexcits.size());
+            for (auto& nexcit: m_nexcits){
                 const OpSig exsig({nexcit, nexcit}, {0, 0});
                 const auto name = exsig.to_string()+" excitations of HF state";
                 m_tables.emplace_back(name, RdmRow(exsig, 1), false);
@@ -69,7 +80,7 @@ namespace hf_excit_hist {
         }
 
         Accumulators(const conf::HfExcits& opts, const shared_rows::Walker* hf):
-            Accumulators(hf, opts.m_max_nexcit, opts.m_thresh, opts.m_save.m_path){}
+            Accumulators(hf, opts.m_nexcits, opts.m_thresh, opts.m_save.m_path){}
 
         ~Accumulators() {
             if (*this) save();
@@ -79,30 +90,33 @@ namespace hf_excit_hist {
             if (!*this) return;
             m_work_conn.connect(m_hf->mbf(), mbf);
             const auto nexcit = m_work_conn.exsig().nfrm_cre();
-            if (nexcit > m_tables.size() + 1) return;
             if (!nexcit) {
                 m_norm += weight;
                 return;
             }
-            auto& table = m_tables[nexcit - 1];
-            table.m_row.m_inds = m_work_conn;
-            auto& lookup = table.lookup(table.m_row.m_inds);
+            const auto i = ind(nexcit);
+            if (i == ~0ul) return;
+            auto& table = m_tables[i];
+            auto& key = m_lookup_keys[i];
+            key = m_work_conn;
+            auto& lookup = table.lookup(key);
             // if the excitation is already in the table, it is added regardless of current weight
             if (lookup) lookup.m_values[0] += weight;
             // if it's not already histogrammed, it can be added only if the instantaneous weight is sufficient
             else if (weight >= m_hf->weight(0)*m_thresh) {
-                table.m_row.m_values = weight;
-                table.insert(table.m_row);
+                auto& insert_row = table.insert(key);
+                insert_row.m_values += weight;
             }
         }
 
         void save(const hdf5::NodeWriter& nw) {
-            uint_t i=1ul;
-            for (auto& table : m_tables) {
-                auto& row = table.m_row;
+            auto table = m_tables.begin();
+            for (auto nexcit: m_nexcits) {
+                OpSig exsig({nexcit, nexcit}, {0, 0});
+                auto& row = table->m_row;
                 for (row.restart(); row; ++row) row.m_values /= m_norm;
-                table.save(nw, OpSig({i, i}, {0, 0}).to_string(), true);
-                ++i;
+                table->save(nw, exsig.to_string(), true);
+                ++table;
             }
         }
 

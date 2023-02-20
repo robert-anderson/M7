@@ -321,3 +321,7 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
         }
     }
 }
+
+void Wavefunction::make_permanent_initiators_from_c2(str_t fname, uint_t max_ncomm) {
+    
+}

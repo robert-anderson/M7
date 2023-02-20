@@ -205,7 +205,7 @@ namespace conf {
     };
 
     struct HfExcits : Section {
-        Param<uint_t> m_max_nexcit;
+        Param<uintv_t> m_nexcits;
         Param<wf_t> m_thresh;
         Buffers m_buffers;
         OptionalFile m_save;

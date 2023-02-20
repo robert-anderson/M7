@@ -14,6 +14,7 @@ target_sources(M7_lib
         Math.h
         MeanStd.h
         Nd.h
+        Parse.h
         Pointer.h
         Probability.h
         ProgressMonitor.cpp

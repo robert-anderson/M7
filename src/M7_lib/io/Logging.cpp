@@ -2,6 +2,7 @@
 // Created by Robert J. Anderson on 26/01/2021.
 //
 
+#include <M7_lib/util/Parse.h>
 #include "Logging.h"
 #include "M7_lib/version/version.h"
 
@@ -93,14 +94,30 @@ void logging::error_backtrace_(uint_t depth) {
     for (const auto& line: tmp) if (!line.empty()) error_(line);
 }
 
-strv_t logging::make_table(const v_t<strv_t> &rows, bool header, bool hlines, uint_t padding) {
+strv_t logging::make_table(v_t<strv_t> rows, bool header, bool hlines, uint_t padding) {
     if (rows.empty()) return {};
+
+    /*
+     * find the longest row to determine number of columns in the table
+     */
     auto cmp_fn = [](const strv_t& row1, const strv_t& row2){
         return row1.size() < row2.size();
     };
     auto max_it = std::max_element(rows.cbegin(), rows.cend(), cmp_fn);
-
     const uint_t ncol = max_it->size();
+    /*
+     * if the cell is parseable as a float and is positive, offset with a space so that first digits are aligned with
+     * those of negatively-signed cells
+     */
+    for (auto& row: rows) {
+        for (auto& cell : row) {
+            double tmp;
+            if (parse::checked(cell, tmp) && tmp >= 0.0) cell.insert(0, " ");
+        }
+    }
+    /*
+     * find the widest cell in each column
+     */
     uintv_t max_sizes(ncol, 0ul);
     for (auto& row: rows) {
         for (auto it=row.cbegin(); it!=row.cend(); ++it) {

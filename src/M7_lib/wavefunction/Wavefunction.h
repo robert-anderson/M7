@@ -92,8 +92,8 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn> {
     }
 
     static bool need_av_weights(const conf::Document &opts) {
-        if (need_send_parents(opts)) return true;
-        return opts.m_av_ests.m_hf_excits.m_max_nexcit > 0;
+//        if (need_send_parents(opts)) return true;
+        return need_send_parents(opts);
     }
 
     bool storing_av_weights() const {
@@ -219,6 +219,8 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn> {
     }
 
     void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm=1000ul);
+
+    void make_permanent_initiators_from_c2(str_t fname, uint_t max_ncomm=1000ul);
 private:
 
 

@@ -220,8 +220,8 @@ conf::InstEsts::InstEsts(Group *parent) :
 conf::HfExcits::HfExcits(Group *parent) :
         Section(parent, "hf_excits",
                         "options relating to averaged amplitudes of MBFs connected to a Hartree-Fock-like MBF", Explicit),
-        m_max_nexcit(this, "max_nexcit", 0ul,
-                     "maximum excitation level from the HF MBF for which to accumulate average amplitudes"),
+        m_nexcits(this, "nexcits", {},
+                     "excitation levels from the HF MBF for which to accumulate average amplitudes"),
         m_thresh(this, "thresh", 0.0,
                     "minimum magnitude of intermediate-normalized walker weight require before histogramming"),
         m_buffers(this),

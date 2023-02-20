@@ -16,19 +16,9 @@ bool CsvFileReader::next(strv_t& tokens) {
     return true;
 }
 
-str_t NumericCsvFileReader::c_allowed_chars(".(),+-eE");
-
-bool NumericCsvFileReader::valid_numeric(const str_t& token) {
-    for (auto& c: token) {
-        if (c >= '0' && c <= '9') continue;
-        if (strchr(c_allowed_chars.c_str(), c) != nullptr) continue;
-        return false;
-    }
-    return true;
-}
-
-bool NumericCsvFileReader::valid_numeric(const strv_t& tokens) {
-    for (auto& token: tokens) if (!valid_numeric(token)) return false;
+bool NumericCsvFileReader::all_float_parseable(const strv_t& tokens) {
+    double tmp;
+    for (auto& token: tokens) if (!parse::checked(token, tmp)) return false;
     return true;
 }
 
@@ -39,49 +29,8 @@ NumericCsvFileReader::NumericCsvFileReader(const str_t& fname,
 bool NumericCsvFileReader::next(strv_t& tokens) {
     do {
         if (!CsvFileReader::next(tokens)) return false;
-    } while (tokens.size() != m_ncolumn || !valid_numeric(tokens));
+    } while (tokens.size() != m_ncolumn || !all_float_parseable(tokens));
     return true;
-}
-
-bool NumericCsvFileReader::parsable_as(const str_t& str, uint_t&) {
-    for (auto c : str) if (strchr(c_allowed_chars.c_str(), c) != nullptr) return false;
-    return true;
-}
-
-bool NumericCsvFileReader::parsable_as(const str_t& str, int&) {
-    for (auto c : str) {
-        if (c=='-') continue;
-        if (strchr(c_allowed_chars.c_str(), c) != nullptr) return false;
-    }
-    return true;
-}
-
-bool NumericCsvFileReader::parsable_as(const str_t&, double&) {
-    return true;
-}
-
-bool NumericCsvFileReader::parsable_as(const str_t&, float&) {
-    return true;
-}
-
-void NumericCsvFileReader::parse(const str_t& str, uint_t& v) {
-    v = std::stoul(str);
-}
-
-void NumericCsvFileReader::parse(const str_t& str, long& v) {
-    v = std::stol(str);
-}
-
-void NumericCsvFileReader::parse(const str_t& str, int& v) {
-    v = std::stoi(str);
-}
-
-void NumericCsvFileReader::parse(const str_t& str, double& v) {
-    v = std::stod(str);
-}
-
-void NumericCsvFileReader::parse(const str_t& str, float& v) {
-    v = std::stof(str);
 }
 
 uint_t NumericCsvFileReader::ncolumn(const str_t& fname, std::function<uint_t(const str_t&)> iline_fn) {
