@@ -12,12 +12,12 @@ target_sources(M7_lib
         FrmBosOnvField.h
         FrmOnvField.cpp
         FrmOnvField.h
-        MaeIndsField.cpp
-        MaeIndsField.h
         Mbf.cpp
         Mbf.h
         NumberField.cpp
         NumberField.h
+        RdmIndsField.cpp
+        RdmIndsField.h
         Row.cpp
         Row.h
         SpecMomIndsField.cpp

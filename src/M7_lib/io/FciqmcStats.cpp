@@ -22,7 +22,6 @@ FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests
         m_delta_nocc_mbf(this, m_wf_format, "Change in number of occupied MBFs", false),
         m_spin_square_num(inst_ests.m_spin_square ? this : nullptr, m_wf_format,
                           "Numerator of reference-projected spin square estimator"),
-        m_coherent_c4(this, "fraction of coherent C4 L1 norm from C2 products"),
         m_exlvl_probs(prop.ncase_excit_gen() ? this : nullptr,
                       {{prop.ncase_excit_gen()}, {"excitation generator index"}},
                       "Probability of attempting to draw excitation level")

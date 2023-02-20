@@ -7,13 +7,13 @@
 
 #include <M7_lib/field/Fields.h>
 
-struct MaeRow : public Row {
-    field::MaeInds m_inds;
+struct RdmRow : public Row {
+    field::RdmInds m_inds;
     field::Numbers<wf_t, 1> m_values;
 
-    field::MaeInds &key_field();
+    field::RdmInds &key_field();
 
-    MaeRow(OpSig exsig, uint_t nvalue);
+    RdmRow(OpSig exsig, uint_t nvalue);
 };
 
 struct SpecMomsRow : public Row {

@@ -15,7 +15,7 @@ std::unique_ptr<HartreeFock> Solver::make_hf() const {
      */
     if (force_hf || m_prop.m_ham.has_brillouin_theorem(m_refs[0].mbf())) {
         const TableBase::Loc loc(m_refs[0].irec());
-        return ptr::smart::make_unique<HartreeFock>(m_wf.m_store, loc);
+        return ptr::smart::make_unique<HartreeFock>(m_wf.m_store, loc, m_opts.m_hf_excits);
     }
     return nullptr;
 }
@@ -226,15 +226,16 @@ void Solver::loop_over_occupied_mbfs() {
          * if the accumulation of MEVs has just started, treat the row as though it became occupied in the annihilation
          * loop of the last MC cycle.
          */
-        if (m_maes.m_accum_epoch.started_this_cycle(m_icycle)) {
+        if (m_maes.m_accum_epoch.started_this_cycle(m_icycle) && m_wf.storing_av_weights()) {
             DEBUG_ASSERT_TRUE(m_maes.m_accum_epoch, "should be in MAE accumulation epoch");
             walker.m_icycle_occ = m_icycle;
             walker.m_average_weight = 0;
         }
 
-        if (m_maes.m_accum_epoch) {
+        if (m_maes.m_accum_epoch && m_wf.storing_av_weights()) {
             walker.m_average_weight += walker.m_weight;
         }
+        if (m_hf && m_hf->m_excit_accums) m_hf->m_excit_accums.add(walker.m_mbf, walker.m_weight[0]);
 
         if (m_maes.is_period_cycle(m_icycle)) {
             /*
@@ -246,7 +247,6 @@ void Solver::loop_over_occupied_mbfs() {
 
         m_refs.contrib_row(walker);
         m_inst_ests.make_numerator_contribs(walker);
-        if (m_hf && m_opts.m_propagator.m_c2_c4_initiator.m_enabled) m_hf->m_accum.add(walker);
 
         m_wf.m_nocc_mbf.m_local++;
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
@@ -258,7 +258,7 @@ void Solver::loop_over_occupied_mbfs() {
 
             const auto &weight = walker.m_weight[ipart];
 
-            bool initiator = is_initiator(walker, ipart);
+            bool initiator = walker.exceeds_initiator_thresh(ipart, m_prop.m_nadd_initiator);
             if (initiator) m_wf.m_ninitiator.m_local[ipart]++;
 
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
@@ -315,15 +315,6 @@ void Solver::propagate_row(Walker& walker, uint_t ipart, bool initiator) {
     m_prop.diagonal(m_wf, walker, ipart);
 }
 
-bool Solver::is_initiator(const Walker& walker, uint_t ipart) {
-    if (walker.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd)) return true;
-    const auto& c2_c4_section = m_opts.m_propagator.m_c2_c4_initiator;
-    if (m_hf && c2_c4_section.m_enabled) {
-        return m_hf->m_accum.is_initiator(walker, c2_c4_section.m_fac);
-    }
-    return false;
-}
-
 void Solver::end_cycle() {
     /*
      * TODO: make these checks compatible with dynamic rank allocation
@@ -366,7 +357,6 @@ void Solver::output_stats() {
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         if (m_inst_ests.m_spin_square) stats.m_spin_square_num = m_inst_ests.m_spin_square->m_est.m_proj_num.m_reduced;
-        if (m_hf) stats.m_coherent_c4 = m_hf->m_accum.m_coherent_c4_l1.m_reduced/m_hf->m_accum.m_total_c4_l1.m_reduced;
         m_stats->commit();
 
         auto &timing_stats = m_timing_stats->m_row;

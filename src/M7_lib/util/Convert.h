@@ -83,8 +83,7 @@ namespace convert {
         // unary "+" ensures that char types are always printed as ints
         if (fmt.m_scientific) tmp << std::scientific;
         tmp << std::setprecision(fmt.m_precision) << (+v);
-        // offset the beginning of the number magnitude if non-negative
-        return tmp.str()[0]=='-' ? tmp.str() : " "+tmp.str();
+        return tmp.str();
     }
 
     template<typename T>

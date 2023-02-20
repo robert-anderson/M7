@@ -11,7 +11,7 @@
 
 namespace excit_gen_tester {
     struct ResultRow : Row {
-        field::MaeInds m_inds;
+        field::RdmInds m_inds;
         field::Number<uint_t> m_occur;
         field::Number<prob_t> m_weight;
         field::Number<ham_t> m_helem;
@@ -22,7 +22,7 @@ namespace excit_gen_tester {
                 m_weight(this, "sum of reciprocal probabilities"),
                 m_helem(this, "hamiltonian matrix element") {}
 
-        field::MaeInds &key_field() {
+        field::RdmInds &key_field() {
             return m_inds;
         }
     };
@@ -68,7 +68,7 @@ namespace excit_gen_tester {
         template<typename mbf_t>
         void fill_results_table(const mbf_t &src_mbf) {
             typedef conn::from_field_t<mbf_t> conn_t;
-            buffered::MaeInds work_inds(m_conn_iter.m_exsig);
+            buffered::RdmInds work_inds(m_conn_iter.m_exsig);
             m_results.clear();
             conn_t conn(m_h.m_basis.size());
             auto body_fn = [&]() {
@@ -92,7 +92,7 @@ namespace excit_gen_tester {
             typedef conn::from_field_t<mbf_t> conn_t;
             conn_t conn(src_mbf);
             OpSig exsig = m_conn_iter.m_exsig;
-            buffered::MaeInds work_inds(m_conn_iter.m_exsig);
+            buffered::RdmInds work_inds(m_conn_iter.m_exsig);
             uint_t nnull = 0ul;
 
             REQUIRE_FALSE(m_results.empty(), "no connections were found by the excitation iterator");

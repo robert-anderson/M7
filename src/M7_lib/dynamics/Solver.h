@@ -22,6 +22,7 @@
 #include "M7_lib/observables/InstEsts.h"
 #include "Annihilator.h"
 #include "M7_lib/wavefunction/HartreeFock.h"
+#include "M7_lib/wavefunction/HfExcitHists.h"
 
 /**
  * This central class brings together wavefunctions, propagator, expectation values, and statistics.
@@ -203,8 +204,6 @@ public:
      *  true if the walker is an initiator
      */
     void propagate_row(Walker& walker, uint_t ipart, bool initiator);
-
-    bool is_initiator(const Walker& walker, uint_t ipart);
 
     /**
      * Loop over all rows in m_wf.m_store which have a non-zero MBF field

@@ -10,13 +10,14 @@
 #include "M7_lib/communication/SharedRows.h"
 #include "M7_lib/parallel/Reduction.h"
 
+#if 0
 namespace hf_excit_coeffs{
     struct Row : ::Row {
-        field::MaeInds m_excit_inds;
+        field::RdmInds m_excit_inds;
         field::Numbers<wf_t, c_ndim_wf> m_weight;
         Row(NdFormat<c_ndim_wf> format):
             m_excit_inds(this, opsig::c_doub, "excit_indices"), m_weight(this, format){}
-        field::MaeInds &key_field() {
+        field::RdmInds &key_field() {
             return m_excit_inds;
         };
         field::Numbers<wf_t, c_ndim_wf> &value_field() {
@@ -33,7 +34,7 @@ namespace hf_excit_coeffs{
         Reduction<wf_t> m_total_c4_l1;
         const shared_rows::Walker* m_hf;
         mutable conn::Mbf m_work_conn;
-        mutable buffered::MaeInds m_work_key;
+        mutable buffered::RdmInds m_work_key;
         mutable buffered::Numbers<wf_t, c_ndim_wf> m_work_weight;
         HfExcitCoeffs(const shared_rows::Walker* hf):
             GlobalAccumulation<Row>("HF excit coeffs", {fmt(hf)}), m_hf(hf),
@@ -168,4 +169,5 @@ namespace hf_excit_coeffs{
 }
 
 
+#endif //M7_HFC2ACCUMULATION_H
 #endif //M7_HFC2ACCUMULATION_H

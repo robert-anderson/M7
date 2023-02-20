@@ -37,10 +37,10 @@ TEST(FciInitializer, C4) {
     auto results = init.solve();
 
 
-    buffered::MappedTable<MaeRow> c1("c1", {opsig::c_1100, 1ul});
-    buffered::MappedTable<MaeRow> c2("c2", {opsig::c_2200, 1ul});
-    buffered::MappedTable<MaeRow> c3("c3", {opsig::c_3300, 1ul});
-    buffered::MappedTable<MaeRow> c4("c4", {opsig::c_4400, 1ul});
+    buffered::MappedTable<RdmRow> c1("c1", {opsig::c_1100, 1ul});
+    buffered::MappedTable<RdmRow> c2("c2", {opsig::c_2200, 1ul});
+    buffered::MappedTable<RdmRow> c3("c3", {opsig::c_3300, 1ul});
+    buffered::MappedTable<RdmRow> c4("c4", {opsig::c_4400, 1ul});
 
     wf_t nw_tot = 0.0;
     v_t<wf_t> nw_sectors(5, 0.0);
@@ -63,10 +63,10 @@ TEST(FciInitializer, C4) {
                 2 * hf.m_basis.m_nsite - elecs, 3ul) * integer::combinatorial(uint_t(elecs), 3ul));
         c4.resize(integer::combinatorial(
                 2 * hf.m_basis.m_nsite - elecs, 4ul) * integer::combinatorial(uint_t(elecs), 4ul));
-        buffered::MaeInds c1_inds(opsig::c_1100);
-        buffered::MaeInds c2_inds(opsig::c_2200);
-        buffered::MaeInds c3_inds(opsig::c_3300);
-        buffered::MaeInds c4_inds(opsig::c_4400);
+        buffered::RdmInds c1_inds(opsig::c_1100);
+        buffered::RdmInds c2_inds(opsig::c_2200);
+        buffered::RdmInds c3_inds(opsig::c_3300);
+        buffered::RdmInds c4_inds(opsig::c_4400);
         auto evec = results.get_evec(0);
         wf_t c0 = *evec;
         nw_sectors[0] = 1.0;
@@ -85,7 +85,7 @@ TEST(FciInitializer, C4) {
         evec = results.get_evec(0);
         --evec;
 
-        v_t<std::pair<MaeIndsField*, MappedTable<MaeRow>*>> pairs = {
+        v_t<std::pair<RdmIndsField*, MappedTable<RdmRow>*>> pairs = {
                 {nullptr,  nullptr},
                 {&c1_inds, &c1},
                 {&c2_inds, &c2},

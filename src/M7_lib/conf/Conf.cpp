@@ -220,8 +220,10 @@ conf::InstEsts::InstEsts(Group *parent) :
 conf::HfExcits::HfExcits(Group *parent) :
         Section(parent, "hf_excits",
                         "options relating to averaged amplitudes of MBFs connected to a Hartree-Fock-like MBF", Explicit),
-        m_max_exlvl(this, "max_exlvl", 0ul,
-                    "maximum excitation level from the HF MBF for which to accumulate average amplitudes"),
+        m_max_nexcit(this, "max_nexcit", 0ul,
+                     "maximum excitation level from the HF MBF for which to accumulate average amplitudes"),
+        m_thresh(this, "thresh", 0.0,
+                    "minimum magnitude of intermediate-normalized walker weight require before histogramming"),
         m_buffers(this),
         m_save(this, "save", "average HF-connected amplitudes save", "M7.hf_excit.h5", Explicit),
         m_load(this, "load", "average HF-connected amplitudes load", "M7.hf_excit.h5", Explicit) {}
@@ -292,8 +294,7 @@ conf::Propagator::Propagator(Group *parent) :
                                 "number of spawns logged for excitation type magnitudes to be used in tau and probability update"),
         m_period(this, "period", 10ul,
                  "number of MC cycles between updates of tau and probabilities if requested"),
-        m_imp_samp_guide(this, "imp_samp_guide"),
-        m_c2_c4_initiator(this), m_semistochastic(this) {}
+        m_imp_samp_guide(this, "imp_samp_guide"), m_semistochastic(this) {}
 
 void conf::Propagator::validate_node_contents() {
     if (m_min_death_mag.m_value==0.0) {
@@ -312,7 +313,7 @@ conf::Document::Document(const str_t& fname) :
         conf_components::Document(fname, "a calculation in M7"),
         m_prng(this), m_basis(this), m_particles(this),
         m_wavefunction(this), m_reference(this), m_shift(this), m_propagator(this),
-        m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this) {}
+        m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this), m_hf_excits(this) {}
 
 void conf::Document::validate_node_contents() {
     REQUIRE_LE(m_wavefunction.m_nw_init, m_propagator.m_nw_target,

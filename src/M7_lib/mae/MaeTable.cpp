@@ -4,11 +4,11 @@
 
 #include "MaeTable.h"
 
-field::MaeInds &MaeRow::key_field() {
+field::RdmInds &RdmRow::key_field() {
     return m_inds;
 }
 
-MaeRow::MaeRow(OpSig exsig, uint_t nvalue) :
+RdmRow::RdmRow(OpSig exsig, uint_t nvalue) :
         m_inds(this, exsig), m_values(this, {nvalue}, "values"){}
 
 field::SpecMomInds &SpecMomsRow::key_field() {

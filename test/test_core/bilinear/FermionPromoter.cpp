@@ -25,7 +25,7 @@ TEST(FermionPromoter, Promoter1BodyDiagonal) {
 
     const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, opsig::c_1100);
-    buffered::MaeInds inds(exsig);
+    buffered::RdmInds inds(exsig);
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
      */
@@ -55,7 +55,7 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
 
     const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, opsig::c_2200);
-    buffered::MaeInds inds(exsig);
+    buffered::RdmInds inds(exsig);
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
      */
@@ -98,7 +98,7 @@ TEST(FermionPromoter, Promoter2BodySingle) {
 
     const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, opsig::c_doub);
-    buffered::MaeInds inds(exsig);
+    buffered::RdmInds inds(exsig);
 
     // common: 1 4 6 7 9
     bool phase;
@@ -166,7 +166,7 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, opsig::c_2200);
     ASSERT_EQ(exsig, conn.exsig());
-    buffered::MaeInds inds(exsig);
+    buffered::RdmInds inds(exsig);
 
     bool phase = fp.apply(0, conn, com, inds.m_frm);
     ASSERT_FALSE(phase);
@@ -203,7 +203,7 @@ TEST(FermionPromoter, Promoter3BodySingle) {
 
     const auto exsig = conn.ranksig(nop_insert);
     ASSERT_EQ(exsig, opsig::c_trip);
-    buffered::MaeInds inds(exsig);
+    buffered::RdmInds inds(exsig);
 
     // common: 1 4 6 7 9
     v_t<std::pair<bool, uintv_t>> correct = {

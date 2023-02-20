@@ -6,19 +6,19 @@
 #include "M7_lib/util/Pointer.h"
 
 HfExcitsOneExsig::HfExcitsOneExsig(OpSig exsig, uint_t nroot) :
-        buffered::MappedTable<MaeRow>(
+        buffered::MappedTable<RdmRow>(
                 logging::format("average {} HF-like excitation coefficients", exsig.to_string()),
-                MaeRow{exsig, nroot}),
+                RdmRow{exsig, nroot}),
         m_working_inds(exsig) {}
 
-MaeRow& HfExcitsOneExsig::lookup(const conn::FrmOnv& key) {
+RdmRow& HfExcitsOneExsig::lookup(const conn::FrmOnv& key) {
     m_working_inds = key;
-    return MappedTable<MaeRow>::lookup(m_working_inds);
+    return MappedTable<RdmRow>::lookup(m_working_inds);
 }
 
-MaeRow& HfExcitsOneExsig::insert(const conn::FrmOnv& key) {
+RdmRow& HfExcitsOneExsig::insert(const conn::FrmOnv& key) {
     m_working_inds = key;
-    return MappedTable<MaeRow>::insert(m_working_inds);
+    return MappedTable<RdmRow>::insert(m_working_inds);
 }
 
 strv_t HfExcitsOneExsig::h5_field_names() const {
@@ -26,7 +26,7 @@ strv_t HfExcitsOneExsig::h5_field_names() const {
 }
 
 void HfExcitsOneExsig::save(const hdf5::NodeWriter& gw) const {
-    Table<MaeRow>::save(gw, m_working_inds.m_exsig.to_string(), h5_field_names(), true);
+    Table<RdmRow>::save(gw, m_working_inds.m_exsig.to_string(), h5_field_names(), true);
 }
 
 void HfExcitsOneExsig::make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot) {
@@ -38,7 +38,7 @@ void HfExcitsOneExsig::make_contribs(const conn::FrmOnv& conn, const wf_t& contr
 HfExcits::HfExcits(const conf::HfExcits& opts, sys::Size extents, uint_t nroot) :
         m_opts(opts), m_av_hf({nroot}), m_conn(extents) {
     REQUIRE_EQ_ALL(nroot, 1ul, "HF excitation averaging currently only implemented for a single root");
-    for (uint_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
+    for (uint_t iexlvl=1ul; iexlvl<=opts.m_max_nexcit; ++iexlvl){
         const auto exsig = opsig::frm(iexlvl);
         m_active_exsigs.push_back(exsig);
         m_hf_excits[exsig] = ptr::smart::make_unique<HfExcitsOneExsig>(exsig, nroot);

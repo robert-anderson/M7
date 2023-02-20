@@ -14,22 +14,22 @@ class SpinFreeRdm : public Rdm {
     /**
      * indices (fermion spatial) of the element to be inserted
      */
-    buffered::MaeInds m_insert_inds;
+    buffered::RdmInds m_insert_inds;
 
     static uint_t nspinsig(uint_t rank){
         using namespace spin_free_rdm_arrays;
         return rank==2 ? c_nspinsig_2 : c_nspinsig_3;
 
     }
-    static uint_t spinsig(const MaeIndsPartition& inds, const sys::frm::Size& size);
+    static uint_t spinsig(const RdmIndsPartition& inds, const sys::frm::Size& size);
 
-    static uint_t pair_spinsig(const MaeIndsPair& inds, const sys::frm::Size& size);
+    static uint_t pair_spinsig(const RdmIndsPair& inds, const sys::frm::Size& size);
 
-    static void spinorbs_to_spat(const MaeIndsPartition& in, MaeIndsPartition& out, const sys::frm::Size& size) {
+    static void spinorbs_to_spat(const RdmIndsPartition& in, RdmIndsPartition& out, const sys::frm::Size& size) {
         for (uint_t i = 0ul; i<in.size(); ++i) out[i] = size.isite(in[i]);
     }
 
-    static void spinorbs_to_spat(const MaeIndsPair& in, MaeIndsPair& out, const sys::frm::Size& size) {
+    static void spinorbs_to_spat(const RdmIndsPair& in, RdmIndsPair& out, const sys::frm::Size& size) {
         spinorbs_to_spat(in.m_cre, out.m_cre, size);
         spinorbs_to_spat(in.m_ann, out.m_ann, size);
     }
@@ -48,9 +48,9 @@ class SpinFreeRdm : public Rdm {
      * @return
      *  the spatial signature
      */
-    static uint_t spatsig(const MaeIndsPartition& spat_inds);
+    static uint_t spatsig(const RdmIndsPartition& spat_inds);
 
-    void make_contribs_from_one_row(const MaeRow& row, wf_t norm);
+    void make_contribs_from_one_row(const RdmRow& row, wf_t norm);
 public:
     /**
      * @param src

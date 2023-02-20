@@ -255,11 +255,12 @@ namespace buffered {
     using from_field_t = typename selector<T>::type;
 
 
-    struct MaeInds : BufferedField<field::MaeInds> {
-        using field::MaeInds::operator=;
-        using field::MaeInds::m_frm;
-        using field::MaeInds::m_bos;
-        MaeInds(OpSig exsig): BufferedField<field::MaeInds>(exsig){}
+    struct RdmInds : BufferedField<field::RdmInds> {
+        using field::RdmInds::operator=;
+        using field::RdmInds::m_frm;
+        using field::RdmInds::m_bos;
+        RdmInds(OpSig exsig): BufferedField<field::RdmInds>(exsig){}
+        RdmInds(const RdmInds& other): BufferedField<field::RdmInds>(static_cast<const field::RdmInds&>(other)){}
     };
 
     struct SpecMomInds : BufferedField<field::SpecMomInds> {

@@ -135,6 +135,7 @@ public:
         m_particle_dst_finder_table("particle moment dst finder", DstFinderRow(sector.basis()), {1000, 1.0}),
         m_selected_spinorbs(make_selected_spinorbs(opts, sector.basis().m_frm.m_nspinorb)),
         m_accum_epoch(accum_epoch) {
+        if (!m_opts.m_enabled) return;
         for (uint_t order = 0ul; order <= m_max_order; ++order) {
             m_hole_spec_moms.emplace_back(order, m_selected_spinorbs, sector.m_frm.m_basis.m_nspinorb);
             m_particle_spec_moms.emplace_back(order, m_selected_spinorbs, sector.m_frm.m_basis.m_nspinorb);
