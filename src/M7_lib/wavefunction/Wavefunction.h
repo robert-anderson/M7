@@ -220,7 +220,13 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn> {
 
     void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm=1000ul);
 
-    void make_permanitiators_from_c2(str_t fname, uint_t max_power, uint_t max_ncomm=1000ul);
+private:
+
+    //void permanitiator_loop(max_irow)
+
+public:
+
+    void make_permanitiators_from_c2(str_t fname, uint_t max_power);
 private:
 
 

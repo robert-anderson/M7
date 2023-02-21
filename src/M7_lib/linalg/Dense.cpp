@@ -4,6 +4,93 @@
 
 #include "Dense.h"
 
+void dense::MatrixBase::set_sizes(uint_t nrow, uint_t ncol) {
+    m_nrow = nrow;
+    m_ncol = ncol;
+    m_nelement = m_ncol * m_nrow;
+    m_row_size = m_ncol * m_element_size;
+}
+
+bool dense::MatrixBase::compatible(const dense::MatrixBase &other) const {
+    if (m_element_size != other.m_element_size) return false;
+    return (m_nrow==other.m_nrow) && (m_ncol==other.m_ncol);
+}
+
+void dense::MatrixBase::resize(uint_t nrow, uint_t ncol) {
+    auto no_copy_resize = [&](){
+        set_sizes(nrow, ncol);
+        m_bw.resize(m_nelement * m_element_size);
+    };
+    if (!m_nelement) {
+        no_copy_resize();
+        return;
+    }
+    const auto old = *this;
+    no_copy_resize();
+    nrow = std::min(m_nrow, old.m_nrow);
+    ncol = std::min(m_ncol, old.m_ncol);
+    for (uint_t irow = 0ul; irow < nrow; ++irow)
+        std::copy(old.cbegin(irow), old.cbegin(irow) + ncol * m_element_size, begin(irow));
+}
+
+dense::MatrixBase::MatrixBase(uint_t nrow, uint_t ncol, uint_t element_size, bool node_shared) :
+        m_buffer("", 1, node_shared), m_bw(&m_buffer), m_element_size(element_size) {
+    resize(nrow, ncol);
+}
+
+dense::MatrixBase::MatrixBase(const dense::MatrixBase &other) : MatrixBase(other.m_nrow, other.m_ncol, other.m_element_size, other.m_buffer.m_node_shared){
+    m_bw = other.m_bw;
+}
+
+dense::MatrixBase &dense::MatrixBase::operator=(const dense::MatrixBase &other) {
+    DEBUG_ASSERT_TRUE(compatible(other), "cannot copy from incompatible matrix");
+    resize(other.m_nrow, other.m_ncol);
+    m_bw = other.m_bw;
+    return *this;
+}
+
+bool dense::MatrixBase::operator==(const dense::MatrixBase &other) const {
+    return !std::memcmp(cbegin(), other.cbegin(), m_bw.m_size);
+}
+
+void dense::MatrixBase::zero() {
+    m_bw.clear();
+    m_bw.set_end(m_nrow);
+}
+
+void dense::MatrixBase::transpose() {
+    auto tmp = *this;
+    set_sizes(m_ncol, m_nrow);
+    for (uint_t icol = 0ul; icol<m_ncol; ++icol) set_col(icol, tmp.cbegin(icol));
+}
+
+void dense::MatrixBase::set(const void *src) {
+    std::memcpy(begin(), src, m_bw.m_size);
+}
+
+void dense::MatrixBase::set_row(uint_t irow, const void *src) {
+    std::memcpy(begin(irow), src, m_row_size);
+}
+
+void dense::MatrixBase::get_row(uint_t irow, void *dst) const {
+    std::memcpy(dst, cbegin(irow), m_row_size);
+}
+
+void dense::MatrixBase::set_col(uint_t icol, const void *src) {
+    auto src_ptr = reinterpret_cast<const buf_t*>(src);
+    for (uint_t irow = 0ul; irow < m_nrow; ++irow) {
+        std::memcpy(begin(irow, icol), src_ptr, m_element_size);
+        src_ptr += m_element_size;
+    }
+}
+
+void dense::MatrixBase::get_col(uint_t icol, void *dst) {
+    auto dst_ptr = reinterpret_cast<buf_t*>(dst);
+    for (uint_t irow = 0ul; irow < m_nrow; ++irow) {
+        std::memcpy(dst_ptr, cbegin(irow, icol), m_element_size);
+        dst_ptr += m_element_size;
+    }
+}
 
 dense::GemmWrapper::GemmWrapper(uint_t nrowp, uint_t ncolp, uint_t nrowq, uint_t ncolq,
                                 char transp, char transq, uint_t nrowr, uint_t ncolr) :
@@ -51,19 +138,19 @@ bool dense::diag(const dense::SquareMatrix<float> &mat, v_t<float> &evals) {
     int info;
     evals.resize(n);
     auto a = mat;
-    ssyev_("N", "U", &n, a.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+    ssyev_("N", "U", &n, a.tbegin(), &n, evals.data(), work.data(), &lwork, &info);
     return !info;
 }
 
 bool dense::diag(const dense::SquareMatrix<float> &mat, dense::SquareMatrix<float> &evecs, v_t<float> &evals) {
-    REQUIRE_TRUE(mat.dims()==evecs.dims(), "shape conflict between matrix and eigenvectors");
+    REQUIRE_TRUE(mat.compatible(evecs), "non-compatibility between matrix and eigenvectors");
     const int n = mat.nrow();
     const int lwork = std::max(1, 3 * n - 1);
     v_t<float> work(lwork);
     int info;
     evals.resize(n);
     evecs = mat;
-    ssyev_("V", "U", &n, evecs.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+    ssyev_("V", "U", &n, evecs.tbegin(), &n, evals.data(), work.data(), &lwork, &info);
     return !info;
 }
 
@@ -75,7 +162,7 @@ bool dense::diag(const dense::SquareMatrix<float> &mat, v_t<std::complex<float>>
     v_t<float> real_evals(n, 0.0);
     v_t<float> imag_evals(n, 0.0);
     auto a = mat;
-    sgeev_("N", "N", &n, a.ptr(), &n, real_evals.data(), imag_evals.data(),
+    sgeev_("N", "N", &n, a.tbegin(), &n, real_evals.data(), imag_evals.data(),
            nullptr, &n, nullptr, &n, work.data(), &lwork, &info);
     arith::zip(real_evals, imag_evals, evals);
     return !info;
@@ -88,19 +175,19 @@ bool dense::diag(const dense::SquareMatrix<double> &mat, v_t<double> &evals) {
     int info;
     evals.resize(n);
     auto a = mat;
-    dsyev_("N", "U", &n, a.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+    dsyev_("N", "U", &n, a.tbegin(), &n, evals.data(), work.data(), &lwork, &info);
     return !info;
 }
 
 bool dense::diag(const dense::SquareMatrix<double> &mat, dense::SquareMatrix<double> &evecs, v_t<double> &evals) {
-    REQUIRE_TRUE(mat.dims()==evecs.dims(), "shape conflict between matrix and eigenvectors");
+    REQUIRE_TRUE(mat.compatible(evecs), "non-compatibility between matrix and eigenvectors");
     const int n = mat.nrow();
     const int lwork = std::max(1, 3 * n - 1);
     v_t<double> work(lwork);
     int info;
     evals.resize(n);
     evecs = mat;
-    dsyev_("V", "U", &n, evecs.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+    dsyev_("V", "U", &n, evecs.tbegin(), &n, evals.data(), work.data(), &lwork, &info);
     return !info;
 }
 
@@ -112,7 +199,7 @@ bool dense::diag(const dense::SquareMatrix<double> &mat, v_t<std::complex<double
     v_t<double> real_evals(n, 0.0);
     v_t<double> imag_evals(n, 0.0);
     auto a = mat;
-    dgeev_("N", "N", &n, a.ptr(), &n, real_evals.data(), imag_evals.data(),
+    dgeev_("N", "N", &n, a.tbegin(), &n, real_evals.data(), imag_evals.data(),
            nullptr, &n, nullptr, &n, work.data(), &lwork, &info);
     arith::zip(real_evals, imag_evals, evals);
     return !info;
@@ -127,13 +214,13 @@ bool dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, v_t<doubl
     int info;
     evals.resize(n);
     auto a = mat;
-    zheev_("N", "U", &n, a.ptr(), &n, evals.data(), work.data(), &lwork, rwork.data(), &info);
+    zheev_("N", "U", &n, a.tbegin(), &n, evals.data(), work.data(), &lwork, rwork.data(), &info);
     return !info;
 }
 
 bool dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, dense::SquareMatrix<std::complex<double>> &evecs,
                  v_t<double> &evals) {
-    REQUIRE_TRUE(mat.dims()==evecs.dims(), "shape conflict between matrix and eigenvectors");
+    REQUIRE_TRUE(mat.compatible(evecs), "shape conflict between matrix and eigenvectors");
     const int n = mat.nrow();
     const int lwork = std::max(1, 2 * n - 1);
     const int lrwork = std::max(1, 3 * n - 1);
@@ -142,7 +229,7 @@ bool dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, dense::Sq
     int info;
     evals.resize(n);
     evecs = mat;
-    zheev_("V", "U", &n, evecs.ptr(), &n, evals.data(), work.data(), &lwork, rwork.data(), &info);
+    zheev_("V", "U", &n, evecs.tbegin(), &n, evals.data(), work.data(), &lwork, rwork.data(), &info);
     return !info;
 }
 
@@ -155,7 +242,7 @@ bool dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, v_t<std::
     int info;
     evals.resize(n);
     auto a = mat;
-    zgeev_("N", "N", &n, a.ptr(), &n, evals.data(),
+    zgeev_("N", "N", &n, a.tbegin(), &n, evals.data(),
            nullptr, &n, nullptr, &n, work.data(), &lwork, rwork.data(), &info);
     return !info;
 }

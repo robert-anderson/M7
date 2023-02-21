@@ -13,18 +13,18 @@
  * accesses an operator-type specific partition of a field containing all indices of the RDM element
  */
 class RdmIndsPartition {
-    NdNumberField<mae_ind_t, 1> &m_field;
+    NdNumberField<rdm_ind_t, 1> &m_field;
     const uint_t m_offset, m_size;
 public:
-    RdmIndsPartition(NdNumberField<mae_ind_t, 1> &field, uint_t offset, uint_t size) :
+    RdmIndsPartition(NdNumberField<rdm_ind_t, 1> &field, uint_t offset, uint_t size) :
         m_field(field), m_offset(offset), m_size(size) {}
 
-    const mae_ind_t &operator[](const uint_t &iind) const {
+    const rdm_ind_t &operator[](const uint_t &iind) const {
         DEBUG_ASSERT_LT(iind, m_size, "operator index OOB in partition");
         return m_field[m_offset + iind];
     };
 
-    mae_ind_t &operator[](const uint_t &iind) {
+    rdm_ind_t &operator[](const uint_t &iind) {
         DEBUG_ASSERT_LT(iind, m_size, "operator index OOB in partition");
         return m_field[m_offset + iind];
     };
@@ -43,7 +43,7 @@ public:
     }
 
     /**
-     * can't simply copy uintv_t since the mae_ind_t is not the same as uint_t in general, so must do a narrowing loop
+     * can't simply copy uintv_t since the rdm_ind_t is not the same as uint_t in general, so must do a narrowing loop
      * @param inds
      *  indices in unsigned system words
      * @return
@@ -64,7 +64,7 @@ struct RdmIndsPair {
     RdmIndsPartition m_cre;
     RdmIndsPartition m_ann;
 
-    RdmIndsPair(NdNumberField<mae_ind_t, 1> &field, uint_t cre_offset,
+    RdmIndsPair(NdNumberField<rdm_ind_t, 1> &field, uint_t cre_offset,
                 uint_t cre_size, uint_t ann_offset, uint_t ann_size) :
             m_cre(field, cre_offset, cre_size), m_ann(field, ann_offset, ann_size) {}
 
@@ -93,8 +93,8 @@ struct RdmIndsPair {
  * will simply not be accessed, since neither view is considered in hashing and comparison operations, the underlying
  * field is.
  */
-struct RdmIndsField : NdNumberField<mae_ind_t, 1> {
-    typedef NdNumberField<mae_ind_t, 1> base_t;
+struct RdmIndsField : NdNumberField<rdm_ind_t, 1> {
+    typedef NdNumberField<rdm_ind_t, 1> base_t;
     using base_t::operator=;
     const OpSig m_exsig;
     const uinta_t<4> m_nops;

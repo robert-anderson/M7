@@ -31,8 +31,8 @@ bool HamTextFileReader::next(uintv_t &inds, ham_t &v) {
     REQUIRE_EQ(m_work_tokens.size(), m_ncolumn, "invalid line found in file "+m_fname);
     auto begin = m_work_tokens.cbegin();
     auto ind_begin = begin + (m_complex_valued ? 2 : 1);
-    NumericCsvFileReader::parse(begin, ind_begin, v);
-    NumericCsvFileReader::parse(ind_begin, m_work_tokens.cend(), inds);
+    parse::checked(begin, ind_begin, v);
+    parse::checked(ind_begin, m_work_tokens.cend(), inds);
     REQUIRE_TRUE(inds_in_range(inds), "index OOB");
     // 1-based indexing is assumed
     decrement_inds(inds);

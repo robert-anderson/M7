@@ -18,7 +18,7 @@ bool CsvFileReader::next(strv_t& tokens) {
 
 bool NumericCsvFileReader::all_float_parseable(const strv_t& tokens) {
     double tmp;
-    for (auto& token: tokens) if (!parse::checked(token, tmp)) return false;
+    for (auto& token: tokens) if (!parse::catching(token, tmp)) return false;
     return true;
 }
 

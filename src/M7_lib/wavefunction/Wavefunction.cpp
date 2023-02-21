@@ -69,7 +69,8 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
                   string::plural(m_dist.nblock()));
 
     if (m_opts.m_wavefunction.m_permanitiator_source.m_enabled)
-        make_permanitiators_from_c2(m_opts.m_wavefunction.m_permanitiator_source.m_path);
+        make_permanitiators_from_c2(
+                m_opts.m_wavefunction.m_permanitiator_source.m_path, 2);
 }
 
 void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
@@ -326,9 +327,12 @@ void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t ma
     }
 }
 
-void Wavefunction::make_permanitiators_from_c2(str_t fname, uint_t max_power, uint_t max_ncomm) {
+void Wavefunction::make_permanitiators_from_c2(str_t fname, uint_t /*max_power*/) {
     buffered::Table<RdmRow> c2("C2 permanitiator setup table", RdmRow(opsig::c_2200, 1), true);
     hdf5::FileReader fr(fname);
+    hdf5::GroupReader gr(fr, "2200");
+    const dense::Matrix<rdm_ind_t> c2_inds(fr, "indices", mpi::on_node_i_am_root());
+    auto dataset_loader = hdf5::DatasetLoader::load_vector<wf_t>(fr, "values", mpi::on_node_i_am_root());
     c2.load(fr, "2200", false, mpi::on_node_i_am_root());
 
     if (mpi::on_node_i_am_root()) {
@@ -342,18 +346,18 @@ void Wavefunction::make_permanitiators_from_c2(str_t fname, uint_t max_power, ui
         };
         quicksort::sort(c2, fn);
     }
-
-    // loop over all ordered max_power-tuples
-    basic_foreach::rtnd::Ordered<true, true> foreach(c2.nrow_in_use(), max_power);
-
-    foreach.loop();
-
-
-    for (uint_t ipower = 0ul; ipower < max_power; ++ipower) {
-
-    }
-
-    std::cout << c2.to_string() << std::endl;
-    std::cout << max_ncomm << std::endl;
-    exit(0  );
+//
+//    // loop over all ordered max_power-tuples
+//    basic_foreach::rtnd::Ordered<true, true> foreach(c2.nrow_in_use(), max_power);
+//
+//    foreach.loop();
+//
+//
+//    for (uint_t ipower = 0ul; ipower < max_power; ++ipower) {
+//
+//    }
+//
+//    std::cout << c2.to_string() << std::endl;
+//    std::cout << max_ncomm << std::endl;
+//    exit(0  );
 }

@@ -112,7 +112,7 @@ strv_t logging::make_table(v_t<strv_t> rows, bool header, bool hlines, uint_t pa
     for (auto& row: rows) {
         for (auto& cell : row) {
             double tmp;
-            if (parse::checked(cell, tmp) && tmp >= 0.0) cell.insert(0, " ");
+            if (parse::catching(cell, tmp) && tmp >= 0.0) cell.insert(0, " ");
         }
     }
     /*
