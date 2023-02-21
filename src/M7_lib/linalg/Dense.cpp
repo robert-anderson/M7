@@ -29,8 +29,11 @@ void dense::MatrixBase::resize(uint_t nrow, uint_t ncol) {
     no_copy_resize();
     nrow = std::min(m_nrow, old.m_nrow);
     ncol = std::min(m_ncol, old.m_ncol);
-    for (uint_t irow = 0ul; irow < nrow; ++irow)
-        std::copy(old.cbegin(irow), old.cbegin(irow) + ncol * m_element_size, begin(irow));
+
+    if (i_can_globally_modify()) {
+        for (uint_t irow = 0ul; irow < nrow; ++irow)
+            std::copy(old.cbegin(irow), old.cbegin(irow) + ncol * m_element_size, begin(irow));
+    }
 }
 
 dense::MatrixBase::MatrixBase(uint_t nrow, uint_t ncol, uint_t element_size, bool node_shared) :
@@ -45,7 +48,7 @@ dense::MatrixBase::MatrixBase(const dense::MatrixBase &other) : MatrixBase(other
 dense::MatrixBase &dense::MatrixBase::operator=(const dense::MatrixBase &other) {
     DEBUG_ASSERT_TRUE(compatible(other), "cannot copy from incompatible matrix");
     resize(other.m_nrow, other.m_ncol);
-    m_bw = other.m_bw;
+    if (i_can_globally_modify()) m_bw = other.m_bw;
     return *this;
 }
 
@@ -54,18 +57,20 @@ bool dense::MatrixBase::operator==(const dense::MatrixBase &other) const {
 }
 
 void dense::MatrixBase::zero() {
-    m_bw.clear();
+    if (i_can_globally_modify()) m_bw.clear();
     m_bw.set_end(m_nrow);
 }
 
 void dense::MatrixBase::transpose() {
     auto tmp = *this;
     set_sizes(m_ncol, m_nrow);
-    for (uint_t icol = 0ul; icol<m_ncol; ++icol) set_col(icol, tmp.cbegin(icol));
+    if (i_can_globally_modify()) {
+        for (uint_t icol = 0ul; icol < m_ncol; ++icol) set_col(icol, tmp.cbegin(icol));
+    }
 }
 
 void dense::MatrixBase::set(const void *src) {
-    std::memcpy(begin(), src, m_bw.m_size);
+    if (i_can_globally_modify()) std::memcpy(begin(), src, m_bw.m_size);
 }
 
 void dense::MatrixBase::set_row(uint_t irow, const void *src) {

@@ -123,6 +123,17 @@ namespace dense {
         uint_t m_nelement = 0ul;
         uint_t m_row_size = 0ul;
 
+        /**
+         * obviously, in non-node_sharing mode, an MPI rank has the authority to modify all elements
+         * but otherwise, we still allow element-wise modification by non-root-on-node ranks, but global modification
+         * e.g. set to zero, scale, add/subtract, should all take place on the node root
+         * @return
+         *  true if this rank participates in globally-modifying operations of the buffer
+         */
+        bool i_can_globally_modify() const {
+            return !m_buffer.m_node_shared || mpi::on_node_i_am_root();
+        }
+
         void set_sizes(uint_t nrow, uint_t ncol);
 
         buf_t* begin() {
@@ -248,6 +259,7 @@ namespace dense {
 
         Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank, bool node_shared=false):
                 Matrix(0, 0, node_shared){
+            this_rank &= i_can_globally_modify();
             hdf5::DatasetLoader dl(nr, name, false, this_rank);
             const auto& shape = dl.m_format.m_h5_shape;
             if (this_rank) resize(shape[0], shape[1]);
@@ -270,8 +282,10 @@ namespace dense {
             const auto nrow = std::max(m_nrow, sparse.nrow());
             const auto ncol = std::max(m_ncol, sparse.max_col_ind()+1);
             if ((nrow != m_nrow) || (ncol != m_ncol)) resize(nrow, ncol);
-            for (uint_t irow = 0ul; irow < sparse.nrow(); ++irow) {
-                for (auto& elem : sparse[irow]) (*this)(irow, elem.m_i) = elem.m_v;
+            if (i_can_globally_modify()) {
+                for (uint_t irow = 0ul; irow < sparse.nrow(); ++irow) {
+                    for (auto &elem: sparse[irow]) (*this)(irow, elem.m_i) = elem.m_v;
+                }
             }
             return *this;
         }
@@ -305,14 +319,18 @@ namespace dense {
         }
 
         Matrix<T>& operator +=(const Matrix<T>& other) {
-            REQUIRE_TRUE(compatible(other), "matrices must be compatible to be added");
-            for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] += other[other];
+            if (i_can_globally_modify()) {
+                REQUIRE_TRUE(compatible(other), "matrices must be compatible to be added");
+                for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] += other[other];
+            }
             return *this;
         }
 
         Matrix<T>& operator -=(const Matrix<T>& other) {
-            REQUIRE_TRUE(compatible(other), "matrices must be compatible to be added");
-            for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] -= other[other];
+            if (i_can_globally_modify()) {
+                REQUIRE_TRUE(compatible(other), "matrices must be compatible to be added");
+                for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] -= other[other];
+            }
             return *this;
         }
 
@@ -340,7 +358,9 @@ namespace dense {
         template<typename U>
         void set(const U* src, tag::Int<1> /*convert*/) {
             static_assert(std::is_convertible<U, T>::value, "invalid conversion");
-            for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] = src[ielem];
+            if (i_can_globally_modify()) {
+                for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] = src[ielem];
+            }
         }
 
         /*
@@ -374,7 +394,9 @@ namespace dense {
         template<typename U>
         void set_row(uint_t irow, const U* src, tag::Int<1> /*convert*/) {
             static_assert(std::is_convertible<U, T>::value, "invalid conversion");
-            for (uint_t icol = 0ul; icol<m_ncol; ++icol) (*this)(irow, icol) = src[icol];
+            if (i_can_globally_modify()) {
+                for (uint_t icol = 0ul; icol < m_ncol; ++icol) (*this)(irow, icol) = src[icol];
+            }
         }
 
         /*
@@ -425,13 +447,17 @@ namespace dense {
         template<typename U>
         void set_col(uint_t icol, const U* src) {
             static_assert(std::is_convertible<U, T>::value, "invalid conversion");
-            for (uint_t irow = 0ul; irow < m_nrow; ++irow) (*this)(irow, icol) = src[irow];
+            if (i_can_globally_modify()) {
+                for (uint_t irow = 0ul; irow < m_nrow; ++irow) (*this)(irow, icol) = src[irow];
+            }
         }
 
         template<typename U>
         void get_col(uint_t icol, U* dst) const {
             static_assert(std::is_convertible<T, U>::value, "invalid conversion");
-            for (uint_t irow = 0ul; irow < m_nrow; ++irow) dst[irow] = (*this)(irow, icol);
+            if (i_can_globally_modify()) {
+                for (uint_t irow = 0ul; irow < m_nrow; ++irow) dst[irow] = (*this)(irow, icol);
+            }
         }
 
     public:
@@ -440,7 +466,9 @@ namespace dense {
          * in-place complex conjugation
          */
         void conj() {
-            for (auto it = tbegin(); it != tbegin() + m_nelement; ++it) *it = arith::conj(*it);
+            if (i_can_globally_modify()) {
+                for (auto it = tbegin(); it != tbegin() + m_nelement; ++it) *it = arith::conj(*it);
+            }
         }
 
         /**
@@ -452,6 +480,7 @@ namespace dense {
         }
 
         void all_sum() {
+            // todo: make node-sharing safe
             Matrix<T> tmp = *this;
             mpi::all_sum(tmp.ctbegin(), tbegin(), m_nelement);
         }
@@ -557,6 +586,7 @@ namespace dense {
         }
 
         void symmetrize(bool conj=dtype::is_complex<T>()) {
+            if (!MatrixBase::i_can_globally_modify()) return;
             const auto n = Matrix<T>::nrow();
             for (uint_t irow=0ul; irow < n; ++irow) {
                 for (uint_t icol=0ul; icol < n; ++icol) {
