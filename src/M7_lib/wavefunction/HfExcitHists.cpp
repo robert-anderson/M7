@@ -20,7 +20,7 @@ hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_t
 hf_excit_hist::Initializer::Initializer(Wavefunction &wf, const Mbf &hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation) :
         m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2200", thresh),
         m_max_power(max_nexcit / 2), m_thresh(thresh), m_cancellation(cancellation),
-        m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf) {}
+        m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf), m_ncreated({max_nexcit+1}) {}
 
 bool hf_excit_hist::Initializer::apply(Mbf &mbf, uint_t ientry) {
     const auto a = m_c2.m_inds(ientry, 0);
@@ -54,7 +54,7 @@ bool hf_excit_hist::Initializer::phase(Mbf &mbf) {
 }
 
 void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_t prev_product) {
-    if (ipower == m_max_power) return;
+    if (ipower > m_max_power) return;
     for (uint_t i = 0ul; i < imax; ++i) {
         auto product = prev_product * m_c2.m_vals[i];
         /*
@@ -69,7 +69,7 @@ void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_
             row.m_permanitiator.set();
             // permanitiators cannot be deleted - need to protect
             row.protect();
-            ++m_ncreated;
+            ++m_ncreated.m_local[ipower*2];
             if (m_cancellation) row.m_weight += (phase(mbf) ? -1 : 1) * product;
             // if not observing cancellation, no need to store the product
         }
@@ -80,28 +80,42 @@ void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_
 
 void hf_excit_hist::Initializer::setup() {
     m_work_mbf = m_hf;
-    setup(m_work_mbf, m_c2.nelement(), 0, 1.0);
+    setup(m_work_mbf, m_c2.nelement(), 1, 1.0);
+    m_ncreated.all_sum();
     auto& row = m_wf.m_store.m_row;
+    strv_t header = {"excitation level", "number in use"};
+    v_t<strv_t> logging_table;
     if (m_cancellation) {
+        header.emplace_back("number revoked by cancellation");
         /*
          * the present state of the wavefunction m_weight stores the cumulative value of the CI products
          * loop over the WF store table and delete any permanitiators which have fallen beneath thresh due to cancellation
          */
-        uint_t nrevoked = 0ul;
+        auto after_cancellation = m_ncreated.m_reduced;
         for (row.restart(); row; ++row) {
             if (row.m_permanitiator.get(0) && std::abs(row.m_weight[0]) < m_thresh) {
-                ++nrevoked;
+                m_work_conn.connect(m_hf, row.m_mbf);
+                --after_cancellation[m_work_conn.m_cre.size()];
                 row.unprotect();
                 m_wf.m_store.erase(row.m_mbf);
-                --m_ncreated;
             }
         }
-        nrevoked = mpi::all_sum(nrevoked);
-        logging::info("Number of revoked permanitiators due to cancellation: {}", nrevoked);
+
+        logging_table.push_back(header);
+        for (uint_t i = 1ul; i<=m_max_power*2; ++i) {
+            logging_table.push_back({
+                convert::to_string(i),
+                convert::to_string(after_cancellation[i]),
+                convert::to_string(m_ncreated.m_reduced[i] - after_cancellation[i])
+            });
+        }
     }
-    logging::info("Number of permanitiators created: {}", mpi::all_sum(m_ncreated));
-    std::cout << m_wf.m_store.to_string() << std::endl;
-    std::cout << "" << std::endl;
+    else {
+        logging_table.push_back(header);
+        for (uint_t i = 1ul; i <= m_max_power * 2; ++i)
+            logging_table.push_back({convert::to_string(i), convert::to_string(m_ncreated.m_reduced[i])});
+    }
+    logging::info_table("Permanitiator breakdown", logging_table, true);
 }
 
 void hf_excit_hist::initialize(Wavefunction &wf, const Mbf &hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation) {

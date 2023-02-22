@@ -58,9 +58,9 @@ namespace hf_excit_hist {
          */
         conn::Mbf m_work_conn;
         /**
-         * number of permanitiators created locally
+         * number of permanitiators created by excitation level
          */
-        uint_t m_ncreated = 0ul;
+        NdReduction<uint_t, 1> m_ncreated;
 
         Initializer(Wavefunction& wf, const field::Mbf& hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation);
 
