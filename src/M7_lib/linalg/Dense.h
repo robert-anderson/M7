@@ -298,12 +298,12 @@ namespace dense {
 
         T &operator[](uint_t ielement) {
             DEBUG_ASSERT_LT(ielement, m_nelement, "element index OOB");
-            return tbegin()+ielement;
+            return tbegin()[ielement];
         }
 
         const T &operator[](uint_t ielement) const {
             DEBUG_ASSERT_LT(ielement, m_nelement, "element index OOB");
-            return ctbegin()+ielement;
+            return ctbegin()[ielement];
         }
 
         T &operator()(uint_t irow, uint_t icol) {

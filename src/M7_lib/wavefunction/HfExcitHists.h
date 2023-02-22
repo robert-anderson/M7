@@ -7,33 +7,76 @@
 
 #include "M7_lib/communication/SharedRows.h"
 #include "M7_lib/mae/MaeTable.h"
+#include "M7_lib/wavefunction/Wavefunction.h"
 
 namespace hf_excit_hist {
 
     struct IndVals {
     private:
-        hdf5::GroupReader m_gr;
+        uint_t m_nelement = 0ul;
     public:
         dense::Matrix<rdm_ind_t> m_inds;
         dense::Vector<wf_t> m_vals;
-        IndVals(const hdf5::NodeReader& parent, str_t name);
+        IndVals(const hdf5::NodeReader& parent, str_t name, wf_t thresh);
+
+        uint_t nelement() const {
+            return m_nelement;
+        }
     };
 
+    struct Initializer {
+        /**
+         * wavefunction into which the permanitiators are to be inserted
+         */
+        Wavefunction& m_wf;
+        /**
+         * reference to Hartree--Fock (like) Many-body basis function
+         */
+        const field::Mbf& m_hf;
+        /**
+         * sorted indices and values of the C2 arrays
+         */
+        const IndVals m_c2;
+        /**
+         * maximum power of C2 operator
+         */
+        const uint_t m_max_power;
+        /**
+         * minimum intermediate-normalized weight for inclusion as a permanitiator
+         */
+        const wf_comp_t m_thresh;
+        /**
+         * whether to revoke peramnitiator status if multiple contributions sum to a value lower in magnitude than thresh
+         */
+        const bool m_cancellation;
+        /**
+         * working object in which C2^n |HF> is formed
+         */
+        buffered::Mbf m_work_mbf;
+        /**
+         * working object for computing the phase of excitations relative to the HF state
+         */
+        conn::Mbf m_work_conn;
 
-    void setup_permanitiators(Wavefunction& wf, const IndVals& indvals, uint_t ipair, uint_t max_power, uint_t imax,
-                              wf_t product, wf_t cutoff, conn::Mbf& conn, field::Mbf& mbf) {
-        for (auto i = 0ul; i < imax; ++i){
-            setup_permanitiators()
-        }
-    }
+        Initializer(Wavefunction& wf, const field::Mbf& hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation);
 
-    void setup_permanitiators(Wavefunction& wf, str_t fname, uint_t max_power, wf_t cutoff) {
-        hdf5::FileReader fr(fname);
-        const IndVals indvals(fr, "2200");
-        buffered::Mbf work_mbf(wf.m_sector);
-        conn::Mbf work_conn(work_mbf);
-        setup_permanitiators(wf, indvals, 0, max_power, indvals.m_vals.nelement(), 1.0, cutoff, work_conn, work_mbf);
-    }
+    private:
+
+        bool apply(field::Mbf& mbf, uint_t ientry);
+
+        bool undo(field::Mbf& mbf, uint_t ientry);
+
+        bool phase(field::Mbf& mbf);
+
+        void setup(field::Mbf& mbf, uint_t imax, uint_t ipower, wf_t prev_product);
+
+    public:
+        void setup();
+    };
+
+    void initialize(Wavefunction& wf, const field::Mbf& hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation);
+
+    void initialize(Wavefunction& wf, const field::Mbf& hf, const conf::CiPerminitiator& opts);
 
 //    struct Accumulator {
 //        buffered::MappedTable<RdmRow> m_table;
@@ -71,84 +114,28 @@ namespace hf_excit_hist {
         const uintv_t m_accumulated_nexcit_inds;
 
     private:
-        static uintv_t make_nexcit_is_accumulated(const uintv_t& nexcits) {
-            if (nexcits.empty()) return {};
-            auto nmax = *std::max_element(nexcits.cbegin(), nexcits.cend());
-            uintv_t out(nmax+1, ~0ul);
-            uint_t i = 0;
-            for (auto& n: nexcits) out[n] = i++;
-            return out;
-        }
+        static uintv_t make_nexcit_is_accumulated(const uintv_t& nexcits);
 
-        uint_t ind(uint_t nexcit) const {
-            return nexcit < m_accumulated_nexcit_inds.size() ? m_accumulated_nexcit_inds[nexcit] : ~0ul;
-        }
+        uint_t ind(uint_t nexcit) const;
 
     public:
-        Accumulators(const shared_rows::Walker* hf, uintv_t nexcits, wf_t thresh, str_t save_file_name):
-            m_hf(hf), m_thresh(thresh), m_work_conn(hf->mbf()), m_save_file_name(std::move(save_file_name)),
-            m_nexcits(std::move(nexcits)), m_accumulated_nexcit_inds(make_nexcit_is_accumulated(m_nexcits)) {
-            if (m_nexcits.empty()) return;
-            REQUIRE_TRUE(m_hf, "HF state must be defined for HF excitation accumulation");
-            m_tables.reserve(m_nexcits.size());
-            m_lookup_keys.reserve(m_nexcits.size());
-            for (auto& nexcit: m_nexcits){
-                const OpSig exsig({nexcit, nexcit}, {0, 0});
-                const auto name = exsig.to_string()+" excitations of HF state";
-                m_tables.emplace_back(name, RdmRow(exsig, 1), false);
-                m_lookup_keys.emplace_back(exsig);
-            }
-        }
+        Accumulators(const shared_rows::Walker* hf, uintv_t nexcits, wf_t thresh, str_t save_file_name);
 
         operator bool () const {
             return !m_tables.empty();
         }
 
-        Accumulators(const conf::HfExcits& opts, const shared_rows::Walker* hf):
-            Accumulators(hf, opts.m_nexcits, opts.m_thresh, opts.m_save.m_path){}
+        Accumulators(const conf::HfExcits& opts, const shared_rows::Walker* hf);
 
         ~Accumulators() {
             if (*this) save();
         }
 
-        void add(const field::Mbf& mbf, wf_t weight) {
-            if (!*this) return;
-            m_work_conn.connect(m_hf->mbf(), mbf);
-            const auto nexcit = m_work_conn.exsig().nfrm_cre();
-            if (!nexcit) {
-                m_norm += weight;
-                return;
-            }
-            const auto i = ind(nexcit);
-            if (i == ~0ul) return;
-            auto& table = m_tables[i];
-            auto& key = m_lookup_keys[i];
-            key = m_work_conn;
-            auto& lookup = table.lookup(key);
-            // if the excitation is already in the table, it is added regardless of current weight
-            if (lookup) lookup.m_values[0] += weight;
-            // if it's not already histogrammed, it can be added only if the instantaneous weight is sufficient
-            else if (std::abs(weight) >= std::abs(m_hf->weight(0)*m_thresh)) {
-                auto& insert_row = table.insert(key);
-                insert_row.m_values += weight;
-            }
-        }
+        void add(const field::Mbf& mbf, wf_t weight);
 
-        void save(const hdf5::NodeWriter& nw) {
-            auto table = m_tables.begin();
-            for (auto nexcit: m_nexcits) {
-                OpSig exsig({nexcit, nexcit}, {0, 0});
-                auto& row = table->m_row;
-                for (row.restart(); row; ++row) row.m_values /= m_norm;
-                table->save(nw, exsig.to_string(), true);
-                ++table;
-            }
-        }
+        void save(const hdf5::NodeWriter& nw);
 
-        void save() {
-            hdf5::FileWriter fw(m_save_file_name);
-            save(fw);
-        }
+        void save();
     };
 }
 

@@ -112,6 +112,8 @@ public:
 
     RdmIndsField(const RdmIndsField& other);
 
+    virtual ~RdmIndsField() = default;
+
     RdmIndsField &operator=(const RdmIndsField &other);
     RdmIndsField &operator=(const FrmOnvConnection& conn);
     RdmIndsField &operator=(const BosOnvConnection& conn);

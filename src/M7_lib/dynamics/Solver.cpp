@@ -96,6 +96,12 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
         m_wf.fci_init(m_prop.m_ham, fci_init_opts);
     }
 
+    if (m_opts.m_wavefunction.m_ci_permanitiator.m_enabled) {
+        REQUIRE_TRUE(m_hf.get(), "CI expansion-based permanitiators requires a HF determinant");
+        hf_excit_hist::initialize(m_wf, m_hf.get()->mbf(), m_opts.m_wavefunction.m_ci_permanitiator);
+        m_wf.refresh_all_hdiags(m_prop.m_ham);
+    }
+
     // TODO: activate load balancing
     //m_wf.m_dist.activate(m_icycle);
 }
@@ -259,6 +265,7 @@ void Solver::loop_over_occupied_mbfs() {
             const auto &weight = walker.m_weight[ipart];
 
             bool initiator = walker.exceeds_initiator_thresh(ipart, m_prop.m_nadd_initiator);
+            initiator |= walker.m_permanitiator.get(ipart);
             if (initiator) m_wf.m_ninitiator.m_local[ipart]++;
 
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);

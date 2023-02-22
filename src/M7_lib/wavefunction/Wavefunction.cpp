@@ -9,6 +9,7 @@
 #include "M7_lib/sort/QuickSort.h"
 #include "FciInitializer.h"
 #include "M7_lib/util/Math.h"
+#include "HfExcitHists.h"
 
 /*
 MappedTableBase::nbucket_guess(
@@ -67,10 +68,6 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
 
     logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
                   string::plural(m_dist.nblock()));
-
-    if (m_opts.m_wavefunction.m_permanitiator_source.m_enabled)
-        make_permanitiators_from_c2(
-                m_opts.m_wavefunction.m_permanitiator_source.m_path, 2);
 }
 
 void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
@@ -268,6 +265,14 @@ Spawn& Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initi
     }
     DEBUG_ASSERT_NE(dst_mbf, src_mbf, "spawning diagonally");
     return spawn;
+}
+
+void Wavefunction::refresh_all_hdiags(const Hamiltonian &h) {
+    auto& row = m_store.m_row;
+    for (row.restart(); row; ++row){
+        if (row.is_freed()) continue;
+        row.m_hdiag = h.get_energy(row.m_mbf);
+    }
 }
 
 void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm) {

@@ -265,6 +265,19 @@ public:
         return m_insert_row;
     }
 
+
+    row_t& lookup_or_insert(const key_field_t& key) {
+        lookup(key, m_lookup_row);
+        if (m_lookup_row) return m_lookup_row;
+        return insert(key);
+    }
+
+    row_t& lookup_or_insert(const row_t& src) {
+        lookup(src, m_lookup_row);
+        if (m_lookup_row) return m_lookup_row;
+        return insert(src);
+    }
+
 private:
     /**
      * for an already-inserted row, map it to the hash table defined by the buckets arg

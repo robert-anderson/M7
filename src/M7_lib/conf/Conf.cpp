@@ -108,14 +108,30 @@ conf::Particles::Particles(Group* parent) :
         m_ms2(this, "ms2", sys::frm::c_undefined_ms2, "2*Ms sector in which the system is to be restricted (taken as reference hint if H does not conserve Sz"),
         m_nboson(this, "nboson", 0ul, "number of bosons in the system (taken as reference hint if H does not conserve boson number"){}
 
+
+
+conf::CiPerminitiator::CiPerminitiator(Group *parent) :
+        Section(parent, "ci_permanitiator",
+            "options relating to conferring permanent initiator status on determinants based on products of "
+            "lower-rank excitations", Explicit),
+        m_path(this, "path", "M7.hf_excit.h5", "file path to CI data source"),
+        m_max_nexcit(this, "max_nexcit", 2,
+            "maximum excitation level of determinants allowed to take on permanent initiator status due to CI products"),
+        m_thresh(this, "thresh", 0.001,
+            "minimum intermediate-normalized coefficient product required for permanitiator status"),
+        m_cancellation(this, "cancellation", true,
+            "if true, an excitation is removed from the list of permanitiators when it takes multiple contributions"
+            " which sum to a value less than thresh")
+{}
+
+
 conf::Wavefunction::Wavefunction(Group *parent) :
         Section(parent, "wavefunction",
                         "options relating to the storage and update of a distributed many-body wavefunction"),
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
         m_fci_init(this, "fci_init", false, "call the ARPACK interface to initialize the required roots to their exact values"),
-        m_permanitiator_source(this, "permanitiator_source", "C2 coeffs file for permanitiator setup", "", conf_components::Explicit),
-        m_buffers(this), m_hash_mapping(this), m_distribution(this),
+        m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_permanitiator(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
         m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit){}
 

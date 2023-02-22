@@ -218,6 +218,8 @@ struct Wavefunction : communicator::BasicSend<Walker, Spawn> {
         return m_format.m_nelement;
     }
 
+    void refresh_all_hdiags(const Hamiltonian& h);
+
     void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm=1000ul);
 
     void orthogonalize(NdReduction<wf_t, 3>& overlaps,
