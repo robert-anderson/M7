@@ -70,6 +70,11 @@ void dense::MatrixBase::transpose() {
     }
 }
 
+void dense::MatrixBase::reorder_rows(const uintv_t &order) {
+    if (i_can_globally_modify())
+        sort::reorder(begin(), m_row_size, order);
+}
+
 void dense::MatrixBase::set(const void *src) {
     if (i_can_globally_modify()) std::memcpy(begin(), src, m_size);
 }

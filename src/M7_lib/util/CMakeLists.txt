@@ -19,6 +19,7 @@ target_sources(M7_lib
         Probability.h
         ProgressMonitor.cpp
         ProgressMonitor.h
+        Sort.cpp
         Sort.h
         String.cpp
         String.h

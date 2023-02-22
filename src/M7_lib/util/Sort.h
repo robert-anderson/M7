@@ -12,35 +12,13 @@
 
 namespace sort {
 
-    template<typename viewable_t>
-    std::function<bool(uint_t, uint_t)>
-    static make_compare_fn(std::function<typename viewable_t::cview_t(uint_t)> getter_fn, bool asc, bool abs_val) {
-        if (asc) {
-            if (abs_val)
-                return [getter_fn](uint_t i1, uint_t i2) {
-                    return std::abs(getter_fn(i1)) < std::abs(getter_fn(i2));
-                };
-            else
-                return [getter_fn](uint_t i1, uint_t i2) {
-                    return arith::real(getter_fn(i1)) < arith::real(getter_fn(i2));
-                };
-        } else {
-            if (abs_val)
-                return [getter_fn](uint_t i1, uint_t i2) {
-                    return std::abs(getter_fn(i1)) > std::abs(getter_fn(i2));
-                };
-            else
-                return [getter_fn](uint_t i1, uint_t i2) {
-                    return arith::real(getter_fn(i1)) > arith::real(getter_fn(i2));
-                };
-        }
-    }
-
     /**
      * @tparam T
      *  floating point element type
      * @param v
-     *  vector to sort
+     *  data to sort
+     * @param number of elements in data
+     *  data to sort
      * @param asc
      *  if true, the lowest value appear first in the output
      * @param abs_val
@@ -49,8 +27,8 @@ namespace sort {
      *  index vector which would sort v to the desired ordering
      */
     template<typename T>
-    uintv_t inds(const v_t<T> &v, bool asc, bool abs_val) {
-        uintv_t out(v.size());
+    uintv_t inds(const T* v, uint_t nelement, bool asc, bool abs_val) {
+        uintv_t out(nelement);
         std::iota(out.begin(), out.end(), 0);
         if (asc) {
             if (abs_val)
@@ -74,56 +52,74 @@ namespace sort {
         return out;
     }
 
+
+    template<typename T>
+    uintv_t inds(const v_t<T> &v, bool asc, bool abs_val) {
+        return inds(v.data(), v.size(), asc, abs_val);
+    }
+
     /**
      * @tparam T
      *  component floating point type
      * @param v
-     *  vector to sort
+     *  data to sort
+     * @param nelement
+     *  number of elements in data
      * @param asc
      *  if true, the lowest value appear first in the output
      * @param abs_val
      *  if true, sort according to the magnitudes of the numbers in v, else compare only the real parts
      */
     template<typename T>
-    void inplace(v_t<T> &v, bool asc, bool abs_val) {
+    void inplace(T* v, uint_t nelement, bool asc, bool abs_val) {
         typedef const T &cr_t;
         if (asc) {
             if (abs_val)
-                std::stable_sort(v.begin(), v.end(), [](cr_t v1, cr_t v2) {
+                std::stable_sort(v, v + nelement, [](cr_t v1, cr_t v2) {
                     return std::abs(v1) < std::abs(v2);
                 });
             else
-                std::stable_sort(v.begin(), v.end(), [](cr_t v1, cr_t v2) {
+                std::stable_sort(v, v + nelement, [](cr_t v1, cr_t v2) {
                     return arith::real(v1) < arith::real(v2);
                 });
         } else {
             if (abs_val)
-                std::stable_sort(v.begin(), v.end(), [](cr_t v1, cr_t v2) {
+                std::stable_sort(v, v + nelement, [](cr_t v1, cr_t v2) {
                     return std::abs(v1) > std::abs(v2);
                 });
             else
-                std::stable_sort(v.begin(), v.end(), [](cr_t v1, cr_t v2) {
+                std::stable_sort(v, v + nelement, [](cr_t v1, cr_t v2) {
                     return arith::real(v1) > arith::real(v2);
                 });
         }
     }
 
+
+    template<typename T>
+    void inplace(v_t<T> &v, bool asc, bool abs_val) {
+        inplace(v.data(), v.size(), asc, abs_val);
+    }
+
     /**
      * apply a naive (copying) reorder operation on a vector determined by the indices in the order vector
-     * @tparam T
-     *  type of data held by vector being reordered
-     * @param in
-     *  input vector to be out-of-place reordered
+     * @param data
+     *  data to be in-place sorted
+     * @param element_size
+     *  size of each element in data
      * @param order
-     *  order of the indices of the in vector to appear in the out vector
-     * @result
-     *  reordered vector
+     *  element indices of initial data in the final data buffer
      */
+    void reorder(void* data, uint_t element_size, const uintv_t& order);
+
+    template<typename T>
+    void reorder(T* data, const uintv_t& order) {
+        reorder(data, sizeof(T), order);
+    }
+
     template<typename T>
     v_t<T> reorder(const v_t<T>& in, const uintv_t& order) {
-        v_t<T> out;
-        out.reserve(in.size());
-        for (auto& i: order) out.push_back(in[i]);
+        v_t<T> out(order.size());
+        reorder(out.data(), order);
         return out;
     }
 }

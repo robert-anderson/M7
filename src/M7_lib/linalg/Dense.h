@@ -15,6 +15,7 @@
 #include <M7_lib/util/FpTol.h>
 #include <M7_lib/defs.h>
 #include <M7_lib/table/Buffer.h>
+#include <M7_lib/util/Sort.h>
 #include "M7_lib/linalg/sparse/Dynamic.h"
 #include "M7_lib/hdf5/Node.h"
 #include "M7_lib/hdf5/DatasetTransaction.h"
@@ -213,6 +214,8 @@ namespace dense {
          * in-place physical transposition via out-of-place buffer procedure
          */
         void transpose();
+
+        void reorder_rows(const uintv_t& order);
 
         /**
          * byte-wise getters and setters are kept protected. subclass methods with std::vector<T> args are safer public
@@ -539,11 +542,32 @@ namespace dense {
         using MatrixBase::m_ncol;
         using MatrixBase::m_nrow;
         using MatrixBase::set_sizes;
+        using MatrixBase::i_can_globally_modify;
     public:
         explicit Vector(uint_t nelement, bool node_shared=false): Matrix<T>(1, nelement, node_shared){}
 
         explicit Vector(const v_t<T>& v): Vector(v.size()) {
             *this = v;
+        }
+
+        void reorder(const uintv_t& order) {
+            if (i_can_globally_modify())
+                sort::reorder(MatrixBase::begin(), MatrixBase::m_element_size, order);
+        }
+
+        void sort_inplace(bool asc, bool absval) {
+            if (i_can_globally_modify())
+                sort::inplace(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
+        }
+
+        Vector<T>& sorted(bool asc, bool absval) {
+            if (i_can_globally_modify())
+                sort::inplace(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
+            return *this;
+        }
+
+        uintv_t sort_inds(bool asc, bool absval) {
+            return sort::inds(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
         }
 
         Vector(const hdf5::NodeReader& nr, const str_t name, bool this_rank, bool node_shared=false):
