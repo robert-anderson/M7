@@ -11,25 +11,43 @@
 /**
  * parsing is done in four modes:
  *  throwing: throws std::invalid_argument and std::out_of_range exceptions if parse fails
- *  catching: catches the above exceptions and returns false in the case that an instance of either was raised
- *  debug_checked: raises an error in debug mode if instance of either exception is thrown
+ *  catching: catches the above exceptions and returns false in the case that an instance of either was thrown
+ *  debug_checked: raises an error only in debug mode if instance of either exception is thrown
  *  checked: raises an error if instance of either exception is thrown
  */
 namespace parse {
+    /*
+     * "std::stox" where x = i, l, ul, f, d, etc will parse until a non-conforming character is found, we want to raise
+     * an exception in the case that the string contains any such junk, so require the final position "idx" to be output
+     */
     static void throwing(const str_t& str, uint_t& v) {
-        v = std::stoul(str);
+        size_t idx;
+        v = std::stoul(str, &idx);
+        if (idx!=str.size()) throw std::invalid_argument("part of string was not parseable");
     }
 
     static void throwing(const str_t& str, long& v) {
-        v = std::stol(str);
+        size_t idx;
+        v = std::stol(str, &idx);
+        if (idx!=str.size()) throw std::invalid_argument("part of string was not parseable");
     }
 
     static void throwing(const str_t& str, int& v) {
-        v = std::stoi(str);
+        size_t idx;
+        v = std::stoi(str, &idx);
+        if (idx!=str.size()) throw std::invalid_argument("part of string was not parseable");
+    }
+
+    static void throwing(const str_t& str, float& v) {
+        size_t idx;
+        v = std::stof(str, &idx);
+        if (idx!=str.size()) throw std::invalid_argument("part of string was not parseable");
     }
 
     static void throwing(const str_t& str, double& v) {
-        v = std::stod(str);
+        size_t idx;
+        v = std::stod(str, &idx);
+        if (idx!=str.size()) throw std::invalid_argument("part of string was not parseable");
     }
 
     typedef strv_t::const_iterator c_iter_token_t;

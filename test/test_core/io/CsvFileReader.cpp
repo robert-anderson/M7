@@ -35,14 +35,20 @@ TEST(NumericCsvFileReader, Fcidump){
 
 TEST(NumericCsvFileReader, ParseScientific){
     double v;
+    v = 0.0;
     ASSERT_TRUE(parse::catching("1.e6", v));
     ASSERT_FLOAT_EQ(v, 1000000.0);
+    v = 0.0;
     ASSERT_TRUE(parse::catching("-0.4e3", v));
     ASSERT_FLOAT_EQ(v, -400.0);
+    v = 0.0;
     ASSERT_TRUE(parse::catching("+3141.596e-3", v));
     ASSERT_FLOAT_EQ(v, 3.141596);
+    v = 0.0;
     ASSERT_TRUE(parse::catching("+0.03141596E+2", v));
     ASSERT_FLOAT_EQ(v, 3.141596);
+    v = 0.0;
+    ASSERT_FALSE(parse::catching("+0.03141596E+2junk", v));
 }
 
 TEST(NumericCsvFileReader, ParseSingleReal){
