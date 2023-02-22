@@ -10,6 +10,31 @@
 
 namespace hf_excit_hist {
 
+    struct IndVals {
+    private:
+        hdf5::GroupReader m_gr;
+    public:
+        dense::Matrix<rdm_ind_t> m_inds;
+        dense::Vector<wf_t> m_vals;
+        IndVals(const hdf5::NodeReader& parent, str_t name);
+    };
+
+
+    void setup_permanitiators(Wavefunction& wf, const IndVals& indvals, uint_t ipair, uint_t max_power, uint_t imax,
+                              wf_t product, wf_t cutoff, conn::Mbf& conn, field::Mbf& mbf) {
+        for (auto i = 0ul; i < imax; ++i){
+            setup_permanitiators()
+        }
+    }
+
+    void setup_permanitiators(Wavefunction& wf, str_t fname, uint_t max_power, wf_t cutoff) {
+        hdf5::FileReader fr(fname);
+        const IndVals indvals(fr, "2200");
+        buffered::Mbf work_mbf(wf.m_sector);
+        conn::Mbf work_conn(work_mbf);
+        setup_permanitiators(wf, indvals, 0, max_power, indvals.m_vals.nelement(), 1.0, cutoff, work_conn, work_mbf);
+    }
+
 //    struct Accumulator {
 //        buffered::MappedTable<RdmRow> m_table;
 //        void save(const hdf5::NodeWriter& nw) const {

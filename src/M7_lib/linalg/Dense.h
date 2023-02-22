@@ -550,6 +550,10 @@ namespace dense {
             *this = v;
         }
 
+        uint_t nelement() const {
+            return MatrixBase::m_nelement;
+        }
+
         void reorder(const uintv_t& order) {
             if (i_can_globally_modify())
                 sort::reorder(MatrixBase::begin(), MatrixBase::m_element_size, order);
