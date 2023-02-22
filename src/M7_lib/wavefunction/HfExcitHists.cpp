@@ -69,6 +69,7 @@ void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_
             row.m_permanitiator.set();
             // permanitiators cannot be deleted - need to protect
             row.protect();
+            ++m_ncreated;
             if (m_cancellation) row.m_weight += (phase(mbf) ? -1 : 1) * product;
             // if not observing cancellation, no need to store the product
         }
@@ -92,10 +93,13 @@ void hf_excit_hist::Initializer::setup() {
                 ++nrevoked;
                 row.unprotect();
                 m_wf.m_store.erase(row.m_mbf);
+                --m_ncreated;
             }
         }
+        nrevoked = mpi::all_sum(nrevoked);
         logging::info("Number of revoked permanitiators due to cancellation: {}", nrevoked);
     }
+    logging::info("Number of permanitiators created: {}", mpi::all_sum(m_ncreated));
     std::cout << m_wf.m_store.to_string() << std::endl;
     std::cout << "" << std::endl;
 }

@@ -260,6 +260,9 @@ namespace buffered {
         using field::RdmInds::m_frm;
         using field::RdmInds::m_bos;
         RdmInds(OpSig exsig): BufferedField<field::RdmInds>(exsig){}
+        RdmInds(const RdmInds& other): BufferedField<field::RdmInds>(other.m_exsig){
+            static_cast<field::RdmInds&>(*this) = other;
+        }
     };
 
     struct SpecMomInds : BufferedField<field::SpecMomInds> {

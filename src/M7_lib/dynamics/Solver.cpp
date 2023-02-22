@@ -265,7 +265,10 @@ void Solver::loop_over_occupied_mbfs() {
             const auto &weight = walker.m_weight[ipart];
 
             bool initiator = walker.exceeds_initiator_thresh(ipart, m_prop.m_nadd_initiator);
-            initiator |= walker.m_permanitiator.get(ipart);
+            if (!initiator) {
+                initiator = walker.m_permanitiator.get(ipart);
+                if (initiator) m_wf.m_ninitiator_perma.m_local[ipart]++;
+            }
             if (initiator) m_wf.m_ninitiator.m_local[ipart]++;
 
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
@@ -360,6 +363,7 @@ void Solver::output_stats() {
         stats.m_l2_norm = m_wf.m_l2_norm_square.m_reduced;
         stats.m_l2_norm.to_sqrt();
         stats.m_ninitiator = m_wf.m_ninitiator.m_reduced;
+        stats.m_ninitiator_perma = m_wf.m_ninitiator_perma.m_reduced;
         stats.m_nocc_mbf = m_wf.m_nocc_mbf.m_reduced;
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();

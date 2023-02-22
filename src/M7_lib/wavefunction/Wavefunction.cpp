@@ -54,6 +54,7 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
     m_sector(sector),
     m_format(m_store.m_row.m_weight.m_format),
     m_ninitiator(m_format),
+    m_ninitiator_perma(m_format),
     m_nwalker(m_format),
     m_delta_nwalker(m_format),
     m_l2_norm_square(m_format),
@@ -62,7 +63,7 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
     m_nannihilated(m_format) {
 
     REQUIRE_TRUE(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row(), "row-field reference error");
-    m_summables.add_members(m_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
+    m_summables.add_members(m_ninitiator, m_ninitiator_perma, m_nocc_mbf, m_delta_nocc_mbf,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
 

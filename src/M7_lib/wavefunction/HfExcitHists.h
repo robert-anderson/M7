@@ -46,7 +46,7 @@ namespace hf_excit_hist {
          */
         const wf_comp_t m_thresh;
         /**
-         * whether to revoke peramnitiator status if multiple contributions sum to a value lower in magnitude than thresh
+         * whether to revoke permanitiator status if multiple contributions sum to a value lower in magnitude than thresh
          */
         const bool m_cancellation;
         /**
@@ -57,6 +57,10 @@ namespace hf_excit_hist {
          * working object for computing the phase of excitations relative to the HF state
          */
         conn::Mbf m_work_conn;
+        /**
+         * number of permanitiators created locally
+         */
+        uint_t m_ncreated = 0ul;
 
         Initializer(Wavefunction& wf, const field::Mbf& hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation);
 
@@ -77,14 +81,6 @@ namespace hf_excit_hist {
     void initialize(Wavefunction& wf, const field::Mbf& hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation);
 
     void initialize(Wavefunction& wf, const field::Mbf& hf, const conf::CiPerminitiator& opts);
-
-//    struct Accumulator {
-//        buffered::MappedTable<RdmRow> m_table;
-//        void save(const hdf5::NodeWriter& nw) const {
-//        }
-//        void save() {
-//        }
-//    };
 
     struct Accumulators {
         /**
