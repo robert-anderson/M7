@@ -92,11 +92,16 @@ namespace hdf5 {
         }
 
         bool operator==(hid_t other) const {
+            // handles can be distinct but refer to the same type, so go through the HDF5 H5Tequal function
             return types_equal(m_handle, other);
         }
 
-        operator hid_t () const;
+        bool operator==(const Type& other) const {
+            return (*this)==other.m_handle;
+        }
 
+        // todo: figure out how to get HDF5 type name / description through API
+//        str_t to_string() const;
     };
 }
 

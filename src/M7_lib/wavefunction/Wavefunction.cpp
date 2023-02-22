@@ -331,21 +331,26 @@ void Wavefunction::make_permanitiators_from_c2(str_t fname, uint_t /*max_power*/
     buffered::Table<RdmRow> c2("C2 permanitiator setup table", RdmRow(opsig::c_2200, 1), true);
     hdf5::FileReader fr(fname);
     hdf5::GroupReader gr(fr, "2200");
-    const dense::Matrix<rdm_ind_t> c2_inds(fr, "indices", mpi::on_node_i_am_root());
-    auto dataset_loader = hdf5::DatasetLoader::load_vector<wf_t>(fr, "values", mpi::on_node_i_am_root());
-    c2.load(fr, "2200", false, mpi::on_node_i_am_root());
+    const dense::Matrix<rdm_ind_t> c2_inds(gr, "indices", mpi::on_node_i_am_root());
+    const dense::Vector<wf_t> c2_vals(gr, "values", mpi::on_node_i_am_root());
 
-    if (mpi::on_node_i_am_root()) {
-        // sort the C2 amplitudes in descending order of magnitude
-        auto row1 = c2.m_row;
-        auto row2 = c2.m_row;
-        auto fn = [&row1, &row2](uint_t i, uint_t j){
-            row1.jump(i);
-            row2.jump(j);
-            return std::abs(row1.m_values[0]) > std::abs(row2.m_values[0]);
-        };
-        quicksort::sort(c2, fn);
-    }
+    std::cout << c2_inds.to_string() << std::endl;
+    std::cout << c2_vals.to_string() << std::endl;
+
+    REQUIRE_TRUE(0, "");
+
+//    if (mpi::on_node_i_am_root()) {
+//        // sort the C2 amplitudes in descending order of magnitude
+//        auto row1 = c2.m_row;
+//        auto row2 = c2.m_row;
+//        auto fn = [&row1, &row2](uint_t i, uint_t j){
+//            row1.jump(i);
+//            row2.jump(j);
+//            return std::abs(row1.m_values[0]) > std::abs(row2.m_values[0]);
+//        };
+//        quicksort::sort(c2, fn);
+//    }
+
 //
 //    // loop over all ordered max_power-tuples
 //    basic_foreach::rtnd::Ordered<true, true> foreach(c2.nrow_in_use(), max_power);

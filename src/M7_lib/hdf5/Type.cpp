@@ -32,7 +32,3 @@ hdf5::Type::~Type() {
     DEBUG_ONLY(status);
     DEBUG_ASSERT_FALSE(status, "HDF5 string type release failed");
 }
-
-hdf5::Type::operator hid_t() const {
-    return m_handle;
-}

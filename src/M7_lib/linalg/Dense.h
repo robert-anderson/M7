@@ -122,6 +122,8 @@ namespace dense {
         uint_t m_ncol = 0ul;
         uint_t m_nelement = 0ul;
         uint_t m_row_size = 0ul;
+        // size is not necessarily m_bw.m_size, since buffer windows are padded to a whole number of words
+        uint_t m_size = 0ul;
 
         /**
          * obviously, in non-node_sharing mode, an MPI rank has the authority to modify all elements
@@ -264,7 +266,8 @@ namespace dense {
             const auto& shape = dl.m_format.m_h5_shape;
             if (this_rank) resize(shape[0], shape[1]);
             std::list<hdf5::Attr> attrs;
-            dl.load_dist_list(nr, name, begin(), m_bw.m_size, false, this_rank, attrs);
+            dl.load_dist_list(nr, name, begin(), m_size, hdf5::Type::make<T>(), dtype::is_complex<T>(),
+                false, this_rank, attrs);
         }
 
         explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_col_ind() + 1){
@@ -533,7 +536,22 @@ namespace dense {
 
     template<typename T>
     class Vector : public Matrix<T> {
-        Vector(uint_t nelement, bool node_shared=false): Matrix<T>(1, nelement, node_shared){}
+        using MatrixBase::m_ncol;
+        using MatrixBase::m_nrow;
+        using MatrixBase::set_sizes;
+    public:
+        explicit Vector(uint_t nelement, bool node_shared=false): Matrix<T>(1, nelement, node_shared){}
+
+        explicit Vector(const v_t<T>& v): Vector(v.size()) {
+            *this = v;
+        }
+
+        Vector(const hdf5::NodeReader& nr, const str_t name, bool this_rank, bool node_shared=false):
+                Matrix<T>(nr, name, this_rank, node_shared){
+            // vectors must have one row
+            if (m_nrow!=1) set_sizes(m_ncol, m_nrow);
+            REQUIRE_EQ(m_nrow, 1ul, "read data has non-vector shape");
+        }
     };
 
     template<typename T>

@@ -25,8 +25,8 @@ bool hdf5::Attr::operator!=(const hdf5::Attr& other) const {
 
 void hdf5::Attr::save(hid_t parent_handle) const {
     auto dataspace = H5Screate_simple(m_format.m_h5_shape.size(), m_format.m_h5_shape.data(), nullptr);
-    auto attr_handle = H5Acreate(parent_handle, m_name.c_str(), m_format.m_type, dataspace, H5P_DEFAULT, H5P_DEFAULT);
-    auto status = H5Awrite(attr_handle, m_format.m_type, m_buf.data());
+    auto attr_handle = H5Acreate(parent_handle, m_name.c_str(), m_format.m_type.m_handle, dataspace, H5P_DEFAULT, H5P_DEFAULT);
+    auto status = H5Awrite(attr_handle, m_format.m_type.m_handle, m_buf.data());
     DEBUG_ONLY(status);
     DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
     H5Aclose(attr_handle);
@@ -43,7 +43,7 @@ hdf5::Attr hdf5::Attr::load(hid_t parent_handle, const str_t& name) {
     Type type(H5Aget_type(attr_handle));
     dataset::ItemFormat format(type, convert::vector<uint_t>(shape), {}, false);
     v_t<buf_t> buf(format.m_size);
-    auto status = H5Aread(attr_handle, type, buf.data());
+    auto status = H5Aread(attr_handle, type.m_handle, buf.data());
     DEBUG_ONLY(status);
     DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
     H5Aclose(attr_handle);

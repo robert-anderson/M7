@@ -158,15 +158,16 @@ namespace parse {
     void debug_checked(c_iter_token_t begin, c_iter_token_t end, T& v) {
         const auto success = catching(begin, end, v);
         DEBUG_ONLY(success);
-        DEBUG_ASSERT_TRUE(success, logging::format(
-                "strings \"{}\", \"{}\" could not be parsed", *begin, *end));
+        DEBUG_ASSERT_TRUE(success, logging::format("strings \"{}\" could not be parsed",
+                                                   convert::to_string(strv_t(begin, end))));
     }
 
     template<typename T>
     void debug_checked(const strv_t& strs, v_t<T>& v) {
         const auto success = catching(strs, v);
         DEBUG_ONLY(success);
-        DEBUG_ASSERT_TRUE(success, logging::format("strings \"{}\" could not be parsed", strs));
+        DEBUG_ASSERT_TRUE(success, logging::format("strings \"{}\" could not be parsed",
+                                                   convert::to_string(strs)));
     }
 
     template<typename T>

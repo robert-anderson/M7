@@ -9,6 +9,7 @@ void dense::MatrixBase::set_sizes(uint_t nrow, uint_t ncol) {
     m_ncol = ncol;
     m_nelement = m_ncol * m_nrow;
     m_row_size = m_ncol * m_element_size;
+    m_size = m_nrow * m_row_size;
 }
 
 bool dense::MatrixBase::compatible(const dense::MatrixBase &other) const {
@@ -53,7 +54,7 @@ dense::MatrixBase &dense::MatrixBase::operator=(const dense::MatrixBase &other) 
 }
 
 bool dense::MatrixBase::operator==(const dense::MatrixBase &other) const {
-    return !std::memcmp(cbegin(), other.cbegin(), m_bw.m_size);
+    return !std::memcmp(cbegin(), other.cbegin(), m_size);
 }
 
 void dense::MatrixBase::zero() {
@@ -70,7 +71,7 @@ void dense::MatrixBase::transpose() {
 }
 
 void dense::MatrixBase::set(const void *src) {
-    if (i_can_globally_modify()) std::memcpy(begin(), src, m_bw.m_size);
+    if (i_can_globally_modify()) std::memcpy(begin(), src, m_size);
 }
 
 void dense::MatrixBase::set_row(uint_t irow, const void *src) {

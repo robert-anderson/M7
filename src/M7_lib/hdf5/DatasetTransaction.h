@@ -228,6 +228,8 @@ namespace hdf5 {
 
         static bool valid_part_flag(bool part);
 
+        const str_t m_name;
+
     public:
 
         /**
