@@ -52,7 +52,7 @@ namespace hdf5 {
 
 
     struct Type {
-        const hid_t m_handle;
+        const hid_t m_id;
         const hsize_t m_size;
 
     private:
@@ -73,8 +73,8 @@ namespace hdf5 {
             return Type(c_types[type_ind<comp_t>()]);
         }
 
-        Type(): m_handle(0), m_size(0ul), m_immutable(true){}
-        explicit Type(hid_t handle): m_handle(handle), m_size(H5Tget_size(m_handle)), m_immutable(true){}
+        Type(): m_id(0), m_size(0ul), m_immutable(true){}
+        explicit Type(hid_t handle): m_id(handle), m_size(H5Tget_size(m_id)), m_immutable(true){}
 
         Type(const Type& other);
 
@@ -93,11 +93,11 @@ namespace hdf5 {
 
         bool operator==(hid_t other) const {
             // handles can be distinct but refer to the same type, so go through the HDF5 H5Tequal function
-            return types_equal(m_handle, other);
+            return types_equal(m_id, other);
         }
 
         bool operator==(const Type& other) const {
-            return (*this)==other.m_handle;
+            return (*this)==other.m_id;
         }
 
         // todo: figure out how to get HDF5 type name / description through API

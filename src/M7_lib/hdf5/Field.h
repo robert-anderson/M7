@@ -93,7 +93,7 @@ namespace hdf5 {
             bool part,
             bool this_rank)
         {
-            const auto nitem = DatasetLoader::read_format(nr.m_handle, name, part, this_rank).m_local.m_nitem;
+            const auto nitem = DatasetLoader::read_format(nr.m_id, name, part, this_rank).m_local.m_nitem;
             load(field, nr, name, nitem, attrs, part, this_rank);
         }
 

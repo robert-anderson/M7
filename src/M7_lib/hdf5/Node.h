@@ -10,16 +10,16 @@
 namespace hdf5 {
 
     struct Node {
-        const hid_t m_handle;
-        Node(hid_t handle);
+        const hid_t m_id;
+        Node(hid_t id);
         operator hid_t() const;
 
         bool child_exists(const str_t& name) const {
-            return H5Oexists_by_name(m_handle, name.c_str(), H5P_DEFAULT);
+            return H5Oexists_by_name(m_id, name.c_str(), H5P_DEFAULT);
         }
     };
 
-    H5O_info_t get_object_info(hid_t obj_handle);
+    H5O_info_t get_object_info(hid_t obj_id);
 
     struct NodeReader : Node {
         NodeReader(hid_t handle) : Node(handle) {}
@@ -27,7 +27,7 @@ namespace hdf5 {
         template<typename T>
         T load_attr(const str_t& name) const {
             T v;
-            auto success = Attr(m_handle, name).parse(v);
+            auto success = Attr(m_id, name).parse(v);
             REQUIRE_TRUE(success, "HDF5 attribute load failed without default value");
             return v;
         }
@@ -35,7 +35,7 @@ namespace hdf5 {
         template<typename T>
         T load_attr(const str_t& name, T default_) const {
             T v;
-            Attr(m_handle, name).parse(v, default_);
+            Attr(m_id, name).parse(v, default_);
             return v;
         }
     };
@@ -44,7 +44,7 @@ namespace hdf5 {
         NodeWriter(hid_t handle): Node(handle){}
 
         void save_attr(const Attr& attr) const {
-            attr.save(m_handle);
+            attr.save(m_id);
         }
 
         template<typename T>
@@ -59,7 +59,7 @@ namespace hdf5 {
             NodeWriter(H5Gcreate(node, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) {}
 
         ~GroupWriter() {
-            auto status = H5Gclose(m_handle);
+            auto status = H5Gclose(m_id);
             REQUIRE_TRUE(!status, "HDF5 Error on closing group");
         }
     };
@@ -69,7 +69,7 @@ namespace hdf5 {
             NodeReader(H5Gopen2(node, name.c_str(), H5P_DEFAULT)) {}
 
         ~GroupReader() {
-            auto status = H5Gclose(m_handle);
+            auto status = H5Gclose(m_id);
             REQUIRE_TRUE(!status, "HDF5 Error on closing group");
         }
     };

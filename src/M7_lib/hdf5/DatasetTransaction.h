@@ -29,11 +29,11 @@ namespace hdf5 {
         /**
          * HDF5 object handles
          */
-        hid_t m_plist = 0;
-        hid_t m_filespace = 0;
-        hid_t m_file_hyperslab = 0;
-        hid_t m_mem_hyperslab = 0;
-        hid_t m_dataset = 0;
+        hid_t m_plist_id = 0;
+        hid_t m_filespace_id = 0;
+        hid_t m_file_hyperslab_id = 0;
+        hid_t m_mem_hyperslab_id = 0;
+        hid_t m_dataset_id = 0;
     public:
         explicit DatasetTransaction(dataset::DistListFormat format);
 
@@ -339,7 +339,7 @@ namespace hdf5 {
             std::list<Attr>& attrs,
             uint_t max_nitem_per_op = c_default_max_nitem_per_op)
         {
-            const auto size = read_format(nr.m_handle, name, part, this_rank).m_local.m_size;
+            const auto size = read_format(nr.m_id, name, part, this_rank).m_local.m_size;
             dst.resize(size / sizeof(T));
             load_dist_list(nr, name, dst.data(), dst.size(), part, this_rank, attrs, max_nitem_per_op);
         }
