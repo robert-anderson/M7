@@ -68,6 +68,7 @@ void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_
                 // generated MBF belongs on this MPI rank
                 auto& row = m_wf.m_store.lookup_or_insert(mbf);
                 row.m_permanitiator.set();
+                if (ipower==1) row.m_ref_conn.set();
                 // permanitiators cannot be deleted - need to protect
                 row.protect();
                 ++m_ncreated.m_local[ipower * 2];
@@ -160,6 +161,8 @@ hf_excit_hist::Accumulators::Accumulators(const shared_rows::Walker *hf, uintv_t
         const OpSig exsig({nexcit, nexcit}, {0, 0});
         const auto name = exsig.to_string()+" excitations of HF state";
         m_tables.emplace_back(name, RdmRow(exsig, 1), false);
+        m_tables.back().resize(500);
+        m_tables.back().set_expansion_factor(2.0);
         m_lookup_keys.emplace_back(exsig);
     }
 }
@@ -192,6 +195,7 @@ void hf_excit_hist::Accumulators::add(const Mbf &mbf, wf_t weight) {
 
 void hf_excit_hist::Accumulators::save(const hdf5::NodeWriter &nw) {
     auto table = m_tables.begin();
+    m_norm = mpi::all_sum(m_norm);
     for (auto nexcit: m_nexcits) {
         OpSig exsig({nexcit, nexcit}, {0, 0});
         auto& row = table->m_row;

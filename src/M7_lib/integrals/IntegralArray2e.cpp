@@ -6,7 +6,7 @@
 #include "M7_lib/foreach/BasicForeach.h"
 
 
-str_t integrals_2e::syms::name(integrals_2e::syms::Sym sym) {
+str_t integrals_2e::syms::desc(integrals_2e::syms::Sym sym) {
     switch (sym) {
         case Null: return "NULL";
         case None: return "no";
@@ -17,6 +17,17 @@ str_t integrals_2e::syms::name(integrals_2e::syms::Sym sym) {
         case DHR: return "8-fold";
     }
     return {};
+}
+
+integrals_2e::syms::Sym integrals_2e::syms::from_symbol(str_t name) {
+    string::to_upper(name);
+    if (name=="DHR") return DHR;
+    else if(name=="DR") return DR;
+    else if (name=="DH") return DH;
+    else if (name=="D") return D;
+    else if (name=="H") return H;
+    else if (name=="None") return None;
+    return Null;
 }
 
 strv_t integrals_2e::syms::equivalences(integrals_2e::syms::Sym sym) {

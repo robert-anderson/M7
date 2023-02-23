@@ -229,7 +229,7 @@ void Solver::loop_over_occupied_mbfs() {
         }
 
         /*
-         * if the accumulation of MEVs has just started, treat the row as though it became occupied in the annihilation
+         * if the accumulation of MAEs has just started, treat the row as though it became occupied in the annihilation
          * loop of the last MC cycle.
          */
         if (m_maes.m_accum_epoch.started_this_cycle(m_icycle) && m_wf.storing_av_weights()) {
@@ -238,9 +238,10 @@ void Solver::loop_over_occupied_mbfs() {
             walker.m_average_weight = 0;
         }
 
-        if (m_maes.m_accum_epoch && m_wf.storing_av_weights()) {
-            walker.m_average_weight += walker.m_weight;
+        if (m_maes.m_accum_epoch) {
+            if (m_wf.storing_av_weights()) walker.m_average_weight += walker.m_weight;
         }
+
         if (m_hf && m_hf->m_excit_accums) m_hf->m_excit_accums.add(walker.m_mbf, walker.m_weight[0]);
 
         if (m_maes.is_period_cycle(m_icycle)) {

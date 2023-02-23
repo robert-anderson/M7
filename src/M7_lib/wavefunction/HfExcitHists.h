@@ -103,7 +103,7 @@ namespace hf_excit_hist {
         /**
          * average HF weight so that output can be intermediate normalized
          */
-        wf_t m_norm;
+        wf_t m_norm = 0.0;
         const str_t m_save_file_name;
 
         const uintv_t m_nexcits;

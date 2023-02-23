@@ -6,6 +6,7 @@
 #define M7_FCIDUMPINFO_H
 
 #include <utility>
+#include <M7_lib/integrals/IntegralArray2e.h>
 
 #include "M7_lib/hdf5/File.h"
 #include "FortranNamelistReader.h"
@@ -58,6 +59,7 @@ struct FcidumpInfo {
     const str_t m_fname;
     const Implementation m_impl;
     const UnrestrictStyle m_ur_style;
+    const integrals_2e::syms::Sym m_init_2e_perm_sym;
     /*
      * metadata fields
      */
@@ -71,7 +73,8 @@ private:
 
 public:
 
-    FcidumpInfo(str_t fname, UnrestrictStyle ur_style=SpinMinor);
+    FcidumpInfo(str_t fname, UnrestrictStyle ur_style=SpinMinor,
+                integrals_2e::syms::Sym init_2e_perm_sym=integrals_2e::syms::DHR);
 
 };
 

@@ -14,9 +14,9 @@ conf::Fcidump::Fcidump(Group *parent) :
            }, "protocol assumed when reading integrals expressed in an unrestricted basis"),
         m_init_2e_perm_sym(this, "init_2e_perm_sym", {
                 // skipping H and None options since they are non-physical
-               {"DHR",  "full 8-fold symmetry: Dummy variables, Hermitian, and Real orbitals"},
+               {"DHR",  "full 8-fold symmetry: Dummy variables, Hermiticity, and Real orbitals"},
                {"DR",  "non-hermitian 4-fold symmetry: Dummy variables and Real orbitals"},
-               {"DR",  "complex orbital 4-fold symmetry: Dummy variables and Real orbitals"},
+               {"DH",  "complex orbital 4-fold symmetry: Dummy variables and Hermiticity"},
                {"D",  "complex orbital, non-hermitian 2-fold symmetry: Dummy variables only"},
            }, "symmetry protocol to initially assume when reading 2-electron integrals") {}
 
