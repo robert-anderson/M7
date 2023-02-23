@@ -102,12 +102,11 @@ namespace conf {
         explicit Particles(Group *parent);
     };
 
-    struct CiPerminitiator : Section {
+    struct CiPermanitiator : Section {
         Param<str_t> m_path;
-        Param<uint_t> m_max_nexcit;
         Param<double> m_thresh;
         Param<bool> m_cancellation;
-        explicit CiPerminitiator(Group* parent);
+        explicit CiPermanitiator(Group* parent);
     };
 
     struct Wavefunction : Section {
@@ -117,7 +116,7 @@ namespace conf {
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Distribution m_distribution;
-        CiPerminitiator m_ci_permanitiator;
+        CiPermanitiator m_ci_permanitiator;
         OptionalFile m_save;
         OptionalFile m_load;
 

@@ -4,7 +4,7 @@
 
 #include "HfExcitHists.h"
 
-hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_t thresh) :
+hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_comp_t thresh) :
         m_inds(hdf5::GroupReader(parent, name), "indices", mpi::on_node_i_am_root()),
         m_vals(hdf5::GroupReader(parent, name), "values", mpi::on_node_i_am_root()) {
     REQUIRE_EQ(m_inds.nrow(), m_vals.nelement(),
@@ -17,10 +17,13 @@ hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_t
     while(m_nelement < m_vals.nelement() && std::abs(m_vals[m_nelement]) >= thresh) ++m_nelement;
 }
 
-hf_excit_hist::Initializer::Initializer(Wavefunction &wf, const Mbf &hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation) :
+hf_excit_hist::Initializer::Initializer(Wavefunction &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, bool cancellation) :
         m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2200", thresh),
-        m_max_power(max_nexcit / 2), m_thresh(thresh), m_cancellation(cancellation),
-        m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf), m_ncreated({max_nexcit+1}) {}
+        m_thresh(thresh), m_cancellation(cancellation),
+        m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf), m_ncreated({2*max_power()+1}) {
+    logging::info("Maximum-magnitude C2 coefficient: {}", m_c2.m_vals[0]);
+    logging::info("Threshold of {} implies maximum relevant power of C2 is {}", m_thresh, max_power());
+}
 
 bool hf_excit_hist::Initializer::apply(Mbf &mbf, uint_t ientry) {
     const auto a = m_c2.m_inds(ientry, 0);
@@ -54,7 +57,6 @@ bool hf_excit_hist::Initializer::phase(Mbf &mbf) {
 }
 
 void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_t prev_product) {
-    if (ipower > m_max_power) return;
     for (uint_t i = 0ul; i < imax; ++i) {
         auto product = prev_product * m_c2.m_vals[i];
         /*
@@ -88,6 +90,7 @@ void hf_excit_hist::Initializer::setup() {
     auto& row = m_wf.m_store.m_row;
     strv_t header = {"excitation level", "number in use"};
     v_t<strv_t> logging_table;
+    auto max_power = this->max_power();
     if (m_cancellation) {
         header.emplace_back("number revoked by cancellation");
         /*
@@ -110,7 +113,7 @@ void hf_excit_hist::Initializer::setup() {
         }
 
         logging_table.push_back(header);
-        for (uint_t i = 1ul; i<=m_max_power*2; ++i) {
+        for (uint_t i = 1ul; i<=max_power*2; ++i) {
             logging_table.push_back({
                 convert::to_string(i),
                 convert::to_string(after_cancellation[i]),
@@ -120,19 +123,19 @@ void hf_excit_hist::Initializer::setup() {
     }
     else {
         logging_table.push_back(header);
-        for (uint_t i = 1ul; i <= m_max_power * 2; ++i)
+        for (uint_t i = 1ul; i <= max_power * 2; ++i)
             logging_table.push_back({convert::to_string(i), convert::to_string(m_ncreated.m_reduced[i])});
     }
     logging::info_table("Permanitiator breakdown", logging_table, true);
 }
 
-void hf_excit_hist::initialize(Wavefunction &wf, const Mbf &hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation) {
-    Initializer(wf, hf, fname, max_nexcit, thresh, cancellation).setup();
+void hf_excit_hist::initialize(Wavefunction &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, bool cancellation) {
+    Initializer(wf, hf, fname, thresh, cancellation).setup();
 }
 
-void hf_excit_hist::initialize(Wavefunction &wf, const Mbf &hf, const conf::CiPerminitiator &opts) {
+void hf_excit_hist::initialize(Wavefunction &wf, const Mbf &hf, const conf::CiPermanitiator &opts) {
     logging::info("Setting permanitiators based on CI data from \"{}\"", opts.m_path.m_value);
-    initialize(wf, hf, opts.m_path, opts.m_max_nexcit, opts.m_thresh, opts.m_cancellation);
+    initialize(wf, hf, opts.m_path, opts.m_thresh, opts.m_cancellation);
 }
 
 
@@ -149,7 +152,7 @@ uint_t hf_excit_hist::Accumulators::ind(uint_t nexcit) const {
     return nexcit < m_accumulated_nexcit_inds.size() ? m_accumulated_nexcit_inds[nexcit] : ~0ul;
 }
 
-hf_excit_hist::Accumulators::Accumulators(const shared_rows::Walker *hf, uintv_t nexcits, wf_t thresh,
+hf_excit_hist::Accumulators::Accumulators(const shared_rows::Walker *hf, uintv_t nexcits, wf_comp_t thresh,
                                           str_t save_file_name) :
         m_hf(hf), m_thresh(thresh), m_work_conn(hf->mbf()), m_save_file_name(std::move(save_file_name)),
         m_nexcits(std::move(nexcits)), m_accumulated_nexcit_inds(make_nexcit_is_accumulated(m_nexcits)) {

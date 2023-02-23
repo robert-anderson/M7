@@ -38,10 +38,6 @@ namespace hf_excit_hist {
          */
         const IndVals m_c2;
         /**
-         * maximum power of C2 operator
-         */
-        const uint_t m_max_power;
-        /**
          * minimum intermediate-normalized weight for inclusion as a permanitiator
          */
         const wf_comp_t m_thresh;
@@ -62,9 +58,24 @@ namespace hf_excit_hist {
          */
         NdReduction<uint_t, 1> m_ncreated;
 
-        Initializer(Wavefunction& wf, const field::Mbf& hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation);
+        Initializer(Wavefunction& wf, const field::Mbf& hf, str_t fname, wf_comp_t thresh, bool cancellation);
 
     private:
+
+        /**
+         * if a = abs_max_coeff, then for a given power n, a^n is the largest possible power that can be generated
+         * if a^n < thresh, then the power n need not be considered for permanitiator creation
+         * a^r = thresh when r = ln(thresh)/ln(a)
+         * a^floor(r) is >= thresh
+         * a^ceil(r) is <= thresh
+         * so n = floor(r) gives the maximum power of C2 that need be considered
+         */
+        uint_t max_power() {
+            const auto limit = uint_t(m_wf.m_sector.m_frm.m_elecs) / 2;
+            if (!m_thresh) return limit;
+            const auto abs_max_coeff = std::abs(m_c2.m_vals[0]);
+            return std::min(limit, uint_t(std::floor(std::log(m_thresh) / std::log(abs_max_coeff))));
+        }
 
         bool apply(field::Mbf& mbf, uint_t ientry);
 
@@ -78,9 +89,9 @@ namespace hf_excit_hist {
         void setup();
     };
 
-    void initialize(Wavefunction& wf, const field::Mbf& hf, str_t fname, uint_t max_nexcit, wf_t thresh, bool cancellation);
+    void initialize(Wavefunction& wf, const field::Mbf& hf, str_t fname, wf_t thresh, bool cancellation);
 
-    void initialize(Wavefunction& wf, const field::Mbf& hf, const conf::CiPerminitiator& opts);
+    void initialize(Wavefunction& wf, const field::Mbf& hf, const conf::CiPermanitiator& opts);
 
     struct Accumulators {
         /**
