@@ -7,12 +7,18 @@
 conf::Fcidump::Fcidump(Group *parent) :
         Section(parent, "fcidump", "options relating to the FCIDUMP file", Explicit),
         m_path(this, "path", "FCIDUMP", "path to file defining fermionic Hamiltonian"),
-        m_unrestrict_style(this, "unrestrict_style",
-           {
+        m_unrestrict_style(this, "unrestrict_style", {
                {"minor",  "spin orbitals in the ududud... ordering"},
                {"major",  "spin orbitals in the uuu...ddd... ordering"},
                {"blocks", "spatial orbitals in Molpro-style blocks (uu|uu), (uu|dd), (dd|dd), h_uu, h_dd"}
-           }, "protocol assumed when reading integrals expressed in an unrestricted basis"){}
+           }, "protocol assumed when reading integrals expressed in an unrestricted basis"),
+        m_init_2e_perm_sym(this, "init_2e_perm_sym", {
+                // skipping H and None options since they are non-physical
+               {"DHR",  "full 8-fold symmetry: Dummy variables, Hermitian, and Real orbitals"},
+               {"DR",  "non-hermitian 4-fold symmetry: Dummy variables and Real orbitals"},
+               {"DR",  "complex orbital 4-fold symmetry: Dummy variables and Real orbitals"},
+               {"D",  "complex orbital, non-hermitian 2-fold symmetry: Dummy variables only"},
+           }, "symmetry protocol to initially assume when reading 2-electron integrals") {}
 
 conf::Bosdump::Bosdump(Group *parent) :
         Section(parent, "bosdump", "options relating to 4-indexed text file defining arbitrary "

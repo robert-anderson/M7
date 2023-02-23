@@ -62,19 +62,21 @@ void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_
          * since the values are sorted in descending order
          */
         if (std::abs(product) < m_thresh) return;
-        apply(mbf, i);
-        if (mpi::i_am(m_wf.m_dist.irank(mbf))) {
-            // generated MBF belongs on this MPI rank
-            auto& row = m_wf.m_store.lookup_or_insert(mbf);
-            row.m_permanitiator.set();
-            // permanitiators cannot be deleted - need to protect
-            row.protect();
-            ++m_ncreated.m_local[ipower*2];
-            if (m_cancellation) row.m_weight += (phase(mbf) ? -1 : 1) * product;
-            // if not observing cancellation, no need to store the product
+        if (apply(mbf, i)) {
+            // i-th indices were successfully applied
+            if (mpi::i_am(m_wf.m_dist.irank(mbf))) {
+                // generated MBF belongs on this MPI rank
+                auto& row = m_wf.m_store.lookup_or_insert(mbf);
+                row.m_permanitiator.set();
+                // permanitiators cannot be deleted - need to protect
+                row.protect();
+                ++m_ncreated.m_local[ipower * 2];
+                if (m_cancellation) row.m_weight += (phase(mbf) ? -1 : 1) * product;
+                // if not observing cancellation, no need to store the product
+            }
+            setup(mbf, i, ipower+1, product);
+            undo(mbf, i);
         }
-        setup(mbf, i, ipower+1, product);
-        undo(mbf, i);
     }
 }
 
@@ -93,11 +95,16 @@ void hf_excit_hist::Initializer::setup() {
          */
         auto after_cancellation = m_ncreated.m_reduced;
         for (row.restart(); row; ++row) {
-            if (row.m_permanitiator.get(0) && std::abs(row.m_weight[0]) < m_thresh) {
-                m_work_conn.connect(m_hf, row.m_mbf);
-                --after_cancellation[m_work_conn.m_cre.size()];
-                row.unprotect();
-                m_wf.m_store.erase(row.m_mbf);
+            if (row.m_permanitiator.get(0)) {
+                if (std::abs(row.m_weight[0]) < m_thresh) {
+                    m_work_conn.connect(m_hf, row.m_mbf);
+                    --after_cancellation[m_work_conn.m_cre.size()];
+                    row.unprotect();
+                    m_wf.m_store.erase(row.m_mbf);
+                }
+                else {
+                    row.m_weight = 0.0;
+                }
             }
         }
 
