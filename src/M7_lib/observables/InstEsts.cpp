@@ -4,7 +4,7 @@
 
 #include "InstEsts.h"
 
-InstEsts::InstEsts(const sys::Sector sector, const wf::References* refs, const conf::InstEsts& opts) {
+InstEsts::InstEsts(const sys::Sector sector, const wf::Refs* refs, const conf::InstEsts& opts) {
     REQUIRE_TRUE(refs, "Invalid pointer to reference MBFs");
     if (opts.m_spin_square.m_value)
         m_spin_square = ptr::smart::make_unique<commuting_obs::SpinSquare>(sector.m_frm, refs);

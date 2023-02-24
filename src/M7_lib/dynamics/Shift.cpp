@@ -22,7 +22,7 @@ const ham_comp_t &Shift::operator[](uint_t ipart) {
     return m_values[ipart];
 }
 
-void Shift::update(const wf::Fci &wf, const wf::References& refs, uint_t icycle, double tau) {
+void Shift::update(const wf::Fci &wf, const wf::Refs& refs, uint_t icycle, double tau) {
     if (m_nwalker_target.read()) m_variable_mode.terminate(icycle);
     const bool is_period_cycle = !(icycle % m_opts.m_shift.m_period);
 

@@ -29,7 +29,7 @@ public:
 
     void off_diagonal(wf::Fci &wf, const Walker& walker, const uint_t& dst_mbf) override;
 
-    void update(uint_t icycle, const wf::Fci &wf, const wf::References& refs) override;
+    void update(uint_t icycle, const wf::Fci &wf, const wf::Refs& refs) override;
 };
 
 #endif //M7_EXACT_LINEAR_PROPAGATOR_H

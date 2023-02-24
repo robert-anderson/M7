@@ -13,7 +13,7 @@
  */
 struct InstEsts {
     std::unique_ptr<commuting_obs::SpinSquare> m_spin_square = nullptr;
-    InstEsts(const sys::Sector sector, const wf::References* refs, const conf::InstEsts& opts);
+    InstEsts(const sys::Sector sector, const wf::Refs* refs, const conf::InstEsts& opts);
 
     void begin_cycle(uint_t icycle);
 

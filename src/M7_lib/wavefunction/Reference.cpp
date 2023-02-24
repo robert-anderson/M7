@@ -89,8 +89,7 @@ const ham_t& wf::Ref::proj_energy_num() const {
     return m_proj_energy_num.m_reduced;
 }
 
-wf::References::References(const conf::Reference &opts, const Hamiltonian &ham, const wf::Fci &wf,
-                           v_t<TableBase::Loc> locs) :
+wf::Refs::Refs(const conf::Reference &opts, const Hamiltonian &ham, const wf::Fci &wf, v_t<TableBase::Loc> locs) :
         m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
     DEBUG_ASSERT_EQ(locs.size(), wf.m_format.m_nelement,
                     "there should be a parallel table location specifying each reference row");
@@ -98,24 +97,24 @@ wf::References::References(const conf::Reference &opts, const Hamiltonian &ham, 
     for (uint_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(opts, ham, wf, ipart, locs[ipart]);
 }
 
-const wf::Ref & wf::References::operator[](const uint_t &ipart) const {
+const wf::Ref & wf::Refs::operator[](const uint_t &ipart) const {
     DEBUG_ASSERT_LT(ipart, m_refs.size(), "reference part index OOB");
     return m_refs[ipart];
 }
 
-void wf::References::begin_cycle(uint_t icycle) {
+void wf::Refs::begin_cycle(uint_t icycle) {
     for (auto& ref: m_refs) ref.begin_cycle(icycle);
 }
 
-void wf::References::end_cycle(uint_t icycle) {
+void wf::Refs::end_cycle(uint_t icycle) {
     for (auto& ref: m_refs) ref.end_cycle(icycle);
 }
 
-void wf::References::contrib_row(const Walker& walker) {
+void wf::Refs::contrib_row(const Walker& walker) {
     for (auto& ref: m_refs) ref.contrib_row(walker);
 }
 
-v_t<bool> wf::References::is_connected(const field::Mbf &mbf) const {
+v_t<bool> wf::Refs::is_connected(const field::Mbf &mbf) const {
     v_t<bool> out;
     out.reserve(m_refs.size());
     for (uint_t ipart=0ul; ipart<m_refs.size(); ++ipart)
@@ -123,13 +122,13 @@ v_t<bool> wf::References::is_connected(const field::Mbf &mbf) const {
     return out;
 }
 
-const field::Numbers<ham_t, c_ndim_wf> & wf::References::proj_energy_nums() {
+const field::Numbers<ham_t, c_ndim_wf> & wf::Refs::proj_energy_nums() {
     uint_t ipart = 0ul;
     for (auto& ref: m_refs) m_proj_energy_nums[ipart++] = ref.proj_energy_num();
     return m_proj_energy_nums;
 }
 
-const field::Numbers<wf_t, c_ndim_wf> & wf::References::weights() {
+const field::Numbers<wf_t, c_ndim_wf> & wf::Refs::weights() {
     uint_t ipart = 0ul;
     for (auto& ref: m_refs) {
         m_weights[ipart] = ref.weight();

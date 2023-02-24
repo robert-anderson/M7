@@ -73,7 +73,7 @@ class Solver {
     /**
      * reference many-body basis functions (MBFs)
      */
-    wf::References m_refs;
+    wf::Refs m_refs;
     /**
      * Hartree-Fock basis function, allocated only when H satisfies the Brillouin theorem wrt the initial reference
      */

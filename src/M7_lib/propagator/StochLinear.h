@@ -51,7 +51,7 @@ public:
 
     v_t<prob_t> excit_gen_case_probs() const override;
 
-    void update(uint_t icycle, const wf::Fci &wf, const wf::References& refs) override;
+    void update(uint_t icycle, const wf::Fci &wf, const wf::Refs& refs) override;
 
     hash::digest_t checksum_() const override;
 

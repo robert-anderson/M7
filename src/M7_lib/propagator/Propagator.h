@@ -66,7 +66,7 @@ public:
         return m_tau;
     }
 
-    virtual void update(uint_t icycle, const wf::Fci &wf, const wf::References& refs);
+    virtual void update(uint_t icycle, const wf::Fci &wf, const wf::Refs& refs);
 
     virtual uint_t ncase_excit_gen() const {
         return 0;

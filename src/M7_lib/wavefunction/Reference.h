@@ -103,16 +103,16 @@ namespace wf {
         const ham_t& proj_energy_num() const;
     };
 
-/**
- * Wavefunctions have many parts in general, and each of these may require different reference ONVs, so here we define
- * a vector of the above-defined single part Ref class
- */
-    struct References {
+    /**
+     * Wavefunctions have many parts in general, and each of these may require different reference ONVs, so here we
+     * define a vector of the above-defined single part Ref class
+     */
+    struct Refs {
         v_t<Ref> m_refs;
         buffered::Numbers<ham_t, c_ndim_wf> m_proj_energy_nums;
         buffered::Numbers<wf_t, c_ndim_wf> m_weights;
 
-        References(const conf::Reference& opts, const Hamiltonian& ham, const Fci& wf, v_t<TableBase::Loc> locs);
+        Refs(const conf::Reference& opts, const Hamiltonian& ham, const Fci& wf, v_t<TableBase::Loc> locs);
 
         const Ref& operator[](const uint_t& ipart) const;
 

@@ -41,7 +41,7 @@ void ExactLinear::diagonal(wf::Fci& wf, Walker& walker, const uint_t& ipart) {
     wf.scale_weight(walker, ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }
 
-void ExactLinear::update(uint_t icycle, const wf::Fci &wf, const wf::References& refs) {
+void ExactLinear::update(uint_t icycle, const wf::Fci &wf, const wf::Refs& refs) {
     Propagator::update(icycle, wf, refs);
     m_mag_log.update(icycle, m_tau);
 }

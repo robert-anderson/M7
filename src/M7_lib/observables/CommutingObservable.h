@@ -23,11 +23,11 @@ namespace commuting_obs {
         /**
          * pointer to the references
          */
-        const wf::References* m_refs;
+        const wf::Refs* m_refs;
 
         NdReduction<ham_t, c_ndim_wf> m_proj_num;
 
-        Estimator(const Hamiltonian* op, const wf::References* refs);
+        Estimator(const Hamiltonian* op, const wf::Refs* refs);
 
         /**
          * occupied MBFs connected to the reference must contribute to the numerator inner product <ref | H | mbf>
@@ -46,7 +46,7 @@ namespace commuting_obs {
         const SpinSquareFrmHam m_frm_ham;
         const Hamiltonian m_op;
         Estimator m_est;
-        SpinSquare(const sys::frm::Sector& sector, const wf::References* refs):
+        SpinSquare(const sys::frm::Sector& sector, const wf::Refs* refs):
                 m_frm_ham(sector), m_op(&m_frm_ham), m_est(&m_op, refs){}
     };
 }
