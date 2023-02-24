@@ -6,7 +6,7 @@
 #define M7_INSTESTS_H
 
 #include "CommutingObservable.h"
-#include "Reference.h"
+#include "M7_lib/wavefunction/Reference.h"
 
 /**
  * Instantaneous estimators. Optional stats that are linear in the wavefunction and can therefore be timestep-resolved

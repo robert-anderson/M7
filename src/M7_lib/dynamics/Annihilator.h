@@ -5,13 +5,9 @@
 #ifndef M7_ANNIHILATOR_H
 #define M7_ANNIHILATOR_H
 
-
 #include <M7_lib/wavefunction/Wavefunction.h>
 #include <M7_lib/wavefunction/Reference.h>
 #include <M7_lib/bilinear/Rdms.h>
-#include "Wavefunction.h"
-#include "Reference.h"
-
 
 /**
  * updates the state of the stored wavefunction subject to the new walkers in the receive buffer,

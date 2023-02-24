@@ -3,8 +3,6 @@
 //
 
 #include "Annihilator.h"
-#include "Wavefunction.h"
-#include "Reference.h"
 
 comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
     if (m_rdms) {

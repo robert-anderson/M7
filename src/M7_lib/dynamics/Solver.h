@@ -17,13 +17,12 @@
 #include <M7_lib/io/ParallelStats.h>
 #include <M7_lib/mae/Maes.h>
 #include <M7_lib/wavefunction/Reference.h>
+#include <M7_lib/wavefunction/Wavefunction.h>
 #include <M7_lib/wavefunction/DeterministicSubspace.h>
 
 #include "M7_lib/propagator/Propagator.h"
 #include "M7_lib/observables/InstEsts.h"
 #include "Annihilator.h"
-#include "Wavefunction.h"
-#include "Reference.h"
 
 /**
  * This central class brings together wavefunctions, propagator, expectation values, and statistics.

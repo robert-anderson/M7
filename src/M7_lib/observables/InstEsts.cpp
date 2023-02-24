@@ -3,7 +3,6 @@
 //
 
 #include "InstEsts.h"
-#include "Reference.h"
 
 InstEsts::InstEsts(const sys::Sector sector, const wf::References* refs, const conf::InstEsts& opts) {
     REQUIRE_TRUE(refs, "Invalid pointer to reference MBFs");

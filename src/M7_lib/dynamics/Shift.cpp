@@ -3,8 +3,6 @@
 //
 
 #include "Shift.h"
-#include "Wavefunction.h"
-#include "Reference.h"
 
 Shift::Shift(const conf::Document &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         m_opts(opts),

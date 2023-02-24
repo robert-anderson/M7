@@ -14,8 +14,7 @@
 
 #include "MagnitudeLogger.h"
 #include "M7_lib/wavefunction/Reference.h"
-#include "Wavefunction.h"
-#include "Reference.h"
+#include "M7_lib/wavefunction/Wavefunction.h"
 
 /**
  * responsible for defining and updating the shift subtracted from the diagonal H elements in

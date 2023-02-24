@@ -8,9 +8,8 @@
 #include <M7_lib/sample/PRNG.h>
 #include <M7_lib/excitgen/ExcitGenGroup.h>
 
+#include "M7_lib/wavefunction/Wavefunction.h"
 #include "M7_lib/propagator/Propagator.h"
-#include "Wavefunction.h"
-#include "Reference.h"
 
 class StochLinear : public Propagator {
 protected:

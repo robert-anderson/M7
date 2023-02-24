@@ -3,8 +3,6 @@
 //
 
 #include "ExactLinear.h"
-#include "Wavefunction.h"
-#include "Reference.h"
 
 ExactLinear::ExactLinear(
         const Hamiltonian& ham, const conf::Document& opts,

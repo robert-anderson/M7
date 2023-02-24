@@ -6,7 +6,6 @@
 #define M7_COMMUTINGOBSERVABLE_H
 
 #include "M7_lib/wavefunction/Reference.h"
-#include "Reference.h"
 
 namespace commuting_obs {
         /**

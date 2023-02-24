@@ -3,7 +3,6 @@
 //
 
 #include "CommutingObservable.h"
-#include "Reference.h"
 
 commuting_obs::Estimator::Estimator(const Hamiltonian* op, const wf::References* refs) :
         m_op(op), m_refs(refs), m_proj_num(refs->m_proj_energy_nums.m_format){

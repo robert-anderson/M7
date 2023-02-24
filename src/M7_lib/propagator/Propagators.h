@@ -10,7 +10,7 @@
 #include "ExactLinear.h"
 #include "StochLinear.h"
 #include "M7_lib/util/Pointer.h"
-#include "Wavefunction.h"
+#include "M7_lib/wavefunction/Wavefunction.h"
 
 namespace props {
 

@@ -9,8 +9,8 @@
 
 #include "M7_lib/propagator/Propagator.h"
 #include "M7_lib/foreach/ConnForeachGroup.h"
-#include "Wavefunction.h"
-#include "Reference.h"
+#include "M7_lib/wavefunction/Reference.h"
+#include "M7_lib/wavefunction/Wavefunction.h"
 
 class ExactLinear : public Propagator {
     /**

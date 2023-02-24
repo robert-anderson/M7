@@ -3,8 +3,6 @@
 //
 
 #include "StochLinear.h"
-#include "Wavefunction.h"
-#include "Reference.h"
 
 StochLinear::StochLinear(const Hamiltonian& ham, const conf::Document& opts,
                                            const wf::Fci& wf) :

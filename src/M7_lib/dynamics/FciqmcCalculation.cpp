@@ -7,7 +7,6 @@
 
 #include "FciqmcCalculation.h"
 #include "M7_lib/propagator/Propagators.h"
-#include "Wavefunction.h"
 
 void fciqmc::run(const conf::Document &opts) {
     /*

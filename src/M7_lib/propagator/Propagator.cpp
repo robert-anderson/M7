@@ -3,8 +3,6 @@
 //
 
 #include "Propagator.h"
-#include "Wavefunction.h"
-#include "Reference.h"
 
 std::unique_ptr<guide::Wavefunction> Propagator::make_imp_samp_guide(const conf::GuideWavefunction& opts) const {
     const str_t fmt = "Guiding propagation via importance sampling with {} wavefunction";

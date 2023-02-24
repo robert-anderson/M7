@@ -3,8 +3,6 @@
 //
 
 #include "Solver.h"
-#include "Wavefunction.h"
-#include "Reference.h"
 
 std::unique_ptr<shared_rows::Walker> Solver::make_hf() const {
     /*

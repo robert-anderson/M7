@@ -12,8 +12,7 @@
 #include "M7_lib/dynamics/Shift.h"
 #include "Guide.h"
 #include "M7_lib/wavefunction/Reference.h"
-#include "Wavefunction.h"
-#include "Reference.h"
+#include "M7_lib/wavefunction/Wavefunction.h"
 
 /**
  * This class is not optionally archivable,
