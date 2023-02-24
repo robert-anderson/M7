@@ -17,7 +17,7 @@
 
 namespace wf {
 
-    class Reference : public shared_rows::Walker {
+    class Ref : public shared_rows::Walker {
         const Hamiltonian& m_ham;
         const Fci& m_wf;
         /**
@@ -48,8 +48,8 @@ namespace wf {
         Reduction<ham_t> m_proj_energy_num;
 
     public:
-        Reference(const conf::Reference& opts, const Hamiltonian& ham,
-                  const Fci& wf, uint_t ipart, TableBase::Loc loc);
+        Ref(const conf::Reference& opts, const Hamiltonian& ham,
+            const Fci& wf, uint_t ipart, TableBase::Loc loc);
 
         uint_t occupied_ncycle(uint_t icycle) const {
             return m_all.m_row.occupied_ncycle(icycle);
@@ -105,16 +105,16 @@ namespace wf {
 
 /**
  * Wavefunctions have many parts in general, and each of these may require different reference ONVs, so here we define
- * a vector of the above-defined single part Reference class
+ * a vector of the above-defined single part Ref class
  */
     struct References {
-        v_t<Reference> m_refs;
+        v_t<Ref> m_refs;
         buffered::Numbers<ham_t, c_ndim_wf> m_proj_energy_nums;
         buffered::Numbers<wf_t, c_ndim_wf> m_weights;
 
         References(const conf::Reference& opts, const Hamiltonian& ham, const Fci& wf, v_t<TableBase::Loc> locs);
 
-        const Reference& operator[](const uint_t& ipart) const;
+        const Ref& operator[](const uint_t& ipart) const;
 
         void begin_cycle(uint_t icycle);
 

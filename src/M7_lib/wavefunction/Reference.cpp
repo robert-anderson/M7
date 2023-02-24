@@ -5,8 +5,8 @@
 #include "Reference.h"
 #include "Wavefunction.h"
 
-wf::Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
-                         const wf::Fci &wf, uint_t ipart, TableBase::Loc loc) :
+wf::Ref::Ref(const conf::Reference &opts, const Hamiltonian &ham,
+             const wf::Fci &wf, uint_t ipart, TableBase::Loc loc) :
         shared_rows::Walker("reference", wf.m_store, loc),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
@@ -19,7 +19,7 @@ wf::Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
               m_ipart, mbf(), m_all.m_row.m_hdiag);
 }
 
-void wf::Reference::update_ref_conn_flags() {
+void wf::Ref::update_ref_conn_flags() {
     auto row = m_wf.m_store.m_row;
     for (row.restart(); row; ++row){
         if (row.m_mbf.is_zero()) continue;
@@ -27,7 +27,7 @@ void wf::Reference::update_ref_conn_flags() {
     }
 }
 
-void wf::Reference::accept_candidate(uint_t icycle) {
+void wf::Ref::accept_candidate(uint_t icycle) {
     /*
      * only continue if the redefinition threshold is non-zero
      */
@@ -53,7 +53,7 @@ void wf::Reference::accept_candidate(uint_t icycle) {
     }
 }
 
-void wf::Reference::contrib_row(const ::Walker& walker) {
+void wf::Ref::contrib_row(const ::Walker& walker) {
     auto weight = 0.5*(walker.m_weight[m_ipart]+walker.m_weight[m_wf.ipart_replica(m_ipart)]);
     if (std::abs(weight) > std::abs(m_candidate_weight)) {
         m_candidate_weight = std::abs(weight);
@@ -64,28 +64,28 @@ void wf::Reference::contrib_row(const ::Walker& walker) {
     }
 }
 
-void wf::Reference::begin_cycle(uint_t icycle) {
+void wf::Ref::begin_cycle(uint_t icycle) {
     accept_candidate(icycle);
     m_candidate_weight = 0.0;
     m_summables.zero_all_local();
     update();
 }
 
-void wf::Reference::end_cycle(uint_t /*icycle*/) {
+void wf::Ref::end_cycle(uint_t /*icycle*/) {
     m_summables.all_sum();
 }
 
-bool wf::Reference::is_connected(const field::Mbf &mbf) const {
+bool wf::Ref::is_connected(const field::Mbf &mbf) const {
     m_conn[mbf].connect(this->mbf(), mbf);
     return ham::is_significant(m_ham.get_element(this->mbf(), m_conn[mbf]));
 }
 
-void wf::Reference::make_numerator_contribs(const field::Mbf &mbf, const wf_t& weight) {
+void wf::Ref::make_numerator_contribs(const field::Mbf &mbf, const wf_t& weight) {
     m_conn[mbf].connect(mbf, this->mbf());
     m_proj_energy_num.m_local += m_ham.get_element(mbf, m_conn[mbf]) * weight;
 }
 
-const ham_t& wf::Reference::proj_energy_num() const {
+const ham_t& wf::Ref::proj_energy_num() const {
     return m_proj_energy_num.m_reduced;
 }
 
@@ -98,7 +98,7 @@ wf::References::References(const conf::Reference &opts, const Hamiltonian &ham, 
     for (uint_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(opts, ham, wf, ipart, locs[ipart]);
 }
 
-const wf::Reference & wf::References::operator[](const uint_t &ipart) const {
+const wf::Ref & wf::References::operator[](const uint_t &ipart) const {
     DEBUG_ASSERT_LT(ipart, m_refs.size(), "reference part index OOB");
     return m_refs[ipart];
 }
