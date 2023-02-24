@@ -5,15 +5,15 @@
 #include "HfExcitHists.h"
 
 hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_comp_t thresh) :
-        m_inds(hdf5::GroupReader(parent, name), "indices", mpi::on_node_i_am_root()),
-        m_vals(hdf5::GroupReader(parent, name), "values", mpi::on_node_i_am_root()) {
+        m_inds(hdf5::GroupReader(parent, name), "indices", mpi::on_node_i_am_root(), true),
+        m_vals(hdf5::GroupReader(parent, name), "values", mpi::on_node_i_am_root(), true) {
     REQUIRE_EQ(m_inds.nrow(), m_vals.nelement(),
                "number of index arrays is not the same as the number of values");
-    if (mpi::on_node_i_am_root()){
-        auto order = m_vals.sort_inds(false, true);
-        m_inds.reorder_rows(order);
-        m_vals.reorder(order);
-    }
+    uintv_t order;
+    if (mpi::on_node_i_am_root()) m_vals.sort_inds(order, false, true);
+    m_inds.reorder_rows(order);
+    m_vals.reorder(order);
+    mpi::barrier_on_node();
     while(m_nelement < m_vals.nelement() && std::abs(m_vals[m_nelement]) >= thresh) ++m_nelement;
 }
 
@@ -23,6 +23,16 @@ hf_excit_hist::Initializer::Initializer(Wavefunction &wf, const Mbf &hf, str_t f
         m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf), m_ncreated({2*max_power()+1}) {
     logging::info("Maximum-magnitude C2 coefficient: {}", m_c2.m_vals[0]);
     logging::info("Threshold of {} implies maximum relevant power of C2 is {}", m_thresh, max_power());
+}
+
+uint_t hf_excit_hist::Initializer::max_power() {
+    const auto limit = uint_t(m_wf.m_sector.m_frm.m_elecs) / 2;
+    wf_comp_t product = 1.0;
+    for (uint_t ipower = 0ul; ipower < limit; ++ipower) {
+        product *= std::abs(m_c2.m_vals[ipower]);
+        if (product < m_thresh) return ipower;
+    }
+    return limit;
 }
 
 bool hf_excit_hist::Initializer::apply(Mbf &mbf, uint_t ientry) {
@@ -71,8 +81,8 @@ void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_
                 auto& row = m_wf.m_store.lookup_or_insert(mbf);
                 row.m_permanitiator.set();
                 if (ipower==1) row.m_ref_conn.set();
-                // permanitiators cannot be deleted - need to protect
-                row.protect();
+                // permanitiators cannot be deleted - need to protect if not already
+                if (!row.is_protected()) row.protect();
                 ++m_ncreated.m_local[ipower * 2];
                 if (m_cancellation) row.m_weight += (phase(mbf) ? -1 : 1) * product;
                 // if not observing cancellation, no need to store the product
@@ -189,7 +199,7 @@ void hf_excit_hist::Accumulators::add(const Mbf &mbf, wf_t weight) {
     auto& lookup = table.lookup(key);
     // if the excitation is already in the table, it is added regardless of current weight
     if (lookup) lookup.m_values[0] += weight;
-        // if it's not already histogrammed, it can be added only if the instantaneous weight is sufficient
+    // if it's not already histogrammed, it can be added only if the instantaneous weight is sufficient
     else if (std::abs(weight) >= std::abs(m_hf->weight(0)*m_thresh)) {
         auto& insert_row = table.insert(key);
         insert_row.m_values += weight;

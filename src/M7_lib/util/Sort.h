@@ -15,6 +15,8 @@ namespace sort {
     /**
      * @tparam T
      *  floating point element type
+     * @param order
+     *  output indices which would put the data in the required order
      * @param v
      *  data to sort
      * @param number of elements in data
@@ -27,28 +29,35 @@ namespace sort {
      *  index vector which would sort v to the desired ordering
      */
     template<typename T>
-    uintv_t inds(const T* v, uint_t nelement, bool asc, bool abs_val) {
-        uintv_t out(nelement);
-        std::iota(out.begin(), out.end(), 0);
+    void inds(uintv_t& order, const T* v, uint_t nelement, bool asc, bool abs_val) {
+        order.resize(nelement);
+        std::iota(order.begin(), order.end(), 0);
         if (asc) {
             if (abs_val)
-                std::stable_sort(out.begin(), out.end(), [&v](uint_t i, uint_t j) {
+                std::stable_sort(order.begin(), order.end(), [&v](uint_t i, uint_t j) {
                     return std::abs(v[i]) < std::abs(v[j]);
                 });
             else
-                std::stable_sort(out.begin(), out.end(), [&v](uint_t i, uint_t j) {
+                std::stable_sort(order.begin(), order.end(), [&v](uint_t i, uint_t j) {
                     return arith::real(v[i]) < arith::real(v[j]);
                 });
         } else {
             if (abs_val)
-                std::stable_sort(out.begin(), out.end(), [&v](uint_t i, uint_t j) {
+                std::stable_sort(order.begin(), order.end(), [&v](uint_t i, uint_t j) {
                     return std::abs(v[i]) > std::abs(v[j]);
                 });
             else
-                std::stable_sort(out.begin(), out.end(), [&v](uint_t i, uint_t j) {
+                std::stable_sort(order.begin(), order.end(), [&v](uint_t i, uint_t j) {
                     return arith::real(v[i]) > arith::real(v[j]);
                 });
         }
+    }
+
+
+    template<typename T>
+    uintv_t inds(const T* v, uint_t nelement, bool asc, bool abs_val) {
+        uintv_t out;
+        inds(out, v, nelement, asc, abs_val);
         return out;
     }
 

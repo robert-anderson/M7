@@ -539,6 +539,7 @@ namespace dense {
 
     template<typename T>
     class Vector : public Matrix<T> {
+        using MatrixBase::m_bw;
         using MatrixBase::m_ncol;
         using MatrixBase::m_nrow;
         using MatrixBase::set_sizes;
@@ -557,21 +558,28 @@ namespace dense {
         void reorder(const uintv_t& order) {
             if (i_can_globally_modify())
                 sort::reorder(MatrixBase::begin(), MatrixBase::m_element_size, order);
+            if (m_bw.node_shared()) mpi::barrier_on_node();
         }
 
         void sort_inplace(bool asc, bool absval) {
             if (i_can_globally_modify())
                 sort::inplace(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
+            if (m_bw.node_shared()) mpi::barrier_on_node();
         }
 
         Vector<T>& sorted(bool asc, bool absval) {
             if (i_can_globally_modify())
                 sort::inplace(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
+            if (m_bw.node_shared()) mpi::barrier_on_node();
             return *this;
         }
 
-        uintv_t sort_inds(bool asc, bool absval) {
-            return sort::inds(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
+        uintv_t sort_inds(bool asc, bool absval) const {
+            return sort::inds(Matrix<T>::ctbegin(), MatrixBase::m_nelement, asc, absval);
+        }
+
+        void sort_inds(uintv_t& order, bool asc, bool absval) const {
+            sort::inds(order, Matrix<T>::ctbegin(), MatrixBase::m_nelement, asc, absval);
         }
 
         Vector(const hdf5::NodeReader& nr, const str_t name, bool this_rank, bool node_shared=false):

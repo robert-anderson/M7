@@ -437,7 +437,7 @@ public:
         DEBUG_ASSERT_TRUE(protection_level(i), "can't unprotect a record which already has zero protection");
         auto it = m_protected_rows.find(i);
         if (it->second==1ul) m_protected_rows.erase(it);
-        --it->second;
+        else --it->second;
     }
 
     /**

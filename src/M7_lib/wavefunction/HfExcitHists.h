@@ -63,19 +63,9 @@ namespace hf_excit_hist {
     private:
 
         /**
-         * if a = abs_max_coeff, then for a given power n, a^n is the largest possible power that can be generated
-         * if a^n < thresh, then the power n need not be considered for permanitiator creation
-         * a^r = thresh when r = ln(thresh)/ln(a)
-         * a^floor(r) is >= thresh
-         * a^ceil(r) is <= thresh
-         * so n = floor(r) gives the maximum power of C2 that need be considered
+         * cumulatively multiply the first n ci coefficients until the product falls below the threshold
          */
-        uint_t max_power() {
-            const auto limit = uint_t(m_wf.m_sector.m_frm.m_elecs) / 2;
-            if (!m_thresh) return limit;
-            const auto abs_max_coeff = std::abs(m_c2.m_vals[0]);
-            return std::min(limit, uint_t(std::floor(std::log(m_thresh) / std::log(abs_max_coeff))));
-        }
+        uint_t max_power();
 
         bool apply(field::Mbf& mbf, uint_t ientry);
 
