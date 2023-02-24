@@ -43,7 +43,7 @@ class Rdms {
 
 public:
     const Epoch& m_accum_epoch;
-    Reduction<wf_t> m_total_norm;
+    reduction::Scalar<wf_t> m_total_norm;
 
     Rdms(const conf::Rdms& opts, v_t<OpSig> ranksigs, sys::Sector sector, const Epoch& accum_epoch);
 

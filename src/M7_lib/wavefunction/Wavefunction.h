@@ -43,44 +43,44 @@ namespace wf {
         /**
          * collection of all reductions which are summed at the end of every cycle
          */
-        ReductionSyndicate m_summables;
+        reduction::Syndicate m_summables;
 
         /**
          * number of initiator MBFs in each part of the WF
          */
-        NdReduction<uint_t, c_ndim_wf> m_ninitiator;
+        reduction::NdArray<uint_t, c_ndim_wf> m_ninitiator;
         /**
          * number of MBFs with any associated weight in any part
          */
-        Reduction<uint_t> m_nocc_mbf;
+        reduction::Scalar<uint_t> m_nocc_mbf;
         /**
          * change in the number of occupied MBFs
          */
-        Reduction<int> m_delta_nocc_mbf;
+        reduction::Scalar<int> m_delta_nocc_mbf;
         /**
          * L1 norm of each part of the WF
          */
-        NdReduction<wf_comp_t, c_ndim_wf> m_nwalker;
+        reduction::NdArray<wf_comp_t, c_ndim_wf> m_nwalker;
         /**
          * change in the L1 norm
          */
-        NdReduction<wf_comp_t, c_ndim_wf> m_delta_nwalker;
+        reduction::NdArray<wf_comp_t, c_ndim_wf> m_delta_nwalker;
         /**
          * square of the L2 norm of each part of the WF
          */
-        NdReduction<wf_comp_t, c_ndim_wf> m_l2_norm_square;
+        reduction::NdArray<wf_comp_t, c_ndim_wf> m_l2_norm_square;
         /**
          * change in the L2 norm
          */
-        NdReduction<wf_comp_t, c_ndim_wf> m_delta_l2_norm_square;
+        reduction::NdArray<wf_comp_t, c_ndim_wf> m_delta_l2_norm_square;
         /**
          * number of walkers received in spawning process
          */
-        NdReduction<wf_comp_t, c_ndim_wf> m_nspawned;
+        reduction::NdArray<wf_comp_t, c_ndim_wf> m_nspawned;
         /**
          * number of walkers annihilated in the loop_over_spawned method for each part
          */
-        NdReduction<wf_comp_t, c_ndim_wf> m_nannihilated;
+        reduction::NdArray<wf_comp_t, c_ndim_wf> m_nannihilated;
 
         Fci(const conf::Document& opts, const sys::Sector& sector);
 
@@ -224,8 +224,7 @@ namespace wf {
     private:
 
 
-        void orthogonalize(NdReduction<wf_t, 3>& overlaps,
-                           uint_t iroot, uint_t jroot, uint_t ireplica) {
+        void orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica) {
             ASSERT(iroot <= jroot);
             auto& row = m_store.m_row;
             const auto ipart_src = m_format.flatten({iroot, ireplica});
@@ -272,7 +271,7 @@ namespace wf {
          */
         void orthogonalize() {
             // bra root, ket root, replica
-            NdReduction<wf_t, 3> overlaps({nroot(), nroot(), nreplica()});
+            reduction::NdArray<wf_t, 3> overlaps({nroot(), nroot(), nreplica()});
             auto& row = m_store.m_row;
             for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
                 for (uint_t jroot = iroot; jroot < nroot(); ++jroot) {

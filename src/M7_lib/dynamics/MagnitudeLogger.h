@@ -29,11 +29,11 @@ struct MagnitudeLogger {
     /**
      * number of draws made in each excitation case
      */
-    NdReduction<ham_comp_t, 1ul> m_ndraw;
+    reduction::NdArray<ham_comp_t, 1ul> m_ndraw;
     /**
      * largest generated magnitude (|helement|/prob) from a single integerized walker
      */
-    NdReduction<ham_comp_t, 1ul> m_gamma;
+    reduction::NdArray<ham_comp_t, 1ul> m_gamma;
     /**
      * working array for assigning new probability values to excitation generator group object
      */

@@ -44,8 +44,8 @@ namespace wf {
          */
         const double m_redefinition_thresh;
 
-        ReductionSyndicate m_summables;
-        Reduction<ham_t> m_proj_energy_num;
+        reduction::Syndicate m_summables;
+        reduction::Scalar<ham_t> m_proj_energy_num;
 
     public:
         Ref(const conf::Reference& opts, const Hamiltonian& ham,

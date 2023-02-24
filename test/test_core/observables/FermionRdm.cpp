@@ -8,7 +8,6 @@
 #include <M7_lib/dynamics/Solver.h>
 #include <M7_lib/field/Mbf.h>
 #include "gtest/gtest.h"
-#include "Wavefunction.h"
 
 
 #ifndef ENABLE_BOSONS

@@ -48,7 +48,7 @@ struct GlobalExtremalRows {
      *
      * After the global sort, the local number is revised lower or kept the same.
      */
-    Reduction<uint_t> m_ninclude;
+    reduction::Scalar<uint_t> m_ninclude;
     /**
      * once the number of included rows over all ranks is at least the number requested, the rank index and sorting
      * value will be loaded into a local table, and then gathered into this table on the root rank only, it is then

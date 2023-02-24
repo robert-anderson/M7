@@ -31,7 +31,7 @@
 
 class Epoch {
     str_t m_name;
-    Reduction<uint_t> m_icycle_start;
+    reduction::Scalar<uint_t> m_icycle_start;
 
 public:
     explicit Epoch(str_t name);

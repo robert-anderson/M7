@@ -8,7 +8,7 @@
 #include "M7_lib/wavefunction/Reference.h"
 
 namespace commuting_obs {
-        /**
+    /**
      * commuting operators have simultaneous eigenfunctions, and so for operators A with the property [A, H] = 0
      * this can be exploited to obtain estimated eigenvalues from the (stochastic) wavefunction
      * A |Psi> = a |Psi>
@@ -25,7 +25,7 @@ namespace commuting_obs {
          */
         const wf::Refs* m_refs;
 
-        NdReduction<ham_t, c_ndim_wf> m_proj_num;
+        reduction::NdArray<ham_t, c_ndim_wf> m_proj_num;
 
         Estimator(const Hamiltonian* op, const wf::Refs* refs);
 

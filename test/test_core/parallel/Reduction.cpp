@@ -7,7 +7,7 @@
 
 TEST(Reduction, NdAllSum) {
     const uint_t nrow = 5, ncol = 6;
-    NdReduction<uint_t, 2> reduction({nrow, ncol});
+    reduction::NdArray<uint_t, 2> reduction({nrow, ncol});
     for (uint_t irow = 0ul; irow < nrow; ++irow)
         for (uint_t icol = 0ul; icol < ncol; ++icol)
             reduction.m_local[{irow, icol}] = hash::in_range({irow, icol, mpi::irank()}, 0, 120);
@@ -27,16 +27,16 @@ TEST(Reduction, NdAllSum) {
 
 TEST(Reduction, NdAllSumSyndicate) {
     const uint_t nrow = 5, ncol = 6;
-    NdReduction<uint_t, 2> reduction({nrow, ncol});
+    reduction::NdArray<uint_t, 2> reduction({nrow, ncol});
     for (uint_t irow = 0ul; irow < nrow; ++irow)
         for (uint_t icol = 0ul; icol < ncol; ++icol)
             reduction.m_local[{irow, icol}] = hash::in_range({irow, icol, mpi::irank()}, 0, 120);
-    NdReduction<int, 2> reduction2({nrow, ncol});
+    reduction::NdArray<int, 2> reduction2({nrow, ncol});
     for (uint_t irow = 0ul; irow < nrow; ++irow)
         for (uint_t icol = 0ul; icol < ncol; ++icol)
             reduction2.m_local[{irow, icol}] = hash::in_range({irow, icol, mpi::irank()}, 0, 150);
 
-    ReductionSyndicate syndicate;
+    reduction::Syndicate syndicate;
     syndicate.add_members(reduction, reduction2);
     syndicate.all_sum();
 
