@@ -16,7 +16,7 @@ The FCIQMC method is founded on the assumption that stochastic application of th
     \ketPsinext = (1-\tau\Hop)\ketPsin
 \f]
 with a suitably small *timestep* \f$\tau\f$, 
-where the \ref Wavefunction is a linear superposition of Slater determinants
+where the \ref Fci is a linear superposition of Slater determinants
 \f[
     \label{eq:psidef}
     \ketPsi \equiv \sum_\bfi \Ci \ketDi
@@ -39,7 +39,7 @@ In the expression of the FCIQMC algorithm, it is convenient to use the following
 \f]
 
 Structurally, the FCIQMC code is contained within a \ref FciqmcCalculation object, which serves as a high-level class tying together the more intricate objects in the implementation.
-One such crucial object is the \ref Wavefunction, which in turn contains a system of three central \ref List objects: namely a \ref WalkerList --- which records the state of the discretised \f$\ketPsin\f$ at an iteration \f$n\f$, and two \ref SpawnList objects --- which are responsible for the MPI-based communication of stochastically-generated off-diagonal Monte Carlo moves.
+One such crucial object is the \ref Fci, which in turn contains a system of three central \ref List objects: namely a \ref WalkerList --- which records the state of the discretised \f$\ketPsin\f$ at an iteration \f$n\f$, and two \ref SpawnList objects --- which are responsible for the MPI-based communication of stochastically-generated off-diagonal Monte Carlo moves.
 
 ### Spawning and Death
  walker list            | send buffer    | receive buffer |

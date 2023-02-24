@@ -6,6 +6,7 @@
 #define M7_COMMUTINGOBSERVABLE_H
 
 #include "M7_lib/wavefunction/Reference.h"
+#include "Reference.h"
 
 namespace commuting_obs {
         /**
@@ -23,11 +24,11 @@ namespace commuting_obs {
         /**
          * pointer to the references
          */
-        const References* m_refs;
+        const wf::References* m_refs;
 
         NdReduction<ham_t, c_ndim_wf> m_proj_num;
 
-        Estimator(const Hamiltonian* op, const References* refs);
+        Estimator(const Hamiltonian* op, const wf::References* refs);
 
         /**
          * occupied MBFs connected to the reference must contribute to the numerator inner product <ref | H | mbf>
@@ -46,7 +47,7 @@ namespace commuting_obs {
         const SpinSquareFrmHam m_frm_ham;
         const Hamiltonian m_op;
         Estimator m_est;
-        SpinSquare(const sys::frm::Sector& sector, const References* refs):
+        SpinSquare(const sys::frm::Sector& sector, const wf::References* refs):
                 m_frm_ham(sector), m_op(&m_frm_ham), m_est(&m_op, refs){}
     };
 }

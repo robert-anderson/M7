@@ -4,13 +4,14 @@
 
 #include "DeterministicSubspace.h"
 #include "M7_lib/util/Pointer.h"
+#include "Wavefunction.h"
 
 #if 0
 field::Mbf &DeterministicDataRow::key_field() {
     return m_mbf;
 }
 
-DeterministicDataRow::DeterministicDataRow(const Wavefunction &wf) :
+DeterministicDataRow::DeterministicDataRow(const Fci &wf) :
         m_mbf(this, wf.m_sector, "mbf"),
         m_weight(this, wf.m_store.m_row.m_weight.m_format, "weight") {}
 
@@ -40,7 +41,7 @@ void DeterministicSubspace::make_rdm_contrib(Rdms &rdms, const shared_rows::Walk
 }
 
 DeterministicSubspace::DeterministicSubspace(
-        const conf::Semistochastic &opts, Wavefunction &wf, uint_t iroot) :
+        const conf::Semistochastic &opts, wf::Fci &wf, uint_t iroot) :
         shared_rows::Set<Walker>("semistochastic", wf.m_store),
         m_opts(opts), m_wf(wf), m_iroot(iroot), m_local_row(wf.m_store.m_row), m_iparts(make_iparts()){}
 
@@ -53,7 +54,7 @@ void DeterministicSubspace::add_(Walker &row) {
 void DeterministicSubspace::select_highest_weighted() {
     auto row1 = m_wf.m_store.m_row;
     auto row2 = row1;
-    Wavefunction::weights_gxr_t gxr(row1.m_weight, row2.m_weight, true, true, m_iparts);
+    wf::Fci::weights_gxr_t gxr(row1.m_weight, row2.m_weight, true, true, m_iparts);
     gxr.find(m_opts.m_size);
     for (uint_t i = 0ul; i < gxr.m_ninclude.m_local; ++i) {
         row1.jump(gxr[i]);
@@ -167,7 +168,7 @@ DeterministicSubspaces::operator bool() const {
 }
 
 void DeterministicSubspaces::init(const Hamiltonian &ham, const Bilinears &bilinears,
-                                  Wavefunction &wf, uint_t icycle) {
+                                  wf::Fci &wf, uint_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
 

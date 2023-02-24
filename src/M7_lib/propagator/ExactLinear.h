@@ -9,6 +9,8 @@
 
 #include "M7_lib/propagator/Propagator.h"
 #include "M7_lib/foreach/ConnForeachGroup.h"
+#include "Wavefunction.h"
+#include "Reference.h"
 
 class ExactLinear : public Propagator {
     /**
@@ -20,14 +22,14 @@ class ExactLinear : public Propagator {
     MagnitudeLogger m_mag_log;
 
 public:
-    ExactLinear(const Hamiltonian& ham, const conf::Document& opts, const Wavefunction& wf,
+    ExactLinear(const Hamiltonian& ham, const conf::Document& opts, const wf::Fci& wf,
                 bool only_nonzero_h_spawns=true);
 
-    void diagonal(Wavefunction &wf, Walker& walker, const uint_t& ipart) override;
+    void diagonal(wf::Fci &wf, Walker& walker, const uint_t& ipart) override;
 
-    void off_diagonal(Wavefunction &wf, const Walker& walker, const uint_t& dst_mbf) override;
+    void off_diagonal(wf::Fci &wf, const Walker& walker, const uint_t& dst_mbf) override;
 
-    void update(const uint_t &icycle, const Wavefunction &wf) override;
+    void update(uint_t icycle, const wf::Fci &wf, const wf::References& refs) override;
 };
 
 #endif //M7_EXACT_LINEAR_PROPAGATOR_H

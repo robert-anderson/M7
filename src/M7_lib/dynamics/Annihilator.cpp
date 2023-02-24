@@ -3,6 +3,8 @@
 //
 
 #include "Annihilator.h"
+#include "Wavefunction.h"
+#include "Reference.h"
 
 comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
     if (m_rdms) {
@@ -31,7 +33,7 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
     }
 }
 
-Annihilator::Annihilator(Wavefunction &wf, const Propagator &prop, const References &refs,
+Annihilator::Annihilator(wf::Fci &wf, const Propagator &prop, const wf::References &refs,
                          const shared_rows::Walker* hf, Rdms &rdms, const uint_t &icycle, wf_comp_t nadd) :
         m_wf(wf), m_prop(prop), m_refs(refs), m_hf(hf), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
         m_work_row1(wf.m_send_recv.m_row), m_work_row2(wf.m_send_recv.m_row), m_dst_walker(m_wf.m_store.m_row),

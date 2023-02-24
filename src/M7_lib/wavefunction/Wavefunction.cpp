@@ -25,7 +25,7 @@ opts.m_wavefunction.m_hash_mapping.m_remap_ratio
  */
 
 
-Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector) :
+wf::Fci::Fci(const conf::Document& opts, const sys::Sector& sector) :
     communicator::BasicSend<Walker, Spawn>(
         "wavefunction",
         // walker row:
@@ -68,7 +68,7 @@ Wavefunction::Wavefunction(const conf::Document& opts, const sys::Sector& sector
                   string::plural(m_dist.nblock()));
 }
 
-void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
+void wf::Fci::log_top_weighted(uint_t ipart, uint_t nrow) {
     buffered::Table<Walker> xr_gathered("global top weighted", m_store.m_row);
     {
         auto row1 = m_store.m_row;
@@ -110,11 +110,11 @@ void Wavefunction::log_top_weighted(uint_t ipart, uint_t nrow) {
     logging::info_table("Top-weighted WF elements for part "+std::to_string(ipart), rows, true, false, 1ul);
 }
 
-Wavefunction::~Wavefunction() {
+wf::Fci::~Fci() {
     for (uint_t ipart=0ul; ipart<npart(); ++ipart) log_top_weighted(ipart);
 }
 
-void Wavefunction::h5_write(const hdf5::NodeWriter& parent, str_t name) {
+void wf::Fci::h5_write(const hdf5::NodeWriter& parent, str_t name) {
     auto field_names = []() -> strv_t {
         if (c_enable_fermions != c_enable_bosons) return {"mbf", "weight"};
         else if (c_enable_fermions != c_enable_bosons) return {"mbf (fermion)", "mbf (boson)", "weight"};
@@ -123,8 +123,8 @@ void Wavefunction::h5_write(const hdf5::NodeWriter& parent, str_t name) {
     m_store.save(parent, name, field_names(), true);
 }
 
-void Wavefunction::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian& /*ham*/, const field::Mbf& /*ref*/,
-                           str_t /*name*/) {
+void wf::Fci::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian& /*ham*/, const field::Mbf& /*ref*/,
+                      str_t /*name*/) {
 #if 0
     m_store.clear();
     buffered::Table<Walker> m_buffer("", {m_store.m_row});
@@ -144,16 +144,16 @@ void Wavefunction::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian
 #endif
 }
 
-void Wavefunction::begin_cycle() {
+void wf::Fci::begin_cycle() {
     m_summables.zero_all_local();
     m_store.attempt_remap();
 }
 
-void Wavefunction::end_cycle() {
+void wf::Fci::end_cycle() {
     m_summables.all_sum();
 }
 
-wf_comp_t Wavefunction::square_norm(uint_t ipart) const {
+wf_comp_t wf::Fci::square_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto& row = m_store.m_row;
     for (row.restart(); row; ++row) {
@@ -163,7 +163,7 @@ wf_comp_t Wavefunction::square_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
-wf_comp_t Wavefunction::l1_norm(uint_t ipart) const {
+wf_comp_t wf::Fci::l1_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto& row = m_store.m_row;
     for (row.restart(); row; ++row) {
@@ -173,7 +173,7 @@ wf_comp_t Wavefunction::l1_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
-void Wavefunction::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
+void wf::Fci::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
     wf_t& weight = walker.m_weight[ipart];
     m_delta_nwalker.m_local[ipart] += std::abs(new_weight);
     m_delta_nwalker.m_local[ipart] -= std::abs(weight);
@@ -182,19 +182,19 @@ void Wavefunction::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
     weight = new_weight;
 }
 
-void Wavefunction::change_weight(Walker& walker, uint_t ipart, wf_t delta) {
+void wf::Fci::change_weight(Walker& walker, uint_t ipart, wf_t delta) {
     set_weight(walker, ipart, walker.m_weight[ipart] + delta);
 }
 
-void Wavefunction::scale_weight(Walker& walker, uint_t ipart, double factor) {
+void wf::Fci::scale_weight(Walker& walker, uint_t ipart, double factor) {
     set_weight(walker, ipart, factor * walker.m_weight[ipart]);
 }
 
-void Wavefunction::zero_weight(Walker& walker, uint_t ipart) {
+void wf::Fci::zero_weight(Walker& walker, uint_t ipart) {
     set_weight(walker, ipart, 0.0);
 }
 
-void Wavefunction::remove_row(Walker& walker) {
+void wf::Fci::remove_row(Walker& walker) {
     DEBUG_ASSERT_TRUE(m_store.lookup(walker.m_mbf), "MBF doesn't exist in table!");
     for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
         zero_weight(walker, ipart);
@@ -203,7 +203,7 @@ void Wavefunction::remove_row(Walker& walker) {
     m_store.erase(walker.m_mbf);
 }
 
-Walker& Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
+Walker& wf::Fci::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
@@ -227,7 +227,7 @@ Walker& Wavefunction::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdia
     return row;
 }
 
-TableBase::Loc Wavefunction::create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
+TableBase::Loc wf::Fci::create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
     const uint_t irank = m_dist.irank(mbf);
     uint_t irec;
     if (mpi::i_am(irank)) {
@@ -237,8 +237,8 @@ TableBase::Loc Wavefunction::create_row(uint_t icycle, const Mbf& mbf, ham_comp_
     return {irank, irec};
 }
 
-Spawn& Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
-                               bool deterministic, uint_t dst_ipart) {
+Spawn& wf::Fci::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
+                          bool deterministic, uint_t dst_ipart) {
     auto& dst_table = send(m_dist.irank(dst_mbf));
 
     auto& spawn = dst_table.m_row;
@@ -252,8 +252,8 @@ Spawn& Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initi
     return spawn;
 }
 
-Spawn& Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
-                               uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight) {
+Spawn& wf::Fci::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
+                          uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight) {
     auto& spawn = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
     if (spawn.m_send_parents) {
         spawn.m_src_mbf = src_mbf;
@@ -263,7 +263,7 @@ Spawn& Wavefunction::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initi
     return spawn;
 }
 
-void Wavefunction::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm) {
+void wf::Fci::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm) {
     /*
      * perform the eigensolver procedure for the required number of states
      */

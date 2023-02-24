@@ -7,7 +7,7 @@
 
 
 #if 0
-TEST(Wavefunction, DynamicRowSet){
+TEST(Fci, DynamicRowSet){
     conf::Document opts;
     opts.m_propagator.m_nw_target = 1000;
     opts.m_wavefunction.m_distribution.m_nblock_per_rank = 3;
@@ -15,7 +15,7 @@ TEST(Wavefunction, DynamicRowSet){
     const uint_t nsite = 6;
     const uint_t nelec = 6;
     const BasisData bd = {nsite, {}};
-    Wavefunction wf(opts, bd);
+    Fci wf(opts, bd);
     ci_gen::SpinSym gen(bd, nelec, 0, ci_gen::default_include_fn(wf));
 
     auto& table = wf.m_store;
@@ -31,7 +31,7 @@ TEST(Wavefunction, DynamicRowSet){
     const uint_t nrow_this_rank = hashing::in_range(mpi::irank(), nrow_rank_lo, nrow_rank_hi);
 
 
-    Wavefunction::DynamicRowSet rowset(wf, "some row set");
+    Fci::DynamicRowSet rowset(wf, "some row set");
     /*
      * and add them to the local subspace
      */

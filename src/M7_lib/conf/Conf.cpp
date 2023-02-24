@@ -126,9 +126,9 @@ conf::Shift::Shift(Group *parent) :
         m_target_damp(this, "target_damp", 0.0, "damping factor in shift update related to growth relative to the target walker population"),
         m_period(this, "period", 5, "number of MC cycles between shift updates"),
         m_ncycle_av(this, "ncycle_av", 100ul, "number of cycles over which to maintain a rolling average"),
-        m_jump(this, "jump", false,
-               "ignore growth data in the shift update, and instead use a projected energy estimator")
-               {}
+        m_fix_ref_weight(this, "fix_ref_weight", false,
+            "ignore growth data in the shift update, and instead use the reference-projected energy estimator,"
+            " this fixes the reference population constant"){}
 
 conf::Semistochastic::Semistochastic(Group *parent) :
         Section(parent, "semistochastic", "options related to semi-stochastic propagation", Explicit),

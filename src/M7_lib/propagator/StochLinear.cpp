@@ -3,9 +3,11 @@
 //
 
 #include "StochLinear.h"
+#include "Wavefunction.h"
+#include "Reference.h"
 
 StochLinear::StochLinear(const Hamiltonian& ham, const conf::Document& opts,
-                                           const Wavefunction& wf) :
+                                           const wf::Fci& wf) :
         Propagator(opts, ham, wf), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
         m_excit_gen_group(ham, opts.m_propagator, m_prng, wf.m_sector.particles()),
         m_mag_log(opts.m_propagator.m_max_bloom,
@@ -22,7 +24,7 @@ StochLinear::StochLinear(const Hamiltonian& ham, const conf::Document& opts,
 }
 
 
-void StochLinear::diagonal(Wavefunction& wf, Walker& walker, const uint_t& ipart) {
+void StochLinear::diagonal(wf::Fci& wf, Walker& walker, const uint_t& ipart) {
     bool flag_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
     const ham_comp_t& hdiag = walker.m_hdiag;
     if (flag_deterministic) {
@@ -42,7 +44,7 @@ void StochLinear::diagonal(Wavefunction& wf, Walker& walker, const uint_t& ipart
     }
 }
 
-void StochLinear::off_diagonal(Wavefunction& wf, const Walker& walker, const uint_t& ipart) {
+void StochLinear::off_diagonal(wf::Fci& wf, const Walker& walker, const uint_t& ipart) {
     const wf_t& weight = walker.m_weight[ipart];
     /*
      * for bilinear estimators based on the consolidated annihilation of spawned contributions
@@ -144,8 +146,8 @@ v_t<prob_t> StochLinear::excit_gen_case_probs() const {
     return m_excit_gen_group.get_probs();
 }
 
-void StochLinear::update(const uint_t& icycle, const Wavefunction& wf) {
-    Propagator::update(icycle, wf);
+void StochLinear::update(uint_t icycle, const wf::Fci& wf, const wf::References& refs) {
+    Propagator::update(icycle, wf, refs);
     m_mag_log.update(icycle, m_tau, m_excit_gen_group);
 }
 

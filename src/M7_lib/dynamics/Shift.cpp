@@ -3,6 +3,8 @@
 //
 
 #include "Shift.h"
+#include "Wavefunction.h"
+#include "Reference.h"
 
 Shift::Shift(const conf::Document &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         m_opts(opts),
@@ -18,11 +20,11 @@ Shift::Shift(const conf::Document &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
     DEBUG_ASSERT_FALSE(m_variable_mode, "Shift should not initially be in variable mode");
 }
 
-const ham_comp_t &Shift::operator[](const uint_t &ipart) {
+const ham_comp_t &Shift::operator[](uint_t ipart) {
     return m_values[ipart];
 }
 
-void Shift::update(const Wavefunction &wf, const uint_t &icycle, const double &tau) {
+void Shift::update(const wf::Fci &wf, const wf::References& refs, uint_t icycle, double tau) {
     if (m_nwalker_target.read()) m_variable_mode.terminate(icycle);
     const bool is_period_cycle = !(icycle % m_opts.m_shift.m_period);
 
@@ -46,11 +48,16 @@ void Shift::update(const Wavefunction &wf, const uint_t &icycle, const double &t
         if (is_period_cycle) a = m_opts.m_shift.m_period;
 
         if (variable_mode && a) {
-            auto rate =  nw / m_nwalker_last_period[ipart];
-            m_values[ipart] -= m_opts.m_shift.m_damp * std::log(std::abs(rate)) / (tau * a);
-            if (m_opts.m_shift.m_target_damp) {
-                rate =  nw / m_nwalker_target;
-                m_values[ipart] -= m_opts.m_shift.m_target_damp * std::log(std::abs(rate)) / (tau * a);
+            if (m_opts.m_shift.m_fix_ref_weight.m_value) {
+                m_values[ipart] = refs[ipart].proj_energy_num()/refs[ipart].weight();
+            }
+            else {
+                auto rate = nw / m_nwalker_last_period[ipart];
+                m_values[ipart] -= m_opts.m_shift.m_damp * std::log(std::abs(rate)) / (tau * a);
+                if (m_opts.m_shift.m_target_damp) {
+                    rate = nw / m_nwalker_target;
+                    m_values[ipart] -= m_opts.m_shift.m_target_damp * std::log(std::abs(rate)) / (tau * a);
+                }
             }
         }
         add_to_average();

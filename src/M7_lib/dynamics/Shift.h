@@ -13,6 +13,9 @@
 #include <M7_lib/parallel/Epoch.h>
 
 #include "MagnitudeLogger.h"
+#include "M7_lib/wavefunction/Reference.h"
+#include "Wavefunction.h"
+#include "Reference.h"
 
 /**
  * responsible for defining and updating the shift subtracted from the diagonal H elements in
@@ -50,7 +53,12 @@ struct Shift {
 
     Shift(const conf::Document &opts, const NdFormat<c_ndim_wf>& wf_fmt);
 
-    const ham_comp_t & operator[](const uint_t& ipart);
+    const ham_comp_t & operator[](uint_t ipart);
+
+
+    void update(const wf::Fci& wf, uint_t icycle, double tau);
+
+    void update(const wf::References& refs, uint_t icycle, double tau);
 
     /**
      * compute the change in all parts of the shift value based on the current values of wf.m_nwalkers
@@ -61,12 +69,14 @@ struct Shift {
      *
      * @param wf
      *  wavefunction whose population growth defines the change in shift
+     * @param refs
+     *  reference MBFs which may alternatively be used to define the shift update
      * @param icycle
      *  MC cycle index
      * @param tau
      *  current timestep
      */
-    void update(const Wavefunction& wf, const uint_t& icycle, const double& tau);
+    void update(const wf::Fci& wf, const wf::References& refs, uint_t icycle, double tau);
 
 private:
 

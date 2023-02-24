@@ -3,6 +3,8 @@
 //
 
 #include "Propagator.h"
+#include "Wavefunction.h"
+#include "Reference.h"
 
 std::unique_ptr<guide::Wavefunction> Propagator::make_imp_samp_guide(const conf::GuideWavefunction& opts) const {
     const str_t fmt = "Guiding propagation via importance sampling with {} wavefunction";
@@ -19,8 +21,8 @@ std::unique_ptr<guide::Wavefunction> Propagator::make_imp_samp_guide(const conf:
     return nullptr;
 }
 
-void Propagator::update(const uint_t& icycle, const Wavefunction& wf) {
-    m_shift.update(wf, icycle, tau());
+void Propagator::update(uint_t icycle, const wf::Fci& wf, const wf::References& refs) {
+    m_shift.update(wf, refs, icycle, tau());
 }
 
 void Propagator::imp_samp_delta(wf_t& delta, ham_t src_ovlp, const Mbf& dst_mbf) const {

@@ -11,6 +11,9 @@
 
 #include "M7_lib/dynamics/Shift.h"
 #include "Guide.h"
+#include "M7_lib/wavefunction/Reference.h"
+#include "Wavefunction.h"
+#include "Reference.h"
 
 /**
  * This class is not optionally archivable,
@@ -39,7 +42,7 @@ public:
 
     std::unique_ptr<guide::Wavefunction> make_imp_samp_guide(const conf::GuideWavefunction& opts) const;
 
-    Propagator(const conf::Document &opts, const Hamiltonian &ham, const Wavefunction &wf) :
+    Propagator(const conf::Document &opts, const Hamiltonian &ham, const wf::Fci &wf) :
             m_tau(opts.m_propagator.m_tau_init),
             m_nadd_initiator(opts.m_propagator.m_nadd),
             m_wf_fmt(wf.m_format),
@@ -52,9 +55,9 @@ public:
 
     virtual ~Propagator() {}
 
-    virtual void diagonal(Wavefunction &wf, Walker& walker, const uint_t &ipart) = 0;
+    virtual void diagonal(wf::Fci &wf, Walker& walker, const uint_t &ipart) = 0;
 
-    virtual void off_diagonal(Wavefunction &wf, const Walker& walker, const uint_t &ipart) = 0;
+    virtual void off_diagonal(wf::Fci &wf, const Walker& walker, const uint_t &ipart) = 0;
 
     virtual ham_t round(const ham_t &weight) {
         return weight;
@@ -64,7 +67,7 @@ public:
         return m_tau;
     }
 
-    virtual void update(const uint_t &icycle, const Wavefunction &wf);
+    virtual void update(uint_t icycle, const wf::Fci &wf, const wf::References& refs);
 
     virtual uint_t ncase_excit_gen() const {
         return 0;

@@ -7,6 +7,7 @@
 
 #include "FciqmcCalculation.h"
 #include "M7_lib/propagator/Propagators.h"
+#include "Wavefunction.h"
 
 void fciqmc::run(const conf::Document &opts) {
     /*
@@ -16,7 +17,7 @@ void fciqmc::run(const conf::Document &opts) {
     /*
      * distributed solution vectors
      */
-    Wavefunction wf(opts, {ham.m_basis, ham.default_particles(opts.m_particles)});
+    wf::Fci wf(opts, {ham.m_basis, ham.default_particles(opts.m_particles)});
     /*
      * propagates the system, either exactly or stochastically
      */

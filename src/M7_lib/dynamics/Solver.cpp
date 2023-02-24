@@ -3,6 +3,8 @@
 //
 
 #include "Solver.h"
+#include "Wavefunction.h"
+#include "Reference.h"
 
 std::unique_ptr<shared_rows::Walker> Solver::make_hf() const {
     /*
@@ -20,7 +22,7 @@ std::unique_ptr<shared_rows::Walker> Solver::make_hf() const {
     return nullptr;
 }
 
-Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
+Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Fci &wf,
                v_t<TableBase::Loc> ref_locs) :
         m_opts(opts), m_prop(prop), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
@@ -160,7 +162,7 @@ void Solver::execute(uint_t ncycle) {
 void Solver::begin_cycle() {
     m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
 
-    m_prop.update(m_icycle, m_wf);
+    m_prop.update(m_icycle, m_wf, m_refs);
 
     m_wf.begin_cycle();
     ASSERT(m_wf.m_nwalker.m_local[0] == 0);
