@@ -22,7 +22,7 @@ StochLinear::StochLinear(const Hamiltonian& ham, const conf::Document& opts,
 }
 
 
-void StochLinear::diagonal(wf::Fci& wf, Walker& walker, const uint_t& ipart) {
+void StochLinear::diagonal(wf::Fci& wf, Walker& walker, uint_t ipart) {
     bool flag_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
     const ham_comp_t& hdiag = walker.m_hdiag;
     if (flag_deterministic) {
@@ -42,7 +42,7 @@ void StochLinear::diagonal(wf::Fci& wf, Walker& walker, const uint_t& ipart) {
     }
 }
 
-void StochLinear::off_diagonal(wf::Fci& wf, const Walker& walker, const uint_t& ipart) {
+void StochLinear::off_diagonal(wf::Fci& wf, const Walker& walker, uint_t ipart, bool initiator) {
     const wf_t& weight = walker.m_weight[ipart];
     /*
      * for bilinear estimators based on the consolidated annihilation of spawned contributions
@@ -53,7 +53,6 @@ void StochLinear::off_diagonal(wf::Fci& wf, const Walker& walker, const uint_t& 
     DEBUG_ASSERT_TRUE(m_ham.complex_valued() || fptol::near_real(weight),
                       "real-valued hamiltonian should never result in non-zero imaginary walker component")
     const auto& src_mbf = walker.m_mbf;
-    bool is_initiator = walker.is_initiator(ipart, m_nadd_initiator);
     bool flag_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
 
     const wf_comp_t abs_weight = std::abs(weight);
@@ -72,8 +71,8 @@ void StochLinear::off_diagonal(wf::Fci& wf, const Walker& walker, const uint_t& 
     for (uint_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
 
         conn.clear();
-        auto icase = m_excit_gen_group.draw_icase();
-        if (!m_excit_gen_group.draw(icase, src_mbf, prob_gen, helem, conn)) {
+        uint_t icase;
+        if (!m_excit_gen_group.draw(src_mbf, prob_gen, helem, conn, icase)) {
             // null excitation generated
             continue;
         }
@@ -131,7 +130,7 @@ void StochLinear::off_diagonal(wf::Fci& wf, const Walker& walker, const uint_t& 
 
             p_succeed_at_least_once = 1.0 - p_fail_all_attempts;
         }
-        wf.add_spawn(dst_mbf, thresh_delta, is_initiator, flag_deterministic,
+        wf.add_spawn(dst_mbf, thresh_delta, initiator, flag_deterministic,
                      ipart, src_mbf, weight / p_succeed_at_least_once);
     }
 }

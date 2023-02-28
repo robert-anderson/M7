@@ -52,8 +52,8 @@ wf::Fci::Fci(const conf::Document& opts, const sys::Sector& sector) :
     m_sector(sector),
     m_format(m_store.m_row.m_weight.m_format),
     m_ninitiator(m_format),
+    m_ninitiator_perma(m_format),
     m_nwalker(m_format),
-    m_delta_nwalker(m_format),
     m_l2_norm_square(m_format),
     m_delta_l2_norm_square(m_format),
     m_nspawned(m_format),
@@ -61,7 +61,7 @@ wf::Fci::Fci(const conf::Document& opts, const sys::Sector& sector) :
 
     REQUIRE_TRUE(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row(), "row-field reference error");
     m_summables.add_members(m_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
-                            m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
+                            m_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
 
     logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
@@ -96,13 +96,15 @@ void wf::Fci::log_top_weighted(uint_t ipart, uint_t nrow) {
 
     auto& row = xr_gathered.m_row;
     v_t<strv_t> rows;
-    rows.push_back({"", "many-body basis function", "walker number", "initiator", "semistoch", "MPI rank"});
+    rows.push_back({"", "many-body basis function", "walker number", "initiator", "energy", "semistoch", "MPI rank"});
     for (row.restart(); row; ++row) {
         rows.push_back({
             std::to_string(row.index()),
             row.m_mbf.to_string(),
-            convert::to_string(row.m_weight[ipart], 6),
-            convert::to_string(row.is_initiator(ipart, m_opts.m_propagator.m_nadd)),
+            convert::to_string(row.m_weight[ipart], {true, 6}),
+            convert::to_string(row.m_weight[ipart] / std::sqrt(m_l2_norm_square.m_reduced[ipart]), {false, 4}),
+            convert::to_string(row.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd) || row.m_permanitiator.get(0)),
+            convert::to_string(row.m_hdiag[iroot_part(ipart)]),
             convert::to_string(bool(row.m_deterministic[iroot_part(ipart)])),
             convert::to_string(m_dist.irank(row.m_mbf))
         });
@@ -153,7 +155,7 @@ void wf::Fci::end_cycle() {
     m_summables.all_sum();
 }
 
-wf_comp_t wf::Fci::square_norm(uint_t ipart) const {
+wf_comp_t wf::Fci::debug_square_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto& row = m_store.m_row;
     for (row.restart(); row; ++row) {
@@ -163,7 +165,7 @@ wf_comp_t wf::Fci::square_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
-wf_comp_t wf::Fci::l1_norm(uint_t ipart) const {
+wf_comp_t wf::Fci::debug_l1_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto& row = m_store.m_row;
     for (row.restart(); row; ++row) {
@@ -175,8 +177,7 @@ wf_comp_t wf::Fci::l1_norm(uint_t ipart) const {
 
 void wf::Fci::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
     wf_t& weight = walker.m_weight[ipart];
-    m_delta_nwalker.m_local[ipart] += std::abs(new_weight);
-    m_delta_nwalker.m_local[ipart] -= std::abs(weight);
+    m_nwalker.delta().m_local[ipart] += std::abs(new_weight) - std::abs(weight);
     m_delta_l2_norm_square.m_local[ipart] += std::pow(std::abs(new_weight), 2.0);
     m_delta_l2_norm_square.m_local[ipart] -= std::pow(std::abs(weight), 2.0);
     weight = new_weight;
@@ -261,6 +262,14 @@ Spawn& wf::Fci::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
     }
     DEBUG_ASSERT_NE(dst_mbf, src_mbf, "spawning diagonally");
     return spawn;
+}
+
+void wf::Fci::refresh_all_hdiags(const Hamiltonian &h) {
+    auto& row = m_store.m_row;
+    for (row.restart(); row; ++row){
+        if (row.is_freed()) continue;
+        row.m_hdiag = h.get_energy(row.m_mbf);
+    }
 }
 
 void wf::Fci::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm) {

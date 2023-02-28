@@ -8,7 +8,6 @@
 #include <M7_lib/io/Options.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/parallel/Reduction.h>
-#include <M7_lib/io/Archivable.h>
 #include <M7_lib/communication/Communicator.h>
 #include <M7_lib/parallel/RankAllocator.h>
 #include <M7_lib/field/Fields.h>
@@ -50,6 +49,10 @@ namespace wf {
          */
         reduction::NdArray<uint_t, c_ndim_wf> m_ninitiator;
         /**
+         * number of initiator MBFs in each part of the WF due to permanitiator status
+         */
+        reduction::NdArray<uint_t, c_ndim_wf> m_ninitiator_perma;
+        /**
          * number of MBFs with any associated weight in any part
          */
         reduction::Scalar<uint_t> m_nocc_mbf;
@@ -60,11 +63,7 @@ namespace wf {
         /**
          * L1 norm of each part of the WF
          */
-        reduction::NdArray<wf_comp_t, c_ndim_wf> m_nwalker;
-        /**
-         * change in the L1 norm
-         */
-        reduction::NdArray<wf_comp_t, c_ndim_wf> m_delta_nwalker;
+        reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf> m_nwalker;
         /**
          * square of the L2 norm of each part of the WF
          */
@@ -92,9 +91,9 @@ namespace wf {
             return opts.m_av_ests.m_rdm.m_ranks.m_value.size();
         }
 
-        static bool need_av_weights(const conf::Document& opts) {
-            if (need_send_parents(opts)) return true;
-            return opts.m_av_ests.m_hf_excits.m_max_exlvl > 0;
+        static bool need_av_weights(const conf::Document &opts) {
+    //        if (need_send_parents(opts)) return true;
+            return need_send_parents(opts);
         }
 
         bool storing_av_weights() const {
@@ -126,9 +125,15 @@ namespace wf {
             return ipart / 2;
         }
 
-        wf_comp_t square_norm(uint_t ipart) const;
+        wf_comp_t debug_square_norm(uint_t ipart) const;
 
-        wf_comp_t l1_norm(uint_t ipart) const;
+        /**
+         * debugging only: number of walkers should be updated each time the wavefunction weights are modified
+         * @param ipart
+         *  part of the WF for which to compute the total number of walkers across all MPI ranks
+         * @return
+         */
+        wf_comp_t debug_l1_norm(uint_t ipart) const;
 
         /**
          * all changes in the m_weight member of any row associated with m_store should occur through
@@ -219,10 +224,9 @@ namespace wf {
             return m_format.m_nelement;
         }
 
-        void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm = 1000ul);
+        void refresh_all_hdiags(const Hamiltonian& h);
 
-    private:
-
+        void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm=1000ul);
 
         void orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica) {
             ASSERT(iroot <= jroot);

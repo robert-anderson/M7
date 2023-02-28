@@ -6,13 +6,10 @@
 #define M7_PROPAGATOR_H
 
 #include <M7_lib/conf/Conf.h>
-#include <M7_lib/io/Archivable.h>
 #include <M7_lib/basis/Suites.h>
 
 #include "M7_lib/dynamics/Shift.h"
 #include "Guide.h"
-#include "M7_lib/wavefunction/Reference.h"
-#include "M7_lib/wavefunction/Wavefunction.h"
 
 /**
  * This class is not optionally archivable,
@@ -54,9 +51,9 @@ public:
 
     virtual ~Propagator() {}
 
-    virtual void diagonal(wf::Fci &wf, Walker& walker, const uint_t &ipart) = 0;
+    virtual void diagonal(wf::Fci &wf, Walker& walker, uint_t ipart) = 0;
 
-    virtual void off_diagonal(wf::Fci &wf, const Walker& walker, const uint_t &ipart) = 0;
+    virtual void off_diagonal(wf::Fci &wf, const Walker& walker, uint_t ipart, bool initiator) = 0;
 
     virtual ham_t round(const ham_t &weight) {
         return weight;

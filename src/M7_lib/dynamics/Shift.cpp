@@ -32,7 +32,7 @@ void Shift::update(const wf::Fci &wf, const wf::Refs& refs, uint_t icycle, doubl
          * over the current occupied list has yet to be performed. Nw_i is required so compute S_i, so we must get it by
          * adding the difference in Nw due to the application of cycle i-1 propagator.
          */
-        auto nw = wf.m_nwalker.m_reduced[ipart] + wf.m_delta_nwalker.m_reduced[ipart];
+        auto nw = wf.m_nwalker.total()[ipart];
         auto& variable_mode = m_variable_mode[ipart];
         /*
          * number of cycles since last update
@@ -40,7 +40,7 @@ void Shift::update(const wf::Fci &wf, const wf::Refs& refs, uint_t icycle, doubl
         uint_t a = 0ul;
         if (variable_mode.update(icycle, nw >= m_nwalker_target)) {
             logging::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
-                      ipart, icycle-1, wf.m_nwalker.m_reduced[ipart], icycle, nw);
+                      ipart, icycle-1, wf.m_nwalker.prev_total()[ipart], icycle, nw);
             a = icycle % m_opts.m_shift.m_period;
         }
         if (is_period_cycle) a = m_opts.m_shift.m_period;
@@ -60,11 +60,7 @@ void Shift::update(const wf::Fci &wf, const wf::Refs& refs, uint_t icycle, doubl
         }
         add_to_average();
     }
-
-    if (is_period_cycle){
-        m_nwalker_last_period = wf.m_nwalker.m_reduced;
-        m_nwalker_last_period += wf.m_delta_nwalker.m_reduced;
-    }
+    if (is_period_cycle) m_nwalker_last_period = wf.m_nwalker.total();
 }
 
 void Shift::add_to_average() {

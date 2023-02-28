@@ -12,10 +12,9 @@ ExactLinear::ExactLinear(
         m_mag_log(opts.m_propagator.m_max_bloom, 0, 1, opts.m_propagator.m_static_tau, true,
                   opts.m_propagator.m_tau_min, opts.m_propagator.m_tau_max, 0.0, opts.m_propagator.m_period) {}
 
-void ExactLinear::off_diagonal(wf::Fci& wf, const Walker& walker, const uint_t& ipart) {
+void ExactLinear::off_diagonal(wf::Fci& wf, const Walker& walker, uint_t ipart, bool initiator) {
     auto& src_mbf = walker.m_mbf;
     const wf_t& weight = walker.m_weight[ipart];
-    bool src_initiator = walker.is_initiator(ipart, m_nadd_initiator);
     bool src_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
     src_mbf.m_decoded.clear();
 
@@ -30,12 +29,12 @@ void ExactLinear::off_diagonal(wf::Fci& wf, const Walker& walker, const uint_t& 
         m_mag_log.log(0, helement, 1.0);
         auto delta = -weight * tau() * helement;
         imp_samp_delta(delta, src_mbf, dst_mbf);
-        wf.add_spawn(dst_mbf, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
+        wf.add_spawn(dst_mbf, delta, initiator, src_deterministic, ipart, src_mbf, weight);
     };
     m_conn_iters.loop(conn, src_mbf, body);
 }
 
-void ExactLinear::diagonal(wf::Fci& wf, Walker& walker, const uint_t& ipart) {
+void ExactLinear::diagonal(wf::Fci& wf, Walker& walker, uint_t ipart) {
     const ham_comp_t& hdiag = walker.m_hdiag;
     DEBUG_ASSERT_NEAR_EQ(hdiag, m_ham.get_energy(walker.m_mbf), "incorrect diagonal H element cached");
     wf.scale_weight(walker, ipart, 1 - (hdiag - m_shift[ipart]) * tau());

@@ -115,8 +115,6 @@ conf::CiPermanitiator::CiPermanitiator(Group *parent) :
             "options relating to conferring permanent initiator status on determinants based on products of "
             "lower-rank excitations", Explicit),
         m_path(this, "path", "M7.hf_excit.h5", "file path to CI data source"),
-//        m_max_nexcit(this, "max_nexcit", 2,
-//            "maximum excitation level of determinants allowed to take on permanent initiator status due to CI products"),
         m_thresh(this, "thresh", 0.001,
             "minimum intermediate-normalized coefficient product required for permanitiator status"),
         m_cancellation(this, "cancellation", true,
