@@ -62,7 +62,7 @@ namespace hdf5 {
          * use dummy arg so as not to have same prototype as public ctor in case hsize_t coincides with hid_t
          * only delegated to when creating a string type
          */
-        Type(hsize_t size, char /*dummy*/);
+        Type(hsize_t size, tag::Int<true> /*is_string*/);
 
     public:
 

@@ -17,8 +17,6 @@ public:
     buf_t *m_data = nullptr;
 private:
 
-    SharedArrayBase(uint_t element_size);
-
     static void alloc(uint_t nelement, uint_t element_size, MPI_Win* win, void** data);
 
     static void free(MPI_Win* win, void** data);
@@ -30,6 +28,11 @@ private:
 protected:
     MPI_Win m_win;
 public:
+
+    SharedArrayBase(uint_t element_size);
+
+    SharedArrayBase(): SharedArrayBase(1ul){}
+
     SharedArrayBase(uint_t nelement, uint_t element_size);
 
     SharedArrayBase& operator=(const SharedArrayBase& other);
@@ -116,5 +119,28 @@ public:
     }
 };
 
+
+template<typename T>
+class SharedScalar : protected SharedArray<T> {
+    /**
+     * written to if this MPI rank is not the root
+     */
+    T m_trash;
+public:
+    SharedScalar() : SharedArray<T>(1ul){}
+
+    SharedScalar(const T& v) : SharedScalar() {
+        *this = v;
+    }
+
+    SharedScalar& operator=(const T& v){
+        SharedArray<T>::set(0, v);
+        return *this;
+    }
+
+    operator const T& () const {
+        return reinterpret_cast<const T&>(*SharedArrayBase::m_data);
+    }
+};
 
 #endif //M7_SHAREDARRAY_H

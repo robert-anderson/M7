@@ -4,7 +4,7 @@
 
 #include "Solver.h"
 
-std::unique_ptr<shared_rows::Walker> Solver::make_hf() const {
+std::unique_ptr<HartreeFock> Solver::make_hf() const {
     /*
      * even if there is no true HF determinant, we need to treat the initial ref as one for averaged excits or when
      * this behaviour is explicitly requested in the configuration document
@@ -15,7 +15,7 @@ std::unique_ptr<shared_rows::Walker> Solver::make_hf() const {
      */
     if (force_hf || m_prop.m_ham.has_brillouin_theorem(m_refs[0].mbf())) {
         const TableBase::Loc loc(m_refs[0].irec());
-        return ptr::smart::make_unique<shared_rows::Walker>("Hartree-Fock ONV", m_wf.m_store, loc);
+        return ptr::smart::make_unique<HartreeFock>(m_wf.m_store, loc);
     }
     return nullptr;
 }
@@ -26,14 +26,14 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Fci &wf,
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_hf(make_hf()), m_exit("exit"), m_maes(opts.m_av_ests, m_wf.m_sector, m_wf.nroot()),
         m_inst_ests(m_wf.m_sector, &m_refs, opts.m_inst_ests),
-        m_annihilator(m_wf, m_prop, m_refs, m_hf.get(), m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
+        m_annihilator(m_wf, m_prop, m_refs, m_hf.get(), m_maes.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_detsubs(opts.m_propagator.m_semistochastic) {
 
     logging::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
     if (m_wf.nreplica() == 2 && !m_prop.ncase_excit_gen())
         logging::warn("Replica populations are redundant when doing exact propagation");
 
-    if (m_maes.m_bilinears && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
+    if (m_maes.m_rdms && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
         logging::warn("Attempting a stochastic propagation estimation of bilinear MAEs without replication, "
                   "this is biased");
 
@@ -79,8 +79,8 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Fci &wf,
     */
 
 
-    if (m_maes.m_bilinears.m_rdms) {
-        if (m_maes.m_bilinears.m_rdms.is_energy_sufficient(m_prop.m_ham))
+    if (m_maes.m_rdms) {
+        if (m_maes.m_rdms.is_energy_sufficient(m_prop.m_ham))
             logging::info("Specified RDM rank signatures are sufficient for variational energy estimation");
         else
             logging::warn("Specified RDM rank signatures are insufficient for variational energy estimation");
@@ -111,7 +111,8 @@ void Solver::execute(uint_t ncycle) {
         m_propagate_timer.unpause();
         if (m_detsubs) {
             m_detsubs.update();
-            m_detsubs.make_rdm_contribs(m_maes.m_bilinears.m_rdms, m_hf.get());
+            m_detsubs.make_rdm_contribs(m_maes.m_rdms, m_hf.get());
+            m_detsubs.make_spec_mom_contribs(m_maes.m_spec_moms);
         }
         loop_over_occupied_mbfs();
         m_propagate_timer.pause();
@@ -190,7 +191,7 @@ void Solver::begin_cycle() {
 
     if (m_opts.m_propagator.m_semistochastic.m_enabled && !m_detsubs) {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
-            m_detsubs.init(m_prop.m_ham, m_maes.m_bilinears, m_wf, m_icycle);
+            m_detsubs.init(m_prop.m_ham, m_maes, m_wf, m_icycle);
             logging::info("Initialized deterministic subspace");
         }
     }
@@ -245,6 +246,7 @@ void Solver::loop_over_occupied_mbfs() {
 
         m_refs.contrib_row(walker);
         m_inst_ests.make_numerator_contribs(walker);
+        if (m_hf && m_opts.m_propagator.m_c2_c4_initiator.m_enabled) m_hf->m_accum.add(walker);
 
         m_wf.m_nocc_mbf.m_local++;
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
@@ -256,7 +258,8 @@ void Solver::loop_over_occupied_mbfs() {
 
             const auto &weight = walker.m_weight[ipart];
 
-            if (walker.is_initiator(ipart, m_opts.m_propagator.m_nadd)) m_wf.m_ninitiator.m_local[ipart]++;
+            bool initiator = is_initiator(walker, ipart);
+            if (initiator) m_wf.m_ninitiator.m_local[ipart]++;
 
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
@@ -266,7 +269,7 @@ void Solver::loop_over_occupied_mbfs() {
 //                m_spawning_timer.reset();
 //                m_spawning_timer.unpause();
 //            }
-            propagate_row(walker, ipart);
+            propagate_row(walker, ipart, initiator);
 //            if (m_wf.m_ra.is_active()) {
 //                m_spawning_timer.pause();
 //                m_wf.m_ra.record_work_time(row, m_spawning_timer);
@@ -305,11 +308,20 @@ void Solver::loop_over_spawned() {
     m_wf.recv().clear();
 }
 
-void Solver::propagate_row(Walker& walker, uint_t ipart) {
+void Solver::propagate_row(Walker& walker, uint_t ipart, bool initiator) {
     if (walker.is_freed()) return;
     if (walker.m_weight[ipart] == 0.0) return;
-    m_prop.off_diagonal(m_wf, walker, ipart);
+    m_prop.off_diagonal(m_wf, walker, ipart, initiator);
     m_prop.diagonal(m_wf, walker, ipart);
+}
+
+bool Solver::is_initiator(const Walker& walker, uint_t ipart) {
+    if (walker.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd)) return true;
+    const auto& c2_c4_section = m_opts.m_propagator.m_c2_c4_initiator;
+    if (m_hf && c2_c4_section.m_enabled) {
+        return m_hf->m_accum.is_initiator(walker, c2_c4_section.m_fac);
+    }
+    return false;
 }
 
 void Solver::end_cycle() {
@@ -354,6 +366,7 @@ void Solver::output_stats() {
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         if (m_inst_ests.m_spin_square) stats.m_spin_square_num = m_inst_ests.m_spin_square->m_est.m_proj_num.m_reduced;
+        if (m_hf) stats.m_coherent_c4 = m_hf->m_accum.m_coherent_c4_l1.m_reduced/m_hf->m_accum.m_total_c4_l1.m_reduced;
         m_stats->commit();
 
         auto &timing_stats = m_timing_stats->m_row;

@@ -43,9 +43,9 @@ struct Row {
     v_t<FieldBase *> m_fields;
 private:
     /**
-     * the position of the currently selected record in the
+     * the position of the currently selected record in the associated Table's buffer window
      */
-    mutable buf_t *m_begin = nullptr;
+    mutable buf_t *m_begin_ptr = nullptr;
 
 public:
     /**
@@ -62,14 +62,33 @@ public:
     mutable Row *m_child = nullptr;
 
     /**
+     * @return
+     *  pointer to the byte at the beginning of the current row with modifying intent
+     */
+    buf_t *begin() {
+        DEBUG_ASSERT_TRUE(m_begin_ptr, "the row pointer is not set")
+        DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
+        return m_table->i_can_modify() ? m_begin_ptr : m_table->trash_dst();
+    }
+
+    const buf_t *cbegin() const {
+        DEBUG_ASSERT_TRUE(m_begin_ptr, "the row pointer is not set")
+        DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
+        return m_begin_ptr;
+    }
+
+    const buf_t* cend() const {return cbegin()+m_size;}
+
+    /**
      * the m_begin pointer must be in the range [table begin, table hwm) for valid dereferencing (field access)
      * @return
      *  true if the m_begin pointer is valid with respect to the "in use" range of the table object
      */
     bool is_deref_valid() const {
-        if (!m_table->m_bw.m_begin) return false;
-        DEBUG_ASSERT_TRUE(m_table->m_bw.m_hwm, "buffer window has null HWM pointer");
-        return ptr::in_range(m_begin, m_table->m_bw.m_begin, m_table->m_bw.m_hwm);
+        const auto table_cbegin = m_table->cbegin();
+        if (!table_cbegin) return false;
+        const auto table_cend = m_table->cend();
+        return ptr::in_range(m_begin_ptr, table_cbegin, table_cend);
     }
 
     /**
@@ -80,7 +99,7 @@ public:
      *  high water mark) the latter condition is typically fulfilled at the end of a loop over rows
      */
     bool is_valid() const {
-        return (m_begin==m_table->m_bw.m_begin) || is_deref_valid() || m_begin == m_table->m_bw.m_hwm;
+        return (m_begin_ptr==m_table->cbegin()) || is_deref_valid() || (m_begin_ptr == m_table->cend());
     }
 
     operator bool () const {
@@ -89,12 +108,12 @@ public:
 
     /**
      * @return
-     * record position within Table
+     *  record position within Table
      */
     uint_t index() const {
         DEBUG_ASSERT_TRUE(is_valid(), "the row is not pointing to memory in the permitted range");
-        const auto begin_offset = std::distance(m_table->m_bw.m_begin, m_begin);
-        return begin_offset / m_size;
+        // can't call cbegin() here because it contains a debug check for is_deref_valid, so cast to const
+        return std::distance(m_table->cbegin(), const_cast<const buf_t*>(m_begin_ptr)) / m_size;
     }
 
     /**
@@ -106,7 +125,9 @@ public:
      */
     unsigned long offset(const Row& other) const {
         DEBUG_ASSERT_EQ(m_table, other.m_table, "offset rows must be associated with the same table");
-        const unsigned long n = std::distance(m_begin, other.m_begin)/m_size;
+        DEBUG_ASSERT_TRUE(is_valid(), "row OOB");
+        DEBUG_ASSERT_TRUE(other.is_valid(), "other row OOB");
+        const unsigned long n = std::distance(m_begin_ptr, other.m_begin_ptr)/m_size;
         DEBUG_ASSERT_EQ(n, other.index() - index(), "incorrect offset");
         return n;
     }
@@ -119,19 +140,7 @@ public:
      */
     bool in_range(uint_t irow_end) const {
         DEBUG_ASSERT_TRUE(is_valid(), "invalid range end given");
-        return ptr::in_range(m_begin, m_table->m_bw.m_begin, m_table->begin(irow_end));
-    }
-
-    buf_t *begin() {
-        DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
-        DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
-        return m_begin;
-    }
-
-    const buf_t *begin() const {
-        DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
-        DEBUG_ASSERT_TRUE(is_deref_valid(), "the row is not pointing to memory in the dereferencable range");
-        return m_begin;
+        return ptr::in_range(m_begin_ptr, m_table->cbegin(), m_table->cbegin(irow_end));
     }
 
     /*
@@ -140,11 +149,11 @@ public:
     void restart(uint_t irow_begin) const {
         DEBUG_ASSERT_LE(irow_begin, m_table->nrow_in_use(), "Cannot restart to an out-of-range row index");
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
-        if (!m_table->m_bw.m_hwm && !irow_begin){
-            m_begin = nullptr;
+        if (!m_table->cend() && !irow_begin){
+            m_begin_ptr = nullptr;
         } else {
             DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
-            m_begin = m_table->begin(irow_begin);
+            m_begin_ptr = m_table->begin(irow_begin);
         }
     }
 
@@ -159,32 +168,43 @@ public:
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
         DEBUG_ASSERT_TRUE(is_valid(), "Row is out of table bounds");
-        m_begin += m_size;
+        m_begin_ptr += m_size;
         return *this;
     }
 
+    /**
+     * random access to the indexed record
+     * @param i
+     *  record index to jump to
+     */
     void jump(uint_t i) const {
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
         DEBUG_ASSERT_LE(i, m_table->nrow_in_use(), "Row is out of table bounds");
-        m_begin = m_table->begin(i);
+        m_begin_ptr = m_table->begin(i);
     }
 
+    /**
+     * jump to table position of another Row
+     */
     void jump(const Row &other) const {
         jump(other.index());
     }
 
+    /**
+     * get a new record in the table (reallocating if needed), and jump this Row to it
+     */
     void push_back_jump() {
         jump(m_table->push_back());
     }
 
     void select_null() const {
-        m_begin = nullptr;
+        m_begin_ptr = nullptr;
     }
 
     void copy_in(const Row &other) {
-        ASSERT(other.m_size == m_size);
-        std::copy(other.begin(), other.begin() + m_size, begin());
+        DEBUG_ASSERT_EQ(other.m_size, m_size, "incompatible row sizes for copy");
+        std::copy(other.cbegin(), other.cbegin() + m_size, begin());
     }
 
     Row() {}
@@ -232,16 +252,57 @@ public:
 
 };
 
-template<typename row_t>
-struct KeyField {
-    static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
-    typedef typename std::remove_reference<typename std::result_of<decltype(&row_t::key_field)(
-            row_t)>::type>::type type;
+/**
+ * structs and methods for extracting types and references of special fields in a Row definition
+ */
+namespace row_fields {
 
-    static type &get(row_t &row) { return row.key_field(); }
+    template<typename row_t>
+    struct Key {
+        static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
+        typedef typename std::remove_reference<
+                typename std::result_of<decltype(&row_t::key_field)(row_t)>::type>::type type;
+        // remove const from row type if needed
+        typedef typename dtype::remove_const_ref_t<row_t>::type clean_row_t;
 
-    static const type &get(const row_t &row) { return const_cast<row_t &>(row).key_field(); }
-};
+        static type& get(clean_row_t& row) { return row.key_field(); }
+
+        static const type& get(const clean_row_t& row) { return const_cast<row_t&>(row).key_field(); }
+    };
+
+    template<typename row_t>
+    struct Value {
+        static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
+        typedef typename std::remove_reference<
+                typename std::result_of<decltype(&row_t::value_field)(row_t)>::type>::type type;
+        // remove const from row type if needed
+        typedef typename dtype::remove_const_ref_t<row_t>::type clean_row_t;
+
+        static type& get(clean_row_t& row) { return row.value_field(); }
+
+        static const type& get(const clean_row_t& row) { return const_cast<row_t&>(row).value_field(); }
+    };
+
+    template<typename row_t>
+    const typename Key<row_t>::type& key(const row_t& row) {
+        return Key<row_t>::get(row);
+    }
+
+    template<typename row_t>
+    typename Key<row_t>::type& key(row_t& row) {
+        return Key<row_t>::get(row);
+    }
+
+    template<typename row_t>
+    const typename Value<row_t>::type& value(const row_t& row) {
+        return Value<row_t>::get(row);
+    }
+
+    template<typename row_t>
+    typename Value<row_t>::type& value(row_t& row) {
+        return Value<row_t>::get(row);
+    }
+}
 
 
 template<typename field_t>

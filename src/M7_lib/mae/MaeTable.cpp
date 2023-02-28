@@ -15,5 +15,4 @@ field::SpecMomInds &SpecMomsRow::key_field() {
     return m_inds;
 }
 
-SpecMomsRow::SpecMomsRow(OpSig exsig, uint_t nvalue) :
-        m_inds(this, exsig), m_values(this, {nvalue}, "values"){}
+SpecMomsRow::SpecMomsRow(uint_t nvalue) : m_inds(this), m_values(this, {nvalue}, "values"){}

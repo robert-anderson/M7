@@ -19,7 +19,7 @@ class PRNG {
     const uint_t m_seed;
     uint_t m_nrefresh = 0;
 public:
-    PRNG(const uint_t &seed, const uint_t &block_size);
+    PRNG(uint_t seed, uint_t block_size);
 
     void refresh();
 

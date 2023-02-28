@@ -63,19 +63,28 @@ struct BitsetField : FieldBase {
         return *this;
     }
 
-    const uint_t &nbit() const {
+    const T* ctbegin() const {
+        return cbegin_as<T>();
+    }
+
+    T* tbegin() {
+        return begin_as<T>();
+    }
+
+    const T* ctend() const {
+        return cend_as<T>();
+    }
+
+
+    uint_t nbit() const {
         return m_format.m_nelement;
     }
 
-    T *dbegin() const {
-        return reinterpret_cast<T *>(begin());
-    }
-
-    BitView operator[](const uint_t &ibit) {
+    BitView operator[](uint_t ibit) {
         return {*this, ibit};
     }
 
-    const BitView operator[](const uint_t &ibit) const {
+    const BitView operator[](uint_t ibit) const {
         return {*this, ibit};
     }
 
@@ -87,41 +96,41 @@ struct BitsetField : FieldBase {
         return {*this, m_format.flatten(inds)};
     }
 
-    bool get(const T *dptr, const uint_t &ibit) const {
-        ASSERT(ibit < nbit());
-        return bit::get(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+    bool get(const T *tptr, uint_t ibit) const {
+        DEBUG_ASSERT_LT(ibit, nbit(), "bit index OOB");
+        return bit::get(tptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
-    bool get(const uint_t &ibit) const {
-        return get(dbegin(), ibit);
+    bool get(uint_t ibit) const {
+        return get(ctbegin(), ibit);
     }
 
-    bool get(const T *dptr, inds_t inds) const {
-        return get(dptr, m_format.flatten(inds));
+    bool get(const T *tptr, inds_t inds) const {
+        return get(tptr, m_format.flatten(inds));
     }
 
     bool get(inds_t inds) const {
         return get(m_format.flatten(inds));
     }
 
-    void set(T *dptr, const uint_t &ibit) {
-        ASSERT(ibit < nbit());
-        bit::set(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+    void set(T *tptr, uint_t ibit) {
+        DEBUG_ASSERT_LT(ibit, nbit(), "bit index OOB");
+        bit::set(tptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
-    void set(const uint_t &ibit) {
-        set(reinterpret_cast<T *>(begin()), ibit);
+    void set(uint_t ibit) {
+        set(tbegin(), ibit);
     }
 
-    void set(T *dptr, inds_t inds) {
-        set(dptr, m_format.flatten(inds));
+    void set(T *tptr, inds_t inds) {
+        set(tptr, m_format.flatten(inds));
     }
 
     void set(inds_t inds) {
         set(m_format.flatten(inds));
     }
 
-    void put_range(const uint_t &ibegin, const uint_t &iend, bool set) {
+    void put_range(uint_t ibegin, uint_t iend, bool set) {
         T mask;
         auto iword_begin = ibegin/nbit_dword();
         auto iword_end = iend/nbit_dword();
@@ -129,22 +138,22 @@ struct BitsetField : FieldBase {
         auto ibitword_end = iend-iword_end*nbit_dword();
         if (iword_begin==iword_end) {
             // begin and end bits are in the same word, so apply mask and return
-            bit::apply_mask(dbegin()[iword_begin], ibitword_begin, ibitword_end, set);
+            bit::apply_mask(tbegin()[iword_begin], ibitword_begin, ibitword_end, set);
             return;
         }
         // begin part: act from first bit to end of its word
-        bit::apply_mask(dbegin()[iword_begin], ibitword_begin, nbit_dword(), set);
+        bit::apply_mask(tbegin()[iword_begin], ibitword_begin, nbit_dword(), set);
         // end part: act to the last bit from the beginning of its word
-        bit::apply_mask(dbegin()[iword_end], 0, ibitword_end, set);
+        bit::apply_mask(tbegin()[iword_end], 0, ibitword_end, set);
         // make the all-bits mask
         bit::make_range_mask(mask, 0, nbit_dword());
         for (uint_t iword=iword_begin+1; iword<iword_end; ++iword){
             // apply it to all words between begin and end
-            bit::apply_mask(dbegin()[iword], mask, set);
+            bit::apply_mask(tbegin()[iword], mask, set);
         }
     }
 
-    void set_range(const uint_t &ibegin, const uint_t &iend) {
+    void set_range(uint_t ibegin, uint_t iend) {
         put_range(ibegin, iend, true);
     }
 
@@ -152,47 +161,47 @@ struct BitsetField : FieldBase {
         set_range(0, m_format.m_nelement);
     }
 
-    void clr_range(const uint_t &ibegin, const uint_t &iend) {
+    void clr_range(uint_t ibegin, uint_t iend) {
         put_range(ibegin, iend, false);
     }
 
-    void clr(T *dptr, const uint_t &ibit) {
+    void clr(T *tptr, uint_t ibit) {
         ASSERT(ibit < nbit());
-        bit::clr(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+        bit::clr(tptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
-    void clr(const uint_t &ibit) {
+    void clr(uint_t ibit) {
         clr(reinterpret_cast<T *>(begin()), ibit);
     }
 
-    void clr(T *dptr, inds_t inds) {
-        clr(dptr, m_format.flatten(inds));
+    void clr(T *tptr, inds_t inds) {
+        clr(tptr, m_format.flatten(inds));
     }
 
     void clr(inds_t inds) {
         clr(m_format.flatten(inds));
     }
 
-    void put(T *dptr, const uint_t &ibit, bool v) {
-        v ? set(dptr, ibit) : clr(dptr, ibit);
+    void put(T *tptr, uint_t ibit, bool v) {
+        v ? set(tptr, ibit) : clr(tptr, ibit);
     }
 
-    void put(const uint_t &ibit, bool v) {
+    void put(uint_t ibit, bool v) {
         v ? set(ibit) : clr(ibit);
     }
 
-    void put(T *dptr, inds_t inds, bool v) {
-        put(dptr, m_format.flatten(inds), v);
+    void put(T *tptr, inds_t inds, bool v) {
+        put(tptr, m_format.flatten(inds), v);
     }
 
     void put(inds_t inds, bool v) {
         put(m_format.flatten(inds), v);
     }
 
-    T get_dataword(const uint_t &idataword) const {
+    T get_dataword(uint_t idataword) const {
         DEBUG_ASSERT_LT(idataword, m_dsize, "dataword index OOB");
-        auto *dptr = reinterpret_cast<T *>(begin());
-        auto tmp = dptr[idataword];
+        auto tptr = ctbegin();
+        auto tmp = tptr[idataword];
         if (idataword + 1 == m_dsize) {
             DEBUG_ASSERT_EQ(tmp, bit::truncate(tmp, m_nbit_in_last_dword),
                        "trailing bits were not clear: possible corruption");
@@ -201,10 +210,10 @@ struct BitsetField : FieldBase {
         return tmp;
     }
 
-    T get_antidataword(const uint_t &idataword) const {
+    T get_antidataword(uint_t idataword) const {
         DEBUG_ASSERT_LT(idataword, m_dsize, "dataword index OOB");
-        auto *dptr = reinterpret_cast<T *>(begin());
-        auto tmp = ~dptr[idataword];
+        auto tptr = ctbegin();
+        auto tmp = ~tptr[idataword];
         if ((idataword + 1) == m_dsize) {
             tmp = bit::truncate(tmp, m_nbit_in_last_dword);
         }
@@ -257,10 +266,10 @@ struct BitsetField : FieldBase {
         return res;
     }
 
-    void save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const override {
+    void save_fn(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const override {
         std::list<hdf5::Attr> attrs;
         attrs.emplace_back(m_format.m_shape, "shape");
-        hdf5::field::save<T>(*this, nw, name, {m_dsize}, {"bitset"}, max_nitem_per_op, attrs, this_rank);
+        hdf5::field::save<T>(*this, nw, name, {m_dsize}, {"bitset"}, this_rank, max_nitem_per_op, attrs);
     }
 };
 

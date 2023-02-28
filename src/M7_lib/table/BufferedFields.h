@@ -264,7 +264,11 @@ namespace buffered {
 
     struct SpecMomInds : BufferedField<field::SpecMomInds> {
         using field::SpecMomInds::operator=;
-        SpecMomInds(OpSig exsig): BufferedField<field::SpecMomInds>(exsig){}
+    };
+
+    struct String : BufferedField<field::String> {
+        using field::String::operator=;
+        String(uint_t length): BufferedField<field::String>(length){}
     };
 }
 

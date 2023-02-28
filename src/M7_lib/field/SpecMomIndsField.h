@@ -7,12 +7,11 @@
 
 #include "MaeIndsField.h"
 
-struct SpecMomIndsField : CompositeField<MaeIndsField, MaeIndsField> {
-    typedef CompositeField<MaeIndsField, MaeIndsField> base_t;
-    const uint_t m_exsig;
-    MaeIndsField m_left, m_right;
+struct SpecMomIndsField : CompositeField<NumberField<mae_ind_t>, NumberField<mae_ind_t>> {
+    typedef CompositeField<NumberField<mae_ind_t>, NumberField<mae_ind_t>> base_t;
+    NumberField<mae_ind_t> m_left, m_right;
 
-    SpecMomIndsField(Row *row, OpSig exsig, str_t name = "indices");
+    SpecMomIndsField(Row *row, str_t name = "indices");
 };
 
 #endif //M7_SPECMOMINDSFIELD_H

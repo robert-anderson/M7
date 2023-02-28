@@ -43,7 +43,7 @@ struct Walker : public Row {
 
     uint_t ipart_replica(uint_t ipart) const;
 
-    bool is_initiator(uint_t ipart, wf_comp_t thresh) const;
+    bool exceeds_initiator_thresh(uint_t ipart, wf_comp_t thresh) const;
 };
 
 struct UniqueOnvRow : public Row {

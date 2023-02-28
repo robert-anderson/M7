@@ -73,6 +73,14 @@ namespace math {
             return tot+pow<2>(std::abs(v));
         }));
     }
+
+    /**
+     * behaves like std::clamp from C++17 but returns copy instead of reference
+     */
+    template<typename T>
+    T clamp(const T& v, const T& lo, const T& hi) {
+        return (v < lo) ? lo : (hi < v ? hi : v);
+    }
 }
 
 #endif //M7_UTIL_MATH_H

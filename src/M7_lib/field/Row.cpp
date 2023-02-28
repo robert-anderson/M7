@@ -57,7 +57,7 @@ strv_t Row::all_field_names() const {
 
 Row::Row(const Row &other) {
     m_table = other.m_table;
-    m_begin = other.m_begin;
+    m_begin_ptr = other.m_begin_ptr;
     other.m_child = this;
     REQUIRE_TRUE(m_fields.empty(), "newly copied Row has associated Fields");
 }

@@ -12,19 +12,37 @@ TEST(BufferedTable, Empty) {
     ASSERT_EQ(table.capacity(), 0);
     ASSERT_EQ(table.nrow_in_use(), 0);
     ASSERT_EQ(table.m_bw.m_size, 0);
-    ASSERT_EQ(table.m_bw.m_begin, nullptr);
+    ASSERT_EQ(table.cbegin(), nullptr);
     table.m_row.restart();
     ASSERT_FALSE(table.m_row.is_deref_valid());
     auto cpy = table;
     ASSERT_EQ(cpy.capacity(), 0);
     ASSERT_EQ(cpy.nrow_in_use(), 0);
     ASSERT_EQ(cpy.m_bw.m_size, 0);
-    ASSERT_EQ(cpy.m_bw.m_begin, nullptr);
+    ASSERT_EQ(cpy.cbegin(), nullptr);
     cpy.m_row.restart();
     ASSERT_FALSE(cpy.m_row.is_deref_valid());
     ASSERT_NE(&cpy.m_row, &table.m_row);
     ASSERT_EQ(&table, table.m_row.m_table);
     ASSERT_EQ(&cpy, cpy.m_row.m_table);
+}
+
+TEST(BufferedTable, NodeShared) {
+    typedef SingleFieldRow<field::Number<hash::digest_t>> row_t;
+    buffered::Table<row_t> table({}, true);
+    const uint_t nrow = 23;
+    table.resize(nrow);
+    for (uint_t irow=0ul; irow<nrow; ++irow) {
+        table.m_row.push_back_jump();
+        table.m_row.m_field = hash::in_range({irow, mpi::irank()}, 12, 190);
+    }
+    mpi::barrier_on_node();
+    /*
+     * check there is no data corruption from race conditions, and that the saved values are those from the node roots
+     */
+    for (table.m_row.restart(); table.m_row; ++table.m_row){
+        ASSERT_EQ(table.m_row.m_field, hash::in_range({table.m_row.index(), mpi::my_node_root_irank()}, 12, 190));
+    }
 }
 
 TEST(BufferedTable, AllGathervEmpty) {

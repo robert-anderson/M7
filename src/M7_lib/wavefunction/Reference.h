@@ -52,7 +52,7 @@ namespace wf {
             const Fci& wf, uint_t ipart, TableBase::Loc loc);
 
         uint_t occupied_ncycle(uint_t icycle) const {
-            return m_all.m_row.occupied_ncycle(icycle);
+            return gathered().m_row.occupied_ncycle(icycle);
         }
 
         const wf_t& weight() const {

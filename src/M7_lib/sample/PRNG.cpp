@@ -6,7 +6,7 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include "PRNG.h"
 
-PRNG::PRNG(const uint_t &seed, const uint_t &block_size) :
+PRNG::PRNG(uint_t seed, uint_t block_size) :
         m_data(block_size, 0u), m_seed(seed+mpi::irank()) {
     ASSERT(block_size > 0);
     m_i = m_data.size();

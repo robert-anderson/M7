@@ -46,7 +46,7 @@ struct DistributedTable : MappedTable<row_t>, DistribBase {
     /**
      * the key field of the store table determines the block, and therefore MPI rank index, to which the row belongs
      */
-    typedef typename KeyField<row_t>::type key_field_t;
+    typedef typename row_fields::Key<row_t>::type key_field_t;
     /**
      * current allocation of load balancing blocks to MPI rank indices
      */
@@ -158,8 +158,9 @@ public:
 namespace buffered {
     template <typename row_t>
     struct DistributedTable : BufferedTable<row_t, ::DistributedTable<row_t>> {
+        // shared is always false for Distributed tables. each instance is rank-private
         DistributedTable(const row_t &row, DistribOptions dist_opts):
-            BufferedTable<row_t, ::DistributedTable<row_t>>(::DistributedTable<row_t>(row, dist_opts)){}
+            BufferedTable<row_t, ::DistributedTable<row_t>>(::DistributedTable<row_t>(row, dist_opts), false){}
 
         using TableBase::rename;
         using TableBase::row_size;

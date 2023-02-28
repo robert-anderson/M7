@@ -11,7 +11,6 @@
 #include <M7_lib/observables/HfExcits.h>
 #include <M7_lib/bilinear/Bilinears.h>
 #include <M7_lib/io/FciqmcStats.h>
-#include <M7_lib/io/Archivable.h>
 #include <M7_lib/io/TimingStats.h>
 #include <M7_lib/io/FciqmcStats.h>
 #include <M7_lib/io/ParallelStats.h>
@@ -23,6 +22,7 @@
 #include "M7_lib/propagator/Propagator.h"
 #include "M7_lib/observables/InstEsts.h"
 #include "Annihilator.h"
+#include "M7_lib/wavefunction/HartreeFock.h"
 
 /**
  * This central class brings together wavefunctions, propagator, expectation values, and statistics.
@@ -77,7 +77,7 @@ class Solver {
     /**
      * Hartree-Fock basis function, allocated only when H satisfies the Brillouin theorem wrt the initial reference
      */
-    const std::unique_ptr<shared_rows::Walker> m_hf = nullptr;
+    const std::unique_ptr<HartreeFock> m_hf = nullptr;
     /**
      * statistics relating to the propagation of the walker population
      */
@@ -147,9 +147,9 @@ private:
     /**
      * selections of MBF in which semi-stochastic propagation is performed
      */
-    DeterministicSubspaces m_detsubs;
+    deterministic::Subspaces m_detsubs;
 
-    std::unique_ptr<shared_rows::Walker> make_hf() const;
+    std::unique_ptr<HartreeFock> make_hf() const;
 
 public:
 
@@ -197,11 +197,15 @@ public:
      * Perform diagonal and off-diagonal propagation via m_prop for a valid row of m_wf.m_store. The row being
      * propagated from is the one currently pointed to by m_wf.m_store.m_row
      * @param walker
-     *
+     *  row in the store table of the wavefunction
      * @param ipart
      *  flat index of m_wf.m_format being propagated
+     * @param initiator
+     *  true if the walker is an initiator
      */
-    void propagate_row(Walker& walker, uint_t ipart);
+    void propagate_row(Walker& walker, uint_t ipart, bool initiator);
+
+    bool is_initiator(const Walker& walker, uint_t ipart);
 
     /**
      * Loop over all rows in m_wf.m_store which have a non-zero MBF field

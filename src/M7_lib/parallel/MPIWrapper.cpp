@@ -2,11 +2,13 @@
 // Created by Robert John Anderson on 2020-02-07.
 //
 
-#include "MPIWrapper.h"
-#include "M7_lib/util/Integer.h"
 
 #include <utility>
-#include <M7_lib/io/Logging.h>
+#include "M7_lib/util/Integer.h"
+#include "M7_lib/io/Logging.h"
+
+#include "SharedArray.h"
+#include "MPIWrapper.h"
 
 void mpi::barrier() {
     MPI_Barrier(MPI_COMM_WORLD);
@@ -71,7 +73,7 @@ void mpi::finalize() {
     }
 }
 
-bool mpi::i_am(const uint_t& i) {
+bool mpi::i_am(uint_t i) {
     return irank() == i;
 }
 
@@ -79,12 +81,16 @@ bool mpi::i_am_root() {
     return i_am(0);
 }
 
-bool mpi::on_node_i_am(const uint_t& i) {
+bool mpi::on_node_i_am(uint_t i) {
     return irank_on_node() == i;
 }
 
 bool mpi::on_node_i_am_root() {
     return on_node_i_am(0);
+}
+
+bool mpi::is_node_root(uint_t irank) {
+    return g_node_roots[irank];
 }
 
 void mpi::abort_(str_t message) {
@@ -120,11 +126,15 @@ void mpi::setup_mpi_globals() {
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     MPI_Get_processor_name(processor_name, &tmp);
     g_processor_name = str_t(processor_name, tmp);
-    MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, irank(), MPI_INFO_NULL, &g_node_comm);
+    MPI_Comm_split_type(MPI_COMM_WORLD, OMPI_COMM_TYPE_CORE, irank(), MPI_INFO_NULL, &g_node_comm);
     MPI_Comm_size(g_node_comm, &tmp);
     g_nrank_on_node = tmp;
     MPI_Comm_rank(g_node_comm, &tmp);
     g_irank_on_node = tmp;
+    mpi::all_gather(char(on_node_i_am_root()), g_node_roots);
+
+    // only the node roots write their world communicator indices to the shared array
+    g_my_node_root_irank = SharedScalar<uint_t>(mpi::irank());
 }
 
 void mpi::blocking_print(const str_t &str) {
@@ -153,11 +163,12 @@ uintv_t mpi::filter(bool cond) {
     return ranks;
 }
 
-
 uint_t g_irank = 0;
 uint_t g_nrank = 1;
 str_t g_processor_name = "";
 MPI_Comm g_node_comm;
 uint_t g_irank_on_node = 0;
 uint_t g_nrank_on_node = 1;
+v_t<char> g_node_roots = {};
+uint_t g_my_node_root_irank = 0;
 int g_p2p_tag = 0;

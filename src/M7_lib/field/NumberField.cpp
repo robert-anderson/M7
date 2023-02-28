@@ -29,7 +29,7 @@ StringField &StringField::operator=(const char *str) {
     auto len = std::strlen(str);
     DEBUG_ASSERT_LE(len, nelement(), "String length does not match that of string field");
     zero();
-    std::copy(str, str+len, dbegin());
+    std::copy(str, str+len, tbegin());
     return *this;
 }
 
@@ -39,7 +39,7 @@ StringField &StringField::operator=(const str_t &str) {
 }
 
 bool StringField::operator==(const char *str) const {
-    return !memcmp(str, dbegin(), std::strlen(str));
+    return !memcmp(str, ctbegin(), std::strlen(str));
 }
 
 bool StringField::operator==(const str_t &str) const {
@@ -55,6 +55,6 @@ bool StringField::operator!=(const str_t &str) const {
 }
 
 str_t StringField::to_string() const {
-    auto len = std::min(nelement(), std::strlen(dbegin()));
-    return {dbegin(), len};
+    auto len = std::min(nelement(), std::strlen(ctbegin()));
+    return {ctbegin(), len};
 }

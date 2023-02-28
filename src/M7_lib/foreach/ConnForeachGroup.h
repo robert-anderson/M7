@@ -20,7 +20,7 @@ public:
     using function_t = conn_foreach::Base::function_t;
 
     template<typename mbf_t>
-    void loop(conn::from_field_t<mbf_t> &conn, const mbf_t &src, const function_t &fn) {
+    void loop(conn::from_field_t<mbf_t> &conn, const mbf_t &src, const function_t &fn) const {
         for(const auto& foreach : m_list) {
             conn.clear();
             foreach->loop(conn, src, fn);

@@ -20,7 +20,7 @@ exgen::Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
                 for (uint_t a = 0ul; a < nspinorb; ++a) {
                     for (uint_t b = 0ul; b < a; ++b) {
                         if (a!=i && a!=j && b!=i && b!=j) {
-                            auto element = m_h.get_coeff_2200(i, j, a, b);
+                            auto element = m_h.get_coeff_2200(b, a, j, i);
                             weights[ab] = std::abs(element);
                         }
                         ++ab;
@@ -51,7 +51,7 @@ bool exgen::Pchb2200::draw_h_frm(OpSig exsig, const field::FrmOnv& src, prob_t& 
 
     DEBUG_ASSERT_LT(i, j, "drawn indices should be strictly ordered");
 
-    // re-pack the selected indices into the flat index of the aliser row
+    // re-pack the selected indices into the flat index of the aliaser row
     ij = integer::strigmap(j, i); // i and j are orbital indices
     if (fptol::near_zero(m_pick_ab_given_ij.norm(ij))) {
         // can't have a valid excitation if the row norm is zero
@@ -60,7 +60,7 @@ bool exgen::Pchb2200::draw_h_frm(OpSig exsig, const field::FrmOnv& src, prob_t& 
 
     uint_t ab = m_pick_ab_given_ij.draw(ij, m_prng);
     integer::inv_strigmap(b, a, ab); // a and b are spin orbital indices
-    //ASSERT(i!=a && i!=b && j!=a && j!=b)
+    DEBUG_ASSERT_TRUE(i!=a && i!=b && j!=a && j!=b, "i, j, a, b should all be distinct");
 
     // reject the excitation if the creation indices are already occupied
     if (src.get(a)) return false;

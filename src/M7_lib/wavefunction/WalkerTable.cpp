@@ -36,6 +36,6 @@ uint_t Walker::ipart_replica(uint_t ipart) const {
     return nreplica()==1 ? ipart : (ipart/2)*2+!(ipart&1ul);
 }
 
-bool Walker::is_initiator(uint_t ipart, wf_comp_t thresh) const {
+bool Walker::exceeds_initiator_thresh(uint_t ipart, wf_comp_t thresh) const {
     return std::abs(m_weight[ipart]) >= thresh;
 }

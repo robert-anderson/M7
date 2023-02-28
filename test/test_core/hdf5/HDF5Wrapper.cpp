@@ -63,14 +63,14 @@ TEST(HDF5Wrapper, StringType) {
 }
 
 TEST(HDF5Wrapper, FloatArray) {
-    const auto i_am_definitive = mpi::i_am(hash::in_range(99, 0, mpi::nrank()));
+    const auto irank = hash::in_range(99, 0, mpi::nrank());
     uintv_t shape = {2, 3};
     v_t<float> v = {0.1, 4.5, 1.2, 3, 2.3, 4};
     // make each rank's v differ by one element
     v[2] = hash::in_range(mpi::irank(), 4, 18);
     {
         hdf5::FileWriter fw("table_test.h5");
-        fw.save_dataset("a_float_array", v, shape, {}, i_am_definitive);
+        hdf5::DatasetSaver::save_array(fw, "a_float_array", v, shape, {}, irank);
     }
     mpi::barrier();
     {
@@ -78,7 +78,7 @@ TEST(HDF5Wrapper, FloatArray) {
         auto nelement = nd::nelement(shape);
         ASSERT_EQ(nelement, v.size());
         ASSERT_TRUE(fr.child_exists("a_float_array"));
-        auto v_read = fr.load_dataset<v_t<float>>("a_float_array", false, true);
+        auto v_read = hdf5::DatasetLoader::load_vector<float>(fr, "a_float_array");
         auto v_def = v;
         v_def[2] = hash::in_range(0, 4, 18);
         ASSERT_EQ(v_read, v_def);
@@ -86,19 +86,19 @@ TEST(HDF5Wrapper, FloatArray) {
 }
 
 TEST(HDF5Wrapper, ComplexArray) {
-    const auto i_am_definitive = mpi::i_am(hash::in_range(99, 0, mpi::nrank()));
+    const auto irank = hash::in_range(99, 0, mpi::nrank());
     uintv_t shape = {2, 3};
     v_t<std::complex<float>> v = {{0.1, 1}, {4.5, 2}, {1.2, 3}, {3, 4}, {2.3, 5}, {4, 6}};
     // make each rank's v differ by one element
     v[2].imag(hash::in_range(mpi::irank(), 4, 18));
     {
         hdf5::FileWriter fw("table_test.h5");
-        fw.save_dataset("a_complex_array", v, shape, {"dim0", "dim1"}, i_am_definitive);
+        hdf5::DatasetSaver::save_array(fw, "a_complex_array", v, shape, {"dim0", "dim1"}, irank);
     }
     mpi::barrier();
     {
         hdf5::FileReader fr("table_test.h5");
-        const auto v_read = fr.load_dataset<v_t<std::complex<float>>>("a_complex_array", false, true);
+        auto v_read = hdf5::DatasetLoader::load_vector<std::complex<float>>(fr, "a_complex_array");
         auto v_def = v;
         v_def[2].imag(hash::in_range(0, 4, 18));
         ASSERT_EQ(v_read, v_def);

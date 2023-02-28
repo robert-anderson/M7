@@ -4,17 +4,14 @@ target_sources(M7_lib
         Attr.h
         DatasetFormat.cpp
         DatasetFormat.h
+        DatasetTransaction.cpp
+        DatasetTransaction.h
+        Field.cpp
         Field.h
         File.cpp
         File.h
-        Group.cpp
-        Group.h
         Node.cpp
         Node.h
-        NodeReader.cpp
-        NodeReader.h
-        NodeWriter.cpp
-        NodeWriter.h
         Type.cpp
         Type.h
 )

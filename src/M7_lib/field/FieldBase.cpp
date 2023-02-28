@@ -38,15 +38,6 @@ bool FieldBase::belongs_to_row(const Row& row) const {
     return belongs_to_row(&row);
 }
 
-buf_t *FieldBase::begin() const {
-    DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
-    return m_row->begin() + m_row_offset;
-}
-
-buf_t *FieldBase::end() const {
-    return begin() + m_size;
-}
-
 const Row *FieldBase::row() const {
     return m_row;
 }
@@ -62,12 +53,12 @@ void FieldBase::zero() {
 }
 
 bool FieldBase::is_zero() const {
-    ASSERT(!m_null_string.empty());
-    return std::memcmp(begin(), m_null_string.data(), m_size) == 0;
+    DEBUG_ASSERT_EQ(m_null_string.size(), m_size, "comparison-with-zero string is incorrect length");
+    return std::memcmp(cbegin(), m_null_string.data(), m_size) == 0;
 }
 
 int FieldBase::cmp(const FieldBase &other) const {
-    return std::memcmp(begin(), other.begin(), m_size);
+    return std::memcmp(cbegin(), other.cbegin(), m_size);
 }
 
 bool FieldBase::operator==(const FieldBase &other) const {
@@ -95,10 +86,10 @@ bool FieldBase::operator>=(const FieldBase &other) const {
 }
 
 hash::digest_t FieldBase::hash() const {
-    return hash::fnv(begin(), m_size);
+    return hash::fnv(cbegin(), m_size);
 }
 
-void FieldBase::save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const {
+void FieldBase::save_fn(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const {
     hdf5::field::save<buf_t>(*this, nw, name, {m_size}, {"bytes"}, max_nitem_per_op, this_rank);
 }
 
@@ -107,24 +98,24 @@ void FieldBase::load_fn(const hdf5::NodeReader& nr, const str_t& name,
     hdf5::field::load<buf_t>(*this, nr, name, max_nitem_per_op, part, this_rank);
 }
 
-void FieldBase::save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const {
-    save_fn(nw, name, max_nitem_per_op, this_rank);
+void FieldBase::save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const {
+    save_fn(nw, name, this_rank, max_nitem_per_op);
 }
 
 void FieldBase::save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const {
-    save(nw, name, c_default_max_nitem_per_op, this_rank);
+    save(nw, name, hdf5::c_default_max_nitem_per_op, this_rank);
 }
 
 void FieldBase::save(const hdf5::NodeWriter& nw, bool this_rank) const {
-    save(nw, m_name, c_default_max_nitem_per_op, this_rank);
+    save(nw, m_name, hdf5::c_default_max_nitem_per_op, this_rank);
 }
 
-void FieldBase::load(const hdf5::NodeReader& nr, const str_t& name, uint_t max_nitem_per_op, bool part, bool this_rank) {
+void FieldBase::load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank, uint_t max_nitem_per_op) {
     load_fn(nr, name, max_nitem_per_op, part, this_rank);
 }
 
 void FieldBase::load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank) {
-    load(nr, name, c_default_max_nitem_per_op, part, this_rank);
+    load(nr, name, hdf5::c_default_max_nitem_per_op, part, this_rank);
 }
 
 void FieldBase::load(const hdf5::NodeReader& nr, bool part, bool this_rank) {

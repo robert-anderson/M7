@@ -203,7 +203,9 @@ conf::SpecMoms::SpecMoms(Group *parent, str_t name, str_t description) :
         m_stochastic(this, "stochastic", true,
                      "if false, perform exact evaluation of contributing connections"),
         m_nattempt_per_walker(this, "nattempt_per_walker", 1.0,
-                              "number of attempts to generate contributions per integerized walker on the source MBF") {}
+                              "number of attempts to generate contributions per integerized walker on the source MBF"),
+        m_max_order(this, "max_order", 1, "maximum order (power of H) of one-particle moment to estimate"),
+        m_spinorbs(this, "spinorbs", {}, "selected perturbing spin orbitals, none specified implies all will be estimated"){}
 
 conf::InstEsts::InstEsts(Group *parent) :
         Section(parent, "inst_ests",
@@ -290,7 +292,8 @@ conf::Propagator::Propagator(Group *parent) :
                                 "number of spawns logged for excitation type magnitudes to be used in tau and probability update"),
         m_period(this, "period", 10ul,
                  "number of MC cycles between updates of tau and probabilities if requested"),
-        m_imp_samp_guide(this, "imp_samp_guide"), m_semistochastic(this) {}
+        m_imp_samp_guide(this, "imp_samp_guide"),
+        m_c2_c4_initiator(this), m_semistochastic(this) {}
 
 void conf::Propagator::validate_node_contents() {
     if (m_min_death_mag.m_value==0.0) {

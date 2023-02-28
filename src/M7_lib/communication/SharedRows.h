@@ -14,6 +14,7 @@ namespace shared_rows {
      */
     template<typename row_t>
     struct Set : public DistribDependent {
+    protected:
         /**
          * the table with the definitive record values to be copied and sent to all ranks
          */
@@ -27,12 +28,13 @@ namespace shared_rows {
          * name to use for this row set in detailed logging
          */
         str_t m_name;
+    private:
         /**
          * all rows gathered
          */
-        buffered::MappedTable<row_t> m_all;
+        buffered::MappedTable<row_t> m_gathered;
         /**
-         * contiguous send table for gathering into m_all
+         * contiguous send table for gathering into m_gathered
          */
         buffered::Table<row_t> m_gather_send;
 
@@ -45,12 +47,12 @@ namespace shared_rows {
     public:
         Set(str_t name, const src_t& src, uintv_t irows = {}) :
                 DistribDependent(src), m_src(src),
-                m_name(name), m_all(name+" all rows", m_src.m_row),
+                m_name(name), m_gathered(name + " all gathered rows", m_src.m_row, false),
                 m_gather_send(name+" gather send", m_src.m_row),
                 m_src_row(m_src.m_row), m_send_row(m_gather_send.m_row) {
             for (auto irow: irows) add_(irow);
             full_update();
-            m_all.m_row.restart();
+            m_gathered.m_row.restart();
         }
 
         virtual ~Set() {}
@@ -69,19 +71,27 @@ namespace shared_rows {
     public:
 
         /**
-         * bring all rows into m_all
-         * direct buffer copy, no rows have changed locations so no need to treat m_all as a mapped table
+         * bring all rows into m_gathered
+         * direct buffer copy, no rows have changed locations so no need to treat m_gathered as a mapped table
          */
         void update() {
             prepare_gather();
-            m_all.TableBase::all_gatherv(m_gather_send);
+            m_gathered.TableBase::all_gatherv(m_gather_send);
+            m_gathered.m_row.restart();
+        }
+
+        /**
+         * only allow const access to the node-shared m_gathered table
+         */
+        const buffered::MappedTable<row_t>& gathered() const {
+            return m_gathered;
         }
 
         void row_index_update() {
-            REQUIRE_EQ_ALL(m_all.nrow_in_use(), m_irecs.size(),
+            REQUIRE_EQ_ALL(m_gathered.nrow_in_use(), m_irecs.size(),
                            "this kind of refresh is only possible when all rows have already been gathered");
             m_irecs = {};
-            auto& row = m_all.m_row;
+            auto& row = m_gathered.m_row;
             for (row.restart(); row; ++row) {
                 auto result = m_src.lookup(row.key_field(), m_src_row);
                 if (result) {
@@ -96,7 +106,8 @@ namespace shared_rows {
          */
         void full_update() {
             prepare_gather();
-            m_all.all_gatherv(m_gather_send);
+            m_gathered.all_gatherv(m_gather_send);
+            m_gathered.m_row.restart();
         }
 
         uint_t nrec_() const {
@@ -131,7 +142,6 @@ namespace shared_rows {
     template<typename row_t>
     struct Single : Set<row_t> {
         typedef buffered::DistributedTable<row_t> src_t;
-        using Set<row_t>::m_all;
         using Set<row_t>::clear;
         using Set<row_t>::add_;
         using Set<row_t>::full_update;
@@ -155,15 +165,14 @@ namespace shared_rows {
     };
 
     struct Walker : Single<::Walker> {
-
         Walker(str_t name, const src_t& src, TableBase::Loc loc): Single<::Walker>(name, src, loc) {}
 
         const field::Mbf &mbf() const {
-            return m_all.m_row.m_mbf;
+            return gathered().m_row.m_mbf;
         }
 
         const wf_t &weight(uint_t ipart) const {
-            return m_all.m_row.m_weight[ipart];
+            return gathered().m_row.m_weight[ipart];
         }
 
         /**
@@ -176,8 +185,9 @@ namespace shared_rows {
          *  normalized average weight
          */
         wf_t norm_average_weight(uint_t icycle, uint_t ipart) const {
-            auto unnorm = m_all.m_row.m_average_weight[ipart]+m_all.m_row.m_weight[ipart];
-            return unnorm/static_cast<wf_comp_t>(m_all.m_row.occupied_ncycle(icycle));
+            auto& row = gathered().m_row;
+            auto unnorm = row.m_average_weight[ipart]+row.m_weight[ipart];
+            return unnorm/static_cast<wf_comp_t>(row.occupied_ncycle(icycle));
         }
     };
 }

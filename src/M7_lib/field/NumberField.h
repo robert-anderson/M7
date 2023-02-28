@@ -36,22 +36,6 @@ struct NdNumberField : NumberFieldBase {
         return m_format.m_nelement;
     }
 
-    T* dbegin() {
-        return reinterpret_cast<T*>(begin());
-    }
-
-    const T* dbegin() const {
-        return reinterpret_cast<const T*>(begin());
-    }
-
-    T* dend() {
-        return reinterpret_cast<T*>(end());
-    }
-
-    const T* dend() const {
-        return reinterpret_cast<const T*>(end());
-    }
-
     NdNumberField(Row *row, NdFormat<nind> format, str_t name = "", bool force_own_words=false) :
             NumberFieldBase(row, sizeof(T), format.m_nelement, dtype::is_complex<T>(),
                     typeid(T), name, force_own_words), m_format(format) {}
@@ -65,14 +49,27 @@ struct NdNumberField : NumberFieldBase {
     }
 
     NdNumberField &operator=(const T &v) {
-        std::fill(dbegin(), dend(), v);
+        auto begin = begin_as<T>();
+        std::fill(begin, begin+nelement(), v);
         return *this;
     }
 
     NdNumberField &operator=(const v_t<T> &v) {
         DEBUG_ASSERT_EQ(v.size(), nelement(), "Vector size does not match that of numeric field");
-        std::copy(v.data(), v.data()+nelement(), dbegin());
+        std::copy(v.data(), v.data()+nelement(), begin_as<T>());
         return *this;
+    }
+
+    const T* ctbegin() const {
+        return cbegin_as<T>();
+    }
+
+    T* tbegin() {
+        return begin_as<T>();
+    }
+
+    const T* ctend() const {
+        return cend_as<T>();
     }
 
     template<typename U>
@@ -133,7 +130,7 @@ private:
 public:
     void copy_to(v_t<T>& v) const {
         DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
-        std::memcpy(v.data(), begin(), m_size);
+        std::memcpy(v.data(), cbegin(), m_size);
     }
 
     template<typename U=T>
@@ -246,13 +243,13 @@ public:
     }
 
     uint_t imax() const {
-        return std::distance(dbegin(), std::max_element(dbegin(), dend()));
+        return std::distance(cbegin_as<T>(), std::max_element(cbegin_as<T>(), cend_as<T>()));
     }
     T max() const {
         return (*this)[imax()];
     }
     uint_t imin() const {
-        return std::distance(dbegin(), std::min_element(dbegin(), dend()));
+        return std::distance(cbegin_as<T>(), std::min_element(cbegin_as<T>(), cend_as<T>()));
     }
     T min() const {
         return (*this)[imin()];
@@ -263,20 +260,20 @@ public:
      */
     T &operator[](const uint_t &ielement) {
         DEBUG_ASSERT_LT(ielement, m_nelement, "Numeric field access OOB");
-        return dbegin()[ielement];
+        return begin_as<T>()[ielement];
     }
 
     const T &operator[](const uint_t &ielement) const {
         DEBUG_ASSERT_LT(ielement, m_nelement, "Numeric field access OOB");
-        return dbegin()[ielement];
+        return cbegin_as<T>()[ielement];
     }
 
     T &operator[](inds_t inds) {
-        return dbegin()[m_format.flatten(inds)];
+        return begin_as<T>()[m_format.flatten(inds)];
     }
 
     const T &operator[](inds_t inds) const {
-        return dbegin()[m_format.flatten(inds)];
+        return cbegin_as<T>()[m_format.flatten(inds)];
     }
 
     template<typename U=T>
@@ -304,10 +301,10 @@ public:
         return m_format.to_string() + (m_is_complex ? complex_dim_string : "");
     }
 
-    void save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const override {
+    void save_fn(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const override {
         auto shape = convert::to_vector(m_format.m_shape.data(), nind);
         auto dim_names = convert::to_vector(m_format.m_dim_names.data(), nind);
-        hdf5::field::save<T>(*this, nw, name, shape, dim_names, max_nitem_per_op, this_rank);
+        hdf5::field::save<T>(*this, nw, name, shape, dim_names, this_rank, max_nitem_per_op);
     }
 };
 
@@ -315,6 +312,7 @@ public:
  * no practical use for this class - included only for testing
  */
 struct StringField : NdNumberField<char, 1ul> {
+    using NdNumberField<char, 1ul>::operator==;
     typedef NdNumberField<char, 1ul> base_t;
     StringField(Row *row, uint_t length, const str_t& name = "", bool force_own_words=false);
 
@@ -338,6 +336,7 @@ template<typename T>
 struct NumberField : NdNumberField<T, 0ul> {
     typedef NdNumberField<T, 0ul> base_t;
     using base_t::operator=;
+    using base_t::operator+=;
 
     NumberField(Row *row, str_t name = "", bool force_own_words=false) :
         base_t(row, {}, name, force_own_words) {}
@@ -354,11 +353,11 @@ struct NumberField : NdNumberField<T, 0ul> {
     }
 
     operator T&() {
-        return *base_t::dbegin();
+        return *base_t::tbegin();
     }
 
     operator const T&() const {
-        return *base_t::dbegin();
+        return *base_t::ctbegin();
     }
 };
 

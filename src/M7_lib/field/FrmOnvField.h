@@ -75,29 +75,26 @@ public:
     void clr(const uint_t& site_offset, const uintv_t& clrbits_alpha, const uintv_t& clrbits_beta);
 
     void excite(const uint_t &i, const uint_t &j) {
-        auto* dptr = reinterpret_cast<uint_t *>(begin());
-        clr(dptr, i);
-        set(dptr, j);
+        clr(tbegin(), i);
+        set(tbegin(), j);
     }
     void excite(inds_t ann, inds_t cre){
-        auto* dptr = reinterpret_cast<uint_t *>(begin());
-        clr(dptr, ann);
-        set(dptr, cre);
+        clr(tbegin(), ann);
+        set(tbegin(), cre);
     }
 
     void excite(const uint_t &i, const uint_t &j, const uint_t &k, const uint_t &l) {
-        auto* dptr = reinterpret_cast<uint_t *>(begin());
-        clr(dptr, i);
-        clr(dptr, j);
-        set(dptr, k);
-        set(dptr, l);
+        clr(tbegin(), i);
+        clr(tbegin(), j);
+        set(tbegin(), k);
+        set(tbegin(), l);
     }
+
     void excite(inds_t ann1, inds_t ann2, inds_t cre1, inds_t cre2) {
-        auto* dptr = reinterpret_cast<uint_t *>(begin());
-        clr(dptr, ann1);
-        clr(dptr, ann2);
-        set(dptr, cre1);
-        set(dptr, cre2);
+        clr(tbegin(), ann1);
+        clr(tbegin(), ann2);
+        set(tbegin(), cre1);
+        set(tbegin(), cre2);
     }
 
     /**

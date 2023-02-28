@@ -190,6 +190,8 @@ namespace conf {
     struct SpecMoms : Bilinears {
         Param<bool> m_stochastic;
         Param<double> m_nattempt_per_walker;
+        Param<uint_t> m_max_order;
+        Param<uintv_t> m_spinorbs;
 
         explicit SpecMoms(Group *parent, str_t name, str_t description);
     };
@@ -223,7 +225,7 @@ namespace conf {
         explicit Mae(Group *parent);
 
         bool any_bilinears() const {
-            return !(m_rdm.m_ranks.m_value.empty() && m_spec_mom.m_ranks.m_value.empty());
+            return !m_rdm.m_ranks.m_value.empty() || m_spec_mom.m_enabled;
         }
     };
 
@@ -275,6 +277,11 @@ namespace conf {
         GuideWavefunction(Group *parent, const str_t& name);
     };
 
+    struct C2C4Initiator : Section {
+        Param<double> m_fac;
+        C2C4Initiator(Group* parent): Section(parent, "c2_c4_initiator", "C2 C4 predictions", Explicit),
+              m_fac(this, "fac", 0.0, "factor"){}
+    };
 
     struct Propagator : Section {
         Param<uint_t> m_ncycle;
@@ -295,6 +302,7 @@ namespace conf {
         Param<uint_t> m_ndraw_min_for_dynamic;
         Param<uint_t> m_period;
         GuideWavefunction m_imp_samp_guide;
+        C2C4Initiator m_c2_c4_initiator;
         Semistochastic m_semistochastic;
 
         explicit Propagator(Group *parent);

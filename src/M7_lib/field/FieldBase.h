@@ -5,17 +5,14 @@
 #ifndef M7_FIELDBASE_H
 #define M7_FIELDBASE_H
 
-#include <M7_lib/defs.h>
 #include <cstring>
 #include <utility>
+#include <M7_lib/defs.h>
 #include <M7_lib/util/Hash.h>
 #include <M7_lib/nd/NdArrayList.h>
 #include <M7_lib/hdf5/Node.h>
 
 #include "Row.h"
-#include "M7_lib/hdf5/NodeWriter.h"
-#include "M7_lib/hdf5/NodeReader.h"
-
 
 /**
  * Base class for the basic containers of data within Rows, which in turn reference locations within a Buffer via Table.
@@ -78,8 +75,6 @@ private:
     friend Row;
 
 public:
-    static constexpr uint_t c_default_max_nitem_per_op = 16000000;
-
     /**
      * @param row
      *  row object to which the new field should be added
@@ -97,7 +92,7 @@ public:
     FieldBase &operator=(const FieldBase &other){
         if (&other == this) return *this;
         DEBUG_ASSERT_TRUE(is_comparable(other), "can't compare to incompatible field");
-        std::memcpy(begin(), other.begin(), m_size);
+        std::memcpy(begin(), other.cbegin(), m_size);
         return *this;
     }
 
@@ -109,9 +104,34 @@ public:
 
     bool belongs_to_row(const Row& row) const;
 
-    buf_t *begin() const;
+    buf_t* begin() {
+        DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
+        return m_row->begin() + m_row_offset;
+    }
 
-    buf_t *end() const;
+    template<typename T>
+    T* begin_as() {
+        return reinterpret_cast<T*>(begin());
+    }
+
+    const buf_t* cbegin() const {
+        DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
+        return m_row->cbegin() + m_row_offset;
+    }
+
+    template<typename T>
+    const T* cbegin_as() const {
+        return reinterpret_cast<const T*>(cbegin());
+    }
+
+    const buf_t* cend() const {
+        return cbegin() + m_size;
+    }
+
+    template<typename T>
+    const T* cend_as() const {
+        return reinterpret_cast<const T*>(cend());
+    }
 
     const Row *row() const;
 
@@ -140,14 +160,14 @@ public:
     void to_buffer(buf_t* dst, uint_t irow) const {
         DEBUG_ASSERT_LT(irow, m_row->m_table->nrow_in_use(), "row index OOB");
         DEBUG_ASSERT_FALSE(m_row->m_table->is_freed(irow), "copying a freed row to buffer");
-        auto src = m_row->m_table->begin() + m_row->m_size * irow + m_row_offset;
+        auto src = m_row->m_table->cbegin(irow) + m_row_offset;
         std::memcpy(dst, src, m_size);
     }
 
     void from_buffer(const buf_t* src, uint_t irow) {
         DEBUG_ASSERT_LT(irow, m_row->m_table->nrow_in_use(), "row index OOB");
         DEBUG_ASSERT_FALSE(m_row->m_table->is_freed(irow), "copying a freed row to buffer");
-        auto dst = m_row->m_table->begin() + m_row->m_size * irow + m_row_offset;
+        auto dst = m_row->m_table->begin(irow) + m_row_offset;
         std::memcpy(dst, src, m_size);
     }
 
@@ -158,12 +178,12 @@ protected:
      *  NodeWriter instance (HDF5 group or file)
      * @param name
      *  desired name in the dataset
-     * @param max_nitem_per_op
-     *  maximum number of items (rows of this Field) that can be saved to HDF5 archive in a single write call
      * @param this_rank
      *  true if data from this MPI rank is to be included in the saved set
+     * @param max_nitem_per_op
+     *  maximum number of items (rows of this Field) that can be saved to HDF5 archive in a single write call
      */
-    virtual void save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const;
+    virtual void save_fn(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const;
 
     /**
      * load many entries of a field in a Table from an HDF5 dataset
@@ -182,13 +202,13 @@ protected:
 
 public:
 
-    void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const;
+    void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const;
 
     void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const;
 
     void save(const hdf5::NodeWriter& nw, bool this_rank) const;
 
-    void load(const hdf5::NodeReader& nr, const str_t& name, uint_t max_nitem_per_op, bool part, bool this_rank);
+    void load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank, uint_t max_nitem_per_op);
 
     void load(const hdf5::NodeReader& nr, const str_t& name, bool part, bool this_rank);
 

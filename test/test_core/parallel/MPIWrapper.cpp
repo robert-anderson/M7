@@ -65,6 +65,37 @@ TEST(MPIWrapper, Allgatherv){
     }
 }
 
+TEST(MPIWrapper, Somegatherv){
+    const uint_t n=4;
+    uintv_t send(n, 0ul);
+    uintv_t recv(n * mpi::nrank(), 0ul);
+    for (uint_t i=0ul; i<n; ++i){
+        send[i] = hash::in_range({mpi::irank(), i}, 3, 123);
+    }
+    // suppose that only even-indexed ranks gather data
+    auto recving = [](uint_t irank=mpi::irank()) -> bool {return !(irank&1ul);};
+    uintv_t sendcounts(mpi::nrank(), 0ul);
+    uintv_t senddispls(mpi::nrank(), 0ul);
+    uintv_t recvcounts(mpi::nrank(), 0ul);
+    uintv_t recvdispls(mpi::nrank(), 0ul);
+    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank){
+        // all ranks send all their data to only the receiving ranks
+        if (recving(irank)) sendcounts[irank] = n;
+    }
+    if (recving()) recvcounts.assign(mpi::nrank(), n);
+    recvdispls = mpi::counts_to_displs_consec(recvcounts);
+
+    mpi::all_to_allv(send.data(), sendcounts, senddispls, recv.data(), recvcounts, recvdispls);
+    uint_t iflat = 0ul;
+    for (uint_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
+        for (uint_t i=0ul; i<n; ++i){
+            if (mpi::irank()%2) ASSERT_EQ(recv[iflat], 0);
+            else ASSERT_EQ(recv[iflat], hash::in_range({isrc, i}, 3, 123));
+            ++iflat;
+        }
+    }
+}
+
 TEST(MPIWrapper, AllgathervRagged){
     const uint_t nsend=hash::in_range(mpi::irank(), 5, 17);
     uintv_t send(nsend, 0ul);
@@ -94,7 +125,6 @@ TEST(MPIWrapper, AllgathervRagged){
         }
     }
 }
-
 
 TEST(MPIWrapper, MaxLocMinLoc){
     typedef double T;

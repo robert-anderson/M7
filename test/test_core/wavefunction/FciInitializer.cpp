@@ -113,8 +113,8 @@ TEST(FciInitializer, C4) {
     hdf5::FileWriter fw("ci.h5");
     c2.save(fw, "c2", mpi::i_am_root());
     c4.save(fw, "c4", mpi::i_am_root());
-    fw.save_dataset("nw_tot", nw_tot, mpi::i_am_root());
-    fw.save_dataset("nw_sectors", nw_sectors, mpi::i_am_root());
+    hdf5::DatasetSaver::save_scalar(fw, "nw_tot", nw_tot);
+    hdf5::DatasetSaver::save_vector(fw, "nw_sectors", nw_sectors);
 }
 
 

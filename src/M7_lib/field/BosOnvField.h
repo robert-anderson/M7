@@ -66,8 +66,8 @@ struct BosOnvField : NdNumberField<bos_occ_t, 1> {
     void foreach_setmode(const fn_t& fn) const {
         static_assert(std::is_same<bos_occ_t, buf_t>::value,
                 "this approach uses aliasing, so the boson occupation must have the same type as the buffer");
-        auto get_work_fn = [this](uint_t idataword){
-            return reinterpret_cast<uint_t*>(begin())[idataword];
+        auto get_work_fn = [this](uint_t idataword) -> uint_t{
+            return cbegin_as<uint_t>()[idataword];
         };
         setbyte_foreach::single<uint_t>(integer::divceil(m_size, sizeof(uint_t)), fn, get_work_fn);
     }

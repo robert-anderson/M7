@@ -4,6 +4,7 @@
 
 #include "Rdms.h"
 #include "SpinfreeRdm.h"
+#include "Bilinears.h"
 
 Rdms::exsig_to_rdms_t Rdms::make_exsig_to_rdms() const {
     exsig_to_rdms_t exsig_to_rdms;
@@ -30,11 +31,11 @@ Rdms::exsig_to_rdms_t Rdms::make_exsig_to_rdms() const {
     return exsig_to_rdms;
 }
 
-Rdms::Rdms(const conf::Rdms& opts, v_t<OpSig> ranksigs, sys::Sector sector, const Epoch& accum_epoch) :
+Rdms::Rdms(const conf::Rdms& opts, sys::Sector sector, const Epoch& accum_epoch) :
         m_opts(opts), m_spinfree(opts.m_spinfree), m_work_conns(sector.size()),
         m_work_com_ops(sector.size()),
         m_accum_epoch(accum_epoch) {
-    for (const auto& ranksig: ranksigs) {
+    for (const auto& ranksig: bilinears::parse_exsigs(opts.m_ranks)) {
         REQUIRE_FALSE(m_pure_rdms[ranksig], "No RDM rank should appear more than once in the specification");
         REQUIRE_NE(ranksig, opsig::c_invalid, "invalid RDM rank signature (perhaps too many operators for OpSig object)");
         REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
@@ -220,7 +221,7 @@ void Rdms::save(const hdf5::NodeWriter& parent) {
     {
         // unnormalized RDMs, suitable for restarts
         hdf5::GroupWriter gw(parent, "archive");
-        gw.save_dataset("norm", m_total_norm.m_reduced, mpi::i_am_root());
+        hdf5::DatasetSaver::save_scalar(gw, "norm", m_total_norm.m_reduced);
         for (const auto& rdm: m_rdms) rdm->save(gw);
     }
 

@@ -96,13 +96,14 @@ void wf::Fci::log_top_weighted(uint_t ipart, uint_t nrow) {
 
     auto& row = xr_gathered.m_row;
     v_t<strv_t> rows;
-    rows.push_back({"", "many-body basis function", "walker number", "initiator", "semistoch", "MPI rank"});
+    rows.push_back({"", "many-body basis function", "walker number", "initiator", "energy", "semistoch", "MPI rank"});
     for (row.restart(); row; ++row) {
         rows.push_back({
             std::to_string(row.index()),
             row.m_mbf.to_string(),
             convert::to_string(row.m_weight[ipart], 6),
-            convert::to_string(row.is_initiator(ipart, m_opts.m_propagator.m_nadd)),
+            "TODO", //convert::to_string(row.is_initiator(ipart, m_opts.m_propagator.m_nadd)),
+            convert::to_string(row.m_hdiag[iroot_part(ipart)]),
             convert::to_string(bool(row.m_deterministic[iroot_part(ipart)])),
             convert::to_string(m_dist.irank(row.m_mbf))
         });
