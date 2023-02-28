@@ -38,7 +38,7 @@ public:
 
     std::unique_ptr<guide::Wavefunction> make_imp_samp_guide(const conf::GuideWavefunction& opts) const;
 
-    Propagator(const conf::Document &opts, const Hamiltonian &ham, const Wavefunction &wf) :
+    Propagator(const conf::Document &opts, const Hamiltonian &ham, const wf::Fci &wf) :
             m_tau(opts.m_propagator.m_tau_init),
             m_nadd_initiator(opts.m_propagator.m_nadd),
             m_wf_fmt(wf.m_format),

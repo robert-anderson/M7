@@ -27,7 +27,7 @@ void deterministic::Subspace::make_rdm_contrib(Rdms &rdms, const shared_rows::Wa
 }
 
 deterministic::Subspace::Subspace(
-        const conf::Semistochastic &opts, Wavefunction &wf, uint_t iroot) :
+        const conf::Semistochastic &opts, wf::Fci &wf, uint_t iroot) :
         shared_rows::Set<Walker>("semistochastic", wf.m_store),
         m_opts(opts), m_wf(wf),
         m_iroot(iroot), m_local_row(wf.m_store.m_row), m_iparts(make_iparts()){}
@@ -165,7 +165,7 @@ deterministic::Subspaces::operator bool() const {
     return m_opts.m_enabled && m_epoch;
 }
 
-void deterministic::Subspaces::init(const Hamiltonian &ham, const Maes& maes, Wavefunction &wf, uint_t icycle) {
+void deterministic::Subspaces::init(const Hamiltonian &ham, const Maes& maes, wf::Fci &wf, uint_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
 

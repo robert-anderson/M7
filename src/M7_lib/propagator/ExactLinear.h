@@ -20,8 +20,7 @@ class ExactLinear : public Propagator {
     MagnitudeLogger m_mag_log;
 
 public:
-    ExactLinear(const Hamiltonian& ham, const conf::Document& opts, const Wavefunction& wf,
-                bool only_nonzero_h_spawns=true);
+    ExactLinear(const Hamiltonian& ham, const conf::Document& opts, const wf::Fci& wf, bool only_nonzero_h_spawns=true);
 
     void diagonal(wf::Fci &wf, Walker& walker, uint_t ipart) override;
 

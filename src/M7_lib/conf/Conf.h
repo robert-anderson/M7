@@ -277,12 +277,6 @@ namespace conf {
         GuideWavefunction(Group *parent, const str_t& name);
     };
 
-    struct C2C4Initiator : Section {
-        Param<double> m_fac;
-        C2C4Initiator(Group* parent): Section(parent, "c2_c4_initiator", "C2 C4 predictions", Explicit),
-              m_fac(this, "fac", 0.0, "factor"){}
-    };
-
     struct Propagator : Section {
         Param<uint_t> m_ncycle;
         Param<bool> m_stochastic;
@@ -302,7 +296,6 @@ namespace conf {
         Param<uint_t> m_ndraw_min_for_dynamic;
         Param<uint_t> m_period;
         GuideWavefunction m_imp_samp_guide;
-        C2C4Initiator m_c2_c4_initiator;
         Semistochastic m_semistochastic;
 
         explicit Propagator(Group *parent);

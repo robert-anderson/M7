@@ -43,7 +43,7 @@ public:
         return get_nattempt(std::abs(weight));
     }
 
-    void off_diagonal(wf::Fci &wf, const Walker& walker, uint_t ipart) override;
+    void off_diagonal(wf::Fci &wf, const Walker& walker, uint_t ipart, bool initiator) override;
 
     uint_t ncase_excit_gen() const override;
 
@@ -54,8 +54,6 @@ public:
     const ExcitGenGroup& excit_gen_group() const {
         return m_excit_gen_group;
     }
-
-    void update(uint_t icycle, const wf::Fci &wf) override;
 
     hash::digest_t checksum_() const override;
 

@@ -293,7 +293,7 @@ conf::Propagator::Propagator(Group *parent) :
         m_period(this, "period", 10ul,
                  "number of MC cycles between updates of tau and probabilities if requested"),
         m_imp_samp_guide(this, "imp_samp_guide"),
-        m_c2_c4_initiator(this), m_semistochastic(this) {}
+        m_semistochastic(this) {}
 
 void conf::Propagator::validate_node_contents() {
     if (m_min_death_mag.m_value==0.0) {

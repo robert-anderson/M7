@@ -237,7 +237,7 @@ namespace deterministic {
         /**
          * need to maintain a reference to the wavefunction so the affected coefficients can be gathered and updated
          */
-        Wavefunction& m_wf;
+        wf::Fci& m_wf;
         /**
          * all the non-zero Hamiltonian connections and their matrix elements for the locally-stored rows (with respect to
          * columns distributed across all ranks)
@@ -272,7 +272,7 @@ namespace deterministic {
 
     public:
 
-        Subspace(const conf::Semistochastic& opts, Wavefunction& wf, uint_t iroot);
+        Subspace(const conf::Semistochastic& opts, wf::Fci& wf, uint_t iroot);
 
         virtual ~Subspace() {}
 
@@ -336,7 +336,7 @@ namespace deterministic {
         /**
          * create subspaces, perform the relevant selections, and call make_connections on each
          */
-        void init(const Hamiltonian& ham, const Maes& maes, Wavefunction& wf, uint_t icycle);
+        void init(const Hamiltonian& ham, const Maes& maes, wf::Fci& wf, uint_t icycle);
 
         void update();
 

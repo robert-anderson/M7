@@ -16,7 +16,7 @@ struct SpecMoms {
     /**
      * const pointer to wavefunction class so we can lookup dst walker weights
      */
-    const Wavefunction* m_wf = nullptr;
+    const wf::Fci* m_wf = nullptr;
     /**
      * pointer to propagator class which is used to generate connections in the perturbed many-body basis
      */
