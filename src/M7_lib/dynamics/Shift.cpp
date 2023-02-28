@@ -14,6 +14,8 @@ Shift::Shift(const conf::Document &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         m_nwalker_target("nwalker_target", opts.m_propagator.m_nw_target){
     if (m_opts.m_shift.m_target_damp)
         logging::info("Using targeted shift damping term (growth relative to target population)");
+    if (m_opts.m_shift.m_fix_ref_weight)
+        logging::info("Updating shift so as to keep the reference population fixed");
     m_nwalker_last_period.zero();
     DEBUG_ASSERT_FALSE(m_variable_mode, "Shift should not initially be in variable mode");
 }
@@ -38,11 +40,21 @@ void Shift::update(const wf::Fci &wf, const wf::Refs& refs, uint_t icycle, doubl
          * number of cycles since last update
          */
         uint_t a = 0ul;
-        if (variable_mode.update(icycle, nw >= m_nwalker_target)) {
-            logging::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
-                      ipart, icycle-1, wf.m_nwalker.prev_total()[ipart], icycle, nw);
-            a = icycle % m_opts.m_shift.m_period;
+        if (m_opts.m_shift.m_fix_ref_weight.m_value) {
+            if (variable_mode.update(icycle, refs[ipart].weight() >= m_nwalker_target)) {
+                logging::info("Variable shift triggered for WF part {}. Cycle {} ref weight: {}",
+                              ipart, icycle, refs[ipart].weight());
+                a = icycle % m_opts.m_shift.m_period;
+            }
         }
+        else {
+            if (variable_mode.update(icycle, nw >= m_nwalker_target)) {
+                logging::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
+                              ipart, icycle - 1, wf.m_nwalker.prev_total()[ipart], icycle, nw);
+                a = icycle % m_opts.m_shift.m_period;
+            }
+        }
+
         if (is_period_cycle) a = m_opts.m_shift.m_period;
 
         if (variable_mode && a) {

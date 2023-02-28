@@ -157,18 +157,33 @@ void wf::Fci::end_cycle() {
 
 wf_comp_t wf::Fci::debug_square_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
-    auto& row = m_store.m_row;
+    auto row = m_store.m_row;
     for (row.restart(); row; ++row) {
+        if (row.is_freed()) continue;
         const wf_t& weight = row.m_weight[ipart];
         res += std::pow(std::abs(weight), 2.0);
     }
     return mpi::all_sum(res);
 }
 
+wf_comp_t wf::Fci::debug_reference_projected_energy(uint_t ipart, const Mbf& ref, const Hamiltonian& h) const {
+    wf_comp_t num = 0.0;
+    wf_comp_t den = 0.0;
+    auto row = m_store.m_row;
+    for (row.restart(); row; ++row) {
+        if (row.is_freed()) continue;
+        const wf_t& weight = row.m_weight[ipart];
+        num += h.get_element(ref, row.m_mbf) * weight;
+        if (row.m_mbf == ref) den+=weight;
+    }
+    return mpi::all_sum(num) / mpi::all_sum(den);
+}
+
 wf_comp_t wf::Fci::debug_l1_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
-    auto& row = m_store.m_row;
+    auto row = m_store.m_row;
     for (row.restart(); row; ++row) {
+        if (row.is_freed()) continue;
         const wf_t& weight = row.m_weight[ipart];
         res += std::abs(weight);
     }
@@ -176,6 +191,7 @@ wf_comp_t wf::Fci::debug_l1_norm(uint_t ipart) const {
 }
 
 void wf::Fci::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
+    if (m_preserve_ref && walker.m_mbf==*m_ref) return;
     wf_t& weight = walker.m_weight[ipart];
     m_nwalker.delta().m_local[ipart] += std::abs(new_weight) - std::abs(weight);
     m_delta_l2_norm_square.m_local[ipart] += std::pow(std::abs(new_weight), 2.0);

@@ -81,6 +81,10 @@ namespace wf {
          */
         reduction::NdArray<wf_comp_t, c_ndim_wf> m_nannihilated;
 
+        // todo: get rid of this hack before merge
+        bool m_preserve_ref = false;
+        const field::Mbf* m_ref = nullptr;
+
         Fci(const conf::Document& opts, const sys::Sector& sector);
 
         ~Fci();
@@ -126,6 +130,8 @@ namespace wf {
         }
 
         wf_comp_t debug_square_norm(uint_t ipart) const;
+
+        wf_comp_t debug_reference_projected_energy(uint_t ipart, const field::Mbf& ref, const Hamiltonian& h) const;
 
         /**
          * debugging only: number of walkers should be updated each time the wavefunction weights are modified

@@ -54,11 +54,6 @@ struct Shift {
 
     const ham_comp_t & operator[](uint_t ipart);
 
-
-    void update(const wf::Fci& wf, uint_t icycle, double tau);
-
-    void update(const wf::Refs& refs, uint_t icycle, double tau);
-
     /**
      * compute the change in all parts of the shift value based on the current values of wf.m_nwalkers
      *

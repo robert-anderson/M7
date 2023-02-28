@@ -168,6 +168,10 @@ void Solver::begin_cycle() {
 //    m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
 
     m_prop.update(m_icycle, m_wf, m_refs);
+    if (m_prop.m_shift.m_variable_mode && m_opts.m_shift.m_fix_ref_weight) {
+        m_wf.m_ref = &m_refs[0].mbf();
+        m_wf.m_preserve_ref = true;
+    }
 
     m_wf.begin_cycle();
     DEBUG_ASSERT_TRUE(m_wf.m_nwalker.delta().m_local.is_zero(), "Cyclic reducibles should be zeroed before new cycle");
