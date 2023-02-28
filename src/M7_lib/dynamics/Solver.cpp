@@ -246,7 +246,10 @@ void Solver::loop_over_occupied_mbfs() {
             if (m_wf.storing_av_weights()) walker.m_average_weight += walker.m_weight;
         }
 
-        if (m_hf && m_hf->m_excit_accums) m_hf->m_excit_accums.add(walker.m_mbf, walker.m_weight[0]);
+        if (m_prop.m_shift.m_variable_mode) {
+            // todo: give hf excit hists accumulation its own epoch
+            if (m_hf && m_hf->m_excit_accums) m_hf->m_excit_accums.add(walker.m_mbf, walker.m_weight[0]);
+        }
 
         if (m_maes.is_period_cycle(m_icycle)) {
             /*
