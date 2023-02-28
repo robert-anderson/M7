@@ -126,7 +126,7 @@ void mpi::setup_mpi_globals() {
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     MPI_Get_processor_name(processor_name, &tmp);
     g_processor_name = str_t(processor_name, tmp);
-    MPI_Comm_split_type(MPI_COMM_WORLD, OMPI_COMM_TYPE_CORE, irank(), MPI_INFO_NULL, &g_node_comm);
+    MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, irank(), MPI_INFO_NULL, &g_node_comm);
     MPI_Comm_size(g_node_comm, &tmp);
     g_nrank_on_node = tmp;
     MPI_Comm_rank(g_node_comm, &tmp);
