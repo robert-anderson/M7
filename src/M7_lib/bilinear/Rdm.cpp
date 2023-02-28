@@ -25,7 +25,7 @@ str_t Rdm::name(str_t str, OpSig ranksig) const {
     return str.empty() ? ranksig.to_string() : str;
 }
 
-void Rdm::add_to_send_table(const MaeInds &inds, wf_t contrib) {
+void Rdm::add_to_send_table(const RdmInds &inds, wf_t contrib) {
     DEBUG_ASSERT_EQ(inds.m_exsig, m_indsig, "incorrect number of operators in MAE indices");
     const auto irank_send = m_dist.irank(inds);
     DEBUG_ASSERT_TRUE(!m_ordered_inds || inds.is_ordered(),
@@ -39,13 +39,13 @@ void Rdm::add_to_send_table(const MaeInds &inds, wf_t contrib) {
 
 Rdm::Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue,
          DistribOptions dist_opts, Sizing store_sizing, Sizing comm_sizing, str_t name) :
-        communicator::MappedSend<MaeRow, MaeRow>(
+        communicator::MappedSend<RdmRow, RdmRow>(
                 "rdm_" + (name.empty() ? this->name(name, ranksig) : name),
                 // distributed "store" table row
-                MaeRow(indsig, nvalue),
+                RdmRow(indsig, nvalue),
                 dist_opts, store_sizing,
                 // send/recv table row
-                MaeRow(indsig, nvalue),
+                RdmRow(indsig, nvalue),
                 comm_sizing),
         m_sector(sector), m_ranksig(ranksig),
         m_nfrm_cre(ranksig.nfrm_cre()), m_nfrm_ann(ranksig.nfrm_ann()),

@@ -2,6 +2,8 @@
 // Created by rja on 15/06/22.
 //
 
+#include <cstring>
+#include <M7_lib/parallel/MPIAssert.h>
 #include "gtest/gtest.h"
 #include "M7_lib/util/Sort.h"
 

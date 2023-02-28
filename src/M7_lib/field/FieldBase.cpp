@@ -95,7 +95,7 @@ void FieldBase::save_fn(const hdf5::NodeWriter& nw, const str_t& name, bool this
 
 void FieldBase::load_fn(const hdf5::NodeReader& nr, const str_t& name,
                         uint_t max_nitem_per_op, bool part, bool this_rank) {
-    hdf5::field::load<buf_t>(*this, nr, name, max_nitem_per_op, part, this_rank);
+    hdf5::field::load(*this, nr, name, max_nitem_per_op, part, this_rank);
 }
 
 void FieldBase::save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const {

@@ -4,14 +4,14 @@
 
 #include "SpinfreeRdm.h"
 
-uint_t SpinFreeRdm::spinsig(const MaeIndsPartition& inds, const sys::frm::Size& size) {
+uint_t SpinFreeRdm::spinsig(const RdmIndsPartition& inds, const sys::frm::Size& size) {
     uint_t out = 0ul;
     for (uint_t i = 0ul; i<inds.size(); ++i)
         if (size.ispin(inds[i])) bit::set(out, i);
     return out;
 }
 
-uint_t SpinFreeRdm::pair_spinsig(const MaeIndsPair& inds, const sys::frm::Size& size) {
+uint_t SpinFreeRdm::pair_spinsig(const RdmIndsPair& inds, const sys::frm::Size& size) {
     using namespace spin_free_rdm_arrays;
     const auto spinsig_cre = spinsig(inds.m_cre, size);
     DEBUG_ASSERT_LT(spinsig_cre, nspinsig(inds.m_cre.size()), "spinsig OOB");
@@ -24,14 +24,14 @@ uint_t SpinFreeRdm::pair_spinsig(const MaeIndsPair& inds, const sys::frm::Size& 
     return ~0ul;
 }
 
-uint_t SpinFreeRdm::spatsig(const MaeIndsPartition& spat_inds) {
+uint_t SpinFreeRdm::spatsig(const RdmIndsPartition& spat_inds) {
     uint_t out = 0ul;
     for (uint_t i=1ul; i<spat_inds.size(); ++i)
         if (spat_inds[i]==spat_inds[i-1]) bit::set(out, i-1);
     return out;
 }
 
-void SpinFreeRdm::make_contribs_from_one_row(const MaeRow& row, wf_t norm) {
+void SpinFreeRdm::make_contribs_from_one_row(const RdmRow& row, wf_t norm) {
     const auto elem = row.m_values[0] / norm;
     auto& given_inds = m_uncontracted_inds;
     const auto& orbs = m_sector.m_frm.m_basis;

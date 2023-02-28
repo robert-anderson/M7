@@ -44,7 +44,7 @@ namespace field {
     using mbf_t = typename std::tuple_element<mbf_type_ind, mbf_tup_t>::type;
     typedef mbf_t<c_mbf_type_ind> Mbf;
 
-    typedef MaeIndsField MaeInds;
+    typedef RdmIndsField RdmInds;
     typedef SpecMomIndsField SpecMomInds;
 
     /**

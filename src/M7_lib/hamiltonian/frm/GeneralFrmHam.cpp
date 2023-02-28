@@ -15,7 +15,7 @@ void GeneralFrmHam::log_ints_sym(integrals_1e::syms::Sym sym, bool initial) {
 void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
     const str_t context_str = initial ? "initially" : "conflict detected:";
     logging::info("{} assuming {} permutational symmetry for 2e integrals",
-              context_str, integrals_2e::syms::name(sym));
+              context_str, integrals_2e::syms::desc(sym));
     const auto equivs = integrals_2e::syms::equivalences(sym);
     if (equivs.size()<2) return;
     logging::info("this storage scheme assumes that {} integrals are equivalent", convert::to_string(equivs));
@@ -86,7 +86,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(IntegralReader* reader) {
     /*
      * even if the source is complex-valued, it can still have DHR symmetry
      */
-    auto ints_2e = integrals_2e::make<ham_t>(m_basis.ncoeff_ind(m_info.m_spin_resolved), integrals_2e::syms::DHR);
+    auto ints_2e = integrals_2e::make<ham_t>(m_basis.ncoeff_ind(m_info.m_spin_resolved), m_info.m_init_2e_perm_sym);
     log_ints_sym(ints_2e->sym(), true);
     REQUIRE_TRUE(ints_2e.get(), "2e integral array object unallocated");
 
@@ -158,7 +158,13 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info):
 }
 
 GeneralFrmHam::GeneralFrmHam(init_opts_t opts):
-        GeneralFrmHam({opts.m_ham.m_fcidump.m_path, FcidumpInfo::ur_style(opts.m_ham.m_fcidump.m_unrestrict_style)}) {}
+    GeneralFrmHam(
+        FcidumpInfo(
+            opts.m_ham.m_fcidump.m_path,
+            FcidumpInfo::ur_style(opts.m_ham.m_fcidump.m_unrestrict_style),
+            integrals_2e::syms::from_symbol(opts.m_ham.m_fcidump.m_init_2e_perm_sym)
+        )
+    ){}
 
 ham_t GeneralFrmHam::get_coeff_1100(uint_t a, uint_t i) const {
     if (m_info.m_spin_resolved) return m_ints.m_1e->get(a, i);

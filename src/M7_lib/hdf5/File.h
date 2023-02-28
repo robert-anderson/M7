@@ -21,26 +21,26 @@ namespace hdf5 {
 
     struct FileReader : NodeReader, FileBase {
     private:
-        static hid_t get_handle(const str_t &fname);
+        static hid_t get_id(const str_t &fname);
 
     public:
-        FileReader(const str_t &fname) : NodeReader(get_handle(fname)), FileBase(fname) {}
+        FileReader(const str_t &fname) : NodeReader(get_id(fname)), FileBase(fname) {}
 
         ~FileReader() {
-            auto status = H5Fclose(m_handle);
+            auto status = H5Fclose(m_id);
             REQUIRE_TRUE(!status, "HDF5 Error on closing file");
         }
     };
 
     struct FileWriter : NodeWriter, FileBase {
     private:
-        static hid_t get_handle(const str_t &fname);
+        static hid_t get_id(const str_t &fname);
 
     public:
-        FileWriter(const str_t &fname) : NodeWriter(get_handle(fname)), FileBase(fname) {}
+        FileWriter(const str_t &fname) : NodeWriter(get_id(fname)), FileBase(fname) {}
 
         ~FileWriter() {
-            auto status = H5Fclose(m_handle);
+            auto status = H5Fclose(m_id);
             REQUIRE_TRUE(!status, "HDF5 Error on closing file");
         }
     };

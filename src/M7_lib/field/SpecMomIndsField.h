@@ -5,11 +5,11 @@
 #ifndef M7_SPECMOMINDSFIELD_H
 #define M7_SPECMOMINDSFIELD_H
 
-#include "MaeIndsField.h"
+#include "RdmIndsField.h"
 
-struct SpecMomIndsField : CompositeField<NumberField<mae_ind_t>, NumberField<mae_ind_t>> {
-    typedef CompositeField<NumberField<mae_ind_t>, NumberField<mae_ind_t>> base_t;
-    NumberField<mae_ind_t> m_left, m_right;
+struct SpecMomIndsField : CompositeField<NumberField<rdm_ind_t>, NumberField<rdm_ind_t>> {
+    typedef CompositeField<NumberField<rdm_ind_t>, NumberField<rdm_ind_t>> base_t;
+    NumberField<rdm_ind_t> m_left, m_right;
 
     SpecMomIndsField(Row *row, str_t name = "indices");
 };

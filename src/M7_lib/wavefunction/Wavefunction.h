@@ -49,6 +49,10 @@ namespace wf {
          */
         reduction::NdArray<uint_t, c_ndim_wf> m_ninitiator;
         /**
+         * number of initiator MBFs in each part of the WF due to permanitiator status
+         */
+        reduction::NdArray<uint_t, c_ndim_wf> m_ninitiator_perma;
+        /**
          * number of MBFs with any associated weight in any part
          */
         reduction::Scalar<uint_t> m_nocc_mbf;
@@ -91,9 +95,9 @@ namespace wf {
             return opts.m_av_ests.m_rdm.m_ranks.m_value.size();
         }
 
-        static bool need_av_weights(const conf::Document& opts) {
-            if (need_send_parents(opts)) return true;
-            return opts.m_av_ests.m_hf_excits.m_max_exlvl > 0;
+        static bool need_av_weights(const conf::Document &opts) {
+    //        if (need_send_parents(opts)) return true;
+            return need_send_parents(opts);
         }
 
         bool storing_av_weights() const {
@@ -218,10 +222,9 @@ namespace wf {
             return m_format.m_nelement;
         }
 
-        void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm = 1000ul);
+        void refresh_all_hdiags(const Hamiltonian& h);
 
-    private:
-
+        void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm=1000ul);
 
         void orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica) {
             ASSERT(iroot <= jroot);

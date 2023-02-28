@@ -65,7 +65,9 @@ namespace integrals_2e {
             Null, None, H, D, DR, DH, DHR
         };
 
-        str_t name(Sym sym);
+        str_t desc(Sym sym);
+
+        Sym from_symbol(str_t name);
 
         strv_t equivalences(Sym sym);
     }

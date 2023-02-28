@@ -14,14 +14,13 @@
 
 namespace convert {
 
-    constexpr uint_t default_fp(tag::Int<0>) { return 0ul; }
-
-    constexpr uint_t default_fp(tag::Int<1>) { return 6ul; }
-
-    template<typename T>
-    constexpr uint_t default_fp() {
-        return default_fp(tag::Int<std::is_floating_point<T>::value>());
-    }
+    struct FloatFmt {
+        const bool m_scientific;
+        const uint_t m_precision;
+        constexpr FloatFmt(bool scientific, uint_t precision):
+                m_scientific(scientific), m_precision(precision){}
+        constexpr FloatFmt(): FloatFmt(true, 6ul){}
+    };
 
     /**
      * this should only be delegated to from the below "catch-all" templated overload
@@ -70,7 +69,7 @@ namespace convert {
     }
 
     template<typename T>
-    static string_if_not_arith_t<T> to_string(const T &v, uint_t /*fp*/) {
+    static string_if_not_arith_t<T> to_string(const T &v, FloatFmt) {
         return to_string(v);
     }
 
@@ -78,11 +77,12 @@ namespace convert {
      * catch-all for arithmetic types
      */
     template<typename T>
-    static string_if_arith_t<T> to_string(const T &v, uint_t fp = default_fp<T>()) {
+    static string_if_arith_t<T> to_string(const T &v, FloatFmt fmt = {}) {
         if (v == std::numeric_limits<T>::max()) return "inf";
         std::stringstream tmp;
         // unary "+" ensures that char types are always printed as ints
-        tmp << std::scientific << std::setprecision(fp) << (+v);
+        if (fmt.m_scientific) tmp << std::scientific;
+        tmp << std::setprecision(fmt.m_precision) << (+v);
         return tmp.str();
     }
 
@@ -95,7 +95,7 @@ namespace convert {
     }
 
     template<typename T>
-    static str_t to_string(const T *v, uint_t /*fp*/) {
+    static str_t to_string(const T *v, FloatFmt fmt) {
         return to_string(v);
     }
 
@@ -108,13 +108,13 @@ namespace convert {
     }
 
     template<typename T>
-    static str_t to_string(T *const v, uint_t /*fp*/) {
+    static str_t to_string(T *const v, FloatFmt) {
         return to_string(v);
     }
 
     template<typename T>
-    static str_t to_string(const std::complex<T> &v, uint_t fp = default_fp<T>()) {
-        return "(" + to_string(v.real(), fp) + ", " + to_string(v.imag(), fp) + ")";
+    static str_t to_string(const std::complex<T> &v, FloatFmt fmt = {}) {
+        return "(" + to_string(v.real(), fmt) + ", " + to_string(v.imag(), fmt) + ")";
     }
 
     static str_t to_string(const str_t &str) {
@@ -123,42 +123,40 @@ namespace convert {
 
     /**
      * such methods must be implemented so we can rely on overloading to work for all types, not just those for which
-     * the floating point precision is meaningful
-     * @param str
-     * @return
+     * the floating point format is meaningful
      */
-    static str_t to_string(const str_t &str, uint_t /*fp*/) {
+    static str_t to_string(const str_t &str, FloatFmt) {
         return to_string(str);
     }
 
     template<typename T>
-    static str_t to_string(const v_t<T> &v, uint_t fp = default_fp<T>()) {
-        auto fn = [&v, &fp](uint_t i, str_t &word) {
+    static str_t to_string(const v_t<T> &v, FloatFmt fmt = {}) {
+        auto fn = [&v, &fmt](uint_t i, str_t &word) {
             if (i >= v.size()) return false;
-            word = to_string(v[i], fp);
+            word = to_string(v[i], fmt);
             return true;
         };
         return "[" + string::join(fn, ", ") + "]";
     }
 
     template<typename key_t, typename value_t>
-    static str_t to_string(const std::map<key_t, value_t> &v, uint_t fp = default_fp<value_t>()) {
-        auto fn = [&v, &fp](uint_t i, str_t &word) {
+    static str_t to_string(const std::map<key_t, value_t> &v, FloatFmt fmt = {}) {
+        auto fn = [&v, &fmt](uint_t i, str_t &word) {
             if (i >= v.size()) return false;
             auto it = v.cend();
             std::advance(it, i);
-            word = to_string(it->first, fp) + ": " + to_string(it->second, fp);
+            word = to_string(it->first, fmt) + ": " + to_string(it->second, fmt);
             return true;
         };
         return "[" + string::join(fn, ", ") + "]";
     }
 
     template<typename T>
-    static str_t to_string(const std::stack<T> &v, uint_t fp = default_fp<T>()) {
+    static str_t to_string(const std::stack<T> &v, FloatFmt fmt = {}) {
         auto cpy = v;
-        auto fn = [&cpy, &fp](uint_t i, str_t &word) {
+        auto fn = [&cpy, &fmt](uint_t i, str_t &word) {
             if (cpy.empty()) return false;
-            word = to_string(cpy.top(), fp);
+            word = to_string(cpy.top(), fmt);
             cpy.pop();
             return true;
         };
@@ -166,18 +164,18 @@ namespace convert {
     }
 
     template<typename T>
-    static str_t to_string(const std::list<T> &v, uint_t fp = default_fp<T>()) {
+    static str_t to_string(const std::list<T> &v, FloatFmt fmt = {}) {
         auto cpy = v;
         v_t<T> tmp;
         for (const auto &it: v) tmp.push_back(it);
-        return to_string(tmp, fp);
+        return to_string(tmp, fmt);
     }
 
     static str_t to_string(bool v) {
         return v ? "true" : "false";
     }
 
-    static str_t to_string(bool v, uint_t) {
+    static str_t to_string(bool v, FloatFmt) {
         return to_string(v);
     }
 

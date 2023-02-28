@@ -102,6 +102,13 @@ namespace conf {
         explicit Particles(Group *parent);
     };
 
+    struct CiPermanitiator : Section {
+        Param<str_t> m_path;
+        Param<double> m_thresh;
+        Param<bool> m_cancellation;
+        explicit CiPermanitiator(Group* parent);
+    };
+
     struct Wavefunction : Section {
         Param<double> m_nw_init;
         Param<uint_t> m_nroot;
@@ -109,6 +116,7 @@ namespace conf {
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Distribution m_distribution;
+        CiPermanitiator m_ci_permanitiator;
         OptionalFile m_save;
         OptionalFile m_load;
 
@@ -205,7 +213,8 @@ namespace conf {
     };
 
     struct HfExcits : Section {
-        Param<uint_t> m_max_exlvl;
+        Param<uintv_t> m_nexcits;
+        Param<wf_t> m_thresh;
         Buffers m_buffers;
         OptionalFile m_save;
         OptionalFile m_load;
@@ -316,6 +325,7 @@ namespace conf {
         Stats m_stats;
         InstEsts m_inst_ests;
         Mae m_av_ests;
+        HfExcits m_hf_excits;
 
         explicit Document(const str_t& fname="");
 

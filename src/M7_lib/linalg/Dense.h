@@ -14,6 +14,8 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/util/FpTol.h>
 #include <M7_lib/defs.h>
+#include <M7_lib/table/Buffer.h>
+#include <M7_lib/util/Sort.h>
 #include "M7_lib/linalg/sparse/Dynamic.h"
 #include "M7_lib/hdf5/Node.h"
 #include "M7_lib/hdf5/DatasetTransaction.h"
@@ -108,91 +110,91 @@ namespace dense {
     }
 
 
-    template<typename T>
-    class Matrix {
-        v_t<T> m_buffer;
-
-        uint_t index(uint_t irow, uint_t icol) const {
-            DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
-            DEBUG_ASSERT_LT(icol, m_ncol, "column index OOB");
-            return irow * m_ncol + icol;
-        }
+    class MatrixBase {
+        Buffer m_buffer;
+    protected:
+        Buffer::Window m_bw;
+        const uint_t m_element_size;
         /**
          * these can't be const because of the need to swap them in the inplace transpose, so instead they are made
          * private and read-only access is provided by a getter method for each
          */
         uint_t m_nrow = 0ul;
         uint_t m_ncol = 0ul;
+        uint_t m_nelement = 0ul;
+        uint_t m_row_size = 0ul;
+        // size is not necessarily m_bw.m_size, since buffer windows are padded to a whole number of words
+        uint_t m_size = 0ul;
+
+        /**
+         * obviously, in non-node_sharing mode, an MPI rank has the authority to modify all elements
+         * but otherwise, we still allow element-wise modification by non-root-on-node ranks, but global modification
+         * e.g. set to zero, scale, add/subtract, should all take place on the node root
+         * @return
+         *  true if this rank participates in globally-modifying operations of the buffer
+         */
+        bool i_can_globally_modify() const {
+            return !m_buffer.m_node_shared || mpi::on_node_i_am_root();
+        }
+
+        void set_sizes(uint_t nrow, uint_t ncol);
+
+        buf_t* begin() {
+            return m_bw.begin();
+        }
+        const buf_t* cbegin() const {
+            return m_bw.cbegin();
+        }
+
+        buf_t* begin(uint_t irow) {
+            DEBUG_ASSERT_LT(irow, m_nrow, "index OOB");
+            return begin() + irow * m_row_size;
+        }
+        const buf_t* cbegin(uint_t irow) const {
+            DEBUG_ASSERT_LT(irow, m_nrow, "index OOB");
+            return cbegin() + irow * m_row_size;
+        }
+
+        buf_t* begin(uint_t irow, uint_t icol) {
+            DEBUG_ASSERT_LT(icol, m_ncol, "index OOB");
+            return begin(irow) + icol * m_element_size;
+        }
+        const buf_t* cbegin(uint_t irow, uint_t icol) const {
+            DEBUG_ASSERT_LT(icol, m_ncol, "index OOB");
+            return cbegin(irow) + icol * m_element_size;
+        }
+
+        template<typename T>
+        T* begin_as() {
+            return reinterpret_cast<T*>(begin());
+        }
+
+        template<typename T>
+        const T* cbegin_as() const {
+            return reinterpret_cast<const T*>(cbegin());
+        }
+
+        template<typename T>
+        T* begin_as(uint_t irow) {
+            return reinterpret_cast<T*>(begin(irow));
+        }
+
+        template<typename T>
+        const T* cbegin_as(uint_t irow) const {
+            return reinterpret_cast<const T*>(cbegin(irow));
+        }
+
     public:
 
-        bool compatible(const Matrix<T>& other) const {
-            return (m_nrow==other.m_nrow) && (m_ncol==other.m_ncol);
-        }
+        bool compatible(const MatrixBase& other) const;
 
-        void resize(uint_t nrow, uint_t ncol) {
-            auto no_copy_resize = [&](){
-                m_buffer.assign(nrow * ncol, T(0));
-                m_nrow = nrow;
-                m_ncol = ncol;
-            };
-            if (m_buffer.empty()) {
-                no_copy_resize();
-                return;
-            }
-            const auto old = *this;
-            no_copy_resize();
-            nrow = std::min(m_nrow, old.m_nrow);
-            ncol = std::min(m_ncol, old.m_ncol);
-            for (uint_t irow = 0ul; irow < nrow; ++irow) std::copy(old.ptr(irow), old.ptr(irow) + ncol, ptr(irow));
-        }
+        void resize(uint_t nrow, uint_t ncol);
 
-        Matrix(uint_t nrow, uint_t ncol) {
-            resize(nrow, ncol);
-        }
+        MatrixBase(uint_t nrow, uint_t ncol, uint_t element_size, bool node_shared);
 
-        Matrix(uint_t nrow, const v_t<T>& rows): Matrix(nrow, rows.size()/nrow) {
-            *this = rows;
-        }
+        MatrixBase(const MatrixBase& other);
 
-        Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank) {
-            hdf5::DatasetLoader dl(nr, name, false, this_rank);
-            const auto& shape = dl.m_format.m_h5_shape;
-            if (this_rank) resize(shape[0], shape[1]);
-            std::list<hdf5::Attr> attrs;
-            dl.load_dist_list(nr, name, m_buffer.data(), m_buffer.size(), false, this_rank, attrs);
-        }
-
-        explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_col_ind() + 1){
-            *this = sparse;
-        }
-
-        Matrix(const Matrix& other): Matrix(other.m_nrow, other.m_ncol){
-            m_buffer = other.m_buffer;
-        }
-
-        Matrix& operator=(const Matrix& other) {
-            m_nrow = other.m_nrow;
-            m_ncol = other.m_ncol;
-            m_buffer = other.m_buffer;
-            return *this;
-        }
-
-        template<typename U>
-        Matrix& operator=(const v_t<U>& v) {
-            REQUIRE_EQ(v.size(), m_buffer.size(), "cannot assign due to incorrect buffer size");
-            set(v.data());
-            return *this;
-        }
-
-        Matrix& operator=(const sparse::dynamic::Matrix<T>& sparse){
-            const auto nrow = std::max(m_nrow, sparse.nrow());
-            const auto ncol = std::max(m_ncol, sparse.max_col_ind()+1);
-            if ((nrow != m_nrow) || (ncol != m_ncol)) resize(nrow, ncol);
-            for (uint_t irow = 0ul; irow < sparse.nrow(); ++irow) {
-                for (auto& elem : sparse[irow]) (*this)(irow, elem.m_i) = elem.m_v;
-            }
-            return *this;
-        }
+        MatrixBase& operator=(const MatrixBase& other);
 
         /**
          * byte-wise equality
@@ -201,63 +203,140 @@ namespace dense {
          * @return
          *  true only if both buffers are identical
          */
-        bool operator==(const Matrix<T>& other) const {
-            return !std::memcmp(ptr(), other.ptr(), sizeof(T)*m_ncol*m_nrow);
-        }
+        bool operator==(const MatrixBase& other) const;
 
         uint_t nrow() const {return m_nrow;}
         uint_t ncol() const {return m_ncol;}
-        std::pair<uint_t, uint_t> dims() const {return {nrow(), ncol()};}
 
-        T* ptr(uint_t irow=0) {
-            return m_buffer.data()+index(irow, 0);
+        void zero();
+
+        /**
+         * in-place physical transposition via out-of-place buffer procedure
+         */
+        void transpose();
+
+        void reorder_rows(const uintv_t& order);
+
+        /**
+         * byte-wise getters and setters are kept protected. subclass methods with std::vector<T> args are safer public
+         * interfaces
+         */
+    protected:
+        void set(const void* src);
+
+        void set_row(uint_t irow, const void* src);
+
+        void get_row(uint_t irow, void* dst) const;
+
+        void set_col(uint_t icol, const void* src);
+
+        void get_col(uint_t icol, void* dst);
+    };
+
+    template<typename T>
+    class Matrix : public MatrixBase {
+
+    protected:
+
+        T* tbegin(uint_t irow) {
+            return begin_as<T>(irow);
         }
 
-        const T* ptr(uint_t irow=0) const {
-            return m_buffer.data()+index(irow, 0);
+        const T* ctbegin(uint_t irow) const {
+            return cbegin_as<T>(irow);
         }
 
-        T &operator[](uint_t iflat) {
-            DEBUG_ASSERT_LT(iflat, m_buffer.size(), "index OOB");
-            return m_buffer[iflat];
+    public:
+        T* tbegin() {
+            return begin_as<T>();
         }
 
-        const T &operator[](uint_t iflat) const {
-            DEBUG_ASSERT_LT(iflat, m_buffer.size(), "index OOB");
-            return m_buffer[iflat];
+        const T* ctbegin() const {
+            return cbegin_as<T>();
+        }
+
+        Matrix(uint_t nrow, uint_t ncol, bool node_shared=false):
+            MatrixBase(nrow, ncol, sizeof(T), node_shared){}
+
+        Matrix(uint_t nrow, const v_t<T>& rows): Matrix(nrow, rows.size()/nrow) {
+            *this = rows;
+        }
+
+        Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank, bool node_shared=false):
+                Matrix(0, 0, node_shared){
+            this_rank &= i_can_globally_modify();
+            hdf5::DatasetLoader dl(nr, name, false, this_rank);
+            const auto& shape = dl.m_format.m_h5_shape;
+            if (this_rank) resize(shape[0], shape[1]);
+            std::list<hdf5::Attr> attrs;
+            dl.load_dist_list(nr, name, begin(), m_size, hdf5::Type::make<T>(), dtype::is_complex<T>(),
+                false, this_rank, attrs);
+        }
+
+        explicit Matrix(const sparse::dynamic::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_col_ind() + 1){
+            *this = sparse;
+        }
+
+        template<typename U>
+        Matrix& operator=(const v_t<U>& v) {
+            REQUIRE_EQ(v.size(), m_nelement, "cannot assign due to incorrect buffer size");
+            set(v.data());
+            return *this;
+        }
+
+        Matrix& operator=(const sparse::dynamic::Matrix<T>& sparse){
+            const auto nrow = std::max(m_nrow, sparse.nrow());
+            const auto ncol = std::max(m_ncol, sparse.max_col_ind()+1);
+            if ((nrow != m_nrow) || (ncol != m_ncol)) resize(nrow, ncol);
+            if (i_can_globally_modify()) {
+                for (uint_t irow = 0ul; irow < sparse.nrow(); ++irow) {
+                    for (auto &elem: sparse[irow]) (*this)(irow, elem.m_i) = elem.m_v;
+                }
+            }
+            return *this;
+        }
+
+        T &operator[](uint_t ielement) {
+            DEBUG_ASSERT_LT(ielement, m_nelement, "element index OOB");
+            return tbegin()[ielement];
+        }
+
+        const T &operator[](uint_t ielement) const {
+            DEBUG_ASSERT_LT(ielement, m_nelement, "element index OOB");
+            return ctbegin()[ielement];
         }
 
         T &operator()(uint_t irow, uint_t icol) {
-            return m_buffer[index(irow, icol)];
+            return *reinterpret_cast<T*>(begin(irow, icol));
         }
 
         const T &operator()(uint_t irow, uint_t icol) const {
-            return m_buffer[index(irow, icol)];
-        }
-
-        void zero() {
-            m_buffer.assign(m_buffer.size(), 0);
+            return *reinterpret_cast<const T*>(cbegin(irow, icol));
         }
 
         bool nearly_equal(const Matrix<T>& other, arith::comp_t<T> rtol, arith::comp_t<T> atol) const {
             REQUIRE_TRUE(compatible(other), "matrices must be compatible to be compared");
-            return dense::nearly_equal(ptr(), other.ptr(), m_buffer.size(), rtol, atol);
+            return dense::nearly_equal(ctbegin(), other.ctbegin(), m_nelement, rtol, atol);
         }
 
         bool nearly_equal(const Matrix<T>& other) const {
             REQUIRE_TRUE(compatible(other), "matrices must be compatible to be compared");
-            return dense::nearly_equal(ptr(), other.ptr(), m_buffer.size());
+            return dense::nearly_equal(ctbegin(), other.ctbegin(), m_nelement);
         }
 
-        Matrix<T>& operator +=(Matrix<T>& other) {
-            REQUIRE_TRUE(compatible(other), "matrices must be compatible to be added");
-            for (uint_t ielem = 0ul; ielem < m_buffer.size(); ++ielem) m_buffer[ielem] += other.m_buffer[ielem];
+        Matrix<T>& operator +=(const Matrix<T>& other) {
+            if (i_can_globally_modify()) {
+                REQUIRE_TRUE(compatible(other), "matrices must be compatible to be added");
+                for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] += other[other];
+            }
             return *this;
         }
 
-        Matrix<T>& operator -=(Matrix<T>& other) {
-            REQUIRE_TRUE(compatible(other), "matrices must be compatible to be subtracted");
-            for (uint_t ielem = 0ul; ielem < m_buffer.size(); ++ielem) m_buffer[ielem] -= other.m_buffer[ielem];
+        Matrix<T>& operator -=(const Matrix<T>& other) {
+            if (i_can_globally_modify()) {
+                REQUIRE_TRUE(compatible(other), "matrices must be compatible to be added");
+                for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] -= other[other];
+            }
             return *this;
         }
 
@@ -272,7 +351,7 @@ namespace dense {
          *  data source
          */
         void set(const T* src, tag::Int<0> /*convert*/) {
-            memcpy(m_buffer.data(), src, m_buffer.size() * sizeof(T));
+            MatrixBase::set(src);
         }
 
         /**
@@ -285,7 +364,9 @@ namespace dense {
         template<typename U>
         void set(const U* src, tag::Int<1> /*convert*/) {
             static_assert(std::is_convertible<U, T>::value, "invalid conversion");
-            for (uint_t ielem = 0ul; ielem < m_buffer.size(); ++ielem) m_buffer[ielem] = src[ielem];
+            if (i_can_globally_modify()) {
+                for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] = src[ielem];
+            }
         }
 
         /*
@@ -304,7 +385,7 @@ namespace dense {
          *  data source
          */
         void set_row(uint_t irow, const T* src, tag::Int<0> /*convert*/) {
-            memcpy(m_buffer.data() + index(irow, 0ul), src, m_ncol * sizeof(T));
+            MatrixBase::set_row(irow, src);
         }
 
         /**
@@ -319,7 +400,9 @@ namespace dense {
         template<typename U>
         void set_row(uint_t irow, const U* src, tag::Int<1> /*convert*/) {
             static_assert(std::is_convertible<U, T>::value, "invalid conversion");
-            for (uint_t icol = 0ul; icol<m_ncol; ++icol) (*this)(irow, icol) = src[icol];
+            if (i_can_globally_modify()) {
+                for (uint_t icol = 0ul; icol < m_ncol; ++icol) (*this)(irow, icol) = src[icol];
+            }
         }
 
         /*
@@ -338,11 +421,11 @@ namespace dense {
          *  data destination
          */
         void get_row(uint_t irow, T* dst, tag::Int<0> /*convert*/) const {
-            memcpy(dst, m_buffer.data() + index(irow, 0ul), m_ncol * sizeof(T));
+            MatrixBase::get_row(irow, dst);
         }
 
         /**
-         * non-converting copy-out
+         * converting copy-out
          * @tparam U
          *  U (!=T)
          * @param irow
@@ -353,7 +436,7 @@ namespace dense {
         template<typename U>
         void get_row(uint_t irow, U* dst, tag::Int<1> /*convert*/) const {
             static_assert(std::is_convertible<T, U>::value, "invalid conversion");
-            for (uint_t icol = 0ul; icol<m_ncol; ++icol) dst[icol] = (*this)(irow, icol);
+            for (uint_t icol = 0ul; icol < m_ncol; ++icol) dst[icol] = (*this)(irow, icol);
         }
 
         /*
@@ -370,35 +453,28 @@ namespace dense {
         template<typename U>
         void set_col(uint_t icol, const U* src) {
             static_assert(std::is_convertible<U, T>::value, "invalid conversion");
-            for (uint_t irow = 0ul; irow<m_nrow; ++irow) (*this)(irow, icol) = src[irow];
+            if (i_can_globally_modify()) {
+                for (uint_t irow = 0ul; irow < m_nrow; ++irow) (*this)(irow, icol) = src[irow];
+            }
         }
 
         template<typename U>
         void get_col(uint_t icol, U* dst) const {
             static_assert(std::is_convertible<T, U>::value, "invalid conversion");
-            for (uint_t irow = 0ul; irow<m_nrow; ++irow) dst[irow] = (*this)(irow, icol);
+            if (i_can_globally_modify()) {
+                for (uint_t irow = 0ul; irow < m_nrow; ++irow) dst[irow] = (*this)(irow, icol);
+            }
         }
 
     public:
 
         /**
-         * in-place physical transposition via out-of-place buffer procedure
-         */
-        void transpose() {
-            auto tmp = m_buffer;
-            std::swap(m_nrow, m_ncol);
-            auto ptr = tmp.data();
-            for (uint_t icol = 0ul; icol<m_ncol; ++icol) {
-                set_col(icol, ptr);
-                ptr+=m_nrow;
-            }
-        }
-
-        /**
          * in-place complex conjugation
          */
         void conj() {
-            for (auto& v: m_buffer) v = arith::conj(v);
+            if (i_can_globally_modify()) {
+                for (auto it = tbegin(); it != tbegin() + m_nelement; ++it) *it = arith::conj(*it);
+            }
         }
 
         /**
@@ -410,8 +486,9 @@ namespace dense {
         }
 
         void all_sum() {
-            auto tmp = *this;
-            mpi::all_sum(tmp.m_buffer.data(), m_buffer.data(), m_buffer.size());
+            // todo: make node-sharing safe
+            Matrix<T> tmp = *this;
+            mpi::all_sum(tmp.ctbegin(), tbegin(), m_nelement);
         }
 
         template<typename U>
@@ -456,12 +533,66 @@ namespace dense {
             uintv_t shape;
             shape.push_back(m_nrow);
             shape.push_back(m_ncol);
-            hdf5::DatasetSaver::save_array(nw, name, m_buffer.data(), shape, {"row", "col"}, irank);
+            hdf5::DatasetSaver::save_array(nw, name, ctbegin(), shape, {"row", "col"}, irank);
+        }
+    };
+
+    template<typename T>
+    class Vector : public Matrix<T> {
+        using MatrixBase::m_bw;
+        using MatrixBase::m_ncol;
+        using MatrixBase::m_nrow;
+        using MatrixBase::set_sizes;
+        using MatrixBase::i_can_globally_modify;
+    public:
+        explicit Vector(uint_t nelement, bool node_shared=false): Matrix<T>(1, nelement, node_shared){}
+
+        explicit Vector(const v_t<T>& v): Vector(v.size()) {
+            *this = v;
+        }
+
+        uint_t nelement() const {
+            return MatrixBase::m_nelement;
+        }
+
+        void reorder(const uintv_t& order) {
+            if (i_can_globally_modify())
+                sort::reorder(MatrixBase::begin(), MatrixBase::m_element_size, order);
+            if (m_bw.node_shared()) mpi::barrier_on_node();
+        }
+
+        void sort_inplace(bool asc, bool absval) {
+            if (i_can_globally_modify())
+                sort::inplace(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
+            if (m_bw.node_shared()) mpi::barrier_on_node();
+        }
+
+        Vector<T>& sorted(bool asc, bool absval) {
+            if (i_can_globally_modify())
+                sort::inplace(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
+            if (m_bw.node_shared()) mpi::barrier_on_node();
+            return *this;
+        }
+
+        uintv_t sort_inds(bool asc, bool absval) const {
+            return sort::inds(Matrix<T>::ctbegin(), MatrixBase::m_nelement, asc, absval);
+        }
+
+        void sort_inds(uintv_t& order, bool asc, bool absval) const {
+            sort::inds(order, Matrix<T>::ctbegin(), MatrixBase::m_nelement, asc, absval);
+        }
+
+        Vector(const hdf5::NodeReader& nr, const str_t name, bool this_rank, bool node_shared=false):
+                Matrix<T>(nr, name, this_rank, node_shared){
+            // vectors must have one row
+            if (m_nrow!=1) set_sizes(m_ncol, m_nrow);
+            REQUIRE_EQ(m_nrow, 1ul, "read data has non-vector shape");
         }
     };
 
     template<typename T>
     class SquareMatrix : public Matrix<T> {
+
         static uint_t nrow_from_flat_size(uint_t n) {
             const auto nrow = integer::sqrt(n);
             REQUIRE_NE(nrow, ~0ul, "SquareMatrix initialization from std::vector requires square number of elements");
@@ -509,6 +640,7 @@ namespace dense {
         }
 
         void symmetrize(bool conj=dtype::is_complex<T>()) {
+            if (!MatrixBase::i_can_globally_modify()) return;
             const auto n = Matrix<T>::nrow();
             for (uint_t irow=0ul; irow < n; ++irow) {
                 for (uint_t icol=0ul; icol < n; ++icol) {
@@ -527,7 +659,7 @@ namespace dense {
         bool is_diagonal() const {
             const auto n = Matrix<T>::ncol();
             if (n==1) return true;
-            auto first_row_ptr = Matrix<T>::ptr()+1ul;
+            auto first_row_ptr = Matrix<T>::ctbegin()+1ul;
             if (std::any_of(first_row_ptr, first_row_ptr+n, [](const T& v){return v!=0.0;})) return false;
             /*
              * non-diagonal part of first row and first element of second row are all zero, so compare all subsequent
@@ -608,7 +740,7 @@ namespace dense {
     void multiply(const Matrix<T>& p, const Matrix<T>& q, Matrix<T>& r,
                   char transp='N', char transq='N', T alpha=1.0, T beta=0.0){
         GemmWrapper wrapper(p.nrow(), p.ncol(), q.nrow(), q.ncol(), transp, transq, r.nrow(), r.ncol());
-        wrapper.multiply(p.ptr(), q.ptr(), r.ptr(), alpha, beta);
+        wrapper.multiply(p.ctbegin(), q.ctbegin(), r.tbegin(), alpha, beta);
     }
 
     template<typename T>
@@ -616,7 +748,7 @@ namespace dense {
                   char transp='N', char transq='N', T alpha=1.0, T beta=0.0){
         r.resize(transp=='N' ? p.nrow() : p.ncol());
         GemmWrapper wrapper(p.nrow(), p.ncol(), q.size(), 1ul, transp, transq, r.size(), 1ul);
-        wrapper.multiply(p.ptr(), q.data(), r.data(), alpha, beta);
+        wrapper.multiply(p.ctbegin(), q.data(), r.data(), alpha, beta);
     }
 
     template<typename T>

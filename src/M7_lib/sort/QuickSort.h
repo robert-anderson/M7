@@ -60,7 +60,7 @@ namespace quicksort {
 
         void reorder_sort(TableBase& table) {
             qs(0, table.nrow_in_use() - 1, table);
-            ASSERT(is_reorder_sorted(table));
+            REQUIRE_TRUE(is_reorder_sorted(table), "reorder sort unsuccessful");
         }
 
         /**
@@ -137,8 +137,13 @@ namespace quicksort {
         }
     };
 
+    template<typename fn_t>
+    void sort(TableBase& table, fn_t fn){
+        SorterFn<fn_t> sorter(fn);
+        sorter.reorder_sort(table);
+    }
     /**
-     * take a std::function instance and
+     * allows the above class to call a std::function, achieving type-erasure but at cost of slower execution
      */
     struct Adaptor {
         comparators::index_cmp_fn_t m_fn;

@@ -14,7 +14,7 @@
 
 #include "FermionPromoter.h"
 
-class Rdm : public communicator::MappedSend<MaeRow, MaeRow> {
+class Rdm : public communicator::MappedSend<RdmRow, RdmRow> {
 public:
     /**
      * RDM accumulation requires knowledge of the size of the basis and the numbers of particles
@@ -40,19 +40,19 @@ protected:
     /**
      * indices of the full second quantised string
      */
-    buffered::MaeInds m_full_inds;
+    buffered::RdmInds m_full_inds;
     /**
      * indices of any contracted intermediate, not the full second quantised string
      */
-    buffered::MaeInds m_uncontracted_inds;
+    buffered::RdmInds m_uncontracted_inds;
     const str_t m_name;
 
     /**
      * objects for table traversal
      */
-    MaeRow m_send_row;
-    MaeRow m_recv_row;
-    MaeRow m_store_row;
+    RdmRow m_send_row;
+    RdmRow m_recv_row;
+    RdmRow m_store_row;
 
     static uint_t nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size);
 
@@ -60,7 +60,7 @@ protected:
 
     str_t name(str_t str, OpSig ranksig) const;
 
-    void add_to_send_table(const field::MaeInds& inds, wf_t contrib);
+    void add_to_send_table(const field::RdmInds& inds, wf_t contrib);
 
     virtual void frm_make_contribs(const field::FrmOnv& /*src_onv*/, const conn::FrmOnv& /*conn*/,
                                    const com_ops::Frm& /*com*/, wf_t /*contrib*/) {}

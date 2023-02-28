@@ -15,7 +15,7 @@ std::unique_ptr<HartreeFock> Solver::make_hf() const {
      */
     if (force_hf || m_prop.m_ham.has_brillouin_theorem(m_refs[0].mbf())) {
         const TableBase::Loc loc(m_refs[0].irec());
-        return ptr::smart::make_unique<HartreeFock>(m_wf.m_store, loc);
+        return ptr::smart::make_unique<HartreeFock>(m_wf.m_store, loc, m_opts.m_hf_excits);
     }
     return nullptr;
 }
@@ -94,6 +94,12 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Fci &wf,
         FciInitOptions fci_init_opts;
         fci_init_opts.m_nroot = m_wf.nroot();
         m_wf.fci_init(m_prop.m_ham, fci_init_opts);
+    }
+
+    if (m_opts.m_wavefunction.m_ci_permanitiator.m_enabled) {
+        REQUIRE_TRUE(m_hf.get(), "CI expansion-based permanitiators requires a HF determinant");
+        hf_excit_hist::initialize(m_wf, m_hf.get()->mbf(), m_opts.m_wavefunction.m_ci_permanitiator);
+        m_wf.refresh_all_hdiags(m_prop.m_ham);
     }
 
     // TODO: activate load balancing
@@ -223,18 +229,20 @@ void Solver::loop_over_occupied_mbfs() {
         }
 
         /*
-         * if the accumulation of MEVs has just started, treat the row as though it became occupied in the annihilation
+         * if the accumulation of MAEs has just started, treat the row as though it became occupied in the annihilation
          * loop of the last MC cycle.
          */
-        if (m_maes.m_accum_epoch.started_this_cycle(m_icycle)) {
+        if (m_maes.m_accum_epoch.started_this_cycle(m_icycle) && m_wf.storing_av_weights()) {
             DEBUG_ASSERT_TRUE(m_maes.m_accum_epoch, "should be in MAE accumulation epoch");
             walker.m_icycle_occ = m_icycle;
             walker.m_average_weight = 0;
         }
 
         if (m_maes.m_accum_epoch) {
-            walker.m_average_weight += walker.m_weight;
+            if (m_wf.storing_av_weights()) walker.m_average_weight += walker.m_weight;
         }
+
+        if (m_hf && m_hf->m_excit_accums) m_hf->m_excit_accums.add(walker.m_mbf, walker.m_weight[0]);
 
         if (m_maes.is_period_cycle(m_icycle)) {
             /*
@@ -257,7 +265,11 @@ void Solver::loop_over_occupied_mbfs() {
 
             const auto &weight = walker.m_weight[ipart];
 
-            bool initiator = is_initiator(walker, ipart);
+            bool initiator = walker.exceeds_initiator_thresh(ipart, m_prop.m_nadd_initiator);
+            if (!initiator) {
+                initiator = walker.m_permanitiator.get(ipart);
+                if (initiator) m_wf.m_ninitiator_perma.m_local[ipart]++;
+            }
             if (initiator) m_wf.m_ninitiator.m_local[ipart]++;
 
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
@@ -314,11 +326,6 @@ void Solver::propagate_row(Walker& walker, uint_t ipart, bool initiator) {
     m_prop.diagonal(m_wf, walker, ipart);
 }
 
-bool Solver::is_initiator(const Walker& walker, uint_t ipart) {
-    if (walker.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd)) return true;
-    return false;
-}
-
 void Solver::end_cycle() {
     /*
      * TODO: make these checks compatible with dynamic rank allocation
@@ -357,6 +364,7 @@ void Solver::output_stats() {
         stats.m_l2_norm = m_wf.m_l2_norm_square.m_reduced;
         stats.m_l2_norm.to_sqrt();
         stats.m_ninitiator = m_wf.m_ninitiator.m_reduced;
+        stats.m_ninitiator_perma = m_wf.m_ninitiator_perma.m_reduced;
         stats.m_nocc_mbf = m_wf.m_nocc_mbf.m_reduced;
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();

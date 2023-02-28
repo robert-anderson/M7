@@ -18,23 +18,23 @@
  * This MBF need not be a true HF determinant with a Brillouin theorem, so it is sometimes referred to in the code as
  * HF-like
  */
-struct HfExcitsOneExsig : buffered::MappedTable<MaeRow> {
+struct HfExcitsOneExsig : buffered::MappedTable<RdmRow> {
 protected:
     /**
      * work space for converting between indexing vector type and the stored key type of the MEV tables
      */
-    mutable buffered::MaeInds m_working_inds;
+    mutable buffered::RdmInds m_working_inds;
 
 public:
     HfExcitsOneExsig(OpSig exsig, uint_t nroot);
 
-    MaeRow& lookup(const conn::FrmOnv& key);
+    RdmRow& lookup(const conn::FrmOnv& key);
 
-    MaeRow& insert(const conn::FrmOnv& key);
+    RdmRow& insert(const conn::FrmOnv& key);
 
     strv_t h5_field_names() const;
 
-    using Table<MaeRow>::save;
+    using Table<RdmRow>::save;
     void save(const hdf5::NodeWriter& gw) const;
 
     void make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot);

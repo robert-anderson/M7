@@ -108,13 +108,28 @@ conf::Particles::Particles(Group* parent) :
         m_ms2(this, "ms2", sys::frm::c_undefined_ms2, "2*Ms sector in which the system is to be restricted (taken as reference hint if H does not conserve Sz"),
         m_nboson(this, "nboson", 0ul, "number of bosons in the system (taken as reference hint if H does not conserve boson number"){}
 
+
+
+conf::CiPermanitiator::CiPermanitiator(Group *parent) :
+        Section(parent, "ci_permanitiator",
+            "options relating to conferring permanent initiator status on determinants based on products of "
+            "lower-rank excitations", Explicit),
+        m_path(this, "path", "M7.hf_excit.h5", "file path to CI data source"),
+        m_thresh(this, "thresh", 0.001,
+            "minimum intermediate-normalized coefficient product required for permanitiator status"),
+        m_cancellation(this, "cancellation", true,
+            "if true, an excitation is removed from the list of permanitiators when it takes multiple contributions"
+            " which sum to a value less than thresh")
+{}
+
+
 conf::Wavefunction::Wavefunction(Group *parent) :
         Section(parent, "wavefunction",
                         "options relating to the storage and update of a distributed many-body wavefunction"),
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
         m_fci_init(this, "fci_init", false, "call the ARPACK interface to initialize the required roots to their exact values"),
-        m_buffers(this), m_hash_mapping(this), m_distribution(this),
+        m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_permanitiator(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
         m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit){}
 
@@ -220,8 +235,10 @@ conf::InstEsts::InstEsts(Group *parent) :
 conf::HfExcits::HfExcits(Group *parent) :
         Section(parent, "hf_excits",
                         "options relating to averaged amplitudes of MBFs connected to a Hartree-Fock-like MBF", Explicit),
-        m_max_exlvl(this, "max_exlvl", 0ul,
-                    "maximum excitation level from the HF MBF for which to accumulate average amplitudes"),
+        m_nexcits(this, "nexcits", {},
+                     "excitation levels from the HF MBF for which to accumulate average amplitudes"),
+        m_thresh(this, "thresh", 0.0,
+                    "minimum magnitude of intermediate-normalized walker weight require before histogramming"),
         m_buffers(this),
         m_save(this, "save", "average HF-connected amplitudes save", "M7.hf_excit.h5", Explicit),
         m_load(this, "load", "average HF-connected amplitudes load", "M7.hf_excit.h5", Explicit) {}
@@ -292,8 +309,7 @@ conf::Propagator::Propagator(Group *parent) :
                                 "number of spawns logged for excitation type magnitudes to be used in tau and probability update"),
         m_period(this, "period", 10ul,
                  "number of MC cycles between updates of tau and probabilities if requested"),
-        m_imp_samp_guide(this, "imp_samp_guide"),
-        m_semistochastic(this) {}
+        m_imp_samp_guide(this, "imp_samp_guide"), m_semistochastic(this) {}
 
 void conf::Propagator::validate_node_contents() {
     if (m_min_death_mag.m_value==0.0) {
@@ -312,7 +328,7 @@ conf::Document::Document(const str_t& fname) :
         conf_components::Document(fname, "a calculation in M7"),
         m_prng(this), m_basis(this), m_particles(this),
         m_wavefunction(this), m_reference(this), m_shift(this), m_propagator(this),
-        m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this) {}
+        m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this), m_hf_excits(this) {}
 
 void conf::Document::validate_node_contents() {
     REQUIRE_LE(m_wavefunction.m_nw_init, m_propagator.m_nw_target,

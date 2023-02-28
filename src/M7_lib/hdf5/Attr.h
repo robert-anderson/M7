@@ -32,7 +32,7 @@ namespace hdf5 {
             REQUIRE_EQ(buf.size(), nd::nelement(shape), "format is not compatible with given vector");
         }
 
-        Attr(hid_t parent_handle, str_t name);
+        Attr(hid_t parent_id, str_t name);
 
         template<typename T>
         Attr(const T* v, uint_t size, str_t name): Attr(v, {Type(v), {size}, {}, dtype::is_complex<T>()}, name){}
@@ -98,8 +98,8 @@ namespace hdf5 {
             else parse(v);
         }
 
-        void save(hid_t parent_handle) const;
-        static Attr load(hid_t parent_handle, const str_t& name);
+        void save(hid_t parent_id) const;
+        static Attr load(hid_t parent_id, const str_t& name);
     };
 
 }

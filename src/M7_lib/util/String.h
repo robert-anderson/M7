@@ -69,6 +69,10 @@ namespace string {
 
     str_t prefix(str_t base, str_t prefix = "", char delimiter = ' ');
 
+    void to_upper(str_t& str);
+
+    void to_lower(str_t& str);
+
 }
 
 #endif //M7_UTIL_STRING_H

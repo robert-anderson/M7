@@ -6,6 +6,8 @@ target_sources(M7_lib
         FciInitializer.h
         HartreeFock.cpp
         HartreeFock.h
+        HfExcitHists.cpp
+        HfExcitHists.h
         Reference.cpp
         Reference.h
         SpawnTable.cpp

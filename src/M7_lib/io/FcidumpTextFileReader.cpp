@@ -21,7 +21,7 @@ FcidumpTextFileReader::FcidumpTextFileReader(const FcidumpInfo& info) :
                 }
             }
             else if (nset_ind(inds)==4) {
-                if (spin(inds[0]) != spin(inds[1]) || spin(inds[2]) != spin(inds[3])) {
+                if ((spin(inds[0]) + spin(inds[2])) != (spin(inds[1]) + spin(inds[3]))) {
                     // spin non-conserving example found
                     m_spin_conserving_2e = false;
                 }

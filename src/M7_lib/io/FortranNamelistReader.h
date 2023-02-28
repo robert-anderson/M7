@@ -35,7 +35,7 @@ public:
         v = default_;
         auto tokens = read(label);
         if (tokens.empty()) return;
-        NumericCsvFileReader::parse(tokens.cbegin(), tokens.cend(), v);
+        parse::debug_checked(tokens.cbegin(), tokens.cend(), v);
     }
 
     void read(v_t<bool>& v, const str_t &label, v_t<bool> default_ = {}) const;

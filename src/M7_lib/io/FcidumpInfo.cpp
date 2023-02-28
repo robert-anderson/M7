@@ -18,8 +18,9 @@ void FcidumpInfo::set_metadata(bool uhf, bool relativistic, uint_t nelec, uint_t
     REQUIRE_EQ(m_orbsym.size(), m_nsite, "invalid ORBSYM specified in FCIDUMP file");
 }
 
-FcidumpInfo::FcidumpInfo(str_t fname, UnrestrictStyle ur_style) :
-        m_fname(std::move(fname)), m_impl(hdf5::FileBase::is_hdf5(m_fname) ? MolcasHDF5 : CSV), m_ur_style(ur_style) {
+FcidumpInfo::FcidumpInfo(str_t fname, UnrestrictStyle ur_style, integrals_2e::syms::Sym init_2e_perm_sym) :
+        m_fname(std::move(fname)), m_impl(hdf5::FileBase::is_hdf5(m_fname) ? MolcasHDF5 : CSV),
+        m_ur_style(ur_style), m_init_2e_perm_sym(init_2e_perm_sym) {
     if (m_impl==CSV) {
         FortranNamelistReader reader(m_fname);
         set_metadata(

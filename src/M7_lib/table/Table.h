@@ -105,7 +105,7 @@ protected:
         for (auto field : m_row.m_fields) {
             auto it = std::find_if(field_names.cbegin(), field_names.cend(),
                                    [&field](const strp_t& pair){return field->m_name==pair.first;});
-            if (it != field_names.cend()) field->load(gr, it->second, max_nitem_per_op, part, this_rank);
+            if (it != field_names.cend()) field->load(gr, it->second, part, this_rank, max_nitem_per_op);
         }
     }
 

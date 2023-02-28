@@ -122,14 +122,14 @@ struct NdNumberField : NumberFieldBase {
 private:
     template<typename U>
     void copy_to(v_t<U>& v) const {
-        DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
+        if (v.size() < m_nelement) v.resize(m_nelement);
         // can't copy since the target type doesn't match: must dereference element-wise and attempt to convert
         for (uint_t i=0ul; i<m_nelement; ++i) v[i] = U((*this)[i]);
     }
 
 public:
     void copy_to(v_t<T>& v) const {
-        DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
+        if (v.size() < m_nelement) v.resize(m_nelement);
         std::memcpy(v.data(), cbegin(), m_size);
     }
 

@@ -40,7 +40,7 @@ ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explicit_hf_
 
     Solver solver(opts, prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
-    return solver.m_maes.m_bilinears.estimate_energy(ham);
+    return solver.m_maes.m_rdms.get_energy(ham);
 }
 
 

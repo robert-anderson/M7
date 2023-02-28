@@ -92,7 +92,7 @@ namespace logging {
      * @return
      *  a vector of strings which when printed will display a table in which the rows are vertically aligned
      */
-    strv_t make_table(const v_t<strv_t>& rows, bool header=false, bool hlines=true, uint_t padding=2);
+    strv_t make_table(v_t<strv_t> rows, bool header=false, bool hlines=true, uint_t padding=2);
 
     strv_t make_table(const str_t& title, const v_t<strv_t>& rows, bool header=false, bool hlines=true, uint_t padding=2);
 

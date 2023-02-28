@@ -173,3 +173,13 @@ str_t string::prefix(str_t base, str_t prefix, char delimiter) {
     prefix.push_back(delimiter);
     return prefix+base;
 }
+
+void string::to_upper(str_t &str) {
+    const auto shift = 'A' - 'a';
+    for (auto& c: str) if (c >= 'a' && c <= 'z') c += shift;
+}
+
+void string::to_lower(str_t &str) {
+    const auto shift = 'a' - 'A';
+    for (auto& c: str) if (c >= 'A' && c <= 'Z') c += shift;
+}

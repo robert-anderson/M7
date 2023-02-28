@@ -85,7 +85,7 @@ private:
      * @return
      *  number of SQ operator exchanges required in the reordering
      */
-    uint_t apply(uint_t icomb, const FrmOps &conn_ops, const FrmOps &com, MaeIndsPartition &mae_inds) const;
+    uint_t apply(uint_t icomb, const FrmOps &conn_ops, const FrmOps &com, RdmIndsPartition &mae_inds) const;
 public:
     /**
      * apply the icomb-th promotion to the connection given and store the result uintv_t
@@ -100,7 +100,7 @@ public:
      * @return
      *  antisymmetric phase associated with sorting both ann and cre to ascending order
      */
-    bool apply(uint_t icomb, const conn::FrmOnv &conn, const FrmOps& com, MaeIndsPair &frm_inds) const;
+    bool apply(uint_t icomb, const conn::FrmOnv &conn, const FrmOps& com, RdmIndsPair &frm_inds) const;
 
 };
 

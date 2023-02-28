@@ -31,7 +31,7 @@ const uint_t *FermionPromoter::begin(uint_t icomb) const {
     return m_all_combs.data() + icomb * m_nop_insert;
 }
 
-uint_t FermionPromoter::apply(uint_t icomb, const FrmOps &conn_ops, const FrmOps &com, MaeIndsPartition &mae_inds) const {
+uint_t FermionPromoter::apply(uint_t icomb, const FrmOps &conn_ops, const FrmOps &com, RdmIndsPartition &mae_inds) const {
     uint_t nexchange = 0ul;
     uint_t icom = 0ul;
     const auto comb = begin(icomb);
@@ -53,7 +53,7 @@ uint_t FermionPromoter::apply(uint_t icomb, const FrmOps &conn_ops, const FrmOps
     return nexchange;
 }
 
-bool FermionPromoter::apply(uint_t icomb, const conn::FrmOnv &conn, const FrmOps &com, MaeIndsPair &frm_inds) const {
+bool FermionPromoter::apply(uint_t icomb, const conn::FrmOnv &conn, const FrmOps &com, RdmIndsPair &frm_inds) const {
     DEBUG_ASSERT_LT(icomb, m_ncomb, "combination index OOB");
     DEBUG_ASSERT_EQ(conn.exsig(), OpSig({m_nexcit, m_nexcit}, {0, 0}),
                     "exsig incompatible with fermion promoter");

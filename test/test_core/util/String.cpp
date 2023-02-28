@@ -25,3 +25,15 @@ TEST(UtilString, Tokenize) {
     auto tokens = string::split(line, " ,");
     ASSERT_EQ(tokens.size(), 5);
 }
+
+TEST(UtilString, ToUpper) {
+    str_t str = "tHis iS an eXample strIng 123";
+    string::to_upper(str);
+    ASSERT_EQ(str, "THIS IS AN EXAMPLE STRING 123");
+}
+
+TEST(UtilString, ToLower) {
+    str_t str = "tHis iS an eXample strIng 123";
+    string::to_lower(str);
+    ASSERT_EQ(str, "this is an example string 123");
+}

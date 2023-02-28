@@ -200,8 +200,8 @@ TEST(Connection, EntireCiPhases) {
 
     strv_t tokens;
     while (file_reader.next(tokens)) {
-        NumericCsvFileReader::parse(tokens.cbegin(), tokens.cbegin()+1, value);
-        NumericCsvFileReader::parse(tokens.cbegin()+1, tokens.cend(), inds);
+        ASSERT_TRUE(parse::catching(tokens.cbegin(), tokens.cbegin()+1, value));
+        ASSERT_TRUE(parse::catching(tokens.cbegin()+1, tokens.cend(), inds));
         bra.zero();
         ket.zero();
         for (uint_t i = 0ul; i < 8ul; ++i) {

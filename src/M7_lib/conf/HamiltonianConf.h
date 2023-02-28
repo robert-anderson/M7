@@ -14,6 +14,7 @@ namespace conf {
     struct Fcidump : Section {
         Param<str_t> m_path;
         SingleChoice<str_t> m_unrestrict_style;
+        SingleChoice<str_t> m_init_2e_perm_sym;
 
         explicit Fcidump(Group *parent);
     };

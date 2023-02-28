@@ -14,15 +14,15 @@ hdf5::DatasetTransaction::DatasetTransaction(hdf5::dataset::DistListFormat forma
 
 hdf5::DatasetTransaction::~DatasetTransaction() {
     // free all HDF5 handles if they have been opened (set non-zero) by the subclasses
-    if (m_plist) H5Pclose(m_plist);
+    if (m_plist_id) H5Pclose(m_plist_id);
     else logging::warn("property list was not opened in transaction");
-    if(m_filespace) H5Sclose(m_filespace);
+    if(m_filespace_id) H5Sclose(m_filespace_id);
     else logging::warn("filespace was not opened in transaction");
-    if (m_file_hyperslab) H5Sclose(m_file_hyperslab);
+    if (m_file_hyperslab_id) H5Sclose(m_file_hyperslab_id);
     else logging::warn("file hyperslab was not opened in transaction");
-    if (m_mem_hyperslab) H5Sclose(m_mem_hyperslab);
+    if (m_mem_hyperslab_id) H5Sclose(m_mem_hyperslab_id);
     else logging::warn("application memory hyperslab was not opened in transaction");
-    if (m_dataset) H5Dclose(m_dataset);
+    if (m_dataset_id) H5Dclose(m_dataset_id);
     else logging::warn("dataset was not opened in transaction");
 }
 
@@ -30,28 +30,28 @@ hdf5::DatasetSaver::DatasetSaver(
         const hdf5::NodeWriter& nw, const str_t& name, hdf5::dataset::PartDistListFormat format) :
         DatasetTransaction(format){
     REQUIRE_FALSE_ALL(name.empty(), "HDF5 dataset must be given a name")
-    m_filespace = H5Screate_simple(format.m_h5_shape.size(), format.m_h5_shape.data(), nullptr);
+    m_filespace_id = H5Screate_simple(format.m_h5_shape.size(), format.m_h5_shape.data(), nullptr);
 
     // specify format of the dataset
-    m_dataset = H5Dcreate(nw.m_handle, name.c_str(), format.m_local.m_item.m_type, m_filespace,
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    REQUIRE_GT_ALL(m_dataset, 0, "dataset creation failed");
+    m_dataset_id = H5Dcreate(nw.m_id, name.c_str(), format.m_local.m_item.m_type.m_id, m_filespace_id,
+                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    REQUIRE_GT_ALL(m_dataset_id, 0, "dataset creation failed");
     {
         // set dimension labels
         uint_t i = 0ul;
-        for (auto& dim_name: format.m_local.m_dim_names) H5DSset_label(m_dataset, i++, dim_name.c_str());
+        for (auto& dim_name: format.m_local.m_dim_names) H5DSset_label(m_dataset_id, i++, dim_name.c_str());
     }
-    H5Sclose(m_filespace);
-    m_filespace = H5Dget_space(m_dataset);
+    H5Sclose(m_filespace_id);
+    m_filespace_id = H5Dget_space(m_dataset_id);
 
     // datasets are always transacted in collective I/O mode
-    m_plist = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(m_plist, H5FD_MPIO_COLLECTIVE);
+    m_plist_id = H5Pcreate(H5P_DATASET_XFER);
+    H5Pset_dxpl_mpio(m_plist_id, H5FD_MPIO_COLLECTIVE);
 
     const hsize_t ndim = format.m_h5_shape.size();
     // hyperslabs for the offsets and counts associated with the file and memory layout respectively
-    m_file_hyperslab = H5Screate_simple(ndim, format.m_h5_shape.data(), nullptr);
-    m_mem_hyperslab = H5Screate_simple(ndim, format.m_h5_shape.data(), nullptr);
+    m_file_hyperslab_id = H5Screate_simple(ndim, format.m_h5_shape.data(), nullptr);
+    m_mem_hyperslab_id = H5Screate_simple(ndim, format.m_h5_shape.data(), nullptr);
 
     if (!m_format.m_nitem) logging::warn("Saving empty dataset \"{}\"", name);
 }
@@ -65,11 +65,11 @@ bool hdf5::DatasetSaver::write(const void* src, uint_t nitem) {
     REQUIRE_LE(m_nitem_done + nitem, m_format.m_local.m_nitem, "too many items");
     m_counts[0] = nitem;
     m_offsets[0] = 0;
-    H5Sselect_hyperslab(m_mem_hyperslab, H5S_SELECT_SET, m_offsets.data(), nullptr, m_counts.data(), nullptr);
+    H5Sselect_hyperslab(m_mem_hyperslab_id, H5S_SELECT_SET, m_offsets.data(), nullptr, m_counts.data(), nullptr);
     m_offsets[0] = m_format.m_nitem_displ + m_nitem_done;
     REQUIRE_EQ(bool(src), bool(m_counts[0]), "count zero with non-null data or count non-zero with null data");
-    H5Sselect_hyperslab(m_file_hyperslab, H5S_SELECT_SET, m_offsets.data(), nullptr, m_counts.data(), nullptr);
-    auto status = H5Dwrite(m_dataset, m_format.m_local.m_item.m_type, m_mem_hyperslab, m_file_hyperslab, m_plist, src);
+    H5Sselect_hyperslab(m_file_hyperslab_id, H5S_SELECT_SET, m_offsets.data(), nullptr, m_counts.data(), nullptr);
+    auto status = H5Dwrite(m_dataset_id, m_format.m_local.m_item.m_type.m_id, m_mem_hyperslab_id, m_file_hyperslab_id, m_plist_id, src);
     REQUIRE_FALSE(status, "HDF5 Error on multidimensional save");
     bool all_done = !src;
     all_done = mpi::all_land(all_done);
@@ -107,7 +107,7 @@ void hdf5::DatasetSaver::save_dist_list(
 
 
 void hdf5::DatasetSaver::save_attrs(const std::list<Attr>& attrs) {
-    for (const auto& attr: attrs) attr.save(m_dataset);
+    for (const auto& attr: attrs) attr.save(m_dataset_id);
 }
 
 bool hdf5::DatasetLoader::exists(hid_t parent, const str_t &name) {
@@ -183,18 +183,18 @@ hdf5::DatasetLoader::read_format(hid_t parent, const str_t &name, bool part, boo
 }
 
 hdf5::DatasetLoader::DatasetLoader(const hdf5::NodeReader &nr, const str_t &name, bool part, bool this_rank) :
-        DatasetTransaction(read_format(nr.m_handle, name, part, this_rank)) {
-    m_dataset = H5Dopen1(nr.m_handle, name.c_str());
-    m_filespace = H5Dget_space(m_dataset);
+        DatasetTransaction(read_format(nr.m_id, name, part, this_rank)), m_name(name) {
+    m_dataset_id = H5Dopen1(nr.m_id, name.c_str());
+    m_filespace_id = H5Dget_space(m_dataset_id);
     const auto ndim = m_format.m_h5_shape.size();
 
     // datasets are always transacted in collective I/O mode
-    m_plist = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(m_plist, H5FD_MPIO_COLLECTIVE);
+    m_plist_id = H5Pcreate(H5P_DATASET_XFER);
+    H5Pset_dxpl_mpio(m_plist_id, H5FD_MPIO_COLLECTIVE);
 
     // hyperslabs for the offsets and counts associated with the file and memory layout respectively
-    m_file_hyperslab = H5Screate_simple(ndim, m_format.m_h5_shape.data(), nullptr);
-    m_mem_hyperslab = H5Screate_simple(ndim, m_format.m_h5_shape.data(), nullptr);
+    m_file_hyperslab_id = H5Screate_simple(ndim, m_format.m_h5_shape.data(), nullptr);
+    m_mem_hyperslab_id = H5Screate_simple(ndim, m_format.m_h5_shape.data(), nullptr);
 
     if (!m_format.m_nitem) logging::warn("Loading empty dataset \"{}\"", name);
 }
@@ -209,7 +209,7 @@ void hdf5::DatasetLoader::load_attrs(std::list<Attr> &attrs) const {
     };
     hsize_t idx = 0ul;
     // use creation order so that elementwise comparison between saved and loaded attr lists may be done
-    H5Aiterate2(m_dataset, H5_INDEX_CRT_ORDER, H5_ITER_INC, &idx, op, reinterpret_cast<void *>(&attrs));
+    H5Aiterate2(m_dataset_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, &idx, op, reinterpret_cast<void *>(&attrs));
     REQUIRE_EQ(idx, attrs.size(), "number of attrs in list should match the final index");
 }
 
@@ -224,13 +224,13 @@ bool hdf5::DatasetLoader::read(void *dst, uint_t nitem) {
     REQUIRE_LE(m_nitem_done + nitem, m_format.m_local.m_nitem, "too many items");
     m_counts[0] = nitem;
     m_offsets[0] = 0;
-    H5Sselect_hyperslab(m_mem_hyperslab, H5S_SELECT_SET, m_offsets.data(), nullptr, m_counts.data(), nullptr);
+    H5Sselect_hyperslab(m_mem_hyperslab_id, H5S_SELECT_SET, m_offsets.data(), nullptr, m_counts.data(), nullptr);
     m_offsets[0] = m_format.m_nitem_displ + m_nitem_done;
 
     REQUIRE_EQ(bool(dst), bool(m_counts[0]),
                "nitem zero with non-null data or nitem non-zero with null data");
-    H5Sselect_hyperslab(m_file_hyperslab, H5S_SELECT_SET, m_offsets.data(), nullptr, m_counts.data(), nullptr);
-    auto status = H5Dread(m_dataset, m_format.m_local.m_item.m_type, m_mem_hyperslab, m_file_hyperslab, m_plist, dst);
+    H5Sselect_hyperslab(m_file_hyperslab_id, H5S_SELECT_SET, m_offsets.data(), nullptr, m_counts.data(), nullptr);
+    auto status = H5Dread(m_dataset_id, m_format.m_local.m_item.m_type.m_id, m_mem_hyperslab_id, m_file_hyperslab_id, m_plist_id, dst);
     REQUIRE_FALSE(status, "HDF5 Error on multidimensional load");
 
     bool all_done = !dst;
@@ -241,8 +241,8 @@ bool hdf5::DatasetLoader::read(void *dst, uint_t nitem) {
 }
 
 hdf5::DatasetLoader::~DatasetLoader() {
-    if (m_nitem_done < m_format.m_local.m_nitem)
-        logging::warn("Not all items were loaded from dataset \"{}\"");
+    if (m_nitem_done && (m_nitem_done < m_format.m_local.m_nitem))
+        logging::warn("Dataset \"{}\" was only partially loaded", m_name);
 }
 
 void hdf5::DatasetLoader::load_dist_list(
@@ -258,11 +258,11 @@ void hdf5::DatasetLoader::load_dist_list(
     uint_t max_nitem_per_op)
 {
     DatasetLoader dl(nr, name, part, this_rank);
-    REQUIRE_GE_ALL(dl.m_format.m_local.m_size, size,
+    REQUIRE_GE_ALL(size, dl.m_format.m_local.m_size,
                    logging::format("buffer is not large enough to read dataset \"{}\"", name));
     if (dl.m_format.m_local.m_size < size)
         logging::warn_("allocated buffer is over-sized for dataset \"{}\"", name);
-    REQUIRE_EQ_ALL(dl.m_format.m_local.m_item.m_type, type,
+    REQUIRE_TRUE_ALL(dl.m_format.m_local.m_item.m_type == type,
                    logging::format("native type of buffer does not agree with that of dataset \"{}\"", name));
     if (is_complex && dl.m_format.m_local.m_item.m_shape.back()!=2)
         logging::warn("buffer is complex but dataset \"{}\" does not have minor index of 2 (real/imag)", name);
