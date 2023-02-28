@@ -28,7 +28,7 @@ namespace hf_excit_hist {
         /**
          * wavefunction into which the permanitiators are to be inserted
          */
-        Wavefunction& m_wf;
+        wf::Fci& m_wf;
         /**
          * reference to Hartree--Fock (like) Many-body basis function
          */
@@ -56,9 +56,9 @@ namespace hf_excit_hist {
         /**
          * number of permanitiators created by excitation level
          */
-        NdReduction<uint_t, 1> m_ncreated;
+        reduction::NdArray<uint_t, 1> m_ncreated;
 
-        Initializer(Wavefunction& wf, const field::Mbf& hf, str_t fname, wf_comp_t thresh, bool cancellation);
+        Initializer(wf::Fci& wf, const field::Mbf& hf, str_t fname, wf_comp_t thresh, bool cancellation);
 
     private:
 
@@ -79,9 +79,9 @@ namespace hf_excit_hist {
         void setup();
     };
 
-    void initialize(Wavefunction& wf, const field::Mbf& hf, str_t fname, wf_t thresh, bool cancellation);
+    void initialize(wf::Fci& wf, const field::Mbf& hf, str_t fname, wf_t thresh, bool cancellation);
 
-    void initialize(Wavefunction& wf, const field::Mbf& hf, const conf::CiPermanitiator& opts);
+    void initialize(wf::Fci& wf, const field::Mbf& hf, const conf::CiPermanitiator& opts);
 
     struct Accumulators {
         /**

@@ -52,6 +52,7 @@ wf::Fci::Fci(const conf::Document& opts, const sys::Sector& sector) :
     m_sector(sector),
     m_format(m_store.m_row.m_weight.m_format),
     m_ninitiator(m_format),
+    m_ninitiator_perma(m_format),
     m_nwalker(m_format),
     m_delta_nwalker(m_format),
     m_l2_norm_square(m_format),
