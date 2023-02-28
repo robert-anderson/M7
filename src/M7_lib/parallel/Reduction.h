@@ -256,8 +256,8 @@ namespace reduction {
         void all_sum() override {
             collect();
             mpi::all_sum(m_local_buffer.data(), m_reduced_buffer.data(), m_local_buffer.size());
-            for (auto cyclic_member: m_cyclic_members) cyclic_member->after_delta_reduce();
             disperse();
+            for (auto cyclic_member: m_cyclic_members) cyclic_member->after_delta_reduce();
         }
 
         void all_max() override {

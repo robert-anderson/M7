@@ -165,12 +165,12 @@ void Solver::execute(uint_t ncycle) {
 }
 
 void Solver::begin_cycle() {
-    m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
+//    m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
 
     m_prop.update(m_icycle, m_wf, m_refs);
 
     m_wf.begin_cycle();
-    ASSERT(m_wf.m_nwalker.m_local[0] == 0);
+    DEBUG_ASSERT_TRUE(m_wf.m_nwalker.delta().m_local.is_zero(), "Cyclic reducibles should be zeroed before new cycle");
 
     // TODO: update load balancing
     //    m_wf.m_ra.update(m_icycle);
@@ -272,7 +272,7 @@ void Solver::loop_over_occupied_mbfs() {
             }
             if (initiator) m_wf.m_ninitiator.m_local[ipart]++;
 
-            m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
+//            m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
             // TODO: load balancing work logging
@@ -353,8 +353,8 @@ void Solver::output_stats() {
         stats.m_icycle = m_icycle;
         stats.m_tau = m_prop.tau();
         stats.m_shift = m_prop.m_shift.m_values;
-        stats.m_nwalker = m_wf.m_nwalker.m_reduced;
-        stats.m_delta_nwalker = m_wf.m_delta_nwalker.m_reduced;
+        stats.m_nwalker = m_wf.m_nwalker.prev_total();
+        stats.m_delta_nwalker = m_wf.m_nwalker.prev_delta();
         stats.m_nwalker_spawned = m_wf.m_nspawned.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_nannihilated.m_reduced;
         stats.m_ref_proj_energy_num = m_refs.proj_energy_nums();
@@ -385,7 +385,7 @@ void Solver::output_stats() {
         stats.m_icycle = m_icycle;
         stats.m_synchronization_overhead = m_synchronization_timer;
         stats.m_nblock_wf_ra = m_wf.m_dist.nblock_();
-        stats.m_nwalker_total = m_wf.m_nwalker.m_reduced.sum();
+        stats.m_nwalker_total = m_wf.m_nwalker.prev_total().sum();
         stats.m_nwalker_lookup_skip = m_wf.m_store.m_nskip_total;
         stats.m_nwalker_lookup = m_wf.m_store.m_nlookup_total;
         stats.m_nrow_recv = m_wf.m_send_recv.m_last_recv_count;

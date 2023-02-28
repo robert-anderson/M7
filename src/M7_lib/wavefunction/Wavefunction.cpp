@@ -54,7 +54,6 @@ wf::Fci::Fci(const conf::Document& opts, const sys::Sector& sector) :
     m_ninitiator(m_format),
     m_ninitiator_perma(m_format),
     m_nwalker(m_format),
-    m_delta_nwalker(m_format),
     m_l2_norm_square(m_format),
     m_delta_l2_norm_square(m_format),
     m_nspawned(m_format),
@@ -62,7 +61,7 @@ wf::Fci::Fci(const conf::Document& opts, const sys::Sector& sector) :
 
     REQUIRE_TRUE(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row(), "row-field reference error");
     m_summables.add_members(m_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
-                            m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
+                            m_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
 
     logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
@@ -156,7 +155,7 @@ void wf::Fci::end_cycle() {
     m_summables.all_sum();
 }
 
-wf_comp_t wf::Fci::square_norm(uint_t ipart) const {
+wf_comp_t wf::Fci::debug_square_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto& row = m_store.m_row;
     for (row.restart(); row; ++row) {
@@ -166,7 +165,7 @@ wf_comp_t wf::Fci::square_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
-wf_comp_t wf::Fci::l1_norm(uint_t ipart) const {
+wf_comp_t wf::Fci::debug_l1_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto& row = m_store.m_row;
     for (row.restart(); row; ++row) {
@@ -178,8 +177,7 @@ wf_comp_t wf::Fci::l1_norm(uint_t ipart) const {
 
 void wf::Fci::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
     wf_t& weight = walker.m_weight[ipart];
-    m_delta_nwalker.m_local[ipart] += std::abs(new_weight);
-    m_delta_nwalker.m_local[ipart] -= std::abs(weight);
+    m_nwalker.delta().m_local[ipart] += std::abs(new_weight) - std::abs(weight);
     m_delta_l2_norm_square.m_local[ipart] += std::pow(std::abs(new_weight), 2.0);
     m_delta_l2_norm_square.m_local[ipart] -= std::pow(std::abs(weight), 2.0);
     weight = new_weight;

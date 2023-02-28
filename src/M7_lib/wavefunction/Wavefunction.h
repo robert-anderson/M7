@@ -63,11 +63,7 @@ namespace wf {
         /**
          * L1 norm of each part of the WF
          */
-        reduction::NdArray<wf_comp_t, c_ndim_wf> m_nwalker;
-        /**
-         * change in the L1 norm
-         */
-        reduction::NdArray<wf_comp_t, c_ndim_wf> m_delta_nwalker;
+        reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf> m_nwalker;
         /**
          * square of the L2 norm of each part of the WF
          */
@@ -129,9 +125,15 @@ namespace wf {
             return ipart / 2;
         }
 
-        wf_comp_t square_norm(uint_t ipart) const;
+        wf_comp_t debug_square_norm(uint_t ipart) const;
 
-        wf_comp_t l1_norm(uint_t ipart) const;
+        /**
+         * debugging only: number of walkers should be updated each time the wavefunction weights are modified
+         * @param ipart
+         *  part of the WF for which to compute the total number of walkers across all MPI ranks
+         * @return
+         */
+        wf_comp_t debug_l1_norm(uint_t ipart) const;
 
         /**
          * all changes in the m_weight member of any row associated with m_store should occur through
