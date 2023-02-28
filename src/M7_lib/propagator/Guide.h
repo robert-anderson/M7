@@ -24,6 +24,7 @@ namespace guide {
         }
 
     public:
+        virtual ~Wavefunction() = default;
         ham_t overlap(const field::FrmOnv& mbf) const;
         ham_t overlap(const field::BosOnv& mbf) const;
         ham_t overlap(const field::FrmBosOnv& mbf) const;

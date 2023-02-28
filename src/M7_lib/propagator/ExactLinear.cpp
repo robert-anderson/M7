@@ -6,15 +6,16 @@
 
 ExactLinear::ExactLinear(
         const Hamiltonian& ham, const conf::Document& opts,
-        const Wavefunction& wf, bool only_nonzero_h_spawns) :
+        const wf::Fci& wf, bool only_nonzero_h_spawns) :
         Propagator(opts, ham, wf), m_only_nonzero_h_spawns(only_nonzero_h_spawns),
         m_conn_iters(ham),
         m_mag_log(opts.m_propagator.m_max_bloom, 0, 1, opts.m_propagator.m_static_tau, true,
                   opts.m_propagator.m_tau_min, opts.m_propagator.m_tau_max, 0.0, opts.m_propagator.m_period) {}
 
-void ExactLinear::off_diagonal(Wavefunction& wf, const Walker& walker, uint_t ipart, bool initiator) {
+void ExactLinear::off_diagonal(wf::Fci& wf, const Walker& walker, const uint_t& ipart) {
     auto& src_mbf = walker.m_mbf;
     const wf_t& weight = walker.m_weight[ipart];
+    bool src_initiator = walker.is_initiator(ipart, m_nadd_initiator);
     bool src_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
     src_mbf.m_decoded.clear();
 
@@ -29,22 +30,18 @@ void ExactLinear::off_diagonal(Wavefunction& wf, const Walker& walker, uint_t ip
         m_mag_log.log(0, helement, 1.0);
         auto delta = -weight * tau() * helement;
         imp_samp_delta(delta, src_mbf, dst_mbf);
-        wf.add_spawn(dst_mbf, delta, initiator, src_deterministic, ipart, src_mbf, weight);
+        wf.add_spawn(dst_mbf, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
     };
     m_conn_iters.loop(conn, src_mbf, body);
 }
 
-void ExactLinear::diagonal(Wavefunction& wf, Walker& walker, uint_t ipart) {
+void ExactLinear::diagonal(wf::Fci& wf, Walker& walker, const uint_t& ipart) {
     const ham_comp_t& hdiag = walker.m_hdiag;
     DEBUG_ASSERT_NEAR_EQ(hdiag, m_ham.get_energy(walker.m_mbf), "incorrect diagonal H element cached");
     wf.scale_weight(walker, ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }
 
-void ExactLinear::update(uint_t icycle, const Wavefunction &wf) {
-    Propagator::update(icycle, wf);
+void ExactLinear::update(uint_t icycle, const wf::Fci &wf, const wf::Refs& refs) {
+    Propagator::update(icycle, wf, refs);
     m_mag_log.update(icycle, m_tau);
-}
-
-const ConnForeachGroup& ExactLinear::conn_iters() const {
-    return m_conn_iters;
 }

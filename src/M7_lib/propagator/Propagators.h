@@ -10,6 +10,7 @@
 #include "ExactLinear.h"
 #include "StochLinear.h"
 #include "M7_lib/util/Pointer.h"
+#include "M7_lib/wavefunction/Wavefunction.h"
 
 namespace props {
 
@@ -17,7 +18,7 @@ namespace props {
     typedef StochLinear Stoch;
 
     static std::unique_ptr<Propagator> get(const Hamiltonian &ham, const conf::Document &opts,
-                                           const Wavefunction &wf) {
+                                           const wf::Fci &wf) {
         /*
          * if the RDM contributions due to connections of the reference are not to be explicitly included on average,
          */

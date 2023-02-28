@@ -5,11 +5,9 @@
 #ifndef M7_ANNIHILATOR_H
 #define M7_ANNIHILATOR_H
 
-
 #include <M7_lib/wavefunction/Wavefunction.h>
 #include <M7_lib/wavefunction/Reference.h>
 #include <M7_lib/bilinear/Rdms.h>
-
 
 /**
  * updates the state of the stored wavefunction subject to the new walkers in the receive buffer,
@@ -20,7 +18,7 @@ struct Annihilator {
     /**
      * wavefunction whose recv and store tables are merged herein
      */
-    Wavefunction &m_wf;
+    wf::Fci &m_wf;
     /**
      * propagator object providing access to Hamiltonian and deterministic subspace information
      */
@@ -28,7 +26,7 @@ struct Annihilator {
     /**
      * references are needed to discern whether newly-created walkers contribute to the reference energies
      */
-    const References& m_refs;
+    const wf::Refs& m_refs;
     /**
      * Hartree-Fock MBF, fixed throughout the calculation, for Brillouin theorem RDM accumulation, may be null
      */
@@ -94,7 +92,7 @@ private:
 
 public:
 
-    Annihilator(Wavefunction &wf, const Propagator& prop, const References& refs,
+    Annihilator(wf::Fci &wf, const Propagator& prop, const wf::Refs& refs,
                 const shared_rows::Walker* hf, Rdms& rdms, const uint_t& icycle, wf_comp_t nadd);
 
     /**

@@ -129,7 +129,7 @@ namespace conf {
         Param<double> m_target_damp;
         Param<uint_t> m_period;
         Param<uint_t> m_ncycle_av;
-        Param<bool> m_jump;
+        Param<bool> m_fix_ref_weight;
 
         explicit Shift(Group *parent);
 
