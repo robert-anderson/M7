@@ -59,4 +59,17 @@ TEST(Reduction, NdAllSumSyndicate) {
         }
     }
 }
+//
+//TEST(Reduction, CyclicScalar){
+//    reduction::cyclic::Scalar<int> v;
+//    ASSERT_EQ(v.m_total_base->m_local_ptr[0], 0);
+//    ASSERT_EQ(v.total().m_reduced, 0);
+//    auto local = hash::in_range(mpi::irank(), 13, 34);
+//    v.delta().m_local = local;
+//    v.all_sum();
+//    int total_reduced = 0;
+//    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) total_reduced+=hash::in_range(irank, 13, 34);
+//    ASSERT_EQ(v.total().m_local, local);
+//    ASSERT_EQ(v.total().m_reduced, total_reduced);
+//}
 

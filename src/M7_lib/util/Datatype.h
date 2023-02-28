@@ -168,6 +168,30 @@ namespace dtype {
     static void nullify(std::array<T, n>& a) {
         for (uint i=0ul; i<n; ++i) nullify(a[i]);
     }
+
+    template<typename T>
+    using make_signed_if_integral = typename std::conditional<
+            std::is_integral<T>::value,
+            typename std::make_signed<typename std::conditional<std::is_integral<T>::value, T, int>::type>::type,
+            T>::type;
+
+    template<typename T>
+    using make_unsigned_if_integral = typename std::conditional<
+            std::is_integral<T>::value,
+            typename std::make_unsigned<typename std::conditional<std::is_integral<T>::value, T, int>::type>::type,
+            T>::type;
+
+    static_assert(std::is_same<make_signed_if_integral<int>, int>::value, "make signed failed");
+    static_assert(std::is_same<make_signed_if_integral<unsigned int>, int>::value, "make signed failed");
+    static_assert(std::is_same<make_signed_if_integral<unsigned char>, signed char>::value, "make signed failed");
+    static_assert(std::is_same<make_signed_if_integral<double>, double>::value, "make signed failed");
+    static_assert(std::is_same<make_signed_if_integral<std::complex<float>>, std::complex<float>>::value, "make signed failed");
+
+    static_assert(std::is_same<make_unsigned_if_integral<int>, unsigned int>::value, "make unsigned failed");
+    static_assert(std::is_same<make_unsigned_if_integral<unsigned int>, unsigned int>::value, "make unsigned failed");
+    static_assert(std::is_same<make_unsigned_if_integral<unsigned char>, unsigned char>::value, "make unsigned failed");
+    static_assert(std::is_same<make_unsigned_if_integral<double>, double>::value, "make unsigned failed");
+    static_assert(std::is_same<make_unsigned_if_integral<std::complex<float>>, std::complex<float>>::value, "make unsigned failed");
 }
 
 
