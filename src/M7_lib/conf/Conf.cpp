@@ -152,7 +152,7 @@ conf::Semistochastic::Semistochastic(Group *parent) :
             "requisite fraction of the total number of walkers required to reside on an MBF for inclusion in the "
             "semistochastic space"),
         m_delay(this, "delay", 0ul,
-                "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space"),
+                "number of MC cycles to sleep after the onset of variable shift mode before initializing the semi-stochastic space"),
         m_save(this, "save", "deterministic subspace save", "M7.detsub.h5", Explicit),
         m_load(this, "load", "deterministic subspace load", "M7.detsub.h5", Explicit){}
 
@@ -238,21 +238,24 @@ conf::HfExcits::HfExcits(Group *parent) :
         m_nexcits(this, "nexcits", {},
                      "excitation levels from the HF MBF for which to accumulate average amplitudes"),
         m_thresh(this, "thresh", 0.0,
-                    "minimum magnitude of intermediate-normalized walker weight require before histogramming"),
+                 "minimum magnitude of intermediate-normalized walker weight require before histogramming"),
+        m_delay(this, "delay", 0,
+                "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate"),
         m_buffers(this),
-        m_save(this, "save", "average HF-connected amplitudes save", "M7.hf_excit.h5", Explicit),
-        m_load(this, "load", "average HF-connected amplitudes load", "M7.hf_excit.h5", Explicit) {}
+        m_save(this, "save", "average HF-connected amplitudes save", "M7.hf_excit.h5", Implicit),
+        m_load(this, "load", "average HF-connected amplitudes load", "M7.hf_excit.h5", Explicit),
+        m_chkpt(this, "chkpt", "average HF-connected amplitudes checkpoint", "M7.hf_excit.{}.h5", Explicit){}
 
 conf::Mae::Mae(Group *parent) :
         Section(parent, "mae",
                         "options related to MAEs (multidimensional averaging estimators): quantities estimated from the "
                         "many-body wavefunction(s) and averaged on-the-fly over a number of MC cycles", Explicit),
         m_delay(this, "delay", 1000ul,
-                "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate MEVs"),
+            "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate"),
         m_ncycle(this, "ncycle", ~0ul,
-                 "number of MC cycles for which to accumulate MAEs before terminating the calculation"),
+            "number of MC cycles for which to accumulate MAEs before terminating the calculation"),
         m_stats_period(this, "stats_period", 100ul,
-                       "number of MC cycles between computation and output of all contracted values computed from the averaged estimators"),
+            "number of MC cycles between computation and output of all contracted values computed from the averaged estimators"),
         m_stats_path(this, "stats_path", "M7.mae.stats", "output path for contracted value statistics"),
         m_rdm(this, "rdm", "options relating to the accumulation and sampling of RDM elements"),
         m_spec_mom(this, "spec_mom", "options relating to the accumulation and sampling of spectral moments"),

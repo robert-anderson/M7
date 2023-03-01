@@ -30,11 +30,21 @@
 #include "MPIAssert.h"
 
 class Epoch {
+    /**
+     * description of the role of the Epoch in the algorithm
+     */
     str_t m_name;
+    /**
+     * cycle on which the Epoch began
+     */
     reduction::Scalar<uint_t> m_icycle_start;
 
 public:
     explicit Epoch(str_t name);
+
+    ~Epoch() {
+        if (!*this) logging::warn("{} epoch was never reached", m_name);
+    }
 
     /**
      * Update the state of the Epoch, no need to check state before
@@ -51,7 +61,7 @@ public:
     /**
      * @return the MPI-synchronized cycle number on which the Epoch began
      */
-    const uint_t& icycle_start() const;
+    uint_t icycle_start() const;
 
     /**
      * @return the MPI-synchronized state of the Epoch
@@ -67,26 +77,23 @@ public:
 class Epochs {
     v_t<Epoch> m_epochs;
 public:
-    Epochs(str_t name, uint_t n, str_t element_identifier="element"){
-        m_epochs.reserve(n);
-        for (uint_t i=0ul; i<n; ++i) m_epochs.emplace_back(name+" (" +element_identifier + " " + std::to_string(i) + ")");
-    }
+    Epochs(str_t name, uint_t n, str_t element_identifier="element");
 
     uint_t nelement() const {
         return m_epochs.size();
     }
 
-    Epoch& operator[](const uint_t i){
+    Epoch& operator[](uint_t i){
         DEBUG_ASSERT_LT(i, m_epochs.size(), "Epoch index OOB");
         return m_epochs[i];
     }
 
-    const Epoch& operator[](const uint_t i) const{
+    const Epoch& operator[](uint_t i) const{
         DEBUG_ASSERT_LT(i, m_epochs.size(), "Epoch index OOB");
         return m_epochs[i];
     }
 
-    void terminate(const uint_t& icycle){
+    void terminate(uint_t icycle){
         for (auto& epoch:m_epochs) epoch.terminate(icycle);
     }
 

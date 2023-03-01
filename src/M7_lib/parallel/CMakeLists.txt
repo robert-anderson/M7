@@ -8,6 +8,8 @@ target_sources(M7_lib
         MPIAssert.h
         MPIWrapper.cpp
         MPIWrapper.h
+        PeriodicEvent.cpp
+        PeriodicEvent.h
         RankAllocator.cpp
         RankAllocator.h
         Reduction.h

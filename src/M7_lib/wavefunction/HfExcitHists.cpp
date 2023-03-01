@@ -162,14 +162,20 @@ uint_t hf_excit_hist::Accumulators::ind(uint_t nexcit) const {
     return nexcit < m_accumulated_nexcit_inds.size() ? m_accumulated_nexcit_inds[nexcit] : ~0ul;
 }
 
-hf_excit_hist::Accumulators::Accumulators(const shared_rows::Walker *hf, uintv_t nexcits, wf_comp_t thresh,
-                                          str_t save_file_name) :
-        m_hf(hf), m_thresh(thresh), m_work_conn(hf->mbf()), m_save_file_name(std::move(save_file_name)),
-        m_nexcits(std::move(nexcits)), m_accumulated_nexcit_inds(make_nexcit_is_accumulated(m_nexcits)) {
+hf_excit_hist::Accumulators::Accumulators(
+        const shared_rows::Walker *hf, uintv_t nexcits, wf_comp_t thresh,
+        const conf::OptionalFile& save_file, const conf::OptionalFileSeries& chkpt_files) :
+        m_hf(hf), m_thresh(thresh), m_work_conn(hf->mbf()),
+        m_nexcits(std::move(nexcits)), m_accumulated_nexcit_inds(make_nexcit_is_accumulated(m_nexcits)),
+        m_accum_epoch("HF excitation accumulation"),
+        m_save_file_path(save_file.path_if_enabled()), m_chkpt_files(m_accum_epoch, chkpt_files){
     if (m_nexcits.empty()) return;
     REQUIRE_TRUE(m_hf, "HF state must be defined for HF excitation accumulation");
     m_tables.reserve(m_nexcits.size());
     m_lookup_keys.reserve(m_nexcits.size());
+    if (m_save_file_name.empty() && !m_chkpt_files)
+        logging::warn("Accumulating HF excitations of rank {}, but saves and checkpointing are both disabled",
+                      convert::to_string(m_nexcits));
     for (auto& nexcit: m_nexcits){
         const OpSig exsig({nexcit, nexcit}, {0, 0});
         const auto name = exsig.to_string()+" excitations of HF state";
@@ -181,10 +187,11 @@ hf_excit_hist::Accumulators::Accumulators(const shared_rows::Walker *hf, uintv_t
 }
 
 hf_excit_hist::Accumulators::Accumulators(const conf::HfExcits &opts, const shared_rows::Walker *hf) :
-        Accumulators(hf, opts.m_nexcits, opts.m_thresh, opts.m_save.m_path){}
+        Accumulators(hf, opts.m_nexcits, opts.m_thresh, opts.m_save, opts.m_chkpt){}
 
 void hf_excit_hist::Accumulators::add(const Mbf &mbf, wf_t weight) {
     if (!*this) return;
+    if (m_accum_epoch) return;
     m_work_conn.connect(m_hf->mbf(), mbf);
     const auto nexcit = m_work_conn.exsig().nfrm_cre();
     if (!nexcit) {
@@ -206,19 +213,30 @@ void hf_excit_hist::Accumulators::add(const Mbf &mbf, wf_t weight) {
     }
 }
 
-void hf_excit_hist::Accumulators::save(const hdf5::NodeWriter &nw) {
+void hf_excit_hist::Accumulators::save(const hdf5::NodeWriter &nw) const {
+    if (!m_accum_epoch) return;
     auto table = m_tables.begin();
-    m_norm = mpi::all_sum(m_norm);
+    auto norm = mpi::all_sum(m_norm);
+    hdf5::DatasetSaver::save_scalar(nw, "norm", norm);
     for (auto nexcit: m_nexcits) {
         OpSig exsig({nexcit, nexcit}, {0, 0});
-        auto& row = table->m_row;
-        for (row.restart(); row; ++row) row.m_values /= m_norm;
         table->save(nw, exsig.to_string(), true);
         ++table;
     }
 }
 
-void hf_excit_hist::Accumulators::save() {
+void hf_excit_hist::Accumulators::save() const {
+    if (m_save_file_name.empty()) return;
     hdf5::FileWriter fw(m_save_file_name);
+    save(fw);
+}
+
+void hf_excit_hist::Accumulators::attempt_chkpt(uint_t icycle) {
+    if (!m_chkpt_files) return;
+    auto path = m_chkpt_files.get_file_path(icycle);
+    if (path.empty()) return;
+    logging::info("Saving HF excitation accumulators to checkpoint file {} on cycle {}", path, icycle);
+    hdf5::FileWriter fw(path);
+    fw.save_attr("icycle", icycle);
     save(fw);
 }

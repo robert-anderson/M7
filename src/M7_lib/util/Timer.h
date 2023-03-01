@@ -14,6 +14,10 @@ class Timer {
     std::chrono::duration<double> m_start, m_total;
 public:
 
+    static void sleep_(double nsec);
+
+    static void sleep(double nsec);
+
     Timer();
 
     bool paused() const;

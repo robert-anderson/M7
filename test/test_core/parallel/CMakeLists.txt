@@ -3,6 +3,7 @@ target_sources(unittest
         Gatherable.cpp
         LoadBalancer.cpp
         MPIWrapper.cpp
+        PeriodicEvent.cpp
         Reduction.cpp
         SharedArray.cpp
 )

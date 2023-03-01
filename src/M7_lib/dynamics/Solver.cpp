@@ -185,7 +185,7 @@ void Solver::begin_cycle() {
     m_refs.begin_cycle(m_icycle);
     if (m_hf) m_hf->update();
 
-    auto update_epoch = [&](const uint_t &ncycle_wait) {
+    auto update_epoch = [&](uint_t ncycle_wait) {
         const auto &epochs = m_prop.m_shift.m_variable_mode;
         if (!epochs) return false;
         return m_icycle > epochs.icycle_start_last() + ncycle_wait;
@@ -197,6 +197,10 @@ void Solver::begin_cycle() {
                              "MAEs only beginning to be accumulated, but not all store tables are empty");
         }
     }
+    if (m_hf && m_hf->m_excit_accums) {
+        m_hf->m_excit_accums.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_hf_excits.m_delay));
+    }
+
     m_inst_ests.begin_cycle(m_icycle);
 
     if (m_opts.m_propagator.m_semistochastic.m_enabled && !m_detsubs) {
@@ -350,6 +354,7 @@ void Solver::end_cycle() {
     m_wf.end_cycle();
     m_maes.end_cycle();
     m_inst_ests.end_cycle(m_icycle);
+    if (m_hf && m_hf->m_excit_accums) m_hf->m_excit_accums.attempt_chkpt(m_icycle);
 }
 
 void Solver::output_stats() {

@@ -20,6 +20,9 @@ namespace conf {
     struct OptionalFile : Section {
         Param<str_t> m_path;
         explicit OptionalFile(Group *parent, str_t name, str_t short_desc, str_t default_path, EnablePolicy ep);
+        str_t path_if_enabled() const {
+            return m_enabled ? m_path.m_value : "";
+        }
     };
 
     struct OptionalFileSeries : Section {
@@ -27,7 +30,9 @@ namespace conf {
         SingleChoice<str_t> m_mode;
         Param<uint_t> m_period;
         explicit OptionalFileSeries(Group *parent, str_t name, str_t short_desc, str_t default_path_fmt, EnablePolicy ep);
-
+        str_t path_fmt_if_enabled() const {
+            return m_enabled ? m_path_fmt.m_value : "";
+        }
 
     protected:
         void validate_node_contents() override;
@@ -215,9 +220,11 @@ namespace conf {
     struct HfExcits : Section {
         Param<uintv_t> m_nexcits;
         Param<wf_t> m_thresh;
+        Param<uint_t> m_delay;
         Buffers m_buffers;
         OptionalFile m_save;
         OptionalFile m_load;
+        OptionalFileSeries m_chkpt;
 
         explicit HfExcits(Group *parent);
     };

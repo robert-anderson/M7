@@ -8,6 +8,7 @@
 #include "M7_lib/communication/SharedRows.h"
 #include "M7_lib/mae/MaeTable.h"
 #include "M7_lib/wavefunction/Wavefunction.h"
+#include "M7_lib/parallel/PeriodicEvent.h"
 
 namespace hf_excit_hist {
 
@@ -102,7 +103,7 @@ namespace hf_excit_hist {
          */
         mutable conn::Mbf m_work_conn;
         /**
-         * average HF weight so that output can be intermediate normalized
+         * average HF weight
          */
         wf_t m_norm = 0.0;
         const str_t m_save_file_name;
@@ -110,13 +111,20 @@ namespace hf_excit_hist {
         const uintv_t m_nexcits;
         const uintv_t m_accumulated_nexcit_inds;
 
+        Epoch m_accum_epoch;
+        const str_t m_save_file_path;
+        PeriodicFileSeries m_chkpt_files;
+
+
     private:
         static uintv_t make_nexcit_is_accumulated(const uintv_t& nexcits);
 
         uint_t ind(uint_t nexcit) const;
 
     public:
-        Accumulators(const shared_rows::Walker* hf, uintv_t nexcits, wf_t thresh, str_t save_file_name);
+        Accumulators(const shared_rows::Walker* hf, uintv_t nexcits, wf_t thresh,
+                     const conf::OptionalFile& save_file,
+                     const conf::OptionalFileSeries& chkpt_files);
 
         operator bool () const {
             return !m_tables.empty();
@@ -130,9 +138,11 @@ namespace hf_excit_hist {
 
         void add(const field::Mbf& mbf, wf_t weight);
 
-        void save(const hdf5::NodeWriter& nw);
+        void save(const hdf5::NodeWriter& nw) const;
 
-        void save();
+        void save() const;
+
+        void attempt_chkpt(uint_t icycle);
     };
 }
 
