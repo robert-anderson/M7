@@ -10,6 +10,8 @@ hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_c
     REQUIRE_EQ(m_inds.nrow(), m_vals.nelement(),
                "number of index arrays is not the same as the number of values");
     uintv_t order;
+    // intermediate normalization
+    m_vals /= hdf5::DatasetLoader::load_vector<wf_t>(parent, "norm")[0];
     if (mpi::on_node_i_am_root()) m_vals.sort_inds(order, false, true);
     m_inds.reorder_rows(order);
     m_vals.reorder(order);
@@ -17,15 +19,22 @@ hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_c
     while(m_nelement < m_vals.nelement() && std::abs(m_vals[m_nelement]) >= thresh) ++m_nelement;
 }
 
-hf_excit_hist::Initializer::Initializer(wf::Fci &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, bool cancellation) :
-        m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2200", thresh),
-        m_thresh(thresh), m_cancellation(cancellation),
-        m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf), m_ncreated({2*max_power()+1}) {
+hf_excit_hist::Initializer::Initializer(
+        wf::Fci &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation) :
+        m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2200", thresh), m_cancellation(cancellation),
+        m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf), m_thresh(max_power ? find_first(max_power) : thresh),
+        m_ncreated({2*max_power_by_thresh()+1}) {
     logging::info("Maximum-magnitude C2 coefficient: {}", m_c2.m_vals[0]);
-    logging::info("Threshold of {} implies maximum relevant power of C2 is {}", m_thresh, max_power());
+    if (max_power) {
+        DEBUG_ASSERT_EQ(max_power, max_power_by_thresh(), "max power specified should match match power computed");
+        logging::info("Specified maximum relevant power of C2 ({}) implies a threshold of {}", max_power, m_thresh);
+    }
+    else {
+        logging::info("Threshold of {} implies maximum relevant power of C2 is {}", m_thresh, max_power_by_thresh());
+    }
 }
 
-uint_t hf_excit_hist::Initializer::max_power() {
+uint_t hf_excit_hist::Initializer::max_power_by_thresh() {
     const auto limit = uint_t(m_wf.m_sector.m_frm.m_elecs) / 2;
     wf_comp_t product = 1.0;
     for (uint_t ipower = 0ul; ipower < limit; ++ipower) {
@@ -33,6 +42,31 @@ uint_t hf_excit_hist::Initializer::max_power() {
         if (product < m_thresh) return ipower;
     }
     return limit;
+}
+
+wf_comp_t hf_excit_hist::Initializer::find_first(uint_t npower) {
+    wf_t product = 1.0;
+    m_work_mbf = m_hf;
+    uint_t ientry = 0ul;
+
+    auto mag = [&](uint_t ientry) {return std::abs(m_c2.m_vals[ientry]);};
+
+    for (uint_t ipower = 1ul; ipower <= npower; ++ipower){
+        for (; ientry < m_c2.nelement(); ++ientry) {
+            if (apply(m_work_mbf, ientry)) {
+                // the entry was successfully applied
+                const bool geo_mean_with_next = (ipower == npower && (ientry + 1) < m_c2.nelement());
+                /*
+                 * to avoid any inconsistencies due to floating-point inequalities, let the last contribution be between
+                 * the current entry and the next-largest one
+                 */
+                product *= geo_mean_with_next ? std::sqrt(mag(ientry) * mag(ientry+1)) : mag(ientry);
+                // exit the loop over entries
+                break;
+            }
+        }
+    }
+    return std::abs(product);
 }
 
 bool hf_excit_hist::Initializer::apply(Mbf &mbf, uint_t ientry) {
@@ -100,7 +134,7 @@ void hf_excit_hist::Initializer::setup() {
     auto& row = m_wf.m_store.m_row;
     strv_t header = {"excitation level", "number in use"};
     v_t<strv_t> logging_table;
-    auto max_power = this->max_power();
+    auto max_power = this->max_power_by_thresh();
     if (m_cancellation) {
         header.emplace_back("number revoked by cancellation");
         /*
@@ -139,13 +173,13 @@ void hf_excit_hist::Initializer::setup() {
     logging::info_table("Permanitiator breakdown", logging_table, true);
 }
 
-void hf_excit_hist::initialize(wf::Fci &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, bool cancellation) {
-    Initializer(wf, hf, fname, thresh, cancellation).setup();
+void hf_excit_hist::initialize(wf::Fci &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation) {
+    Initializer(wf, hf, fname, thresh, max_power, cancellation).setup();
 }
 
 void hf_excit_hist::initialize(wf::Fci &wf, const Mbf &hf, const conf::CiPermanitiator &opts) {
     logging::info("Setting permanitiators based on CI data from \"{}\"", opts.m_path.m_value);
-    initialize(wf, hf, opts.m_path, opts.m_thresh, opts.m_cancellation);
+    initialize(wf, hf, opts.m_path, opts.m_thresh, opts.m_max_power, opts.m_cancellation);
 }
 
 
@@ -191,7 +225,7 @@ hf_excit_hist::Accumulators::Accumulators(const conf::HfExcits &opts, const shar
 
 void hf_excit_hist::Accumulators::add(const Mbf &mbf, wf_t weight) {
     if (!*this) return;
-    if (m_accum_epoch) return;
+    if (!m_accum_epoch) return;
     m_work_conn.connect(m_hf->mbf(), mbf);
     const auto nexcit = m_work_conn.exsig().nfrm_cre();
     if (!nexcit) {

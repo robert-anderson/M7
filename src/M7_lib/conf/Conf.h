@@ -110,6 +110,7 @@ namespace conf {
     struct CiPermanitiator : Section {
         Param<str_t> m_path;
         Param<double> m_thresh;
+        Param<uint_t> m_max_power;
         Param<bool> m_cancellation;
         explicit CiPermanitiator(Group* parent);
     };

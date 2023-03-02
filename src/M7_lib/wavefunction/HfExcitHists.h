@@ -39,10 +39,6 @@ namespace hf_excit_hist {
          */
         const IndVals m_c2;
         /**
-         * minimum intermediate-normalized weight for inclusion as a permanitiator
-         */
-        const wf_comp_t m_thresh;
-        /**
          * whether to revoke permanitiator status if multiple contributions sum to a value lower in magnitude than thresh
          */
         const bool m_cancellation;
@@ -55,18 +51,24 @@ namespace hf_excit_hist {
          */
         conn::Mbf m_work_conn;
         /**
+         * minimum intermediate-normalized weight for inclusion as a permanitiator
+         */
+        const wf_comp_t m_thresh;
+        /**
          * number of permanitiators created by excitation level
          */
         reduction::NdArray<uint_t, 1> m_ncreated;
 
-        Initializer(wf::Fci& wf, const field::Mbf& hf, str_t fname, wf_comp_t thresh, bool cancellation);
+        Initializer(wf::Fci& wf, const field::Mbf& hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation);
 
     private:
 
         /**
          * cumulatively multiply the first n ci coefficients until the product falls below the threshold
          */
-        uint_t max_power();
+        uint_t max_power_by_thresh();
+
+        wf_comp_t find_first(uint_t npower);
 
         bool apply(field::Mbf& mbf, uint_t ientry);
 
@@ -80,7 +82,7 @@ namespace hf_excit_hist {
         void setup();
     };
 
-    void initialize(wf::Fci& wf, const field::Mbf& hf, str_t fname, wf_t thresh, bool cancellation);
+    void initialize(wf::Fci& wf, const field::Mbf& hf, str_t fname, wf_t thresh, uint_t max_power, bool cancellation);
 
     void initialize(wf::Fci& wf, const field::Mbf& hf, const conf::CiPermanitiator& opts);
 

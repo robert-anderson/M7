@@ -116,7 +116,9 @@ conf::CiPermanitiator::CiPermanitiator(Group *parent) :
             "lower-rank excitations", Explicit),
         m_path(this, "path", "M7.hf_excit.h5", "file path to CI data source"),
         m_thresh(this, "thresh", 0.001,
-            "minimum intermediate-normalized coefficient product required for permanitiator status"),
+                 "minimum intermediate-normalized coefficient product required for permanitiator status"),
+        m_max_power(this, "max_power", 0,
+                 "maximum power of C2 for which one permanitiator is desired"),
         m_cancellation(this, "cancellation", true,
             "if true, an excitation is removed from the list of permanitiators when it takes multiple contributions"
             " which sum to a value less than thresh")

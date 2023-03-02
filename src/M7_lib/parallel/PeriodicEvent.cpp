@@ -44,7 +44,9 @@ PeriodicEvent::Reason PeriodicEvent::get_event(uint_t icycle, uint_t& ievent) {
 }
 
 PeriodicEvent::Reason PeriodicFileSeries::due(uint_t icycle) {
-    if(m_epoch) PeriodicEvent::m_icycle_last_event = m_epoch.icycle_start();
+    // set the last event cycle if it has a null value but the associated epoch has already started
+    if (m_epoch && PeriodicEvent::m_icycle_last_event==~0ul)
+        PeriodicEvent::m_icycle_last_event = m_epoch.icycle_start();
     return PeriodicEvent::due(icycle);
 }
 

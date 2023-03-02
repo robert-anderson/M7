@@ -340,6 +340,21 @@ namespace dense {
             return *this;
         }
 
+        Matrix<T>& operator *=(T scalar) {
+            if (i_can_globally_modify()) {
+                for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] *= scalar;
+            }
+            return *this;
+        }
+
+        Matrix<T>& operator /=(T scalar) {
+            if (i_can_globally_modify()) {
+                for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) (*this)[ielem] /= scalar;
+            }
+            return *this;
+        }
+
+
     protected:
         /*
          * for bounds safety, we keep these set-from and get-to pointer methods protected
