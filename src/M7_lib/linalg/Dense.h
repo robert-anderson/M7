@@ -264,10 +264,9 @@ namespace dense {
 
         Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank, bool node_shared=false):
                 Matrix(0, 0, node_shared){
-            this_rank &= i_can_globally_modify();
             hdf5::DatasetLoader dl(nr, name, false, this_rank);
             const auto& shape = dl.m_format.m_h5_shape;
-            if (this_rank) resize(shape[0], shape[1]);
+            resize(shape[0], shape[1]);
             std::list<hdf5::Attr> attrs;
             dl.load_dist_list(nr, name, begin(), m_size, hdf5::Type::make<T>(), dtype::is_complex<T>(),
                 false, this_rank, attrs);
