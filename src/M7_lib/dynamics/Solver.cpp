@@ -266,7 +266,7 @@ void Solver::loop_over_occupied_mbfs() {
         m_refs.contrib_row(walker);
         m_inst_ests.make_numerator_contribs(walker);
 
-        m_wf.m_nocc_mbf.m_local++;
+        ++m_wf.m_nocc_mbf.delta();
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
 
             DEBUG_ASSERT_TRUE(!m_wf.m_store.m_row.m_mbf.is_zero(),
@@ -274,17 +274,12 @@ void Solver::loop_over_occupied_mbfs() {
             DEBUG_ASSERT_TRUE(mpi::i_am(m_wf.m_dist.irank(m_wf.m_store.m_row.m_mbf)),
                               "Stored MBF should be on its allocated rank");
 
-            const auto &weight = walker.m_weight[ipart];
-
             bool initiator = walker.exceeds_initiator_thresh(ipart, m_prop.m_nadd_initiator);
             if (!initiator) {
                 initiator = walker.m_permanitiator.get(ipart);
                 if (initiator) m_wf.m_ninitiator_perma.m_local[ipart]++;
             }
             if (initiator) m_wf.m_ninitiator.m_local[ipart]++;
-
-//            m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
-            m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
             // TODO: load balancing work logging
 //            if (m_wf.m_ra.is_active()) {
@@ -373,12 +368,12 @@ void Solver::output_stats() {
         stats.m_ref_weight = m_refs.weights();
         stats.m_ref_proj_energy = stats.m_ref_proj_energy_num;
         stats.m_ref_proj_energy /= stats.m_ref_weight;
-        stats.m_l2_norm = m_wf.m_l2_norm_square.m_reduced;
+        stats.m_l2_norm = m_wf.m_l2_norm_square.prev_total();
         stats.m_l2_norm.to_sqrt();
         stats.m_ninitiator = m_wf.m_ninitiator.m_reduced;
         stats.m_ninitiator_perma = m_wf.m_ninitiator_perma.m_reduced;
-        stats.m_nocc_mbf = m_wf.m_nocc_mbf.m_reduced;
-        stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
+        stats.m_nocc_mbf = m_wf.m_nocc_mbf.prev_total();
+        stats.m_delta_nocc_mbf = m_wf.m_nocc_mbf.prev_delta();
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         if (m_inst_ests.m_spin_square) stats.m_spin_square_num = m_inst_ests.m_spin_square->m_est.m_proj_num.m_reduced;
         m_stats->commit();

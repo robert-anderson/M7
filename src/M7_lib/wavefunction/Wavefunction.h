@@ -55,11 +55,7 @@ namespace wf {
         /**
          * number of MBFs with any associated weight in any part
          */
-        reduction::Scalar<uint_t> m_nocc_mbf;
-        /**
-         * change in the number of occupied MBFs
-         */
-        reduction::Scalar<int> m_delta_nocc_mbf;
+        reduction::cyclic::Scalar<uint_t> m_nocc_mbf;
         /**
          * L1 norm of each part of the WF
          */
@@ -67,11 +63,7 @@ namespace wf {
         /**
          * square of the L2 norm of each part of the WF
          */
-        reduction::NdArray<wf_comp_t, c_ndim_wf> m_l2_norm_square;
-        /**
-         * change in the L2 norm
-         */
-        reduction::NdArray<wf_comp_t, c_ndim_wf> m_delta_l2_norm_square;
+        reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf> m_l2_norm_square;
         /**
          * number of walkers received in spawning process
          */

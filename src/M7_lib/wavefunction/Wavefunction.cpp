@@ -55,14 +55,11 @@ wf::Fci::Fci(const conf::Document& opts, const sys::Sector& sector) :
     m_ninitiator_perma(m_format),
     m_nwalker(m_format),
     m_l2_norm_square(m_format),
-    m_delta_l2_norm_square(m_format),
     m_nspawned(m_format),
     m_nannihilated(m_format) {
 
     REQUIRE_TRUE(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row(), "row-field reference error");
-    m_summables.add_members(m_ninitiator, m_ninitiator_perma, m_nocc_mbf, m_delta_nocc_mbf,
-                            m_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
-                            m_nspawned, m_nannihilated);
+    m_summables.add_members(m_ninitiator, m_ninitiator_perma, m_nocc_mbf, m_nwalker, m_l2_norm_square, m_nspawned, m_nannihilated);
 
     logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
                   string::plural(m_dist.nblock()));
@@ -102,7 +99,7 @@ void wf::Fci::log_top_weighted(uint_t ipart, uint_t nrow) {
             std::to_string(row.index()),
             row.m_mbf.to_string(),
             convert::to_string(row.m_weight[ipart], {true, 6}),
-            convert::to_string(row.m_weight[ipart] / std::sqrt(m_l2_norm_square.m_reduced[ipart]), {false, 4}),
+            convert::to_string(row.m_weight[ipart] / std::sqrt(m_l2_norm_square.total()[ipart]), {false, 4}),
             convert::to_string(row.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd) || row.m_permanitiator.get(0)),
             convert::to_string(row.m_hdiag[iroot_part(ipart)]),
             convert::to_string(bool(row.m_deterministic[iroot_part(ipart)])),
@@ -193,9 +190,8 @@ wf_comp_t wf::Fci::debug_l1_norm(uint_t ipart) const {
 void wf::Fci::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
     if (m_preserve_ref && walker.m_mbf==*m_ref) return;
     wf_t& weight = walker.m_weight[ipart];
-    m_nwalker.delta().m_local[ipart] += std::abs(new_weight) - std::abs(weight);
-    m_delta_l2_norm_square.m_local[ipart] += std::pow(std::abs(new_weight), 2.0);
-    m_delta_l2_norm_square.m_local[ipart] -= std::pow(std::abs(weight), 2.0);
+    m_nwalker.delta()[ipart] += std::abs(new_weight) - std::abs(weight);
+    m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
     weight = new_weight;
 }
 
@@ -215,7 +211,7 @@ void wf::Fci::remove_row(Walker& walker) {
     DEBUG_ASSERT_TRUE(m_store.lookup(walker.m_mbf), "MBF doesn't exist in table!");
     for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
         zero_weight(walker, ipart);
-        m_delta_nocc_mbf.m_local--;
+        --m_nocc_mbf.delta();
     }
     m_store.erase(walker.m_mbf);
 }
@@ -225,7 +221,7 @@ Walker& wf::Fci::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, co
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
     auto& row = m_store.insert(mbf);
-    m_delta_nocc_mbf.m_local++;
+    ++m_nocc_mbf.delta();
     DEBUG_ASSERT_EQ(row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
     row.m_hdiag = hdiag;
     for (uint_t ipart=0ul; ipart < npart(); ++ipart)

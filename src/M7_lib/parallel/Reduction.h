@@ -83,15 +83,24 @@ namespace reduction {
 
     namespace cyclic {
 
-        template<typename T>
         struct CyclicBase {
+            virtual void after_delta_reduce() {}
+        };
+
+        template<typename T>
+        struct Cyclic : CyclicBase {
             typedef dtype::make_signed_if_integral<T> delta_t;
             ReductionBase<delta_t>* m_delta_base;
             ReductionBase<T>* m_total_base;
             ReductionBase<delta_t>* m_prev_delta_base;
             ReductionBase<T>* m_prev_total_base;
 
-            void after_delta_reduce() {
+            Cyclic(ReductionBase<delta_t>* delta_base, ReductionBase<T>* total_base,
+                   ReductionBase<delta_t>* prev_delta_base, ReductionBase<T>* prev_total_base):
+                m_delta_base(delta_base), m_total_base(total_base),
+                m_prev_delta_base(prev_delta_base), m_prev_total_base(prev_total_base){}
+
+            void after_delta_reduce() override {
                 const auto nelement = m_total_base->m_nelement;
                 // update previous totals
                 {
@@ -133,8 +142,8 @@ namespace reduction {
         };
 
         template<typename T, uint_t nind>
-        struct NdArray : CyclicBase<T> {
-            using delta_t = typename CyclicBase<T>::delta_t;
+        struct NdArray : Cyclic<T> {
+            using delta_t = typename Cyclic<T>::delta_t;
         private:
             reduction::NdArray<delta_t, nind> m_delta;
             // total should never be directly modified - the point of this class is to modify by deltas and accumulate
@@ -142,15 +151,23 @@ namespace reduction {
             reduction::LocalReducedPair<delta_t, nind> m_prev_delta;
             reduction::LocalReducedPair<T, nind> m_prev_total;
             // don't expose these pointers to the base classes - only needed for adding as member of a syndicate
-            using CyclicBase<T>::m_delta_base;
-            using CyclicBase<T>::m_total_base;
-            using CyclicBase<T>::after_delta_reduce;
+            using Cyclic<T>::m_delta_base;
+            using Cyclic<T>::m_total_base;
+            using Cyclic<T>::after_delta_reduce;
 
         public:
-            reduction::LocalReducedPair<delta_t, nind>& delta() {
-                return m_delta;
+            /**
+             * @return
+             *  modifiable ref to the local delta array
+             */
+            typename reduction::LocalReducedPair<delta_t, nind>::store_t& delta() {
+                return m_delta.m_local;
             }
 
+            /**
+             * @return
+             *  const ref to the reduced total
+             */
             const typename reduction::LocalReducedPair<T, nind>::store_t& total() const {
                 return m_total.m_reduced;
             }
@@ -165,15 +182,15 @@ namespace reduction {
 
 
             NdArray(const uinta_t<nind>& shape) :
-                CyclicBase<T>{&m_delta, &m_total, &m_prev_delta, &m_prev_total},
+                Cyclic<T>(&m_delta, &m_total, &m_prev_delta, &m_prev_total),
                 m_delta(shape), m_total(shape), m_prev_delta(shape), m_prev_total(shape){}
 
-            NdArray() : CyclicBase<T>{&m_delta, &m_total} {}
+            NdArray(): NdArray(uinta_t<0ul>{}){}
 
             // cyclic only needs to support accumulations i.e. summation
             void all_sum() {
                 m_delta.all_sum();
-                CyclicBase<T>::after_delta_reduce();
+                after_delta_reduce();
             }
         };
 
@@ -201,7 +218,6 @@ namespace reduction {
     template<typename T>
     struct SyndicateGroup : reduction::SyndicateGroupBase {
         v_t<ReductionBase<T> *> m_members;
-        v_t<cyclic::CyclicBase<T> *> m_cyclic_members;
         v_t<T> m_local_buffer;
         v_t<T> m_reduced_buffer;
 
@@ -213,14 +229,9 @@ namespace reduction {
             m_reduced_buffer.resize(m_local_buffer.size());
         }
 
-        void add_member(cyclic::CyclicBase<T>& member) {
-            add_member(*member.m_delta_base);
-            m_cyclic_members.push_back(&member);
-        }
-
         void zero_all_local() override {
             for (ReductionBase<T> *member: m_members)
-                memset(reinterpret_cast<char*>(member->m_local_ptr), 0, member->m_nelement * sizeof(T));
+                std::memset(member->m_local_ptr, 0, member->m_nelement * sizeof(T));
         }
 
         void zero_all_reduced() override {
@@ -257,7 +268,6 @@ namespace reduction {
             collect();
             mpi::all_sum(m_local_buffer.data(), m_reduced_buffer.data(), m_local_buffer.size());
             disperse();
-            for (auto cyclic_member: m_cyclic_members) cyclic_member->after_delta_reduce();
         }
 
         void all_max() override {
@@ -275,6 +285,7 @@ namespace reduction {
 
     struct Syndicate {
         std::array<std::unique_ptr<SyndicateGroupBase>, mpi_types.size()> m_groups;
+        v_t<cyclic::CyclicBase*> m_cyclic_members;
 
     private:
         /**
@@ -296,8 +307,9 @@ namespace reduction {
         }
 
         template<typename T>
-        void add_member(cyclic::CyclicBase<T>& member) {
-            get_group<T>()->add_member(member);
+        void add_member(cyclic::Cyclic<T>& member) {
+            add_member(*member.m_delta_base);
+            m_cyclic_members.push_back(&member);
         }
 
         void add_members() {}
@@ -309,7 +321,7 @@ namespace reduction {
         }
 
         template<typename T, typename ...Args>
-        void add_members(cyclic::CyclicBase<T>& first, Args& ... rest) {
+        void add_members(cyclic::Cyclic<T>& first, Args& ... rest) {
             add_member(first);
             add_members(std::forward<Args&>(rest)...);
         }
@@ -328,14 +340,17 @@ namespace reduction {
 
         void all_sum() {
             for (auto& group: m_groups) if (group) group->all_sum();
+            for (auto cyclic_member: m_cyclic_members) cyclic_member->after_delta_reduce();
         }
 
         void all_max() {
             for (auto& group: m_groups) if (group) group->all_max();
+            for (auto cyclic_member: m_cyclic_members) cyclic_member->after_delta_reduce();
         }
 
         void all_min() {
             for (auto& group: m_groups) if (group) group->all_min();
+            for (auto cyclic_member: m_cyclic_members) cyclic_member->after_delta_reduce();
         }
     };
 }
