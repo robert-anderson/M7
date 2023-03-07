@@ -18,7 +18,7 @@ struct Annihilator {
     /**
      * wavefunction whose recv and store tables are merged herein
      */
-    wf::Fci &m_wf;
+    wf::Vectors &m_wf;
     /**
      * propagator object providing access to Hamiltonian and deterministic subspace information
      */
@@ -92,7 +92,7 @@ private:
 
 public:
 
-    Annihilator(wf::Fci &wf, const Propagator& prop, const wf::Refs& refs,
+    Annihilator(wf::Vectors &wf, const Propagator& prop, const wf::Refs& refs,
                 const shared_rows::Walker* hf, Rdms& rdms, const uint_t& icycle, wf_comp_t nadd);
 
     /**

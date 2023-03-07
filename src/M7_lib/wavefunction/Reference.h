@@ -19,7 +19,7 @@ namespace wf {
 
     class Ref : public shared_rows::Walker {
         const Hamiltonian& m_ham;
-        const Fci& m_wf;
+        const Vectors& m_wf;
         /**
          * index to the "part" of the wavefunction for which this object tracks the reference row
          */
@@ -49,7 +49,7 @@ namespace wf {
 
     public:
         Ref(const conf::Reference& opts, const Hamiltonian& ham,
-            const Fci& wf, uint_t ipart, TableBase::Loc loc);
+            const Vectors& wf, uint_t ipart, TableBase::Loc loc);
 
         uint_t occupied_ncycle(uint_t icycle) const {
             return gathered().m_row.occupied_ncycle(icycle);
@@ -112,7 +112,7 @@ namespace wf {
         buffered::Numbers<ham_t, c_ndim_wf> m_proj_energy_nums;
         buffered::Numbers<wf_t, c_ndim_wf> m_weights;
 
-        Refs(const conf::Reference& opts, const Hamiltonian& ham, const Fci& wf, v_t<TableBase::Loc> locs);
+        Refs(const conf::Reference& opts, const Hamiltonian& ham, const Vectors& wf, v_t<TableBase::Loc> locs);
 
         const Ref& operator[](const uint_t& ipart) const;
 

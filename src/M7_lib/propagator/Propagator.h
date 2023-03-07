@@ -38,7 +38,7 @@ public:
 
     std::unique_ptr<guide::Wavefunction> make_imp_samp_guide(const conf::GuideWavefunction& opts) const;
 
-    Propagator(const conf::Document &opts, const Hamiltonian &ham, const wf::Fci &wf) :
+    Propagator(const conf::Document &opts, const Hamiltonian &ham, const wf::Vectors &wf) :
             m_tau(opts.m_propagator.m_tau_init),
             m_nadd_initiator(opts.m_propagator.m_nadd),
             m_wf_fmt(wf.m_format),
@@ -51,9 +51,9 @@ public:
 
     virtual ~Propagator() {}
 
-    virtual void diagonal(wf::Fci &wf, Walker& walker, uint_t ipart) = 0;
+    virtual void diagonal(wf::Vectors &wf, Walker& walker, uint_t ipart) = 0;
 
-    virtual void off_diagonal(wf::Fci &wf, const Walker& walker, uint_t ipart, bool initiator) = 0;
+    virtual void off_diagonal(wf::Vectors &wf, const Walker& walker, uint_t ipart, bool initiator) = 0;
 
     virtual ham_t round(const ham_t &weight) {
         return weight;
@@ -63,7 +63,7 @@ public:
         return m_tau;
     }
 
-    virtual void update(uint_t icycle, const wf::Fci &wf, const wf::Refs& refs);
+    virtual void update(uint_t icycle, const wf::Vectors &wf, const wf::Refs& refs);
 
     virtual uint_t ncase_excit_gen() const {
         return 0;

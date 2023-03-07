@@ -6,13 +6,13 @@
 
 ExactLinear::ExactLinear(
         const Hamiltonian& ham, const conf::Document& opts,
-        const wf::Fci& wf, bool only_nonzero_h_spawns) :
+        const wf::Vectors& wf, bool only_nonzero_h_spawns) :
         Propagator(opts, ham, wf), m_only_nonzero_h_spawns(only_nonzero_h_spawns),
         m_conn_iters(ham),
         m_mag_log(opts.m_propagator.m_max_bloom, 0, 1, opts.m_propagator.m_static_tau, true,
                   opts.m_propagator.m_tau_min, opts.m_propagator.m_tau_max, 0.0, opts.m_propagator.m_period) {}
 
-void ExactLinear::off_diagonal(wf::Fci& wf, const Walker& walker, uint_t ipart, bool initiator) {
+void ExactLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipart, bool initiator) {
     auto& src_mbf = walker.m_mbf;
     const wf_t& weight = walker.m_weight[ipart];
     bool src_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
@@ -34,13 +34,13 @@ void ExactLinear::off_diagonal(wf::Fci& wf, const Walker& walker, uint_t ipart, 
     m_conn_iters.loop(conn, src_mbf, body);
 }
 
-void ExactLinear::diagonal(wf::Fci& wf, Walker& walker, uint_t ipart) {
+void ExactLinear::diagonal(wf::Vectors& wf, Walker& walker, uint_t ipart) {
     const ham_comp_t& hdiag = walker.m_hdiag;
     DEBUG_ASSERT_NEAR_EQ(hdiag, m_ham.get_energy(walker.m_mbf), "incorrect diagonal H element cached");
     wf.scale_weight(walker, ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }
 
-void ExactLinear::update(uint_t icycle, const wf::Fci &wf, const wf::Refs& refs) {
+void ExactLinear::update(uint_t icycle, const wf::Vectors &wf, const wf::Refs& refs) {
     Propagator::update(icycle, wf, refs);
     m_mag_log.update(icycle, m_tau);
 }

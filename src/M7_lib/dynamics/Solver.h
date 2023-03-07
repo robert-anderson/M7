@@ -70,7 +70,7 @@ class Solver {
     /**
      * solution vector storing multiple eigenvectors of H in distributed memory
      */
-    wf::Fci &m_wf;
+    wf::Vectors &m_wf;
     /**
      * reference many-body basis functions (MBFs)
      */
@@ -154,9 +154,9 @@ private:
 
 public:
 
-    Solver(const conf::Document& opts, Propagator &prop, wf::Fci &wf, v_t<TableBase::Loc> ref_locs);
+    Solver(const conf::Document& opts, Propagator &prop, wf::Vectors &wf, v_t<TableBase::Loc> ref_locs);
 
-    Solver(const conf::Document& opts, Propagator &prop, wf::Fci &wf, TableBase::Loc ref_loc):
+    Solver(const conf::Document& opts, Propagator &prop, wf::Vectors &wf, TableBase::Loc ref_loc):
         Solver(opts, prop, wf, v_t<TableBase::Loc>(wf.npart(), ref_loc)){}
 
     /**

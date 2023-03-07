@@ -25,7 +25,7 @@ namespace wf {
         /**
          * solution vector storing multiple eigenvectors of H in distributed memory
          */
-        wf::Fci &m_wf;
+        wf::Vectors &m_wf;
         /**
          * reference many-body basis functions (MBFs)
          */
@@ -77,7 +77,7 @@ namespace wf {
          */
         reduction::NdArray<wf_comp_t, c_ndim_wf> m_nannihilated;
 
-        Modifier(wf::Fci& wf, wf::Refs& refs, const Hamiltonian& ham):
+        Modifier(wf::Vectors& wf, wf::Refs& refs, const Hamiltonian& ham):
             m_wf(wf), m_refs(refs), m_ham(ham),
             m_ninitiator(m_wf.m_format),
             m_ninitiator_perma(m_wf.m_format),
@@ -146,7 +146,7 @@ namespace wf {
             return row;
         }
 
-        TableBase::Loc wf::Fci::create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
+        TableBase::Loc wf::Vectors::create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
             const uint_t irank = m_dist.irank(mbf);
             uint_t irec;
             if (mpi::i_am(irank)) {
@@ -156,7 +156,7 @@ namespace wf {
             return {irank, irec};
         }
 
-        Spawn& wf::Fci::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
+        Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
                                   bool deterministic, uint_t dst_ipart) {
             auto& dst_table = send(m_dist.irank(dst_mbf));
 
@@ -171,7 +171,7 @@ namespace wf {
             return spawn;
         }
 
-        Spawn& wf::Fci::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
+        Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
                                   uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight) {
             auto& spawn = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
             if (spawn.m_send_parents) {

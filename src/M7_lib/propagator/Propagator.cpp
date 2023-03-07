@@ -19,7 +19,7 @@ std::unique_ptr<guide::Wavefunction> Propagator::make_imp_samp_guide(const conf:
     return nullptr;
 }
 
-void Propagator::update(uint_t icycle, const wf::Fci& wf, const wf::Refs& refs) {
+void Propagator::update(uint_t icycle, const wf::Vectors& wf, const wf::Refs& refs) {
     m_shift.update(wf, refs, icycle, tau(), wf.debug_reference_projected_energy(0, refs[0].mbf(), m_ham));
 }
 

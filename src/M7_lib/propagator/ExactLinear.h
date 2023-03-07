@@ -20,13 +20,13 @@ class ExactLinear : public Propagator {
     MagnitudeLogger m_mag_log;
 
 public:
-    ExactLinear(const Hamiltonian& ham, const conf::Document& opts, const wf::Fci& wf, bool only_nonzero_h_spawns=true);
+    ExactLinear(const Hamiltonian& ham, const conf::Document& opts, const wf::Vectors& wf, bool only_nonzero_h_spawns=true);
 
-    void diagonal(wf::Fci &wf, Walker& walker, uint_t ipart) override;
+    void diagonal(wf::Vectors &wf, Walker& walker, uint_t ipart) override;
 
-    void off_diagonal(wf::Fci &wf, const Walker& walker, uint_t ipart_dst, bool initiator) override;
+    void off_diagonal(wf::Vectors &wf, const Walker& walker, uint_t ipart_dst, bool initiator) override;
 
-    void update(uint_t icycle, const wf::Fci &wf, const wf::Refs& refs) override;
+    void update(uint_t icycle, const wf::Vectors &wf, const wf::Refs& refs) override;
 };
 
 #endif //M7_EXACT_LINEAR_PROPAGATOR_H

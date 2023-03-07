@@ -24,7 +24,7 @@ ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explicit_hf_
     buffered::Mbf ref_onv(ham.m_basis);
     mbf::set_aufbau_mbf(ref_onv, particles);
 
-    wf::Fci wf(opts, {ham.m_basis, particles});
+    wf::Vectors wf(opts, {ham.m_basis, particles});
     ExactLinear prop(ham, opts, wf, explicit_hf_conns);
     auto ref_energy = ham.get_energy(ref_onv);
 

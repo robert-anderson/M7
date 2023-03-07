@@ -6,7 +6,7 @@
 #include "Wavefunction.h"
 
 wf::Ref::Ref(const conf::Reference &opts, const Hamiltonian &ham,
-             const wf::Fci &wf, uint_t ipart, TableBase::Loc loc) :
+             const wf::Vectors &wf, uint_t ipart, TableBase::Loc loc) :
         shared_rows::Walker("reference", wf.m_store, loc),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
@@ -89,7 +89,7 @@ const ham_t& wf::Ref::proj_energy_num() const {
     return m_proj_energy_num.m_reduced;
 }
 
-wf::Refs::Refs(const conf::Reference &opts, const Hamiltonian &ham, const wf::Fci &wf, v_t<TableBase::Loc> locs) :
+wf::Refs::Refs(const conf::Reference &opts, const Hamiltonian &ham, const wf::Vectors &wf, v_t<TableBase::Loc> locs) :
         m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
     DEBUG_ASSERT_EQ(locs.size(), wf.m_format.m_nelement,
                     "there should be a parallel table location specifying each reference row");

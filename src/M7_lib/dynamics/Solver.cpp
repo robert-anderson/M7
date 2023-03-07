@@ -20,7 +20,7 @@ std::unique_ptr<HartreeFock> Solver::make_hf() const {
     return nullptr;
 }
 
-Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Fci &wf,
+Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf,
                v_t<TableBase::Loc> ref_locs) :
         m_opts(opts), m_prop(prop), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),

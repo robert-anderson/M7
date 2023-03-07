@@ -28,7 +28,7 @@ namespace wf {
      *
      * This m_store is often called the "main walker list", and the SendRecv tables are the called the "spawning lists"
      */
-    struct Fci : communicator::BasicSend<Walker, Spawn> {
+    struct Vectors : communicator::BasicSend<Walker, Spawn> {
         typedef GlobalExtremalRows<wf_t, c_ndim_wf> weights_gxr_t;
 
         const conf::Document& m_opts;
@@ -77,9 +77,9 @@ namespace wf {
         bool m_preserve_ref = false;
         const field::Mbf* m_ref = nullptr;
 
-        Fci(const conf::Document& opts, const sys::Sector& sector);
+        Vectors(const conf::Document& opts, const sys::Sector& sector);
 
-        ~Fci();
+        ~Vectors();
 
         void log_top_weighted(uint_t ipart, uint_t nrow = 20);
 

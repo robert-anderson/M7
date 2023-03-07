@@ -27,7 +27,7 @@ void deterministic::Subspace::make_rdm_contrib(Rdms &rdms, const shared_rows::Wa
 }
 
 deterministic::Subspace::Subspace(
-        const conf::Semistochastic &opts, wf::Fci &wf, uint_t iroot) :
+        const conf::Semistochastic &opts, wf::Vectors &wf, uint_t iroot) :
         shared_rows::Set<Walker>("semistochastic", wf.m_store),
         m_opts(opts), m_wf(wf),
         m_iroot(iroot), m_local_row(wf.m_store.m_row), m_iparts(make_iparts()){}
@@ -41,7 +41,7 @@ void deterministic::Subspace::add_(Walker &row) {
 void deterministic::Subspace::select_highest_weighted() {
     auto row1 = m_wf.m_store.m_row;
     auto row2 = row1;
-    wf::Fci::weights_gxr_t gxr(row1.m_weight, row2.m_weight, true, true, m_iparts);
+    wf::Vectors::weights_gxr_t gxr(row1.m_weight, row2.m_weight, true, true, m_iparts);
     gxr.find(m_opts.m_size);
     for (uint_t i = 0ul; i < gxr.m_ninclude.m_local; ++i) {
         row1.jump(gxr[i]);
@@ -165,7 +165,7 @@ deterministic::Subspaces::operator bool() const {
     return m_opts.m_enabled && m_epoch;
 }
 
-void deterministic::Subspaces::init(const Hamiltonian &ham, const Maes& maes, wf::Fci &wf, uint_t icycle) {
+void deterministic::Subspaces::init(const Hamiltonian &ham, const Maes& maes, wf::Vectors &wf, uint_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
 

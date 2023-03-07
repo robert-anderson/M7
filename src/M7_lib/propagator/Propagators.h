@@ -18,7 +18,7 @@ namespace props {
     typedef StochLinear Stoch;
 
     static std::unique_ptr<Propagator> get(const Hamiltonian &ham, const conf::Document &opts,
-                                           const wf::Fci &wf) {
+                                           const wf::Vectors &wf) {
         /*
          * if the RDM contributions due to connections of the reference are not to be explicitly included on average,
          */

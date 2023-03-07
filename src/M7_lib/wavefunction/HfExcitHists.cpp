@@ -20,7 +20,7 @@ hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_c
 }
 
 hf_excit_hist::Initializer::Initializer(
-        wf::Fci &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation) :
+        wf::Vectors &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation) :
         m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2200", thresh), m_cancellation(cancellation),
         m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf), m_thresh(max_power ? find_first(max_power) : thresh),
         m_ncreated({2*max_power_by_thresh()+1}) {
@@ -173,11 +173,11 @@ void hf_excit_hist::Initializer::setup() {
     logging::info_table("Permanitiator breakdown", logging_table, true);
 }
 
-void hf_excit_hist::initialize(wf::Fci &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation) {
+void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation) {
     Initializer(wf, hf, fname, thresh, max_power, cancellation).setup();
 }
 
-void hf_excit_hist::initialize(wf::Fci &wf, const Mbf &hf, const conf::CiPermanitiator &opts) {
+void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, const conf::CiPermanitiator &opts) {
     logging::info("Setting permanitiators based on CI data from \"{}\"", opts.m_path.m_value);
     initialize(wf, hf, opts.m_path, opts.m_thresh, opts.m_max_power, opts.m_cancellation);
 }

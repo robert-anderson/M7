@@ -28,9 +28,9 @@ protected:
     }
 
 public:
-    StochLinear(const Hamiltonian &ham, const conf::Document &opts, const wf::Fci& wf);
+    StochLinear(const Hamiltonian &ham, const conf::Document &opts, const wf::Vectors& wf);
 
-    void diagonal(wf::Fci &wf, Walker& walker, uint_t ipart) override;
+    void diagonal(wf::Vectors &wf, Walker& walker, uint_t ipart) override;
 
     template<typename T>
     uint_t get_nattempt(const T &weight) {
@@ -43,13 +43,13 @@ public:
         return get_nattempt(std::abs(weight));
     }
 
-    void off_diagonal(wf::Fci &wf, const Walker& walker, uint_t ipart, bool initiator) override;
+    void off_diagonal(wf::Vectors &wf, const Walker& walker, uint_t ipart, bool initiator) override;
 
     uint_t ncase_excit_gen() const override;
 
     v_t<prob_t> excit_gen_case_probs() const override;
 
-    void update(uint_t icycle, const wf::Fci &wf, const wf::Refs& refs) override;
+    void update(uint_t icycle, const wf::Vectors &wf, const wf::Refs& refs) override;
 
     const ExcitGenGroup& excit_gen_group() const {
         return m_excit_gen_group;

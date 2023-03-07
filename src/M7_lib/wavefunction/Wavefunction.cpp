@@ -25,7 +25,7 @@ opts.m_wavefunction.m_hash_mapping.m_remap_ratio
  */
 
 
-wf::Fci::Fci(const conf::Document& opts, const sys::Sector& sector) :
+wf::Vectors::Vectors(const conf::Document& opts, const sys::Sector& sector) :
     communicator::BasicSend<Walker, Spawn>(
         "wavefunction",
         // walker row:
@@ -65,7 +65,7 @@ wf::Fci::Fci(const conf::Document& opts, const sys::Sector& sector) :
                   string::plural(m_dist.nblock()));
 }
 
-void wf::Fci::log_top_weighted(uint_t ipart, uint_t nrow) {
+void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
     buffered::Table<Walker> xr_gathered("global top weighted", m_store.m_row);
     {
         auto row1 = m_store.m_row;
@@ -109,11 +109,11 @@ void wf::Fci::log_top_weighted(uint_t ipart, uint_t nrow) {
     logging::info_table("Top-weighted WF elements for part "+std::to_string(ipart), rows, true, false, 1ul);
 }
 
-wf::Fci::~Fci() {
+wf::Vectors::~Vectors() {
     for (uint_t ipart=0ul; ipart<npart(); ++ipart) log_top_weighted(ipart);
 }
 
-void wf::Fci::h5_write(const hdf5::NodeWriter& parent, str_t name) {
+void wf::Vectors::h5_write(const hdf5::NodeWriter& parent, str_t name) {
     auto field_names = []() -> strv_t {
         if (c_enable_fermions != c_enable_bosons) return {"mbf", "weight"};
         else if (c_enable_fermions != c_enable_bosons) return {"mbf (fermion)", "mbf (boson)", "weight"};
@@ -122,8 +122,8 @@ void wf::Fci::h5_write(const hdf5::NodeWriter& parent, str_t name) {
     m_store.save(parent, name, field_names(), true);
 }
 
-void wf::Fci::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian& /*ham*/, const field::Mbf& /*ref*/,
-                      str_t /*name*/) {
+void wf::Vectors::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian& /*ham*/, const field::Mbf& /*ref*/,
+                          str_t /*name*/) {
 #if 0
     m_store.clear();
     buffered::Table<Walker> m_buffer("", {m_store.m_row});
@@ -143,16 +143,16 @@ void wf::Fci::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian& /*h
 #endif
 }
 
-void wf::Fci::begin_cycle() {
+void wf::Vectors::begin_cycle() {
     m_summables.zero_all_local();
     m_store.attempt_remap();
 }
 
-void wf::Fci::end_cycle() {
+void wf::Vectors::end_cycle() {
     m_summables.all_sum();
 }
 
-wf_comp_t wf::Fci::debug_square_norm(uint_t ipart) const {
+wf_comp_t wf::Vectors::debug_square_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto row = m_store.m_row;
     for (row.restart(); row; ++row) {
@@ -163,7 +163,7 @@ wf_comp_t wf::Fci::debug_square_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
-wf_comp_t wf::Fci::debug_reference_projected_energy(uint_t ipart, const Mbf& ref, const Hamiltonian& h) const {
+wf_comp_t wf::Vectors::debug_reference_projected_energy(uint_t ipart, const Mbf& ref, const Hamiltonian& h) const {
     wf_comp_t num = 0.0;
     wf_comp_t den = 0.0;
     auto row = m_store.m_row;
@@ -176,7 +176,7 @@ wf_comp_t wf::Fci::debug_reference_projected_energy(uint_t ipart, const Mbf& ref
     return mpi::all_sum(num) / mpi::all_sum(den);
 }
 
-wf_comp_t wf::Fci::debug_l1_norm(uint_t ipart) const {
+wf_comp_t wf::Vectors::debug_l1_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
     auto row = m_store.m_row;
     for (row.restart(); row; ++row) {
@@ -187,7 +187,7 @@ wf_comp_t wf::Fci::debug_l1_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
-void wf::Fci::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
+void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
     if (m_preserve_ref && walker.m_mbf==*m_ref) return;
     wf_t& weight = walker.m_weight[ipart];
     m_nwalker.delta()[ipart] += std::abs(new_weight) - std::abs(weight);
@@ -195,19 +195,19 @@ void wf::Fci::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
     weight = new_weight;
 }
 
-void wf::Fci::change_weight(Walker& walker, uint_t ipart, wf_t delta) {
+void wf::Vectors::change_weight(Walker& walker, uint_t ipart, wf_t delta) {
     set_weight(walker, ipart, walker.m_weight[ipart] + delta);
 }
 
-void wf::Fci::scale_weight(Walker& walker, uint_t ipart, double factor) {
+void wf::Vectors::scale_weight(Walker& walker, uint_t ipart, double factor) {
     set_weight(walker, ipart, factor * walker.m_weight[ipart]);
 }
 
-void wf::Fci::zero_weight(Walker& walker, uint_t ipart) {
+void wf::Vectors::zero_weight(Walker& walker, uint_t ipart) {
     set_weight(walker, ipart, 0.0);
 }
 
-void wf::Fci::remove_row(Walker& walker) {
+void wf::Vectors::remove_row(Walker& walker) {
     DEBUG_ASSERT_TRUE(m_store.lookup(walker.m_mbf), "MBF doesn't exist in table!");
     for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
         zero_weight(walker, ipart);
@@ -216,7 +216,7 @@ void wf::Fci::remove_row(Walker& walker) {
     m_store.erase(walker.m_mbf);
 }
 
-Walker& wf::Fci::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
+Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
@@ -240,7 +240,7 @@ Walker& wf::Fci::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, co
     return row;
 }
 
-TableBase::Loc wf::Fci::create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
+TableBase::Loc wf::Vectors::create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
     const uint_t irank = m_dist.irank(mbf);
     uint_t irec;
     if (mpi::i_am(irank)) {
@@ -250,8 +250,8 @@ TableBase::Loc wf::Fci::create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdi
     return {irank, irec};
 }
 
-Spawn& wf::Fci::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
-                          bool deterministic, uint_t dst_ipart) {
+Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
+                              bool deterministic, uint_t dst_ipart) {
     auto& dst_table = send(m_dist.irank(dst_mbf));
 
     auto& spawn = dst_table.m_row;
@@ -265,8 +265,8 @@ Spawn& wf::Fci::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
     return spawn;
 }
 
-Spawn& wf::Fci::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
-                          uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight) {
+Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
+                              uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight) {
     auto& spawn = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
     if (spawn.m_send_parents) {
         spawn.m_src_mbf = src_mbf;
@@ -276,7 +276,7 @@ Spawn& wf::Fci::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
     return spawn;
 }
 
-void wf::Fci::refresh_all_hdiags(const Hamiltonian &h) {
+void wf::Vectors::refresh_all_hdiags(const Hamiltonian &h) {
     auto& row = m_store.m_row;
     for (row.restart(); row; ++row){
         if (row.is_freed()) continue;
@@ -284,7 +284,7 @@ void wf::Fci::refresh_all_hdiags(const Hamiltonian &h) {
     }
 }
 
-void wf::Fci::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm) {
+void wf::Vectors::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm) {
     /*
      * perform the eigensolver procedure for the required number of states
      */

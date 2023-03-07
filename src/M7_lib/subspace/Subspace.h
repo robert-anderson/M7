@@ -53,11 +53,11 @@ struct SubspaceExlvl {
  *
  * The required information is
  */
-struct Subspace : Fci::DynamicRowSet {
+struct Subspace : Vectors::DynamicRowSet {
 
     //v_t<std::forward_list<>> m_
 
-    Subspace(const Fci& wf, str_t name): Fci::DynamicRowSet(wf, name){}
+    Subspace(const Vectors& wf, str_t name): Vectors::DynamicRowSet(wf, name){}
 
     void update() override;
 
