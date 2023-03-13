@@ -14,8 +14,7 @@ protected:
     PRNG m_prng;
     ExcitGenGroup m_excit_gen_group;
     MagnitudeLogger m_mag_log;
-    const double m_min_spawn_mag;
-    const double m_min_death_mag;
+    const wf_comp_t m_min_spawn_mag;
 
     template<typename T>
     static T phase(const T& weight) {

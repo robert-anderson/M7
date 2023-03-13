@@ -17,29 +17,22 @@ StochLinear::StochLinear(const Hamiltonian& ham, const conf::Document& opts,
                   opts.m_propagator.m_tau_max,
                   opts.m_propagator.m_min_exlvl_prob,
                   opts.m_propagator.m_period),
-        m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag),
-        m_min_death_mag(opts.m_propagator.m_min_death_mag){
+        m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag){
 }
 
 
 void StochLinear::diagonal(wf::Vectors& wf, Walker& walker, uint_t ipart) {
-    bool flag_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
-    const ham_comp_t& hdiag = walker.m_hdiag;
-    if (flag_deterministic) {
-        wf.scale_weight(walker, ipart, 1 - (hdiag - m_shift[ipart]) * tau());
-    } else {
-        // the probability that each unit walker will die
-        auto death_rate = (hdiag - m_shift[ipart]) * tau();
-        if (death_rate == 0.0) return;
-        if (death_rate < 0.0 || death_rate > 1.0 || m_min_death_mag == 0.0) {
-            // clone / create antiwalkers continuously
-            wf.scale_weight(walker, ipart, 1 - death_rate);
-        } else {
-            // kill stochastically
-            auto new_weight = m_prng.stochastic_round(walker.m_weight[ipart] * (1 - death_rate), m_min_death_mag);
-            wf.set_weight(walker, ipart, new_weight);
-        }
-    }
+    // do death exactly
+    Propagator::diagonal(wf, walker, ipart);
+    const auto round_mag = 1.0;
+    // leave weight alone if the walker is protected from deletion
+    if (walker.is_protected()) return;
+    // retrieve the post-death weight
+    const auto weight = walker.m_weight[ipart];
+    // don't attempt stochastic round if the weight exceeds the threshold
+    if (std::abs(weight) >= round_mag) return;
+    // else, do the stochastic round, logging the change in magnitude
+    wf.set_weight(walker, ipart, m_prng.stochastic_round(weight, round_mag));
 }
 
 void StochLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipart, bool initiator) {

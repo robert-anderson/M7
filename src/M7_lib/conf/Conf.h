@@ -307,7 +307,6 @@ namespace conf {
         Param<bool> m_static_tau;
         Param<bool> m_static_probs;
         Param<double> m_min_spawn_mag;
-        Param<double> m_min_death_mag;
         Param<double> m_min_exlvl_prob;
         Param<v_t<double>> m_exlvl_probs_init;
         Param<uint_t> m_ndraw_min_for_dynamic;

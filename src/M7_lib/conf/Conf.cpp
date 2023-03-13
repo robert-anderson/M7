@@ -305,7 +305,6 @@ conf::Propagator::Propagator(Group *parent) :
         m_static_probs(this, "static_probs", true, "keep excitation level probabilities fixed"),
         m_min_spawn_mag(this, "min_spawn_mag", 0.4,
                         "spawn magnitude threshold - smaller spawns are stochastically rounded about this value"),
-        m_min_death_mag(this, "min_death_mag", 0.0, "death magnitude threshold"),
         m_min_exlvl_prob(this, "min_exlvl_prob", 1e-3,
                          "prevent the probability of drawing an excitation class falling below this threshold"),
         m_exlvl_probs_init(this, "exlvl_probs_init", {},
@@ -317,11 +316,6 @@ conf::Propagator::Propagator(Group *parent) :
         m_imp_samp_guide(this, "imp_samp_guide"), m_semistochastic(this) {}
 
 void conf::Propagator::validate_node_contents() {
-    if (m_min_death_mag.m_value==0.0) {
-        m_min_death_mag.m_value = m_min_spawn_mag.m_value;
-        logging::warn("{} was zero, defaulting to the specified value of {}",
-                  m_min_death_mag.m_path.m_string, m_min_spawn_mag.m_path.m_string);
-    }
     if (m_max_bloom.m_value==0.0) {
         m_max_bloom.m_value = m_nadd.m_value;
         logging::warn("{} was zero, defaulting to the specified value of {}",

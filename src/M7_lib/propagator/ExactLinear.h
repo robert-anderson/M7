@@ -22,8 +22,6 @@ class ExactLinear : public Propagator {
 public:
     ExactLinear(const Hamiltonian& ham, const conf::Document& opts, const wf::Vectors& wf, bool only_nonzero_h_spawns=true);
 
-    void diagonal(wf::Vectors &wf, Walker& walker, uint_t ipart) override;
-
     void off_diagonal(wf::Vectors &wf, const Walker& walker, uint_t ipart_dst, bool initiator) override;
 
     void update(uint_t icycle, const wf::Vectors &wf, const wf::Refs& refs) override;
