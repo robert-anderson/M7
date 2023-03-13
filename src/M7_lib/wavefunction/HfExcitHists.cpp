@@ -103,6 +103,8 @@ bool hf_excit_hist::Initializer::phase(Mbf &mbf) {
 void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_t prev_product) {
     for (uint_t i = 0ul; i < imax; ++i) {
         auto product = prev_product * m_c2.m_vals[i];
+        // the form of the product is (1/n!)*(c2)^n
+        product /= ipower;
         /*
          * do not continue with this branch of contributions if the prev_product is already smaller than the thresh,
          * since the values are sorted in descending order
