@@ -1,6 +1,6 @@
 ---
 shift:
-  damp: 0.5
+  damp: 0.2
 stats:
   period: 5
 wavefunction:
@@ -10,7 +10,7 @@ propagator:
   stochastic: yes
   nw_target: 1000
   nadd: 3.0
-  ncycle: 400000
+  ncycle: 200000
 hamiltonian:
   fermion:
     fcidump: yes
