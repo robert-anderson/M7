@@ -82,6 +82,16 @@ namespace buffered {
             field::Number<T>::operator=(other);
             return *this;
         }
+
+        operator T& () {
+            return (*this)[0];
+        }
+
+        operator const T& () const {
+            return (*this)[0];
+        }
+
+
     };
 
     template<typename T, uint_t nind>

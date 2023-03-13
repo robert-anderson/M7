@@ -44,7 +44,6 @@ namespace wf {
          */
         const double m_redefinition_thresh;
 
-        reduction::Syndicate m_summables;
         reduction::Scalar<ham_t> m_proj_energy_num;
 
     public:

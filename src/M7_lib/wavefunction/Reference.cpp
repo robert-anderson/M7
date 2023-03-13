@@ -14,7 +14,6 @@ wf::Ref::Ref(const conf::Reference &opts, const Hamiltonian &ham,
         logging::info("Reference redefinition is deactivated");
     else
         REQUIRE_GE_ALL(m_redefinition_thresh, 1.0, "invalid redefinition threshold");
-    m_summables.add_members(m_proj_energy_num);
     logging::info("Initial reference MBF for WF part {} is {} with energy {}",
                   m_ipart, mbf(), gathered().m_row.m_hdiag);
 }
@@ -67,12 +66,12 @@ void wf::Ref::contrib_row(const ::Walker& walker) {
 void wf::Ref::begin_cycle(uint_t icycle) {
     accept_candidate(icycle);
     m_candidate_weight = 0.0;
-    m_summables.zero_all_local();
+    m_proj_energy_num.m_local.zero();
     update();
 }
 
 void wf::Ref::end_cycle(uint_t /*icycle*/) {
-    m_summables.all_sum();
+    m_proj_energy_num.all_sum();
 }
 
 bool wf::Ref::is_connected(const field::Mbf &mbf) const {

@@ -217,7 +217,7 @@ private:
      *  desired number of rows to find
      */
     void sort(uint_t nrow) {
-        nrow = std::min(nrow, m_ninclude.m_reduced);
+        nrow = std::min<uint_t>(nrow, m_ninclude.m_reduced);
         uintv_t ninclude_each_rank(mpi::nrank(), 0ul);
         if (mpi::i_am_root()) {
             REQUIRE_EQ(m_global_sorter.nrow_in_use(), m_ninclude.m_reduced,

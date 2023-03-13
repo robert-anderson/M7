@@ -276,16 +276,6 @@ public:
         return cbegin_as<T>()[m_format.flatten(inds)];
     }
 
-    template<typename U=T>
-    operator const typename std::enable_if<!nind, U>::type &() const {
-        return (*this)[0];
-    }
-
-    template<typename U=T>
-    operator typename std::enable_if<!nind, U>::type &() {
-        return (*this)[0];
-    }
-
     str_t to_string() const override {
         str_t tmp;
         if (nind > 0) tmp += "[";
@@ -358,6 +348,14 @@ struct NumberField : NdNumberField<T, 0ul> {
 
     operator const T&() const {
         return *base_t::ctbegin();
+    }
+
+    arith::comp_t<T> real() const {
+        return arith::real(T(*this));
+    }
+
+    arith::comp_t<T> imag() const {
+        return arith::imag(T(*this));
     }
 };
 

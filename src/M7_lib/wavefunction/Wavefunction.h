@@ -42,7 +42,7 @@ namespace wf {
         /**
          * collection of all reductions which are summed at the end of every cycle
          */
-        reduction::Syndicate m_summables;
+        v_t<reduction::Base*> m_summed;
 
         /**
          * number of initiator MBFs in each part of the WF
@@ -55,7 +55,7 @@ namespace wf {
         /**
          * number of MBFs with any associated weight in any part
          */
-        reduction::cyclic::Scalar<uint_t> m_nocc_mbf;
+        reduction::cyclic::Scalar<int64_t, false> m_nocc_mbf;
         /**
          * L1 norm of each part of the WF
          */

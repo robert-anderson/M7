@@ -174,7 +174,7 @@ void Solver::begin_cycle() {
     }
 
     m_wf.begin_cycle();
-    DEBUG_ASSERT_TRUE(m_wf.m_nwalker.delta().m_local.is_zero(), "Cyclic reducibles should be zeroed before new cycle");
+    DEBUG_ASSERT_TRUE(m_wf.m_nwalker.delta().is_zero(), "Cyclic reducibles should be zeroed before new cycle");
 
     // TODO: update load balancing
     //    m_wf.m_ra.update(m_icycle);
@@ -347,6 +347,7 @@ void Solver::end_cycle() {
 //                "Unlogged creations of initiator MBFs have occurred");
     m_refs.end_cycle(m_icycle);
     m_wf.end_cycle();
+    REQUIRE_FALSE_ALL(m_wf.m_nwalker.total().is_zero(), "All walkers died");
     m_maes.end_cycle();
     m_inst_ests.end_cycle(m_icycle);
     if (m_hf && m_hf->m_excit_accums) m_hf->m_excit_accums.attempt_chkpt(m_icycle);
@@ -361,7 +362,7 @@ void Solver::output_stats() {
         stats.m_tau = m_prop.tau();
         stats.m_shift = m_prop.m_shift.m_values;
         stats.m_nwalker = m_wf.m_nwalker.prev_total();
-        stats.m_delta_nwalker = m_wf.m_nwalker.prev_delta();
+        stats.m_delta_nwalker = m_wf.m_nwalker.prev_delta().m_reduced;
         stats.m_nwalker_spawned = m_wf.m_nspawned.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_nannihilated.m_reduced;
         stats.m_ref_proj_energy_num = m_refs.proj_energy_nums();
@@ -373,7 +374,7 @@ void Solver::output_stats() {
         stats.m_ninitiator = m_wf.m_ninitiator.m_reduced;
         stats.m_ninitiator_perma = m_wf.m_ninitiator_perma.m_reduced;
         stats.m_nocc_mbf = m_wf.m_nocc_mbf.prev_total();
-        stats.m_delta_nocc_mbf = m_wf.m_nocc_mbf.prev_delta();
+        stats.m_delta_nocc_mbf = m_wf.m_nocc_mbf.prev_delta().m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         if (m_inst_ests.m_spin_square) stats.m_spin_square_num = m_inst_ests.m_spin_square->m_est.m_proj_num.m_reduced;
         m_stats->commit();

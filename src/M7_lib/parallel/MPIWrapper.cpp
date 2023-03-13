@@ -172,3 +172,5 @@ uint_t g_nrank_on_node = 1;
 v_t<char> g_node_roots = {};
 uint_t g_my_node_root_irank = 0;
 int g_p2p_tag = 0;
+std::array<v_t<buf_t>, mpi_types.size()> g_send_reduction_buffers = {};
+std::array<v_t<buf_t>, mpi_types.size()> g_recv_reduction_buffers = {};

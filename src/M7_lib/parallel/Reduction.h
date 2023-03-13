@@ -10,350 +10,216 @@
 
 namespace reduction {
 
-    template<typename T>
-    struct ReductionBase {
-        const uint_t m_nelement;
-        T *m_local_ptr = nullptr;
-        T *m_reduced_ptr = nullptr;
+    struct Base {
+        FieldBase& m_local_base;
+        FieldBase& m_reduced_base;
+        const uint_t m_itype;
+        Base(FieldBase& local_base, FieldBase& reduced_base, uint_t itype):
+            m_local_base(local_base), m_reduced_base(reduced_base), m_itype(itype){}
 
-        ReductionBase(uint_t nelement) : m_nelement(nelement) {}
+        virtual ~Base() = default;
+
+        virtual void post_reduce(){}
+
+    private:
+        uint_t m_global_reduced_offset = ~0ul;
+
+    public:
+        void to_global_send() {
+            auto& send_buf = g_send_reduction_buffers[m_itype];
+            m_global_reduced_offset = send_buf.size();
+            auto ptr = m_local_base.cbegin();
+            send_buf.insert(send_buf.cend(), ptr, ptr + m_local_base.m_size);
+            auto& recv_buf = g_recv_reduction_buffers[m_itype];
+            if (recv_buf.size() < send_buf.size()) recv_buf.resize(send_buf.size());
+        }
+
+        void from_global_recv() {
+            DEBUG_ASSERT_NE(m_global_reduced_offset, ~0ul, "global offset should have been set in a prior to_global_send call");
+            auto& buf = g_recv_reduction_buffers[m_itype];
+            const auto ptr = m_reduced_base.begin();
+            std::memcpy(ptr, buf.data()+m_global_reduced_offset, m_reduced_base.m_size);
+            m_global_reduced_offset = ~0ul;
+        }
     };
 
     template<typename T, uint_t nind>
-    struct LocalReducedPair : ReductionBase<T> {
-        typedef typename std::conditional<nind==0, T, buffered::Numbers<T, nind>>::type store_t;
+    struct NdArray : public Base {
+        /*
+         * buffered::Number class has additional methods for conversion
+         */
+        typedef typename std::conditional<nind==0, buffered::Number<T>, buffered::Numbers<T, nind>>::type store_t;
+        NdFormat<nind> m_format;
         store_t m_local;
         store_t m_reduced;
-        using ReductionBase<T>::m_local_ptr;
-        using ReductionBase<T>::m_reduced_ptr;
-        using ReductionBase<T>::m_nelement;
+        NdArray(const uinta_t<nind>& shape) :
+            Base(m_local, m_reduced, mpi_type_ind<T>()), m_format(shape), m_local(m_format), m_reduced(m_format){}
 
-    private:
-        LocalReducedPair(const NdFormat<nind>& /*format*/, tag::Int<true> /*zero_dims*/) :
-                ReductionBase<T>(1) {
-            m_local_ptr = &m_local;
-            m_reduced_ptr = &m_reduced;
-            m_local = 0;
-            m_reduced = 0;
+        NdArray& operator=(const NdArray<T, nind>& other) {
+            m_local = other.m_local;
+            m_reduced = other.m_reduced;
+            return *this;
         }
 
-        LocalReducedPair(const NdFormat<nind>& format, tag::Int<false> /*zero_dims*/) :
-                ReductionBase<T>(format.m_nelement), m_local(format.m_shape), m_reduced(format.m_shape) {
-            m_local_ptr = reinterpret_cast<T *>(m_local.begin());
-            m_reduced_ptr = reinterpret_cast<T *>(m_reduced.begin());
-            m_local = 0;
-            m_reduced = 0;
+        NdArray(const NdArray<T, nind>& other) : NdArray(other.m_format.m_shape){
+            *this = other;
+        }
+
+        // only available for scalar case
+        NdArray() : Base(m_local, m_reduced, mpi_type_ind<T>()){}
+    private:
+        void all_reduce(MpiOp op) {
+            mpi::all_reduce(m_local.ctbegin(), m_reduced.tbegin(), op, m_local.m_nelement);
+            post_reduce();
         }
 
     public:
-        LocalReducedPair(const uinta_t<nind>& shape) :
-                LocalReducedPair({shape}, tag::Int<nind == 0>()){}
-
-        LocalReducedPair() : LocalReducedPair({}, tag::Int<nind == 0>()){
-            static_assert(!nind, "This ctor is only valid in the scalar case");
-        }
-    };
-
-
-    template<typename T, uint_t nind>
-    struct NdArray : LocalReducedPair<T, nind> {
-        using ReductionBase<T>::m_local_ptr;
-        using ReductionBase<T>::m_reduced_ptr;
-        using ReductionBase<T>::m_nelement;
-
-        NdArray(const uinta_t<nind>& shape) : LocalReducedPair<T, nind>({shape}){}
-        NdArray() : LocalReducedPair<T, 0ul>(){}
-
-        void all_sum() {
-            mpi::all_sum(m_local_ptr, m_reduced_ptr, m_nelement);
-        }
-
-        void all_max() {
-            mpi::all_max(m_local_ptr, m_reduced_ptr, m_nelement);
-        }
-
-        void all_min() {
-            mpi::all_min(m_local_ptr, m_reduced_ptr, m_nelement);
-        }
+        void all_sum() {all_reduce(MpiSum);}
+        void all_max() {all_reduce(MpiMax);}
+        void all_min() {all_reduce(MpiMin);}
     };
 
     template<typename T>
-    using Scalar = NdArray<T, 0>;
+    struct Scalar : NdArray<T, 0> {
+        Scalar() : NdArray<T, 0>() {}
+
+        Scalar& operator=(const Scalar& other) {
+            NdArray<T, 0>::operator=(other);
+            return *this;
+        }
+
+        Scalar(const Scalar<T>& other) : NdArray<T, 0>() {
+            *this = other;
+        }
+    };
 
 
     namespace cyclic {
 
-        struct CyclicBase {
-            virtual void after_delta_reduce() {}
-        };
+        template<typename delta_t, uint_t nind, bool total_signed = std::is_signed<delta_t>::value>
+        struct NdArray : reduction::NdArray<delta_t, nind> {
+            typedef dtype::set_signedness_if_integral_t<delta_t, total_signed> total_t;
 
-        template<typename T>
-        struct Cyclic : CyclicBase {
-            typedef dtype::make_signed_if_integral<T> delta_t;
-            ReductionBase<delta_t>* m_delta_base;
-            ReductionBase<T>* m_total_base;
-            ReductionBase<delta_t>* m_prev_delta_base;
-            ReductionBase<T>* m_prev_total_base;
+        protected:
+            using reduction::NdArray<delta_t, nind>::m_local;
+            using reduction::NdArray<delta_t, nind>::m_reduced;
 
-            Cyclic(ReductionBase<delta_t>* delta_base, ReductionBase<T>* total_base,
-                   ReductionBase<delta_t>* prev_delta_base, ReductionBase<T>* prev_total_base):
-                m_delta_base(delta_base), m_total_base(total_base),
-                m_prev_delta_base(prev_delta_base), m_prev_total_base(prev_total_base){}
+            reduction::NdArray<total_t, nind> m_total;
+            reduction::NdArray<delta_t, nind> m_prev_delta;
+            reduction::NdArray<total_t, nind> m_prev_total;
 
-            void after_delta_reduce() override {
-                const auto nelement = m_total_base->m_nelement;
-                // update previous totals
-                {
-                    auto src = m_total_base->m_local_ptr;
-                    auto dst = m_prev_total_base->m_local_ptr;
-                    std::copy(src, src + nelement, dst);
-                }
-                {
-                    auto src = m_total_base->m_reduced_ptr;
-                    auto dst = m_prev_total_base->m_reduced_ptr;
-                    std::copy(src, src + nelement, dst);
-                }
+
+            // only available for scalar case
+            NdArray(): reduction::NdArray<delta_t, 0ul>() {}
+        public:
+            NdArray(const uinta_t<nind>& shape):
+                reduction::NdArray<delta_t, nind>(shape), m_total(shape), m_prev_delta(shape), m_prev_total(shape){}
+
+
+            void post_reduce() override {
+                const auto nelement = m_local.m_nelement;
                 // update previous deltas
-                {
-                    auto src = m_delta_base->m_local_ptr;
-                    auto dst = m_prev_delta_base->m_local_ptr;
-                    std::copy(src, src + nelement, dst);
-                }
-                {
-                    auto src = m_delta_base->m_reduced_ptr;
-                    auto dst = m_prev_delta_base->m_reduced_ptr;
-                    std::copy(src, src + nelement, dst);
-                }
+                m_prev_delta = *this;
+                // update previous totals
+                m_prev_total = m_total;
                 // update totals
                 for (uint_t ielement=0ul; ielement < nelement; ++ielement) {
-                    m_total_base->m_local_ptr[ielement] += m_delta_base->m_local_ptr[ielement];
-                    m_total_base->m_reduced_ptr[ielement] += m_delta_base->m_reduced_ptr[ielement];
+                    m_total.m_local.tbegin()[ielement] += m_local.ctbegin()[ielement];
+                    m_total.m_reduced.tbegin()[ielement] += m_reduced.ctbegin()[ielement];
                 }
                 // re-zero deltas
-                {
-                    auto ptr = m_delta_base->m_local_ptr;
-                    std::memset(ptr, 0, nelement * sizeof(delta_t));
-                }
-                {
-                    auto ptr = m_delta_base->m_reduced_ptr;
-                    std::memset(ptr, 0, nelement * sizeof(delta_t));
-                }
-            }
-        };
-
-        template<typename T, uint_t nind>
-        struct NdArray : Cyclic<T> {
-            using delta_t = typename Cyclic<T>::delta_t;
-        private:
-            reduction::NdArray<delta_t, nind> m_delta;
-            // total should never be directly modified - the point of this class is to modify by deltas and accumulate
-            reduction::LocalReducedPair<T, nind> m_total;
-            reduction::LocalReducedPair<delta_t, nind> m_prev_delta;
-            reduction::LocalReducedPair<T, nind> m_prev_total;
-            // don't expose these pointers to the base classes - only needed for adding as member of a syndicate
-            using Cyclic<T>::m_delta_base;
-            using Cyclic<T>::m_total_base;
-            using Cyclic<T>::after_delta_reduce;
-
-        public:
-            /**
-             * @return
-             *  modifiable ref to the local delta array
-             */
-            typename reduction::LocalReducedPair<delta_t, nind>::store_t& delta() {
-                return m_delta.m_local;
+                m_local = 0;
+                m_reduced = 0;
             }
 
-            /**
-             * @return
-             *  const ref to the reduced total
-             */
-            const typename reduction::LocalReducedPair<T, nind>::store_t& total() const {
+            const typename reduction::NdArray<total_t, nind>::store_t& total() const {
                 return m_total.m_reduced;
             }
 
-            const typename reduction::LocalReducedPair<delta_t, nind>::store_t& prev_delta() const {
-                return m_prev_delta.m_reduced;
-            }
-
-            const typename reduction::LocalReducedPair<T, nind>::store_t& prev_total() const {
+            const typename reduction::NdArray<total_t, nind>::store_t& prev_total() const {
                 return m_prev_total.m_reduced;
             }
 
+            typename reduction::NdArray<delta_t, nind>::store_t& delta() {
+                return m_local;
+            }
 
-            NdArray(const uinta_t<nind>& shape) :
-                Cyclic<T>(&m_delta, &m_total, &m_prev_delta, &m_prev_total),
-                m_delta(shape), m_total(shape), m_prev_delta(shape), m_prev_total(shape){}
-
-            NdArray(): NdArray(uinta_t<0ul>{}){}
-
-            // cyclic only needs to support accumulations i.e. summation
-            void all_sum() {
-                m_delta.all_sum();
-                after_delta_reduce();
+            const reduction::NdArray<delta_t, nind>& prev_delta() const {
+                return m_prev_delta;
             }
         };
 
-        template<typename T>
-        using Scalar = NdArray<T, 0>;
+        template<typename delta_t, bool total_signed = std::is_signed<delta_t>::value>
+        struct Scalar : NdArray<delta_t, 0, total_signed> {
+            Scalar() : NdArray<delta_t, 0, total_signed>() {}
+
+            Scalar& operator=(const Scalar& other) {
+                NdArray<delta_t, 0, total_signed>::operator=(other);
+                return *this;
+            }
+
+            Scalar(const Scalar<delta_t, total_signed>& other) : NdArray<delta_t, 0, total_signed>() {
+                *this = other;
+            }
+        };
     }
 
-    struct SyndicateGroupBase {
-
-        virtual ~SyndicateGroupBase(){}
-
-        virtual void zero_all_local() = 0;
-
-        virtual void zero_all_reduced() = 0;
-
-        virtual void zero_all() = 0;
-
-        virtual void all_sum() = 0;
-
-        virtual void all_max() = 0;
-
-        virtual void all_min() = 0;
-    };
-
-    template<typename T>
-    struct SyndicateGroup : reduction::SyndicateGroupBase {
-        v_t<ReductionBase<T> *> m_members;
-        v_t<T> m_local_buffer;
-        v_t<T> m_reduced_buffer;
-
-        SyndicateGroup() {}
-
-        void add_member(ReductionBase<T>& member) {
-            m_members.push_back(&member);
-            m_local_buffer.resize(m_local_buffer.size() + member.m_nelement);
-            m_reduced_buffer.resize(m_local_buffer.size());
-        }
-
-        void zero_all_local() override {
-            for (ReductionBase<T> *member: m_members)
-                std::memset(member->m_local_ptr, 0, member->m_nelement * sizeof(T));
-        }
-
-        void zero_all_reduced() override {
-            for (ReductionBase<T> *member: m_members)
-                memset(reinterpret_cast<char*>(member->m_reduced_ptr), 0, member->m_nelement * sizeof(T));
-        }
-
-        void zero_all() override {
-            zero_all_local();
-            zero_all_reduced();
-        }
-
-    private:
-        void collect() {
-            auto dst = m_local_buffer.data();
-            for (ReductionBase<T> *member: m_members) {
-                const uint_t nelement = member->m_nelement;
-                memcpy(dst, member->m_local_ptr, nelement * sizeof(T));
-                dst += nelement;
-            }
-        }
-
-        void disperse() {
-            auto src = m_reduced_buffer.data();
-            for (ReductionBase<T> *member: m_members) {
-                const uint_t nelement = member->m_nelement;
-                memcpy(member->m_reduced_ptr, src, nelement * sizeof(T));
-                src += nelement;
-            }
-        }
-
-    public:
-        void all_sum() override {
-            collect();
-            mpi::all_sum(m_local_buffer.data(), m_reduced_buffer.data(), m_local_buffer.size());
-            disperse();
-        }
-
-        void all_max() override {
-            collect();
-            mpi::all_max(m_local_buffer.data(), m_reduced_buffer.data(), m_local_buffer.size());
-            disperse();
-        }
-
-        void all_min() override {
-            collect();
-            mpi::all_min(m_local_buffer.data(), m_reduced_buffer.data(), m_local_buffer.size());
-            disperse();
-        }
-    };
-
-    struct Syndicate {
-        std::array<std::unique_ptr<SyndicateGroupBase>, mpi_types.size()> m_groups;
-        v_t<cyclic::CyclicBase*> m_cyclic_members;
-
-    private:
-        /**
-         * @return
-         *  syndicate group of the required type. if it does not already exist, it will be created first
-         */
+    namespace {
         template<typename T>
-        SyndicateGroup<T>* get_group() {
-            auto igroup = mpi_type_ind<T>();
-            if (!m_groups[igroup]) m_groups[igroup] = ptr::smart::make_unique<SyndicateGroup<T>>();
-            return dynamic_cast<SyndicateGroup<T> *>(m_groups[igroup].get());
+        void all_reduce_one_type(MpiOp op) {
+            const auto& send = g_send_reduction_buffers[mpi_type_ind<T>()];
+            auto& recv = g_recv_reduction_buffers[mpi_type_ind<T>()];
+            DEBUG_ASSERT_EQ(send.size(), recv.size(), "send and recv buffers for the same type should be identical");
+            if (!send.size()) return;
+            auto send_ptr = reinterpret_cast<const T*>(send.data());
+            auto recv_ptr = reinterpret_cast<T*>(recv.data());
+            mpi::all_reduce(send_ptr, recv_ptr, op, send.size() / sizeof(T));
         }
 
-    public:
-
-        template<typename T>
-        void add_member(ReductionBase<T>& member) {
-            get_group<T>()->add_member(member);
+        void all_reduce(MpiOp op) {
+            all_reduce_one_type<char>(op);
+            all_reduce_one_type<short int>(op);
+            all_reduce_one_type<int>(op);
+            all_reduce_one_type<long int>(op);
+            all_reduce_one_type<long long int>(op);
+            all_reduce_one_type<unsigned char>(op);
+            all_reduce_one_type<unsigned short int>(op);
+            all_reduce_one_type<unsigned int>(op);
+            all_reduce_one_type<unsigned long int>(op);
+            all_reduce_one_type<unsigned long long int>(op);
+            all_reduce_one_type<float>(op);
+            all_reduce_one_type<double>(op);
+            all_reduce_one_type<long double>(op);
+            all_reduce_one_type<std::complex<float>>(op);
+            all_reduce_one_type<std::complex<double>>(op);
+            all_reduce_one_type<std::complex<long double>>(op);
+            all_reduce_one_type<bool>(op);
         }
 
-        template<typename T>
-        void add_member(cyclic::Cyclic<T>& member) {
-            add_member(*member.m_delta_base);
-            m_cyclic_members.push_back(&member);
+        void all_reduce(v_t<Base*>& members, MpiOp op) {
+            for (auto& member: members) member->to_global_send();
+            all_reduce(op);
+            for (auto& member: members) member->from_global_recv();
+            for (auto& send: g_send_reduction_buffers) send.clear();
+            for (auto& recv: g_recv_reduction_buffers) recv.assign(recv.size(), 0);
         }
+    }
 
-        void add_members() {}
+    static void all_sum(v_t<Base*>& members) {all_reduce(members, MpiSum);}
+    static void all_max(v_t<Base*>& members) {all_reduce(members, MpiMax);}
+    static void all_min(v_t<Base*>& members) {all_reduce(members, MpiMin);}
 
-        template<typename T, typename ...Args>
-        void add_members(ReductionBase<T>& first, Args& ... rest) {
-            add_member(first);
-            add_members(std::forward<Args&>(rest)...);
-        }
+    static void zero_local(v_t<Base*>& members) {
+        for (auto& member: members) member->m_local_base.zero();
+    }
 
-        template<typename T, typename ...Args>
-        void add_members(cyclic::Cyclic<T>& first, Args& ... rest) {
-            add_member(first);
-            add_members(std::forward<Args&>(rest)...);
-        }
-
-        void zero_all_local() {
-            for (auto& group: m_groups) if (group) group->zero_all_local();
-        }
-
-        void zero_all_reduced() {
-            for (auto& group: m_groups) if (group) group->zero_all_reduced();
-        }
-
-        void zero_all() {
-            for (auto& group: m_groups) if (group) group->zero_all();
-        }
-
-        void all_sum() {
-            for (auto& group: m_groups) if (group) group->all_sum();
-            for (auto cyclic_member: m_cyclic_members) cyclic_member->after_delta_reduce();
-        }
-
-        void all_max() {
-            for (auto& group: m_groups) if (group) group->all_max();
-            for (auto cyclic_member: m_cyclic_members) cyclic_member->after_delta_reduce();
-        }
-
-        void all_min() {
-            for (auto& group: m_groups) if (group) group->all_min();
-            for (auto cyclic_member: m_cyclic_members) cyclic_member->after_delta_reduce();
-        }
-    };
+    static void all_reduce(v_t<Base*>& members, MpiOp op) {
+        for (auto& member: members) member->to_global_send();
+        all_reduce(op);
+        for (auto& member: members) member->from_global_recv();
+        for (auto& send: g_send_reduction_buffers) send.clear();
+        for (auto& recv: g_recv_reduction_buffers) recv.assign(recv.size(), 0);
+    }
 }
-
 
 #endif //M7_REDUCTION_H

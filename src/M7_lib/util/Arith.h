@@ -50,6 +50,7 @@ namespace arith {
      */
     template<typename T>
     static constexpr T conj(const T &v) {
+        static_assert(dtype::is_arithmetic<T>(), "only conjugation of arithmetic or complex types makes sense");
         static_assert(!dtype::is_complex<T>(), "Complex values should be conjugated by overloads.");
         return v;
     }
@@ -67,6 +68,7 @@ namespace arith {
      */
     template<typename T>
     static constexpr T real(const T &v) {
+        static_assert(dtype::is_arithmetic<T>(), "only real part of arithmetic or complex types makes sense");
         static_assert(!dtype::is_complex<T>(), "Real part of complex values should be taken by overloads.");
         return v;
     }
@@ -84,6 +86,7 @@ namespace arith {
      */
     template<typename T>
     static constexpr T imag(const T&) {
+        static_assert(dtype::is_arithmetic<T>(), "only imag part of arithmetic or complex types makes sense");
         static_assert(!dtype::is_complex<T>(), "Imaginary part of complex values should be taken by overloads.");
         return T(0);
     }

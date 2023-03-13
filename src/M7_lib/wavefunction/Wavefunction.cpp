@@ -59,7 +59,7 @@ wf::Vectors::Vectors(const conf::Document& opts, const sys::Sector& sector) :
     m_nannihilated(m_format) {
 
     REQUIRE_TRUE(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row(), "row-field reference error");
-    m_summables.add_members(m_ninitiator, m_ninitiator_perma, m_nocc_mbf, m_nwalker, m_l2_norm_square, m_nspawned, m_nannihilated);
+    m_summed = {&m_ninitiator, &m_ninitiator_perma, &m_nocc_mbf, &m_nwalker, &m_l2_norm_square, &m_nspawned, &m_nannihilated};
 
     logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
                   string::plural(m_dist.nblock()));
@@ -144,12 +144,12 @@ void wf::Vectors::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian&
 }
 
 void wf::Vectors::begin_cycle() {
-    m_summables.zero_all_local();
+    reduction::zero_local(m_summed);
     m_store.attempt_remap();
 }
 
 void wf::Vectors::end_cycle() {
-    m_summables.all_sum();
+    reduction::all_sum(m_summed);
 }
 
 wf_comp_t wf::Vectors::debug_square_norm(uint_t ipart) const {

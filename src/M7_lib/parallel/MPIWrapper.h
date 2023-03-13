@@ -194,6 +194,13 @@ extern uint_t g_my_node_root_irank;
  */
 extern int g_p2p_tag;
 
+/**
+ * for performing multiple reduction operations simultaneously in a single communication (see reduction namespace)
+ */
+extern std::array<v_t<buf_t>, mpi_types.size()> g_send_reduction_buffers;
+extern std::array<v_t<buf_t>, mpi_types.size()> g_recv_reduction_buffers;
+
+
 namespace mpi {
 
     typedef int count_t;
