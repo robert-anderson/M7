@@ -45,26 +45,24 @@ public:
      *  value to round
      * @param magnitude
      *  scalar about which to round v
-     * @param prob
-     *  probability of the higher magnitude outcome
+     * @param prob_hi_mag
+     *  probability of the higher magnitude outcome. if v is exactly an integer multiple of magnitude, then this higher
+     *  magnitude outcome is defined as v, with the prob_hi_mag being equal to 1
      * @return
-     *  the higher magnitude result with probability given by prob, or the lower magnitude result with probability given
-     *  by 1-prob
+     *  the higher magnitude result with probability given by prob_hi_mag, or the lower magnitude result with probability given
+     *  by 1-prob_hi_mag
      */
     template<typename T>
-    T stochastic_round(const T &v, const T &magnitude, prob_t& prob) {
+    T stochastic_round(const T &v, const T &magnitude, prob_t& prob_hi_mag) {
         static_assert(std::is_floating_point<T>::value, "stochastic round is only applicable to floating point types");
         DEBUG_ASSERT_GE(magnitude, 1e-14, "magnitude should be non-negative and non-zero");
-        prob = v / magnitude;
-        const long int_ratio = prob;
-        if (v >= 0) {
-            prob = prob - double(int_ratio);
-            return double(draw_float() < prob ? (int_ratio + 1) : int_ratio) * magnitude;
-        }
-        else {
-            prob = double(int_ratio) - prob;
-            return (draw_float() < prob ? (int_ratio - 1) : int_ratio) * magnitude;
-        }
+        const auto pos = v >= 0.0;
+        prob_hi_mag = v / magnitude;
+        if (!pos) prob_hi_mag = -prob_hi_mag;
+        const auto int_ratio = std::ceil(prob_hi_mag);
+        prob_hi_mag = 1.0 - (int_ratio - prob_hi_mag);
+        const auto rounded = (draw_float() < prob_hi_mag ? int_ratio : (int_ratio - 1)) * magnitude;
+        return pos ? rounded : -rounded;
     }
 
     template<typename T>

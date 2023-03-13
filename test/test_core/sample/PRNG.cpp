@@ -36,6 +36,15 @@ TEST(PRNG, StochasticRoundProb) {
     // probability of drawing high value is normalized difference between v and low value
     const auto prob_hi = v/rounding_magnitude - uint_t(v / rounding_magnitude);
     ASSERT_EQ(prob, prob_hi);
+    // prob of high-mag value when input is 0 is 1
+    prng.stochastic_round(0.0, rounding_magnitude, prob);
+    ASSERT_EQ(prob, 1.0);
+    // prob of high-mag value when input is rounding_magnitude is 1
+    prng.stochastic_round(rounding_magnitude, rounding_magnitude, prob);
+    ASSERT_EQ(prob, 1.0);
+    // prob of high-mag value when input is -rounding_magnitude is 1
+    prng.stochastic_round(-rounding_magnitude, rounding_magnitude, prob);
+    ASSERT_EQ(prob, 1.0);
 }
 
 TEST(PRNG, NegativeStochasticRound) {

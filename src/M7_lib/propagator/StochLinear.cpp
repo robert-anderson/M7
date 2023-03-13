@@ -123,6 +123,11 @@ void StochLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipa
 
             p_succeed_at_least_once = 1.0 - p_fail_all_attempts;
         }
+        DEBUG_ASSERT_GT(p_succeed_at_least_once, 0.0,
+                        "probability of sampling RDM connection should be positive, non-zero");
+        DEBUG_ASSERT_LE(p_succeed_at_least_once, 1.0,
+                        "probability of sampling RDM connection cannot exceed 1.0");
+
         wf.add_spawn(dst_mbf, thresh_delta, initiator, flag_deterministic,
                      ipart, src_mbf, weight / p_succeed_at_least_once);
     }
