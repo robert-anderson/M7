@@ -21,7 +21,7 @@ hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_c
 
 hf_excit_hist::Initializer::Initializer(
         wf::Vectors &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation) :
-        m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2200", thresh), m_cancellation(cancellation),
+        m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2", thresh), m_cancellation(cancellation),
         m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf), m_thresh(max_power ? find_first(max_power) : thresh),
         m_ncreated({2*max_power_by_thresh()+1}) {
     logging::info("Maximum-magnitude C2 coefficient: {}", m_c2.m_vals[0]);
@@ -227,7 +227,7 @@ void hf_excit_hist::Accumulators::add(const Mbf &mbf, wf_t weight) {
     if (!*this) return;
     if (!m_accum_epoch) return;
     m_work_conn.connect(m_hf->mbf(), mbf);
-    const auto nexcit = m_work_conn.exsig().nfrm_cre();
+    const auto nexcit = conn::nfrm_cre(m_work_conn);
     if (!nexcit) {
         m_norm += weight;
         return;
@@ -253,8 +253,11 @@ void hf_excit_hist::Accumulators::save(const hdf5::NodeWriter &nw) const {
     auto norm = mpi::all_sum(m_norm);
     hdf5::DatasetSaver::save_scalar(nw, "norm", norm);
     for (auto nexcit: m_nexcits) {
-        OpSig exsig({nexcit, nexcit}, {0, 0});
-        table->save(nw, exsig.to_string(), true);
+        /*
+         * HF-related quantities are only applicable to fermionic excitations, so we may dispense with the full wxyz
+         * string naming convention designed to support fermion-boson excitations
+         */
+        table->save(nw, convert::to_string(nexcit), true);
         ++table;
     }
 }

@@ -52,6 +52,23 @@ namespace conn {
 
     template<typename T>
     using from_field_t = typename selector<T>::type;
+
+
+    static uint_t nfrm_cre(const FrmOnv& c) {return c.m_cre.size();}
+    static uint_t nfrm_cre(const BosOnv&) {return 0;}
+    static uint_t nfrm_cre(const FrmBosOnv& c) {return nfrm_cre(c.m_frm);}
+
+    static uint_t nfrm_ann(const FrmOnv& c) {return c.m_ann.size();}
+    static uint_t nfrm_ann(const BosOnv&) {return 0;}
+    static uint_t nfrm_ann(const FrmBosOnv& c) {return nfrm_ann(c.m_frm);}
+
+    static uint_t nbos_cre(const FrmOnv&) {return 0;}
+    static uint_t nbos_cre(const BosOnv& c) {return c.m_cre.size();}
+    static uint_t nbos_cre(const FrmBosOnv& c) {return nbos_cre(c.m_frm);}
+
+    static uint_t nbos_ann(const FrmOnv&) {return 0;}
+    static uint_t nbos_ann(const BosOnv& c) {return c.m_ann.size();}
+    static uint_t nbos_ann(const FrmBosOnv& c) {return nbos_ann(c.m_frm);}
 }
 
 #endif //M7_CONNECTIONS_H
