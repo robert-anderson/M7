@@ -199,7 +199,10 @@ namespace reduction {
         void all_reduce(v_t<Base*>& members, MpiOp op) {
             for (auto& member: members) member->to_global_send();
             all_reduce(op);
-            for (auto& member: members) member->from_global_recv();
+            for (auto& member: members) {
+                member->from_global_recv();
+                member->post_reduce();
+            }
             for (auto& send: g_send_reduction_buffers) send.clear();
             for (auto& recv: g_recv_reduction_buffers) recv.assign(recv.size(), 0);
         }
@@ -211,14 +214,6 @@ namespace reduction {
 
     static void zero_local(v_t<Base*>& members) {
         for (auto& member: members) member->m_local_base.zero();
-    }
-
-    static void all_reduce(v_t<Base*>& members, MpiOp op) {
-        for (auto& member: members) member->to_global_send();
-        all_reduce(op);
-        for (auto& member: members) member->from_global_recv();
-        for (auto& send: g_send_reduction_buffers) send.clear();
-        for (auto& recv: g_recv_reduction_buffers) recv.assign(recv.size(), 0);
     }
 }
 
