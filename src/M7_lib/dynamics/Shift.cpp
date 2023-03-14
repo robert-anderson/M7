@@ -3,6 +3,7 @@
 //
 
 #include "Shift.h"
+#include "M7_lib/util/Math.h"
 
 Shift::Shift(const conf::Document &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         m_opts(opts),
@@ -11,7 +12,8 @@ Shift::Shift(const conf::Document &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         m_avg_value_histories(wf_fmt.m_nelement, std::queue<ham_comp_t>()),
         m_avg_values(wf_fmt.m_shape, opts.m_shift.m_init),
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
-        m_nwalker_target("nwalker_target", opts.m_propagator.m_nw_target){
+        m_nwalker_target("nwalker_target", opts.m_propagator.m_nw_target),
+        m_target_damp_fac(opts.m_shift.m_target_damp ? math::pow<2>(opts.m_shift.m_damp.m_value) : 0.0){
     if (m_opts.m_shift.m_target_damp)
         logging::info("Using targeted shift damping term (growth relative to target population)");
     if (m_opts.m_shift.m_fix_ref_weight)
@@ -64,9 +66,9 @@ void Shift::update(const wf::Vectors &wf, const wf::Refs& refs, uint_t icycle, d
             else {
                 auto rate = nw / m_nwalker_last_period[ipart];
                 m_values[ipart] -= m_opts.m_shift.m_damp * std::log(std::abs(rate)) / (tau * a);
-                if (m_opts.m_shift.m_target_damp) {
+                if (m_target_damp_fac) {
                     rate = nw / m_nwalker_target;
-                    m_values[ipart] -= m_opts.m_shift.m_target_damp * std::log(std::abs(rate)) / (tau * a);
+                    m_values[ipart] -= m_target_damp_fac * std::log(std::abs(rate)) / (tau * a);
                 }
             }
         }

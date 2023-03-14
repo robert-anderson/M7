@@ -49,6 +49,10 @@ struct Shift {
      * the target walker number can be changed by the user on the fly
      */
     InteractiveVariable<wf_comp_t> m_nwalker_target;
+    /**
+     * if using target-driven damping, this will be y^2/4 where y is the normal (static) damp factor, else it will be 0
+     */
+    const double m_target_damp_fac;
 
     Shift(const conf::Document &opts, const NdFormat<c_ndim_wf>& wf_fmt);
 
