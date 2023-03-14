@@ -1,27 +1,25 @@
-[1678724746] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 16.000000KB x 2 tables = 32.000000KB
-[1678724746] [info] Reallocating buffer " recv" 0B -> 32.000000KB
-[1678724746] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
-[1678724746] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1678724746] [info] Reallocating buffer " recv" 0B -> 32.000000KB
-[1678724746] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1678724746] [info] Reallocating buffer "wavefunction" 0B -> 32.000000KB
-[1678724746] [info] Reallocating buffer "wavefunction send" 0B x 2 tables = 0B -> 120B x 2 tables = 240B
-[1678724746] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
-[1678724746] [info] Reallocating buffer "reference gather send" 0B -> 32B
-[1678724746] [info] Reallocating buffer "reference all gathered rows" 0B -> 32B
-[1678724746] [info] Reallocating buffer "Hartree-Fock ONV gather send" 0B -> 32B
-[1678724746] [info] Reallocating buffer "Hartree-Fock ONV all gathered rows" 0B -> 32B
-[1678724746] [info] Reallocating buffer "hole moment dst finder send" 0B x 2 tables = 0B -> 12.000000KB x 2 tables = 24.000000KB
-[1678724746] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
-[1678724746] [info] Reallocating buffer "particle moment dst finder send" 0B x 2 tables = 0B -> 12.000000KB x 2 tables = 24.000000KB
-[1678724746] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
-[1678724746] [info] Reallocating buffer "M7.stats" 0B -> 144B
-[1678724746] [info] Reallocating buffer "M7.timing" 0B -> 40B
-[1678724746] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
-[1678724748] [info] Reallocating buffer "wavefunction send" 120B x 2 tables = 240B -> 216B x 2 tables = 432B
-[1678724753] [info] Reallocating buffer "wavefunction send" 216B x 2 tables = 432B -> 360B x 2 tables = 720B
-[1678724754] [info] Reallocating buffer "wavefunction recv" 240B -> 400B
-[1678724803] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 192B
-[1678724803] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
-[1678724803] [info] Reallocating buffer "Included local rows" 0B -> 384B
-[1678724803] [info] Reallocating buffer "global top weighted" 0B -> 640B
+[1678750000] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 16.000000KB x 2 tables = 32.000000KB
+[1678750000] [info] Reallocating buffer " recv" 0B -> 32.000000KB
+[1678750000] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
+[1678750000] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1678750000] [info] Reallocating buffer " recv" 0B -> 32.000000KB
+[1678750000] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1678750000] [info] Reallocating buffer "wavefunction" 0B -> 16.000000KB
+[1678750000] [info] Reallocating buffer "wavefunction send" 0B x 2 tables = 0B -> 120B x 2 tables = 240B
+[1678750000] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
+[1678750000] [info] Reallocating buffer "reference gather send" 0B -> 32B
+[1678750000] [info] Reallocating buffer "reference all gathered rows" 0B -> 32B
+[1678750000] [info] Reallocating buffer "Hartree-Fock ONV gather send" 0B -> 32B
+[1678750000] [info] Reallocating buffer "Hartree-Fock ONV all gathered rows" 0B -> 32B
+[1678750000] [info] Reallocating buffer "hole moment dst finder send" 0B x 2 tables = 0B -> 12.000000KB x 2 tables = 24.000000KB
+[1678750000] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
+[1678750000] [info] Reallocating buffer "particle moment dst finder send" 0B x 2 tables = 0B -> 12.000000KB x 2 tables = 24.000000KB
+[1678750000] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
+[1678750000] [info] Reallocating buffer "M7.stats" 0B -> 144B
+[1678750000] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1678750000] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
+[1678750003] [info] Reallocating buffer "wavefunction send" 120B x 2 tables = 240B -> 216B x 2 tables = 432B
+[1678750021] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 160B
+[1678750021] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1678750021] [info] Reallocating buffer "Included local rows" 0B -> 320B
+[1678750021] [info] Reallocating buffer "global top weighted" 0B -> 640B

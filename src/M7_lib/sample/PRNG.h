@@ -29,13 +29,6 @@ public:
 
     uint32_t draw_uint(uint32_t min, uint32_t max);
 
-    /**
-     * sample integers according to a linear distribution (favoring larger integers in the range)
-     * @param modular_base
-     * @return
-     */
-    uint32_t draw_uint_linear_bias(uint32_t modular_base);
-
     double draw_float();
 
     /**

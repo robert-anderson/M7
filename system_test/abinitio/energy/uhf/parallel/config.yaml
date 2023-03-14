@@ -8,9 +8,9 @@ wavefunction:
 propagator:
   tau_init: 0.001
   stochastic: yes
-  nw_target: 4000
+  nw_target: 1000
   nadd: 3.0
-  ncycle: 300000
+  ncycle: 200000
 hamiltonian:
   fermion:
     fcidump:

@@ -39,10 +39,6 @@ double PRNG::draw_float() {
     return double(draw_uint()) / (1ul + std::mt19937::max());
 }
 
-uint32_t PRNG::draw_uint_linear_bias(uint32_t modular_base) {
-    return std::floor(modular_base*std::sqrt(draw_float()));
-}
-
 hash::digest_t PRNG::checksum() const {
     const auto nbyte = m_data.size()*sizeof(uint32_t);
     const auto ptr = reinterpret_cast<const buf_t*>(m_data.data());
