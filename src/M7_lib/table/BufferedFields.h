@@ -72,7 +72,7 @@ namespace buffered {
         using BufferedField<field::Number<T>>::operator==;
         using BufferedField<field::Number<T>>::operator T &;
         using BufferedField<field::Number<T>>::operator const T &;
-        Number(): BufferedField<field::Number<T>>({}){}
+        Number(): BufferedField<field::Number<T>>(){}
         Number(const Number& other): Number() {
             *this = other;
         }
