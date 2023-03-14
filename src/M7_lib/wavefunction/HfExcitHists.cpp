@@ -39,6 +39,7 @@ uint_t hf_excit_hist::Initializer::max_power_by_thresh() {
     wf_comp_t product = 1.0;
     for (uint_t ipower = 0ul; ipower < limit; ++ipower) {
         product *= std::abs(m_c2.m_vals[ipower]);
+        product /= (ipower+1);
         if (product < m_thresh) return ipower;
     }
     return limit;
