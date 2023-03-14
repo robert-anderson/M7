@@ -93,7 +93,7 @@ void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
 
     auto& row = xr_gathered.m_row;
     v_t<strv_t> rows;
-    rows.push_back({"", "many-body basis function", "walker number", "initiator", "energy", "semistoch", "MPI rank"});
+    rows.push_back({"", "many-body basis function", "walkers", "coefficient", "initiator", "energy", "semistoch", "MPI rank"});
     for (row.restart(); row; ++row) {
         rows.push_back({
             std::to_string(row.index()),
