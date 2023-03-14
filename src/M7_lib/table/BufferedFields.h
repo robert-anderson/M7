@@ -71,6 +71,7 @@ namespace buffered {
         using BufferedField<field::Number<T>>::operator=;
         using BufferedField<field::Number<T>>::operator==;
         using BufferedField<field::Number<T>>::operator T &;
+        using BufferedField<field::Number<T>>::operator const T &;
         Number(): BufferedField<field::Number<T>>({}){}
         Number(const Number& other): Number() {
             *this = other;
@@ -82,16 +83,6 @@ namespace buffered {
             field::Number<T>::operator=(other);
             return *this;
         }
-
-        operator T& () {
-            return (*this)[0];
-        }
-
-        operator const T& () const {
-            return (*this)[0];
-        }
-
-
     };
 
     template<typename T, uint_t nind>
