@@ -9,6 +9,7 @@
 #include "M7_lib/propagator/Propagators.h"
 
 void fciqmc::run(const conf::Document &opts) {
+    mpi::barrier();
     /*
      * sum of weighted many-body operator products determining the energies and transition amplitudes between MBFs
      */
