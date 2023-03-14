@@ -140,7 +140,9 @@ conf::Shift::Shift(Group *parent) :
                         "options relating to the diagonal shift parameter and the manner in which it is varied"),
         m_init(this, "init", 0.0, "initial shift relative to the energy of the initial reference MBF"),
         m_damp(this, "damp", 0.05, "walker growth-related damping factor in shift update"),
-        m_target_damp(this, "target_damp", 0.0, "damping factor in shift update related to growth relative to the target walker population"),
+        m_target_damp(this, "target_damp", false,
+                      "use damping factor in shift update related to growth relative to the target walker population. "
+                      "this is set to the optimal value damp^2/4"),
         m_period(this, "period", 5, "number of MC cycles between shift updates"),
         m_ncycle_av(this, "ncycle_av", 100ul, "number of cycles over which to maintain a rolling average"),
         m_fix_ref_weight(this, "fix_ref_weight", false,
