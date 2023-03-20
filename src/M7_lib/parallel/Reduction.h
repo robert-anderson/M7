@@ -26,17 +26,17 @@ namespace reduction {
 
     public:
         void to_global_send() {
-            auto& send_buf = g_send_reduction_buffers[m_itype];
+            auto& send_buf = mpi::g_send_reduce_buffers[m_itype];
             m_global_reduced_offset = send_buf.size();
             auto ptr = m_local_base.cbegin();
             send_buf.insert(send_buf.cend(), ptr, ptr + m_local_base.m_size);
-            auto& recv_buf = g_recv_reduction_buffers[m_itype];
+            auto& recv_buf = mpi::g_recv_reduce_buffers[m_itype];
             if (recv_buf.size() < send_buf.size()) recv_buf.resize(send_buf.size());
         }
 
         void from_global_recv() {
             DEBUG_ASSERT_NE(m_global_reduced_offset, ~0ul, "global offset should have been set in a prior to_global_send call");
-            auto& buf = g_recv_reduction_buffers[m_itype];
+            auto& buf = mpi::g_recv_reduce_buffers[m_itype];
             const auto ptr = m_reduced_base.begin();
             std::memcpy(ptr, buf.data()+m_global_reduced_offset, m_reduced_base.m_size);
             m_global_reduced_offset = ~0ul;
@@ -53,7 +53,7 @@ namespace reduction {
         store_t m_local;
         store_t m_reduced;
         NdArray(const uinta_t<nind>& shape) :
-            Base(m_local, m_reduced, mpi_type_ind<T>()), m_format(shape), m_local(m_format), m_reduced(m_format){}
+                Base(m_local, m_reduced, mpi::type_ind<T>()), m_format(shape), m_local(m_format), m_reduced(m_format){}
 
         NdArray& operator=(const NdArray<T, nind>& other) {
             m_local = other.m_local;
@@ -66,17 +66,17 @@ namespace reduction {
         }
 
         // only available for scalar case
-        NdArray() : Base(m_local, m_reduced, mpi_type_ind<T>()){}
+        NdArray() : Base(m_local, m_reduced, mpi::type_ind<T>()){}
     private:
-        void all_reduce(MpiOp op) {
+        void all_reduce(mpi::Op op) {
             mpi::all_reduce(m_local.ctbegin(), m_reduced.tbegin(), op, m_local.m_nelement);
             post_reduce();
         }
 
     public:
-        void all_sum() {all_reduce(MpiSum);}
-        void all_max() {all_reduce(MpiMax);}
-        void all_min() {all_reduce(MpiMin);}
+        void all_sum() {all_reduce(mpi::SumOp);}
+        void all_max() {all_reduce(mpi::MaxOp);}
+        void all_min() {all_reduce(mpi::MinOp);}
     };
 
     template<typename T>
@@ -166,17 +166,17 @@ namespace reduction {
 
     namespace {
         template<typename T>
-        void all_reduce_one_type(MpiOp op) {
-            const auto& send = g_send_reduction_buffers[mpi_type_ind<T>()];
-            auto& recv = g_recv_reduction_buffers[mpi_type_ind<T>()];
+        void all_reduce_one_type(mpi::Op op) {
+            const auto& send = mpi::g_send_reduce_buffers[mpi::type_ind<T>()];
+            auto& recv = mpi::g_recv_reduce_buffers[mpi::type_ind<T>()];
             DEBUG_ASSERT_EQ(send.size(), recv.size(), "send and recv buffers for the same type should be identical");
             if (!send.size()) return;
             auto send_ptr = reinterpret_cast<const T*>(send.data());
             auto recv_ptr = reinterpret_cast<T*>(recv.data());
-            mpi::all_reduce(send_ptr, recv_ptr, op, send.size() / sizeof(T));
+            all_reduce(send_ptr, recv_ptr, op, send.size() / sizeof(T));
         }
 
-        void all_reduce(MpiOp op) {
+        void all_reduce(mpi::Op op) {
             all_reduce_one_type<char>(op);
             all_reduce_one_type<short int>(op);
             all_reduce_one_type<int>(op);
@@ -196,21 +196,21 @@ namespace reduction {
             all_reduce_one_type<bool>(op);
         }
 
-        void all_reduce(v_t<Base*>& members, MpiOp op) {
+        static void all_reduce(v_t<Base*>& members, mpi::Op op) {
             for (auto& member: members) member->to_global_send();
             all_reduce(op);
             for (auto& member: members) {
                 member->from_global_recv();
                 member->post_reduce();
             }
-            for (auto& send: g_send_reduction_buffers) send.clear();
-            for (auto& recv: g_recv_reduction_buffers) recv.assign(recv.size(), 0);
+            for (auto& send: mpi::g_send_reduce_buffers) send.clear();
+            for (auto& recv: mpi::g_recv_reduce_buffers) recv.assign(recv.size(), 0);
         }
     }
 
-    static void all_sum(v_t<Base*>& members) {all_reduce(members, MpiSum);}
-    static void all_max(v_t<Base*>& members) {all_reduce(members, MpiMax);}
-    static void all_min(v_t<Base*>& members) {all_reduce(members, MpiMin);}
+    static void all_sum(v_t<Base*>& members) {all_reduce(members, mpi::SumOp);}
+    static void all_max(v_t<Base*>& members) {all_reduce(members, mpi::MaxOp);}
+    static void all_min(v_t<Base*>& members) {all_reduce(members, mpi::MinOp);}
 
     static void zero_local(v_t<Base*>& members) {
         for (auto& member: members) member->m_local_base.zero();

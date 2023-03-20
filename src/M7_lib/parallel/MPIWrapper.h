@@ -47,164 +47,165 @@
  * forgotten in this case.
  */
 
-static const std::array<MPI_Datatype, 17> mpi_types =
-        {MPI_CHAR, MPI_SHORT, MPI_INT, MPI_LONG, MPI_LONG_LONG_INT,
-         MPI_UNSIGNED_CHAR, MPI_UNSIGNED_SHORT, MPI_UNSIGNED, MPI_UNSIGNED_LONG,
-         MPI_UNSIGNED_LONG_LONG, MPI_FLOAT, MPI_DOUBLE, MPI_LONG_DOUBLE,
-         MPI_COMPLEX, MPI_DOUBLE_COMPLEX, MPI_CXX_LONG_DOUBLE_COMPLEX, MPI_CXX_BOOL};
-
-template<typename T>
-static constexpr uint_t mpi_type_ind() { return ~0ul; }
-
-template<>
-constexpr uint_t mpi_type_ind<char>() { return 0; }
-
-template<>
-constexpr uint_t mpi_type_ind<short int>() { return 1; }
-
-template<>
-constexpr uint_t mpi_type_ind<int>() { return 2; }
-
-template<>
-constexpr uint_t mpi_type_ind<long int>() { return 3; }
-
-template<>
-constexpr uint_t mpi_type_ind<long long int>() { return 4; }
-
-template<>
-constexpr uint_t mpi_type_ind<unsigned char>() { return 5; }
-
-template<>
-constexpr uint_t mpi_type_ind<unsigned short int>() { return 6; }
-
-template<>
-constexpr uint_t mpi_type_ind<unsigned int>() { return 7; }
-
-template<>
-constexpr uint_t mpi_type_ind<unsigned long int>() { return 8; }
-
-template<>
-constexpr uint_t mpi_type_ind<unsigned long long int>() { return 9; }
-
-template<>
-constexpr uint_t mpi_type_ind<float>() { return 10; }
-
-template<>
-constexpr uint_t mpi_type_ind<double>() { return 11; }
-
-template<>
-constexpr uint_t mpi_type_ind<long double>() { return 12; }
-
-template<>
-constexpr uint_t mpi_type_ind<std::complex<float>>() { return 13; }
-
-template<>
-constexpr uint_t mpi_type_ind<std::complex<double>>() { return 14; }
-
-template<>
-constexpr uint_t mpi_type_ind<std::complex<long double>>() { return 15; }
-
-template<>
-constexpr uint_t mpi_type_ind<bool>() { return 16; }
-
-
-template<typename T>
-constexpr bool mpi_supported() { return mpi_type_ind<T>() != ~0ul; }
-
-
-template<typename T>
-static MPI_Datatype mpi_type() { return mpi_types[mpi_type_ind<T>()]; }
-
-/*
- * For use with minloc and maxloc
- * MPI_FLOAT_INT: struct { float, int }
- * MPI_LONG_INT: struct { long, int }
- * MPI_DOUBLE_INT: struct { double, int }
- * MPI_SHORT_INT: struct { short, int }
- * MPI_2INT: struct { int, int }
- * MPI_LONG_DOUBLE_INT: struct { long double, int }
- */
-
-template<typename T>
-static MPI_Datatype mpi_pair_type() { return MPI_Datatype(); }
-
-template<>
-MPI_Datatype mpi_pair_type<float>() { return MPI_FLOAT_INT; }
-
-template<>
-MPI_Datatype mpi_pair_type<long>() { return MPI_LONG_INT; }
-
-template<>
-MPI_Datatype mpi_pair_type<double>() { return MPI_DOUBLE_INT; }
-
-template<>
-MPI_Datatype mpi_pair_type<short>() { return MPI_SHORT_INT; }
-
-template<>
-MPI_Datatype mpi_pair_type<int>() { return MPI_2INT; }
-
-template<>
-MPI_Datatype mpi_pair_type<long double>() { return MPI_LONG_DOUBLE_INT; }
-
-const std::array<MPI_Op, 5> op_map{MPI_MAX, MPI_MIN, MPI_SUM, MPI_LAND, MPI_LOR};
-const std::array<MPI_Op, 2> pair_op_map{MPI_MAXLOC, MPI_MINLOC};
-
-enum MpiOp {
-    MpiMax, MpiMin, MpiSum, MpiLand, MpiLor
-};
-
-enum MpiPairOp {
-    MpiMaxLoc, MpiMinLoc
-};
-
-/**
- * rank index in the world communicator
- */
-extern uint_t g_irank;
-/**
- * number of ranks in the world communicator
- */
-extern uint_t g_nrank;
-/**
- * name of this rank
- */
-extern str_t g_processor_name;
-/**
- * communicator among ranks on the same node, where a "node" is a group of ranks with access to the same main memory
- */
-extern MPI_Comm g_node_comm;
-/**
- * rank index within this node
- */
-extern uint_t g_irank_on_node;
-/**
- * number of ranks on this node
- */
-extern uint_t g_nrank_on_node;
-/**
- * list of world communicator rank indices of the node roots
- */
-extern v_t<char> g_node_roots;
-/**
- * world communicator rank index of the node root of this rank
- */
-extern uint_t g_my_node_root_irank;
-/**
- * todo: delete - point to point comms no longer used
- */
-extern int g_p2p_tag;
-
-/**
- * for performing multiple reduction operations simultaneously in a single communication (see reduction namespace)
- */
-extern std::array<v_t<buf_t>, mpi_types.size()> g_send_reduction_buffers;
-extern std::array<v_t<buf_t>, mpi_types.size()> g_recv_reduction_buffers;
-
 
 namespace mpi {
+    /**
+     * rank index in the world communicator
+     */
+    extern uint_t g_irank;
+    /**
+     * number of ranks in the world communicator
+     */
+    extern uint_t g_nrank;
+    /**
+     * name of this rank
+     */
+    extern str_t g_processor_name;
+    /**
+     * communicator among ranks on the same node, where a "node" is a group of ranks with access to the same main memory
+     */
+    extern MPI_Comm g_node_comm;
+    /**
+     * rank index within this node
+     */
+    extern uint_t g_irank_on_node;
+    /**
+     * number of ranks on this node
+     */
+    extern uint_t g_nrank_on_node;
+    /**
+     * list of world communicator rank indices of the node roots
+     */
+    extern v_t<char> g_node_roots;
+    /**
+     * world communicator rank index of the node root of this rank
+     */
+    extern uint_t g_my_node_root_irank;
+    /**
+     * todo: delete - point to point comms no longer used
+     */
+    extern int g_p2p_tag;
+
 
     typedef int count_t;
     typedef v_t<count_t> countv_t;
+    static const std::array<MPI_Datatype, 17> g_types = {
+        MPI_CHAR, MPI_SHORT, MPI_INT, MPI_LONG, MPI_LONG_LONG_INT,
+        MPI_UNSIGNED_CHAR, MPI_UNSIGNED_SHORT, MPI_UNSIGNED, MPI_UNSIGNED_LONG,
+        MPI_UNSIGNED_LONG_LONG, MPI_FLOAT, MPI_DOUBLE, MPI_LONG_DOUBLE,
+        MPI_COMPLEX, MPI_DOUBLE_COMPLEX, MPI_CXX_LONG_DOUBLE_COMPLEX, MPI_CXX_BOOL};
+
+    template<typename T>
+    static constexpr uint_t type_ind() { return ~0ul; }
+
+    template<>
+    constexpr uint_t type_ind<char>() { return 0; }
+
+    template<>
+    constexpr uint_t type_ind<short int>() { return 1; }
+
+    template<>
+    constexpr uint_t type_ind<int>() { return 2; }
+
+    template<>
+    constexpr uint_t type_ind<long int>() { return 3; }
+
+    template<>
+    constexpr uint_t type_ind<long long int>() { return 4; }
+
+    template<>
+    constexpr uint_t type_ind<unsigned char>() { return 5; }
+
+    template<>
+    constexpr uint_t type_ind<unsigned short int>() { return 6; }
+
+    template<>
+    constexpr uint_t type_ind<unsigned int>() { return 7; }
+
+    template<>
+    constexpr uint_t type_ind<unsigned long int>() { return 8; }
+
+    template<>
+    constexpr uint_t type_ind<unsigned long long int>() { return 9; }
+
+    template<>
+    constexpr uint_t type_ind<float>() { return 10; }
+
+    template<>
+    constexpr uint_t type_ind<double>() { return 11; }
+
+    template<>
+    constexpr uint_t type_ind<long double>() { return 12; }
+
+    template<>
+    constexpr uint_t type_ind<std::complex<float>>() { return 13; }
+
+    template<>
+    constexpr uint_t type_ind<std::complex<double>>() { return 14; }
+
+    template<>
+    constexpr uint_t type_ind<std::complex<long double>>() { return 15; }
+
+    template<>
+    constexpr uint_t type_ind<bool>() { return 16; }
+
+
+    template<typename T>
+    constexpr bool type_supported() { return type_ind<T>() != ~0ul; }
+
+
+    template<typename T>
+    static MPI_Datatype type() {
+        static_assert(type_supported<T>(), "given type is not supported by MPI");
+        return g_types[type_ind<T>()];
+    }
+
+    /*
+     * For use with minloc and maxloc
+     * MPI_FLOAT_INT: struct { float, int }
+     * MPI_LONG_INT: struct { long, int }
+     * MPI_DOUBLE_INT: struct { double, int }
+     * MPI_SHORT_INT: struct { short, int }
+     * MPI_2INT: struct { int, int }
+     * MPI_LONG_DOUBLE_INT: struct { long double, int }
+     */
+    template<typename T>
+    static MPI_Datatype pair_type() { return MPI_Datatype(); }
+
+    template<>
+    MPI_Datatype pair_type<float>() { return MPI_FLOAT_INT; }
+
+    template<>
+    MPI_Datatype pair_type<long>() { return MPI_LONG_INT; }
+
+    template<>
+    MPI_Datatype pair_type<double>() { return MPI_DOUBLE_INT; }
+
+    template<>
+    MPI_Datatype pair_type<short>() { return MPI_SHORT_INT; }
+
+    template<>
+    MPI_Datatype pair_type<int>() { return MPI_2INT; }
+
+    template<>
+    MPI_Datatype pair_type<long double>() { return MPI_LONG_DOUBLE_INT; }
+
+    const std::array<MPI_Op, 5> op_map{MPI_MAX, MPI_MIN, MPI_SUM, MPI_LAND, MPI_LOR};
+    const std::array<MPI_Op, 2> pair_op_map{MPI_MAXLOC, MPI_MINLOC};
+
+    enum Op {
+        MaxOp, MinOp, SumOp, LandOp, LorOp
+    };
+
+    enum PairOp {
+        MaxLocOp, MinLocOp
+    };
+
+    /**
+     * for performing multiple reduction operations simultaneously in a single communication
+     */
+    extern std::array<v_t<buf_t>, g_types.size()> g_send_reduce_buffers;
+    extern std::array<v_t<buf_t>, g_types.size()> g_recv_reduce_buffers;
 
     void setup_mpi_globals();
 
@@ -305,29 +306,29 @@ namespace mpi {
     }
 
     template<typename T>
-    static bool reduce(const T *send, T *recv, MpiOp op, uint_t ndata = 1, uint_t iroot = 0) {
-        return MPI_Reduce(send, recv, snrw(ndata), mpi_type<T>(), op_map[op], snrw(iroot), MPI_COMM_WORLD) ==
+    static bool reduce(const T *send, T *recv, Op op, uint_t ndata = 1, uint_t iroot = 0) {
+        return MPI_Reduce(send, recv, snrw(ndata), type<T>(), op_map[op], snrw(iroot), MPI_COMM_WORLD) ==
                MPI_SUCCESS;
     }
 
     template<typename T>
-    static bool all_reduce(const T *send, T *recv, MpiOp op, uint_t ndata = 1) {
-        static_assert(mpi_type_ind<T>() != ~0ul, "Not a valid MPI type");
-        return MPI_Allreduce(send, recv, snrw(ndata), mpi_type<T>(), op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
+    static bool all_reduce(const T *send, T *recv, Op op, uint_t ndata = 1) {
+        static_assert(type_ind<T>() != ~0ul, "Not a valid MPI type");
+        return MPI_Allreduce(send, recv, snrw(ndata), type<T>(), op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
     static bool all_reduce(const std::pair<T, uint_t> *send,
                            std::pair<T, uint_t> *recv,
-                           MpiPairOp op, uint_t ndata = 1) {
-        static_assert(mpi_type_ind<T>() != ~0ul, "Not a valid MPI type");
+                           PairOp op, uint_t ndata = 1) {
+        static_assert(type_ind<T>() != ~0ul, "Not a valid MPI type");
         v_t<std::pair<T, count_t>> tmp_send;
         tmp_send.reserve(ndata);
         for (uint_t idata = 0ul; idata < ndata; ++idata)
             tmp_send.push_back({send[idata].first, snrw(send[idata].second)});
         v_t<std::pair<T, count_t>> tmp_recv;
         tmp_recv.reserve(ndata);
-        auto res = MPI_Allreduce(tmp_send.data(), tmp_recv.data(), ndata, mpi_pair_type<T>(),
+        auto res = MPI_Allreduce(tmp_send.data(), tmp_recv.data(), ndata, pair_type<T>(),
                                  pair_op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
         for (uint_t idata = 0ul; idata < ndata; ++idata)
             recv[idata] = std::pair<T, uint_t>{tmp_recv[idata].first, tmp_recv[idata].second};
@@ -338,7 +339,7 @@ namespace mpi {
     template<typename T>
     static bool all_reduce(const v_t<std::pair<T, uint_t>> &send,
                            v_t<std::pair<T, uint_t>> &recv,
-                           MpiPairOp op) {
+                           PairOp op) {
         ASSERT(send.size() == recv.size());
         return all_reduce(send.data(), recv.data(), op, send.size());
     }
@@ -348,12 +349,12 @@ namespace mpi {
      */
     template<typename T>
     static bool max(const T *send, T *recv, uint_t ndata = 1, uint_t iroot = 0) {
-        return reduce(send, recv, MpiMax, ndata, iroot);
+        return reduce(send, recv, MaxOp, ndata, iroot);
     }
 
     template<typename T>
     static bool all_max(const T *send, T *recv, uint_t ndata = 1) {
-        return all_reduce(send, recv, MpiMax, ndata);
+        return all_reduce(send, recv, MaxOp, ndata);
     }
 
     template<typename T>
@@ -380,12 +381,12 @@ namespace mpi {
      */
     template<typename T>
     static bool min(const T *send, T *recv, uint_t ndata = 1, uint_t iroot = 0) {
-        return reduce(send, recv, MpiMin, ndata, iroot);
+        return reduce(send, recv, MinOp, ndata, iroot);
     }
 
     template<typename T>
     static bool all_min(const T *send, T *recv, uint_t ndata = 1) {
-        return all_reduce(send, recv, MpiMin, ndata);
+        return all_reduce(send, recv, MinOp, ndata);
     }
 
     template<typename T>
@@ -412,12 +413,12 @@ namespace mpi {
      */
     template<typename T>
     static bool sum(const T *send, T *recv, uint_t ndata = 1, uint_t iroot = 0) {
-        return reduce(send, recv, MpiSum, ndata, iroot);
+        return reduce(send, recv, SumOp, ndata, iroot);
     }
 
     template<typename T>
     static bool all_sum(const T *send, T *recv, uint_t ndata = 1) {
-        return all_reduce(send, recv, MpiSum, ndata);
+        return all_reduce(send, recv, SumOp, ndata);
     }
 
     template<typename T>
@@ -445,12 +446,12 @@ namespace mpi {
 
     template<typename T>
     static bool land(const T *send, T *recv, uint_t ndata = 1, uint_t iroot = 0) {
-        return reduce(send, recv, MpiLand, ndata, iroot);
+        return reduce(send, recv, LandOp, ndata, iroot);
     }
 
     template<typename T>
     static bool all_land(const T *send, T *recv, uint_t ndata = 1) {
-        return all_reduce(send, recv, MpiLand, ndata);
+        return all_reduce(send, recv, LandOp, ndata);
     }
 
     template<typename T>
@@ -481,12 +482,12 @@ namespace mpi {
 
     template<typename T>
     static bool lor(const T *send, T *recv, uint_t ndata = 1, uint_t iroot = 0) {
-        return reduce(send, recv, MpiLor, ndata, iroot);
+        return reduce(send, recv, LorOp, ndata, iroot);
     }
 
     template<typename T>
     static bool all_lor(const T *send, T *recv, uint_t ndata = 1) {
-        return all_reduce(send, recv, MpiLor, ndata);
+        return all_reduce(send, recv, LorOp, ndata);
     }
 
     template<typename T>
@@ -521,13 +522,13 @@ namespace mpi {
 
     template<typename T>
     static bool send(const T *data, uint_t ndata, uint_t irank_dst, int tag) {
-        return MPI_Send(reinterpret_cast<const void *>(data), snrw(ndata), mpi_type<T>(), snrw(irank_dst), tag,
+        return MPI_Send(reinterpret_cast<const void *>(data), snrw(ndata), type<T>(), snrw(irank_dst), tag,
                         MPI_COMM_WORLD);
     }
 
     template<typename T>
     static bool recv(T *data, uint_t ndata, uint_t irank_src, int tag) {
-        return MPI_Recv(reinterpret_cast<void *>(data), snrw(ndata), mpi_type<T>(), snrw(irank_src), tag,
+        return MPI_Recv(reinterpret_cast<void *>(data), snrw(ndata), type<T>(), snrw(irank_src), tag,
                         MPI_COMM_WORLD,
                         MPI_STATUS_IGNORE);
     }
@@ -538,7 +539,7 @@ namespace mpi {
      */
     template<typename T>
     static bool bcast(T *data, uint_t ndata = 1, uint_t iroot = 0) {
-        return MPI_Bcast(reinterpret_cast<void *>(data), snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) ==
+        return MPI_Bcast(reinterpret_cast<void *>(data), snrw(ndata), type<T>(), snrw(iroot), MPI_COMM_WORLD) ==
                MPI_SUCCESS;
     }
 
@@ -553,7 +554,7 @@ namespace mpi {
         mpi::bcast(size, iroot);
         if (!i_am(iroot)) data.resize(size);
         auto data_ptr = reinterpret_cast<void *>(data.data());
-        return MPI_Bcast(data_ptr, snrw(size), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Bcast(data_ptr, snrw(size), type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     static bool bcast(str_t &data, uint_t iroot = 0) {
@@ -571,7 +572,7 @@ namespace mpi {
         v_t<std::pair<T, uint_t>> tmp;
         tmp.reserve(ndata);
         for (uint_t idata = 0ul; idata < ndata; ++idata) tmp.push_back({send[idata], irank()});
-        return all_reduce(tmp.data(), recv, MpiMaxLoc, ndata);
+        return all_reduce(tmp.data(), recv, MaxLocOp, ndata);
     }
 
     template<typename T>
@@ -593,7 +594,7 @@ namespace mpi {
         v_t<std::pair<T, uint_t>> tmp;
         tmp.reserve(ndata);
         for (uint_t idata = 0ul; idata < ndata; ++idata) tmp.push_back({send[idata], irank()});
-        return all_reduce(tmp.data(), recv, MpiMinLoc, ndata);
+        return all_reduce(tmp.data(), recv, MinLocOp, ndata);
     }
 
     template<typename T>
@@ -620,8 +621,8 @@ namespace mpi {
             const T *send, uint_t sendcount, T *recv, uint_t recvcount, uint_t iroot) {
         auto send_ptr = reinterpret_cast<void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
-        return MPI_Gather(send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr,
-                          snrw(recvcount), mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Gather(send_ptr, snrw(sendcount), type<T>(), recv_ptr,
+                          snrw(recvcount), type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
@@ -630,7 +631,7 @@ namespace mpi {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Allgather(
-                send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr, snrw(recvcount), mpi_type<T>(), MPI_COMM_WORLD) ==
+                send_ptr, snrw(sendcount), type<T>(), recv_ptr, snrw(recvcount), type<T>(), MPI_COMM_WORLD) ==
                MPI_SUCCESS;
     }
 
@@ -652,8 +653,8 @@ namespace mpi {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Gatherv(
-                send_ptr, sendcount, mpi_type<T>(),
-                recv_ptr, recvcounts, recvdispls, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+                send_ptr, sendcount, type<T>(),
+                recv_ptr, recvcounts, recvdispls, type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
@@ -663,8 +664,8 @@ namespace mpi {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Allgatherv(
-                send_ptr, sendcount, mpi_type<T>(),
-                recv_ptr, recvcounts, recvdispls, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+                send_ptr, sendcount, type<T>(),
+                recv_ptr, recvcounts, recvdispls, type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
@@ -727,8 +728,8 @@ namespace mpi {
             const T *send, uint_t sendcount, T *recv, uint_t recvcount, uint_t iroot) {
         auto send_ptr = reinterpret_cast<void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
-        return MPI_Scatter(send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr,
-                           snrw(recvcount), mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Scatter(send_ptr, snrw(sendcount), type<T>(), recv_ptr,
+                           snrw(recvcount), type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
@@ -738,8 +739,8 @@ namespace mpi {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Scatterv(
-                send_ptr, sendcounts, senddispls, mpi_type<T>(),
-                recv_ptr, recvcount, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+                send_ptr, sendcounts, senddispls, type<T>(),
+                recv_ptr, recvcount, type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
@@ -759,8 +760,8 @@ namespace mpi {
     static bool all_to_all(const T *send, uint_t nsend, T *recv, uint_t nrecv) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
-        return MPI_Alltoall(send_ptr, snrw(nsend), mpi_type<T>(),
-                            recv_ptr, snrw(nrecv), mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Alltoall(send_ptr, snrw(nsend), type<T>(),
+                            recv_ptr, snrw(nrecv), type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
@@ -775,8 +776,8 @@ namespace mpi {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Alltoallv(
-                send_ptr, sendcounts, senddispls, mpi_type<T>(),
-                recv_ptr, recvcounts, recvdispls, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+                send_ptr, sendcounts, senddispls, type<T>(),
+                recv_ptr, recvcounts, recvdispls, type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>

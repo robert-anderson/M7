@@ -9,7 +9,7 @@ SharedArrayBase::SharedArrayBase(uint_t element_size) : m_element_size(element_s
 void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, void **data) {
     const auto nbyte = nelement * element_size;
     const auto local_nbyte = mpi::on_node_i_am_root() ? nbyte : 0ul;
-    auto ierr = MPI_Win_allocate_shared(local_nbyte, element_size, MPI_INFO_NULL, g_node_comm, data, win);
+    auto ierr = MPI_Win_allocate_shared(local_nbyte, element_size, MPI_INFO_NULL, mpi::g_node_comm, data, win);
     REQUIRE_EQ(ierr, MPI_SUCCESS, "MPI Shared memory error");
     DEBUG_ASSERT_TRUE(*data, "data pointer not set");
     MPI_Win_lock_all(0, *win);

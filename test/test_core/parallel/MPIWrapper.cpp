@@ -143,7 +143,7 @@ TEST(MPIWrapper, MaxLocMinLoc){
     std::pair<T, uint_t> mpi_max{std::numeric_limits<T>::min(), 0};
     std::pair<T, uint_t> mpi_min{std::numeric_limits<T>::max(), 0};
 
-    ASSERT_EQ(MPI_DOUBLE_INT, mpi_pair_type<T>());
+    ASSERT_EQ(MPI_DOUBLE_INT, mpi::pair_type<T>());
 
     ASSERT_TRUE(mpi::all_maxloc(local, mpi_max));
     ASSERT_EQ(max, mpi_max);

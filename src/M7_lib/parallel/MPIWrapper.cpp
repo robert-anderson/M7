@@ -163,14 +163,14 @@ uintv_t mpi::filter(bool cond) {
     return ranks;
 }
 
-uint_t g_irank = 0;
-uint_t g_nrank = 1;
-str_t g_processor_name = "";
-MPI_Comm g_node_comm;
-uint_t g_irank_on_node = 0;
-uint_t g_nrank_on_node = 1;
-v_t<char> g_node_roots = {};
-uint_t g_my_node_root_irank = 0;
-int g_p2p_tag = 0;
-std::array<v_t<buf_t>, mpi_types.size()> g_send_reduction_buffers = {};
-std::array<v_t<buf_t>, mpi_types.size()> g_recv_reduction_buffers = {};
+uint_t mpi::g_irank = 0;
+uint_t mpi::g_nrank = 1;
+str_t mpi::g_processor_name = "";
+MPI_Comm mpi::g_node_comm;
+uint_t mpi::g_irank_on_node = 0;
+uint_t mpi::g_nrank_on_node = 1;
+v_t<char> mpi::g_node_roots = {};
+uint_t mpi::g_my_node_root_irank = 0;
+int mpi::g_p2p_tag = 0;
+std::array<v_t<buf_t>, mpi::g_types.size()> mpi::g_send_reduce_buffers = {};
+std::array<v_t<buf_t>, mpi::g_types.size()> mpi::g_recv_reduce_buffers = {};

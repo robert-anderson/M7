@@ -12,6 +12,7 @@ target_sources(M7_lib
         PeriodicEvent.h
         RankAllocator.cpp
         RankAllocator.h
+        Reduction.cpp
         Reduction.h
         SharedArray.cpp
         SharedArray.h
