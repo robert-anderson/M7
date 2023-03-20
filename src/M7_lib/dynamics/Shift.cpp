@@ -43,9 +43,10 @@ void Shift::update(const wf::Vectors &wf, const wf::Refs& refs, uint_t icycle, d
          */
         uint_t a = 0ul;
         if (m_opts.m_shift.m_fix_ref_weight.m_value) {
-            if (variable_mode.update(icycle, refs[ipart].weight() >= m_nwalker_target)) {
-                logging::info("Variable shift triggered for WF part {}. Cycle {} ref weight: {}",
-                              ipart, icycle, refs[ipart].weight());
+            const auto mag = std::abs(refs[ipart].weight());
+            if (variable_mode.update(icycle, mag >= m_nwalker_target)) {
+                logging::info("Variable shift triggered for WF part {}. Cycle {} ref magnitude: {}",
+                              ipart, icycle, mag);
                 a = icycle % m_opts.m_shift.m_period;
             }
         }

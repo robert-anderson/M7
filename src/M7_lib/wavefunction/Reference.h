@@ -18,6 +18,7 @@
 namespace wf {
 
     class Ref : public shared_rows::Walker {
+        using shared_rows::Walker::row;
         const Hamiltonian& m_ham;
         const Vectors& m_wf;
         /**
@@ -100,6 +101,7 @@ namespace wf {
         void make_numerator_contribs(const Mbf& mbf, const wf_t& weight);
 
         const ham_t& proj_energy_num() const;
+
     };
 
     /**

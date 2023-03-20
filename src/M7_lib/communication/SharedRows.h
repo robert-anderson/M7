@@ -28,7 +28,6 @@ namespace shared_rows {
          * name to use for this row set in detailed logging
          */
         str_t m_name;
-    private:
         /**
          * all rows gathered
          */
@@ -146,6 +145,7 @@ namespace shared_rows {
         using Set<row_t>::add_;
         using Set<row_t>::full_update;
         using Set<row_t>::m_irecs;
+        using Set<row_t>::m_src_row;
 
         Single(str_t name, const src_t& src, TableBase::Loc loc): Set<row_t>(name, src, loc) {}
 
@@ -157,6 +157,10 @@ namespace shared_rows {
 
         uint_t irec() const {
             return m_irecs.empty() ? ~0ul : *m_irecs.cbegin();
+        }
+
+        row_t& row() {
+            return m_src_row;
         }
 
         bool is_mine() const {

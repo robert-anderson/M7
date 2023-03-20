@@ -81,6 +81,11 @@ namespace math {
     T clamp(const T& v, const T& lo, const T& hi) {
         return (v < lo) ? lo : (hi < v ? hi : v);
     }
+
+    template<typename T>
+    T phase(const T& v) {
+        return v/std::abs(v);
+    }
 }
 
 #endif //M7_UTIL_MATH_H
