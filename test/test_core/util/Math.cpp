@@ -2,7 +2,7 @@
 // Created by rja on 14/06/22.
 //
 
-#include "gtest/gtest.h"
+#include "test_core/defs.h"
 #include "M7_lib/util/Math.h"
 
 using namespace math;
@@ -13,4 +13,9 @@ TEST(UtilMath, CompileTimePow) {
     ASSERT_EQ(pow<0>(10), 1ul);
     ASSERT_EQ(pow<1>(10), 10ul);
     ASSERT_EQ(pow<1>(0), 0ul);
+}
+
+TEST(UtilMath, GeoMean) {
+    v_t<double> v = {0.12 , 0.009, 0.034, 0.074, 0.023, 0.003, 0.002, 0.079};
+    ASSERT_NEAR_EQ(math::geo_mean(v), 0.02036831352);
 }

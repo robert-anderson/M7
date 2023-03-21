@@ -7,6 +7,7 @@
 
 #include <complex>
 #include <numeric>
+#include <random>
 #include "M7_lib/defs.h"
 
 
@@ -85,6 +86,23 @@ namespace math {
     template<typename T>
     T phase(const T& v) {
         return v/std::abs(v);
+    }
+
+    /**
+     * geometric mean of the absolute value of given data
+     * mean(v) = (prod_i |v_i|) / sqrt(n)
+     *         = exp(sum_i log v_i / n)
+     */
+    template<typename T>
+    T geo_mean(const T* v, uint_t n) {
+        T tot = 0.0;
+        for (auto ptr=v; ptr!=v+n; ++ptr) tot+=std::log(std::abs(*ptr));
+        return std::exp(tot / n);
+    }
+
+    template<typename T>
+    T geo_mean(const v_t<T>& v) {
+        return geo_mean(v.data(), v.size());
     }
 }
 
