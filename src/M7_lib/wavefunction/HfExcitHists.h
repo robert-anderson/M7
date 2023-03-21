@@ -13,16 +13,13 @@
 namespace hf_excit_hist {
 
     struct IndVals {
-    private:
+        wf_comp_t m_geo_mean = 0.0;
+        wf_comp_t m_thresh = 0.0;
         uint_t m_nelement = 0ul;
-    public:
         dense::Matrix<rdm_ind_t> m_inds;
         dense::Vector<wf_t> m_vals;
-        IndVals(const hdf5::NodeReader& parent, str_t name, wf_t thresh);
 
-        uint_t nelement() const {
-            return m_nelement;
-        }
+        IndVals(const hdf5::NodeReader& parent, str_t name, wf_t thresh);
     };
 
     struct Initializer {
@@ -51,15 +48,12 @@ namespace hf_excit_hist {
          */
         conn::Mbf m_work_conn;
         /**
-         * minimum intermediate-normalized weight for inclusion as a permanitiator
-         */
-        const wf_comp_t m_thresh;
-        /**
          * number of permanitiators created by excitation level
          */
         reduction::NdArray<uint_t, 1> m_ncreated;
 
-        Initializer(wf::Vectors& wf, const field::Mbf& hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation);
+        Initializer(wf::Vectors& wf, const field::Mbf& hf, str_t fname,
+                    double geo_mean_power_thresh, bool cancellation);
 
     private:
 
@@ -67,8 +61,6 @@ namespace hf_excit_hist {
          * cumulatively multiply the first n ci coefficients until the product falls below the threshold
          */
         uint_t max_power_by_thresh();
-
-        wf_comp_t find_first(uint_t npower);
 
         bool apply(field::Mbf& mbf, uint_t ientry);
 
@@ -82,7 +74,7 @@ namespace hf_excit_hist {
         void setup();
     };
 
-    void initialize(wf::Vectors& wf, const field::Mbf& hf, str_t fname, wf_t thresh, uint_t max_power, bool cancellation);
+    void initialize(wf::Vectors& wf, const field::Mbf& hf, str_t fname, double geo_mean_power_thresh, bool cancellation);
 
     void initialize(wf::Vectors& wf, const field::Mbf& hf, const conf::CiPermanitiator& opts);
 

@@ -115,13 +115,12 @@ conf::CiPermanitiator::CiPermanitiator(Group *parent) :
             "options relating to conferring permanent initiator status on determinants based on products of "
             "lower-rank excitations", Explicit),
         m_path(this, "path", "M7.hf_excit.h5", "file path to CI data source"),
-        m_thresh(this, "thresh", 0.001,
-                 "minimum intermediate-normalized coefficient product required for permanitiator status"),
-        m_max_power(this, "max_power", 0,
-                 "maximum power of C2 for which one permanitiator is desired"),
+        m_geo_mean_power_thresh(this, "geo_mean_power_thresh", 2.0,
+         "power of the geometric mean of intermediate-normalized C2 coefficients defining the threshold required "
+            "for permanitiator status"),
         m_cancellation(this, "cancellation", true,
             "if true, an excitation is removed from the list of permanitiators when it takes multiple contributions"
-            " which sum to a value less than thresh")
+            " which sum to a value less than threshold implied by C2 list and geo_mean_power_thresh")
 {}
 
 

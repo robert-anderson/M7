@@ -2,9 +2,10 @@
 // Created by rja on 19/02/23.
 //
 
+#include <M7_lib/util/Math.h>
 #include "HfExcitHists.h"
 
-hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_comp_t thresh) :
+hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, double geo_mean_power_thresh) :
         m_inds(hdf5::GroupReader(parent, name), "indices", mpi::on_node_i_am_root(), true),
         m_vals(hdf5::GroupReader(parent, name), "values", mpi::on_node_i_am_root(), true) {
     REQUIRE_EQ(m_inds.nrow(), m_vals.nelement(),
@@ -16,22 +17,21 @@ hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, wf_c
     m_inds.reorder_rows(order);
     m_vals.reorder(order);
     mpi::barrier_on_node();
-    while(m_nelement < m_vals.nelement() && std::abs(m_vals[m_nelement]) >= thresh) ++m_nelement;
+    m_geo_mean = math::geo_mean(m_vals.tbegin(), m_vals.nelement());
+    m_thresh = std::pow(m_geo_mean, geo_mean_power_thresh);
+    while(m_nelement < m_vals.nelement() && std::abs(m_vals[m_nelement]) >= m_thresh) ++m_nelement;
 }
 
 hf_excit_hist::Initializer::Initializer(
-        wf::Vectors &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation) :
-        m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2", thresh), m_cancellation(cancellation),
-        m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf), m_thresh(max_power ? find_first(max_power) : thresh),
+        wf::Vectors &wf, const Mbf &hf, str_t fname, double geo_mean_power_thresh, bool cancellation) :
+        m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2", geo_mean_power_thresh),
+        m_cancellation(cancellation), m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf),
         m_ncreated({2*max_power_by_thresh()+1}) {
     logging::info("Maximum-magnitude C2 coefficient: {}", m_c2.m_vals[0]);
-    if (max_power) {
-        DEBUG_ASSERT_EQ(max_power, max_power_by_thresh(), "max power specified should match match power computed");
-        logging::info("Specified maximum relevant power of C2 ({}) implies a threshold of {}", max_power, m_thresh);
-    }
-    else {
-        logging::info("Threshold of {} implies maximum relevant power of C2 is {}", m_thresh, max_power_by_thresh());
-    }
+    logging::info("Geometric mean of C2 coefficients: {}", m_c2.m_geo_mean);
+    logging::info("Specified power of C2 geo mean ({}) implies a threshold of {} for C2^n permanitiators",
+                  geo_mean_power_thresh, m_c2.m_thresh);
+    logging::info("Threshold implies maximum relevant power of C2 is {}", max_power_by_thresh());
 }
 
 uint_t hf_excit_hist::Initializer::max_power_by_thresh() {
@@ -40,34 +40,9 @@ uint_t hf_excit_hist::Initializer::max_power_by_thresh() {
     for (uint_t ipower = 0ul; ipower < limit; ++ipower) {
         product *= std::abs(m_c2.m_vals[ipower]);
         product /= (ipower+1);
-        if (product < m_thresh) return ipower;
+        if (product < m_c2.m_thresh) return ipower;
     }
     return limit;
-}
-
-wf_comp_t hf_excit_hist::Initializer::find_first(uint_t npower) {
-    wf_t product = 1.0;
-    m_work_mbf = m_hf;
-    uint_t ientry = 0ul;
-
-    auto mag = [&](uint_t ientry) {return std::abs(m_c2.m_vals[ientry]);};
-
-    for (uint_t ipower = 1ul; ipower <= npower; ++ipower){
-        for (; ientry < m_c2.nelement(); ++ientry) {
-            if (apply(m_work_mbf, ientry)) {
-                // the entry was successfully applied
-                const bool geo_mean_with_next = (ipower == npower && (ientry + 1) < m_c2.nelement());
-                /*
-                 * to avoid any inconsistencies due to floating-point inequalities, let the last contribution be between
-                 * the current entry and the next-largest one
-                 */
-                product *= geo_mean_with_next ? std::sqrt(mag(ientry) * mag(ientry+1)) : mag(ientry);
-                // exit the loop over entries
-                break;
-            }
-        }
-    }
-    return std::abs(product);
 }
 
 bool hf_excit_hist::Initializer::apply(Mbf &mbf, uint_t ientry) {
@@ -110,7 +85,7 @@ void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_
          * do not continue with this branch of contributions if the prev_product is already smaller than the thresh,
          * since the values are sorted in descending order
          */
-        if (std::abs(product) < m_thresh) return;
+        if (std::abs(product) < m_c2.m_thresh) return;
         if (apply(mbf, i)) {
             // i-th indices were successfully applied
             if (mpi::i_am(m_wf.m_dist.irank(mbf))) {
@@ -132,7 +107,7 @@ void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_
 
 void hf_excit_hist::Initializer::setup() {
     m_work_mbf = m_hf;
-    setup(m_work_mbf, m_c2.nelement(), 1, 1.0);
+    setup(m_work_mbf, m_c2.m_nelement, 1, 1.0);
     m_ncreated.all_sum();
     auto& row = m_wf.m_store.m_row;
     strv_t header = {"excitation level", "number in use"};
@@ -147,7 +122,7 @@ void hf_excit_hist::Initializer::setup() {
         auto after_cancellation = m_ncreated.m_reduced;
         for (row.restart(); row; ++row) {
             if (row.m_permanitiator.get(0)) {
-                if (std::abs(row.m_weight[0]) < m_thresh) {
+                if (std::abs(row.m_weight[0]) < m_c2.m_thresh) {
                     m_work_conn.connect(m_hf, row.m_mbf);
                     --after_cancellation[m_work_conn.m_cre.size()];
                     row.unprotect();
@@ -176,15 +151,14 @@ void hf_excit_hist::Initializer::setup() {
     logging::info_table("Permanitiator breakdown", logging_table, true);
 }
 
-void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, str_t fname, wf_comp_t thresh, uint_t max_power, bool cancellation) {
-    Initializer(wf, hf, fname, thresh, max_power, cancellation).setup();
+void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, str_t fname, double geo_mean_power_thresh, bool cancellation) {
+    Initializer(wf, hf, fname, geo_mean_power_thresh, cancellation).setup();
 }
 
 void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, const conf::CiPermanitiator &opts) {
     logging::info("Setting permanitiators based on CI data from \"{}\"", opts.m_path.m_value);
-    initialize(wf, hf, opts.m_path, opts.m_thresh, opts.m_max_power, opts.m_cancellation);
+    initialize(wf, hf, opts.m_path, opts.m_geo_mean_power_thresh, opts.m_cancellation);
 }
-
 
 uintv_t hf_excit_hist::Accumulators::make_nexcit_is_accumulated(const uintv_t &nexcits) {
     if (nexcits.empty()) return {};
