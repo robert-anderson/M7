@@ -3,6 +3,7 @@
 //
 
 #include "Timer.h"
+#include <M7_lib/parallel/MPIAssert.h>
 
 
 void Timer::sleep_(double nsec) {

@@ -16,6 +16,7 @@
 
 #include <M7_lib/parallel/MPIWrapper.h>
 #include <M7_lib/util/Datatype.h>
+#include <M7_lib/util/Timer.h>
 
 
 /*
@@ -23,6 +24,20 @@
  *   1. Reduced: only output by the root MPI rank to stdout, and a non-color copy to M7.log
  *   2. Local: output by all ranks (including the root) to M7.log.<irank>
  */
+
+//struct Logger {
+//    const Timer m_start;
+//    std::unique_ptr<std::ostream> m_reduced_file;
+//    std::unique_ptr<std::ostream> m_local_file;
+//
+//    enum Level {Info, Warn, Error};
+//
+//    template<typename ...Args>
+//    static str_t format(const str_t& fmt_string, Args&&... args){
+//
+//    }
+//
+//};
 
 extern std::shared_ptr<spdlog::logger> g_reduced_stdout_logger;
 extern std::shared_ptr<spdlog::logger> g_reduced_file_logger;
