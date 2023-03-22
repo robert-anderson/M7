@@ -214,6 +214,11 @@ def check_ninit(fname='M7.stats'):
     run, bench = stats_columns('Initiator', fname)
     if not np.allclose(run, bench): fail('initiator number trajectories do not agree')
 
+def check_nocc_mbf(fname='M7.stats'):
+    if benchmarking: return
+    run, bench = stats_columns('Occupied MBFs', fname)
+    if not np.allclose(run, bench): fail('number of occupied MBF trajectories do not agree')
+
 def check_rdm_archives(fname='M7.rdm.h5'):
     if benchmarking: return
     run, bench = instance.rdms(fname)

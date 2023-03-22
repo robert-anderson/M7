@@ -167,11 +167,6 @@ void Solver::execute(uint_t ncycle) {
 void Solver::begin_cycle() {
 //    m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
 
-    m_prop.update(m_icycle, m_wf, m_refs);
-    if (m_prop.m_shift.m_variable_mode && m_opts.m_shift.m_fix_ref_weight) {
-        m_wf.m_ref = &m_refs[0].mbf();
-        m_wf.m_preserve_ref = true;
-    }
 
     m_wf.begin_cycle();
     DEBUG_ASSERT_TRUE(m_wf.m_nwalker.delta().is_zero(), "Cyclic reducibles should be zeroed before new cycle");
@@ -184,6 +179,12 @@ void Solver::begin_cycle() {
     }
     m_refs.begin_cycle(m_icycle);
     if (m_hf) m_hf->update();
+
+    m_prop.update(m_icycle, m_wf, m_refs);
+    if (m_prop.m_shift.m_variable_mode && m_opts.m_shift.m_fix_ref_weight) {
+        m_wf.m_ref = &m_refs[0].mbf();
+        m_wf.m_preserve_ref = true;
+    }
 
     auto update_epoch = [&](uint_t ncycle_wait) {
         const auto &epochs = m_prop.m_shift.m_variable_mode;
@@ -234,6 +235,15 @@ void Solver::loop_over_occupied_mbfs() {
             m_maes.make_average_contribs(walker, m_hf.get(), m_icycle);
             m_wf.remove_row(walker);
             continue;
+        }
+
+        // todo: this is a temporary fix for getting a test benchmark
+        if (m_wf.m_ref) {
+            if (walker.m_mbf == *m_wf.m_ref && m_wf.m_preserve_ref) {
+                m_wf.m_preserve_ref = false;
+                m_wf.set_weight(walker, m_opts.m_propagator.m_nw_target);
+                m_wf.m_preserve_ref = true;
+            }
         }
 
         /*
