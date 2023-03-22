@@ -32,7 +32,8 @@ void StochLinear::diagonal(wf::Vectors& wf, Walker& walker, uint_t ipart) {
     // don't attempt stochastic round if the weight exceeds the threshold
     if (std::abs(weight) >= round_mag) return;
     // else, do the stochastic round, logging the change in magnitude
-    wf.set_weight(walker, ipart, m_prng.stochastic_round(weight, round_mag));
+    const auto new_weight = m_prng.stochastic_round(weight, round_mag);
+    wf.set_weight(walker, ipart, new_weight);
 }
 
 void StochLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipart, bool initiator) {

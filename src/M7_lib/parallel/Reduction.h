@@ -170,8 +170,8 @@ namespace reduction {
     static void all_max(v_t<Base*>& members) {all_reduce(members, mpi::MaxOp);}
     static void all_min(v_t<Base*>& members) {all_reduce(members, mpi::MinOp);}
 
-    static void zero_local(v_t<Base*>& members) {
-        for (auto& member: members) member->m_local_base.zero();
+    static void clear_local(v_t<Base*>& members) {
+        for (auto& member: members) member->m_local_base.clear();
     }
 }
 

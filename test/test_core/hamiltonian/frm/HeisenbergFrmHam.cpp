@@ -21,7 +21,7 @@ namespace heisenberg_test {
     }
 
     static void set_onv_from_spinvec(field::FrmOnv& onv, const uintv_t& spinvec){
-        onv.zero();
+        onv.clear();
         uint_t isite = 0ul;
         for (auto &spin: spinvec) onv.set({spin, isite++});
     }

@@ -39,7 +39,7 @@ struct BitsetField : FieldBase {
     // number of bits unused in last dataword
     const uint_t m_nbit_in_last_dword;
 
-    using FieldBase::zero;
+    using FieldBase::clear;
     using FieldBase::begin;
 
     BitsetField(Row *row, NdFormat<nind> format, str_t name="", bool force_own_words=false) :
@@ -58,7 +58,7 @@ struct BitsetField : FieldBase {
 
     BitsetField &operator=(const uintv_t &setbits) {
         // prezero the element
-        zero();
+        FieldBase::clear();
         for (const auto &ind: setbits) set(ind);
         return *this;
     }

@@ -63,7 +63,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
         DEBUG_ASSERT_TRUE(allow_initiation,
                           "initiator rules are turned off, every initiating annihilation should be allowed");
     }
-    DEBUG_ASSERT_FALSE(dst_mbf.is_zero(), "recv table is contiguous, shouldn't have any cleared rows");
+    DEBUG_ASSERT_FALSE(dst_mbf.is_clear(), "recv table is contiguous, shouldn't have any cleared rows");
     DEBUG_ASSERT_EQ(m_wf.m_dist.irank(dst_mbf), mpi::irank(),
                     "the received MBF has not been sent to the right MPI rank!")
     // zero magnitude weights should not have been communicated

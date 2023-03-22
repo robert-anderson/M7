@@ -219,7 +219,7 @@ void Solver::loop_over_occupied_mbfs() {
          * stats always refer to the state of the wavefunction in the previous iteration
          */
 
-        if (walker.m_mbf.is_zero())
+        if (walker.m_mbf.is_clear())
             /*
              * this is a free row, caused by an earlier call to m_wf.remove_row()
              */
@@ -268,7 +268,7 @@ void Solver::loop_over_occupied_mbfs() {
 
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
 
-            DEBUG_ASSERT_TRUE(!m_wf.m_store.m_row.m_mbf.is_zero(),
+            DEBUG_ASSERT_TRUE(!m_wf.m_store.m_row.m_mbf.is_clear(),
                               "Stored MBF should not be zeroed");
             DEBUG_ASSERT_TRUE(mpi::i_am(m_wf.m_dist.irank(m_wf.m_store.m_row.m_mbf)),
                               "Stored MBF should be on its allocated rank");
@@ -302,7 +302,7 @@ void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
     if (!m_maes.m_accum_epoch || m_maes.is_period_cycle(icycle)) return;
     auto& walker = m_wf.m_store.m_row;
     for (walker.restart(); walker; ++walker) {
-        if (walker.m_mbf.is_zero()) continue;
+        if (walker.m_mbf.is_clear()) continue;
         m_maes.make_average_contribs(walker, m_hf.get(), icycle);
     }
     m_maes.end_cycle();

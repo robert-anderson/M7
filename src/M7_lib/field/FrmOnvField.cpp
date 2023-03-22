@@ -28,7 +28,7 @@ FrmOnvField::FrmOnvField(const FrmOnvField &other) :
 
 FrmOnvField &FrmOnvField::operator=(std::pair<const uintv_t &, const uintv_t &> setbits) {
     // prezero the element
-    zero();
+    clear();
     for (const auto &ind: setbits.first) set(ind);
     for (const auto &ind: setbits.second) set(ind+m_basis.m_nsite);
     return *this;
@@ -86,14 +86,14 @@ void FrmOnvField::set(const uint_t &site_offset, const uintv_t &setbits_alpha, c
 }
 
 void FrmOnvField::set(const uintv_t &setbits_alpha, const uintv_t &setbits_beta) {
-    zero();
+    clear();
     for(auto& i: setbits_alpha) set({0, i});
     for(auto& i: setbits_beta) set({1, i});
 }
 
 void FrmOnvField::set_spins(const uintv_t &alpha_sites) {
     DEBUG_ASSERT_LE(alpha_sites.size(), m_basis.m_nsite, "can't have more spins than sites");
-    zero();
+    clear();
     auto it = alpha_sites.cbegin();
     for (uint_t isite=0ul; isite<m_basis.m_nsite; ++isite){
         if (it==alpha_sites.cend() || *it>isite) set({1, isite});

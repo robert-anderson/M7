@@ -83,6 +83,19 @@ struct NdNumberField : NumberFieldBase {
         return FieldBase::operator==(other);
     }
 
+    /**
+     * float types have two values for zero: 0 and -0. The latter of which does not correspond to cleared bytes, so it
+     * does not suffice to use is_clear for numeric types. IEEE 754 demands that -0 and 0 are equal, even if they differ
+     * in the signbit
+     * @return
+     */
+    bool is_zero() const {
+        for (auto ptr=ctbegin(); ptr!=ctbegin()+m_nelement; ++ptr) {
+            if (*ptr != T(0)) return false;
+        }
+        return true;
+    }
+
     T sum_over(const uintv_t& inds) const {
         T tot{};
         for (const auto& ind: inds) tot+=(*this)[ind];

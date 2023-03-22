@@ -18,7 +18,7 @@ Shift::Shift(const conf::Document &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         logging::info("Using targeted shift damping term (growth relative to target population)");
     if (m_opts.m_shift.m_fix_ref_weight)
         logging::info("Updating shift so as to keep the reference population fixed");
-    m_nwalker_last_period.zero();
+    m_nwalker_last_period.clear();
     DEBUG_ASSERT_FALSE(m_variable_mode, "Shift should not initially be in variable mode");
 }
 

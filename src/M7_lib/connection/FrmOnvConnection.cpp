@@ -19,8 +19,8 @@ FrmOnvConnection::FrmOnvConnection(const FrmOnvField& mbf) : FrmOnvConnection(mb
 
 void FrmOnvConnection::connect(const FrmOnvField& src, const FrmOnvField &dst) {
     DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
-    DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
-    DEBUG_ASSERT_FALSE(dst.is_zero(), "should not be computing connection to zero ONV");
+    DEBUG_ASSERT_FALSE(src.is_clear(), "should not be computing connection from cleared ONV");
+    DEBUG_ASSERT_FALSE(dst.is_clear(), "should not be computing connection to cleared ONV");
     clear();
 
     uint_t src_work, dst_work, work;
@@ -84,7 +84,7 @@ bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, F
 
 void FrmOnvConnection::apply(const FrmOnvField &src, FrmOnvField &dst) const {
     DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
-    DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
+    DEBUG_ASSERT_FALSE(src.is_clear(), "should not be computing connection from cleared ONV");
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     const auto nann = m_ann.size();

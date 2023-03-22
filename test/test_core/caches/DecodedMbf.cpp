@@ -28,7 +28,7 @@ TEST(DecodedMbf, Simple){
      */
     const uint_t noccorb = 3;
     auto occ_fn = [&mbf](const inds_t& inds) {
-        mbf.zero();
+        mbf.clear();
         mbf = inds;
         mbf.m_decoded.clear();
         auto& occ_simple_inds = mbf.m_decoded.m_simple_occs.get();

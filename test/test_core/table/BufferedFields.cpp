@@ -48,20 +48,20 @@ TEST(BufferedFields, Numbers){
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = direct_cpy;
     ASSERT_EQ(direct, direct_cpy);
 
     //  6. copy-assignable from const T&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = base_cref;
     ASSERT_EQ(direct, base_cref);
 
     //  7. assignable via any other method T::operator=
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = elements;
     ASSERT_EQ(direct.to_vector(), elements);
 }
@@ -92,20 +92,20 @@ TEST(BufferedFields, Number){
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = direct_cpy;
     ASSERT_EQ(direct, direct_cpy);
 
     //  6. copy-assignable from const T&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = base_cref;
     ASSERT_EQ(direct, base_cref);
 
     //  7. assignable via any other method T::operator=
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = element;
     ASSERT_EQ(direct, element);
 }
@@ -137,19 +137,19 @@ TEST(BufferedFields, NdBitset){
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = direct_cpy;
     ASSERT_EQ(direct, direct_cpy);
 
     //  6. copy-assignable from const T&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = base_cref;
     ASSERT_EQ(direct, base_cref);
 
     //  7. assignable via any other method T::operator=
-    direct.zero();
+    direct.clear();
     ASSERT_EQ(direct.nsetbit(), 0ul);
     direct = setbits;
     ASSERT_EQ(direct.nsetbit(), setbits.size());
@@ -182,19 +182,19 @@ TEST(BufferedFields, Bitset){
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = direct_cpy;
     ASSERT_EQ(direct, direct_cpy);
 
     //  6. copy-assignable from const T&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = base_cref;
     ASSERT_EQ(direct, base_cref);
 
     //  7. assignable via any other method T::operator=
-    direct.zero();
+    direct.clear();
     ASSERT_EQ(direct.nsetbit(), 0ul);
     direct = setbits;
     ASSERT_EQ(direct.nsetbit(), setbits.size());
@@ -230,19 +230,19 @@ TEST(BufferedFields, FrmOnv){
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = direct_cpy;
     ASSERT_EQ(direct, direct_cpy);
 
     //  6. copy-assignable from const T&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = base_cref;
     ASSERT_EQ(direct, base_cref);
 
     //  7. assignable via any other method T::operator=
-    direct.zero();
+    direct.clear();
     direct = frm_inds;
     ASSERT_EQ(direct, direct_cpy);
 }
@@ -276,19 +276,19 @@ TEST(BufferedFields, BosOnv){
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = direct_cpy;
     ASSERT_EQ(direct, direct_cpy);
 
     //  6. copy-assignable from const T&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = base_cref;
     ASSERT_EQ(direct, base_cref);
 
     //  7. assignable via any other method T::operator=
-    direct.zero();
+    direct.clear();
     direct = bos_inds;
     ASSERT_EQ(direct, direct_cpy);
 }
@@ -324,19 +324,19 @@ TEST(BufferedFields, FrmBosOnv){
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = direct_cpy;
     ASSERT_EQ(direct, direct_cpy);
 
     //  6. copy-assignable from const T&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = base_cref;
     ASSERT_EQ(direct, base_cref);
 
     //  7. assignable via any other method T::operator=
-    direct.zero();
+    direct.clear();
     direct = {frm_inds, bos_inds};
     ASSERT_EQ(direct, direct_cpy);
 }
@@ -372,19 +372,19 @@ TEST(BufferedFields, FrmXonv){
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = direct_cpy;
     ASSERT_EQ(direct, direct_cpy);
 
     //  6. copy-assignable from const T&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = base_cref;
     ASSERT_EQ(direct, base_cref);
 
     //  7. assignable via any other method T::operator=
-    direct.zero();
+    direct.clear();
     direct = {ket_inds, bra_inds};
     ASSERT_EQ(direct, direct_cpy);
 }
@@ -420,19 +420,19 @@ TEST(BufferedFields, BosXonv){
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = direct_cpy;
     ASSERT_EQ(direct, direct_cpy);
 
     //  6. copy-assignable from const T&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = base_cref;
     ASSERT_EQ(direct, base_cref);
 
     //  7. assignable via any other method T::operator=
-    direct.zero();
+    direct.clear();
     direct = {ket_inds, bra_inds};
     ASSERT_EQ(direct, direct_cpy);
 }
@@ -480,19 +480,19 @@ TEST(BufferedFields, FrmBosXonv){
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = direct_cpy;
     ASSERT_EQ(direct, direct_cpy);
 
     //  6. copy-assignable from const T&
-    direct.zero();
-    ASSERT_TRUE(direct.is_zero());
+    direct.clear();
+    ASSERT_TRUE(direct.is_clear());
     direct = base_cref;
     ASSERT_EQ(direct, base_cref);
 
     //  7. assignable via any other method T::operator=
-    direct.zero();
+    direct.clear();
     direct = {{ket_frm_inds, ket_bos_inds}, {bra_frm_inds, bra_bos_inds}};
     ASSERT_EQ(direct, direct_cpy);
 }

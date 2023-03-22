@@ -144,7 +144,7 @@ void wf::Vectors::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian&
 }
 
 void wf::Vectors::begin_cycle() {
-    reduction::zero_local(m_summed);
+    reduction::clear_local(m_summed);
     m_store.attempt_remap();
 }
 

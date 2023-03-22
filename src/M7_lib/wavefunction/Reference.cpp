@@ -21,7 +21,7 @@ wf::Ref::Ref(const conf::Reference &opts, const Hamiltonian &ham,
 void wf::Ref::update_ref_conn_flags() {
     auto row = m_wf.m_store.m_row;
     for (row.restart(); row; ++row){
-        if (row.m_mbf.is_zero()) continue;
+        if (row.m_mbf.is_clear()) continue;
         row.m_ref_conn.put(m_ipart, is_connected(row.m_mbf));
     }
 }
@@ -66,7 +66,7 @@ void wf::Ref::contrib_row(const ::Walker& walker) {
 void wf::Ref::begin_cycle(uint_t icycle) {
     accept_candidate(icycle);
     m_candidate_weight = 0.0;
-    m_proj_energy_num.m_local.zero();
+    m_proj_energy_num.m_local.clear();
     update();
 }
 

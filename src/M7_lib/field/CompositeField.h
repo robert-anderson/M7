@@ -42,15 +42,15 @@ protected:
         void operator()(const T &v) { m_str += v.to_string() + " "; }
     };
 
-    struct ZeroFn {
+    struct ClearFn {
         template<typename T>
-        void operator()(T &v) { v.zero(); }
+        void operator()(T &v) { v.clear();}
     };
 
-    struct IsZeroFn {
+    struct IsClearFn {
         bool m_and = true;
         template<typename T>
-        void operator()(const T &v) { m_and &= v.is_zero(); }
+        void operator()(const T &v) { m_and &= v.is_clear();}
     };
 
     struct HashFn {
@@ -129,13 +129,13 @@ struct CompositeField : CompositeFieldBase {
         return fn.m_str;
     }
 
-    void zero() {
-        ZeroFn fn;
+    void clear() {
+        ClearFn fn;
         tuple::foreach(m_refs, fn);
     }
 
-    bool is_zero() const {
-        IsZeroFn fn;
+    bool is_clear() const {
+        IsClearFn fn;
         tuple::foreach(m_refs, fn);
         return fn.m_and;
     }

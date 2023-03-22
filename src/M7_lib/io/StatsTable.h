@@ -71,7 +71,7 @@ namespace statistic {
             if (m_mean) this->add_to(m_reduced);
             else if (!m_ncommit_this_period) this->copy_to(m_reduced);
             ++m_ncommit_this_period;
-            NumberFieldBase::zero();
+            NumberFieldBase::clear();
         }
 
         void reset() override {

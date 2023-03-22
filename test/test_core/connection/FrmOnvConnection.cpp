@@ -202,15 +202,15 @@ TEST(Connection, EntireCiPhases) {
     while (file_reader.next(tokens)) {
         ASSERT_TRUE(parse::catching(tokens.cbegin(), tokens.cbegin()+1, value));
         ASSERT_TRUE(parse::catching(tokens.cbegin()+1, tokens.cend(), inds));
-        bra.zero();
-        ket.zero();
+        bra.clear();
+        ket.clear();
         for (uint_t i = 0ul; i < 8ul; ++i) {
             if (inds[i]) bra.set(i);
         }
         for (uint_t i = 8ul; i < 16ul; ++i) {
             if (inds[i]) ket.set(i - 8);
         }
-        if (bra.is_zero() || ket.is_zero()) continue;
+        if (bra.is_clear() || ket.is_clear()) continue;
         if (bra.nsetbit() != ket.nsetbit()) continue;
 
         if (value<0)

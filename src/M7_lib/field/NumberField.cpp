@@ -28,7 +28,7 @@ StringField &StringField::operator=(const StringField &other) {
 StringField &StringField::operator=(const char *str) {
     auto len = std::strlen(str);
     DEBUG_ASSERT_LE(len, nelement(), "String length does not match that of string field");
-    zero();
+    clear();
     std::copy(str, str+len, tbegin());
     return *this;
 }

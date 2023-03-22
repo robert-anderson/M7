@@ -5,7 +5,7 @@
 #include "Mbf.h"
 
 void mbf::set_aufbau_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
-    onv.zero();
+    onv.clear();
     uint_t nalpha, nbeta;
     if (elecs.m_ms2.conserve()){
         nalpha = elecs.m_nalpha;
@@ -28,7 +28,7 @@ void mbf::set_aufbau_mbf(field::FrmOnv &onv, sys::Particles particles) {
 
 void mbf::set_aufbau_mbf(field::BosOnv &onv, sys::bos::Bosons bosons) {
     if (!onv.nelement()) return;
-    onv.zero();
+    onv.clear();
     onv[0] = bosons;
 }
 
@@ -41,7 +41,7 @@ void mbf::set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
     REQUIRE_TRUE(elecs.m_ms2.conserve(), "Neel state requires conserved 2*Ms");
     REQUIRE_LE(std::abs(elecs.m_ms2), 1,
                "Neel state requires overall spin of -1, 0, or 1");
-    onv.zero();
+    onv.clear();
     uint_t ispin = elecs.m_ms2 < 0;
     for (uint_t isite = 0ul; isite < elecs; ++isite) {
         onv.set({ispin, isite});
@@ -52,7 +52,7 @@ void mbf::set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
 void mbf::set_from_def_array(field::FrmOnv &mbf, const v_t<uintv_t> &def, uint_t idef) {
     if (def.empty()) return;
     REQUIRE_LT(idef, def.size(), "MBF definition index OOB");
-    mbf.zero();
+    mbf.clear();
     auto& definds = def[idef];
     if (definds.size() == mbf.m_basis.m_nspinorb) {
         // assume the determinant is specified as a bit string
@@ -75,7 +75,7 @@ void mbf::set_from_def_array(field::FrmOnv &mbf, const v_t<uintv_t> &def, uint_t
 void mbf::set_from_def_array(field::BosOnv &mbf, const v_t<uintv_t> &def, uint_t idef) {
     if (def.empty()) return;
     REQUIRE_LT(idef, def.size(), "MBF definition index OOB");
-    mbf.zero();
+    mbf.clear();
     auto& definds = def[idef];
     REQUIRE_EQ(definds.size(), mbf.m_nelement,
                "length of input vector does not match number of boson modes");

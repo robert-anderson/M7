@@ -34,7 +34,7 @@ BosOnvField &BosOnvField::operator=(const uintv_t &inds) {
 }
 
 void BosOnvField::set_ops(const uintv_t &iops) {
-    zero();
+    clear();
     for (auto& iop: iops) (*this)[iop]++;
 }
 

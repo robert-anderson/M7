@@ -137,9 +137,9 @@ public:
 
     Row *row_of_copy() const;
 
-    void zero();
+    void clear();
 
-    bool is_zero() const;
+    bool is_clear() const;
 
     bool operator==(const FieldBase &other) const;
 

@@ -48,11 +48,11 @@ Row *FieldBase::row_of_copy() const {
     return m_row->m_child;
 }
 
-void FieldBase::zero() {
+void FieldBase::clear() {
     std::memset(begin(), 0, m_size);
 }
 
-bool FieldBase::is_zero() const {
+bool FieldBase::is_clear() const {
     DEBUG_ASSERT_EQ(m_null_string.size(), m_size, "comparison-with-zero string is incorrect length");
     return std::memcmp(cbegin(), m_null_string.data(), m_size) == 0;
 }

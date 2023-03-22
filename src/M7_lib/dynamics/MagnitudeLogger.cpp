@@ -52,6 +52,6 @@ void MagnitudeLogger::update(uint_t icycle, double &tau, ExcitGenGroup &excit_ge
         for (auto& new_prob : m_new_probs) new_prob /= gamma_sum;
         prob::rectify(m_new_probs, m_prob_min);
         excit_gens.set_probs(m_new_probs);
-        m_gamma.m_local.zero();
+        m_gamma.m_local.clear();
     }
 }

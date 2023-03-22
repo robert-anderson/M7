@@ -19,7 +19,7 @@ TEST(Fields, HashUniformityTrueRandom){
     buffered::FrmOnv fonv(nsite);
 
     for (uint_t idraw=0ul; idraw<ndraw; ++idraw){
-        fonv.zero();
+        fonv.clear();
         for (auto ispin: {0ul, 1ul}) {
             uint_t nset = 0ul;
             while (nset < nelec/2) {
@@ -54,7 +54,7 @@ TEST(Fields, HashUniformityLowIndexMoreLikely){
     buffered::FrmOnv fonv(nsite);
 
     for (uint_t idraw=0ul; idraw<ndraw; ++idraw){
-        fonv.zero();
+        fonv.clear();
         for (auto ispin: {0ul, 1ul}) {
             uint_t nset = 0ul;
             uint_t isite = 0ul;

@@ -30,7 +30,7 @@ TEST(BitsetField, SetRange) {
     buffered::Bitset<uint16_t> field(nbit);
     for (uint_t ibegin=0ul; ibegin<nbit; ++ibegin){
         for (uint_t iend=ibegin+1; iend<nbit; ++iend) {
-            field.zero();
+            field.clear();
             field.set_range(ibegin, iend);
             for (uint_t ibit=0ul; ibit<nbit; ++ibit){
                 if (ibit<ibegin) {ASSERT_FALSE(field.get(ibit));}

@@ -24,7 +24,7 @@ void commuting_obs::Estimator::make_numerator_contribs(const Walker& walker) {
 }
 
 void commuting_obs::Estimator::begin_cycle(uint_t /*icycle*/) {
-    m_proj_num.m_local.zero();
+    m_proj_num.m_local.clear();
 }
 
 void commuting_obs::Estimator::end_cycle(uint_t /*icycle*/) {

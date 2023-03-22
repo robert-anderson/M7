@@ -55,7 +55,7 @@ TEST(Reduction, NdAllSumSyndicate) {
     reduction::all_sum(syndicate);
     chk_sum_all_fn(reduction, 120);
     chk_sum_all_fn(reduction2, 150);
-    reduction::zero_local(syndicate);
+    reduction::clear_local(syndicate);
     ASSERT_TRUE(reduction.m_local.is_zero());
     ASSERT_TRUE(reduction2.m_local.is_zero());
 

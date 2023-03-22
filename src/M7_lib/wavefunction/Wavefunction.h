@@ -279,7 +279,7 @@ namespace wf {
                 for (uint_t jroot = iroot; jroot < nroot(); ++jroot) {
                     for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
                         for (row.restart(); row; ++row) {
-                            if (!row.m_mbf.is_zero()) orthogonalize(overlaps, iroot, jroot, ireplica);
+                            if (!row.m_mbf.is_clear()) orthogonalize(overlaps, iroot, jroot, ireplica);
                         }
                         overlaps.all_sum();
                     }

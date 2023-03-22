@@ -121,7 +121,7 @@ void PureRdm::frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv
 void PureRdm::frmbos_make_contribs(const field::FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
                                const com_ops::FrmBos& com, wf_t contrib) {
     auto exsig = conn.exsig();
-    m_full_inds.zero();
+    m_full_inds.clear();
     if (exsig.is_pure_frm() && m_ranksig.is_pure_frm()) make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib);
     /*
      * fermion promotion (if any) is handled in the delegated method, but if this is a hopping-coupled or density-coupled
