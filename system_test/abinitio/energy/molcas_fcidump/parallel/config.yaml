@@ -1,10 +1,10 @@
 ---
 shift:
-  damp: 0.1
+  damp: 0.2
 stats:
   period: 5
 wavefunction:
-  nw_init: 100
+  nw_init: 10
 propagator:
   tau_init: 0.001
   stochastic: yes
