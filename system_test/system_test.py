@@ -155,7 +155,7 @@ def make_local_name(asset):
 def bring(asset):
     src = resolve_src_path(asset)
     dst = make_local_name(asset)
-    assert not dst.exists()
+    if dst.exists(): os.unlink(dst)
     os.symlink(src.absolute(), dst.absolute())
 
 def run(config='config.yaml', nrank=1, assets=[]):
