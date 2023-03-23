@@ -100,7 +100,6 @@ namespace hf_excit_hist {
          * average HF weight
          */
         wf_t m_norm = 0.0;
-        const str_t m_save_file_name;
 
         const uintv_t m_nexcits;
         const uintv_t m_accumulated_nexcit_inds;

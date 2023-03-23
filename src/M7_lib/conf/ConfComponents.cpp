@@ -116,12 +116,7 @@ bool conf_components::Group::make_enabled() const {
      */
     auto parent_group = dynamic_cast<const Group*>(m_parent);
     REQUIRE_TRUE(parent_group, "parent must be a group");
-    /*
-     * check that a non-Explicit does not have an Explicit parent
-     */
-    if (m_enable_policy!=Explicit)
-        REQUIRE_FALSE(parent_group->m_enable_policy==Explicit,
-                      "group cannot be implicitly enabled or required if its parent is explicitly enabled");
+
     /*
      * if the Node is in the file, and has a non-zero number of key-value pairs defined within it, it is enabled
      */

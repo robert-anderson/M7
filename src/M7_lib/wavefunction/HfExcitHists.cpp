@@ -184,7 +184,7 @@ hf_excit_hist::Accumulators::Accumulators(
     REQUIRE_TRUE(m_hf, "HF state must be defined for HF excitation accumulation");
     m_tables.reserve(m_nexcits.size());
     m_lookup_keys.reserve(m_nexcits.size());
-    if (m_save_file_name.empty() && !m_chkpt_files)
+    if (m_save_file_path.empty() && !m_chkpt_files)
         logging::warn("Accumulating HF excitations of rank {}, but saves and checkpointing are both disabled",
                       convert::to_string(m_nexcits));
     for (auto& nexcit: m_nexcits){
@@ -198,7 +198,8 @@ hf_excit_hist::Accumulators::Accumulators(
 }
 
 hf_excit_hist::Accumulators::Accumulators(const conf::HfExcits &opts, const shared_rows::Walker *hf) :
-        Accumulators(hf, opts.m_nexcits, opts.m_thresh, opts.m_save, opts.m_chkpt){}
+        Accumulators(hf, opts.m_nexcits, opts.m_thresh, opts.m_save, opts.m_chkpt){
+}
 
 void hf_excit_hist::Accumulators::add(const Mbf &mbf, wf_t weight) {
     if (!*this) return;
@@ -240,8 +241,8 @@ void hf_excit_hist::Accumulators::save(const hdf5::NodeWriter &nw) const {
 }
 
 void hf_excit_hist::Accumulators::save() const {
-    if (m_save_file_name.empty()) return;
-    hdf5::FileWriter fw(m_save_file_name);
+    if (m_save_file_path.empty()) return;
+    hdf5::FileWriter fw(m_save_file_path);
     save(fw);
 }
 
