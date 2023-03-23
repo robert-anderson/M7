@@ -77,6 +77,7 @@ bool hf_excit_hist::Initializer::phase(Mbf &mbf) {
 }
 
 void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_t prev_product) {
+    auto& row = m_wf.m_store.m_row;
     for (uint_t i = 0ul; i < imax; ++i) {
         auto product = prev_product * m_c2.m_vals[i];
         // the form of the product is (1/n!)*(c2)^n
@@ -90,12 +91,15 @@ void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_
             // i-th indices were successfully applied
             if (mpi::i_am(m_wf.m_dist.irank(mbf))) {
                 // generated MBF belongs on this MPI rank
-                auto& row = m_wf.m_store.lookup_or_insert(mbf);
-                row.m_permanitiator.set();
-                if (ipower==1) row.m_ref_conn.set();
-                // permanitiators cannot be deleted - need to protect if not already
-                if (!row.is_protected()) row.protect();
-                ++m_ncreated.m_local[ipower * 2];
+                const bool exists = m_wf.m_store.lookup(mbf, row);
+                if (!exists) {
+                    m_wf.m_store.insert(mbf, row);
+                    row.m_permanitiator.set();
+                    if (ipower==1) row.m_ref_conn.set();
+                    // permanitiators cannot be deleted - need to protect
+                    row.protect();
+                    ++m_ncreated.m_local[ipower * 2];
+                }
                 if (m_cancellation) row.m_weight += (phase(mbf) ? -1 : 1) * product;
                 // if not observing cancellation, no need to store the product
             }
