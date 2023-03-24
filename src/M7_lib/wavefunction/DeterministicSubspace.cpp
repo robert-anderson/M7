@@ -50,7 +50,7 @@ void deterministic::Subspace::select_highest_weighted() {
 }
 
 void deterministic::Subspace::select_l1_norm_fraction() {
-    auto av_l1_norm = m_wf.m_nwalker.total().sum_over(m_iparts) / m_iparts.size();
+    auto av_l1_norm = m_wf.m_stats.m_nwalker.total().sum_over(m_iparts) / m_iparts.size();
     const auto cutoff = av_l1_norm * m_opts.m_l1_fraction_cutoff.m_value;
     auto row = m_wf.m_store.m_row;
     for (row.restart(); row; ++row){

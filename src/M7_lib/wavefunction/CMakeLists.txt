@@ -14,6 +14,8 @@ target_sources(M7_lib
         Reference.h
         SpawnTable.cpp
         SpawnTable.h
+        Stats.cpp
+        Stats.h
         WalkerTable.cpp
         WalkerTable.h
         Wavefunction.cpp

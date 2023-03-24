@@ -38,7 +38,7 @@ void fciqmc::run(const conf::Document &opts) {
             wf.set_weight(ref_walker, ipart, wf_t(opts.m_wavefunction.m_nw_init));
     }
     m_prop->m_shift.m_values = ref_energy + opts.m_shift.m_init;
-    wf.m_nwalker.all_sum();
+    wf.m_stats.m_nwalker.all_sum();
     Solver solver(opts, *m_prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
 }

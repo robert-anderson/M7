@@ -69,7 +69,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
     // zero magnitude weights should not have been communicated
     if (delta_weight == 0.0) return;
 
-    m_wf.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
+    m_wf.m_stats.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
     if (!dst_walker) {
         /*
          * the destination MBF row in m_wf.m_store is not currently occupied, so initiator rules must be applied
@@ -90,7 +90,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
             //m_aborted_weight += std::abs(*delta_weight);
             return;
         }
-        m_wf.m_nannihilated.m_local[dst_ipart] += annihilated_magnitude(weight_before, delta_weight);
+        m_wf.m_stats.m_nannihilated.m_local[dst_ipart] += annihilated_magnitude(weight_before, delta_weight);
         m_wf.change_weight(dst_walker, dst_ipart, delta_weight);
     }
 }

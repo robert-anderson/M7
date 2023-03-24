@@ -286,9 +286,9 @@ void Solver::loop_over_occupied_mbfs() {
             bool initiator = walker.exceeds_initiator_thresh(ipart, m_prop.m_nadd_initiator);
             if (!initiator) {
                 initiator = walker.m_permanitiator.get(ipart);
-                if (initiator) m_wf.m_ninitiator_perma.m_local[ipart]++;
+                if (initiator) m_wf.m_stats.m_ninitiator_perma.m_local[ipart]++;
             }
-            if (initiator) m_wf.m_ninitiator.m_local[ipart]++;
+            if (initiator) m_wf.m_stats.m_ninitiator.m_local[ipart]++;
 
             // TODO: load balancing work logging
 //            if (m_wf.m_ra.is_active()) {
@@ -356,7 +356,7 @@ void Solver::end_cycle() {
 //                "Unlogged creations of initiator MBFs have occurred");
     m_refs.end_cycle(m_icycle);
     m_wf.end_cycle();
-    REQUIRE_FALSE_ALL(m_wf.m_nwalker.total().is_zero(), "All walkers died");
+    REQUIRE_FALSE_ALL(m_wf.m_stats.m_nwalker.total().is_zero(), "All walkers died");
     m_maes.end_cycle();
     m_inst_ests.end_cycle(m_icycle);
     if (m_hf && m_hf->m_excit_accums) m_hf->m_excit_accums.attempt_chkpt(m_icycle);
@@ -370,20 +370,20 @@ void Solver::output_stats() {
         stats.m_icycle = m_icycle;
         stats.m_tau = m_prop.tau();
         stats.m_shift = m_prop.m_shift.m_values;
-        stats.m_nwalker = m_wf.m_nwalker.prev_total();
-        stats.m_delta_nwalker = m_wf.m_nwalker.prev_delta().m_reduced;
-        stats.m_nwalker_spawned = m_wf.m_nspawned.m_reduced;
-        stats.m_nwalker_annihilated = m_wf.m_nannihilated.m_reduced;
+        stats.m_nwalker = m_wf.m_stats.m_nwalker.prev_total();
+        stats.m_delta_nwalker = m_wf.m_stats.m_nwalker.prev_delta().m_reduced;
+        stats.m_nwalker_spawned = m_wf.m_stats.m_nspawned.m_reduced;
+        stats.m_nwalker_annihilated = m_wf.m_stats.m_nannihilated.m_reduced;
         stats.m_ref_proj_energy_num = m_refs.proj_energy_nums();
         stats.m_ref_weight = m_refs.weights();
         stats.m_ref_proj_energy = stats.m_ref_proj_energy_num;
         stats.m_ref_proj_energy /= stats.m_ref_weight;
-        stats.m_l2_norm = m_wf.m_l2_norm_square.prev_total();
+        stats.m_l2_norm = m_wf.m_stats.m_l2_norm_square.prev_total();
         stats.m_l2_norm.to_sqrt();
-        stats.m_ninitiator = m_wf.m_ninitiator.m_reduced;
-        stats.m_ninitiator_perma = m_wf.m_ninitiator_perma.m_reduced;
-        stats.m_nocc_mbf = m_wf.m_nocc_mbf.prev_total();
-        stats.m_delta_nocc_mbf = m_wf.m_nocc_mbf.prev_delta().m_reduced;
+        stats.m_ninitiator = m_wf.m_stats.m_ninitiator.m_reduced;
+        stats.m_ninitiator_perma = m_wf.m_stats.m_ninitiator_perma.m_reduced;
+        stats.m_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_total();
+        stats.m_delta_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_delta().m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         if (m_inst_ests.m_spin_square) stats.m_spin_square_num = m_inst_ests.m_spin_square->m_est.m_proj_num.m_reduced;
         m_stats->commit();
@@ -402,7 +402,7 @@ void Solver::output_stats() {
         stats.m_icycle = m_icycle;
         stats.m_synchronization_overhead = m_synchronization_timer;
         stats.m_nblock_wf_ra = m_wf.m_dist.nblock_();
-        stats.m_nwalker_total = m_wf.m_nwalker.prev_total().sum();
+        stats.m_nwalker_total = m_wf.m_stats.m_nwalker.prev_total().sum();
         stats.m_nwalker_lookup_skip = m_wf.m_store.m_nskip_total;
         stats.m_nwalker_lookup = m_wf.m_store.m_nlookup_total;
         stats.m_nrow_recv = m_wf.m_send_recv.m_last_recv_count;

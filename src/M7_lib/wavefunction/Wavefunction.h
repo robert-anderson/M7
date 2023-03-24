@@ -14,6 +14,7 @@
 #include <M7_lib/sort/QuickSort.h>
 #include <M7_lib/sort/GlobalExtremalRows.h>
 
+#include "Stats.h"
 #include "WalkerTable.h"
 #include "SpawnTable.h"
 #include "FciInitializer.h"
@@ -39,39 +40,7 @@ namespace wf {
          */
         NdEnumeration<c_ndim_wf> m_format;
 
-        /**
-         * collection of all reductions which are summed at the end of every cycle
-         */
-        v_t<reduction::Base*> m_summed;
-
-        /**
-         * number of initiator MBFs in each part of the WF
-         */
-        reduction::NdArray<uint_t, c_ndim_wf> m_ninitiator;
-        /**
-         * number of initiator MBFs in each part of the WF due to permanitiator status
-         */
-        reduction::NdArray<uint_t, c_ndim_wf> m_ninitiator_perma;
-        /**
-         * number of MBFs with any associated weight in any part
-         */
-        reduction::cyclic::Scalar<int64_t, false> m_nocc_mbf;
-        /**
-         * L1 norm of each part of the WF
-         */
-        reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf> m_nwalker;
-        /**
-         * square of the L2 norm of each part of the WF
-         */
-        reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf> m_l2_norm_square;
-        /**
-         * number of walkers received in spawning process
-         */
-        reduction::NdArray<wf_comp_t, c_ndim_wf> m_nspawned;
-        /**
-         * number of walkers annihilated in the loop_over_spawned method for each part
-         */
-        reduction::NdArray<wf_comp_t, c_ndim_wf> m_nannihilated;
+        Stats m_stats;
 
         // todo: get rid of this hack before merge
         bool m_preserve_ref = false;

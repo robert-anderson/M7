@@ -9,22 +9,6 @@
 #include "FciInitializer.h"
 #include "M7_lib/util/Math.h"
 
-/*
-MappedTableBase::nbucket_guess(
-        opts.m_propagator.m_nw_target / mpi::nrank(),
-        opts.m_wavefunction.m_hash_mapping.m_remap_ratio),
-opts.m_wavefunction.m_hash_mapping.m_remap_nlookup,
-opts.m_wavefunction.m_hash_mapping.m_remap_ratio
- */
-
-/*
- *
-    Communicator(str_t name,
-                 const store_row_t &store_row, DistribOptions dist_opts, Sizing store_sizing,
-                 const send_recv_row_t &send_recv_row, Sizing comm_sizing):
- */
-
-
 wf::Vectors::Vectors(const conf::Document& opts, const sys::Sector& sector) :
     communicator::BasicSend<Walker, Spawn>(
         "wavefunction",
@@ -48,18 +32,9 @@ wf::Vectors::Vectors(const conf::Document& opts, const sys::Sector& sector) :
             opts.m_wavefunction.m_buffers.m_comm_exp_fac
         }
     ),
-    m_opts(opts),
-    m_sector(sector),
-    m_format(m_store.m_row.m_weight.m_format),
-    m_ninitiator(m_format),
-    m_ninitiator_perma(m_format),
-    m_nwalker(m_format),
-    m_l2_norm_square(m_format),
-    m_nspawned(m_format),
-    m_nannihilated(m_format) {
+    m_opts(opts), m_sector(sector), m_format(m_store.m_row.m_weight.m_format), m_stats(m_format) {
 
     REQUIRE_TRUE(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row(), "row-field reference error");
-    m_summed = {&m_ninitiator, &m_ninitiator_perma, &m_nocc_mbf, &m_nwalker, &m_l2_norm_square, &m_nspawned, &m_nannihilated};
 
     logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
                   string::plural(m_dist.nblock()));
@@ -99,7 +74,7 @@ void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
             std::to_string(row.index()),
             row.m_mbf.to_string(),
             convert::to_string(row.m_weight[ipart], {true, 6}),
-            convert::to_string(row.m_weight[ipart] / std::sqrt(m_l2_norm_square.total()[ipart]), {false, 4}),
+            convert::to_string(row.m_weight[ipart] / std::sqrt(m_stats.m_l2_norm_square.total()[ipart]), {false, 4}),
             convert::to_string(row.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd) || row.m_permanitiator.get(0)),
             convert::to_string(row.m_hdiag[iroot_part(ipart)]),
             convert::to_string(bool(row.m_deterministic[iroot_part(ipart)])),
@@ -144,12 +119,12 @@ void wf::Vectors::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian&
 }
 
 void wf::Vectors::begin_cycle() {
-    reduction::clear_local(m_summed);
+    reduction::clear_local(m_stats.m_summed);
     m_store.attempt_remap();
 }
 
 void wf::Vectors::end_cycle() {
-    reduction::all_sum(m_summed);
+    reduction::all_sum(m_stats.m_summed);
 }
 
 wf_comp_t wf::Vectors::debug_square_norm(uint_t ipart) const {
@@ -190,8 +165,8 @@ wf_comp_t wf::Vectors::debug_l1_norm(uint_t ipart) const {
 void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
     if (m_preserve_ref && walker.m_mbf==*m_ref) return;
     wf_t& weight = walker.m_weight[ipart];
-    m_nwalker.delta()[ipart] += std::abs(new_weight) - std::abs(weight);
-    m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
+    m_stats.m_nwalker.delta()[ipart] += std::abs(new_weight) - std::abs(weight);
+    m_stats.m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
     weight = new_weight;
 }
 
@@ -211,7 +186,7 @@ void wf::Vectors::remove_row(Walker& walker) {
     DEBUG_ASSERT_TRUE(m_store.lookup(walker.m_mbf), "MBF doesn't exist in table!");
     for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
         zero_weight(walker, ipart);
-        --m_nocc_mbf.delta();
+        --m_stats.m_nocc_mbf.delta();
     }
     m_store.erase(walker.m_mbf);
 }
@@ -221,7 +196,7 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
     auto& row = m_store.insert(mbf);
-    ++m_nocc_mbf.delta();
+    ++m_stats.m_nocc_mbf.delta();
     DEBUG_ASSERT_EQ(row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
     row.m_hdiag = hdiag;
     for (uint_t ipart=0ul; ipart < npart(); ++ipart)
