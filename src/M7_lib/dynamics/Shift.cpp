@@ -26,7 +26,7 @@ const ham_comp_t &Shift::operator[](uint_t ipart) {
     return m_values[ipart];
 }
 
-void Shift::update(const wf::Vectors &wf, uint_t icycle, double tau, ham_comp_t value) {
+void Shift::update(const wf::Vectors &wf, uint_t icycle, double tau) {
     if (m_nwalker_target.read()) m_variable_mode.terminate(icycle);
     const bool is_period_cycle = !(icycle % m_opts.m_shift.m_period);
 
@@ -62,7 +62,7 @@ void Shift::update(const wf::Vectors &wf, uint_t icycle, double tau, ham_comp_t 
 
         if (variable_mode && a) {
             if (m_opts.m_shift.m_fix_ref_weight.m_value) {
-                m_values[ipart] = value;
+                m_values[ipart] = wf.reference_projected_energy(ipart);
             }
             else {
                 auto rate = nw / m_nwalker_last_period[ipart];

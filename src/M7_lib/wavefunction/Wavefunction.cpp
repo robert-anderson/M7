@@ -183,23 +183,14 @@ void wf::Vectors::end_cycle(uint_t icycle) {
     m_refs.end_cycle(icycle);
 }
 
-wf_comp_t wf::Vectors::debug_square_norm(uint_t ipart) const {
-    wf_comp_t res = 0.0;
-    auto row = m_store.m_row;
-    for (row.restart(); row; ++row) {
-        if (row.is_freed()) continue;
-        const wf_t& weight = row.m_weight[ipart];
-        res += std::pow(std::abs(weight), 2.0);
-    }
-    return mpi::all_sum(res);
-}
-
-wf_comp_t wf::Vectors::debug_reference_projected_energy(uint_t ipart) const {
+wf_comp_t wf::Vectors::reference_projected_energy(uint_t ipart) const {
     wf_comp_t num = 0.0;
     wf_comp_t den = 0.0;
-    auto row = m_store.m_row;
-    for (row.restart(); row; ++row) {
-        if (row.is_freed()) continue;
+    auto& row = m_store.m_row;
+    for (auto irec: m_irec_refconns) {
+        row.jump(irec);
+        if (!row.m_ref_conn.get(ipart)) continue;
+        DEBUG_ASSERT_FALSE(row.is_freed(), "reference-connected row should not be freed");
         const wf_t& weight = row.m_weight[ipart];
         num += m_ham.get_element(m_refs[ipart].mbf(), row.m_mbf) * weight;
         if (row.m_mbf == m_refs[ipart].mbf()) den+=weight;
@@ -207,14 +198,23 @@ wf_comp_t wf::Vectors::debug_reference_projected_energy(uint_t ipart) const {
     return mpi::all_sum(num) / mpi::all_sum(den);
 }
 
+wf_comp_t wf::Vectors::debug_square_norm(uint_t ipart) const {
+    wf_comp_t res = 0.0;
+    auto fn = [&](const Walker& row) {
+        const wf_t& weight = row.m_weight[ipart];
+        res += std::pow(std::abs(weight), 2.0);
+    };
+    m_store.foreach_row_in_use(fn);
+    return mpi::all_sum(res);
+}
+
 wf_comp_t wf::Vectors::debug_l1_norm(uint_t ipart) const {
     wf_comp_t res = 0.0;
-    auto row = m_store.m_row;
-    for (row.restart(); row; ++row) {
-        if (row.is_freed()) continue;
+    auto fn = [&](const Walker& row) {
         const wf_t& weight = row.m_weight[ipart];
         res += std::abs(weight);
-    }
+    };
+    m_store.foreach_row_in_use(fn);
     return mpi::all_sum(res);
 }
 
@@ -244,6 +244,12 @@ void wf::Vectors::remove_row(Walker& walker) {
         zero_weight(walker, ipart);
         --m_stats.m_nocc_mbf.delta();
     }
+    if (!walker.m_ref_conn.is_clear()) {
+        // erasing a row which is connected to the reference in at least one part
+        DEBUG_ASSERT_TRUE(m_irec_refconns.count(walker.index()), "this record index should already be in the set");
+        m_irec_refconns.erase(walker.index());
+    }
+
     m_store.erase(walker.m_mbf);
 }
 
@@ -271,8 +277,8 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1>) {
 
 Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<0>) {
     auto& row = create_row_(icycle, mbf, tag::Int<1>());
-    for (uint_t ipart=0ul; ipart < npart(); ++ipart)
-        row.m_ref_conn.put(ipart, m_refs[ipart].is_connected(mbf));
+    for (uint_t i=0ul; i < npart(); ++i) row.m_ref_conn.put(i, m_refs[i].is_connected(mbf));
+    if (!row.m_ref_conn.is_clear()) m_irec_refconns.insert(row.index());
     return row;
 }
 
@@ -310,8 +316,10 @@ void wf::Vectors::refresh_all_hdiags() {
 }
 
 void wf::Vectors::refresh_all_refconns() {
+    m_irec_refconns.clear();
     auto fn = [&](Walker& row) {
         for (uint_t i=0ul; i < npart(); ++i) row.m_ref_conn.put(i, m_refs[i].is_connected(row.m_mbf));
+        if (!row.m_ref_conn.is_clear()) m_irec_refconns.insert(row.index());
     };
     m_store.foreach_row_in_use(fn);
 }

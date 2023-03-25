@@ -72,7 +72,7 @@ struct Shift {
      * @param tau
      *  current timestep
      */
-    void update(const wf::Vectors& wf, uint_t icycle, double tau, ham_comp_t value);
+    void update(const wf::Vectors& wf, uint_t icycle, double tau);
 
 private:
 

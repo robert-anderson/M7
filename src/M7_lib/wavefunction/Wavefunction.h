@@ -61,6 +61,10 @@ namespace wf {
          * when this is set to true, the reference population is maintained at the current value
          */
         bool m_ref_weights_preserved = false;
+        /**
+         * set of record indices of currently-occupied walkers connected to at least one reference MBF
+         */
+        std::set<uint_t> m_irec_refconns;
 
         v_t<TableBase::Loc> setup();
 
@@ -117,9 +121,13 @@ namespace wf {
             return ipart / 2;
         }
 
-        wf_comp_t debug_square_norm(uint_t ipart) const;
+        /**
+         * @return
+         *  reference-projected energy of the current walker population
+         */
+        wf_comp_t reference_projected_energy(uint_t ipart) const;
 
-        wf_comp_t debug_reference_projected_energy(uint_t ipart) const;
+        wf_comp_t debug_square_norm(uint_t ipart) const;
 
         /**
          * debugging only: number of walkers should be updated each time the wavefunction weights are modified

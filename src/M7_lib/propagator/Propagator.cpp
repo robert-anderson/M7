@@ -29,7 +29,7 @@ void Propagator::diagonal(wf::Vectors &wf, Walker &walker, uint_t ipart) {
 }
 
 void Propagator::update(uint_t icycle, const wf::Vectors& wf) {
-    m_shift.update(wf, icycle, tau(), wf.debug_reference_projected_energy(0));
+    m_shift.update(wf, icycle, tau());
 }
 
 void Propagator::imp_samp_delta(wf_t& delta, ham_t src_ovlp, const Mbf& dst_mbf) const {
