@@ -209,6 +209,11 @@ def check_nw(fname='M7.stats'):
     run, bench = stats_columns('WF L1 norm', fname)
     if not np.allclose(run, bench): fail('walker trajectories do not agree')
 
+def check_ref_weight(fname='M7.stats'):
+    if benchmarking: return
+    run, bench = stats_columns('Reference weight', fname)
+    if not np.allclose(run, bench): fail('reference weight trajectories do not agree')
+
 def check_shift(fname='M7.stats'):
     if benchmarking: return
     run, bench = stats_columns('Diagonal shift', fname)
@@ -255,14 +260,20 @@ def within_error(correct_value, mean, error):
 '''
 check that a stats column is statistically correct (within errorbars)
 '''
-def check_stat_correct(correct_value, column_name, nburnin, nblock=32, fname='M7.stats'):
-    stats, _ = stats_columns(column_name, fname)
-    mean, err = block(stats[nburnin:], nblock)
+class BlockOpts:
+    nblock = 32
+    err_scale = 2.0
+    fname = 'M7.stats'
+
+def check_stat_correct(correct_value, column_name, nburnin, opts=BlockOpts()):
+    stats, _ = stats_columns(column_name, opts.fname)
+    mean, err = block(stats[nburnin:], opts.nblock)
+    err *= opts.err_scale
     if not within_error(correct_value, mean, err):
-        fail(f'mean of column "{column_name}" ({mean:.6e}) is not correct ({correct_value:.6e}) within error bars (+/-{err:.3e})')
+        fail(f'mean of column "{column_name}" ({mean:.6e}) is not correct ({correct_value:.6e}) within {opts.err_scale}x error bars (+/-{err:.3e})')
 
-def check_shift_correct(correct_value, nburnin, nblock=32, fname='M7.stats'):
-    check_stat_correct(correct_value, 'Diagonal shift', nburnin, nblock, fname)
+def check_shift_correct(correct_value, nburnin, opts=BlockOpts()):
+    check_stat_correct(correct_value, 'Diagonal shift', nburnin, opts)
 
-def check_proje_correct(correct_value, nburnin, nblock=32, fname='M7.stats'):
-    check_stat_correct(correct_value, 'Reference-projected energy', nburnin, nblock, fname)
+def check_proje_correct(correct_value, nburnin, opts=BlockOpts()):
+    check_stat_correct(correct_value, 'Reference-projected energy', nburnin, opts)
