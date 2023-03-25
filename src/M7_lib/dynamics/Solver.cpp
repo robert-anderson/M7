@@ -93,13 +93,13 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf,
         logging::info("Performing exact FCI initialization of wavefunctions");
         FciInitOptions fci_init_opts;
         fci_init_opts.m_nroot = m_wf.nroot();
-        m_wf.fci_init(m_prop.m_ham, fci_init_opts);
+        m_wf.fci_init(fci_init_opts);
     }
 
     if (m_opts.m_wavefunction.m_ci_permanitiator.m_enabled) {
         REQUIRE_TRUE(m_hf.get(), "CI expansion-based permanitiators requires a HF determinant");
         hf_excit_hist::initialize(m_wf, m_hf.get()->mbf(), m_opts.m_wavefunction.m_ci_permanitiator);
-        m_wf.refresh_all_hdiags(m_prop.m_ham);
+        m_wf.refresh_all_hdiags();
     }
 
     // TODO: activate load balancing

@@ -17,7 +17,7 @@ void fciqmc::run(const conf::Document &opts) {
     /*
      * distributed solution vectors
      */
-    wf::Vectors wf(opts, {ham.m_basis, ham.default_particles(opts.m_particles)});
+    wf::Vectors wf(opts, ham);
     /*
      * propagates the system, either exactly or stochastically
      */

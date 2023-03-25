@@ -31,8 +31,17 @@ namespace wf {
      */
     struct Vectors : communicator::BasicSend<Walker, Spawn> {
         typedef GlobalExtremalRows<wf_t, c_ndim_wf> weights_gxr_t;
-
+        /**
+         * reference to whole configuration document
+         */
         const conf::Document& m_opts;
+        /**
+         * reference to the Hamiltonian whose eigenvectors are estimated in this class
+         */
+        const Hamiltonian& m_ham;
+        /**
+         * basis and particle number sector information
+         */
         const sys::Sector m_sector;
 
         /**
@@ -46,7 +55,7 @@ namespace wf {
         bool m_preserve_ref = false;
         const field::Mbf* m_ref = nullptr;
 
-        Vectors(const conf::Document& opts, const sys::Sector& sector);
+        Vectors(const conf::Document& opts, const Hamiltonian& ham);
 
         ~Vectors();
 
@@ -67,8 +76,7 @@ namespace wf {
 
         void h5_write(const hdf5::NodeWriter& parent, str_t name = "wavefunction");
 
-        void h5_read(const hdf5::NodeReader& parent, const Hamiltonian& ham, const Mbf& ref,
-                     str_t name = "wavefunction");
+        void h5_read(const hdf5::NodeReader& parent, const Mbf& ref, str_t name = "wavefunction");
 
         void begin_cycle();
 
@@ -92,7 +100,7 @@ namespace wf {
 
         wf_comp_t debug_square_norm(uint_t ipart) const;
 
-        wf_comp_t debug_reference_projected_energy(uint_t ipart, const field::Mbf& ref, const Hamiltonian& h) const;
+        wf_comp_t debug_reference_projected_energy(uint_t ipart, const field::Mbf& ref) const;
 
         /**
          * debugging only: number of walkers should be updated each time the wavefunction weights are modified
@@ -191,9 +199,9 @@ namespace wf {
             return m_format.m_nelement;
         }
 
-        void refresh_all_hdiags(const Hamiltonian& h);
+        void refresh_all_hdiags();
 
-        void fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm=1000ul);
+        void fci_init(FciInitOptions opts, uint_t max_ncomm=1000ul);
 
         void orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica) {
             ASSERT(iroot <= jroot);

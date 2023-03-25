@@ -9,12 +9,12 @@
 #include "FciInitializer.h"
 #include "M7_lib/util/Math.h"
 
-wf::Vectors::Vectors(const conf::Document& opts, const sys::Sector& sector) :
+wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     communicator::BasicSend<Walker, Spawn>(
         "wavefunction",
         // walker row:
         {
-            sector.basis(),
+            ham.m_basis,
             opts.m_wavefunction.m_nroot,
             opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)
         },
@@ -25,14 +25,17 @@ wf::Vectors::Vectors(const conf::Document& opts, const sys::Sector& sector) :
             opts.m_wavefunction.m_buffers.m_store_exp_fac
         },
         // send/recv row
-        {sector.basis(), need_send_parents(opts)},
+        {ham.m_basis, need_send_parents(opts)},
         // send/recv sizing
         {
             std::max(10ul, uint_t(opts.m_propagator.m_nw_target * opts.m_propagator.m_tau_init)),
             opts.m_wavefunction.m_buffers.m_comm_exp_fac
         }
     ),
-    m_opts(opts), m_sector(sector), m_format(m_store.m_row.m_weight.m_format), m_stats(m_format) {
+    m_opts(opts),
+    m_ham(ham),
+    m_sector(m_ham.m_basis, m_ham.default_particles(m_opts.m_particles)),
+    m_format(m_store.m_row.m_weight.m_format), m_stats(m_format) {
 
     REQUIRE_TRUE(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row(), "row-field reference error");
 
@@ -97,7 +100,7 @@ void wf::Vectors::h5_write(const hdf5::NodeWriter& parent, str_t name) {
     m_store.save(parent, name, field_names(), true);
 }
 
-void wf::Vectors::h5_read(const hdf5::NodeReader& /*parent*/, const Hamiltonian& /*ham*/, const field::Mbf& /*ref*/,
+void wf::Vectors::h5_read(const hdf5::NodeReader& /*parent*/, const field::Mbf& /*ref*/,
                           str_t /*name*/) {
 #if 0
     m_store.clear();
@@ -138,14 +141,14 @@ wf_comp_t wf::Vectors::debug_square_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
-wf_comp_t wf::Vectors::debug_reference_projected_energy(uint_t ipart, const Mbf& ref, const Hamiltonian& h) const {
+wf_comp_t wf::Vectors::debug_reference_projected_energy(uint_t ipart, const Mbf& ref) const {
     wf_comp_t num = 0.0;
     wf_comp_t den = 0.0;
     auto row = m_store.m_row;
     for (row.restart(); row; ++row) {
         if (row.is_freed()) continue;
         const wf_t& weight = row.m_weight[ipart];
-        num += h.get_element(ref, row.m_mbf) * weight;
+        num += m_ham.get_element(ref, row.m_mbf) * weight;
         if (row.m_mbf == ref) den+=weight;
     }
     return mpi::all_sum(num) / mpi::all_sum(den);
@@ -251,19 +254,19 @@ Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initia
     return spawn;
 }
 
-void wf::Vectors::refresh_all_hdiags(const Hamiltonian &h) {
+void wf::Vectors::refresh_all_hdiags() {
     auto& row = m_store.m_row;
     for (row.restart(); row; ++row){
         if (row.is_freed()) continue;
-        row.m_hdiag = h.get_energy(row.m_mbf);
+        row.m_hdiag = m_ham.get_energy(row.m_mbf);
     }
 }
 
-void wf::Vectors::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max_ncomm) {
+void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
     /*
      * perform the eigensolver procedure for the required number of states
      */
-    FciInitializer init(h, opts);
+    FciInitializer init(m_ham, opts);
     const auto results = init.solve();
     /*
      * compute the ratio of initial number of walkers to L1-norms of the eigenvectors to get the right scale
@@ -310,7 +313,7 @@ void wf::Vectors::fci_init(const Hamiltonian& h, FciInitOptions opts, uint_t max
         auto& recv_row = m_send_recv.recv().m_row;
         for (recv_row.restart(); recv_row; ++recv_row) {
             m_store.lookup(recv_row.m_dst_mbf, m_store.m_insert_row);
-            if (!m_store.m_insert_row) create_row(0ul, recv_row.m_dst_mbf, h.get_energy(recv_row.m_dst_mbf), 0);
+            if (!m_store.m_insert_row) create_row(0ul, recv_row.m_dst_mbf, m_ham.get_energy(recv_row.m_dst_mbf), 0);
             m_store.m_insert_row.m_weight = recv_row.m_delta_weight;
         }
     }
