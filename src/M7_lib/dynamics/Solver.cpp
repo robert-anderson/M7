@@ -178,9 +178,8 @@ void Solver::begin_cycle() {
     if (m_hf) m_hf->update();
 
     m_prop.update(m_icycle, m_wf);
-    if (m_prop.m_shift.m_variable_mode && m_opts.m_shift.m_fix_ref_weight) {
-        m_wf.m_preserve_ref = true;
-    }
+    if (m_prop.m_shift.m_variable_mode && m_opts.m_shift.m_fix_ref_weight)
+        m_wf.preserve_ref_weights(m_opts.m_propagator.m_nw_target);
 
     auto update_epoch = [&](uint_t ncycle_wait) {
         const auto &epochs = m_prop.m_shift.m_variable_mode;
@@ -231,13 +230,6 @@ void Solver::loop_over_occupied_mbfs() {
             m_maes.make_average_contribs(walker, m_hf.get(), m_icycle);
             m_wf.remove_row(walker);
             continue;
-        }
-
-        // todo: this is a temporary fix for getting a test benchmark
-        if (walker.m_mbf == m_wf.m_refs[0].mbf() && m_wf.m_preserve_ref) {
-            m_wf.m_preserve_ref = false;
-            m_wf.set_weight(walker, m_opts.m_propagator.m_nw_target);
-            m_wf.m_preserve_ref = true;
         }
 
         /*

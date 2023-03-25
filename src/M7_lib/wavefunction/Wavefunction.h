@@ -20,6 +20,7 @@
 #include "FciInitializer.h"
 #include "Reference.h"
 #include "M7_lib/field/Mbf.h"
+#include "M7_lib/util/Math.h"
 
 namespace wf {
 
@@ -54,20 +55,28 @@ namespace wf {
          * walker updates need to be logged for the stats file and shift updates etc
          */
         Stats m_stats;
-        // todo: get rid of this hack before merge
-        bool m_preserve_ref = false;
+
+    private:
+        /**
+         * when this is set to true, the reference population is maintained at the current value
+         */
+        bool m_ref_weights_preserved = false;
+
+        v_t<TableBase::Loc> setup();
+
+    public:
         /**
          * Reference MBFs for each population
          */
         wf::Refs m_refs;
 
-    private:
-        v_t<TableBase::Loc> setup();
-
-    public:
         Vectors(const conf::Document& opts, const Hamiltonian& ham);
 
         ~Vectors();
+
+        void preserve_ref_weights(wf_comp_t mag);
+
+        bool ref_weights_preserved() const;
 
         void log_top_weighted(uint_t ipart, uint_t nrow = 20);
 

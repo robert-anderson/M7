@@ -124,6 +124,24 @@ wf::Vectors::~Vectors() {
     for (uint_t ipart=0ul; ipart<npart(); ++ipart) log_top_weighted(ipart);
 }
 
+void wf::Vectors::preserve_ref_weights(wf_comp_t mag) {
+    if (m_ref_weights_preserved)
+        return; // reference weights already being preserved
+    for (uint_t ipart = 0ul; ipart < npart(); ++ipart) {
+        if (!m_refs[ipart].is_mine()) continue;
+        auto irec = m_refs[ipart].irec();
+        auto row = m_store.m_row;
+        row.jump(irec);
+        const wf_t weight = row.m_weight[ipart];
+        set_weight(row, math::phase(weight) * mag);
+    }
+    m_ref_weights_preserved = true;
+}
+
+bool wf::Vectors::ref_weights_preserved() const {
+    return m_ref_weights_preserved;
+}
+
 void wf::Vectors::h5_write(const hdf5::NodeWriter& parent, str_t name) {
     auto field_names = []() -> strv_t {
         if (c_enable_fermions != c_enable_bosons) return {"mbf", "weight"};
@@ -201,7 +219,7 @@ wf_comp_t wf::Vectors::debug_l1_norm(uint_t ipart) const {
 }
 
 void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
-    if (m_preserve_ref && walker.m_mbf==m_refs[ipart].mbf()) return;
+    if (m_ref_weights_preserved && walker.m_mbf==m_refs[ipart].mbf()) return;
     wf_t& weight = walker.m_weight[ipart];
     m_stats.m_nwalker.delta()[ipart] += std::abs(new_weight) - std::abs(weight);
     m_stats.m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
