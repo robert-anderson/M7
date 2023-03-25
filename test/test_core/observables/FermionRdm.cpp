@@ -28,7 +28,7 @@ ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explicit_hf_
     ExactLinear prop(ham, opts, wf, explicit_hf_conns);
     auto ref_energy = ham.get_energy(ref_onv);
 
-    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    auto ref_loc = wf.create_row(0, ref_onv, 1);
     if (ref_loc.is_mine()) {
         auto walker = wf.m_store.m_row;
         walker.jump(ref_loc.m_irec);

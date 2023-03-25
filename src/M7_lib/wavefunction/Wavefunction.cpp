@@ -194,14 +194,14 @@ void wf::Vectors::remove_row(Walker& walker) {
     m_store.erase(walker.m_mbf);
 }
 
-Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
+Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, const v_t<bool>& refconns) {
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
     auto& row = m_store.insert(mbf);
     ++m_stats.m_nocc_mbf.delta();
     DEBUG_ASSERT_EQ(row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
-    row.m_hdiag = hdiag;
+    row.m_hdiag = m_ham.get_energy(mbf);
     for (uint_t ipart=0ul; ipart < npart(); ++ipart)
         row.m_ref_conn.put(ipart, refconns[ipart]);
     /*
@@ -218,11 +218,11 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag
     return row;
 }
 
-TableBase::Loc wf::Vectors::create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns) {
+TableBase::Loc wf::Vectors::create_row(uint_t icycle, const Mbf& mbf, const v_t<bool>& refconns) {
     const uint_t irank = m_dist.irank(mbf);
     uint_t irec;
     if (mpi::i_am(irank)) {
-        irec = create_row_(icycle, mbf, hdiag, refconns).index();
+        irec = create_row_(icycle, mbf, refconns).index();
     }
     mpi::bcast(irec, irank);
     return {irank, irec};
@@ -313,7 +313,7 @@ void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
         auto& recv_row = m_send_recv.recv().m_row;
         for (recv_row.restart(); recv_row; ++recv_row) {
             m_store.lookup(recv_row.m_dst_mbf, m_store.m_insert_row);
-            if (!m_store.m_insert_row) create_row(0ul, recv_row.m_dst_mbf, m_ham.get_energy(recv_row.m_dst_mbf), 0);
+            if (!m_store.m_insert_row) create_row(0ul, recv_row.m_dst_mbf, 0);
             m_store.m_insert_row.m_weight = recv_row.m_delta_weight;
         }
     }

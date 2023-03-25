@@ -163,31 +163,27 @@ namespace wf {
          *  MC cycle index on which MBF is being added
          * @param mbf
          *  MBF of row to be added
-         * @param hdiag
-         *  diagonal matrix element is cached here
-         * @return
-         *  index of created row
          * @param refconn
          *  element true if reference MBF of corresponding WF part is connected
          *  i.e. the connection to the reference has a non-zero H matrix element
          * @return
+         *  ref to created row
          */
-        Walker& create_row_(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns);
+        Walker& create_row_(uint_t icycle, const Mbf& mbf, const v_t<bool>& refconns);
 
 
-        Walker& create_row_(uint_t icycle, const Mbf& mbf,
-                            const ham_comp_t& hdiag, bool refconn) {
-            return create_row_(icycle, mbf, hdiag, v_t<bool>(npart(), refconn));
+        Walker& create_row_(uint_t icycle, const Mbf& mbf, bool refconn) {
+            return create_row_(icycle, mbf, v_t<bool>(npart(), refconn));
         }
 
         /**
          * Called on all ranks, dispatching create_row_ on the assigned rank only
          */
-        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, const v_t<bool>& refconns);
+        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf, const v_t<bool>& refconns);
 
 
-        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf, ham_comp_t hdiag, bool refconn) {
-            return create_row(icycle, mbf, hdiag, v_t<bool>(npart(), refconn));
+        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf, bool refconn) {
+            return create_row(icycle, mbf, v_t<bool>(npart(), refconn));
         }
 
         Spawn& add_spawn(const Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart);

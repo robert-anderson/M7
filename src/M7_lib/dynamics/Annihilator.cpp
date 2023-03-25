@@ -79,8 +79,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
             return;
         }
 
-        auto& new_walker = m_wf.create_row_(
-                m_icycle, dst_mbf, m_prop.m_ham.get_energy(dst_mbf), m_refs.is_connected(dst_mbf));
+        auto& new_walker = m_wf.create_row_(m_icycle, dst_mbf, m_refs.is_connected(dst_mbf));
         m_wf.set_weight(new_walker, dst_ipart, delta_weight);
 
     } else {

@@ -30,7 +30,7 @@ void fciqmc::run(const conf::Document &opts) {
 
     auto ref_energy = ham.get_energy(ref_mbf);
     TableBase::Loc ref_loc = {wf.m_dist.irank(ref_mbf), 0ul};
-    wf.create_row(0, ref_mbf, ref_energy, v_t<bool>(wf.npart(), true));
+    wf.create_row(0, ref_mbf, v_t<bool>(wf.npart(), true));
     if (ref_loc.is_mine()) {
         auto ref_walker = wf.m_store.m_row;
         ref_walker.jump(ref_loc.m_irec);
