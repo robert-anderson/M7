@@ -9,6 +9,35 @@
 #include "FciInitializer.h"
 #include "M7_lib/util/Math.h"
 
+
+v_t<TableBase::Loc> wf::Vectors::setup() {
+    v_t<TableBase::Loc> ref_locs;
+    if (m_opts.m_wavefunction.m_load.m_enabled) {
+        // the wavefunction is to be loaded from HDF5 archive
+    }
+    else if (m_opts.m_wavefunction.m_fci_init) {
+        // the wavefunction is to be initialized using exact eigenvectors from the Arnoldi method
+    }
+    else {
+        // no special initialization options specified: generate or parse reference MBFs and create walkers there
+        /*
+         * create the reference MBF and add it to the walker table
+         */
+        buffered::Mbf ref_mbf(m_sector);
+        mbf::set(ref_mbf, m_sector.particles(), m_opts.m_reference.m_mbf_init, 0ul);
+
+        const auto loc = create_row_setup(0, ref_mbf);
+        if (loc.is_mine()) {
+            auto ref_walker = m_store.m_row;
+            ref_walker.jump(loc.m_irec);
+            for (uint_t ipart = 0ul; ipart < npart(); ++ipart)
+                set_weight(ref_walker, ipart, wf_t(m_opts.m_wavefunction.m_nw_init));
+        }
+        for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(loc);
+    }
+    return ref_locs;
+}
+
 wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     communicator::BasicSend<Walker, Spawn>(
         "wavefunction",
@@ -35,12 +64,16 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     m_opts(opts),
     m_ham(ham),
     m_sector(m_ham.m_basis, m_ham.default_particles(m_opts.m_particles)),
-    m_format(m_store.m_row.m_weight.m_format), m_stats(m_format) {
+    m_format(m_store.m_row.m_weight.m_format),
+    m_stats(m_format),
+    m_refs(opts.m_reference, *this, setup()) {
 
     REQUIRE_TRUE(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row(), "row-field reference error");
 
     logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
                   string::plural(m_dist.nblock()));
+    refresh_all_hdiags();
+    refresh_all_refconns();
 }
 
 void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
@@ -121,13 +154,15 @@ void wf::Vectors::h5_read(const hdf5::NodeReader& /*parent*/, const field::Mbf& 
 #endif
 }
 
-void wf::Vectors::begin_cycle() {
+void wf::Vectors::begin_cycle(uint_t icycle) {
     reduction::clear_local(m_stats.m_summed);
     m_store.attempt_remap();
+    m_refs.begin_cycle(icycle);
 }
 
-void wf::Vectors::end_cycle() {
+void wf::Vectors::end_cycle(uint_t icycle) {
     reduction::all_sum(m_stats.m_summed);
+    m_refs.end_cycle(icycle);
 }
 
 wf_comp_t wf::Vectors::debug_square_norm(uint_t ipart) const {
@@ -141,15 +176,15 @@ wf_comp_t wf::Vectors::debug_square_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
-wf_comp_t wf::Vectors::debug_reference_projected_energy(uint_t ipart, const Mbf& ref) const {
+wf_comp_t wf::Vectors::debug_reference_projected_energy(uint_t ipart) const {
     wf_comp_t num = 0.0;
     wf_comp_t den = 0.0;
     auto row = m_store.m_row;
     for (row.restart(); row; ++row) {
         if (row.is_freed()) continue;
         const wf_t& weight = row.m_weight[ipart];
-        num += m_ham.get_element(ref, row.m_mbf) * weight;
-        if (row.m_mbf == ref) den+=weight;
+        num += m_ham.get_element(m_refs[ipart].mbf(), row.m_mbf) * weight;
+        if (row.m_mbf == m_refs[ipart].mbf()) den+=weight;
     }
     return mpi::all_sum(num) / mpi::all_sum(den);
 }
@@ -166,7 +201,7 @@ wf_comp_t wf::Vectors::debug_l1_norm(uint_t ipart) const {
 }
 
 void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
-    if (m_preserve_ref && walker.m_mbf==*m_ref) return;
+    if (m_preserve_ref && walker.m_mbf==m_refs[ipart].mbf()) return;
     wf_t& weight = walker.m_weight[ipart];
     m_stats.m_nwalker.delta()[ipart] += std::abs(new_weight) - std::abs(weight);
     m_stats.m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
@@ -194,16 +229,14 @@ void wf::Vectors::remove_row(Walker& walker) {
     m_store.erase(walker.m_mbf);
 }
 
-Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, const v_t<bool>& refconns) {
-    DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
+Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1>) {
+
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
     auto& row = m_store.insert(mbf);
     ++m_stats.m_nocc_mbf.delta();
     DEBUG_ASSERT_EQ(row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
     row.m_hdiag = m_ham.get_energy(mbf);
-    for (uint_t ipart=0ul; ipart < npart(); ++ipart)
-        row.m_ref_conn.put(ipart, refconns[ipart]);
     /*
      * we need to be very careful here of off-by-one-like mistakes. the initial walker is "created" at the beginning
      * of MC cycle 0, and so the stats line output for cycle 0 will show that the number of walkers is the initial
@@ -218,14 +251,11 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, const v_t<bool>&
     return row;
 }
 
-TableBase::Loc wf::Vectors::create_row(uint_t icycle, const Mbf& mbf, const v_t<bool>& refconns) {
-    const uint_t irank = m_dist.irank(mbf);
-    uint_t irec;
-    if (mpi::i_am(irank)) {
-        irec = create_row_(icycle, mbf, refconns).index();
-    }
-    mpi::bcast(irec, irank);
-    return {irank, irec};
+Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<0>) {
+    auto& row = create_row_(icycle, mbf, tag::Int<1>());
+    for (uint_t ipart=0ul; ipart < npart(); ++ipart)
+        row.m_ref_conn.put(ipart, m_refs[ipart].is_connected(mbf));
+    return row;
 }
 
 Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
@@ -255,11 +285,17 @@ Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initia
 }
 
 void wf::Vectors::refresh_all_hdiags() {
-    auto& row = m_store.m_row;
-    for (row.restart(); row; ++row){
-        if (row.is_freed()) continue;
+    auto fn = [&](Walker& row) {
         row.m_hdiag = m_ham.get_energy(row.m_mbf);
-    }
+    };
+    m_store.foreach_row_in_use(fn);
+}
+
+void wf::Vectors::refresh_all_refconns() {
+    auto fn = [&](Walker& row) {
+        for (uint_t i=0ul; i < npart(); ++i) row.m_ref_conn.put(i, m_refs[i].is_connected(row.m_mbf));
+    };
+    m_store.foreach_row_in_use(fn);
 }
 
 void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
@@ -313,7 +349,7 @@ void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
         auto& recv_row = m_send_recv.recv().m_row;
         for (recv_row.restart(); recv_row; ++recv_row) {
             m_store.lookup(recv_row.m_dst_mbf, m_store.m_insert_row);
-            if (!m_store.m_insert_row) create_row(0ul, recv_row.m_dst_mbf, 0);
+            if (!m_store.m_insert_row) create_row(0ul, recv_row.m_dst_mbf);
             m_store.m_insert_row.m_weight = recv_row.m_delta_weight;
         }
     }

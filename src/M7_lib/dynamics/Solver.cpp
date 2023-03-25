@@ -13,20 +13,18 @@ std::unique_ptr<HartreeFock> Solver::make_hf() const {
     /*
      * assuming that if there exists a Hartree-Fock determinant, it will be the initial reference of the zero-th root
      */
-    if (force_hf || m_prop.m_ham.has_brillouin_theorem(m_refs[0].mbf())) {
-        const TableBase::Loc loc(m_refs[0].irec());
+    if (force_hf || m_prop.m_ham.has_brillouin_theorem(m_wf.m_refs[0].mbf())) {
+        const TableBase::Loc loc(m_wf.m_refs[0].irec());
         return ptr::smart::make_unique<HartreeFock>(m_wf.m_store, loc, m_opts.m_hf_excits);
     }
     return nullptr;
 }
 
-Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf,
-               v_t<TableBase::Loc> ref_locs) :
+Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
         m_opts(opts), m_prop(prop), m_wf(wf),
-        m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_hf(make_hf()), m_exit("exit"), m_maes(opts.m_av_ests, m_wf.m_sector, m_wf.nroot()),
-        m_inst_ests(m_wf.m_sector, &m_refs, opts.m_inst_ests),
-        m_annihilator(m_wf, m_prop, m_refs, m_hf.get(), m_maes.m_rdms, m_icycle, opts.m_propagator.m_nadd),
+        m_inst_ests(m_wf.m_sector, &m_wf.m_refs, opts.m_inst_ests),
+        m_annihilator(m_wf, m_prop, m_hf.get(), m_maes.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_detsubs(opts.m_propagator.m_semistochastic) {
 
     logging::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
@@ -168,8 +166,8 @@ void Solver::begin_cycle() {
 //    m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
 
 
-    m_wf.begin_cycle();
-    DEBUG_ASSERT_TRUE(m_wf.m_nwalker.delta().is_zero(), "Cyclic reducibles should be zeroed before new cycle");
+    m_wf.begin_cycle(m_icycle);
+    DEBUG_ASSERT_TRUE(m_wf.m_stats.m_nwalker.delta().is_zero(), "Cyclic reducibles should be zeroed before new cycle");
 
     // TODO: update load balancing
     //    m_wf.m_ra.update(m_icycle);
@@ -177,12 +175,10 @@ void Solver::begin_cycle() {
     if (m_wf.nroot() > 1 && m_prop.m_shift.m_variable_mode) {
         m_wf.orthogonalize();
     }
-    m_refs.begin_cycle(m_icycle);
     if (m_hf) m_hf->update();
 
-    m_prop.update(m_icycle, m_wf, m_refs);
+    m_prop.update(m_icycle, m_wf);
     if (m_prop.m_shift.m_variable_mode && m_opts.m_shift.m_fix_ref_weight) {
-        m_wf.m_ref = &m_refs[0].mbf();
         m_wf.m_preserve_ref = true;
     }
 
@@ -238,12 +234,10 @@ void Solver::loop_over_occupied_mbfs() {
         }
 
         // todo: this is a temporary fix for getting a test benchmark
-        if (m_wf.m_ref) {
-            if (walker.m_mbf == *m_wf.m_ref && m_wf.m_preserve_ref) {
-                m_wf.m_preserve_ref = false;
-                m_wf.set_weight(walker, m_opts.m_propagator.m_nw_target);
-                m_wf.m_preserve_ref = true;
-            }
+        if (walker.m_mbf == m_wf.m_refs[0].mbf() && m_wf.m_preserve_ref) {
+            m_wf.m_preserve_ref = false;
+            m_wf.set_weight(walker, m_opts.m_propagator.m_nw_target);
+            m_wf.m_preserve_ref = true;
         }
 
         /*
@@ -273,7 +267,7 @@ void Solver::loop_over_occupied_mbfs() {
             m_maes.make_average_contribs(walker, m_hf.get(), m_icycle);
         }
 
-        m_refs.contrib_row(walker);
+        m_wf.m_refs.contrib_row(walker);
         m_inst_ests.make_numerator_contribs(walker);
 
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
@@ -354,8 +348,7 @@ void Solver::end_cycle() {
 //    }
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator MBFs have occurred");
-    m_refs.end_cycle(m_icycle);
-    m_wf.end_cycle();
+    m_wf.end_cycle(m_icycle);
     REQUIRE_FALSE_ALL(m_wf.m_stats.m_nwalker.total().is_zero(), "All walkers died");
     m_maes.end_cycle();
     m_inst_ests.end_cycle(m_icycle);
@@ -374,8 +367,8 @@ void Solver::output_stats() {
         stats.m_delta_nwalker = m_wf.m_stats.m_nwalker.prev_delta().m_reduced;
         stats.m_nwalker_spawned = m_wf.m_stats.m_nspawned.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_stats.m_nannihilated.m_reduced;
-        stats.m_ref_proj_energy_num = m_refs.proj_energy_nums();
-        stats.m_ref_weight = m_refs.weights();
+        stats.m_ref_proj_energy_num = m_wf.m_refs.proj_energy_nums();
+        stats.m_ref_weight = m_wf.m_refs.weights();
         stats.m_ref_proj_energy = stats.m_ref_proj_energy_num;
         stats.m_ref_proj_energy /= stats.m_ref_weight;
         stats.m_l2_norm = m_wf.m_stats.m_l2_norm_square.prev_total();

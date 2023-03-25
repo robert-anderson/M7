@@ -21,24 +21,13 @@
 ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explicit_hf_conns){
     Hamiltonian ham({opts.m_hamiltonian, opts.m_basis, opts.m_particles});
     auto particles = ham.default_particles();
-    buffered::Mbf ref_onv(ham.m_basis);
-    mbf::set_aufbau_mbf(ref_onv, particles);
 
     wf::Vectors wf(opts, ham);
     ExactLinear prop(ham, opts, wf, explicit_hf_conns);
-    auto ref_energy = ham.get_energy(ref_onv);
 
-    auto ref_loc = wf.create_row(0, ref_onv, 1);
-    if (ref_loc.is_mine()) {
-        auto walker = wf.m_store.m_row;
-        walker.jump(ref_loc.m_irec);
-        for (uint_t ipart = 0ul; ipart < wf.npart(); ++ipart)
-            wf.set_weight(walker, ipart, wf_t(opts.m_wavefunction.m_nw_init));
-    }
+    prop.m_shift.m_values = wf.m_refs[0].hdiag() + opts.m_shift.m_init;
 
-    prop.m_shift.m_values = ref_energy+opts.m_shift.m_init;
-
-    Solver solver(opts, prop, wf, ref_loc);
+    Solver solver(opts, prop, wf);
     solver.execute(opts.m_propagator.m_ncycle);
     return solver.m_maes.m_rdms.get_energy(ham);
 }

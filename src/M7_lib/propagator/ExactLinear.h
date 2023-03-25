@@ -24,7 +24,7 @@ public:
 
     void off_diagonal(wf::Vectors &wf, const Walker& walker, uint_t ipart_dst, bool initiator) override;
 
-    void update(uint_t icycle, const wf::Vectors &wf, const wf::Refs& refs) override;
+    void update(uint_t icycle, const wf::Vectors &wf) override;
 };
 
 #endif //M7_EXACT_LINEAR_PROPAGATOR_H

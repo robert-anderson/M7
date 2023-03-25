@@ -28,8 +28,8 @@ void Propagator::diagonal(wf::Vectors &wf, Walker &walker, uint_t ipart) {
     wf.scale_weight(walker, ipart, 1.0 - death_rate);
 }
 
-void Propagator::update(uint_t icycle, const wf::Vectors& wf, const wf::Refs& refs) {
-    m_shift.update(wf, refs, icycle, tau(), wf.debug_reference_projected_energy(0, refs[0].mbf()));
+void Propagator::update(uint_t icycle, const wf::Vectors& wf) {
+    m_shift.update(wf, icycle, tau(), wf.debug_reference_projected_energy(0));
 }
 
 void Propagator::imp_samp_delta(wf_t& delta, ham_t src_ovlp, const Mbf& dst_mbf) const {

@@ -34,7 +34,7 @@ void ExactLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipa
     m_conn_iters.loop(conn, src_mbf, body);
 }
 
-void ExactLinear::update(uint_t icycle, const wf::Vectors &wf, const wf::Refs& refs) {
-    Propagator::update(icycle, wf, refs);
+void ExactLinear::update(uint_t icycle, const wf::Vectors &wf) {
+    Propagator::update(icycle, wf);
     m_mag_log.update(icycle, m_tau);
 }

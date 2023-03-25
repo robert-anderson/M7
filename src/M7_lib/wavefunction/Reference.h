@@ -8,19 +8,20 @@
 #include <M7_lib/observables/HfExcits.h>
 #include <M7_lib/basis/Suites.h>
 #include <M7_lib/parallel/RankAllocator.h>
+#include <M7_lib/parallel/Reduction.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/nd/NdArray.h>
 #include <M7_lib/communication/SharedRows.h>
 
 #include "WalkerTable.h"
-#include "Wavefunction.h"
 
 namespace wf {
 
+    struct Vectors;
+
     class Ref : public shared_rows::Walker {
         using shared_rows::Walker::row;
-        const Hamiltonian& m_ham;
-        const Vectors& m_wf;
+        Vectors& m_wf;
         /**
          * index to the "part" of the wavefunction for which this object tracks the reference row
          */
@@ -48,8 +49,7 @@ namespace wf {
         reduction::Scalar<ham_t> m_proj_energy_num;
 
     public:
-        Ref(const conf::Reference& opts, const Hamiltonian& ham,
-            const Vectors& wf, uint_t ipart, TableBase::Loc loc);
+        Ref(const conf::Reference& opts, Vectors& wf, uint_t ipart, TableBase::Loc loc);
 
         uint_t occupied_ncycle(uint_t icycle) const {
             return gathered().m_row.occupied_ncycle(icycle);
@@ -59,10 +59,9 @@ namespace wf {
             return Walker::weight(m_ipart);
         }
 
-        /**
-         * Perform a special loop over stored rows of the WF, updating the reference connection flags of each non-zero row.
-         */
-        void update_ref_conn_flags();
+        ham_comp_t hdiag() const {
+            return gathered().m_row.m_hdiag;
+        }
 
         /**
          * If the candidate with the highest absolute weight across all MPI ranks has a weight larger than that of the current
@@ -113,7 +112,7 @@ namespace wf {
         buffered::Numbers<ham_t, c_ndim_wf> m_proj_energy_nums;
         buffered::Numbers<wf_t, c_ndim_wf> m_weights;
 
-        Refs(const conf::Reference& opts, const Hamiltonian& ham, const Vectors& wf, v_t<TableBase::Loc> locs);
+        Refs(const conf::Reference& opts, Vectors& wf, v_t<TableBase::Loc> locs);
 
         const Ref& operator[](const uint_t& ipart) const;
 

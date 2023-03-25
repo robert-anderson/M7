@@ -59,6 +59,32 @@ struct Table : TableBase {
         return static_cast<const Row&>(row).m_table == this;
     }
 
+private:
+    template<typename fn_t>
+    void foreach_row_in_use_base(const fn_t& fn) {
+        try {
+            for (m_row.restart(); m_row; ++m_row) {
+                if (m_row.is_freed()) continue;
+                fn(m_row);
+            }
+        }
+        catch (const ExitLoop& ex){}
+        m_row.restart();
+    }
+public:
+
+    template<typename fn_t>
+    void foreach_row_in_use(const fn_t& fn) {
+        functor::assert_prototype<void(row_t&)>(fn);
+        foreach_row_in_use_base(fn);
+    }
+
+    template<typename fn_t>
+    void foreach_row_in_use(const fn_t& fn) const {
+        functor::assert_prototype<void(const row_t&)>(fn);
+        const_cast<Table<row_t>&>(*this).foreach_row_in_use_base(fn);
+    }
+
 protected:
     /**
      * @param parent

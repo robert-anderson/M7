@@ -18,6 +18,8 @@
 #include "WalkerTable.h"
 #include "SpawnTable.h"
 #include "FciInitializer.h"
+#include "Reference.h"
+#include "M7_lib/field/Mbf.h"
 
 namespace wf {
 
@@ -48,13 +50,21 @@ namespace wf {
          * all multidimensional array indices of the multidimensional fields of the m_store row
          */
         NdEnumeration<c_ndim_wf> m_format;
-
+        /**
+         * walker updates need to be logged for the stats file and shift updates etc
+         */
         Stats m_stats;
-
         // todo: get rid of this hack before merge
         bool m_preserve_ref = false;
-        const field::Mbf* m_ref = nullptr;
+        /**
+         * Reference MBFs for each population
+         */
+        wf::Refs m_refs;
 
+    private:
+        v_t<TableBase::Loc> setup();
+
+    public:
         Vectors(const conf::Document& opts, const Hamiltonian& ham);
 
         ~Vectors();
@@ -78,9 +88,9 @@ namespace wf {
 
         void h5_read(const hdf5::NodeReader& parent, const Mbf& ref, str_t name = "wavefunction");
 
-        void begin_cycle();
+        void begin_cycle(uint_t icycle);
 
-        void end_cycle();
+        void end_cycle(uint_t icycle);
 
         uint_t nroot() const {
             return m_store.m_row.nroot();
@@ -100,7 +110,7 @@ namespace wf {
 
         wf_comp_t debug_square_norm(uint_t ipart) const;
 
-        wf_comp_t debug_reference_projected_energy(uint_t ipart, const field::Mbf& ref) const;
+        wf_comp_t debug_reference_projected_energy(uint_t ipart) const;
 
         /**
          * debugging only: number of walkers should be updated each time the wavefunction weights are modified
@@ -157,34 +167,52 @@ namespace wf {
 
         void remove_row(Walker& walker);
 
+    private:
+        /**
+         * row creation in the setup cannot set the reference connections field, since the reference is not set until
+         * after the setup step
+         */
+
+        Walker& create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1> /*setup*/);
+
+        Walker& create_row_(uint_t icycle, const Mbf& mbf, tag::Int<0> /*setup*/);
+
+        template<uint_t setup>
+        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf, tag::Int<setup>) {
+            const uint_t irank = m_dist.irank(mbf);
+            uint_t irec;
+            if (mpi::i_am(irank)) {
+                irec = create_row_(icycle, mbf, tag::Int<setup>()).index();
+            }
+            mpi::bcast(irec, irank);
+            return {irank, irec};
+        }
+
+        Walker& create_row_setup_(uint_t icycle, const Mbf& mbf) {
+            return create_row_(icycle, mbf, tag::Int<1>());
+        }
+
+        TableBase::Loc create_row_setup(uint_t icycle, const Mbf& mbf) {
+            return create_row(icycle, mbf, tag::Int<1>());
+        }
+
+    public:
+
         /**
          * Only called on the rank assigned to the MBF by the RankAllocator
          * @param icycle
          *  MC cycle index on which MBF is being added
          * @param mbf
          *  MBF of row to be added
-         * @param refconn
-         *  element true if reference MBF of corresponding WF part is connected
-         *  i.e. the connection to the reference has a non-zero H matrix element
          * @return
          *  ref to created row
          */
-        Walker& create_row_(uint_t icycle, const Mbf& mbf, const v_t<bool>& refconns);
-
-
-        Walker& create_row_(uint_t icycle, const Mbf& mbf, bool refconn) {
-            return create_row_(icycle, mbf, v_t<bool>(npart(), refconn));
-        }
+        Walker& create_row_(uint_t icycle, const Mbf& mbf) {return create_row_(icycle, mbf, tag::Int<0>());}
 
         /**
          * Called on all ranks, dispatching create_row_ on the assigned rank only
          */
-        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf, const v_t<bool>& refconns);
-
-
-        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf, bool refconn) {
-            return create_row(icycle, mbf, v_t<bool>(npart(), refconn));
-        }
+        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf) {return create_row(icycle, mbf, tag::Int<0>());}
 
         Spawn& add_spawn(const Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart);
 
@@ -196,6 +224,8 @@ namespace wf {
         }
 
         void refresh_all_hdiags();
+
+        void refresh_all_refconns();
 
         void fci_init(FciInitOptions opts, uint_t max_ncomm=1000ul);
 

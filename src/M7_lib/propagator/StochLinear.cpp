@@ -142,8 +142,8 @@ v_t<prob_t> StochLinear::excit_gen_case_probs() const {
     return m_excit_gen_group.get_probs();
 }
 
-void StochLinear::update(uint_t icycle, const wf::Vectors& wf, const wf::Refs& refs) {
-    Propagator::update(icycle, wf, refs);
+void StochLinear::update(uint_t icycle, const wf::Vectors& wf) {
+    Propagator::update(icycle, wf);
     m_mag_log.update(icycle, m_tau, m_excit_gen_group);
 }
 

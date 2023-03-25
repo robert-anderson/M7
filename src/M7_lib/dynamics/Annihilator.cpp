@@ -31,9 +31,9 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
     }
 }
 
-Annihilator::Annihilator(wf::Vectors &wf, const Propagator &prop, const wf::Refs &refs,
+Annihilator::Annihilator(wf::Vectors &wf, const Propagator &prop,
                          const shared_rows::Walker* hf, Rdms &rdms, const uint_t &icycle, wf_comp_t nadd) :
-        m_wf(wf), m_prop(prop), m_refs(refs), m_hf(hf), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
+        m_wf(wf), m_prop(prop), m_hf(hf), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
         m_work_row1(wf.m_send_recv.m_row), m_work_row2(wf.m_send_recv.m_row), m_dst_walker(m_wf.m_store.m_row),
         m_dst_weight(m_wf.npart(), wf_t{}), m_sort_cmp_fn(make_sort_cmp_fn()) {
     REQUIRE_TRUE_ALL(bool(m_rdms)==m_work_row1.m_send_parents,
@@ -79,7 +79,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
             return;
         }
 
-        auto& new_walker = m_wf.create_row_(m_icycle, dst_mbf, m_refs.is_connected(dst_mbf));
+        auto& new_walker = m_wf.create_row_(m_icycle, dst_mbf);
         m_wf.set_weight(new_walker, dst_ipart, delta_weight);
 
     } else {

@@ -72,10 +72,6 @@ class Solver {
      */
     wf::Vectors &m_wf;
     /**
-     * reference many-body basis functions (MBFs)
-     */
-    wf::Refs m_refs;
-    /**
      * Hartree-Fock basis function, allocated only when H satisfies the Brillouin theorem wrt the initial reference
      */
     const std::unique_ptr<HartreeFock> m_hf = nullptr;
@@ -154,10 +150,7 @@ private:
 
 public:
 
-    Solver(const conf::Document& opts, Propagator &prop, wf::Vectors &wf, v_t<TableBase::Loc> ref_locs);
-
-    Solver(const conf::Document& opts, Propagator &prop, wf::Vectors &wf, TableBase::Loc ref_loc):
-        Solver(opts, prop, wf, v_t<TableBase::Loc>(wf.npart(), ref_loc)){}
+    Solver(const conf::Document& opts, Propagator &prop, wf::Vectors &wf);
 
     /**
      * Perform ncycle iterations of the solver.

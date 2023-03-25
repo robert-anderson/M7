@@ -48,7 +48,7 @@ public:
 
     v_t<prob_t> excit_gen_case_probs() const override;
 
-    void update(uint_t icycle, const wf::Vectors &wf, const wf::Refs& refs) override;
+    void update(uint_t icycle, const wf::Vectors &wf) override;
 
     const ExcitGenGroup& excit_gen_group() const {
         return m_excit_gen_group;

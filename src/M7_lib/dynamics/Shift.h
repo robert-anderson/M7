@@ -67,14 +67,12 @@ struct Shift {
      *
      * @param wf
      *  wavefunction whose population growth defines the change in shift
-     * @param refs
-     *  reference MBFs which may alternatively be used to define the shift update
      * @param icycle
      *  MC cycle index
      * @param tau
      *  current timestep
      */
-    void update(const wf::Vectors& wf, const wf::Refs& refs, uint_t icycle, double tau, ham_comp_t value);
+    void update(const wf::Vectors& wf, uint_t icycle, double tau, ham_comp_t value);
 
 private:
 

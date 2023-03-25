@@ -24,10 +24,6 @@ struct Annihilator {
      */
     const Propagator& m_prop;
     /**
-     * references are needed to discern whether newly-created walkers contribute to the reference energies
-     */
-    const wf::Refs& m_refs;
-    /**
      * Hartree-Fock MBF, fixed throughout the calculation, for Brillouin theorem RDM accumulation, may be null
      */
     const shared_rows::Walker* m_hf;
@@ -92,7 +88,7 @@ private:
 
 public:
 
-    Annihilator(wf::Vectors &wf, const Propagator& prop, const wf::Refs& refs,
+    Annihilator(wf::Vectors &wf, const Propagator& prop,
                 const shared_rows::Walker* hf, Rdms& rdms, const uint_t& icycle, wf_comp_t nadd);
 
     /**

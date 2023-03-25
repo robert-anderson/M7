@@ -5,10 +5,9 @@
 #include "Reference.h"
 #include "Wavefunction.h"
 
-wf::Ref::Ref(const conf::Reference &opts, const Hamiltonian &ham,
-             const wf::Vectors &wf, uint_t ipart, TableBase::Loc loc) :
+wf::Ref::Ref(const conf::Reference &opts, wf::Vectors &wf, uint_t ipart, TableBase::Loc loc) :
         shared_rows::Walker("reference", wf.m_store, loc),
-        m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
+        m_wf(wf), m_ipart(ipart), m_conn(wf.m_ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
     if (m_redefinition_thresh==0.0)
         logging::info("Reference redefinition is deactivated");
@@ -16,14 +15,6 @@ wf::Ref::Ref(const conf::Reference &opts, const Hamiltonian &ham,
         REQUIRE_GE_ALL(m_redefinition_thresh, 1.0, "invalid redefinition threshold");
     logging::info("Initial reference MBF for WF part {} is {} with energy {}",
                   m_ipart, mbf(), gathered().m_row.m_hdiag);
-}
-
-void wf::Ref::update_ref_conn_flags() {
-    auto row = m_wf.m_store.m_row;
-    for (row.restart(); row; ++row){
-        if (row.m_mbf.is_clear()) continue;
-        row.m_ref_conn.put(m_ipart, is_connected(row.m_mbf));
-    }
 }
 
 void wf::Ref::accept_candidate(uint_t icycle) {
@@ -48,7 +39,7 @@ void wf::Ref::accept_candidate(uint_t icycle) {
         logging::info("New    : {}, weight: {: .6e}, MPI rank: {}",
                       mbf().to_string(), candidate_weight, m_wf.m_dist.irank(mbf()));
         m_candidate_weight = 0.0;
-        update_ref_conn_flags();
+        m_wf.refresh_all_refconns();
     }
 }
 
@@ -76,24 +67,24 @@ void wf::Ref::end_cycle(uint_t /*icycle*/) {
 
 bool wf::Ref::is_connected(const field::Mbf &mbf) const {
     m_conn[mbf].connect(this->mbf(), mbf);
-    return ham::is_significant(m_ham.get_element(this->mbf(), m_conn[mbf]));
+    return ham::is_significant(m_wf.m_ham.get_element(this->mbf(), m_conn[mbf]));
 }
 
 void wf::Ref::make_numerator_contribs(const field::Mbf &mbf, const wf_t& weight) {
     m_conn[mbf].connect(mbf, this->mbf());
-    m_proj_energy_num.m_local += m_ham.get_element(mbf, m_conn[mbf]) * weight;
+    m_proj_energy_num.m_local += m_wf.m_ham.get_element(mbf, m_conn[mbf]) * weight;
 }
 
 const ham_t& wf::Ref::proj_energy_num() const {
     return m_proj_energy_num.m_reduced;
 }
 
-wf::Refs::Refs(const conf::Reference &opts, const Hamiltonian &ham, const wf::Vectors &wf, v_t<TableBase::Loc> locs) :
+wf::Refs::Refs(const conf::Reference &opts, wf::Vectors &wf, v_t<TableBase::Loc> locs) :
         m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
     DEBUG_ASSERT_EQ(locs.size(), wf.m_format.m_nelement,
                     "there should be a parallel table location specifying each reference row");
     m_refs.reserve(wf.m_format.m_nelement);
-    for (uint_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(opts, ham, wf, ipart, locs[ipart]);
+    for (uint_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(opts, wf, ipart, locs[ipart]);
 }
 
 const wf::Ref & wf::Refs::operator[](const uint_t &ipart) const {
