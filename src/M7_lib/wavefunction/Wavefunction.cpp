@@ -8,33 +8,50 @@
 #include "M7_lib/sort/QuickSort.h"
 #include "FciInitializer.h"
 #include "M7_lib/util/Math.h"
+#include "HfExcitHists.h"
 
 
 v_t<TableBase::Loc> wf::Vectors::setup() {
     v_t<TableBase::Loc> ref_locs;
+    /*
+     * create the reference MBF and add it to the walker table
+     */
+    buffered::Mbf ref_mbf(m_sector);
+    mbf::set(ref_mbf, m_sector.particles(), m_opts.m_reference.m_mbf_init, 0ul);
+
+
+    const auto permanitiators = m_opts.m_wavefunction.m_ci_permanitiator.m_enabled;
+    /*
+     * insert reference MBF into the store table
+     */
+    const auto ref_loc = create_row_setup(0, ref_mbf);
+    if (ref_loc.is_mine()) {
+        auto ref_walker = m_store.m_row;
+        ref_walker.jump(ref_loc.m_irec);
+        for (uint_t ipart = 0ul; ipart < npart(); ++ipart) {
+            set_weight(ref_walker, ipart, wf_t(m_opts.m_wavefunction.m_nw_init));
+        }
+        if (permanitiators) ref_walker.m_permanitiator.set();
+    }
+
+    if (permanitiators) {
+        /*
+         * using the "permanitiator" adaptation with low-rank CI information as a source
+         */
+        hf_excit_hist::initialize(*this, ref_mbf, m_opts.m_wavefunction.m_ci_permanitiator);
+    }
+
+    for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
+
     if (m_opts.m_wavefunction.m_load.m_enabled) {
         // the wavefunction is to be loaded from HDF5 archive
     }
     else if (m_opts.m_wavefunction.m_fci_init) {
         // the wavefunction is to be initialized using exact eigenvectors from the Arnoldi method
-    }
-    else {
-        // no special initialization options specified: generate or parse reference MBFs and create walkers there
-        /*
-         * create the reference MBF and add it to the walker table
-         */
-        buffered::Mbf ref_mbf(m_sector);
-        mbf::set(ref_mbf, m_sector.particles(), m_opts.m_reference.m_mbf_init, 0ul);
-
-        const auto loc = create_row_setup(0, ref_mbf);
-        if (loc.is_mine()) {
-            auto ref_walker = m_store.m_row;
-            ref_walker.jump(loc.m_irec);
-            for (uint_t ipart = 0ul; ipart < npart(); ++ipart) {
-                set_weight(ref_walker, ipart, wf_t(m_opts.m_wavefunction.m_nw_init));
-            }
-        }
-        for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(loc);
+        logging::info("Performing exact FCI initialization of wavefunctions");
+        FciInitOptions fci_init_opts;
+        fci_init_opts.m_nroot = this->nroot();
+        fci_init(fci_init_opts);
     }
     return ref_locs;
 }
@@ -75,6 +92,8 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
                   string::plural(m_dist.nblock()));
     refresh_all_hdiags();
     refresh_all_refconns();
+
+    std::cout << m_store.to_string() << std::endl;
 }
 
 void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {

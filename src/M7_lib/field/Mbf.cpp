@@ -102,34 +102,3 @@ void mbf::set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDe
     set(mbf.m_frm, particles, def, idef);
     set(mbf.m_bos, particles, def, idef);
 }
-
-OpSig mbf::exsig(const field::FrmOnv &src, const field::FrmOnv &dst) {
-    uint_t src_work, dst_work, work;
-    uint_t nann = 0ul;
-    uint_t ncre = 0ul;
-    for (uint_t idataword = 0ul; idataword < src.m_dsize; ++idataword) {
-        src_work = src.get_dataword(idataword);
-        dst_work = dst.get_dataword(idataword);
-        work = src_work & ~dst_work;
-        while (work) nann += (bit::next_setbit(work), 1ul);
-        work = dst_work & ~src_work;
-        while (work) ncre += (bit::next_setbit(work), 1ul);
-    }
-    return opsig::frm(ncre, nann);
-}
-
-OpSig mbf::exsig(const field::BosOnv &src, const field::BosOnv &dst) {
-    uint_t nann = 0ul;
-    uint_t ncre = 0ul;
-    for (uint_t imode = 0ul; imode < src.nelement(); ++imode) {
-        if (src[imode] > dst[imode]) ++nann;
-        else if (src[imode] < dst[imode]) ++ncre;
-    }
-    return opsig::bos(ncre, nann);
-}
-
-OpSig mbf::exsig(const field::FrmBosOnv &src, const field::FrmBosOnv &dst) {
-    const auto frm = exsig(src.m_frm, dst.m_frm);
-    const auto bos = exsig(src.m_bos, dst.m_bos);
-    return {{frm.nfrm_cre(), frm.nfrm_ann()}, {bos.nbos_cre(), bos.nbos_ann()}};
-}

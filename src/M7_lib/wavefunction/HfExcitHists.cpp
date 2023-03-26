@@ -4,6 +4,7 @@
 
 #include <M7_lib/util/Math.h>
 #include "HfExcitHists.h"
+#include "Wavefunction.h"
 
 hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, double geo_mean_power_thresh) :
         m_inds(hdf5::GroupReader(parent, name), "indices", mpi::on_node_i_am_root(), true),
@@ -76,42 +77,57 @@ bool hf_excit_hist::Initializer::phase(Mbf &mbf) {
     return m_work_conn.phase(m_hf);
 }
 
-void hf_excit_hist::Initializer::setup(Mbf &mbf, uint_t imax, uint_t ipower, wf_t prev_product) {
-    auto& row = m_wf.m_store.m_row;
+void hf_excit_hist::Initializer::setup(Mbf& mbf, uint_t imax, uint_t ipower, wf_t prev_product) {
     for (uint_t i = 0ul; i < imax; ++i) {
-        auto product = prev_product * m_c2.m_vals[i];
-        // the form of the product is (1/n!)*(c2)^n
-        product /= ipower;
-        /*
-         * do not continue with this branch of contributions if the prev_product is already smaller than the thresh,
-         * since the values are sorted in descending order
-         */
-        if (std::abs(product) < m_c2.m_thresh) return;
-        if (apply(mbf, i)) {
-            // i-th indices were successfully applied
-            if (mpi::i_am(m_wf.m_dist.irank(mbf))) {
-                // generated MBF belongs on this MPI rank
-                const bool exists = m_wf.m_store.lookup(mbf, row);
-                if (!exists) {
-                    m_wf.m_store.insert(mbf, row);
-                    row.m_permanitiator.set();
-                    if (ipower==1) row.m_ref_conn.set();
-                    // permanitiators cannot be deleted - need to protect
-                    row.protect();
-                    ++m_ncreated.m_local[ipower * 2];
-                }
-                if (m_cancellation) row.m_weight += (phase(mbf) ? -1 : 1) * product;
-                // if not observing cancellation, no need to store the product
-            }
-            setup(mbf, i, ipower+1, product);
-            undo(mbf, i);
-        }
+        if (loop_body(mbf, i, ipower, prev_product)) return;
     }
+}
+
+void hf_excit_hist::Initializer::setup(Mbf& mbf) {
+    // parallelize over the first loop in the recursion
+    const uint_t nelement_local = mpi::evenly_shared_count(m_c2.m_nelement);
+    /*
+     * because there is a synchronization at the end of each iteration of the top-level loop, each rank must execute
+     * reach the communication call same number of times.
+     */
+    const auto nelement_local_max = mpi::all_max(nelement_local);
+    const auto stride = mpi::nrank();
+    const auto offset = mpi::irank();
+
+    for (uint_t i = 0ul; i < nelement_local_max; ++i) {
+        // only call the loop body if this rank still has work to do
+        if (i < nelement_local) {
+            const auto ielement = offset + i * stride;
+            loop_body(mbf, ielement, 1, 1.0);
+        }
+        communicate_and_insert();
+    }
+}
+
+void hf_excit_hist::Initializer::communicate_and_insert() {
+    m_wf.m_send_recv.communicate();
+    auto& store_row = m_wf.m_store.m_row;
+    auto fn = [&](const Spawn& recv_row) {
+        m_wf.m_store.lookup(recv_row.m_dst_mbf, store_row);
+        if (!store_row) {
+            // MBF not already added
+            m_wf.m_store.insert(recv_row.m_dst_mbf, store_row);
+            store_row.m_permanitiator.set();
+            // permanitiators cannot be deleted - need to protect
+            store_row.protect();
+            const auto exlvl = OpCounts(m_hf, recv_row.m_dst_mbf).m_nfrm_cre;
+            DEBUG_ASSERT_FALSE(exlvl & 1ul, "excitation level should be even, since currently only C2 is used as source info");
+            const auto ipower = exlvl / 2;
+            ++m_ncreated.m_local[ipower * 2];
+        }
+        store_row.m_weight += wf_t(recv_row.m_delta_weight);
+    };
+    m_wf.recv().foreach_row_in_use(fn);
 }
 
 void hf_excit_hist::Initializer::setup() {
     m_work_mbf = m_hf;
-    setup(m_work_mbf, m_c2.m_nelement, 1, 1.0);
+    setup(m_work_mbf);
     m_ncreated.all_sum();
     auto& row = m_wf.m_store.m_row;
     strv_t header = {"excitation level", "number in use"};
@@ -126,14 +142,17 @@ void hf_excit_hist::Initializer::setup() {
         auto after_cancellation = m_ncreated.m_reduced;
         for (row.restart(); row; ++row) {
             if (row.m_permanitiator.get(0)) {
+                const auto ipower = OpCounts(m_hf, row.m_mbf).m_nfrm_cre / 2;
                 if (std::abs(row.m_weight[0]) < m_c2.m_thresh) {
-                    m_work_conn.connect(m_hf, row.m_mbf);
-                    --after_cancellation[m_work_conn.m_cre.size()];
-                    row.unprotect();
-                    m_wf.m_store.erase(row.m_mbf);
+                    // the reference is not eligible for deletion
+                    if (ipower) {
+                        --after_cancellation[ipower];
+                        row.unprotect();
+                        m_wf.m_store.erase(row.m_mbf);
+                    }
                 }
                 else {
-                    row.m_weight = 0.0;
+                    if (ipower) row.m_weight = 0.0;
                 }
             }
         }
@@ -141,10 +160,10 @@ void hf_excit_hist::Initializer::setup() {
         logging_table.push_back(header);
         for (uint_t i = 1ul; i<=max_power*2; ++i) {
             logging_table.push_back({
-                convert::to_string(i),
-                convert::to_string(after_cancellation[i]),
-                convert::to_string(m_ncreated.m_reduced[i] - after_cancellation[i])
-            });
+                                            convert::to_string(i),
+                                            convert::to_string(after_cancellation[i]),
+                                            convert::to_string(m_ncreated.m_reduced[i] - after_cancellation[i])
+                                    });
         }
     }
     else {
@@ -153,6 +172,29 @@ void hf_excit_hist::Initializer::setup() {
             logging_table.push_back({convert::to_string(i), convert::to_string(m_ncreated.m_reduced[i])});
     }
     logging::info_table("Permanitiator breakdown", logging_table, true);
+}
+
+bool hf_excit_hist::Initializer::loop_body(Mbf& mbf, uint_t ielement, uint_t ipower, wf_t prev_product) {
+    auto product = prev_product * m_c2.m_vals[ielement];
+    // the form of the product is (1/n!)*(c2)^n
+    product /= ipower;
+    /*
+     * do not continue with this branch of contributions if the prev_product is already smaller than the thresh,
+     * since the values are sorted in descending order
+     */
+    if (std::abs(product) < m_c2.m_thresh) return true;
+    if (apply(mbf, ielement)) {
+        // i-th indices were successfully applied
+        auto irank = m_wf.m_dist.irank(mbf);
+        auto& send_table = m_wf.send(irank);
+        auto& send_row = send_table.m_row;
+        send_row.push_back_jump();
+        send_row.m_dst_mbf = mbf;
+        if (m_cancellation) send_row.m_delta_weight = (phase(mbf) ? -1 : 1) * product;
+        setup(mbf, ielement, ipower + 1, product);
+        undo(mbf, ielement);
+    }
+    return false;
 }
 
 void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, str_t fname, double geo_mean_power_thresh, bool cancellation) {

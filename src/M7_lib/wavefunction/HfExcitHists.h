@@ -7,11 +7,13 @@
 
 #include "M7_lib/communication/SharedRows.h"
 #include "M7_lib/mae/MaeTable.h"
-#include "M7_lib/wavefunction/Wavefunction.h"
 #include "M7_lib/parallel/PeriodicEvent.h"
 
-namespace hf_excit_hist {
+namespace wf {
+    struct Vectors;
+}
 
+namespace hf_excit_hist {
     struct IndVals {
         wf_comp_t m_geo_mean = 0.0;
         wf_comp_t m_thresh = 0.0;
@@ -68,9 +70,27 @@ namespace hf_excit_hist {
 
         bool phase(field::Mbf& mbf);
 
+        /**
+         * recurse through coefficient tree from ielement
+         */
+        bool loop_body(field::Mbf& mbf, uint_t ielement, uint_t ipower, wf_t prev_product);
+
+        /**
+         * generic loop
+         */
         void setup(field::Mbf& mbf, uint_t imax, uint_t ipower, wf_t prev_product);
 
+        /**
+         * top-level loop
+         */
+        void setup(field::Mbf& mbf);
+
+        void communicate_and_insert();
+
     public:
+        /**
+         * calls top-level loop and applies cancellation if required
+         */
         void setup();
     };
 

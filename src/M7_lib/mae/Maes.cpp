@@ -4,7 +4,7 @@
 
 #include "Maes.h"
 
-Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t nroot) :
+Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t /*nroot*/) :
         m_accum_epoch("MAE accumulation"),
         m_rdms(opts.m_rdm, sector, m_accum_epoch),
         m_spec_moms(opts.m_spec_mom, sector, m_accum_epoch),
@@ -49,7 +49,7 @@ void Maes::make_average_contribs(Walker &row, const shared_rows::Walker* hf, uin
 
     for (uint_t ipart = 0ul; ipart < row.m_wf_format.m_nelement; ++ipart) {
         auto ipart_replica = row.ipart_replica(ipart);
-        const auto iroot = ipart / row.nreplica();
+        // const auto iroot = ipart / row.nreplica();
         /*
          * the "average" weights actually refer to the unnormalized average. The averages are obtained by dividing
          * each by the number of cycles for which the row is occupied.

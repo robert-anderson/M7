@@ -6,6 +6,7 @@
 #define M7_MBF_H
 
 #include <M7_lib/conf/Conf.h>
+#include <M7_lib/connection/OpCounts.h>
 #include "Fields.h"
 
 /**
@@ -43,11 +44,10 @@ namespace mbf {
 
     void set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, uint_t idef);
 
-    OpSig exsig(const field::FrmOnv &src, const field::FrmOnv &dst);
-
-    OpSig exsig(const field::BosOnv &src, const field::BosOnv &dst);
-
-    OpSig exsig(const field::FrmBosOnv &src, const field::FrmBosOnv &dst);
+    template<typename mbf_t>
+    OpSig exsig(const mbf_t &src, const mbf_t& dst) {
+        return OpCounts(src, dst).opsig();
+    }
 
     static bool get_spinorb(const field::FrmOnv& onv, uint_t ispinorb) {
         return onv.get(ispinorb);
