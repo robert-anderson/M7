@@ -30,8 +30,9 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
         if (loc.is_mine()) {
             auto ref_walker = m_store.m_row;
             ref_walker.jump(loc.m_irec);
-            for (uint_t ipart = 0ul; ipart < npart(); ++ipart)
+            for (uint_t ipart = 0ul; ipart < npart(); ++ipart) {
                 set_weight(ref_walker, ipart, wf_t(m_opts.m_wavefunction.m_nw_init));
+            }
         }
         for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(loc);
     }
@@ -133,7 +134,8 @@ void wf::Vectors::preserve_ref_weights(wf_comp_t mag) {
         auto row = m_store.m_row;
         row.jump(irec);
         const wf_t weight = row.m_weight[ipart];
-        set_weight(row, math::phase(weight) * mag);
+        const auto fixed_weight = math::phase(weight) * mag;
+        set_weight(row, ipart, fixed_weight);
     }
     m_ref_weights_preserved = true;
 }
@@ -187,7 +189,7 @@ wf_comp_t wf::Vectors::reference_projected_energy(uint_t ipart) const {
     wf_comp_t num = 0.0;
     wf_comp_t den = 0.0;
     auto& row = m_store.m_row;
-    for (auto irec: m_irec_refconns) {
+    for (auto irec: m_irec_ref_conns) {
         row.jump(irec);
         if (!row.m_ref_conn.get(ipart)) continue;
         DEBUG_ASSERT_FALSE(row.is_freed(), "reference-connected row should not be freed");
@@ -195,7 +197,10 @@ wf_comp_t wf::Vectors::reference_projected_energy(uint_t ipart) const {
         num += m_ham.get_element(m_refs[ipart].mbf(), row.m_mbf) * weight;
         if (row.m_mbf == m_refs[ipart].mbf()) den+=weight;
     }
-    return mpi::all_sum(num) / mpi::all_sum(den);
+    num = mpi::all_sum(num);
+    den = mpi::all_sum(den);
+    DEBUG_ASSERT_NE(std::abs(den), 0.0, "reference weight is zero");
+    return num / den;
 }
 
 wf_comp_t wf::Vectors::debug_square_norm(uint_t ipart) const {
@@ -219,6 +224,7 @@ wf_comp_t wf::Vectors::debug_l1_norm(uint_t ipart) const {
 }
 
 void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
+    DEBUG_ASSERT_FALSE(std::isnan(std::abs(new_weight)), "new weight is invalid");
     if (m_ref_weights_preserved && walker.m_mbf==m_refs[ipart].mbf()) return;
     wf_t& weight = walker.m_weight[ipart];
     m_stats.m_nwalker.delta()[ipart] += std::abs(new_weight) - std::abs(weight);
@@ -244,13 +250,20 @@ void wf::Vectors::remove_row(Walker& walker) {
         zero_weight(walker, ipart);
         --m_stats.m_nocc_mbf.delta();
     }
-    if (!walker.m_ref_conn.is_clear()) {
-        // erasing a row which is connected to the reference in at least one part
-        DEBUG_ASSERT_TRUE(m_irec_refconns.count(walker.index()), "this record index should already be in the set");
-        m_irec_refconns.erase(walker.index());
-    }
-
+    remove_ref_conn(walker);
     m_store.erase(walker.m_mbf);
+}
+
+void wf::Vectors::add_ref_conn(const Walker& walker) {
+    if (walker.m_ref_conn.is_clear()) return;
+    DEBUG_ASSERT_FALSE(m_irec_ref_conns.count(walker.index()), "this record index is already in the set");
+    m_irec_ref_conns.insert(walker.index());
+}
+
+void wf::Vectors::remove_ref_conn(const Walker& walker) {
+    if (walker.m_ref_conn.is_clear()) return;
+    DEBUG_ASSERT_TRUE(m_irec_ref_conns.count(walker.index()), "this record index should be in the set");
+    m_irec_ref_conns.erase(walker.index());
 }
 
 Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1>) {
@@ -277,8 +290,10 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1>) {
 
 Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<0>) {
     auto& row = create_row_(icycle, mbf, tag::Int<1>());
-    for (uint_t i=0ul; i < npart(); ++i) row.m_ref_conn.put(i, m_refs[i].connected(mbf));
-    if (!row.m_ref_conn.is_clear()) m_irec_refconns.insert(row.index());
+    for (uint_t ipart=0ul; ipart < npart(); ++ipart) {
+        row.m_ref_conn.put(ipart, m_refs[ipart].connected(mbf));
+        add_ref_conn(row);
+    }
     return row;
 }
 
@@ -316,10 +331,12 @@ void wf::Vectors::refresh_all_hdiags() {
 }
 
 void wf::Vectors::refresh_all_refconns() {
-    m_irec_refconns.clear();
+    m_irec_ref_conns.clear();
     auto fn = [&](Walker& row) {
-        for (uint_t i=0ul; i < npart(); ++i) row.m_ref_conn.put(i, m_refs[i].connected(row.m_mbf));
-        if (!row.m_ref_conn.is_clear()) m_irec_refconns.insert(row.index());
+        for (uint_t ipart=0ul; ipart < npart(); ++ipart) {
+            row.m_ref_conn.put(ipart, m_refs[ipart].connected(row.m_mbf));
+            add_ref_conn(row);
+        }
     };
     m_store.foreach_row_in_use(fn);
 }

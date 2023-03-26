@@ -232,7 +232,7 @@ public:
         // don't go to the expense of forming the connection if the excitation signature would be out of range
         auto exsig = mbf::exsig(src, dst);
         if (exsig == opsig::c_invalid) return 0.0;
-        if (exsig.conserves_nfrm()) return 0.0;
+        if (!exsig.conserves_nfrm()) return 0.0;
         if (exsig.nfrm_cre() > 3ul) return 0.0;
         conn.connect(src, dst);
         return get_element(src, conn);
@@ -240,7 +240,7 @@ public:
 
 
     template<typename mbf_t>
-    ham_t connected(const mbf_t &src, const mbf_t &dst) const {
+    bool connected(const mbf_t &src, const mbf_t &dst) const {
         return ham::is_significant(get_element(src, dst));
     }
 

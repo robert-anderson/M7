@@ -64,7 +64,7 @@ namespace wf {
         /**
          * set of record indices of currently-occupied walkers connected to at least one reference MBF
          */
-        std::set<uint_t> m_irec_refconns;
+        std::set<uint_t> m_irec_ref_conns;
 
         v_t<TableBase::Loc> setup();
 
@@ -185,6 +185,11 @@ namespace wf {
         void remove_row(Walker& walker);
 
     private:
+
+        void add_ref_conn(const Walker& walker);
+
+        void remove_ref_conn(const Walker& walker);
+
         /**
          * row creation in the setup cannot set the reference connections field, since the reference is not set until
          * after the setup step
