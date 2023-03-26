@@ -27,6 +27,7 @@
 #include "M7_lib/hamiltonian/bos/InteractingBoseGasBosHam.h"
 #include "M7_lib/hamiltonian/frmbos/GeneralLadderHam.h"
 #include "M7_lib/util/Pointer.h"
+#include "M7_lib/field/Mbf.h"
 
 
 using namespace field;
@@ -228,8 +229,19 @@ public:
     template<typename mbf_t>
     ham_t get_element(const mbf_t &src, const mbf_t &dst) const {
         auto &conn = m_work_conn[src];
+        // don't go to the expense of forming the connection if the excitation signature would be out of range
+        auto exsig = mbf::exsig(src, dst);
+        if (exsig == opsig::c_invalid) return 0.0;
+        if (exsig.conserves_nfrm()) return 0.0;
+        if (exsig.nfrm_cre() > 3ul) return 0.0;
         conn.connect(src, dst);
         return get_element(src, conn);
+    }
+
+
+    template<typename mbf_t>
+    ham_t connected(const mbf_t &src, const mbf_t &dst) const {
+        return ham::is_significant(get_element(src, dst));
     }
 
     bool complex_valued() const;

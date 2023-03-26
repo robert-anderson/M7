@@ -82,9 +82,10 @@ void deterministic::Subspace::make_connections(const Hamiltonian &ham, const Rdm
         for (all_row.restart(); all_row; ++all_row) {
             // loop over full subspace (H columns)
             // only add to sparse H if dets are connected
+            if (mbf::exsig(m_local_row.m_mbf, all_row.m_mbf) == opsig::c_invalid) continue;
             conn_work.connect(m_local_row.m_mbf, all_row.m_mbf);
             const auto exsig = conn_work.exsig();
-            if ((exsig == opsig::c_zero) || (exsig == opsig::c_invalid)) continue; // diagonal or out of bounds
+            if (exsig == opsig::c_zero) continue; // diagonal
             auto helem = ham.get_element(m_local_row.m_mbf, conn_work);
             if (ham::is_significant(helem)) {
                 m_ham_matrix.add(iirow, {all_row.index(), helem});

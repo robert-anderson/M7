@@ -30,6 +30,12 @@ namespace opsig {
     static constexpr uint_t c_ndistinct = (1 << (2 * c_nbit_nop_frm + 2 * c_nbit_nop_bos));
 }
 
+/**
+ * OpSigs encode the rank or excitation level of a second-quantized operator string in a compact form. The exact number
+ * and range of possible single integer representations of OpSigs is determined by the numbers of bits defined in the
+ * above namespace. The representable ranks are therefore limited to those useful in ascertaining connectivity with
+ * respect to a particular operator e.g. Hamiltonian or RDM
+ */
 class OpSig {
     uint_t m_i;
 
@@ -78,11 +84,11 @@ public:
     }
 
     bool operator==(const OpSig& other) const {
-        return other.m_i==m_i;
+        return other.m_i == m_i;
     }
 
     bool operator!=(const OpSig& other) const {
-        return other.m_i!=m_i;
+        return other.m_i != m_i;
     }
 
     constexpr operator const uint_t& () const {

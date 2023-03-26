@@ -277,7 +277,7 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1>) {
 
 Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<0>) {
     auto& row = create_row_(icycle, mbf, tag::Int<1>());
-    for (uint_t i=0ul; i < npart(); ++i) row.m_ref_conn.put(i, m_refs[i].is_connected(mbf));
+    for (uint_t i=0ul; i < npart(); ++i) row.m_ref_conn.put(i, m_refs[i].connected(mbf));
     if (!row.m_ref_conn.is_clear()) m_irec_refconns.insert(row.index());
     return row;
 }
@@ -318,7 +318,7 @@ void wf::Vectors::refresh_all_hdiags() {
 void wf::Vectors::refresh_all_refconns() {
     m_irec_refconns.clear();
     auto fn = [&](Walker& row) {
-        for (uint_t i=0ul; i < npart(); ++i) row.m_ref_conn.put(i, m_refs[i].is_connected(row.m_mbf));
+        for (uint_t i=0ul; i < npart(); ++i) row.m_ref_conn.put(i, m_refs[i].connected(row.m_mbf));
         if (!row.m_ref_conn.is_clear()) m_irec_refconns.insert(row.index());
     };
     m_store.foreach_row_in_use(fn);

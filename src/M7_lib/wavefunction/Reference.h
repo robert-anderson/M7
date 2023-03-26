@@ -26,12 +26,6 @@ namespace wf {
          * index to the "part" of the wavefunction for which this object tracks the reference row
          */
         const uint_t m_ipart;
-
-        /**
-         * work space for computing connections to other MBFs via the Hamiltonian
-         */
-        mutable suite::Conns m_conn;
-
         /**
          * If a candidate for redefinition of the reference is found, then its weight and row within m_list must be stored
          */
@@ -90,7 +84,7 @@ namespace wf {
          * @return
          *  true if the matrix element of the Hamiltonian between the current reference and the argument is non-zero
          */
-        bool is_connected(const Mbf& mbf) const;
+        bool connected(const Mbf& mbf) const;
 
         /**
          * occupied MBFs connected to the reference must contribute to the numerator inner product <ref | H | mbf>
@@ -122,7 +116,7 @@ namespace wf {
 
         void contrib_row(const Walker& walker);
 
-        v_t<bool> is_connected(const Mbf& onv) const;
+        v_t<bool> connected(const Mbf& mbf) const;
 
         const Numbers<ham_t, c_ndim_wf>& proj_energy_nums();
 

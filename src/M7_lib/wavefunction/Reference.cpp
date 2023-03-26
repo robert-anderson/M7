@@ -7,8 +7,7 @@
 
 wf::Ref::Ref(const conf::Reference &opts, wf::Vectors &wf, uint_t ipart, TableBase::Loc loc) :
         shared_rows::Walker("reference", wf.m_store, loc),
-        m_wf(wf), m_ipart(ipart), m_conn(wf.m_ham.m_basis.size()),
-        m_redefinition_thresh(opts.m_redef_thresh){
+        m_wf(wf), m_ipart(ipart), m_redefinition_thresh(opts.m_redef_thresh){
     if (m_redefinition_thresh==0.0)
         logging::info("Reference redefinition is deactivated");
     else
@@ -65,14 +64,12 @@ void wf::Ref::end_cycle(uint_t /*icycle*/) {
     m_proj_energy_num.all_sum();
 }
 
-bool wf::Ref::is_connected(const field::Mbf &mbf) const {
-    m_conn[mbf].connect(this->mbf(), mbf);
-    return ham::is_significant(m_wf.m_ham.get_element(this->mbf(), m_conn[mbf]));
+bool wf::Ref::connected(const field::Mbf &mbf) const {
+    return m_wf.m_ham.connected(mbf, this->mbf());
 }
 
 void wf::Ref::make_numerator_contribs(const field::Mbf &mbf, const wf_t& weight) {
-    m_conn[mbf].connect(mbf, this->mbf());
-    m_proj_energy_num.m_local += m_wf.m_ham.get_element(mbf, m_conn[mbf]) * weight;
+    m_proj_energy_num.m_local += m_wf.m_ham.get_element(mbf, this->mbf()) * weight;
 }
 
 const ham_t& wf::Ref::proj_energy_num() const {
@@ -104,11 +101,11 @@ void wf::Refs::contrib_row(const Walker& walker) {
     for (auto& ref: m_refs) ref.contrib_row(walker);
 }
 
-v_t<bool> wf::Refs::is_connected(const field::Mbf &mbf) const {
+v_t<bool> wf::Refs::connected(const field::Mbf &mbf) const {
     v_t<bool> out;
     out.reserve(m_refs.size());
     for (uint_t ipart=0ul; ipart<m_refs.size(); ++ipart)
-        out.push_back(m_refs[ipart].is_connected(mbf));
+        out.push_back(m_refs[ipart].connected(mbf));
     return out;
 }
 
