@@ -160,10 +160,10 @@ void hf_excit_hist::Initializer::setup() {
         logging_table.push_back(header);
         for (uint_t i = 1ul; i<=max_power*2; ++i) {
             logging_table.push_back({
-                                            convert::to_string(i),
-                                            convert::to_string(after_cancellation[i]),
-                                            convert::to_string(m_ncreated.m_reduced[i] - after_cancellation[i])
-                                    });
+                convert::to_string(i),
+                convert::to_string(after_cancellation[i]),
+                convert::to_string(m_ncreated.m_reduced[i] - after_cancellation[i])
+            });
         }
     }
     else {
