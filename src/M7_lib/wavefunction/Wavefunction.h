@@ -97,10 +97,6 @@ namespace wf {
             return m_store.m_row.m_average_weight.belongs_to_row();
         }
 
-        void h5_write(const hdf5::NodeWriter& parent, str_t name = "wavefunction");
-
-        void h5_read(const hdf5::NodeReader& parent, const Mbf& ref, str_t name = "wavefunction");
-
         void begin_cycle(uint_t icycle);
 
         void end_cycle(uint_t icycle);
@@ -251,27 +247,7 @@ namespace wf {
 
         void fci_init(FciInitOptions opts, uint_t max_ncomm=1000ul);
 
-        void orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica) {
-            ASSERT(iroot <= jroot);
-            auto& row = m_store.m_row;
-            const auto ipart_src = m_format.flatten({iroot, ireplica});
-            const auto ipart_dst = m_format.flatten({jroot, ireplica});
-            overlaps.m_local[{iroot, jroot, ireplica}] +=
-                    arith::conj(row.m_weight[ipart_src]) * row.m_weight[ipart_dst];
-            if (jroot + 1 < nroot()) {
-                // there is another part to project onto
-                const auto ipart_next = m_format.flatten({jroot + 1, ireplica});
-                overlaps.m_local[{iroot, jroot + 1, ireplica}] +=
-                        arith::conj(row.m_weight[ipart_src]) * row.m_weight[ipart_next];
-            }
-            if (iroot < jroot) {
-                const auto& overlap = overlaps.m_reduced[{iroot, jroot, ireplica}];
-                const auto& norm = overlaps.m_reduced[{iroot, iroot, ireplica}];
-                ASSERT(std::abs(norm) > 1e-12);
-                const auto gs_coeff = overlap / norm;
-                change_weight(row, ipart_dst, -gs_coeff * row.m_weight[ipart_src]);
-            }
-        }
+        void orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica);
 
     public:
 
@@ -296,28 +272,11 @@ namespace wf {
          *  project psi_0 out of all higher states
          *
          */
-        void orthogonalize() {
-            // bra root, ket root, replica
-            reduction::NdArray<wf_t, 3> overlaps({nroot(), nroot(), nreplica()});
-            auto& row = m_store.m_row;
-            for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
-                for (uint_t jroot = iroot; jroot < nroot(); ++jroot) {
-                    for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
-                        for (row.restart(); row; ++row) {
-                            if (!row.m_mbf.is_clear()) orthogonalize(overlaps, iroot, jroot, ireplica);
-                        }
-                        overlaps.all_sum();
-                    }
-                }
-            }
-        }
+        void orthogonalize();
 
-        void save(const hdf5::NodeWriter& parent) const {
-            auto& row = m_store.m_row;
-            hdf5::GroupWriter gw(parent, "wf");
-            row.m_mbf.save(gw, true);
-            row.m_weight.save(gw, true);
-        }
+        void save(const hdf5::NodeWriter& parent) const;
+
+        void save() const;
     };
 }
 

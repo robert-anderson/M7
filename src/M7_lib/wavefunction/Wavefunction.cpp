@@ -123,6 +123,7 @@ void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
 
 wf::Vectors::~Vectors() {
     for (uint_t ipart=0ul; ipart<npart(); ++ipart) log_top_weighted(ipart);
+    if (m_opts.m_wavefunction.m_save.m_enabled) save();
 }
 
 void wf::Vectors::preserve_ref_weights(wf_comp_t mag) {
@@ -144,6 +145,7 @@ bool wf::Vectors::ref_weights_preserved() const {
     return m_ref_weights_preserved;
 }
 
+#if 0
 void wf::Vectors::h5_write(const hdf5::NodeWriter& parent, str_t name) {
     auto field_names = []() -> strv_t {
         if (c_enable_fermions != c_enable_bosons) return {"mbf", "weight"};
@@ -155,7 +157,6 @@ void wf::Vectors::h5_write(const hdf5::NodeWriter& parent, str_t name) {
 
 void wf::Vectors::h5_read(const hdf5::NodeReader& /*parent*/, const field::Mbf& /*ref*/,
                           str_t /*name*/) {
-#if 0
     m_store.clear();
     buffered::Table<Walker> m_buffer("", {m_store.m_row});
     m_buffer.push_back();
@@ -171,8 +172,8 @@ void wf::Vectors::h5_read(const hdf5::NodeReader& /*parent*/, const field::Mbf& 
         auto& walker = create_row(0ul, row_reader.m_mbf, ham.get_energy(row_reader.m_mbf), v_t<bool>(npart(), ref_conn));
         set_weight(walker, row_reader.m_weight);
     }
-#endif
 }
+#endif
 
 void wf::Vectors::begin_cycle(uint_t icycle) {
     reduction::clear_local(m_stats.m_summed);
@@ -396,4 +397,55 @@ void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
             m_store.m_insert_row.m_weight = recv_row.m_delta_weight;
         }
     }
+}
+
+void wf::Vectors::orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica) {
+    ASSERT(iroot <= jroot);
+    auto& row = m_store.m_row;
+    const auto ipart_src = m_format.flatten({iroot, ireplica});
+    const auto ipart_dst = m_format.flatten({jroot, ireplica});
+    overlaps.m_local[{iroot, jroot, ireplica}] +=
+            arith::conj(row.m_weight[ipart_src]) * row.m_weight[ipart_dst];
+    if (jroot + 1 < nroot()) {
+        // there is another part to project onto
+        const auto ipart_next = m_format.flatten({jroot + 1, ireplica});
+        overlaps.m_local[{iroot, jroot + 1, ireplica}] +=
+                arith::conj(row.m_weight[ipart_src]) * row.m_weight[ipart_next];
+    }
+    if (iroot < jroot) {
+        const auto& overlap = overlaps.m_reduced[{iroot, jroot, ireplica}];
+        const auto& norm = overlaps.m_reduced[{iroot, iroot, ireplica}];
+        ASSERT(std::abs(norm) > 1e-12);
+        const auto gs_coeff = overlap / norm;
+        change_weight(row, ipart_dst, -gs_coeff * row.m_weight[ipart_src]);
+    }
+}
+
+void wf::Vectors::orthogonalize() {
+    // bra root, ket root, replica
+    reduction::NdArray<wf_t, 3> overlaps({nroot(), nroot(), nreplica()});
+    auto& row = m_store.m_row;
+    for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
+        for (uint_t jroot = iroot; jroot < nroot(); ++jroot) {
+            for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
+                for (row.restart(); row; ++row) {
+                    if (!row.m_mbf.is_clear()) orthogonalize(overlaps, iroot, jroot, ireplica);
+                }
+                overlaps.all_sum();
+            }
+        }
+    }
+}
+
+void wf::Vectors::save(const hdf5::NodeWriter& parent) const {
+    auto& row = m_store.m_row;
+    hdf5::GroupWriter gw(parent, "wf");
+    row.m_mbf.save(gw, true);
+    row.m_weight.save(gw, true);
+}
+
+void wf::Vectors::save() const {
+    REQUIRE_TRUE_ALL(m_opts.m_wavefunction.m_save.m_enabled, "wavefunction saving is disabled in config document")
+    hdf5::FileWriter fw(m_opts.m_wavefunction.m_save.m_path);
+    save(fw);
 }
