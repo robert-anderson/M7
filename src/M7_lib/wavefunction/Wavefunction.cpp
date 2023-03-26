@@ -2,12 +2,9 @@
 // Created by Robert John Anderson on 2020-04-03.
 //
 
-#include <M7_lib/basis/Suites.h>
+#include "M7_lib/basis/Suites.h"
 #include "Wavefunction.h"
-#include "M7_lib/linalg/FciIters.h"
-#include "M7_lib/sort/QuickSort.h"
 #include "FciInitializer.h"
-#include "M7_lib/util/Math.h"
 #include "HfExcitHists.h"
 
 
