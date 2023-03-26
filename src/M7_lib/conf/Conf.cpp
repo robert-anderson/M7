@@ -261,8 +261,8 @@ conf::Mae::Mae(Group *parent) :
             "number of MC cycles between computation and output of all contracted values computed from the averaged estimators"),
         m_stats_path(this, "stats_path", "M7.mae.stats", "output path for contracted value statistics"),
         m_rdm(this, "rdm", "options relating to the accumulation and sampling of RDM elements"),
-        m_spec_mom(this, "spec_mom", "options relating to the accumulation and sampling of spectral moments"),
-        m_hf_excits(this) {}
+        m_spec_mom(this, "spec_mom", "options relating to the accumulation and sampling of spectral moments")
+        {}
 
 
 conf::GuideWavefunction::ExpFac::ExpFac(conf::GuideWavefunction* parent, str_t name, str_t description) :

@@ -27,10 +27,6 @@ struct Maes {
      */
     SpecMoms m_spec_moms;
     /**
-     * averaged amplitudes of MBFs that are excitations of the HF-like MBF
-     */
-    HfExcits m_hf_excits;
-    /**
      * number of cycles between consecutive averaging operations and stats output
      */
     const uint_t m_period;

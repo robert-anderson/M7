@@ -236,7 +236,6 @@ namespace conf {
         Param<str_t> m_stats_path;
         Rdms m_rdm;
         SpecMoms m_spec_mom;
-        HfExcits m_hf_excits;
 
         explicit Mae(Group *parent);
 

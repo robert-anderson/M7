@@ -8,7 +8,7 @@ Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t nroot) :
         m_accum_epoch("MAE accumulation"),
         m_rdms(opts.m_rdm, sector, m_accum_epoch),
         m_spec_moms(opts.m_spec_mom, sector, m_accum_epoch),
-        m_hf_excits(opts.m_hf_excits, sector.size(), nroot), m_period(opts.m_stats_period) {
+        m_period(opts.m_stats_period) {
     if (*this) {
         m_stats = ptr::smart::make_unique<MaeStats>(
                 opts.m_stats_path, "FCIQMC Multidimensional Averaged Estimators",
@@ -17,11 +17,11 @@ Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t nroot) :
 }
 
 Maes::operator bool() const {
-    return m_rdms || m_spec_moms || m_hf_excits;
+    return m_rdms || m_spec_moms;
 }
 
 bool Maes::all_stores_empty() const {
-    return m_rdms.all_stores_empty() && m_hf_excits.all_stores_empty();
+    return m_rdms.all_stores_empty();
 }
 
 bool Maes::is_period_cycle(uint_t icycle) {
@@ -55,11 +55,6 @@ void Maes::make_average_contribs(Walker &row, const shared_rows::Walker* hf, uin
          * each by the number of cycles for which the row is occupied.
          */
         const auto av_weight = row.m_average_weight[ipart] / ncycle_occ;
-
-        /*
-         * accumulate contributions to reference excitations if required
-         */
-        if (hf) m_hf_excits.make_contribs(row.m_mbf, hf->mbf(), ncycle_occ * av_weight, iroot);
 
         if (m_rdms) {
             auto av_weight_rep = row.m_average_weight[ipart_replica] / ncycle_occ;
