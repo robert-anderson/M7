@@ -144,15 +144,12 @@ void hf_excit_hist::Initializer::setup() {
             if (row.m_permanitiator.get(0)) {
                 const auto ipower = OpCounts(m_hf, row.m_mbf).m_nfrm_cre / 2;
                 if (std::abs(row.m_weight[0]) < m_c2.m_thresh) {
-                    // the reference is not eligible for deletion
-                    if (ipower) {
-                        --after_cancellation[ipower];
-                        row.unprotect();
-                        m_wf.m_store.erase(row.m_mbf);
-                    }
+                    --after_cancellation[ipower];
+                    row.unprotect();
+                    m_wf.m_store.erase(row.m_mbf);
                 }
                 else {
-                    if (ipower) row.m_weight = 0.0;
+                    row.m_weight = 0.0;
                 }
             }
         }

@@ -21,6 +21,14 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
 
 
     const auto permanitiators = m_opts.m_wavefunction.m_ci_permanitiator.m_enabled;
+
+    if (permanitiators) {
+        /*
+         * using the "permanitiator" adaptation with low-rank CI information as a source
+         */
+        hf_excit_hist::initialize(*this, ref_mbf, m_opts.m_wavefunction.m_ci_permanitiator);
+    }
+
     /*
      * insert reference MBF into the store table
      */
@@ -32,13 +40,6 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
             set_weight(ref_walker, ipart, wf_t(m_opts.m_wavefunction.m_nw_init));
         }
         if (permanitiators) ref_walker.m_permanitiator.set();
-    }
-
-    if (permanitiators) {
-        /*
-         * using the "permanitiator" adaptation with low-rank CI information as a source
-         */
-        hf_excit_hist::initialize(*this, ref_mbf, m_opts.m_wavefunction.m_ci_permanitiator);
     }
 
     for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
