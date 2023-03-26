@@ -117,8 +117,7 @@ void hf_excit_hist::Initializer::communicate_and_insert() {
             store_row.protect();
             const auto exlvl = OpCounts(m_hf, recv_row.m_dst_mbf).m_nfrm_cre;
             DEBUG_ASSERT_FALSE(exlvl & 1ul, "excitation level should be even, since currently only C2 is used as source info");
-            const auto ipower = exlvl / 2;
-            ++m_ncreated.m_local[ipower * 2];
+            ++m_ncreated.m_local[exlvl];
         }
         store_row.m_weight += wf_t(recv_row.m_delta_weight);
     };
@@ -142,9 +141,9 @@ void hf_excit_hist::Initializer::setup() {
         auto after_cancellation = m_ncreated.m_reduced;
         for (row.restart(); row; ++row) {
             if (row.m_permanitiator.get(0)) {
-                const auto ipower = OpCounts(m_hf, row.m_mbf).m_nfrm_cre / 2;
+                const auto iexlvl = OpCounts(m_hf, row.m_mbf).m_nfrm_cre;
                 if (std::abs(row.m_weight[0]) < m_c2.m_thresh) {
-                    --after_cancellation[ipower];
+                    --after_cancellation[iexlvl];
                     row.unprotect();
                     m_wf.m_store.erase(row.m_mbf);
                 }
