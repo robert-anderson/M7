@@ -15,6 +15,7 @@ propagator:
   semistochastic:
     size: 28
     delay: 10
+    period: 20
 hamiltonian:
   fermion:
     fcidump:
