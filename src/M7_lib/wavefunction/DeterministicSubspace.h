@@ -7,7 +7,6 @@
 
 #include "M7_lib/mae/Maes.h"
 #include "M7_lib/linalg/sparse/Sparse.h"
-#include "M7_lib/hamiltonian/frm/FrmHam.h"
 #include <M7_lib/field/Fields.h>
 
 #include "WalkerTable.h"
@@ -189,7 +188,7 @@ namespace deterministic {
         /**
          * initialize sparse Hamiltonian representing the projection of full H into the perturbed deterministic space
          */
-        void setup_ham(const Hamiltonian& h);
+        void setup_ham(const Hamiltonian& ham);
 
         /**
          * rezero, then populate the perturbed space working vector
@@ -209,9 +208,9 @@ namespace deterministic {
 
     public:
 
-        void setup(const Hamiltonian& h, const MappedTable<Walker>& walker_subspace) {
+        void setup(const Hamiltonian& ham, const MappedTable<Walker>& walker_subspace) {
             setup_basis(walker_subspace);
-            setup_ham(h);
+            setup_ham(ham);
         }
 
         /**
@@ -238,6 +237,11 @@ namespace deterministic {
          * need to maintain a reference to the wavefunction so the affected coefficients can be gathered and updated
          */
         wf::Vectors& m_wf;
+        /**
+         * reference to the bilinear expectation values which take contributions from connections within the
+         * deterministic subspace
+         */
+        Maes& m_maes;
         /**
          * all the non-zero Hamiltonian connections and their matrix elements for the locally-stored rows (with respect to
          * columns distributed across all ranks)
@@ -267,12 +271,12 @@ namespace deterministic {
 
         uintv_t make_iparts();
 
-        void make_rdm_contrib(Rdms& rdms, const shared_rows::Walker* hf, const sparse::Element& elem);
+        void make_rdm_contrib(const shared_rows::Walker* hf, const sparse::Element& elem);
 
 
     public:
 
-        Subspace(const conf::Semistochastic& opts, wf::Vectors& wf, uint_t iroot);
+        Subspace(const conf::Semistochastic& opts, wf::Vectors& wf, Maes& maes, uint_t iroot);
 
         virtual ~Subspace() {}
 
@@ -287,12 +291,20 @@ namespace deterministic {
 
         void select_l1_norm_fraction();
 
-        void make_connections(const Hamiltonian& ham, const Rdms& rdms);
-        void make_connections(const Hamiltonian& ham, const SpecMoms& rdms);
+    private:
+        void make_connections(const Rdms& rdms);
+        void make_connections(const SpecMoms& rdms);
 
-        void make_rdm_contribs(Rdms& rdms, const shared_rows::Walker* hf);
+    public:
+        void make_connections() {
+            make_connections(m_maes.m_rdms);
+            make_connections(m_maes.m_spec_moms);
+        }
 
-        void make_spec_mom_contribs(SpecMoms& spec_moms) {
+        void make_rdm_contribs(const shared_rows::Walker* hf);
+
+        void make_spec_mom_contribs() {
+            auto& spec_moms = m_maes.m_spec_moms;
             if (!spec_moms || !spec_moms.m_accum_epoch) return;
             REQUIRE_TRUE(m_frm_hole_perturbed.get(), "uninitialized");
             REQUIRE_TRUE(m_frm_particle_perturbed.get(), "uninitialized");
@@ -336,15 +348,15 @@ namespace deterministic {
         /**
          * create subspaces, perform the relevant selections, and call make_connections on each
          */
-        void init(const Hamiltonian& ham, const Maes& maes, wf::Vectors& wf, uint_t icycle);
+        void init(wf::Vectors &wf, Maes &maes, uint_t icycle);
 
-        void update();
+        void update(uint_t icycle);
 
         void project(double tau);
 
-        void make_rdm_contribs(Rdms& rdms, const shared_rows::Walker* hf);
+        void make_rdm_contribs(const shared_rows::Walker* hf);
 
-        void make_spec_mom_contribs(SpecMoms& spec_moms);
+        void make_spec_mom_contribs();
     };
 }
 

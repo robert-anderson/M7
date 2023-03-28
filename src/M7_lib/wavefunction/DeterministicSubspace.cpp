@@ -12,7 +12,8 @@ uintv_t deterministic::Subspace::make_iparts() {
     return {ipart, ipart + 1};
 }
 
-void deterministic::Subspace::make_rdm_contrib(Rdms &rdms, const shared_rows::Walker *hf, const sparse::Element& elem) {
+void deterministic::Subspace::make_rdm_contrib(const shared_rows::Walker *hf, const sparse::Element& elem) {
+    auto& rdms = m_maes.m_rdms;
     const auto& row = this->gathered().m_row;
     row.jump(elem);
     if (hf && (row.m_mbf == hf->mbf())) return;
@@ -27,9 +28,9 @@ void deterministic::Subspace::make_rdm_contrib(Rdms &rdms, const shared_rows::Wa
 }
 
 deterministic::Subspace::Subspace(
-        const conf::Semistochastic &opts, wf::Vectors &wf, uint_t iroot) :
+        const conf::Semistochastic &opts, wf::Vectors &wf, Maes& maes, uint_t iroot) :
         shared_rows::Set<Walker>("semistochastic", wf.m_store),
-        m_opts(opts), m_wf(wf),
+        m_opts(opts), m_wf(wf), m_maes(maes),
         m_iroot(iroot), m_local_row(wf.m_store.m_row), m_iparts(make_iparts()){}
 
 void deterministic::Subspace::add_(Walker &row) {
@@ -59,7 +60,7 @@ void deterministic::Subspace::select_l1_norm_fraction() {
     }
 }
 
-void deterministic::Subspace::make_connections(const Hamiltonian &ham, const Rdms &rdms){
+void deterministic::Subspace::make_connections(const Rdms &rdms){
     const auto& gathered = this->gathered();
     full_update();
     if (!gathered.nrow_in_use()) {
@@ -86,7 +87,7 @@ void deterministic::Subspace::make_connections(const Hamiltonian &ham, const Rdm
             conn_work.connect(m_local_row.m_mbf, all_row.m_mbf);
             const auto exsig = conn_work.exsig();
             if (exsig == opsig::c_zero) continue; // diagonal
-            auto helem = ham.get_element(m_local_row.m_mbf, conn_work);
+            auto helem = m_wf.m_ham.get_element(m_local_row.m_mbf, conn_work);
             if (ham::is_significant(helem)) {
                 m_ham_matrix.add(iirow, {all_row.index(), helem});
                 ++nconn_ham;
@@ -103,17 +104,18 @@ void deterministic::Subspace::make_connections(const Hamiltonian &ham, const Rdm
     if (rdms) logging::info("Number of H-unconnected, but RDM-contributing pairs of MBFs: {}", nconn_rdm);
 }
 
-void deterministic::Subspace::make_connections(const Hamiltonian &ham, const SpecMoms &spec_moms) {
+void deterministic::Subspace::make_connections(const SpecMoms &spec_moms) {
     if (!spec_moms) return;
     m_frm_hole_perturbed = ptr::smart::make_unique<FrmOpPerturbed>(
             m_wf.m_sector, true, spec_moms.m_selected_spinorbs, m_iroot);
-    m_frm_hole_perturbed->setup(ham, gathered());
+    m_frm_hole_perturbed->setup(m_wf.m_ham, gathered());
     m_frm_particle_perturbed = ptr::smart::make_unique<FrmOpPerturbed>(
             m_wf.m_sector, false, spec_moms.m_selected_spinorbs, m_iroot);
-    m_frm_particle_perturbed->setup(ham, gathered());
+    m_frm_particle_perturbed->setup(m_wf.m_ham, gathered());
 }
 
-void deterministic::Subspace::make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf) {
+void deterministic::Subspace::make_rdm_contribs(const shared_rows::Walker *hf) {
+    auto& rdms = m_maes.m_rdms;
     if (!rdms || !rdms.m_accum_epoch) return;
     uint_t iirec = ~0ul;
     for (auto irec: m_irecs) {
@@ -124,13 +126,13 @@ void deterministic::Subspace::make_rdm_contribs(Rdms &rdms, const shared_rows::W
          * make contributions due to hamiltonian connections
          */
         for (auto& elem : m_ham_matrix[iirec]){
-            make_rdm_contrib(rdms, hf, elem);
+            make_rdm_contrib(hf, elem);
         }
         /*
          * make contributions due to RDM-only connections
          */
         for (auto& elem : m_rdm_network[iirec]){
-            make_rdm_contrib(rdms, hf, elem);
+            make_rdm_contrib(hf, elem);
         }
     }
 }
@@ -166,14 +168,14 @@ deterministic::Subspaces::operator bool() const {
     return m_opts.m_enabled && m_epoch;
 }
 
-void deterministic::Subspaces::init(const Hamiltonian &ham, const Maes& maes, wf::Vectors &wf, uint_t icycle) {
+void deterministic::Subspaces::init(wf::Vectors &wf, Maes &maes, uint_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
 
     for (uint_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {
         auto& detsub = m_detsubs[iroot];
         REQUIRE_TRUE_ALL(detsub == nullptr, "detsubs should not already be allocated");
-        detsub = ptr::smart::make_unique<Subspace>(m_opts, wf, iroot);
+        detsub = ptr::smart::make_unique<Subspace>(m_opts, wf, maes, iroot);
         if (m_opts.m_l1_fraction_cutoff.m_value < 1.0) {
             logging::info("Selecting walkers with magnitude >= {:.5f}% of the current global population "
                           "for root {} deterministic subspace", 100.0*m_opts.m_l1_fraction_cutoff.m_value, iroot);
@@ -183,9 +185,11 @@ void deterministic::Subspaces::init(const Hamiltonian &ham, const Maes& maes, wf
                           m_opts.m_size, iroot);
             detsub->select_highest_weighted();
         }
-        detsub->make_connections(ham, maes.m_rdms);
-        detsub->make_connections(ham, maes.m_spec_moms);
+        logging::info("Root {} deterministic subspace selection complete", iroot);
+        detsub->make_connections();
     }
+    if (m_opts.m_period.m_value < ~0ul)
+        logging::info("Deterministic subspace refresh period: {}", string::plural("cycle", m_opts.m_period.m_value));
 
     if (m_opts.m_save.m_enabled) {
         // the subspaces are not going to change, so might as well dump them to archive now
@@ -196,7 +200,7 @@ void deterministic::Subspaces::init(const Hamiltonian &ham, const Maes& maes, wf
     m_epoch.update(icycle, true);
 }
 
-void deterministic::Subspaces::update() {
+void deterministic::Subspaces::update(uint_t icycle) {
     if (!*this) return;
     for (auto &detsub: m_detsubs) detsub->update();
 }
@@ -206,14 +210,14 @@ void deterministic::Subspaces::project(double tau) {
     for (auto &detsub: m_detsubs) detsub->project(tau);
 }
 
-void deterministic::Subspaces::make_rdm_contribs(Rdms &rdms, const shared_rows::Walker *hf) {
+void deterministic::Subspaces::make_rdm_contribs(const shared_rows::Walker *hf) {
     if (!*this) return;
-    for (auto &detsub: m_detsubs) detsub->make_rdm_contribs(rdms, hf);
+    for (auto &detsub: m_detsubs) detsub->make_rdm_contribs(hf);
 }
 
-void deterministic::Subspaces::make_spec_mom_contribs(SpecMoms& spec_moms) {
+void deterministic::Subspaces::make_spec_mom_contribs() {
     if (!*this) return;
-    for (auto &detsub: m_detsubs) detsub->make_spec_mom_contribs(spec_moms);
+    for (auto &detsub: m_detsubs) detsub->make_spec_mom_contribs();
 }
 
 deterministic::FrmOpPerturbed::FrmOpPerturbed(sys::Sector sector, bool hole, uintv_t select_pert_inds, uint_t iroot) :
@@ -265,14 +269,14 @@ void deterministic::FrmOpPerturbed::setup_basis(const MappedTable<Walker>& walke
     // m_basis_map now contains correspondences between walker deterministic subspace and perturber basis
 }
 
-void deterministic::FrmOpPerturbed::setup_ham(const Hamiltonian& h) {
+void deterministic::FrmOpPerturbed::setup_ham(const Hamiltonian& ham) {
     // share out the perturbed-space Hamiltonian rows evenly
     const auto count_local = mpi::evenly_shared_count(full_basis_size());
     m_pert_basis_displ = mpi::evenly_shared_displ(full_basis_size());
     auto row = m_pert_basis_table.m_row;
     const auto& src = row.m_field;
     for (row.jump(m_pert_basis_displ); row.in_range(m_pert_basis_displ + count_local); ++row) {
-        const auto helem_diag = h.get_element(src);
+        const auto helem_diag = ham.get_element(src);
         const auto irow = row.index() - m_pert_basis_displ;
         DEBUG_ASSERT_TRUE(m_ham_pert[irow].empty(), "sparse Hamiltonian row should be empty");
         if (ham::is_significant(helem_diag)) m_ham_pert.insert(irow, {row.index(), helem_diag});
@@ -280,7 +284,7 @@ void deterministic::FrmOpPerturbed::setup_ham(const Hamiltonian& h) {
         const auto& dst = col.m_field;
         for (col.restart(); col; ++col) {
             const auto icol = col.index();
-            const auto helem = h.get_element(src, dst);
+            const auto helem = ham.get_element(src, dst);
             if (ham::is_significant(helem)) m_ham_pert.insert(irow, {icol, helem});
         }
     }
