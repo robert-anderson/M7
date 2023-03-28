@@ -64,6 +64,18 @@ namespace hf_excit_hist {
          */
         uint_t max_power_by_thresh();
 
+        /**
+         * @return
+         *  threshold which would yield a single permanitiator for C2^ipower excitations
+         */
+        wf_comp_t thresh_for_first_pmntr(uint_t ipower);
+
+        /**
+         * @return
+         *  power of the C2 geometric mean corresponding to thresh_for_first_pmntr(ipower)
+         */
+        wf_comp_t gmp_for_first_pmntr(uint_t ipower);
+
         bool apply(field::Mbf& mbf, uint_t ientry);
 
         bool undo(field::Mbf& mbf, uint_t ientry);

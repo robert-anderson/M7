@@ -46,6 +46,28 @@ uint_t hf_excit_hist::Initializer::max_power_by_thresh() {
     return limit;
 }
 
+wf_comp_t hf_excit_hist::Initializer::thresh_for_first_pmntr(uint_t ipower) {
+    wf_comp_t product = 1.0;
+    m_work_mbf = m_hf;
+    uint_t ielement = 0ul;
+
+    for (uint_t i = 1ul; i <= ipower; ++i){
+        for (; ielement < m_c2.m_nelement; ++ielement) {
+            if (apply(m_work_mbf, ielement)) {
+                // the entry was successfully applied
+                product *= std::abs(m_c2.m_vals[ielement])/i;
+                // exit the loop over elements
+                break;
+            }
+        }
+    }
+    return product;
+}
+
+wf_comp_t hf_excit_hist::Initializer::gmp_for_first_pmntr(uint_t ipower) {
+    return std::log(thresh_for_first_pmntr(ipower)) / std::log(m_c2.m_geo_mean);
+}
+
 bool hf_excit_hist::Initializer::apply(Mbf &mbf, uint_t ientry) {
     const auto a = m_c2.m_inds(ientry, 0);
     const auto b = m_c2.m_inds(ientry, 1);

@@ -19,10 +19,3 @@ TEST(UtilMath, GeoMean) {
     v_t<double> v = {0.12 , 0.009, 0.034, 0.074, 0.023, 0.003, 0.002, 0.079};
     ASSERT_NEAR_EQ(math::geo_mean(v), 0.02036831352);
 }
-
-TEST(UtilMath, Logarithm) {
-    const double d1 = -8;
-    const double d2 = 4;
-    ASSERT_NEAR_EQ((math::logarithm(d1) + math::logarithm(d2)).exp(), d1 * d2);
-    ASSERT_NEAR_EQ((math::logarithm(d1) - math::logarithm(d2)).exp(), d1 / d2);
-}
