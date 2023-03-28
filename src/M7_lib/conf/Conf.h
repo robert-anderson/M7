@@ -144,6 +144,7 @@ namespace conf {
         Param<uint_t> m_size;
         Param<double> m_l1_fraction_cutoff;
         Param<uint_t> m_delay;
+        Param<uint_t> m_period;
         OptionalFile m_save;
         OptionalFile m_load;
 

@@ -155,7 +155,9 @@ conf::Semistochastic::Semistochastic(Group *parent) :
             "requisite fraction of the total number of walkers required to reside on an MBF for inclusion in the "
             "semistochastic space"),
         m_delay(this, "delay", 0ul,
-                "number of MC cycles to sleep after the onset of variable shift mode before initializing the semi-stochastic space"),
+                "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space(s)"),
+        m_period(this, "period", ~0ul,
+                 "number of MC cycles between refreshes of the semi-stochastic space(s)"),
         m_save(this, "save", "deterministic subspace save", "M7.detsub.h5", Explicit),
         m_load(this, "load", "deterministic subspace load", "M7.detsub.h5", Explicit){}
 

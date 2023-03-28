@@ -243,7 +243,7 @@ namespace wf {
 
         void refresh_all_hdiags();
 
-        void refresh_all_refconns();
+        void refresh_all_ref_conns();
 
         void fci_init(FciInitOptions opts, uint_t max_ncomm=1000ul);
 

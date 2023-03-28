@@ -89,9 +89,7 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
                   string::plural(m_dist.nblock()));
     refresh_all_hdiags();
-    refresh_all_refconns();
-
-    std::cout << m_store.to_string() << std::endl;
+    refresh_all_ref_conns();
 }
 
 void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
@@ -310,8 +308,8 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<0>) {
     auto& row = create_row_(icycle, mbf, tag::Int<1>());
     for (uint_t ipart=0ul; ipart < npart(); ++ipart) {
         row.m_ref_conn.put(ipart, m_refs[ipart].connected(mbf));
-        add_ref_conn(row);
     }
+    add_ref_conn(row);
     return row;
 }
 
@@ -348,13 +346,14 @@ void wf::Vectors::refresh_all_hdiags() {
     m_store.foreach_row_in_use(fn);
 }
 
-void wf::Vectors::refresh_all_refconns() {
+void wf::Vectors::refresh_all_ref_conns() {
     m_irec_ref_conns.clear();
     auto fn = [&](Walker& row) {
         for (uint_t ipart=0ul; ipart < npart(); ++ipart) {
-            row.m_ref_conn.put(ipart, m_refs[ipart].connected(row.m_mbf));
-            add_ref_conn(row);
+            auto connected = m_refs[ipart].connected(row.m_mbf);
+            row.m_ref_conn.put(ipart, connected);
         }
+        add_ref_conn(row);
     };
     m_store.foreach_row_in_use(fn);
 }

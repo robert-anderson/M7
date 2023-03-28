@@ -38,7 +38,7 @@ void wf::Ref::accept_candidate(uint_t icycle) {
         logging::info("New    : {}, weight: {: .6e}, MPI rank: {}",
                       mbf().to_string(), candidate_weight, m_wf.m_dist.irank(mbf()));
         m_candidate_weight = 0.0;
-        m_wf.refresh_all_refconns();
+        m_wf.refresh_all_ref_conns();
     }
 }
 
