@@ -9,6 +9,7 @@
 #include <numeric>
 #include <random>
 #include "M7_lib/defs.h"
+#include "Arith.h"
 
 
 namespace math {
@@ -89,21 +90,99 @@ namespace math {
     }
 
     /**
+     * log of geometric mean of the absolute value of given data
+     */
+    template<typename T>
+    T log_geo_mean(const T* v, uint_t n) {
+        T tot = 0.0;
+        for (auto ptr=v; ptr!=v+n; ++ptr) tot+=std::log(std::abs(*ptr));
+        return tot / n;
+    }
+
+    template<typename T>
+    T log_geo_mean(const v_t<T>& v) {
+        return log_geo_mean(v.data(), v.size());
+    }
+
+    /**
      * geometric mean of the absolute value of given data
      * mean(v) = (prod_i |v_i|) / sqrt(n)
      *         = exp(sum_i log v_i / n)
      */
     template<typename T>
     T geo_mean(const T* v, uint_t n) {
-        T tot = 0.0;
-        for (auto ptr=v; ptr!=v+n; ++ptr) tot+=std::log(std::abs(*ptr));
-        return std::exp(tot / n);
+        return std::exp(log_geo_mean(v, n));
     }
 
     template<typename T>
     T geo_mean(const v_t<T>& v) {
         return geo_mean(v.data(), v.size());
     }
+
+    template <typename T>
+    class Logarithm {
+        T m_magnitude;
+        bool m_sign;
+    public:
+        Logarithm(const T& magnitude, bool sign): m_magnitude(magnitude), m_sign(!dtype::is_complex<T>() && sign) {}
+        explicit Logarithm(const T& v): Logarithm(std::log(std::abs(v)), arith::real(v) < 0) {}
+
+        Logarithm& operator += (const Logarithm<T>& other) {
+            m_magnitude += other.m_magnitude;
+            m_sign ^= other.m_sign;
+            return *this;
+        }
+
+        Logarithm operator + (const Logarithm<T>& other) const {
+            auto tmp = *this;
+            tmp += other;
+            return tmp;
+        }
+
+        Logarithm& operator -= (const Logarithm<T>& other) {
+            m_magnitude -= other.m_magnitude;
+            m_sign ^= other.m_sign;
+            return *this;
+        }
+
+        Logarithm operator - (const Logarithm<T>& other) const {
+            auto tmp = *this;
+            tmp -= other;
+            return tmp;
+        }
+
+        Logarithm& operator *= (const T& v) {
+            *this += Logarithm<T>(v);
+            return *this;
+        }
+
+        Logarithm operator * (const T& v) const {
+            auto tmp = *this;
+            tmp *= v;
+            return tmp;
+        }
+
+        Logarithm& operator /= (const T& v) {
+            *this -= Logarithm<T>(v);
+            return *this;
+        }
+
+        Logarithm operator / (const T& v) const {
+            auto tmp = *this;
+            tmp /= v;
+            return tmp;
+        }
+
+        T exp() const {
+            return m_sign ? -std::exp(m_magnitude) : std::exp(m_magnitude);
+        }
+    };
+
+
+    template<typename T>
+    Logarithm<T> logarithm(const T& magnitude, bool sign) {return {magnitude, sign};}
+    template<typename T>
+    Logarithm<T> logarithm(const T& v) {return Logarithm<T>(v);}
 }
 
 #endif //M7_UTIL_MATH_H
