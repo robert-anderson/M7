@@ -39,6 +39,20 @@ void deterministic::Subspace::add_(Walker &row) {
     logging::debug_("adding MBF {} to the deterministic subspace", row.m_mbf.to_string());
 }
 
+void deterministic::Subspace::clear() {
+    auto row = m_wf.m_store.m_row;
+    /*
+     * loop through the tracked rows in the WF store table and clear the detsub flags
+     */
+    for (uint_t irec : m_irecs) {
+        row.jump(irec);
+        DEBUG_ASSERT_TRUE(row.m_deterministic.get(m_iroot),
+                          "walker being removed from deterministic subspace did not have the flag set in the WF store table");
+        row.m_deterministic.clr(m_iroot);
+    }
+    base_t::clear();
+}
+
 void deterministic::Subspace::select_highest_weighted() {
     auto row1 = m_wf.m_store.m_row;
     auto row2 = row1;
@@ -68,11 +82,15 @@ void deterministic::Subspace::make_connections(const Rdms &rdms){
         return;
     }
     logging::info("Forming a deterministic subspace with {} MBFs", gathered.nrow_in_use());
+
     suite::Conns conns_work(m_wf.m_sector.size());
     auto &conn_work = conns_work[m_local_row.m_mbf];
     uint_t nconn_ham = 0ul;
     uint_t nconn_rdm = 0ul;
+
+    m_ham_matrix.clear();
     m_ham_matrix.resize(nrec_());
+    m_rdm_network.clear();
     m_rdm_network.resize(nrec_());
     uint_t iirow = ~0ul;
     for (auto irec: m_irecs) {
@@ -171,23 +189,21 @@ deterministic::Subspaces::operator bool() const {
 void deterministic::Subspaces::init(wf::Vectors &wf, Maes &maes, uint_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
+    m_epoch.update(icycle, true);
 
     for (uint_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {
         auto& detsub = m_detsubs[iroot];
-        REQUIRE_TRUE_ALL(detsub == nullptr, "detsubs should not already be allocated");
         detsub = ptr::smart::make_unique<Subspace>(m_opts, wf, maes, iroot);
         if (m_opts.m_l1_fraction_cutoff.m_value < 1.0) {
             logging::info("Selecting walkers with magnitude >= {:.5f}% of the current global population "
                           "for root {} deterministic subspace", 100.0*m_opts.m_l1_fraction_cutoff.m_value, iroot);
-            detsub->select_l1_norm_fraction();
         } else {
             logging::info("Selecting upto {} largest-magnitude walkers for root {} deterministic subspace",
                           m_opts.m_size, iroot);
-            detsub->select_highest_weighted();
         }
-        logging::info("Root {} deterministic subspace selection complete", iroot);
-        detsub->make_connections();
     }
+    refresh();
+
     if (m_opts.m_period.m_value < ~0ul)
         logging::info("Deterministic subspace refresh period: {}", string::plural("cycle", m_opts.m_period.m_value));
 
@@ -196,12 +212,43 @@ void deterministic::Subspaces::init(wf::Vectors &wf, Maes &maes, uint_t icycle) 
         hdf5::FileWriter fw(m_opts.m_save.m_path);
         for (auto& detsub: m_detsubs) detsub->save(fw);
     }
+}
 
-    m_epoch.update(icycle, true);
+void deterministic::Subspaces::refresh() {
+    const auto nroot = m_detsubs.size();
+    REQUIRE_TRUE_ALL(nroot, "detsub smart pointers should already be allocated");
+
+    for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
+        REQUIRE_TRUE_ALL(m_detsubs[iroot].get(), "detsub smart pointers should already be allocated");
+        auto& detsub = m_detsubs[iroot];
+        /*
+         * overwrite any previous subspace definition
+         */
+        detsub->clear();
+        if (m_opts.m_l1_fraction_cutoff.m_value < 1.0)
+            detsub->select_l1_norm_fraction();
+        else
+            detsub->select_highest_weighted();
+        detsub->make_connections();
+    }
+
+    if (m_opts.m_save.m_enabled) {
+        // the subspaces are not going to change, so might as well dump them to archive now
+        hdf5::FileWriter fw(m_opts.m_save.m_path);
+        for (auto& detsub: m_detsubs) detsub->save(fw);
+    }
 }
 
 void deterministic::Subspaces::update(uint_t icycle) {
     if (!*this) return;
+    if (m_opts.m_period.m_value != ~0ul) {
+        // refreshes have been enabled in the configuration document
+        const auto ncycle_since_start = icycle - m_epoch.icycle_start();
+        if (ncycle_since_start && !(ncycle_since_start % m_opts.m_period.m_value)) {
+            logging::info("Refreshing deterministic subspace(s) on cycle {}", icycle);
+            refresh();
+        }
+    }
     for (auto &detsub: m_detsubs) detsub->update();
 }
 

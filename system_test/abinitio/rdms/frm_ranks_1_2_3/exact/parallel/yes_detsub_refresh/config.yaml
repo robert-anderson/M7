@@ -14,7 +14,7 @@ propagator:
   ncycle: 500000
   semistochastic:
     size: 28
-    delay: 10
+    period: 20
     period: 1000
 hamiltonian:
   fermion:

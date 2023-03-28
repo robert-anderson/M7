@@ -232,6 +232,13 @@ namespace sparse {
                 return m_rows.size();
             }
 
+            void clear(uint_t irow) {
+                m_rows[irow].clear();
+            }
+
+            void clear() {
+                for (uint_t irow=0ul; irow<nrow(); ++irow) clear(irow);
+            }
         protected:
             str_t row_to_string(uint_t irow) const override {
                 strv_t out;

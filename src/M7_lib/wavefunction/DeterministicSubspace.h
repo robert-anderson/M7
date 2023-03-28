@@ -287,6 +287,8 @@ namespace deterministic {
          */
         void add_(Walker& row);
 
+        void clear();
+
         void select_highest_weighted();
 
         void select_l1_norm_fraction();
@@ -349,6 +351,8 @@ namespace deterministic {
          * create subspaces, perform the relevant selections, and call make_connections on each
          */
         void init(wf::Vectors &wf, Maes &maes, uint_t icycle);
+
+        void refresh();
 
         void update(uint_t icycle);
 
