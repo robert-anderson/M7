@@ -1,7 +1,7 @@
 from system_test import *
 
 skip_unless('many-body basis function', 'fermion (determinant)')
-run(assets=['HF_RDMs/FCIDUMP', 'HF_RDMs/fock.h5', 'HF_RDMs/exact_rdms.pkl'])
+run(nrank=2, assets=['HF_RDMs/FCIDUMP', 'HF_RDMs/exact_rdms.pkl'])
 check_nw()
 check_rdm_archives()
 

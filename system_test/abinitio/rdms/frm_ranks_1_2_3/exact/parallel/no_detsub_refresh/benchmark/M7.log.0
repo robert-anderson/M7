@@ -1,0 +1,145 @@
+[1680011666] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 32.000000KB x 2 tables = 64.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 64.000000KB
+[1680011666] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 64.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011666] [info] Reallocating buffer "wavefunction" 0B -> 6.400000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 0B x 2 tables = 0B -> 400B x 2 tables = 800B
+[1680011666] [info] Reallocating buffer "wavefunction recv" 0B -> 800B
+[1680011666] [info] Reallocating buffer "reference all gathered rows" 0B -> 64B
+[1680011666] [info] Reallocating buffer "reference all gathered rows" 0B -> 64B
+[1680011666] [info] Reallocating buffer "Hartree-Fock ONV all gathered rows" 0B -> 64B
+[1680011666] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 8.000000KB x 2 tables = 16.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011666] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011666] [info] Reallocating buffer "rdm_1100" 0B -> 400B
+[1680011666] [info] Reallocating buffer "rdm_1100 send" 0B x 2 tables = 0B -> 400B x 2 tables = 800B
+[1680011666] [info] Reallocating buffer "rdm_1100 recv" 0B -> 800B
+[1680011666] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 8.000000KB x 2 tables = 16.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011666] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011666] [info] Reallocating buffer "rdm_2200" 0B -> 672B
+[1680011666] [info] Reallocating buffer "rdm_2200 send" 0B x 2 tables = 0B -> 672B x 2 tables = 1.344000KB
+[1680011666] [info] Reallocating buffer "rdm_2200 recv" 0B -> 1.344000KB
+[1680011666] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 8.000000KB x 2 tables = 16.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011666] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011666] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011666] [info] Reallocating buffer "rdm_3300" 0B -> 160B
+[1680011666] [info] Reallocating buffer "rdm_3300 send" 0B x 2 tables = 0B -> 160B x 2 tables = 320B
+[1680011666] [info] Reallocating buffer "rdm_3300 recv" 0B -> 320B
+[1680011666] [info] Reallocating buffer "hole moment dst finder send" 0B x 2 tables = 0B -> 12.000000KB x 2 tables = 24.000000KB
+[1680011666] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
+[1680011666] [info] Reallocating buffer "particle moment dst finder send" 0B x 2 tables = 0B -> 12.000000KB x 2 tables = 24.000000KB
+[1680011666] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
+[1680011666] [info] Reallocating buffer "M7.mae.stats" 0B -> 24B
+[1680011666] [info] Reallocating buffer "M7.stats" 0B -> 232B
+[1680011666] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1680011666] [info] Reallocating buffer "wavefunction recv" 800B -> 4.200000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 400B x 2 tables = 800B -> 660B x 2 tables = 1.320000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 660B x 2 tables = 1.320000KB -> 1.020000KB x 2 tables = 2.040000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 1.020000KB x 2 tables = 2.040000KB -> 1.560000KB x 2 tables = 3.120000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 1.560000KB x 2 tables = 3.120000KB -> 2.400000KB x 2 tables = 4.800000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 2.400000KB x 2 tables = 4.800000KB -> 3.660000KB x 2 tables = 7.320000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 3.660000KB x 2 tables = 7.320000KB -> 5.520000KB x 2 tables = 11.040000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 5.520000KB x 2 tables = 11.040000KB -> 8.340000KB x 2 tables = 16.680000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 8.340000KB x 2 tables = 16.680000KB -> 12.540000KB x 2 tables = 25.080000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 12.540000KB x 2 tables = 25.080000KB -> 18.840000KB x 2 tables = 37.680000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 18.840000KB x 2 tables = 37.680000KB -> 28.320000KB x 2 tables = 56.640000KB
+[1680011666] [info] Reallocating buffer "wavefunction recv" 4.200000KB -> 61.200000KB
+[1680011666] [info] Reallocating buffer "wavefunction send" 28.320000KB x 2 tables = 56.640000KB -> 42.540000KB x 2 tables = 85.080000KB
+[1680011666] [info] Reallocating buffer "wavefunction recv" 61.200000KB -> 97.320000KB
+[1680011666] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 224B
+[1680011666] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 448B
+[1680011666] [info] Reallocating buffer "semistochastic gather send" 0B -> 896B
+[1680011666] [info] Reallocating buffer "semistochastic all gathered rows" 0B -> 1.792000KB
+[1680011666] [info] Size of local deterministic subspace: 14
+[1680011667] [info] Reallocating buffer "rdm_3300 send" 160B x 2 tables = 320B -> 264B x 2 tables = 528B
+[1680011667] [info] Reallocating buffer "rdm_3300 send" 264B x 2 tables = 528B -> 408B x 2 tables = 816B
+[1680011667] [info] Reallocating buffer "rdm_3300 send" 408B x 2 tables = 816B -> 624B x 2 tables = 1.248000KB
+[1680011667] [info] Reallocating buffer "rdm_3300 send" 624B x 2 tables = 1.248000KB -> 960B x 2 tables = 1.920000KB
+[1680011667] [info] Reallocating buffer "rdm_3300 send" 960B x 2 tables = 1.920000KB -> 1.464000KB x 2 tables = 2.928000KB
+[1680011667] [info] Reallocating buffer "rdm_3300 send" 1.464000KB x 2 tables = 2.928000KB -> 2.208000KB x 2 tables = 4.416000KB
+[1680011667] [info] Reallocating buffer "rdm_3300 send" 2.208000KB x 2 tables = 4.416000KB -> 3.336000KB x 2 tables = 6.672000KB
+[1680011667] [info] Reallocating buffer "rdm_2200 send" 672B x 2 tables = 1.344000KB -> 1.032000KB x 2 tables = 2.064000KB
+[1680011667] [info] Reallocating buffer "rdm_2200 send" 1.032000KB x 2 tables = 2.064000KB -> 1.560000KB x 2 tables = 3.120000KB
+[1680011667] [info] Reallocating buffer "rdm_3300 send" 3.336000KB x 2 tables = 6.672000KB -> 5.016000KB x 2 tables = 10.032000KB
+[1680011667] [info] Reallocating buffer "rdm_3300 send" 5.016000KB x 2 tables = 10.032000KB -> 7.536000KB x 2 tables = 15.072000KB
+[1680011667] [info] Reallocating buffer "rdm_3300 recv" 320B -> 17.424000KB
+[1680011667] [info] Reallocating buffer "rdm_3300" 160B -> 264B
+[1680011667] [info] Reallocating buffer "rdm_3300" 264B -> 408B
+[1680011667] [info] Reallocating buffer "rdm_3300" 408B -> 624B
+[1680011667] [info] Reallocating buffer "rdm_3300" 624B -> 960B
+[1680011667] [info] Reallocating buffer "rdm_3300" 960B -> 1.464000KB
+[1680011667] [info] Reallocating buffer "rdm_3300" 1.464000KB -> 2.208000KB
+[1680011667] [info] Reallocating buffer "rdm_3300" 2.208000KB -> 3.336000KB
+[1680011667] [info] Reallocating buffer "rdm_3300" 3.336000KB -> 5.016000KB
+[1680011667] [info] Reallocating buffer "rdm_3300" 5.016000KB -> 7.536000KB
+[1680011667] [info] Reallocating buffer "rdm_2200 recv" 1.344000KB -> 4.104000KB
+[1680011667] [info] Reallocating buffer "rdm_2200" 672B -> 1.032000KB
+[1680011667] [info] Reallocating buffer "rdm_2200" 1.032000KB -> 1.560000KB
+[1680011668] [info] Reallocating buffer "rdm_2200 send" 1.560000KB x 2 tables = 3.120000KB -> 2.352000KB x 2 tables = 4.704000KB
+[1680011668] [info] Reallocating buffer "rdm_3300" 7.536000KB -> 11.328000KB
+[1680011668] [info] remapping hash table for "rdm_3300"
+[1680011668] [info] current ratio of skips to total lookups (2.5696048215875624) exceeds set limit (2)
+[1680011668] [info] replacing current bucket vector of size 100 with a new one of size 192
+[1680011668] [info] Reallocating buffer "rdm_2200" 1.560000KB -> 2.352000KB
+[1680011668] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 8.000000KB x 2 tables = 16.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011668] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011668] [info] Reallocating buffer "rdm_3300" 0B -> 4.032000KB
+[1680011668] [info] Reallocating buffer "rdm_3300 send" 0B x 2 tables = 0B -> 32.000000KB x 2 tables = 64.000000KB
+[1680011668] [info] Reallocating buffer "rdm_3300 recv" 0B -> 64.000000KB
+[1680011668] [info] Reallocating buffer "rdm_3300" 4.032000KB -> 6.072000KB
+[1680011668] [info] Reallocating buffer "rdm_3300" 6.072000KB -> 9.120000KB
+[1680011668] [info] Reallocating buffer "rdm_3300" 9.120000KB -> 13.704000KB
+[1680011668] [info] remapping hash table for "rdm_3300"
+[1680011668] [info] current ratio of skips to total lookups (3.1646234676007006) exceeds set limit (2)
+[1680011668] [info] replacing current bucket vector of size 100 with a new one of size 237
+[1680011668] [info] Reallocating buffer "rdm_3300" 13.704000KB -> 20.568000KB
+[1680011668] [info] Reallocating buffer "rdm_3300" 20.568000KB -> 30.864000KB
+[1680011668] [info] remapping hash table for "rdm_3300"
+[1680011668] [info] current ratio of skips to total lookups (3.9986013986013984) exceeds set limit (2)
+[1680011668] [info] replacing current bucket vector of size 237 with a new one of size 709
+[1680011668] [info] Reallocating buffer "rdm_3300" 30.864000KB -> 46.320000KB
+[1680011668] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 8.000000KB x 2 tables = 16.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011668] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011668] [info] Reallocating buffer "rdm_2200" 0B -> 928B
+[1680011668] [info] Reallocating buffer "rdm_2200 send" 0B x 2 tables = 0B -> 32.000000KB x 2 tables = 64.000000KB
+[1680011668] [info] Reallocating buffer "rdm_2200 recv" 0B -> 64.000000KB
+[1680011668] [info] Reallocating buffer "rdm_2200" 928B -> 1.416000KB
+[1680011668] [info] Reallocating buffer "rdm_2200" 1.416000KB -> 2.136000KB
+[1680011668] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 8.000000KB x 2 tables = 16.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011668] [info] Reallocating buffer " send" 0B x 2 tables = 0B -> 4.000000KB x 2 tables = 8.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1680011668] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680011668] [info] Reallocating buffer "rdm_1100" 0B -> 96B
+[1680011668] [info] Reallocating buffer "rdm_1100 send" 0B x 2 tables = 0B -> 32.000000KB x 2 tables = 64.000000KB
+[1680011668] [info] Reallocating buffer "rdm_1100 recv" 0B -> 64.000000KB
+[1680011668] [info] Reallocating buffer "rdm_1100" 96B -> 168B
+[1680011668] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 176B
+[1680011668] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1680011668] [info] Reallocating buffer "Included local rows" 0B -> 704B
+[1680011668] [info] Reallocating buffer "global top weighted" 0B -> 1.280000KB
+[1680011668] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 176B
+[1680011668] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1680011668] [info] Reallocating buffer "Included local rows" 0B -> 704B
+[1680011668] [info] Reallocating buffer "global top weighted" 0B -> 1.280000KB
