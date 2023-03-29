@@ -52,8 +52,13 @@ void Shift::update(const wf::Vectors &wf, uint_t icycle, double tau) {
         }
         else {
             if (variable_mode.update(icycle, nw >= m_nwalker_target)) {
-                logging::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
-                              ipart, icycle - 1, wf.m_stats.m_nwalker.prev_total()[ipart], icycle, nw);
+                if (icycle) {
+                    logging::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
+                                  ipart, icycle - 1, wf.m_stats.m_nwalker.prev_total()[ipart], icycle, nw);
+                }
+                else {
+                    logging::info("Variable shift triggered immediately for WF part {}.", ipart);
+                }
                 a = icycle % m_opts.m_shift.m_period;
             }
         }
@@ -65,7 +70,8 @@ void Shift::update(const wf::Vectors &wf, uint_t icycle, double tau) {
                 m_values[ipart] = wf.reference_projected_energy(ipart);
             }
             else {
-                auto rate = nw / m_nwalker_last_period[ipart];
+                // if this is the first cycle, we have no growth rate, so set it to 1 i.e. "unchanged"
+                auto rate = icycle ? nw / m_nwalker_last_period[ipart] : 1.0;
                 m_values[ipart] -= m_opts.m_shift.m_damp * std::log(std::abs(rate)) / (tau * a);
                 if (m_target_damp_fac != 0.0) {
                     rate = nw / m_nwalker_target;
