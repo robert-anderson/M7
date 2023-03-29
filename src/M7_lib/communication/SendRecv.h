@@ -112,9 +112,6 @@ public:
         for (auto &it: sendcounts) it *= row_size();
         uintv_t recvcounts(mpi::nrank(), 0ul);
 
-        auto all_sends_empty = !std::accumulate(sendcounts.cbegin(), sendcounts.cend(), 0ul);
-        if (all_sends_empty) return;
-
         m_recv.clear();
 
         mpi::all_to_all(sendcounts, recvcounts);
