@@ -1,0 +1,16 @@
+###################################
+#    FCIQMC Timings Stats File    #
+###################################
+# Number of statistics output: 5
+# Number of columns: 5
+# Distinct multidimensional formats: 1
+#
+# Format list (major index first):
+# A: scalar
+#
+#  1.  Total time waited at MPI_Barrier (A)
+#  2.  Time spent in loop over occupied ONVs (A)
+#  3.  Time spent in communicating spawns (A)
+#  4.  Time spent in annihilation loop (A)
+#  5.  Total cycle time (A)
+#

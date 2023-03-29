@@ -1,0 +1,30 @@
+###########################
+#    FCIQMC Stats File    #
+###########################
+# Number of statistics output: 17
+# Number of columns: 18
+# Distinct multidimensional formats: 3
+#
+# Format list (major index first):
+# A: scalar
+# B: nroot (1) nreplica (1) 
+# C: excitation generator index (2) 
+#
+#  1.  Cycle number (A)
+#  2.  Timestep (A)
+#  3.  Diagonal shift (B)
+#  4.  WF L1 norm (number of walkers) (B)
+#  5.  Walkers added this cycle (B)
+#  6.  Walkers spawned this cycle (B)
+#  7.  Walkers annihilated this cycle (B)
+#  8.  Numerator of reference-projected energy estimator (B)
+#  9.  Reference weight (B)
+#  10.  Reference-projected energy (B)
+#  11.  L2 norm of the wavefunction (B)
+#  12.  Initiator MBFs (B)
+#  13.  Initiator MBFs due to permanitiator status only (B)
+#  14.  Occupied MBFs (B)
+#  15.  Change in number of occupied MBFs (B)
+#  16.  Numerator of reference-projected spin square estimator (B)
+#  17.  Probability of attempting to draw excitation level (C)
+#

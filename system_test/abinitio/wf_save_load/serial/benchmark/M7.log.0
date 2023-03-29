@@ -1,0 +1,19 @@
+[1680075458] [info] Reallocating buffer " send" 0B -> 32.000000KB
+[1680075458] [info] Reallocating buffer " recv" 0B -> 32.000000KB
+[1680075458] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1680075458] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680075458] [info] Reallocating buffer " recv" 0B -> 32.000000KB
+[1680075458] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1680075458] [info] Reallocating buffer "wavefunction" 0B -> 32.000000KB
+[1680075458] [info] Reallocating buffer "wavefunction send" 0B -> 240B
+[1680075458] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
+[1680075458] [info] Reallocating buffer "WF load table" 0B -> 80B
+[1680075458] [info] Reallocating buffer "reference gather send" 0B -> 32B
+[1680075458] [info] Reallocating buffer "reference all gathered rows" 0B -> 32B
+[1680075458] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
+[1680075458] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
+[1680075458] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
+[1680075458] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
+[1680075458] [info] Reallocating buffer "M7.stats" 0B -> 144B
+[1680075458] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1680075458] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
