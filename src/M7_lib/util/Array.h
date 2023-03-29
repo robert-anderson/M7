@@ -21,6 +21,14 @@ namespace array {
         tmp.assign(array.cbegin(), array.cend());
         return tmp;
     }
+
+template<typename T, uint_t nind>
+    static std::array<T, nind> from_vector(const v_t<T>& vector) {
+        DEBUG_ASSERT_EQ(vector.size(), nind, "vector is not the correct size for conversion to std::array");
+        std::array<T, nind> tmp;
+        std::copy(vector.cbegin(), vector.cend(), tmp.begin());
+        return tmp;
+    }
 }
 
 template<typename T, uint_t nind>

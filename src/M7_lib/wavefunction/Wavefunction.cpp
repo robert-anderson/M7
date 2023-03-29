@@ -43,6 +43,7 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
 
     if (m_opts.m_wavefunction.m_load.m_enabled) {
         // the wavefunction is to be loaded from HDF5 archive
+        load();
     }
     else if (m_opts.m_wavefunction.m_fci_init) {
         // the wavefunction is to be initialized using exact eigenvectors from the Arnoldi method
@@ -160,36 +161,6 @@ bool wf::Vectors::ref_weights_preserved() const {
     return m_ref_weights_preserved;
 }
 
-#if 0
-void wf::Vectors::h5_write(const hdf5::NodeWriter& parent, str_t name) {
-    auto field_names = []() -> strv_t {
-        if (c_enable_fermions != c_enable_bosons) return {"mbf", "weight"};
-        else if (c_enable_fermions != c_enable_bosons) return {"mbf (fermion)", "mbf (boson)", "weight"};
-        return {};
-    };
-    m_store.save(parent, name, field_names(), true);
-}
-
-void wf::Vectors::h5_read(const hdf5::NodeReader& /*parent*/, const field::Mbf& /*ref*/,
-                          str_t /*name*/) {
-    m_store.clear();
-    buffered::Table<Walker> m_buffer("", {m_store.m_row});
-    m_buffer.push_back();
-    RowHdf5Reader<Walker> row_reader(m_buffer.m_row, parent, name, h5_field_names());
-    suite::Conns conn(m_sector.size());
-
-    row_reader.restart();
-    DEBUG_ASSERT_EQ(row_reader.m_weight.nelement(), m_format.m_nelement, "row reader has incompatible dimensionality");
-    for (uint_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
-        row_reader.read(iitem);
-        conn[ref].connect(ref, row_reader.m_mbf);
-        bool ref_conn = ham::is_significant(ham.get_element(ref, conn[ref]));
-        auto& walker = create_row(0ul, row_reader.m_mbf, ham.get_energy(row_reader.m_mbf), v_t<bool>(npart(), ref_conn));
-        set_weight(walker, row_reader.m_weight);
-    }
-}
-#endif
-
 void wf::Vectors::begin_cycle(uint_t icycle) {
     reduction::clear_local(m_stats.m_summed);
     m_store.attempt_remap();
@@ -283,7 +254,6 @@ void wf::Vectors::remove_ref_conn(const Walker& walker) {
 }
 
 Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1>) {
-
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
     auto& row = m_store.insert(mbf);
@@ -408,9 +378,8 @@ void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
         m_send_recv.communicate();
         auto& recv_row = m_send_recv.recv().m_row;
         for (recv_row.restart(); recv_row; ++recv_row) {
-            m_store.lookup(recv_row.m_dst_mbf, m_store.m_insert_row);
-            if (!m_store.m_insert_row) create_row(0ul, recv_row.m_dst_mbf);
-            m_store.m_insert_row.m_weight = recv_row.m_delta_weight;
+            auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
+            store_row.m_weight = recv_row.m_delta_weight;
         }
     }
 }
@@ -464,4 +433,170 @@ void wf::Vectors::save() const {
     REQUIRE_TRUE_ALL(m_opts.m_wavefunction.m_save.m_enabled, "wavefunction saving is disabled in config document")
     hdf5::FileWriter fw(m_opts.m_wavefunction.m_save.m_path);
     save(fw);
+}
+
+struct DistTableLoader {
+
+    struct NameFieldPair {
+        const str_t m_name;
+        FieldBase * const m_field;
+        NameFieldPair(str_t name, FieldBase *field): m_name(std::move(name)), m_field(field){}
+    };
+
+private:
+    struct FieldLoaderPair {
+        FieldBase * const m_field;
+        hdf5::DatasetLoader * const m_loader;
+    };
+
+    /**
+     * allocate a dataset loader for each field
+     */
+    v_t<hdf5::DatasetLoader> m_loaders;
+    /**
+     * put field and loader pointer pairs together in a vector so they can be easily iterated over simultaneously
+     */
+    v_t<FieldLoaderPair> m_fields_loaders;
+
+    uint_t max_item_size() const {
+        uint_t max = 0ul;
+        for (auto& field_loader: m_fields_loaders) {
+            const auto size = field_loader.m_loader->m_format.m_local.m_item.m_size;
+            if (size > max) max = size;
+        }
+        return max;
+    }
+    uint_t nitem_next(uint_t max_nitem_per_op) const {
+        return m_fields_loaders.front().m_loader->nitem_next(max_nitem_per_op);
+    }
+
+    static v_t<NameFieldPair> make_pairs(const v_t<FieldBase*>& fields) {
+        v_t<NameFieldPair> tmp;
+        tmp.reserve(fields.size());
+        for (auto field: fields) tmp.emplace_back(field->m_name, field);
+        return tmp;
+    }
+
+public:
+
+    uint_t nitem() const {
+        return m_fields_loaders.front().m_loader->m_format.m_nitem;
+    }
+
+    uint_t nitem_local() const {
+        return m_fields_loaders.front().m_loader->m_format.m_local.m_nitem;
+    }
+    DistTableLoader(const hdf5::NodeReader& nr, v_t<NameFieldPair> pairs) {
+        m_loaders.reserve(pairs.size());
+        m_fields_loaders.reserve(pairs.size());
+        for (auto& pair: pairs) {
+            m_loaders.emplace_back(nr, pair.m_name, true, true);
+            REQUIRE_EQ_ALL(m_loaders.back().m_format.m_nitem, m_loaders.front().m_format.m_nitem,
+                           "number of elements should be constant for all fields");
+            m_fields_loaders.push_back({pair.m_field, &m_loaders.back()});
+        }
+    }
+
+    DistTableLoader(const hdf5::NodeReader& nr, const v_t<FieldBase *>& fields):
+            DistTableLoader(nr, make_pairs(fields)){}
+
+    DistTableLoader(const hdf5::NodeReader& nr, Row& row): DistTableLoader(nr, row.m_fields){}
+
+
+    template<typename fn_t>
+    void load(uint_t max_nitem_per_op, const fn_t& fn) {
+        functor::assert_prototype<void(uint_t)>(fn);
+        max_nitem_per_op = std::min(max_nitem_per_op, nitem_local());
+        for (auto field_loader : m_fields_loaders) {
+            auto& table = field_loader.m_field->m_row->m_table;
+            if (table->nrow_in_use() < max_nitem_per_op) table->push_back(max_nitem_per_op);
+        }
+
+        // use same contiguous buffer for all fields, so allocate enough space for the field with the largest items
+        v_t<buf_t> buf(max_nitem_per_op * max_item_size());
+
+        bool all_done = false;
+        while (!all_done) {
+            buf.clear();
+            const auto nitem_to_find = nitem_next(max_nitem_per_op);
+            for (auto& field_loader: m_fields_loaders) {
+                auto& field = field_loader.m_field;
+                auto& loader = field_loader.m_loader;
+                all_done = loader->read(nitem_to_find ? buf.data() : nullptr, nitem_to_find);
+                auto src = buf.data();
+                for (uint_t irow = 0ul; irow < nitem_to_find; ++irow) {
+                    field->from_buffer(src, irow);
+                    src += field->m_size;
+                }
+            }
+            fn(nitem_to_find);
+        }
+    }
+};
+
+void wf::Vectors::load(const hdf5::NodeReader& parent) {
+    hdf5::GroupReader gr(parent, "wf");
+    const auto weight_shape = hdf5::DatasetLoader::read_format(gr, "weight", true, true).m_local.m_item.m_shape;
+    const auto nreplica = this->nreplica();
+    const auto nreplica_on_file = weight_shape.back();
+
+    REQUIRE_EQ_ALL(weight_shape.front(), nroot(), "incompatible number of roots in file");
+
+    if (nreplica > nreplica_on_file) {
+        logging::info("Loading non-replicated wavefunctions for a replica calculation: duplicating weights");
+    }
+    else if (nreplica < nreplica_on_file) {
+        logging::warn("Loading replicated wavefunctions for a non-replica calculation: discarding second replica");
+    }
+
+    auto file_ipart = [&nreplica, &nreplica_on_file](uint_t ipart) {
+        if (nreplica == nreplica_on_file) return ipart;
+        else if (nreplica > nreplica_on_file) return ipart / 2;
+        return ipart * 2;
+    };
+
+    struct LoadRow : Row {
+        NdFormat<c_ndim_wf> m_format;
+        field::Mbf m_mbf;
+        field::Numbers<wf_t, c_ndim_wf> m_weight;
+        LoadRow(sys::Basis basis, uintv_t weight_shape):
+            m_format(array::from_vector<uint_t, c_ndim_wf>(weight_shape)),
+            m_mbf(this, basis, "many-body basis function"),
+            m_weight(this, m_format, "weight"){}
+    };
+
+    typedef buffered::Table<LoadRow> load_table_t;
+    load_table_t load_table("WF load table", {m_sector.basis(), weight_shape});
+    DistTableLoader loader(gr, load_table.m_row);
+
+    auto fill_fn = [&](uint_t nitem) {
+        auto& row = load_table.m_row;
+        for (row.restart(); row.in_range(nitem); ++row) {
+            auto irank_dst = m_dist.irank(row.m_mbf);
+            auto& send_table = send(irank_dst);
+            auto& send_row = send_table.m_row;
+            send_row.push_back_jump();
+            send_row.m_dst_mbf = row.m_mbf;
+            for (uint_t ipart=0ul; ipart < npart(); ++ipart) {
+                send_row.m_ipart_dst = ipart;
+                send_row.m_delta_weight[ipart] = row.m_weight[file_ipart(ipart)];
+            }
+        }
+        m_send_recv.communicate();
+
+        auto fn = [&](const Spawn& recv_row) {
+            auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
+            const auto ipart = recv_row.m_ipart_dst[0];
+            store_row.m_weight[ipart] += wf_t(recv_row.m_delta_weight);
+        };
+        recv().foreach_row_in_use(fn);
+    };
+    loader.load(5, fill_fn);
+    logging::info("{} Walkers successfully loaded from HDF5 archive", loader.nitem());
+}
+
+void wf::Vectors::load() {
+    REQUIRE_TRUE_ALL(m_opts.m_wavefunction.m_load.m_enabled, "wavefunction loading is disabled in config document");
+    hdf5::FileReader fr(m_opts.m_wavefunction.m_load.m_path);
+    load(fr);
 }

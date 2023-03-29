@@ -41,46 +41,14 @@ namespace hdf5 {
         }
 
 
-        static void load(
+        void load(
             FieldBase& field,
             const hdf5::NodeReader& nr,
             const str_t& name,
             uint_t max_nitem_per_op,
             std::list<Attr>& attrs,
             bool part,
-            bool this_rank)
-        {
-            DatasetLoader dl(nr, name, part, this_rank);
-            if (field.m_row->m_table->nrow_in_use() < dl.nitem_remaining())
-                field.m_row->m_table->push_back(dl.nitem_remaining());
-
-            // need not allocate a buffer longer than needed
-            max_nitem_per_op = std::min(dl.m_format.m_local.m_nitem, max_nitem_per_op);
-            v_t<buf_t> buf(max_nitem_per_op * dl.m_format.m_local.m_item.m_size);
-
-            // items are given by records, which are rows below the high water mark that have not been freed
-            uint_t nitem_found = 0ul;
-            uint_t irow = 0ul;
-            bool all_done = false;
-            while (!all_done) {
-                buf.clear();
-                const auto nitem_to_find = dl.nitem_next(max_nitem_per_op);
-                const auto next_nitem_found = nitem_found + nitem_to_find;
-                all_done = dl.read(nitem_to_find ? buf.data() : nullptr, nitem_to_find);
-                if (next_nitem_found != nitem_found) {
-                    auto buf_ptr = buf.data();
-                    while (nitem_found != next_nitem_found) {
-                        if (!field.m_row->m_table->is_freed(irow)) {
-                            field.from_buffer(buf_ptr, irow);
-                            buf_ptr += field.m_size;
-                            ++nitem_found;
-                        }
-                        ++irow;
-                    }
-                }
-            }
-            dl.load_attrs(attrs);
-        }
+            bool this_rank);
 
         /**
          * assume all items are loaded in one op

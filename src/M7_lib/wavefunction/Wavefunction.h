@@ -214,6 +214,17 @@ namespace wf {
             return create_row(icycle, mbf, tag::Int<1>());
         }
 
+        template<uint_t setup>
+        Walker& lookup_or_create_row_(uint_t icycle, const Mbf& mbf, tag::Int<setup>) {
+            auto& lookup = m_store.lookup(mbf);
+            if (lookup) return lookup;
+            return create_row_(icycle, mbf, tag::Int<setup>());
+        }
+
+        Walker& lookup_or_create_row_setup_(uint_t icycle, const Mbf& mbf) {
+            return lookup_or_create_row_(icycle, mbf, tag::Int<1>());
+        }
+
     public:
 
         /**
@@ -231,6 +242,8 @@ namespace wf {
          * Called on all ranks, dispatching create_row_ on the assigned rank only
          */
         TableBase::Loc create_row(uint_t icycle, const Mbf& mbf) {return create_row(icycle, mbf, tag::Int<0>());}
+
+        Walker& lookup_or_create_row_(uint_t icycle, const Mbf& mbf) {return lookup_or_create_row_(icycle, mbf, tag::Int<0>());}
 
         Spawn& add_spawn(const Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart);
 
@@ -277,6 +290,10 @@ namespace wf {
         void save(const hdf5::NodeWriter& parent) const;
 
         void save() const;
+
+        void load(const hdf5::NodeReader& parent);
+
+        void load();
     };
 }
 
