@@ -68,13 +68,8 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
      * set the shift to the initial reference-projected energy plus the user-defined offset
      */
     const ham_comp_t ref_energy = wf.reference_projected_energy(0);
-    if (wf.was_loaded() && !m_opts.m_shift.m_cont_grow.m_value) {
-        m_prop.m_shift.m_values = ref_energy;
-        m_prop.m_shift.m_variable_mode.start(0);
-    }
-    else {
-        m_prop.m_shift.m_values = ref_energy + opts.m_shift.m_init;
-    }
+    m_prop.m_shift.m_values = ref_energy;
+    if (!wf.was_loaded() || m_opts.m_shift.m_cont_grow.m_value) m_prop.m_shift.m_values += opts.m_shift.m_init;
 
     if (m_maes.m_rdms) {
         if (m_maes.m_rdms.is_energy_sufficient(m_prop.m_ham))
