@@ -124,7 +124,7 @@ void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
     rows.push_back({"", "many-body basis function", "walkers", "coefficient", "initiator", "energy", "semistoch", "MPI rank"});
 
     const auto l2_norm_square = m_stats.m_l2_norm_square.total()[ipart];
-    REQUIRE_GT_ALL(l2_norm_square, 0.0, "L2 norm must be positive non-zero");
+    REQUIRE_GT(l2_norm_square, 0.0, "L2 norm must be positive non-zero");
     for (row.restart(); row; ++row) {
         rows.push_back({
             std::to_string(row.index()),
