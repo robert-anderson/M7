@@ -112,10 +112,9 @@ public:
         for (auto &it: sendcounts) it *= row_size();
         uintv_t recvcounts(mpi::nrank(), 0ul);
 
-//        auto all_sends_empty = !std::accumulate(sendcounts.cbegin(), sendcounts.cend(), 0ul);
-//        if (all_sends_empty && m_last_recv_count) {
-//            logging::debug_("this rank is sending no data at all, but it received data in the previous communication");
-//        }
+        auto all_sends_empty = !std::accumulate(sendcounts.cbegin(), sendcounts.cend(), 0ul);
+        if (all_sends_empty) return;
+
         m_recv.clear();
 
         mpi::all_to_all(sendcounts, recvcounts);
