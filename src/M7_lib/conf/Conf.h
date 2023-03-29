@@ -135,6 +135,7 @@ namespace conf {
         Param<uint_t> m_period;
         Param<uint_t> m_ncycle_av;
         Param<bool> m_fix_ref_weight;
+        Param<bool> m_cont_grow;
 
         explicit Shift(Group *parent);
 

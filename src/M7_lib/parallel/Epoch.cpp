@@ -24,6 +24,10 @@ bool Epoch::update(uint_t icycle, bool condition) {
     return false;
 }
 
+void Epoch::start(uint_t icycle) {
+    update(icycle, true);
+}
+
 void Epoch::terminate(uint_t icycle) {
     if (!*this) return;
     ASSERT(icycle_start() != ~0ul)

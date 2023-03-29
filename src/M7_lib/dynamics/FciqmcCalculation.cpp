@@ -23,8 +23,6 @@ void fciqmc::run(const conf::Document &opts) {
      */
     std::unique_ptr<Propagator> m_prop = props::get(ham, opts, wf);
 
-    const ham_comp_t ground_ref_energy = wf.m_refs[0].hdiag();
-    m_prop->m_shift.m_values = ground_ref_energy + opts.m_shift.m_init;
     wf.m_stats.m_nwalker.all_sum();
     Solver solver(opts, *m_prop, wf);
     solver.execute(opts.m_propagator.m_ncycle);

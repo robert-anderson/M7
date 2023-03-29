@@ -56,6 +56,8 @@ public:
      */
     bool update(uint_t icycle, bool condition);
 
+    void start(uint_t icycle);
+
     void terminate(uint_t icycle);
 
     /**
@@ -102,6 +104,10 @@ public:
      * the cycle on which the last epoch to start started, or ~0ul if any epochs have yet to start
      */
     uint_t icycle_start_last() const;
+
+    void start(uint_t icycle) {
+        for (auto& epoch : m_epochs) epoch.start(icycle);
+    }
 
     /**
      * @return

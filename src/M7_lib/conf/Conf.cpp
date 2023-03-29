@@ -140,13 +140,17 @@ conf::Shift::Shift(Group *parent) :
         m_init(this, "init", 0.0, "initial shift relative to the energy of the initial reference MBF"),
         m_damp(this, "damp", 0.05, "walker growth-related damping factor in shift update"),
         m_target_damp(this, "target_damp", false,
-                      "use damping factor in shift update related to growth relative to the target walker population. "
-                      "this is set to the optimal value damp^2/4"),
+            "use damping factor in shift update related to growth relative to the target walker population. "
+            "this is set to the optimal value damp^2/4"),
         m_period(this, "period", 5, "number of MC cycles between shift updates"),
         m_ncycle_av(this, "ncycle_av", 100ul, "number of cycles over which to maintain a rolling average"),
         m_fix_ref_weight(this, "fix_ref_weight", false,
             "ignore growth data in the shift update, and instead use the reference-projected energy estimator,"
-            " this fixes the reference population constant"){}
+            " this fixes the reference population constant"),
+        m_cont_grow(this, "cont_grow", false,
+            "if the calculation is restarted from a previous growth phase, the default behaviour is to enter variable"
+            " shift mode immediately. with this option set to true, the shift will instead not begin to vary until the "
+            " normal criterion is attained"){}
 
 conf::Semistochastic::Semistochastic(Group *parent) :
         Section(parent, "semistochastic", "options related to semi-stochastic propagation", Explicit),

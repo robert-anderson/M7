@@ -600,3 +600,7 @@ void wf::Vectors::load() {
     hdf5::FileReader fr(m_opts.m_wavefunction.m_load.m_path);
     load(fr);
 }
+
+bool wf::Vectors::was_loaded() const {
+    return m_opts.m_wavefunction.m_load.m_enabled;
+}
