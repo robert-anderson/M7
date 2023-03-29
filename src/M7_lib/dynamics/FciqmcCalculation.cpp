@@ -23,7 +23,7 @@ void fciqmc::run(const conf::Document &opts) {
      */
     std::unique_ptr<Propagator> m_prop = props::get(ham, opts, wf);
 
-    wf.m_stats.m_nwalker.all_sum();
+    wf.m_stats.all_sum();
     Solver solver(opts, *m_prop, wf);
     solver.execute(opts.m_propagator.m_ncycle);
 }

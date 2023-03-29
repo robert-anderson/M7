@@ -122,12 +122,15 @@ void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
     auto& row = xr_gathered.m_row;
     v_t<strv_t> rows;
     rows.push_back({"", "many-body basis function", "walkers", "coefficient", "initiator", "energy", "semistoch", "MPI rank"});
+
+    const auto l2_norm_square = m_stats.m_l2_norm_square.total()[ipart];
+    REQUIRE_GT_ALL(l2_norm_square, 0.0, "L2 norm must be positive non-zero");
     for (row.restart(); row; ++row) {
         rows.push_back({
             std::to_string(row.index()),
             row.m_mbf.to_string(),
             convert::to_string(row.m_weight[ipart], {true, 6}),
-            convert::to_string(row.m_weight[ipart] / std::sqrt(m_stats.m_l2_norm_square.total()[ipart]), {false, 4}),
+            convert::to_string(row.m_weight[ipart] / std::sqrt(l2_norm_square), {false, 4}),
             convert::to_string(row.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd) || row.m_permanitiator.get(0)),
             convert::to_string(row.m_hdiag[iroot_part(ipart)]),
             convert::to_string(bool(row.m_deterministic[iroot_part(ipart)])),
@@ -587,11 +590,11 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
         auto fn = [&](const Spawn& recv_row) {
             auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
             const auto ipart = recv_row.m_ipart_dst[0];
-            store_row.m_weight[ipart] += wf_t(recv_row.m_delta_weight);
+            set_weight(store_row, ipart, recv_row.m_delta_weight);
         };
         recv().foreach_row_in_use(fn);
     };
-    loader.load(5, fill_fn);
+    loader.load(5000, fill_fn);
     logging::info("{} Walkers successfully loaded from HDF5 archive", loader.nitem());
 }
 

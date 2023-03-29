@@ -47,6 +47,10 @@ namespace wf {
         reduction::NdArray<wf_comp_t, c_ndim_wf> m_nannihilated;
 
         Stats(const NdFormat<c_ndim_wf>& format);
+
+        void all_sum() {
+            reduction::all_sum(m_summed);
+        }
     };
 }
 
