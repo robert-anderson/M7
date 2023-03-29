@@ -552,7 +552,7 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
         logging::warn("Loading replicated wavefunctions for a non-replica calculation: discarding second replica");
     }
 
-    auto file_ipart = [&nreplica, &nreplica_on_file](uint_t ipart) {
+    auto file_ipart_fn = [&nreplica, &nreplica_on_file](uint_t ipart) {
         if (nreplica == nreplica_on_file) return ipart;
         else if (nreplica > nreplica_on_file) return ipart / 2;
         return ipart * 2;
@@ -582,7 +582,8 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
             send_row.m_dst_mbf = row.m_mbf;
             for (uint_t ipart=0ul; ipart < npart(); ++ipart) {
                 send_row.m_ipart_dst = ipart;
-                send_row.m_delta_weight[ipart] = row.m_weight[file_ipart(ipart)];
+                const auto file_ipart = file_ipart_fn(ipart);
+                send_row.m_delta_weight = row.m_weight[file_ipart];
             }
         }
         m_send_recv.communicate();
