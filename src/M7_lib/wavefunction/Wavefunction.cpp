@@ -213,6 +213,13 @@ wf_comp_t wf::Vectors::debug_l1_norm(uint_t ipart) const {
     return mpi::all_sum(res);
 }
 
+uint_t wf::Vectors::debug_ndeterministic(uint_t iroot) const {
+    uint_t res = 0;
+    auto fn = [&](const Walker& row) {res += row.m_deterministic.get(iroot);};
+    m_store.foreach_row_in_use(fn);
+    return res;
+}
+
 void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
     DEBUG_ASSERT_FALSE(std::isnan(std::abs(new_weight)), "new weight is invalid");
     if (m_ref_weights_preserved && walker.m_mbf==m_refs[ipart].mbf()) return;

@@ -225,17 +225,12 @@ void deterministic::Subspaces::refresh() {
          * overwrite any previous subspace definition
          */
         detsub->clear();
+        DEBUG_ASSERT_FALSE(detsub->m_wf.debug_ndeterministic(iroot), "flags remain set");
         if (m_opts.m_l1_fraction_cutoff.m_value < 1.0)
             detsub->select_l1_norm_fraction();
         else
             detsub->select_highest_weighted();
         detsub->make_connections();
-    }
-
-    if (m_opts.m_save.m_enabled) {
-        // the subspaces are not going to change, so might as well dump them to archive now
-        hdf5::FileWriter fw(m_opts.m_save.m_path);
-        for (auto& detsub: m_detsubs) detsub->save(fw);
     }
 }
 

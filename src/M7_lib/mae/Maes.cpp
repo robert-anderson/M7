@@ -69,10 +69,8 @@ void Maes::make_average_contribs(Walker &row, const shared_rows::Walker* hf, uin
                 if ((exsig_from_hf != opsig::c_zero) && m_rdms.takes_contribs_from(exsig_from_hf)) {
                     const auto av_weight_hf = hf->norm_average_weight(icycle, ipart);
                     const auto av_weight_hf_rep = hf->norm_average_weight(icycle, ipart_replica);
-                    m_rdms.make_contribs(hf->mbf(), row.m_mbf,
-                                                     ncycle_occ * av_weight_hf * av_weight_rep);
-                    m_rdms.make_contribs(row.m_mbf, hf->mbf(),
-                                                     ncycle_occ * av_weight * av_weight_hf_rep);
+                    m_rdms.make_contribs(hf->mbf(), row.m_mbf, ncycle_occ * av_weight_hf * av_weight_rep);
+                    m_rdms.make_contribs(row.m_mbf, hf->mbf(), ncycle_occ * av_weight * av_weight_hf_rep);
                 }
             }
         }

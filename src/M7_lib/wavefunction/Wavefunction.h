@@ -133,6 +133,8 @@ namespace wf {
          */
         wf_comp_t debug_l1_norm(uint_t ipart) const;
 
+        uint_t debug_ndeterministic(uint_t iroot) const;
+
         /**
          * all changes in the m_weight member of any row associated with m_store should occur through
          * this function so that changes can be properly recorded
