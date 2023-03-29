@@ -5,7 +5,7 @@ stats:
   period: 5
 wavefunction:
   nw_init: 10
-  ci_permanitiator:
+  ci_pmntr:
     geo_mean_power_thresh: 2.1
     cancellation: yes
 propagator:
