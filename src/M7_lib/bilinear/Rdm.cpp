@@ -77,7 +77,6 @@ Rdm::Rdm(const conf::Rdms& opts, OpSig ranksig, OpSig indsig, sys::Sector sector
             Sizing{nrow_estimate(indsig, sector.size()), opts.m_buffers.m_comm_exp_fac}, name){}
 
 void Rdm::end_cycle() {
-    if (!send().buffer_size()) return;
     communicate();
     if (m_send_recv.recv().empty()) return;
     for (m_recv_row.restart(); m_recv_row; ++m_recv_row) {
