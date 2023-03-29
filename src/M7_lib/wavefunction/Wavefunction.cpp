@@ -578,9 +578,9 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
             auto irank_dst = m_dist.irank(row.m_mbf);
             auto& send_table = send(irank_dst);
             auto& send_row = send_table.m_row;
-            send_row.push_back_jump();
-            send_row.m_dst_mbf = row.m_mbf;
             for (uint_t ipart=0ul; ipart < npart(); ++ipart) {
+                send_row.push_back_jump();
+                send_row.m_dst_mbf = row.m_mbf;
                 send_row.m_ipart_dst = ipart;
                 const auto file_ipart = file_ipart_fn(ipart);
                 send_row.m_delta_weight = row.m_weight[file_ipart];
