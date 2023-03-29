@@ -109,8 +109,8 @@ void hf_excit_hist::Initializer::setup(Mbf& mbf) {
     // parallelize over the first loop in the recursion
     const uint_t nelement_local = mpi::evenly_shared_count(m_c2.m_nelement);
     /*
-     * because there is a synchronization at the end of each iteration of the top-level loop, each rank must execute
-     * reach the communication call same number of times.
+     * because there is a synchronization at the end of each iteration of the top-level loop, each rank must reach the
+     * communication call same number of times.
      */
     const auto nelement_local_max = mpi::all_max(nelement_local);
     const auto stride = mpi::nrank();
@@ -134,7 +134,7 @@ void hf_excit_hist::Initializer::communicate_and_insert() {
         if (!store_row) {
             // MBF not already added
             m_wf.m_store.insert(recv_row.m_dst_mbf, store_row);
-            store_row.m_permanitiator.set();
+            store_row.m_pmntr.set();
             // permanitiators cannot be deleted - need to protect
             store_row.protect();
             const auto exlvl = OpCounts(m_hf, recv_row.m_dst_mbf).m_nfrm_cre;
@@ -162,7 +162,7 @@ void hf_excit_hist::Initializer::setup() {
          */
         auto after_cancellation = m_ncreated.m_reduced;
         for (row.restart(); row; ++row) {
-            if (row.m_permanitiator.get(0)) {
+            if (row.m_pmntr.get(0)) {
                 const auto iexlvl = OpCounts(m_hf, row.m_mbf).m_nfrm_cre;
                 if (std::abs(row.m_weight[0]) < m_c2.m_thresh) {
                     --after_cancellation[iexlvl];
@@ -219,7 +219,7 @@ void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, str_t fname, doub
     Initializer(wf, hf, fname, geo_mean_power_thresh, cancellation).setup();
 }
 
-void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, const conf::CiPermanitiator &opts) {
+void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, const conf::CiPmntr &opts) {
     logging::info("Setting permanitiators based on CI data from \"{}\"", opts.m_path.m_value);
     initialize(wf, hf, opts.m_path, opts.m_geo_mean_power_thresh, opts.m_cancellation);
 }

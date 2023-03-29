@@ -110,10 +110,10 @@ conf::Particles::Particles(Group* parent) :
 
 
 
-conf::CiPermanitiator::CiPermanitiator(Group *parent) :
-        Section(parent, "ci_permanitiator",
-            "options relating to conferring permanent initiator status on determinants based on products of "
-            "lower-rank excitations", Explicit),
+conf::CiPmntr::CiPmntr(Group *parent) :
+        Section(parent, "ci_pmntr",
+            "options relating to conferring permanent initiator aka \"permanitiator\" status on determinants "
+            "based on products of lower-rank excitations", Explicit),
         m_path(this, "path", "M7.hf_excit.h5", "file path to CI data source"),
         m_geo_mean_power_thresh(this, "geo_mean_power_thresh", 2.0,
          "power of the geometric mean of intermediate-normalized C2 coefficients defining the threshold required "
@@ -130,7 +130,7 @@ conf::Wavefunction::Wavefunction(Group *parent) :
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
         m_fci_init(this, "fci_init", false, "call the ARPACK interface to initialize the required roots to their exact values"),
-        m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_permanitiator(this),
+        m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_pmntr(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
         m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit){}
 

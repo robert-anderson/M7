@@ -18,7 +18,7 @@ FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests
         m_ref_proj_energy(this, m_wf_format, "Reference-projected energy"),
         m_l2_norm(this, m_wf_format, "L2 norm of the wavefunction"),
         m_ninitiator(this, m_wf_format, "Initiator MBFs", false),
-        m_ninitiator_perma(this, m_wf_format, "Initiator MBFs due to permanitiator status only", false),
+        m_ninitiator_pmntr(this, m_wf_format, "Initiator MBFs due to permanitiator status only", false),
         m_nocc_mbf(this, m_wf_format, "Occupied MBFs", false),
         m_delta_nocc_mbf(this, m_wf_format, "Change in number of occupied MBFs", false),
         m_spin_square_num(inst_ests.m_spin_square ? this : nullptr, m_wf_format,

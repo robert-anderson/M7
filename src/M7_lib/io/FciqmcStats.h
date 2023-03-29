@@ -27,7 +27,7 @@ struct FciqmcStatsRow : StatsRow {
     statistic::Numbers<ham_t, c_ndim_wf> m_ref_proj_energy;
     statistic::Numbers<ham_comp_t, c_ndim_wf> m_l2_norm;
     statistic::Numbers<uint_t, c_ndim_wf> m_ninitiator;
-    statistic::Numbers<uint_t, c_ndim_wf> m_ninitiator_perma;
+    statistic::Numbers<uint_t, c_ndim_wf> m_ninitiator_pmntr;
     statistic::Numbers<uint_t, c_ndim_wf> m_nocc_mbf;
     statistic::Numbers<int, c_ndim_wf> m_delta_nocc_mbf;
     statistic::Numbers<wf_t, c_ndim_wf> m_spin_square_num;

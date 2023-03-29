@@ -249,7 +249,7 @@ void Solver::loop_over_occupied_mbfs() {
 
             bool initiator = walker.exceeds_initiator_thresh(ipart, m_prop.m_nadd_initiator);
             if (!initiator) {
-                initiator = walker.m_permanitiator.get(ipart);
+                initiator = walker.m_pmntr.get(ipart);
                 if (initiator) m_wf.m_stats.m_ninitiator_perma.m_local[ipart]++;
             }
             if (initiator) m_wf.m_stats.m_ninitiator.m_local[ipart]++;
@@ -344,7 +344,7 @@ void Solver::output_stats() {
         stats.m_l2_norm = m_wf.m_stats.m_l2_norm_square.prev_total();
         stats.m_l2_norm.to_sqrt();
         stats.m_ninitiator = m_wf.m_stats.m_ninitiator.m_reduced;
-        stats.m_ninitiator_perma = m_wf.m_stats.m_ninitiator_perma.m_reduced;
+        stats.m_ninitiator_pmntr = m_wf.m_stats.m_ninitiator_perma.m_reduced;
         stats.m_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_total();
         stats.m_delta_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_delta().m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();

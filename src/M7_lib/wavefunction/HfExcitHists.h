@@ -108,7 +108,7 @@ namespace hf_excit_hist {
 
     void initialize(wf::Vectors& wf, const field::Mbf& hf, str_t fname, double geo_mean_power_thresh, bool cancellation);
 
-    void initialize(wf::Vectors& wf, const field::Mbf& hf, const conf::CiPermanitiator& opts);
+    void initialize(wf::Vectors& wf, const field::Mbf& hf, const conf::CiPmntr& opts);
 
     struct Accumulators {
         /**

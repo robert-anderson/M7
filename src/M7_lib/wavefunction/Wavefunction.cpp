@@ -17,13 +17,13 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
     mbf::set(ref_mbf, m_sector.particles(), m_opts.m_reference.m_mbf_init, 0ul);
 
 
-    const auto permanitiators = m_opts.m_wavefunction.m_ci_permanitiator.m_enabled;
+    const auto pmntr = m_opts.m_wavefunction.m_ci_pmntr.m_enabled;
 
-    if (permanitiators) {
+    if (pmntr) {
         /*
          * using the "permanitiator" adaptation with low-rank CI information as a source
          */
-        hf_excit_hist::initialize(*this, ref_mbf, m_opts.m_wavefunction.m_ci_permanitiator);
+        hf_excit_hist::initialize(*this, ref_mbf, m_opts.m_wavefunction.m_ci_pmntr);
     }
 
     /*
@@ -36,7 +36,7 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
         for (uint_t ipart = 0ul; ipart < npart(); ++ipart) {
             set_weight(ref_walker, ipart, wf_t(m_opts.m_wavefunction.m_nw_init));
         }
-        if (permanitiators) ref_walker.m_permanitiator.set();
+        if (pmntr) ref_walker.m_pmntr.set();
     }
 
     for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
@@ -131,7 +131,7 @@ void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
             row.m_mbf.to_string(),
             convert::to_string(row.m_weight[ipart], {true, 6}),
             convert::to_string(row.m_weight[ipart] / std::sqrt(l2_norm_square), {false, 4}),
-            convert::to_string(row.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd) || row.m_permanitiator.get(0)),
+            convert::to_string(row.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd) || row.m_pmntr.get(0)),
             convert::to_string(row.m_hdiag[iroot_part(ipart)]),
             convert::to_string(bool(row.m_deterministic[iroot_part(ipart)])),
             convert::to_string(m_dist.irank(row.m_mbf))
