@@ -38,7 +38,7 @@ void HfExcitsOneExsig::make_contribs(const conn::FrmOnv& conn, const wf_t& contr
 HfExcits::HfExcits(const conf::HfExcits& opts, sys::Size extents, uint_t nroot) :
         m_opts(opts), m_av_hf({nroot}), m_conn(extents) {
 //    REQUIRE_EQ_ALL(nroot, 1ul, "HF excitation averaging currently only implemented for a single root");
-//    for (uint_t iexlvl=1ul; iexlvl<=opts.m_max_nexcit; ++iexlvl){
+//    for (uint_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
 //        const auto exsig = opsig::frm(iexlvl);
 //        m_active_exsigs.push_back(exsig);
 //        m_hf_excits[exsig] = ptr::smart::make_unique<HfExcitsOneExsig>(exsig, nroot);

@@ -6,7 +6,7 @@
 #include "HfExcitHists.h"
 #include "Wavefunction.h"
 
-hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, double geo_mean_power_thresh) :
+hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name) :
         m_inds(hdf5::GroupReader(parent, name), "indices", mpi::on_node_i_am_root(), true),
         m_vals(hdf5::GroupReader(parent, name), "values", mpi::on_node_i_am_root(), true) {
     REQUIRE_EQ(m_inds.nrow(), m_vals.nelement(),
@@ -19,31 +19,28 @@ hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name, doub
     m_vals.reorder(order);
     mpi::barrier_on_node();
     m_geo_mean = math::geo_mean(m_vals.tbegin(), m_vals.nelement());
-    m_thresh = std::pow(m_geo_mean, geo_mean_power_thresh);
-    while(m_nelement < m_vals.nelement() && std::abs(m_vals[m_nelement]) >= m_thresh) ++m_nelement;
 }
 
 hf_excit_hist::Initializer::Initializer(
-        wf::Vectors &wf, const Mbf &hf, str_t fname, double geo_mean_power_thresh, bool cancellation) :
-        m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2", geo_mean_power_thresh),
-        m_cancellation(cancellation), m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf),
-        m_ncreated({2*max_power_by_thresh()+1}) {
+        wf::Vectors &wf, const Mbf &hf, str_t fname, uint_t max_exlvl, double delta_k, bool cancellation) :
+        m_wf(wf), m_hf(hf), m_c2(hdf5::FileReader(fname), "2"),
+        m_cancellation(cancellation), m_work_mbf(wf.m_sector), m_work_conn(m_work_mbf), m_ncreated({max_exlvl+1}),
+        m_min_ks(make_min_ks(max_exlvl/2)), m_max_ks(make_max_ks(delta_k)), m_threshs(make_threshs()) {
     logging::info("Maximum-magnitude C2 coefficient: {}", m_c2.m_vals[0]);
     logging::info("Geometric mean of C2 coefficients: {}", m_c2.m_geo_mean);
-    logging::info("Specified power of C2 geo mean ({}) implies a threshold of {} for C2^n permanitiators",
-                  geo_mean_power_thresh, m_c2.m_thresh);
-    logging::info("Threshold implies maximum relevant power of C2 is {}", max_power_by_thresh());
-}
 
-uint_t hf_excit_hist::Initializer::max_power_by_thresh() {
-    const auto limit = uint_t(m_wf.m_sector.m_frm.m_elecs) / 2;
-    wf_comp_t product = 1.0;
-    for (uint_t ipower = 0ul; ipower < limit; ++ipower) {
-        product *= std::abs(m_c2.m_vals[ipower]);
-        product /= (ipower+1);
-        if (product < m_c2.m_thresh) return ipower;
+    v_t<strv_t> logging_table;
+    logging_table.push_back({"Excitation level", "K1", "K1 + delta K", "Thresh"});
+    const auto max_power = max_exlvl / 2;
+    for (uint_t ipower = 1ul; ipower <= max_power; ++ipower) {
+        logging_table.push_back({
+            convert::to_string(ipower * 2),
+            convert::to_string(m_min_ks[ipower], {false, 4}),
+            convert::to_string(m_max_ks[ipower], {false, 4}),
+            convert::to_string(m_threshs[ipower])
+        });
     }
-    return limit;
+    logging::info_table("Permanitiator thresholds", logging_table, true);
 }
 
 wf_comp_t hf_excit_hist::Initializer::thresh_for_first_pmntr(uint_t ipower) {
@@ -52,7 +49,7 @@ wf_comp_t hf_excit_hist::Initializer::thresh_for_first_pmntr(uint_t ipower) {
     uint_t ielement = 0ul;
 
     for (uint_t i = 1ul; i <= ipower; ++i){
-        for (; ielement < m_c2.m_nelement; ++ielement) {
+        for (; ielement < m_c2.nelement(); ++ielement) {
             if (apply(m_work_mbf, ielement)) {
                 // the entry was successfully applied
                 product *= std::abs(m_c2.m_vals[ielement])/i;
@@ -66,6 +63,25 @@ wf_comp_t hf_excit_hist::Initializer::thresh_for_first_pmntr(uint_t ipower) {
 
 wf_comp_t hf_excit_hist::Initializer::gmp_for_first_pmntr(uint_t ipower) {
     return std::log(thresh_for_first_pmntr(ipower)) / std::log(m_c2.m_geo_mean);
+}
+
+v_t<double> hf_excit_hist::Initializer::make_min_ks(uint_t npower) {
+    v_t<double> tmp;
+    tmp.reserve(npower);
+    for (uint_t ipower=0ul; ipower <= npower; ++ipower) tmp.push_back(gmp_for_first_pmntr(ipower));
+    return tmp;
+}
+
+v_t<double> hf_excit_hist::Initializer::make_max_ks(double delta_k) {
+    auto tmp = m_min_ks;
+    for (auto& v : tmp) v += delta_k;
+    return tmp;
+}
+
+v_t<double> hf_excit_hist::Initializer::make_threshs() {
+    auto tmp = m_max_ks;
+    for (auto& v : tmp) v = std::pow(m_c2.m_geo_mean, v);
+    return tmp;
 }
 
 bool hf_excit_hist::Initializer::apply(Mbf &mbf, uint_t ientry) {
@@ -107,7 +123,7 @@ void hf_excit_hist::Initializer::setup(Mbf& mbf, uint_t imax, uint_t ipower, wf_
 
 void hf_excit_hist::Initializer::setup(Mbf& mbf) {
     // parallelize over the first loop in the recursion
-    const uint_t nelement_local = mpi::evenly_shared_count(m_c2.m_nelement);
+    const uint_t nelement_local = mpi::evenly_shared_count(m_c2.nelement());
     /*
      * because there is a synchronization at the end of each iteration of the top-level loop, each rank must reach the
      * communication call same number of times.
@@ -153,7 +169,7 @@ void hf_excit_hist::Initializer::setup() {
     auto& row = m_wf.m_store.m_row;
     strv_t header = {"excitation level", "number in use"};
     v_t<strv_t> logging_table;
-    auto max_power = this->max_power_by_thresh();
+    const auto ipower_max = m_threshs.size()-1;
     if (m_cancellation) {
         header.emplace_back("number revoked by cancellation");
         /*
@@ -164,7 +180,9 @@ void hf_excit_hist::Initializer::setup() {
         for (row.restart(); row; ++row) {
             if (row.m_pmntr.get(0)) {
                 const auto iexlvl = OpCounts(m_hf, row.m_mbf).m_nfrm_cre;
-                if (std::abs(row.m_weight[0]) < m_c2.m_thresh) {
+                const auto ipower = iexlvl / 2;
+                const auto& thresh = m_threshs[ipower];
+                if (std::abs(row.m_weight[0]) < thresh) {
                     --after_cancellation[iexlvl];
                     row.unprotect();
                     m_wf.m_store.erase(row.m_mbf);
@@ -176,7 +194,7 @@ void hf_excit_hist::Initializer::setup() {
         }
 
         logging_table.push_back(header);
-        for (uint_t i = 1ul; i<=max_power*2; ++i) {
+        for (uint_t i = 1ul; i<=ipower_max*2; ++i) {
             logging_table.push_back({
                 convert::to_string(i),
                 convert::to_string(after_cancellation[i]),
@@ -186,7 +204,7 @@ void hf_excit_hist::Initializer::setup() {
     }
     else {
         logging_table.push_back(header);
-        for (uint_t i = 1ul; i <= max_power * 2; ++i)
+        for (uint_t i = 1ul; i <= ipower_max * 2; ++i)
             logging_table.push_back({convert::to_string(i), convert::to_string(m_ncreated.m_reduced[i])});
     }
     logging::info_table("Permanitiator breakdown", logging_table, true);
@@ -197,31 +215,34 @@ bool hf_excit_hist::Initializer::loop_body(Mbf& mbf, uint_t ielement, uint_t ipo
     // the form of the product is (1/n!)*(c2)^n
     product /= ipower;
     /*
-     * do not continue with this branch of contributions if the prev_product is already smaller than the thresh,
+     * do not continue with this branch of contributions if the prev_product is already smaller than the smallest thresh,
      * since the values are sorted in descending order
      */
-    if (std::abs(product) < m_c2.m_thresh) return true;
-    if (apply(mbf, ielement)) {
-        // i-th indices were successfully applied
-        auto irank = m_wf.m_dist.irank(mbf);
-        auto& send_table = m_wf.send(irank);
-        auto& send_row = send_table.m_row;
-        send_row.push_back_jump();
-        send_row.m_dst_mbf = mbf;
-        if (m_cancellation) send_row.m_delta_weight = (phase(mbf) ? -1 : 1) * product;
-        setup(mbf, ielement, ipower + 1, product);
-        undo(mbf, ielement);
+    if (std::abs(product) < m_threshs.back()) return true;
+    if (std::abs(product) > m_threshs[ipower]) {
+        if (apply(mbf, ielement)) {
+            // i-th indices were successfully applied
+            auto irank = m_wf.m_dist.irank(mbf);
+            auto& send_table = m_wf.send(irank);
+            auto& send_row = send_table.m_row;
+            send_row.push_back_jump();
+            send_row.m_dst_mbf = mbf;
+            if (m_cancellation) send_row.m_delta_weight = (phase(mbf) ? -1 : 1) * product;
+            setup(mbf, ielement, ipower + 1, product);
+            undo(mbf, ielement);
+        }
     }
     return false;
 }
 
-void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, str_t fname, double geo_mean_power_thresh, bool cancellation) {
-    Initializer(wf, hf, fname, geo_mean_power_thresh, cancellation).setup();
+void hf_excit_hist::initialize(wf::Vectors& wf, const field::Mbf& hf, str_t fname,
+                               uint_t max_exlvl, double delta_k, bool cancellation) {
+    Initializer(wf, hf, fname, max_exlvl, delta_k, cancellation).setup();
 }
 
 void hf_excit_hist::initialize(wf::Vectors &wf, const Mbf &hf, const conf::CiPmntr &opts) {
     logging::info("Setting permanitiators based on CI data from \"{}\"", opts.m_path.m_value);
-    initialize(wf, hf, opts.m_path, opts.m_geo_mean_power_thresh, opts.m_cancellation);
+    initialize(wf, hf, opts.m_path, opts.m_max_exlvl, opts.m_delta_k, opts.m_cancellation);
 }
 
 uintv_t hf_excit_hist::Accumulators::make_nexcit_is_accumulated(const uintv_t &nexcits) {

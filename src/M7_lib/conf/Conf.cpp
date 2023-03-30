@@ -115,9 +115,11 @@ conf::CiPmntr::CiPmntr(Group *parent) :
             "options relating to conferring permanent initiator aka \"permanitiator\" status on determinants "
             "based on products of lower-rank excitations", Explicit),
         m_path(this, "path", "M7.hf_excit.h5", "file path to CI data source"),
-        m_geo_mean_power_thresh(this, "geo_mean_power_thresh", 2.0,
-         "power of the geometric mean of intermediate-normalized C2 coefficients defining the threshold required "
-            "for permanitiator status"),
+        m_delta_k(this, "delta_k", 0.1,
+                  "the highest-magnitude CI product in an excitation level i is denoted G^Ki, where G is the geometric mean of "
+                  "the C2 amplitudes. MBFs of excitation level i are granted permanitiator status if their CI product exceeds "
+                  "G^(Ki+delta_k)"),
+        m_max_exlvl(this, "max_exlvl", 2, "highest excitation level in which to grant permanitiator status"),
         m_cancellation(this, "cancellation", true,
             "if true, an excitation is removed from the list of permanitiators when it takes multiple contributions"
             " which sum to a value less than threshold implied by C2 list and geo_mean_power_thresh")

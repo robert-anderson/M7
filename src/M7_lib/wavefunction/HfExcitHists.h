@@ -16,12 +16,14 @@ namespace wf {
 namespace hf_excit_hist {
     struct IndVals {
         wf_comp_t m_geo_mean = 0.0;
-        wf_comp_t m_thresh = 0.0;
-        uint_t m_nelement = 0ul;
         dense::Matrix<rdm_ind_t> m_inds;
         dense::Vector<wf_t> m_vals;
 
-        IndVals(const hdf5::NodeReader& parent, str_t name, wf_t thresh);
+        IndVals(const hdf5::NodeReader& parent, str_t name);
+
+        uint_t nelement() const {
+            return m_vals.nelement();
+        }
     };
 
     struct Initializer {
@@ -53,17 +55,23 @@ namespace hf_excit_hist {
          * number of permanitiators created by excitation level
          */
         reduction::NdArray<uint_t, 1> m_ncreated;
+        /**
+         * k_i for each power i
+         */
+        const v_t<double> m_min_ks;
+        /**
+         * k_i + delta k_i for each power i
+         */
+        const v_t<double> m_max_ks;
+        /**
+         * C2 geometric mean to the power of max_ks for each power i
+         */
+        const v_t<double> m_threshs;
 
         Initializer(wf::Vectors& wf, const field::Mbf& hf, str_t fname,
-                    double geo_mean_power_thresh, bool cancellation);
+                    uint_t max_exlvl, double delta_k, bool cancellation);
 
     private:
-
-        /**
-         * cumulatively multiply the first n ci coefficients until the product falls below the threshold
-         */
-        uint_t max_power_by_thresh();
-
         /**
          * @return
          *  threshold which would yield a single permanitiator for C2^ipower excitations
@@ -75,6 +83,12 @@ namespace hf_excit_hist {
          *  power of the C2 geometric mean corresponding to thresh_for_first_pmntr(ipower)
          */
         wf_comp_t gmp_for_first_pmntr(uint_t ipower);
+
+        v_t<double> make_min_ks(uint_t npower);
+
+        v_t<double> make_max_ks(double delta_k);
+
+        v_t<double> make_threshs();
 
         bool apply(field::Mbf& mbf, uint_t ientry);
 
@@ -106,7 +120,8 @@ namespace hf_excit_hist {
         void setup();
     };
 
-    void initialize(wf::Vectors& wf, const field::Mbf& hf, str_t fname, double geo_mean_power_thresh, bool cancellation);
+    void initialize(wf::Vectors& wf, const field::Mbf& hf, str_t fname,
+                    uint_t max_exlvl, double delta_k, bool cancellation);
 
     void initialize(wf::Vectors& wf, const field::Mbf& hf, const conf::CiPmntr& opts);
 
