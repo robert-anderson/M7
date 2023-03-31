@@ -248,8 +248,19 @@ void Solver::loop_over_occupied_mbfs() {
                               "Stored MBF should be on its allocated rank");
 
             bool initiator = walker.exceeds_initiator_thresh(ipart, m_prop.m_nadd_initiator);
-            if (!initiator) {
+            if (!initiator && m_opts.m_wavefunction.m_ci_pmntr.m_enabled) {
+                // the initiator criterion was not satisfied, see if this is a permanitiator
                 initiator = walker.m_pmntr.get(ipart);
+                const auto& all_init_above_max_exlvl = m_opts.m_wavefunction.m_ci_pmntr.m_all_init_above_max_exlvl;
+                if (!initiator && all_init_above_max_exlvl) {
+                    /*
+                     * this walker is not a stored permanitiator, but if its excitation level is above the threshold,
+                     * then it is allowed to be an initiator
+                     */
+                    const auto& max_pmntr_exlvl = m_opts.m_wavefunction.m_ci_pmntr.m_max_exlvl.m_value;
+                    const auto exlvl = OpCounts(m_wf.m_refs[0].mbf(), walker.m_mbf).m_nfrm_cre;
+                    if (exlvl > max_pmntr_exlvl) initiator = true;
+                }
                 if (initiator) m_wf.m_stats.m_ninitiator_perma.m_local[ipart]++;
             }
             if (initiator) m_wf.m_stats.m_ninitiator.m_local[ipart]++;

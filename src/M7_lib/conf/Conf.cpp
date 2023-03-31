@@ -116,10 +116,12 @@ conf::CiPmntr::CiPmntr(Group *parent) :
             "based on products of lower-rank excitations", Explicit),
         m_path(this, "path", "M7.hf_excit.h5", "file path to CI data source"),
         m_delta_k(this, "delta_k", 0.1,
-                  "the highest-magnitude CI product in an excitation level i is denoted G^Ki, where G is the geometric mean of "
-                  "the C2 amplitudes. MBFs of excitation level i are granted permanitiator status if their CI product exceeds "
-                  "G^(Ki+delta_k)"),
+            "the highest-magnitude CI product in an excitation level i is denoted G^Ki, where G is the geometric mean of "
+            "the C2 amplitudes. MBFs of excitation level i are granted permanitiator status if their CI product exceeds "
+            "G^(Ki+delta_k)"),
         m_max_exlvl(this, "max_exlvl", 2, "highest excitation level in which to grant permanitiator status"),
+        m_all_init_above_max_exlvl(this, "all_init_above_max_exlvl", false,
+            "if true, all determinants above the max_exlvl excitation level will be granted initiator status"),
         m_cancellation(this, "cancellation", true,
             "if true, an excitation is removed from the list of permanitiators when it takes multiple contributions"
             " which sum to a value less than threshold implied by C2 list and geo_mean_power_thresh")

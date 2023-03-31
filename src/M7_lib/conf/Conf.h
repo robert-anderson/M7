@@ -111,6 +111,7 @@ namespace conf {
         Param<str_t> m_path;
         Param<double> m_delta_k;
         Param<uint_t> m_max_exlvl;
+        Param<bool> m_all_init_above_max_exlvl;
         Param<bool> m_cancellation;
         explicit CiPmntr(Group* parent);
     };
