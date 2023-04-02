@@ -37,7 +37,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
 
     if (mpi::i_am_root()) {
         m_stats = ptr::smart::make_unique<FciqmcStats>(
-            "M7.stats", "FCIQMC", FciqmcStatsRow(m_prop, m_inst_ests), m_opts.m_stats.m_period);
+            "M7.stats", "FCIQMC", FciqmcStatsRow(m_prop, m_inst_ests, m_opts.m_stats.m_exlvl_resolved), m_opts.m_stats.m_period);
         m_timing_stats = ptr::smart::make_unique<TimingStats>(
             "M7.timing", "FCIQMC Timings", TimingStatsRow(), m_opts.m_stats.m_period);
     }
@@ -261,7 +261,7 @@ void Solver::loop_over_occupied_mbfs() {
                     const auto exlvl = OpCounts(m_wf.m_refs[0].mbf(), walker.m_mbf).m_nfrm_cre;
                     if (exlvl > max_pmntr_exlvl) initiator = true;
                 }
-                if (initiator) m_wf.m_stats.m_ninitiator_perma.m_local[ipart]++;
+                if (initiator) m_wf.m_stats.m_nocc_pmntr.m_local[ipart]++;
             }
             if (initiator) m_wf.m_stats.m_ninitiator.m_local[ipart]++;
 
@@ -355,7 +355,7 @@ void Solver::output_stats() {
         stats.m_l2_norm = m_wf.m_stats.m_l2_norm_square.prev_total();
         stats.m_l2_norm.to_sqrt();
         stats.m_ninitiator = m_wf.m_stats.m_ninitiator.m_reduced;
-        stats.m_ninitiator_pmntr = m_wf.m_stats.m_ninitiator_perma.m_reduced;
+        stats.m_nocc_pmntr = m_wf.m_stats.m_nocc_pmntr.m_reduced;
         stats.m_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_total();
         stats.m_delta_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_delta().m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();

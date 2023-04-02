@@ -92,6 +92,16 @@ public:
 
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.m_shape, other.m_dim_names){}
 
+    NdFormat<nind+1> add_minor_dim(uint_t nelement, str_t name="") {
+        std::array<uint_t, nind+1> shape;
+        std::copy(m_shape.cbegin(), m_shape.cend(), shape.begin());
+        shape.back() = nelement;
+        std::array<str_t, nind+1> dim_names;
+        std::copy(m_dim_names.cbegin(), m_dim_names.cend(), dim_names.begin());
+        dim_names.back() = name;
+        return {shape, dim_names};
+    }
+
     bool operator==(const NdFormat<nind> &other) const{
         for (uint_t iind = 0ul; iind != nind; ++iind){
             if (other.m_shape[iind] != m_shape[iind]) return false;

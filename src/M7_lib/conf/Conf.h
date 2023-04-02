@@ -161,6 +161,7 @@ namespace conf {
         Param<str_t> m_path;
         Param<uint_t> m_period;
         Param<bool> m_parallel;
+        Param<bool> m_exlvl_resolved;
 
         explicit Stats(Group *parent);
 

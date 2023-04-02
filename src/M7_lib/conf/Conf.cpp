@@ -176,13 +176,15 @@ void conf::Semistochastic::validate_node_contents() {
 
 conf::Stats::Stats(Group *parent) :
         Section(parent, "stats",
-                        "options relating to the recording of time series statistics about the calculation"),
+            "options relating to the recording of time series statistics about the calculation"),
         m_path(this, "path", "M7.stats",
-               "path to the file to which MC cycle statistics will be output"),
+            "path to the file to which MC cycle statistics will be output"),
         m_period(this, "period", 1,
-               "number of MC cycles between output of averaged stats"),
+            "number of MC cycles between output of averaged stats"),
         m_parallel(this, "parallel", false,
-                   "output additional stats from each MPI rank") {}
+            "output additional stats from each MPI rank"),
+        m_exlvl_resolved(this, "exlvl_resolved", false,
+            "output stats broken down by excitation level from the reference MBF") {}
 
 void conf::Stats::validate_node_contents() {
     REQUIRE_TRUE(m_period.m_value, "Stats output period must be non-zero");

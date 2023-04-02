@@ -22,9 +22,9 @@ namespace wf {
          */
         reduction::NdArray<uint_t, c_ndim_wf> m_ninitiator;
         /**
-         * number of initiator MBFs in each part of the WF due to permanitiator status
+         * number of occupied permanitiator MBFs in each part of the WF
          */
-        reduction::NdArray<uint_t, c_ndim_wf> m_ninitiator_perma;
+        reduction::NdArray<uint_t, c_ndim_wf> m_nocc_pmntr;
         /**
          * number of MBFs with any associated weight in any part
          */

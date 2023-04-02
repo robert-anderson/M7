@@ -280,6 +280,14 @@ namespace sys {
             }
 
             uint_t size() const;
+
+            /**
+             * @return
+             *  maximum possible excitation level of one fermion MBF relative to another
+             */
+            uint_t max_exlvl() const {
+                return std::min(uint_t(m_elecs), m_basis.m_nspinorb);
+            }
         };
     }
 
