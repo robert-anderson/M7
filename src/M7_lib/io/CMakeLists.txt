@@ -28,6 +28,7 @@ target_sources(M7_lib
         ParallelStats.cpp
         ParallelStats.h
         ProgressBar.h
+        StatsTable.cpp
         StatsTable.h
         Symlink.cpp
         Symlink.h

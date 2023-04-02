@@ -104,89 +104,41 @@ namespace statistic {
     };
 }
 
-
-template<typename row_t>
-struct StatsTable : buffered::Table<row_t> {
-    static_assert(std::is_base_of<StatsRow, row_t>::value, "Template arg must be derived from StatsRow");
+struct StatsTableBase {
     const str_t m_fname, m_description;
-    std::unique_ptr<std::ofstream> m_file;
     const uint_t m_period;
+    std::unique_ptr<std::ofstream> m_file;
+    const v_t<FieldBase *> m_fields;
     uint_t m_ncommit = 0;
 
-    void write_header() const {
-        auto& row = this->m_row;
-        uint_t ncolumn = 0ul;
-        std::map<str_t, uint_t> m_format_strings;
-        uint_t nformat = 0ul;
-        for (const FieldBase *field : row.m_fields) {
-            auto num_field = dynamic_cast<const NumberFieldBase *>(field);
-            ncolumn += (num_field->m_is_complex + 1) * num_field->m_nelement;
-            auto format_string = num_field->format_string();
-            auto it = m_format_strings.find(format_string);
-            if (it == m_format_strings.end()) m_format_strings[format_string] = nformat++;
-        }
-        *m_file << string::boxed(m_description + " Stats File") <<
-                "# Number of statistics output: " << row.m_fields.size() <<
-                "\n# Number of columns: " << ncolumn <<
-                "\n# Distinct multidimensional formats: " << m_format_strings.size() << "\n#" <<
-                "\n# Format list (major index first):" << "\n";
-
-        for (uint_t i = 0ul; i < nformat; ++i) {
-            for (const auto &it : m_format_strings) {
-                if (it.second == i) {
-                    *m_file << "# " << static_cast<char>('A' + i) << ": " << it.first << "\n";
-                    break;
-                }
-            }
-        }
-        *m_file << "#\n";
-
-        auto icolumn = 1ul;
-        for (const FieldBase *field : row.m_fields) {
-            auto num_field = dynamic_cast<const NumberFieldBase *>(field);
-            auto format_string = num_field->format_string();
-            auto it = m_format_strings.find(format_string);
-            if (it == m_format_strings.end()) m_format_strings[format_string] = nformat++;
-            *m_file << "#  " << icolumn << ".  " << num_field->m_name <<
-                    " (" << static_cast<char>('A' + m_format_strings[num_field->format_string()]) << ")\n";
-            icolumn += (num_field->m_is_complex + 1) * num_field->m_nelement;
-        }
-        *m_file << "#\n";
-        *m_file << std::flush;
-    }
-
-    StatsTable(str_t fname, str_t description, const row_t &row, uint_t period) :
-            buffered::Table<row_t>(fname, {row}), m_fname(fname), m_description(std::move(description)),
-            m_file(new std::ofstream(fname)), m_period(period) {
-        write_header();
-        buffered::Table<row_t>::push_back();
-        Table<row_t>::m_row.restart();
-    }
-
-    void commit() {
-        for (FieldBase *field : this->m_row.m_fields)
-            dynamic_cast<statistic::Base *>(field)->commit();
-        if (!(++m_ncommit % m_period)) flush();
-    }
+    StatsTableBase(str_t fname, str_t description, uint_t period, const Row& row);
 
 private:
 
-    str_t make_line() const {
-        str_t res;
-        const auto& row = this->m_row;
-        for (const FieldBase *field : row.m_fields) {
-            auto stats_field = dynamic_cast<const statistic::Base *>(field);
-            res += stats_field->stats_string() + " ";
-        }
-        return res;
-    }
+    std::map<str_t, uint_t> make_format_strings() const;
 
-    void flush() {
-        *m_file << make_line() << std::endl;
-        for (FieldBase *field : this->m_row.m_fields) {
-            auto num_field = dynamic_cast<statistic::Base *>(field);
-            num_field->reset();
-        }
+    uint_t make_ncolumn() const;
+
+    void write_header() const;
+
+    str_t make_line() const;
+
+    void flush();
+
+public:
+    void commit() ;
+
+};
+
+template<typename row_t>
+struct StatsTable : public buffered::Table<row_t>, StatsTableBase {
+    static_assert(std::is_base_of<StatsRow, row_t>::value, "Template arg must be derived from StatsRow");
+
+    StatsTable(str_t fname, str_t description, const row_t &row, uint_t period) :
+            buffered::Table<row_t>(fname, {row}),
+            StatsTableBase(fname, std::move(description), period, this->m_row){
+        buffered::Table<row_t>::push_back();
+        Table<row_t>::m_row.restart();
     }
 };
 
