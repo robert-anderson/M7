@@ -492,6 +492,18 @@ namespace dense {
         }
 
         /**
+         * set every element with magnitude less than thresh to zero
+         */
+        void screen(const arith::comp_t<T>& thresh) {
+            if (i_can_globally_modify()) {
+                for (uint_t ielem = 0ul; ielem < m_nelement; ++ielem) {
+                    auto& elem = (*this)[ielem];
+                    if (std::abs(elem) < thresh) elem = 0.0;
+                }
+            }
+        }
+
+        /**
          * in-place hermitian conjugate-transposition
          */
         void dagger() {
@@ -562,7 +574,7 @@ namespace dense {
         explicit Vector(uint_t nelement, bool node_shared=false): Matrix<T>(1, nelement, node_shared){}
 
         explicit Vector(const v_t<T>& v): Vector(v.size()) {
-            *this = v;
+            Matrix<T>::operator=(v);
         }
 
         uint_t nelement() const {

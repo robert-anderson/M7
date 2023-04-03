@@ -226,8 +226,9 @@ conf::Rdms::Rdms(Group *parent, str_t name, str_t description) :
 conf::Fock4rdm::Fock4rdm(Group* parent) :
         Section(parent, "fock_4rdm",
                 "options related to the contraction of the 4RDM with the generalized Fock matrix",
-                conf_components::Explicit), m_fock_path(this, "fock_path", "fock.h5",
-                                                        "path to the file containing the fock matrix"){}
+                conf_components::Explicit),
+        m_fock_path(this, "fock_path", "fock.h5", "path to the file containing the fock matrix"),
+        m_screen_thresh(this, "screen_thresh", 0.0, "threshold for matrix element screening"){}
 conf::SpecMoms::SpecMoms(Group *parent, str_t name, str_t description) :
         Bilinears(parent, name, description),
         m_stochastic(this, "stochastic", true,

@@ -47,6 +47,11 @@ Rdms::Rdms(const conf::Rdms& opts, sys::Sector sector, const Epoch& accum_epoch)
     if (opts.m_fock_4rdm.m_enabled) {
         logging::info("Loading generalized Fock matrix for accumulation of its contraction with the 4RDM");
         FockMatrix fock(sector.m_frm.m_basis.m_nsite, opts.m_fock_4rdm.m_fock_path);
+        const auto screen_thresh = opts.m_fock_4rdm.m_screen_thresh.m_value;
+        if (screen_thresh != 0.0) {
+            logging::info("Screening Fock matrix element with magnitude lower than {:.2g} to zero", screen_thresh);
+            fock.screen(screen_thresh);
+        }
         const auto diag = fock.is_diagonal();
         logging::info("The given Fock matrix was found to be {}diagonal", (diag ? "" : "non-"));
 

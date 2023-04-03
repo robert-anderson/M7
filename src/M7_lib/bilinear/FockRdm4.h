@@ -53,7 +53,7 @@ class DiagFockRdm4 : public FockRdm4 {
     /**
      * Diagonal elements of the generalized Fock in the active space
      */
-    const v_t<ham_t> m_fock;
+    const dense::Vector<ham_t> m_fock;
 
 public:
 

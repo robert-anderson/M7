@@ -195,6 +195,7 @@ namespace conf {
 
     struct Fock4rdm : Section {
         Param<str_t> m_fock_path;
+        Param<double> m_screen_thresh;
         explicit Fock4rdm(Group* parent);
     };
 

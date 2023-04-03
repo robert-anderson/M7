@@ -80,7 +80,7 @@ void NonDiagFockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOn
 }
 
 DiagFockRdm4::DiagFockRdm4(const conf::Rdms& opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue) :
-        FockRdm4(opts, opsig::c_trip, sector, nvalue), m_fock(fock.get_diagonal()){}
+        FockRdm4(opts, opsig::c_trip, sector, nvalue), m_fock(dense::Vector<ham_t>(fock.get_diagonal())){}
 
 void DiagFockRdm4::frm_make_contribs(const FrmOnv& src_onv, const conn::FrmOnv& conn,
                                      const FrmOps& com, wf_t contrib) {
