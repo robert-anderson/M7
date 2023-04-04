@@ -5,12 +5,13 @@
 #include "FockRdm4.h"
 
 
-FockRdm4::FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector, uint_t nvalue) :
-        ContractedRdm(opts, opsig::c_4400, opsig::c_3300, max_contrib_exsig, sector, nvalue, "4400f"){}
+FockRdm4::FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector, uint_t nvalue, bool nonzero_diagonal) :
+        ContractedRdm(opts, opsig::c_4400, opsig::c_3300, max_contrib_exsig, sector, nvalue, "4400f"),
+        m_nonzero_diagonal(nonzero_diagonal){}
 
 
 NonDiagFockRdm4::NonDiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue) :
-        FockRdm4(opts, opsig::c_4400, sector, nvalue), m_fock(fock){
+        FockRdm4(opts, opsig::c_4400, sector, nvalue, !fock.diagonal_is_zero()), m_fock(fock){
     REQUIRE_EQ(fock.nrow(), sector.m_frm.m_basis.m_nsite, "Incorrectly-sized Fock matrix given");
     if (m_fock.is_diagonal())
         logging::warn("Performing 4RDM contraction of a diagonal Fock matrix without exploiting diagonality");
@@ -19,6 +20,8 @@ NonDiagFockRdm4::NonDiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock,
 void NonDiagFockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn,
                                         const FrmOps &com, wf_t contrib) {
     const auto exlvl = conn.m_cre.size();
+    // there's no need to perform diagonal element promotion if the Fock matrix has no non-zero diagonal entries
+    if (!exlvl && !m_nonzero_diagonal) return;
     DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
                       "this method should not have been delegated given the exsig of the contribution");
     /*
@@ -80,7 +83,10 @@ void NonDiagFockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOn
 }
 
 DiagFockRdm4::DiagFockRdm4(const conf::Rdms& opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue) :
-        FockRdm4(opts, opsig::c_trip, sector, nvalue), m_fock(dense::Vector<ham_t>(fock.get_diagonal())){}
+        FockRdm4(opts, opsig::c_trip, sector, nvalue, !fock.diagonal_is_zero()),
+        m_fock(dense::Vector<ham_t>(fock.get_diagonal())){
+    REQUIRE_TRUE_ALL(FockRdm4::m_nonzero_diagonal, "Fock matrix has no non-zero diagonal elements");
+}
 
 void DiagFockRdm4::frm_make_contribs(const FrmOnv& src_onv, const conn::FrmOnv& conn,
                                      const FrmOps& com, wf_t contrib) {

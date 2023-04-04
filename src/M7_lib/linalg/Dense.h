@@ -699,6 +699,15 @@ namespace dense {
             return true;
         }
 
+        bool diagonal_is_zero() const {
+            const auto n = Matrix<T>::ncol();
+            for (uint_t irow=0ul; irow < n; ++irow) {
+                if (this->operator()(irow, irow) != 0.0) return false;
+            }
+            // no counterexamples found
+            return true;
+        }
+
         v_t<T> get_diagonal() const {
             const auto n = Matrix<T>::ncol();
             v_t<T> tmp;
