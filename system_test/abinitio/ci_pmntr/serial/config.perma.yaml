@@ -6,7 +6,8 @@ stats:
 wavefunction:
   nw_init: 10
   ci_pmntr:
-    geo_mean_power_thresh: 2.1
+    delta_k: 0.7
+    max_exlvl: 4
     cancellation: yes
 propagator:
   tau_init: 0.001
