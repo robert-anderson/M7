@@ -84,13 +84,13 @@ Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epo
     }
     for (auto& rdm: m_rdms) {
         if (rdm->m_stoch_thresh_contribs) {
-            logging::info("Stochastically rounding contributions to RDM {} around {:.2g} in standard normalization",
+            logging::info("Stochastically applying standard-normalized threshold {:.2g} on contributions to RDM {}",
                           rdm->name(), m_opts.m_stoch_thresh_mag.m_value);
             REQUIRE_TRUE_ALL(m_stoch_thresh_prng.get(),
                              "Stochastic thresholding of RDM contribs requires non-zero specified positive magnitude");
         }
         if (rdm->m_neglect_tiny_contribs) {
-            logging::info("Neglecting all |CiCj| contributions to RDM {} below {:.2g} in standard normalization",
+            logging::info("Neglecting all |CiCj| contributions to RDM {} below magnitude {:.2g} in standard normalization",
                           rdm->name(), m_opts.m_stoch_thresh_mag.m_value);
         }
     }
@@ -118,7 +118,7 @@ void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_op
         }
         if (rdm->m_stoch_thresh_contribs){
             const auto norm = this->contrib_norm(0);
-            const auto rdm_contrib = m_stoch_thresh_prng->stochastic_threshold(contrib / norm, m_opts.m_stoch_thresh_mag);
+            const auto rdm_contrib = m_stoch_thresh_prng->stochastic_threshold(contrib / norm, m_opts.m_stoch_thresh_mag.m_value);
             // skip this contribution if it was stochastically rounded to zero
             if (rdm_contrib == 0.0) continue;
         }
@@ -193,7 +193,8 @@ ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     trace = mpi::all_sum(trace);
     DEBUG_ASSERT_GT(std::abs(trace), 1e-14, "RDM trace should be non-zero");
     const auto norm = arith::real(trace) / integer::nspair(nelec);
-    REQUIRE_NEAR_EQ(norm, m_total_norm.m_reduced.real(),
+    if (!rdm2->approx_contribs())
+        REQUIRE_NEAR_EQ(norm, m_total_norm.m_reduced.real(),
                       "2RDM norm should match total of sampled diagonal contributions");
     REQUIRE_NEAR_ZERO(m_total_norm.m_reduced.imag(), "2RDM norm should be purely real");
     return arith::real(ham.m_e_core) + (arith::real(e1) + arith::real(e2)) / norm;

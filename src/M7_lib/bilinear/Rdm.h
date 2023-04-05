@@ -81,6 +81,10 @@ protected:
 
 public:
 
+    bool approx_contribs() const {
+        return m_stoch_thresh_contribs || m_neglect_tiny_contribs;
+    }
+
     str_t name() const {
         return name(m_name, m_ranksig);
     }
