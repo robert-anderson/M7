@@ -77,15 +77,15 @@ Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epo
     if (!exsigs.empty())
         logging::info("Excitation signatures contributing to the sampled RDMs: {}", convert::to_string(exsigs));
 
-    if (m_opts.m_stoch_round_mag > 0.0) {
+    if (m_opts.m_stoch_thresh_mag > 0.0) {
         const uint_t seed = 123;
         const uint_t block_size = 10000;
         m_stoch_thresh_prng = ptr::smart::make_unique<PRNG>(seed, block_size);
     }
     for (auto& rdm: m_rdms) {
-        if (rdm->m_stoch_round_contribs) {
+        if (rdm->m_stoch_thresh_contribs) {
             logging::info("Stochastically rounding contributions to RDM {} around {:.2g} in standard normalization",
-                rdm->name(), m_opts.m_stoch_round_mag.m_value);
+                rdm->name(), m_opts.m_stoch_thresh_mag.m_value);
             REQUIRE_TRUE_ALL(m_stoch_thresh_prng.get(),
                 "Stochastic thresholding of RDM contribs requires non-zero specified positive magnitude");
         }
@@ -107,9 +107,9 @@ void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_op
     if (!exsig) m_total_norm.m_local+=contrib;
     for (auto& rdm: m_exsig_to_rdms[exsig]) {
         auto rdm_contrib = contrib;
-        if (rdm->m_stoch_round_contribs){
+        if (rdm->m_stoch_thresh_contribs){
             const auto norm = this->contrib_norm(0);
-            const auto rdm_contrib = m_stoch_thresh_prng->stochastic_threshold(contrib / norm, m_opts.m_stoch_round_mag);
+            const auto rdm_contrib = m_stoch_thresh_prng->stochastic_threshold(contrib / norm, m_opts.m_stoch_thresh_mag);
             // skip this contribution if it was stochastically rounded to zero
             if (rdm_contrib == 0.0) continue;
         }

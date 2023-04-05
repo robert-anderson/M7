@@ -38,7 +38,7 @@ void Rdm::add_to_send_table(const RdmInds &inds, wf_t contrib) {
     m_send_row.m_values[0] += contrib;
 }
 
-Rdm::Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue, bool stoch_round_contribs,
+Rdm::Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue, bool stoch_thresh_contribs,
          DistribOptions dist_opts, Sizing store_sizing, Sizing comm_sizing, str_t name) :
         communicator::MappedSend<RdmRow, RdmRow>(
                 "rdm_" + (name.empty() ? this->name(name, ranksig) : name),
@@ -54,7 +54,7 @@ Rdm::Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue, bool st
         m_indsig(indsig), //m_rank_ind(m_indsig.(m_indsig)),
         m_nfrm_cre_ind(m_indsig.nfrm_cre()), m_nfrm_ann_ind(m_indsig.nfrm_ann()),
         m_nbos_cre_ind(m_indsig.nbos_cre()), m_nbos_ann_ind(m_indsig.nbos_ann()),
-        m_stoch_round_contribs(stoch_round_contribs),
+        m_stoch_thresh_contribs(stoch_thresh_contribs),
         m_full_inds(ranksig), m_uncontracted_inds(m_indsig), m_name(name),
         m_send_row(m_send_recv.m_row), m_recv_row(m_send_recv.m_row), m_store_row(m_store.m_row) {
     /*
@@ -72,8 +72,8 @@ Rdm::Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue, bool st
 }
 
 Rdm::Rdm(const conf::Rdms& opts, OpSig ranksig, OpSig indsig, sys::Sector sector,
-         uint_t nvalue, bool stoch_round_contribs, str_t name) :
-        Rdm(ranksig, indsig, sector, nvalue, stoch_round_contribs, opts.m_distribution,
+         uint_t nvalue, bool stoch_thresh_contribs, str_t name) :
+        Rdm(ranksig, indsig, sector, nvalue, stoch_thresh_contribs, opts.m_distribution,
             // store sizing
             Sizing{nrow_estimate(indsig, sector.size()), opts.m_buffers.m_store_exp_fac},
             // send/recv sizing
@@ -96,7 +96,7 @@ void Rdm::save(hdf5::NodeWriter& gw) const {
 
 PureRdm::PureRdm(const conf::Rdms& opts, OpSig ranksig, sys::Sector sector, uint_t nvalue, str_t name) :
         Rdm(opts, ranksig, ranksig, sector, nvalue,
-            opts.m_stoch_round_mag != 0.0 && bilinears::in_parsed_exsigs(ranksig, opts.m_stoch_round_ranks), name){}
+            opts.m_stoch_thresh_mag != 0.0 && bilinears::in_parsed_exsigs(ranksig, opts.m_stoch_thresh_ranks), name){}
 
 void PureRdm::frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn, const FrmOps& com, wf_t contrib) {
     const auto exlvl = conn.m_cre.size();
