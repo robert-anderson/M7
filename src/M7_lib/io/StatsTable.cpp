@@ -58,7 +58,7 @@ void StatsTableBase::write_header() const {
         auto num_field = dynamic_cast<const NumberFieldBase *>(field);
         auto format_string = num_field->format_string();
         auto it = format_strings.find(format_string);
-        DEBUG_ASSERT_NE(it, format_strings.end(), "format string should have been found in the map");
+        DEBUG_ASSERT_FALSE(it==format_strings.cend(), "format string should have been found in the map");
         *m_file << "#  " << icolumn << ".  " << num_field->m_name << " (" << static_cast<char>('A' + it->second) << ")\n";
         icolumn += (num_field->m_is_complex + 1) * num_field->m_nelement;
     }
