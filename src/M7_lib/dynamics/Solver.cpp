@@ -22,7 +22,7 @@ std::unique_ptr<HartreeFock> Solver::make_hf() const {
 
 Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
         m_opts(opts), m_prop(prop), m_wf(wf),
-        m_hf(make_hf()), m_exit("exit"), m_maes(opts.m_av_ests, m_wf.m_sector, m_wf.nroot()),
+        m_hf(make_hf()), m_exit("exit"), m_maes(opts.m_av_ests, m_wf),
         m_inst_ests(m_wf.m_sector, &m_wf.m_refs, opts.m_inst_ests),
         m_annihilator(m_wf, m_prop, m_hf.get(), m_maes.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_detsubs(opts.m_propagator.m_semistochastic) {

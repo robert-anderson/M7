@@ -4,10 +4,10 @@
 
 #include "Maes.h"
 
-Maes::Maes(const conf::Mae &opts, sys::Sector sector, uint_t /*nroot*/) :
+Maes::Maes(const conf::Mae &opts, const wf::Vectors& wf) :
         m_accum_epoch("MAE accumulation"),
-        m_rdms(opts.m_rdm, sector, m_accum_epoch),
-        m_spec_moms(opts.m_spec_mom, sector, m_accum_epoch),
+        m_rdms(opts.m_rdm, wf, m_accum_epoch),
+        m_spec_moms(opts.m_spec_mom, wf, m_accum_epoch),
         m_period(opts.m_stats_period) {
     if (*this) {
         m_stats = ptr::smart::make_unique<MaeStats>(

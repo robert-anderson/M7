@@ -39,7 +39,7 @@ struct Maes {
      */
     std::unique_ptr<MaeStats> m_stats = nullptr;
 
-    Maes(const conf::Mae &opts, sys::Sector sector, uint_t nroot);
+    Maes(const conf::Mae &opts, const wf::Vectors& wf);
 
     operator bool() const;
 

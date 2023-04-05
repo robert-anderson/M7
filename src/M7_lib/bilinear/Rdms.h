@@ -14,6 +14,10 @@ class Rdms {
      */
     const conf::Rdms& m_opts;
     /**
+     * reference to the wavefunctions from which this group of RDMs takes bilinear contributions
+     */
+    const wf::Vectors& m_wf;
+    /**
      * RDM objects managed by this instance
      */
     std::forward_list<std::unique_ptr<Rdm>> m_rdms;
@@ -39,13 +43,24 @@ class Rdms {
     suite::Conns m_work_conns;
     suite::ComOps m_work_com_ops;
 
+    /**
+     * if stochastic thresholding of contributions is enabled, this PRNG is created
+     */
+    std::unique_ptr<PRNG> m_stoch_thresh_prng;
+
     exsig_to_rdms_t make_exsig_to_rdms() const;
+
+    /**
+     * to achieve standard normalization of an RDM contribution Ci*Cj, it must be divided by the L2 norms of the
+     * two wavefunctions
+     */
+    wf_comp_t contrib_norm(uint_t iroot) const;
 
 public:
     const Epoch& m_accum_epoch;
     reduction::Scalar<wf_t> m_total_norm;
 
-    Rdms(const conf::Rdms& opts, sys::Sector sector, const Epoch& accum_epoch);
+    Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch);
 
     ~Rdms() {
         if (m_opts.m_save.m_enabled) save();

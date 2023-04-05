@@ -11,12 +11,13 @@
 struct SpecMoms {
 
     const conf::SpecMoms& m_opts;
+    /**
+     * const ref to wavefunction class so we can lookup dst walker weights
+     */
+    const wf::Vectors& m_wf;
+    const sys::Basis m_basis;
 
     typedef SendRecv<DstFinderRow, Table<DstFinderRow>> dst_finder_comm_t;
-    /**
-     * const pointer to wavefunction class so we can lookup dst walker weights
-     */
-    const wf::Vectors* m_wf = nullptr;
     /**
      * pointer to propagator class which is used to generate connections in the perturbed many-body basis
      */
@@ -129,16 +130,16 @@ private:
     }
 
 public:
-    SpecMoms(const conf::SpecMoms& opts, sys::Sector sector, const Epoch& accum_epoch):
-        m_opts(opts), m_max_order(opts.m_max_order),
-        m_hole_dst_finder_table("hole moment dst finder", DstFinderRow(sector.basis()), {1000, 1.0}),
-        m_particle_dst_finder_table("particle moment dst finder", DstFinderRow(sector.basis()), {1000, 1.0}),
-        m_selected_spinorbs(make_selected_spinorbs(opts, sector.basis().m_frm.m_nspinorb)),
+    SpecMoms(const conf::SpecMoms& opts, const wf::Vectors& wf, const Epoch& accum_epoch):
+        m_opts(opts), m_wf(wf), m_basis(m_wf.m_sector.basis()), m_max_order(opts.m_max_order),
+        m_hole_dst_finder_table("hole moment dst finder", DstFinderRow(m_basis), {1000, 1.0}),
+        m_particle_dst_finder_table("particle moment dst finder", DstFinderRow(m_basis), {1000, 1.0}),
+        m_selected_spinorbs(make_selected_spinorbs(opts, m_basis.m_frm.m_nspinorb)),
         m_accum_epoch(accum_epoch) {
         if (!m_opts.m_enabled) return;
         for (uint_t order = 0ul; order <= m_max_order; ++order) {
-            m_hole_spec_moms.emplace_back(order, m_selected_spinorbs, sector.m_frm.m_basis.m_nspinorb);
-            m_particle_spec_moms.emplace_back(order, m_selected_spinorbs, sector.m_frm.m_basis.m_nspinorb);
+            m_hole_spec_moms.emplace_back(order, m_selected_spinorbs, m_basis.m_frm.m_nspinorb);
+            m_particle_spec_moms.emplace_back(order, m_selected_spinorbs, m_basis.m_frm.m_nspinorb);
         }
     }
 

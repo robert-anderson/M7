@@ -31,23 +31,29 @@ Rdms::exsig_to_rdms_t Rdms::make_exsig_to_rdms() const {
     return exsig_to_rdms;
 }
 
-Rdms::Rdms(const conf::Rdms& opts, sys::Sector sector, const Epoch& accum_epoch) :
-        m_opts(opts), m_spinfree(opts.m_spinfree), m_work_conns(sector.size()),
-        m_work_com_ops(sector.size()),
-        m_accum_epoch(accum_epoch) {
+wf_comp_t Rdms::contrib_norm(uint_t iroot) const {
+    const auto ipart1 = m_wf.m_format.flatten(iroot, 0);
+    const auto ipart2 = m_wf.nreplica()==1 ? ipart1 : m_wf.m_format.flatten(iroot, 1);
+    const auto& l2_norm_squares = m_wf.m_stats.m_l2_norm_square.total();
+    return std::sqrt(l2_norm_squares[ipart1] * l2_norm_squares[ipart2]);
+}
+
+Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch) :
+        m_opts(opts), m_wf(wf), m_spinfree(opts.m_spinfree), m_work_conns(m_wf.m_sector.size()),
+        m_work_com_ops(m_wf.m_sector.size()), m_accum_epoch(accum_epoch) {
     for (const auto& ranksig: bilinears::parse_exsigs(opts.m_ranks)) {
         REQUIRE_FALSE(m_pure_rdms[ranksig], "No RDM rank should appear more than once in the specification");
         REQUIRE_NE(ranksig, opsig::c_invalid, "invalid RDM rank signature (perhaps too many operators for OpSig object)");
         REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
         REQUIRE_TRUE(ranksig.conserves_nfrm(), "fermion non-conserving RDMs are not yet supported");
         REQUIRE_LE(ranksig.nbos(), 1ul, "RDMs with more than one boson operator are not yet supported");
-        m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, PureRdm>(opts, ranksig, sector, 1ul));
+        m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, PureRdm>(opts, ranksig, m_wf.m_sector, 1ul));
         auto rdm_ptr = m_rdms.front().get();
         m_pure_rdms[ranksig] = rdm_ptr;
     }
     if (opts.m_fock_4rdm.m_enabled) {
         logging::info("Loading generalized Fock matrix for accumulation of its contraction with the 4RDM");
-        FockMatrix fock(sector.m_frm.m_basis.m_nsite, opts.m_fock_4rdm.m_fock_path);
+        FockMatrix fock(m_wf.m_sector.m_frm.m_basis.m_nsite, opts.m_fock_4rdm.m_fock_path);
         const auto screen_thresh = opts.m_fock_4rdm.m_screen_thresh.m_value;
         if (screen_thresh != 0.0) {
             logging::info("Screening Fock matrix element with magnitude lower than {:.2g} to zero", screen_thresh);
@@ -56,8 +62,8 @@ Rdms::Rdms(const conf::Rdms& opts, sys::Sector sector, const Epoch& accum_epoch)
         const auto diag = fock.is_diagonal();
         logging::info("The given Fock matrix was found to be {}diagonal", (diag ? "" : "non-"));
 
-        if (!diag) m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, NonDiagFockRdm4>(opts, fock, sector, 1ul));
-        else m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, DiagFockRdm4>(opts, fock, sector, 1ul));
+        if (!diag) m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, NonDiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
+        else m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, DiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
     }
     m_exsig_to_rdms = make_exsig_to_rdms();
 
@@ -71,10 +77,18 @@ Rdms::Rdms(const conf::Rdms& opts, sys::Sector sector, const Epoch& accum_epoch)
     if (!exsigs.empty())
         logging::info("Excitation signatures contributing to the sampled RDMs: {}", convert::to_string(exsigs));
 
+    if (m_opts.m_stoch_round_mag > 0.0) {
+        const uint_t seed = 123;
+        const uint_t block_size = 10000;
+        m_stoch_thresh_prng = ptr::smart::make_unique<PRNG>(seed, block_size);
+    }
     for (auto& rdm: m_rdms) {
-        if (rdm->m_stoch_round_contribs)
+        if (rdm->m_stoch_round_contribs) {
             logging::info("Stochastically rounding contributions to RDM {} around {:.2g} in standard normalization",
-                          rdm->name(), m_opts.m_stoch_round_mag.m_value);
+                rdm->name(), m_opts.m_stoch_round_mag.m_value);
+            REQUIRE_TRUE_ALL(m_stoch_thresh_prng.get(),
+                "Stochastic thresholding of RDM contribs requires non-zero specified positive magnitude");
+        }
     }
 
 }
@@ -87,16 +101,19 @@ bool Rdms::takes_contribs_from(OpSig exsig) const {
     return (exsig != opsig::c_invalid) && !m_exsig_to_rdms[exsig].empty();
 }
 
-
 void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_ops::Mbf& com, const wf_t& contrib) {
     auto exsig = conn.exsig();
     if (exsig == opsig::c_invalid) return;
     if (!exsig) m_total_norm.m_local+=contrib;
     for (auto& rdm: m_exsig_to_rdms[exsig]) {
+        auto rdm_contrib = contrib;
         if (rdm->m_stoch_round_contribs){
-//            m_total_norm
+            const auto norm = this->contrib_norm(0);
+            const auto rdm_contrib = m_stoch_thresh_prng->stochastic_threshold(contrib / norm, m_opts.m_stoch_round_mag);
+            // skip this contribution if it was stochastically rounded to zero
+            if (rdm_contrib == 0.0) continue;
         }
-        rdm->make_contribs(src_onv, conn, com, contrib);
+        rdm->make_contribs(src_onv, conn, com, rdm_contrib);
     }
 }
 
@@ -259,3 +276,4 @@ void Rdms::save() {
     REQUIRE_TRUE(m_opts.m_save.m_enabled, "save() called on Rdms object but saving was not enabled");
     save(hdf5::FileWriter(m_opts.m_save.m_path));
 }
+
