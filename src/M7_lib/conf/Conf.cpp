@@ -208,6 +208,10 @@ void conf::SpfWeightedTwf::validate_node_contents() {
 conf::Bilinears::Bilinears(Group *parent, str_t name, str_t description) :
         Section(parent, name, description, Explicit),
         m_ranks(this, "ranks", {}, "Ranks to accumulate"),
+        m_stoch_round_ranks(this, "stoch_round_ranks", {},
+            "Ranks for which CiCj contributions should be stochastically rounded"),
+        m_stoch_round_mag(this, "stoch_round_mag", 0.0,
+            "Magnitude about which to stochastically round CiCj contributions for selected ranks"),
         m_buffers(this), m_hash_mapping(this), m_distribution(this),
         m_save(this, "save", "bilinear estimators save", "M7.rdm.h5", Explicit),
         m_load(this, "load", "bilinear estimators load", "M7.rdm.h5", Explicit){}
@@ -225,10 +229,12 @@ conf::Rdms::Rdms(Group *parent, str_t name, str_t description) :
 
 conf::Fock4rdm::Fock4rdm(Group* parent) :
         Section(parent, "fock_4rdm",
-                "options related to the contraction of the 4RDM with the generalized Fock matrix",
+                    "options related to the contraction of the 4RDM with the generalized Fock matrix",
                 conf_components::Explicit),
         m_fock_path(this, "fock_path", "fock.h5", "path to the file containing the fock matrix"),
-        m_screen_thresh(this, "screen_thresh", 0.0, "threshold for matrix element screening"){}
+        m_screen_thresh(this, "screen_thresh", 0.0, "threshold for matrix element screening"),
+        m_stoch_round(this, "stoch_round", false, "if true, stochastically round small contributions to Fock*4RDM"){}
+
 conf::SpecMoms::SpecMoms(Group *parent, str_t name, str_t description) :
         Bilinears(parent, name, description),
         m_stochastic(this, "stochastic", true,

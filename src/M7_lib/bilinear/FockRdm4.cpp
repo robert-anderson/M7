@@ -6,7 +6,8 @@
 
 
 FockRdm4::FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector, uint_t nvalue, bool nonzero_diagonal) :
-        ContractedRdm(opts, opsig::c_4400, opsig::c_3300, max_contrib_exsig, sector, nvalue, "4400f"),
+        ContractedRdm(opts, opsig::c_4400, opsig::c_3300, max_contrib_exsig, sector,
+                      nvalue, opts.m_fock_4rdm.m_stoch_round.m_value, "4400f"),
         m_nonzero_diagonal(nonzero_diagonal){}
 
 

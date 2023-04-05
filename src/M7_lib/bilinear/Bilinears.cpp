@@ -30,3 +30,8 @@ v_t<OpSig> bilinears::parse_exsigs(const strv_t& strings) {
                     "output should have the same number of exsigs as specification");
     return out;
 }
+
+bool bilinears::in_parsed_exsigs(const OpSig& opsig, const strv_t& strings) {
+    auto tmp = parse_exsigs(strings);
+    return std::find(tmp.cbegin(), tmp.cend(), opsig) != tmp.cend();
+}

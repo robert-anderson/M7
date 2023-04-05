@@ -45,6 +45,8 @@ namespace bilinears {
      */
     v_t<OpSig> parse_exsigs(const strv_t &strings);
 
+    bool in_parsed_exsigs(const OpSig& opsig, const strv_t &strings);
+
 }
 
 #endif //M7_BILINEARS_H

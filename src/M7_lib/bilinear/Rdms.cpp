@@ -42,7 +42,8 @@ Rdms::Rdms(const conf::Rdms& opts, sys::Sector sector, const Epoch& accum_epoch)
         REQUIRE_TRUE(ranksig.conserves_nfrm(), "fermion non-conserving RDMs are not yet supported");
         REQUIRE_LE(ranksig.nbos(), 1ul, "RDMs with more than one boson operator are not yet supported");
         m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, PureRdm>(opts, ranksig, sector, 1ul));
-        m_pure_rdms[ranksig] = m_rdms.front().get();
+        auto rdm_ptr = m_rdms.front().get();
+        m_pure_rdms[ranksig] = rdm_ptr;
     }
     if (opts.m_fock_4rdm.m_enabled) {
         logging::info("Loading generalized Fock matrix for accumulation of its contraction with the 4RDM");
@@ -58,7 +59,6 @@ Rdms::Rdms(const conf::Rdms& opts, sys::Sector sector, const Epoch& accum_epoch)
         if (!diag) m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, NonDiagFockRdm4>(opts, fock, sector, 1ul));
         else m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, DiagFockRdm4>(opts, fock, sector, 1ul));
     }
-
     m_exsig_to_rdms = make_exsig_to_rdms();
 
     m_total_norm.m_local = 0.0;
@@ -71,6 +71,12 @@ Rdms::Rdms(const conf::Rdms& opts, sys::Sector sector, const Epoch& accum_epoch)
     if (!exsigs.empty())
         logging::info("Excitation signatures contributing to the sampled RDMs: {}", convert::to_string(exsigs));
 
+    for (auto& rdm: m_rdms) {
+        if (rdm->m_stoch_round_contribs)
+            logging::info("Stochastically rounding contributions to RDM {} around {:.2g} in standard normalization",
+                          rdm->name(), m_opts.m_stoch_round_mag.m_value);
+    }
+
 }
 
 Rdms::operator bool() const {
@@ -81,11 +87,17 @@ bool Rdms::takes_contribs_from(OpSig exsig) const {
     return (exsig != opsig::c_invalid) && !m_exsig_to_rdms[exsig].empty();
 }
 
+
 void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_ops::Mbf& com, const wf_t& contrib) {
     auto exsig = conn.exsig();
     if (exsig == opsig::c_invalid) return;
     if (!exsig) m_total_norm.m_local+=contrib;
-    for (auto& rdm: m_exsig_to_rdms[exsig]) rdm->make_contribs(src_onv, conn, com, contrib);
+    for (auto& rdm: m_exsig_to_rdms[exsig]) {
+        if (rdm->m_stoch_round_contribs){
+//            m_total_norm
+        }
+        rdm->make_contribs(src_onv, conn, com, contrib);
+    }
 }
 
 void Rdms::make_contribs(const Mbf& src_onv, const Mbf& dst_onv, const wf_t& contrib) {
