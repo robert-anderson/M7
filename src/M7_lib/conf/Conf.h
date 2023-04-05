@@ -181,8 +181,10 @@ namespace conf {
 
     struct Bilinears : Section {
         Param<strv_t> m_ranks;
-        Param<strv_t> m_stoch_thresh_ranks;
         Param<double> m_stoch_thresh_mag;
+        Param<strv_t> m_stoch_thresh_ranks;
+        Param<double> m_neglect_contribs_mag;
+        Param<strv_t> m_neglect_tiny_contribs_ranks;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Distribution m_distribution;
@@ -199,6 +201,7 @@ namespace conf {
         Param<str_t> m_fock_path;
         Param<double> m_screen_thresh;
         Param<bool> m_stoch_thresh;
+        Param<bool> m_neglect_tiny_contribs;
         explicit Fock4rdm(Group* parent);
     };
 

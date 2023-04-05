@@ -132,7 +132,7 @@ void SpinFreeRdm::make_contribs_from_one_row(const RdmRow& row, wf_t norm) {
 
 SpinFreeRdm::SpinFreeRdm(const Rdm& src, wf_t norm, uint_t nelem_per_comm) :
         Rdm(src.m_ranksig, src.m_indsig, src.m_sector, src.m_store.m_row.m_values.nelement(),
-            false, src.m_store.m_dist_opts,
+            false, false, src.m_store.m_dist_opts,
             {src.m_store.nrow_in_use(), src.m_store.m_bw.get_expansion_factor()},
             {nelem_per_comm, 1.0}, src.name()), m_insert_inds(src.m_indsig) {
     REQUIRE_EQ_ALL(m_nfrm_cre, m_nfrm_ann, "spin tracing requires fermion number conservation");

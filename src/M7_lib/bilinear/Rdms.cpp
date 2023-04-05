@@ -85,9 +85,13 @@ Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epo
     for (auto& rdm: m_rdms) {
         if (rdm->m_stoch_thresh_contribs) {
             logging::info("Stochastically rounding contributions to RDM {} around {:.2g} in standard normalization",
-                rdm->name(), m_opts.m_stoch_thresh_mag.m_value);
+                          rdm->name(), m_opts.m_stoch_thresh_mag.m_value);
             REQUIRE_TRUE_ALL(m_stoch_thresh_prng.get(),
-                "Stochastic thresholding of RDM contribs requires non-zero specified positive magnitude");
+                             "Stochastic thresholding of RDM contribs requires non-zero specified positive magnitude");
+        }
+        if (rdm->m_neglect_tiny_contribs) {
+            logging::info("Neglecting all |CiCj| contributions to RDM {} below {:.2g} in standard normalization",
+                          rdm->name(), m_opts.m_stoch_thresh_mag.m_value);
         }
     }
 
@@ -107,6 +111,11 @@ void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_op
     if (!exsig) m_total_norm.m_local+=contrib;
     for (auto& rdm: m_exsig_to_rdms[exsig]) {
         auto rdm_contrib = contrib;
+        if (rdm->m_neglect_tiny_contribs){
+            const auto norm = this->contrib_norm(0);
+            // skip this contribution if it is tiny
+            if (std::abs(contrib / norm) < m_opts.m_neglect_contribs_mag) continue;
+        }
         if (rdm->m_stoch_thresh_contribs){
             const auto norm = this->contrib_norm(0);
             const auto rdm_contrib = m_stoch_thresh_prng->stochastic_threshold(contrib / norm, m_opts.m_stoch_thresh_mag);

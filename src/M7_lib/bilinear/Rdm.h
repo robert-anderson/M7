@@ -34,6 +34,10 @@ public:
      * if true, stochastically round CiCj about a specified magnitude before contributing
      */
     const bool m_stoch_thresh_contribs;
+    /**
+     * if true, discard and CiCj contribution where |CiCj| is below a specified magnitude
+     */
+    const bool m_neglect_tiny_contribs;
 
 protected:
     bool m_ordered_inds = true;
@@ -81,7 +85,8 @@ public:
         return name(m_name, m_ranksig);
     }
 
-    Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue, bool stoch_thresh_contribs,
+    Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue,
+        bool stoch_thresh_contribs, bool neglect_tiny_contribs,
         DistribOptions dist_opts, Sizing store_sizing, Sizing comm_sizing, str_t name="");
 
     /**
@@ -95,13 +100,15 @@ public:
      *  number of values to encode in each RDM element
      * @param stoch_thresh_contribs
      *  if true, stochastically round small contributions to this RDM
+     * @param neglect_tiny_contribs
+     *  if true, neglect small contributions to this RDM
      * @param name
      *  string identifier for logging and archive output. if empty, this is generated from the ranksig
      * @param indsig
      *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
      */
     Rdm(const conf::Rdms& opts, OpSig ranksig, OpSig indsig, sys::Sector sector,
-        uint_t nvalue, bool stoch_thresh_contribs, str_t name="");
+        uint_t nvalue, bool stoch_thresh_contribs, bool neglect_tiny_contribs, str_t name="");
 
     void end_cycle();
 
@@ -183,14 +190,16 @@ public:
      *  number of values to encode in each RDM element
      * @param stoch_thresh_contribs
      *  if true, stochastically round small contributions to this RDM
+     * @param neglect_tiny_contribs
+     *  if true, neglect small contributions to this RDM
      * @param name
      *  string identifier for logging and archive output. if empty, this is generated from the ranksig
      * @param indsig
      *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
      */
     ContractedRdm(const conf::Rdms& opts, OpSig ranksig, OpSig indsig, OpSig max_contrib_exsig,
-                  sys::Sector sector, uint_t nvalue, bool stoch_thresh_contribs, str_t name=""):
-            Rdm(opts, ranksig, indsig, sector, nvalue, stoch_thresh_contribs, name),
+                  sys::Sector sector, uint_t nvalue, bool stoch_thresh_contribs, bool neglect_tiny_contribs, str_t name=""):
+            Rdm(opts, ranksig, indsig, sector, nvalue, stoch_thresh_contribs, neglect_tiny_contribs, name),
             m_max_contrib_exsig(max_contrib_exsig){
         REQUIRE_TRUE(m_max_contrib_exsig.contribs_to(m_ranksig), "max contributing exsig is incompatible with ranksig");
     }

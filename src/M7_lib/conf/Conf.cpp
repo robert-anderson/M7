@@ -208,10 +208,14 @@ void conf::SpfWeightedTwf::validate_node_contents() {
 conf::Bilinears::Bilinears(Group *parent, str_t name, str_t description) :
         Section(parent, name, description, Explicit),
         m_ranks(this, "ranks", {}, "Ranks to accumulate"),
-        m_stoch_thresh_ranks(this, "stoch_thresh_ranks", {},
-            "Ranks for which CiCj contributions should be stochastically rounded"),
         m_stoch_thresh_mag(this, "stoch_thresh_mag", 0.0,
             "Magnitude about which to stochastically round CiCj contributions for selected ranks"),
+        m_stoch_thresh_ranks(this, "stoch_thresh_ranks", {},
+            "Ranks for which small CiCj (|CiCJ| < stoch_thresh_mag) contributions should be stochastically rounded"),
+        m_neglect_contribs_mag(this, "neglect_contribs_mag", 0.0,
+            "Magnitude below which to discard contributions for selected ranks"),
+        m_neglect_tiny_contribs_ranks(this, "neglect_tiny_contribs_ranks", {},
+            "Ranks for which tiny CiCj (|CiCJ| < neglect_contribs_mag) contributions should be discarded"),
         m_buffers(this), m_hash_mapping(this), m_distribution(this),
         m_save(this, "save", "bilinear estimators save", "M7.rdm.h5", Explicit),
         m_load(this, "load", "bilinear estimators load", "M7.rdm.h5", Explicit){}
@@ -233,7 +237,8 @@ conf::Fock4rdm::Fock4rdm(Group* parent) :
                 conf_components::Explicit),
         m_fock_path(this, "fock_path", "fock.h5", "path to the file containing the fock matrix"),
         m_screen_thresh(this, "screen_thresh", 0.0, "threshold for matrix element screening"),
-        m_stoch_thresh(this, "stoch_thresh", false, "if true, stochastically round small contributions to Fock*4RDM"){}
+        m_stoch_thresh(this, "stoch_thresh", false, "if true, stochastically round small contributions to Fock*4RDM"),
+        m_neglect_tiny_contribs(this, "neglect_tiny_contribs", false, "if true, discard tiny contributions to Fock*4RDM"){}
 
 conf::SpecMoms::SpecMoms(Group *parent, str_t name, str_t description) :
         Bilinears(parent, name, description),
