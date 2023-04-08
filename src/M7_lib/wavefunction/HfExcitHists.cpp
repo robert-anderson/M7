@@ -166,24 +166,25 @@ void hf_excit_hist::Initializer::setup() {
     m_work_mbf = m_hf;
     setup(m_work_mbf);
     m_ncreated.all_sum();
+    auto ntotal = m_ncreated.m_reduced.sum();
     auto& row = m_wf.m_store.m_row;
     strv_t header = {"excitation level", "number in use"};
     v_t<strv_t> logging_table;
     const auto ipower_max = m_threshs.size()-1;
     if (m_cancellation) {
+        auto ncancelled = m_ncreated;
         header.emplace_back("number revoked by cancellation");
         /*
          * the present state of the wavefunction m_weight stores the cumulative value of the CI products
          * loop over the WF store table and delete any permanitiators which have fallen beneath thresh due to cancellation
          */
-        auto after_cancellation = m_ncreated.m_reduced;
         for (row.restart(); row; ++row) {
             if (row.m_pmntr.get(0)) {
                 const auto iexlvl = OpCounts(m_hf, row.m_mbf).m_nfrm_cre;
                 const auto ipower = iexlvl / 2;
                 const auto& thresh = m_threshs[ipower];
                 if (std::abs(row.m_weight[0]) < thresh) {
-                    --after_cancellation[iexlvl];
+                    ++ncancelled.m_local[iexlvl];
                     row.unprotect();
                     m_wf.m_store.erase(row.m_mbf);
                 }
@@ -193,12 +194,15 @@ void hf_excit_hist::Initializer::setup() {
             }
         }
 
+        ncancelled.all_sum();
+        ntotal -= ncancelled.m_reduced.sum();
+
         logging_table.push_back(header);
         for (uint_t i = 1ul; i<=ipower_max*2; ++i) {
             logging_table.push_back({
                 convert::to_string(i),
-                convert::to_string(after_cancellation[i]),
-                convert::to_string(m_ncreated.m_reduced[i] - after_cancellation[i])
+                convert::to_string(m_ncreated.m_reduced[i] - ncancelled.m_reduced[i]),
+                convert::to_string(ncancelled.m_reduced[i])
             });
         }
     }
@@ -208,6 +212,7 @@ void hf_excit_hist::Initializer::setup() {
             logging_table.push_back({convert::to_string(i), convert::to_string(m_ncreated.m_reduced[i])});
     }
     logging::info_table("Permanitiator breakdown", logging_table, true);
+    logging::info("Total number of permanitiators in use: {}", ntotal);
 }
 
 bool hf_excit_hist::Initializer::loop_body(Mbf& mbf, uint_t ielement, uint_t ipower, wf_t prev_product) {
