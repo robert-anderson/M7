@@ -5,7 +5,11 @@
 #ifndef M7_UTIL_BIT_H
 #define M7_UTIL_BIT_H
 
+#ifdef ENABLE_X86
 #include <x86intrin.h>
+#elif ENABLE_ARM
+#include <arm_neon.h>
+#endif
 #include "M7_lib/defs.h"
 #include "Tag.h"
 
