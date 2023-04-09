@@ -266,7 +266,10 @@ namespace dense {
                 Matrix(0, 0, node_shared){
             hdf5::DatasetLoader dl(nr, name, false, this_rank);
             const auto& shape = dl.m_format.m_h5_shape;
-            resize(shape[0], shape[1]);
+            const auto nrow = (shape.size() > 0) ? shape[0] : 1ul;
+            const auto ncol = (shape.size() > 1) ? shape[1] : 1ul;
+            REQUIRE_LE_ALL(shape.size(), 2ul, "matrix cannot be loaded from array of more than 2 dimensions");
+            resize(nrow, ncol);
             std::list<hdf5::Attr> attrs;
             dl.load_dist_list(nr, name, begin(), m_size, hdf5::Type::make<T>(), dtype::is_complex<T>(),
                 false, this_rank, attrs);
