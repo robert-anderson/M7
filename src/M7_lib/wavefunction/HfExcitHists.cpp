@@ -173,6 +173,7 @@ void hf_excit_hist::Initializer::setup() {
     const auto ipower_max = m_threshs.size()-1;
     if (m_cancellation) {
         auto ncancelled = m_ncreated;
+        ncancelled.m_local = 0;
         header.emplace_back("number revoked by cancellation");
         /*
          * the present state of the wavefunction m_weight stores the cumulative value of the CI products
