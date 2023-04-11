@@ -27,5 +27,6 @@ TEST(Pchb1101hc, Test){
 
     foreach_t conn_iter;
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
-    ASSERT_EQ(tester.run(src_mbf, 5000000), "");
+    const auto correct = mpi::all_land(tester.run(src_mbf, 5000000) == "");
+    ASSERT_TRUE(correct);
 }

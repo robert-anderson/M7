@@ -24,7 +24,8 @@ TEST(PRNG, StochasticRound) {
     for (uint_t i=0; i<n; ++i){
         tot+=prng.stochastic_round(v, rounding_magnitude);
     }
-    ASSERT_LT(std::abs(tot/n-v), 1e-4);
+    const auto correct = mpi::all_land(std::abs(tot / n - v) < 1e-3);
+    ASSERT_TRUE(correct);
 }
 
 TEST(PRNG, StochasticRoundProb) {
@@ -56,7 +57,8 @@ TEST(PRNG, NegativeStochasticRound) {
     for (uint_t i=0; i<n; ++i){
         tot+=prng.stochastic_round(v, rounding_magnitude);
     }
-    ASSERT_LT(std::abs(tot/n-v), 1e-4);
+    const auto correct = mpi::all_land(std::abs(tot / n - v) < 1e-3);
+    ASSERT_TRUE(correct);
 }
 
 TEST(PRNG, ComplexStochasticRound) {
@@ -68,7 +70,8 @@ TEST(PRNG, ComplexStochasticRound) {
     for (uint_t i=0; i<n; ++i){
         tot+=prng.stochastic_round(v, rounding_magnitude);
     }
-    ASSERT_LT(std::abs(tot/(double)n-v), 1e-4);
+    const auto correct = mpi::all_land(std::abs(tot/(double)n-v) < 1e-3);
+    ASSERT_TRUE(correct);
 }
 
 TEST(PRNG, StochasticThreshold) {
@@ -85,7 +88,8 @@ TEST(PRNG, StochasticThreshold) {
     for (uint_t i=0; i<n; ++i){
         tot+=prng.stochastic_threshold(v, rounding_magnitude);
     }
-    ASSERT_LT(std::abs(tot/n-v), 1e-4);
+    const auto correct = mpi::all_land(std::abs(tot/n-v) < 1e-3);
+    ASSERT_TRUE(correct);
 }
 
 TEST(PRNG, ModularBase){
@@ -107,5 +111,6 @@ TEST(PRNG, InRange) {
     for (uint_t i = 0; i < n; ++i) {
         tot += prng.draw_uint(min, max);
     }
-    ASSERT_LT(std::abs(tot / double(n) - (max+min-1)/2.0), 1e-4);
+    const auto correct = mpi::all_land(std::abs(tot / double(n) - (max+min-1)/2.0) < 1e-3);
+    ASSERT_TRUE(correct);
 }

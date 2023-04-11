@@ -16,7 +16,8 @@ TEST(Pchb2200, FromHFDeterminant) {
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
     buffered::FrmOnv src_mbf(frm_ham.m_basis);
     mbf::set_aufbau_mbf(src_mbf, h.default_particles().m_frm);
-    ASSERT_EQ(tester.run(src_mbf, 10000000), "");
+    const auto correct = mpi::all_land(tester.run(src_mbf, 10000000) == "");
+    ASSERT_TRUE(correct);
 }
 
 TEST(Pchb2200, FromExcited){
@@ -28,5 +29,6 @@ TEST(Pchb2200, FromExcited){
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
     buffered::FrmOnv src_mbf(frm_ham.m_basis);
     src_mbf = {{0, 1, 3}, {1, 2, 4}};
-    ASSERT_EQ(tester.run(src_mbf, 50000000), "");
+    const auto correct = mpi::all_land(tester.run(src_mbf, 50000000) == "");
+    ASSERT_TRUE(correct);
 }

@@ -44,6 +44,7 @@ int main(int argc, char **argv) {
         //std::cerr.rdbuf(original_stderr_buffer);
     }
 
+    mpi::barrier();
     mpi::finalize();
     return result;
 }

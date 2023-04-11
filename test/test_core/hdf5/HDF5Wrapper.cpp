@@ -80,7 +80,7 @@ TEST(HDF5Wrapper, FloatArray) {
         ASSERT_TRUE(fr.child_exists("a_float_array"));
         auto v_read = hdf5::DatasetLoader::load_vector<float>(fr, "a_float_array");
         auto v_def = v;
-        v_def[2] = hash::in_range(0, 4, 18);
+        v_def[2] = hash::in_range(irank, 4, 18);
         ASSERT_EQ(v_read, v_def);
     }
 }
@@ -100,7 +100,7 @@ TEST(HDF5Wrapper, ComplexArray) {
         hdf5::FileReader fr("table_test.h5");
         auto v_read = hdf5::DatasetLoader::load_vector<std::complex<float>>(fr, "a_complex_array");
         auto v_def = v;
-        v_def[2].imag(hash::in_range(0, 4, 18));
+        v_def[2].imag(hash::in_range(irank, 4, 18));
         ASSERT_EQ(v_read, v_def);
     }
 }

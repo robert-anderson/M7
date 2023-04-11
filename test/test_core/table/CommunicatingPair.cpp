@@ -46,11 +46,11 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
 
 TEST(CommunicatingPair, CommunicateVectors){
     typedef SingleFieldRow<field::Numbers<uint_t, 1>> row_t;
-    const double expansion_factor = 0.5;
+    const double expansion_factor = 0;
     const uint_t nelement_vector = 13;
     send_recv::BasicSend<row_t> send_recv("Test pair", {nelement_vector}, {mpi::nrank(), expansion_factor});
     // after resize:
-    const uint_t bw_size = send_recv.row_size();// * (1.0+expansion_factor);
+    const uint_t bw_size = send_recv.row_size();
     ASSERT_EQ(bw_size, nelement_vector*sizeof(uint_t));
     const uint_t hash_lo = 123, hash_hi = 789;
 

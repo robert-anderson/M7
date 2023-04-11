@@ -18,5 +18,6 @@ TEST(HeisenbergExchange, Pbc2D) {
     buffered::FrmOnv src_mbf(h.m_basis);
     mbf::set_neel_mbf(src_mbf, h.default_particles().m_frm);
     tester.fill_results_table(src_mbf);
-    ASSERT_EQ(tester.run(src_mbf, 1000000), "");
+    const auto correct = mpi::all_land(tester.run(src_mbf, 1000000) == "");
+    ASSERT_TRUE(correct);
 }

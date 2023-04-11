@@ -20,7 +20,8 @@ TEST(HolsteinUniform, Creation) {
     src_mbf.m_bos = {0, 2, 3, 1, 0, 4, 1, 2};
     conn_foreach::bos::Cre conn_iter;
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
-    ASSERT_EQ(tester.run(src_mbf, 5000000), "");
+    const auto correct = mpi::all_land(tester.run(src_mbf, 5000000) == "");
+    ASSERT_TRUE(correct);
 }
 
 TEST(HolsteinUniform, Annihilation) {
@@ -36,5 +37,6 @@ TEST(HolsteinUniform, Annihilation) {
     src_mbf.m_bos = {0, 2, 3, 1, 0, 4, 1, 2};
     conn_foreach::bos::Ann conn_iter;
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
-    ASSERT_EQ(tester.run(src_mbf, 5000000), "");
+    const auto correct = mpi::all_land(tester.run(src_mbf, 10000000) == "");
+    ASSERT_TRUE(correct);
 }

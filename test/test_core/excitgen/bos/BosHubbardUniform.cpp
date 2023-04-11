@@ -16,5 +16,6 @@ TEST(BosHubbardUniform, Pbc1D) {
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
     buffered::BosOnv src_mbf(h.m_basis);
     src_mbf = {1, 0, 2, 1, 3, 1};
-    ASSERT_EQ(tester.run(src_mbf, 3000000), "");
+    const auto correct = mpi::all_land(tester.run(src_mbf, 3000000) == "");
+    ASSERT_TRUE(correct);
 }

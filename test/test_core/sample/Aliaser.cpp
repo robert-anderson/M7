@@ -24,7 +24,8 @@ TEST(Aliaser, DistributionCheck) {
             ASSERT_FALSE(results[i]);
         }
         else {
-            ASSERT_LT(std::abs(1.0 - (float(results[i]) / float(n_attempts)) / (probs[i] / norm)), 0.01);
+            const auto correct = mpi::all_land(std::abs(1.0 - (float(results[i]) / float(n_attempts)) / (probs[i] / norm)) < 0.01);
+            ASSERT_TRUE(correct);
         }
     }
 }
