@@ -86,10 +86,13 @@ void FcidumpTextFileReader::convert_inds(uintv_t &inds) {
 
 bool FcidumpTextFileReader::next(uintv_t &inds, ham_t &v) {
     if (!HamTextFileReader::next(inds, v)) return false;
-    // check for line of the form "0.0  0 0 0 0"
-    if ((v==0.0) && std::all_of(inds.cbegin(), inds.cend(), [](uint_t i){return i==~0ul;})){
-        ++m_nnull_lines;
-        return next(inds, v);
+    // check for line of the form "0.0  0 0 0 0" in a Molpro blocks-style spin-resolved FCIDUMP
+    if (m_info.m_ur_style==FcidumpInfo::SpinBlocks) {
+        if ((v == 0.0) && std::all_of(inds.cbegin(), inds.cend(), [](uint_t i) { return i == ~0ul; })) {
+            // this line is a delimiter between spin blocks, to skip over it
+            ++m_nnull_lines;
+            return next(inds, v);
+        }
     }
     convert_inds(inds);
     return true;

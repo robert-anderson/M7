@@ -7,6 +7,10 @@
 
 #include "M7_lib/hamiltonian/frm/FrmHam.h"
 
+/**
+ * in atomic units:
+ *  S^2 = S+S- + Sz * (Sz - 1)
+ */
 struct SpinSquareFrmHam : FrmHam, ElecSpecTerm {
 
     // This is Sz * (Sz - 1) which stays constant

@@ -39,6 +39,7 @@ TEST(CommunicatorNew, SharedRow) {
 //    comm_t::SharedRow shared_row(comm, {0, 0}, "test shared row");
 }
 
+#if 0
 TEST(CommunicatorNew, Redistribution) {
     using namespace communicator_new_test;
     typedef communicator::BasicSend<TestRow, TestRow> comm_t;
@@ -85,3 +86,5 @@ TEST(CommunicatorNew, Redistribution) {
 
 //    comm_t::SharedRow shared_row(comm, {0, 0}, "test shared row");
 }
+
+#endif

@@ -5,6 +5,7 @@
 #include "File.h"
 
 bool hdf5::FileBase::is_hdf5(const str_t& fname) {
+    if (fname.empty()) return false;
     return H5Fis_hdf5(fname.c_str()) > 0;
 }
 

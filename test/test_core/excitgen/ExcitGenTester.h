@@ -113,7 +113,7 @@ namespace excit_gen_tester {
                 if (fptol::near_zero(prob)) return GenWithZeroProb;
                 const auto chk_prob = m_excit_gen.prob(src_mbf, conn);
                 if (chk_prob < 0.0 || chk_prob > 1.0) return InvalidProb;
-                if (!fptol::near_zero(prob, chk_prob)) {
+                if (!fptol::near_equal(prob, chk_prob)) {
                     return ProbMismatch;
                 }
                 const auto chk_prob_given_helem = m_excit_gen.prob(src_mbf, conn, helem);

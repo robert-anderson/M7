@@ -11,8 +11,8 @@ TEST(InteractingBosGasBosHam, DiagonalMatrixElements) {
     InteractingBoseGasBosHam bos_ham(1, nwave, 1.0);
     Hamiltonian ham_src(&bos_ham);
     buffered::BosOnv mbf(ham_src.m_basis);
-    mbf = {0, 0, 0, 0, 0, 0, 3};
+    mbf = {0, 0, 0, 0, 0, 3, 0};
     ham_t helem;
     helem = ham_src.get_element(mbf);
-    ASSERT_NEAR_EQ(helem, 5.07);
+    ASSERT_NEAR_EQ(helem, 12);
 }

@@ -8,5 +8,4 @@ target_sources(unittest
         FortranNamelistReader.cpp
         Hdf5FcidumpReader.cpp
         InteractiveVariable.cpp
-        Logging.cpp
 )

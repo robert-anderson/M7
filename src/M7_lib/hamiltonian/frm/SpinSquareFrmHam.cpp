@@ -12,6 +12,7 @@ SpinSquareFrmHam::SpinSquareFrmHam(const sys::frm::Sector& sector):
 }
 
 ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv& onv) const {
+    // only the orbitals with single occupation of a beta electron count towards the S+S- term
     return m_sz_term + onv.nopen_shell_beta();
 }
 

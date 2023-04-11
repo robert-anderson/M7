@@ -14,8 +14,9 @@ TEST(LoadBalancer, Redistributor) {
 
     Redistributor rr(block_iranks, work_figs, nrank);
     const v_t<Redistributor::Move> chk_moves = {
-            {44, 6}, {76, 6}, {98, 9}, {44, 3}, {98, 4}, {76, 6},
-            {44, 9}, {18, 3}, {1, 1}, {53, 4}, {42, 5}, {36, 6}, {21, 9}
+            {12, 4}, {52, 4}, {13, 4}, {19, 4}, {53, 4}, {66, 1}, {103, 3},
+            {9, 4}, {33, 1}, {39, 5}, {57, 3}, {11, 4}, {21, 6}, {116, 4}
     };
+
     ASSERT_EQ(rr.m_moves, chk_moves);
 }

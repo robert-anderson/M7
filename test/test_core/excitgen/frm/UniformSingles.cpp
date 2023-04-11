@@ -16,5 +16,5 @@ TEST(UniformSingles, FromExcited){
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(h.m_basis);
     src_mbf = {{0, 1, 2, 3, 4}, {0, 1, 2, 3, 5}};
-    ASSERT_EQ(tester.run(src_mbf, 1000000), "");
+    ASSERT_EQ(tester.run(src_mbf, 5000000), "");
 }

@@ -74,7 +74,7 @@ Redistributor::Redistributor(const uintv_t &block_iranks, const v_t<double> &blo
         m_total_work_figs[m_block_iranks[iblock]] += m_block_work_figs[iblock];
         DEBUG_ASSERT_GE(m_block_work_figs[iblock], 0.0, "block work figure should be non-negative");
     }
-    if (mpi::nrank()==1ul) return;
+    if (nrank == 1ul) return;
     uint_t iblock, irank_dst;
     while (update(iblock, irank_dst)) m_moves.push_back({iblock, irank_dst});
 }

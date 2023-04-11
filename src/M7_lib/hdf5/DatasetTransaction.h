@@ -172,7 +172,7 @@ namespace hdf5 {
             auto nitem = mpi::i_am(irank) ? shape.front() : 0ul;
             uintv_t item_shape(shape.cbegin()+1, shape.cend());
             auto leading_dim_name = dim_names.empty() ? "" : dim_names.front();
-            strv_t item_dim_names(dim_names.cbegin()+1, dim_names.cend());
+            auto item_dim_names = dim_names.empty() ? strv_t() : strv_t(dim_names.cbegin()+1, dim_names.cend());
             save_dist_list(nw, name, src, Type::make<T>(), dtype::is_complex<T>(), item_shape, item_dim_names, nitem,
                            attrs, max_nitem_per_op);
         }

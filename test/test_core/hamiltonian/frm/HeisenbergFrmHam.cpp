@@ -42,12 +42,12 @@ TEST(HeisenbergFrmHam, LocalExchangeOnly){
     set_onv_from_spinvec(src, {1, 0, 0, 1, 1, 0});
     set_onv_from_spinvec(dst, {1, 0, 0, 1, 0, 1});
     conn.connect(src, dst);
-    ASSERT_EQ(ham.get_element_2200(src, conn), 0.0);
+    ASSERT_EQ(ham.get_element_2200(src, conn), 0.5);
 
     set_onv_from_spinvec(dst, {0, 0, 0, 1, 1, 1});
     conn.connect(src, dst);
     // with PBCs, boundary sites on the lattice with opposite spins are allowed to exchange
-    ASSERT_NE(ham.get_element_2200(src, conn), 0.0);
+    ASSERT_EQ(ham.get_element_2200(src, conn), 0.5);
 
     set_onv_from_spinvec(dst, {1, 1, 0, 1, 0, 0});
     conn.connect(src, dst);

@@ -6,7 +6,7 @@
 #include "M7_lib/wavefunction/WalkerTable.h"
 
 TEST(WalkerTable, Fields){
-    sys::Basis basis(5, 7);
+    sys::Basis basis(5*c_enable_fermions, 7*c_enable_bosons);
     WalkerTable table(Walker(basis, 1, 1, false));
     auto& row = table.m_row;
 

@@ -15,7 +15,8 @@ TEST(SpinSquareFrmHam, Elements) {
         buffered::FrmOnv onv(ham.m_basis);
         onv = {{0, 1, 2, 3}, {0, 1, 2, 4}};
 
-        ASSERT_EQ(ham.get_element_0000(onv), 3.0);
+        // only one beta openshell, and Sz = 0
+        ASSERT_EQ(ham.get_element_0000(onv), 1.0);
 
         conn::FrmOnv conn(onv);
         conn.m_ann.set({0, 3});
@@ -51,7 +52,7 @@ TEST(SpinSquareFrmHam, Elements) {
         buffered::FrmOnv det(ham.m_basis);
         det = {{0, 1, 2, 4}, {0, 1, 2, 3}};
 
-        ASSERT_EQ(ham.get_element_0000(det), 3.0);
+        ASSERT_EQ(ham.get_element_0000(det), 1.0);
 
         conn::FrmOnv conn(det);
         conn.m_ann.set({0, 4});

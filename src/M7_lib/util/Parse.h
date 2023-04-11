@@ -179,8 +179,12 @@ namespace parse {
     template<typename T>
     void checked(c_iter_token_t begin, c_iter_token_t end, T& v) {
         const auto success = catching(begin, end, v);
-        REQUIRE_TRUE(success, logging::format(
-                "strings \"{}\", \"{}\" could not be parsed", *begin, *end));
+        auto make_strings_fn = [&begin, &end]() -> str_t {
+            strv_t tmp;
+            for (auto it=begin; it!=end; ++it) tmp.push_back(*it);
+            return convert::to_string(tmp);
+        };
+        REQUIRE_TRUE(success, logging::format("strings {} could not be parsed", make_strings_fn()));
     }
 
     template<typename T>

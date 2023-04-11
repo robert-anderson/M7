@@ -87,7 +87,8 @@ TEST(BasicForeach, CtndUnrestrictedExit) {
         };
 
         ctnd::Unrestricted<nind> foreach(shape);
-        foreach.loop(fn);
+        try { ASSERT_ANY_THROW(foreach.loop(fn)); }
+        catch (const ExitLoop &) {}
         // should have terminated on item i
         ASSERT_EQ(iiter, i);
     }
@@ -157,7 +158,9 @@ TEST(BasicForeach, CtndOrderedExit) {
         };
 
         ctnd::Ordered<nind, true, true> foreach(n);
-        foreach.loop(fn);
+        try {ASSERT_ANY_THROW(foreach.loop(fn));}
+        catch (const ExitLoop &) {}
+
         // should have terminated on item i
         ASSERT_EQ(iiter, i);
     }
@@ -352,7 +355,8 @@ TEST(BasicForeach, RtndUnrestrictedExit) {
         };
 
         rtnd::Unrestricted foreach(shape);
-        foreach.loop(fn);
+        try { ASSERT_ANY_THROW(foreach.loop(fn)); }
+        catch (const ExitLoop&){}
         // should have terminated on item i
         ASSERT_EQ(iiter, i);
     }
@@ -423,7 +427,8 @@ TEST(BasicForeach, RtndOrderedExit) {
         };
 
         rtnd::Ordered<true, true> foreach(n, nind);
-        foreach.loop(fn);
+        try { ASSERT_ANY_THROW(foreach.loop(fn)); }
+        catch (const ExitLoop&){}
         // should have terminated on item i
         ASSERT_EQ(iiter, i);
     }
