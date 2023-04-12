@@ -166,6 +166,7 @@ TEST(UtilBit, NextSetByte) {
         uint_t nsetbit=0ul;
         while (u64){
             const auto ibyte = bit::next_setbyte(u64);
+            ASSERT_LT(ibyte, 8);
             // make sure all bytes are found
             ASSERT_TRUE(bit::get(set_bytes, ibyte));
             ++nsetbit;

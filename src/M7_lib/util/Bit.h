@@ -121,7 +121,7 @@ namespace bit {
      * _c: carry out the operation in software (slow), only used when neither of the above are supported
      */
 
-    static uint_t trailz64_tzcnt(const unsigned long &n) {
+    static uint_t trailz64_tzcnt(const uint64_t &n) {
 #ifdef ENABLE_TZCNT
         uint_t res;
         asm("tzcntq %1, %0;": "=r" (res): "r" (n));
@@ -132,9 +132,9 @@ namespace bit {
 #endif
     }
 
-    static uint_t trailz32_tzcnt(const unsigned &n) {
+    static uint_t trailz32_tzcnt(const uint32_t &n) {
 #ifdef ENABLE_TZCNT
-        unsigned res;
+        uint32_t res;
         asm("tzcnt %1, %0;": "=r" (res): "r" (n));
         return res;
 #else
@@ -143,7 +143,7 @@ namespace bit {
 #endif
     }
 
-    static uint_t trailz64_rbitclz(const unsigned long &n) {
+    static uint_t trailz64_rbitclz(const uint64_t &n) {
 #ifdef ENABLE_RBITCLZ
         uint_t result;
         asm("rbit %1, %1\nclz %0, %1": "=r" (result): "r" (n));
@@ -154,9 +154,9 @@ namespace bit {
 #endif
     }
 
-    static uint_t trailz32_rbitclz(const unsigned &n) {
+    static uint_t trailz32_rbitclz(const uint32_t &n) {
 #ifdef ENABLE_RBITCLZ
-        unsigned result;
+        uint32_t result;
         asm("rbit %1, %1\nclz %0, %1": "=r" (result): "r" (n));
         return result;
 #else
@@ -165,7 +165,7 @@ namespace bit {
 #endif
     }
 
-    static uint_t trailz64_c(const unsigned long &n) {
+    static uint_t trailz64_c(const uint64_t &n) {
         if (!n) return 64;
         uint8_t index;
         for (uint_t shift = 0ul; shift != 64; shift += 8) {
@@ -174,7 +174,7 @@ namespace bit {
         return 64;
     }
 
-    static uint_t trailz32_c(const unsigned &n) {
+    static uint_t trailz32_c(const uint32_t &n) {
         if (!n) return 32;
         uint8_t index;
         for (uint_t shift = 0ul; shift != 32; shift += 8) {
@@ -183,7 +183,7 @@ namespace bit {
         return 32;
     }
 
-    static uint_t trailz64(const unsigned &n) {
+    static uint_t trailz64(const uint64_t &n) {
 #if defined(ENABLE_TZCNT)
         return trailz64_tzcnt(n);
 #elif defined(ENABLE_RBITCLZ)
@@ -194,7 +194,7 @@ namespace bit {
 #endif
     }
 
-    static uint_t trailz32(const unsigned &n) {
+    static uint_t trailz32(const uint32_t &n) {
 #if defined(ENABLE_TZCNT)
         return trailz32_tzcnt(n);
 #elif defined(ENABLE_RBITCLZ)
@@ -213,21 +213,21 @@ namespace bit {
      * _c: carry out the operation in software (slow), only used when neither of the above are supported
      */
 
-    static uint_t nsetbit64_popcnt(const unsigned long &n) {
+    static uint_t nsetbit64_popcnt(const uint64_t &n) {
         uint_t res;
         asm("popcntq %1, %0;": "=r" (res): "r" (n));
         return res;
     }
 
-    static uint_t nsetbit32_popcnt(const unsigned &n) {
-        unsigned res;
+    static uint_t nsetbit32_popcnt(const uint32_t &n) {
+        uint32_t res;
         asm("popcnt %1, %0;": "=r" (res): "r" (n));
         return res;
     }
 
-    static uint_t nsetbit64_arm_neon(const unsigned long &n) {
+    static uint_t nsetbit64_arm_neon(const uint64_t &n) {
 #ifdef ENABLE_ARM_NEON
-        uint8x8_t vec = vld1_u8(reinterpret_cast<const unsigned char*>(&num));
+        uint8x8_t vec = vld1_u8(reinterpret_cast<const uint32_t char*>(&num));
         uint64x1_t popcount = vpaddl_u32(vpaddl_u16(vpaddl_u8(vcnt_u8(vec))));
         return vget_lane_u64(popcount, 0);
 #else
@@ -236,25 +236,25 @@ namespace bit {
 #endif
     }
 
-    static uint_t nsetbit32_arm_neon(const unsigned &n) {
+    static uint_t nsetbit32_arm_neon(const uint32_t &n) {
         return nsetbit64_arm_neon(n);
     }
 
-    static uint_t nsetbit64_c(const unsigned long &n) {
+    static uint_t nsetbit64_c(const uint64_t &n) {
         if (!n) return 0;
         uint_t tot = 0ul;
         for (uint_t shift = 0ul; shift != 64; shift += 8) tot += popcnt_c_table[(n >> shift) & 0xff];
         return tot;
     }
 
-    static uint_t nsetbit32_c(const unsigned &n) {
+    static uint_t nsetbit32_c(const uint32_t &n) {
         if (!n) return 0;
         uint_t tot = 0ul;
         for (uint_t shift = 0ul; shift != 32; shift += 8) tot += popcnt_c_table[(n >> shift) & 0xff];
         return tot;
     }
 
-    static uint_t nsetbit64(const unsigned long &n) {
+    static uint_t nsetbit64(const uint64_t &n) {
 #if defined(ENABLE_POPCNT)
         return nsetbit64_popcnt(n);
 #elif defined(ENABLE_ARM_NEON)
@@ -265,7 +265,7 @@ namespace bit {
 #endif
     }
 
-    static uint_t nsetbit32(const unsigned &n) {
+    static uint_t nsetbit32(const uint32_t &n) {
 #if defined(ENABLE_POPCNT)
         return nsetbit32_popcnt(n);
 #elif defined(ENABLE_ARM_NEON)
@@ -276,21 +276,14 @@ namespace bit {
 #endif
     }
 
-    static uint_t next_setbit(unsigned long long &work) {
+    static uint_t next_setbit(uint64_t &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         const auto result = trailz64(work);
         bit::clr(work, result);
         return result;
     }
 
-    static uint_t next_setbit(unsigned long &work) {
-        static_assert(sizeof(work) == 8, "Data length not supported");
-        const auto result = trailz64(work);
-        bit::clr(work, result);
-        return result;
-    }
-
-    static uint_t next_setbit(unsigned &work) {
+    static uint_t next_setbit(uint32_t &work) {
         static_assert(sizeof(work) == 4, "Data length not supported");
         const auto result = trailz32(work);
         bit::clr(work, result);
@@ -307,17 +300,12 @@ namespace bit {
 
 
 
-    static uint_t nsetbit(const unsigned long long &work) {
+    static uint_t nsetbit(const uint64_t &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         return nsetbit64(work);
     }
 
-    static uint_t nsetbit(const unsigned long &work) {
-        static_assert(sizeof(work) == 8, "Data length not supported");
-        return nsetbit64(work);
-    }
-
-    static uint_t nsetbit(const unsigned &work) {
+    static uint_t nsetbit(const uint32_t &work) {
         static_assert(sizeof(work) == 4, "Data length not supported");
         return nsetbit32(work);
     }
