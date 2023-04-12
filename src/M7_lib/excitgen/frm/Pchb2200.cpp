@@ -27,7 +27,7 @@ exgen::Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
                     }
                 }
                 DEBUG_ASSERT_EQ(ab, m_nspinorb_pair, "loop did not include all vacant orbital pairs");
-                m_pick_ab_given_ij.update(ij, weights);
+                m_pick_ab_given_ij.update_(ij, weights);
                 ++ij;
             }
         }

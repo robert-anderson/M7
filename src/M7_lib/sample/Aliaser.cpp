@@ -11,13 +11,13 @@ Aliaser::Aliaser(uint_t nrow, uint_t nprob) :
         m_alias_table(m_nrow, m_nprob),
         m_norm(m_nrow) {}
 
-void Aliaser::update(uint_t irow, const prob_t *probs, const uint_t nprob) {
+void Aliaser::update_(uint_t irow, const prob_t *probs, const uint_t nprob) {
     DEBUG_ASSERT_LT(irow, m_nrow, "row index OOB");
-    m_norm.set(irow, std::accumulate(probs, probs + nprob, 0.0));
+    m_norm.set_(irow, std::accumulate(probs, probs + nprob, 0.0));
     std::stack<uint_t> smaller;
     std::stack<uint_t> larger;
     for (uint_t iprob = 0ul; iprob < m_nprob; ++iprob) {
-        m_prob_table.set(irow, iprob, probs[iprob] * m_nprob);
+        m_prob_table.set_(irow, iprob, probs[iprob] * m_nprob);
         if (m_prob_table.get(irow, iprob) < m_norm[irow]) smaller.push(iprob);
         else larger.push(iprob);
     }
@@ -27,16 +27,16 @@ void Aliaser::update(uint_t irow, const prob_t *probs, const uint_t nprob) {
         smaller.pop();
         large = larger.top();
         larger.pop();
-        m_alias_table.set(irow, small, large);
-        m_prob_table.set(irow, large,
+        m_alias_table.set_(irow, small, large);
+        m_prob_table.set_(irow, large,
                          m_prob_table.get(irow, large) - (m_norm[irow] - m_prob_table.get(irow, small)));
         if (m_prob_table.get(irow, large) < m_norm[irow]) smaller.push(large);
         else larger.push(large);
     }
 }
 
-void Aliaser::update(uint_t irow, const v_t<prob_t> &probs) {
-    update(irow, probs.data(), probs.size());
+void Aliaser::update_(uint_t irow, const v_t<prob_t> &probs) {
+    update_(irow, probs.data(), probs.size());
 }
 
 uint_t Aliaser::draw(uint_t irow, PRNG &prng) const {
@@ -55,11 +55,12 @@ prob_t Aliaser::norm(uint_t irow) const {
 SingleAliaser::SingleAliaser(uint_t nprob) : Aliaser(1, nprob){}
 
 SingleAliaser::SingleAliaser(const v_t<prob_t> &probs) : Aliaser(1, probs.size()) {
-    update(probs);
+    if (mpi::on_node_i_am_root()) update_(probs);
+    mpi::barrier_on_node();
 }
 
-void SingleAliaser::update(const v_t<prob_t> &probs) {
-    Aliaser::update(0ul, probs);
+void SingleAliaser::update_(const v_t<prob_t> &probs) {
+    Aliaser::update_(0ul, probs);
 }
 
 uint_t SingleAliaser::draw(PRNG &prng) const {

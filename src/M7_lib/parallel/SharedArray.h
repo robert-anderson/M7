@@ -46,23 +46,20 @@ public:
     ~SharedArrayBase();
 
 protected:
-    void set(uint_t i, uint_t n, const void* src) {
+    void set_(uint_t i, uint_t n, const void* src) {
+        DEBUG_ASSERT_TRUE(mpi::on_node_i_am_root(), "element-modifying access should only take place on the root rank");
         DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
         DEBUG_ASSERT_LE(i+n, m_nelement, "end OOB");
-        // element-modifying access should only take place on the root rank
-        if (mpi::on_node_i_am_root()) std::memcpy(m_data+(i*m_element_size), src, n*m_element_size);
+        std::memcpy(m_data+(i*m_element_size), src, n*m_element_size);
 
     }
 
-    void set(uint_t i, const void* src) {
-        DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
-        // element-modifying access should only take place on the root rank
-        if (mpi::on_node_i_am_root()) std::memcpy(m_data+(i*m_element_size), src, m_element_size);
+    void set_(uint_t i, const void* src) {
+        set_(i, 1, src);
     }
 
-    void set(const void* src) {
-        // element-modifying access should only take place on the root rank
-        if (mpi::on_node_i_am_root()) std::memcpy(m_data, src, m_nbyte);
+    void set_(const void* src) {
+        set_(0, m_nelement, src);
     }
 
     void get(uint_t i, uint_t n, void* dst) {
@@ -91,17 +88,16 @@ public:
         return m_nelement;
     }
 
-    void set(uint_t i, const T &v) {
-        SharedArrayBase::set(i, &v);
+    void set_(uint_t i, const T &v) {
+        SharedArrayBase::set_(i, &v);
     }
 
-    void set(uint_t i, const v_t<T> &v) {
-        SharedArrayBase::set(i, v.size(), v.data());
+    void set_(uint_t i, const v_t<T> &v) {
+        SharedArrayBase::set_(i, v.size(), v.data());
     }
 
-    void set(const v_t<T> &v) {
-        DEBUG_ASSERT_TRUE(!mpi::on_node_i_am_root() || (v.size()==m_nelement), "incompatible source");
-        SharedArrayBase::set(v.data());
+    void set_(const v_t<T> &v) {
+        SharedArrayBase::set_(v.data());
     }
 
     void get(uint_t i, v_t<T> &v) {
@@ -122,20 +118,17 @@ public:
 
 template<typename T>
 class SharedScalar : protected SharedArray<T> {
-    /**
-     * written to if this MPI rank is not the root
-     */
-    T m_trash;
+
 public:
     SharedScalar() : SharedArray<T>(1ul){}
 
-    SharedScalar(const T& v) : SharedScalar() {
-        *this = v;
+    explicit SharedScalar(const T& v) : SharedScalar() {
+        if (mpi::on_node_i_am_root()) set_(v);
+        mpi::barrier_on_node();
     }
 
-    SharedScalar& operator=(const T& v){
-        SharedArray<T>::set(0, v);
-        return *this;
+    void set_(const T &v) {
+        SharedArrayBase::set_(0, &v);
     }
 
     operator const T& () const {

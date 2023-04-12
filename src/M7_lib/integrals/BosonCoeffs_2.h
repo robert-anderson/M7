@@ -23,7 +23,7 @@ public:
 
     BosonCoeffs_2(uint_t nmode);
 
-    void set(uint_t i, uint_t j, uint_t k, uint_t l, ham_t value);
+    void set_(uint_t i, uint_t j, uint_t k, uint_t l, ham_t value);
 
     ham_t get(uint_t i, uint_t j, uint_t k, uint_t l) const;
 

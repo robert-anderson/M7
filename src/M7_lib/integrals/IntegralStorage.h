@@ -36,7 +36,7 @@ private:
         return std::abs(elem) >= c_coeff_atol;
     }
 
-    bool set_data(v_t<T>& data, uint_t iflat, T elem){
+    bool set_data_(v_t<T>& data, uint_t iflat, T elem){
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
         if (!is_significant(elem)) return true;
         auto& ref = data[iflat];
@@ -45,18 +45,18 @@ private:
         return true;
     }
 
-    bool set_data(SharedArray<T>& data, uint_t iflat, T elem){
+    bool set_data_(SharedArray<T>& data, uint_t iflat, T elem){
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
         if (!is_significant(elem)) return true;
         if (data[iflat]!=T(0) && is_significant(elem-data[iflat])) return false;
-        data.set(iflat, elem);
+        data.set_(iflat, elem);
         return true;
     }
 
 public:
     bool set_data_(uint_t iflat, T elem){
         DEBUG_ASSERT_TRUE(mpi::on_node_i_am_root(), "integral elements should only be set from node root ranks");
-        return set_data(m_data, iflat, elem);
+        return set_data_(m_data, iflat, elem);
     }
 
     T get_data(uint_t iflat) const {

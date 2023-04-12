@@ -15,11 +15,11 @@ public:
     SharedMatrix(uint_t nrow, uint_t ncol):
         SharedArray<T>(nrow*ncol), m_nrow(nrow), m_ncol(ncol){}
 
-    void set(const uint_t &irow, const uint_t& icol, const T& v) {
+    void set_(const uint_t &irow, const uint_t& icol, const T& v) {
         // element-modifying access should only take place on the root rank
         ASSERT(irow<m_nrow)
         ASSERT(icol<m_ncol)
-        SharedArray<T>::set(irow*m_ncol+icol, v);
+        SharedArray<T>::set_(irow*m_ncol+icol, v);
     }
 
     const T& get(const uint_t &irow, const uint_t& icol) const {

@@ -14,19 +14,23 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, uint_t occ_cutoff) :
     ham_t value;
 
     logging::info("Reading Boson Hamiltonian coefficients from file \"" + file_reader.m_fname + "\"...");
-    while (file_reader.next(inds, value)) {
-        if (!ham::is_significant(value)) continue;
-        auto ranksig = file_reader.ranksig(inds);
-        auto exsig = file_reader.exsig(inds, ranksig);
-        DEBUG_ASSERT_TRUE(exsig.contribs_to(ranksig), "excitation does not contribute to this operator rank");
-        if (ranksig == opsig::c_0011) {
-            m_contribs_0011.set_nonzero(exsig);
-            m_coeffs_1.set(inds[0], inds[1], value);
-        } else if (ranksig == opsig::c_0022) {
-            m_contribs_0022.set_nonzero(exsig);
-            m_coeffs_2.set(inds[0], inds[1], inds[2], inds[3], value);
+    if (mpi::on_node_i_am_root()) {
+        while (file_reader.next(inds, value)) {
+            if (!ham::is_significant(value)) continue;
+            auto ranksig = file_reader.ranksig(inds);
+            auto exsig = file_reader.exsig(inds, ranksig);
+            DEBUG_ASSERT_TRUE(exsig.contribs_to(ranksig), "excitation does not contribute to this operator rank");
+            if (ranksig == opsig::c_0011) {
+                m_contribs_0011.set_nonzero(exsig);
+                m_coeffs_1.set_(inds[0], inds[1], value);
+            } else if (ranksig == opsig::c_0022) {
+                m_contribs_0022.set_nonzero(exsig);
+                m_coeffs_2.set_(inds[0], inds[1], inds[2], inds[3], value);
+            }
         }
     }
+    m_contribs_0011.bcast();
+    m_contribs_0022.bcast();
     log_data();
 }
 

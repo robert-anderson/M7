@@ -23,7 +23,7 @@ exgen::Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
                         weights[n] = std::abs(element);
                     }
                 }
-                m_pick_n_given_pq.update(pq, weights);
+                m_pick_n_given_pq.update_(pq, weights);
                 ++pq;
             }
         }

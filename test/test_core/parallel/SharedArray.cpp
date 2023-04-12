@@ -12,11 +12,14 @@ TEST(SharedArray, VectorTest) {
     v_t<SharedArray<hash::digest_t>> arrays;
     for (uint_t i = 0ul; i < nrow; ++i) {
         arrays.emplace_back(mpi::nrank() * nelement_per_rank);
-        auto& array = arrays.back();
-        for (uint_t ielem=0ul; ielem < array.size(); ++ielem) {
-            array.set(ielem, hash::in_range({i, ielem}, 2, 13));
+        if (mpi::on_node_i_am_root()) {
+            auto& array = arrays.back();
+            for (uint_t ielem = 0ul; ielem < array.size(); ++ielem) {
+                array.set_(ielem, hash::in_range({i, ielem}, 2, 13));
+            }
         }
     }
+    mpi::barrier_on_node();
     for (uint_t i = 0ul; i < nrow; ++i) {
         const auto& array = arrays[i];
         for (uint_t ielem=0ul; ielem < array.size(); ++ielem) {

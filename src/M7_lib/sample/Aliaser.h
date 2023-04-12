@@ -23,9 +23,9 @@ private:
 public:
     Aliaser(uint_t nrow, uint_t nprob);
 
-    void update(uint_t irow, const prob_t *probs, uint_t nprob);
+    void update_(uint_t irow, const prob_t *probs, uint_t nprob);
 
-    void update(uint_t irow, const v_t<prob_t> &probs);
+    void update_(uint_t irow, const v_t<prob_t> &probs);
 
     uint_t draw(uint_t irow, PRNG &prng) const;
 
@@ -38,7 +38,7 @@ public:
 
     SingleAliaser(const v_t<prob_t> &probs);
 
-    void update(const v_t<prob_t> &probs);
+    void update_(const v_t<prob_t> &probs);
 
     uint_t draw(PRNG &prng) const;
 

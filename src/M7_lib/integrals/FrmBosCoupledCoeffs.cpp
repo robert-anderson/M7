@@ -21,7 +21,7 @@ FrmBosCoupledCoeffs::FrmBosCoupledCoeffs(sys::Size sizes, bool spin_resolved):
 
 void FrmBosCoupledCoeffs::set_(uint_t n, uint_t p, uint_t q, ham_t value) {
     DEBUG_ASSERT_TRUE(mpi::on_node_i_am_root(), "FrmBos coupled coeffs should only be set from node root ranks");
-    m_v.set(index(n, p, q), value);
+    m_v.set_(index(n, p, q), value);
 }
 
 ham_t FrmBosCoupledCoeffs::get(uint_t n, uint_t p, uint_t q) const {
