@@ -36,7 +36,7 @@ endif()
 
 try_compile(ENABLE_TZCNT ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/cmake/have_tzcnt.cpp)
 if (ENABLE_TZCNT)
-    message("TZCNT instruction detected")
+    message("TZCNT and TZCNTQ instructions detected")
     target_compile_definitions(M7_lib PUBLIC ENABLE_TZCNT)
 endif()
 

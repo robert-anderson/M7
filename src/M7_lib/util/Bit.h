@@ -124,7 +124,7 @@ namespace bit {
     static uint_t trailz64_tzcnt(const unsigned long &n) {
 #ifdef ENABLE_TZCNT
         uint_t res;
-        asm("tzcnt %1, %0;": "=r" (res): "r" (n));
+        asm("tzcntq %1, %0;": "=r" (res): "r" (n));
         return res;
 #else
         (void) n;
