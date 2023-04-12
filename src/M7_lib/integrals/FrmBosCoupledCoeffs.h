@@ -53,7 +53,7 @@ public:
      * @param value
      *  coefficient value
      */
-    void set(uint_t n, uint_t p, uint_t q, ham_t value);
+    void set_(uint_t n, uint_t p, uint_t q, ham_t value);
 
     /**
      * access the coefficient value (called on any rank)

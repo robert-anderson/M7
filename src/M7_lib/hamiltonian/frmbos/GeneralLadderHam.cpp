@@ -18,19 +18,23 @@ GeneralLadderHam::GeneralLadderHam(sys::Basis basis, const EbdumpInfo& info):
     REQUIRE_EQ(file_reader.m_info.m_nsite, m_basis.m_frm.m_nsite, "EBDUMP has incorrect number of sites");
     REQUIRE_EQ(file_reader.m_info.m_nmode, m_basis.m_bos.m_nmode, "EBDUMP has incorrect number of modes");
 
-    logging::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
-    while (file_reader.next(inds, value)) {
-        if (!ham::is_significant(value)) continue;
-        auto ranksig = file_reader.ranksig(inds);
-        auto exsig = file_reader.exsig(inds, ranksig);
-        if ((ranksig == opsig::c_1110) || (ranksig == opsig::c_1101)) {
-            DEBUG_ASSERT_EQ(ranksig, opsig::c_1110, "ranksig should be either 0010 or 1110");
-            m_contribs_1110.set_nonzero(exsig);
-            m_contribs_1101.set_nonzero(exsig.conj());
-            m_v.set(inds[0], inds[1], inds[2], value);
+    logging::info( "Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
+    if (mpi::on_node_i_am_root()) {
+        while (file_reader.next(inds, value)) {
+            if (!ham::is_significant(value)) continue;
+            auto ranksig = file_reader.ranksig(inds);
+            auto exsig = file_reader.exsig(inds, ranksig);
+            if ((ranksig == opsig::c_1110) || (ranksig == opsig::c_1101)) {
+                DEBUG_ASSERT_EQ(ranksig, opsig::c_1110, "ranksig should be either 0010 or 1110");
+                m_contribs_1110.set_nonzero(exsig);
+                m_contribs_1101.set_nonzero(exsig.conj());
+                m_v.set_(inds[0], inds[1], inds[2], value);
+            }
+            // else, ignore any 0001 or 0010 coefficients here - they belong in the BosHam
         }
-        // else, ignore any 0001 or 0010 coefficients here - they belong in the BosHam
     }
+    m_contribs_1110.bcast();
+    m_contribs_1101.bcast();
     log_data();
 }
 

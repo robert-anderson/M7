@@ -19,7 +19,8 @@ FrmBosCoupledCoeffs::FrmBosCoupledCoeffs(sys::Size sizes, bool spin_resolved):
         m_ncoeff_ind_frm2(m_ncoeff_ind_frm * m_ncoeff_ind_frm), m_ncoeff_ind_bos(m_sizes.m_bos.m_nmode),
         m_v(m_ncoeff_ind_bos * m_ncoeff_ind_frm2){}
 
-void FrmBosCoupledCoeffs::set(uint_t n, uint_t p, uint_t q, ham_t value) {
+void FrmBosCoupledCoeffs::set_(uint_t n, uint_t p, uint_t q, ham_t value) {
+    DEBUG_ASSERT_TRUE(mpi::on_node_i_am_root(), "FrmBos coupled coeffs should only be set from node root ranks");
     m_v.set(index(n, p, q), value);
 }
 

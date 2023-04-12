@@ -54,7 +54,8 @@ private:
     }
 
 public:
-    bool set_data(uint_t iflat, T elem){
+    bool set_data_(uint_t iflat, T elem){
+        DEBUG_ASSERT_TRUE(mpi::on_node_i_am_root(), "integral elements should only be set from node root ranks");
         return set_data(m_data, iflat, elem);
     }
 

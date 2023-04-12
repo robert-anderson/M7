@@ -40,14 +40,14 @@ uint_t GeneralFrmHam::make_ints_(IntegralReader *reader, GeneralFrmHam::ints_1e_
         rank_contrib.set_nonzero(d.m_exsig);
 
         if (d.m_ranksig == opsig::c_sing) {
-            if (!ints_1e->set(d.m_inds[0], d.m_inds[1], d.m_value)) {
+            if (!ints_1e->set_(d.m_inds[0], d.m_inds[1], d.m_value)) {
                 logging::info_("integral < {} | h_core | {} > value {} is at odds with stored value {}",
                                d.m_inds[0], d.m_inds[1], d.m_value, ints_1e->get(d.m_inds[0], d.m_inds[1]));
                 return 1ul;
             }
         } else if (d.m_ranksig == opsig::c_doub) {
             // FCIDUMP integral indices are in chemists' ordering
-            if (!ints_2e->set(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3], d.m_value)) {
+            if (!ints_2e->set_(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3], d.m_value)) {
                 logging::info_("integral < {} {} | {} {} > value {} is at odds with stored value {}",
                                d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3], d.m_value,
                                ints_2e->get(d.m_inds[0], d.m_inds[2], d.m_inds[1], d.m_inds[3]));

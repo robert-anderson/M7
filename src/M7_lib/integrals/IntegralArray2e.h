@@ -198,7 +198,7 @@ namespace integrals_2e {
         Array(uint_t norb): m_norb(norb){}
         virtual ~Array() = default;
 
-        virtual bool set(uint_t a, uint_t b, uint_t i, uint_t j, T elem) = 0;
+        virtual bool set_(uint_t a, uint_t b, uint_t i, uint_t j, T elem) = 0;
 
         virtual T get(uint_t a, uint_t b, uint_t i, uint_t j) const = 0;
 
@@ -208,20 +208,20 @@ namespace integrals_2e {
     template<typename indexer_t, typename T>
     struct IndexedArray : Array<T> {
         static_assert(std::is_base_of<IntegralIndexer, indexer_t>::value, "invalid template class");
-        using Array<T>::set;
+        using Array<T>::set_;
         using Array<T>::get;
         indexer_t m_indexer;
         SharedIntegralStorage<T> m_data;
 
         IndexedArray(uint_t norb) : Array<T>(norb), m_indexer(norb), m_data(m_indexer.m_size) {}
 
-        bool set(uint_t a, uint_t b, uint_t i, uint_t j, T elem) override {
+        bool set_(uint_t a, uint_t b, uint_t i, uint_t j, T elem) override {
             // any compiler should statically execute this conditional
             if (!dtype::is_complex<T>())
-                return m_data.set_data(m_indexer.index_only(a, b, i, j), elem);
+                return m_data.set_data_(m_indexer.index_only(a, b, i, j), elem);
             else {
                 const auto pair = m_indexer.index_and_conj(a, b, i, j);
-                return m_data.set_data(pair.first, pair.second ? arith::conj(elem) : elem);
+                return m_data.set_data_(pair.first, pair.second ? arith::conj(elem) : elem);
             }
         }
 
