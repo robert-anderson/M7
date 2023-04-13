@@ -64,7 +64,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_options(M7_lib
         PUBLIC
-             -mbmi -g
+             -g
         PRIVATE
             -Wno-unused-function -Wno-bad-function-cast
     )

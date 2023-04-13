@@ -110,7 +110,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
-             -mbmi -g
+             -g
         PRIVATE
             -Wno-unused-function -Wno-cast-function-type
             -Wall -Wextra
@@ -164,7 +164,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
-             -mbmi -g
+             -g
         PRIVATE
             -Wno-unused-function -Wno-bad-function-cast
             #-Wall -Wextra

@@ -229,7 +229,7 @@ namespace bit {
 
     static uint_t nsetbit64_arm_neon(const uint64_t &n) {
 #ifdef ENABLE_ARM_NEON
-        uint8x8_t vec = vld1_u8(reinterpret_cast<const uint32_t char*>(&num));
+        uint8x8_t vec = vld1_u8(reinterpret_cast<const unsigned char*>(&n));
         uint64x1_t popcount = vpaddl_u32(vpaddl_u16(vpaddl_u8(vcnt_u8(vec))));
         return vget_lane_u64(popcount, 0);
 #else
