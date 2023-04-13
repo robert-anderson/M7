@@ -49,7 +49,7 @@ namespace frm_onv_connection_test {
         return direct && connect && apply;
     }
     static bool pred_false(bool direct, bool connect, bool apply){
-        return !pred_true(direct, connect, apply);
+        return !direct && !connect && !apply;
     }
 }
 
