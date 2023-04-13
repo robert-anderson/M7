@@ -160,7 +160,7 @@ TEST(UtilBit, NextSetByte) {
         uint64_t u64 = 0;
         for (uint i=0ul; i<CHAR_BIT; ++i) {
             // set the byte to an arbitrary value if its corresponding bit in the counter is set
-            if (bit::get(set_bytes, i)) reinterpret_cast<char*>(&u64)[i] = 'M';
+            if (bit::get(set_bytes, i)) bit::put_byte(u64, i, 'M');
         }
         const auto nsetbit_chk = bit::nsetbit(uint_t(set_bytes));
         uint_t nsetbit=0ul;

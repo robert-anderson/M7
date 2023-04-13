@@ -114,6 +114,29 @@ namespace bit {
         return x & (T(1) << T(i));
     }
 
+    template<typename T>
+    static void put_byte(T &x, uint_t ibyte, char c) {
+        T mask;
+        // first clear the byte in x
+        mask = 0xff;
+        mask <<= ibyte * CHAR_BIT;
+        x &= ~mask;
+        // then insert the char
+        mask = c;
+        mask <<= ibyte * CHAR_BIT;
+        x |= mask;
+    }
+
+    template<typename T>
+    static void clr_byte(T &x, uint_t ibyte) {
+        put_byte(x, ibyte, 0);
+    }
+
+    template<typename T>
+    static char get_byte(const T &x, uint_t ibyte) {
+        return (x >> ibyte * CHAR_BIT) & 0xff;
+    }
+
     /*
      * "count trailing zeros" implementations for 32-bit and 64-bit unsigned integers
      * _tzcnt: inline the x86 instruction TZCNT
@@ -299,11 +322,9 @@ namespace bit {
     static uint_t next_setbyte(T &work) {
         static_assert(std::is_integral<T>::value && std::is_unsigned<T>::value, "invalid type for bit operations");
         const uint_t ibyte = next_setbit(work) / CHAR_BIT;
-        reinterpret_cast<char*>(&work)[ibyte] = 0;
+        clr_byte(work, ibyte);
         return ibyte;
     }
-
-
 
     static uint_t nsetbit(const uint64_t &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
