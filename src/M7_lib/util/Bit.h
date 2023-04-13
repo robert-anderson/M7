@@ -117,7 +117,7 @@ namespace bit {
     /*
      * "count trailing zeros" implementations for 32-bit and 64-bit unsigned integers
      * _tzcnt: inline the x86 instruction TZCNT
-     * _rbitclz: compose the ARM instructions RBIT and CLZ
+     * _clz: inline the ARM instruction CLZ
      * _c: carry out the operation in software (slow), only used when neither of the above are supported
      */
 
@@ -143,22 +143,22 @@ namespace bit {
 #endif
     }
 
-    static uint_t trailz64_rbitclz(const uint64_t &n) {
-#ifdef ENABLE_RBITCLZ
+    static uint_t trailz64_clz(const uint64_t &n) {
+#ifdef ENABLE_CLZ
         uint_t result;
-        asm("rbit %1, %1\nclz %0, %1": "=r" (result): "r" (n));
-        return result;
+        asm("clz %0, %1": "=r" (result): "r" (n));
+        return 63 - result;
 #else
         (void) n;
         return ~0ul;
 #endif
     }
 
-    static uint_t trailz32_rbitclz(const uint32_t &n) {
-#ifdef ENABLE_RBITCLZ
+    static uint_t trailz32_clz(const uint32_t &n) {
+#ifdef ENABLE_CLZ
         uint32_t result;
-        asm("rbit %1, %1\nclz %0, %1": "=r" (result): "r" (n));
-        return result;
+        asm("clz %0, %1": "=r" (result): "r" (n));
+        return 31 - result;
 #else
         (void) n;
         return ~0u;
@@ -169,7 +169,8 @@ namespace bit {
         if (!n) return 64;
         uint8_t index;
         for (uint_t shift = 0ul; shift != 64; shift += 8) {
-            if ((index = (n >> shift) & 0xff) != 8) return trailz_c_table[index] + shift;
+            index = (n >> shift) & 0xff;
+            if (index) return bit::trailz_c_table[index] + shift;
         }
         return 64;
     }
@@ -178,7 +179,8 @@ namespace bit {
         if (!n) return 32;
         uint8_t index;
         for (uint_t shift = 0ul; shift != 32; shift += 8) {
-            if ((index = (n >> shift) & 0xff) != 8) return trailz_c_table[index] + shift;
+            index = (n >> shift) & 0xff;
+            if (index) return bit::trailz_c_table[index] + shift;
         }
         return 32;
     }
@@ -186,8 +188,8 @@ namespace bit {
     static uint_t trailz64(const uint64_t &n) {
 #if defined(ENABLE_TZCNT)
         return trailz64_tzcnt(n);
-#elif defined(ENABLE_RBITCLZ)
-        return trailz64_rbitclz(n);
+#elif defined(ENABLE_CLZ)
+        return trailz64_clz(n);
 #else
         // resort to software implementation
         return trailz64_c(n);
@@ -197,8 +199,8 @@ namespace bit {
     static uint_t trailz32(const uint32_t &n) {
 #if defined(ENABLE_TZCNT)
         return trailz32_tzcnt(n);
-#elif defined(ENABLE_RBITCLZ)
-        return trailz32_rbitclz(n);
+#elif defined(ENABLE_CLZ)
+        return trailz32_clz(n);
 #else
         // resort to software implementation
         return trailz32_c(n);

@@ -182,26 +182,24 @@ TEST(UtilBit, TrailzSoftwareImpl64) {
     /*
      * software implementation should agree with optimized implementation (if any available)
      */
-    uint64_t i;
-    i = 0;
-    ASSERT_EQ(bit::trailz64(i), bit::trailz64_c(i));
-    i = 21354;
-    ASSERT_EQ(bit::trailz64(i), bit::trailz64_c(i));
-    i += 1ul << 40;
-    ASSERT_EQ(bit::trailz64(i), bit::trailz64_c(i));
+    ASSERT_EQ(bit::trailz64(0ul), bit::trailz64_c(0ul));
+    for (uint_t ibit=0ul; ibit < 64ul; ++ibit) {
+        ASSERT_EQ(bit::trailz64_c(1ul << ibit), ibit);
+        ASSERT_EQ(bit::trailz64(1ul << ibit), ibit);
+        ASSERT_EQ(bit::trailz64(1ul << ibit), bit::trailz64_c(1ul << ibit));
+    }
 }
 
 TEST(UtilBit, TrailzSoftwareImpl32) {
     /*
      * software implementation should agree with optimized implementation (if any available)
      */
-    uint32_t i;
-    i = 0;
-    ASSERT_EQ(bit::trailz32(i), bit::trailz32_c(i));
-    i = 21354;
-    ASSERT_EQ(bit::trailz32(i), bit::trailz32_c(i));
-    i += 1ul << 20;
-    ASSERT_EQ(bit::trailz32(i), bit::trailz32_c(i));
+    ASSERT_EQ(bit::trailz32(0), bit::trailz32_c(0));
+    for (uint_t ibit=0ul; ibit < 32ul; ++ibit) {
+        ASSERT_EQ(bit::trailz32_c(1 << ibit), ibit);
+        ASSERT_EQ(bit::trailz32(1 << ibit), ibit);
+        ASSERT_EQ(bit::trailz32(1 << ibit), bit::trailz32_c(1 << ibit));
+    }
 }
 
 TEST(UtilBit, NSetBitSoftwareImpl64) {
@@ -211,7 +209,9 @@ TEST(UtilBit, NSetBitSoftwareImpl64) {
     uint64_t i;
     i = 0;
     ASSERT_EQ(bit::nsetbit64(i), bit::nsetbit64_c(i));
-    i = 21354;
+    i = 219354;
+    ASSERT_EQ(bit::nsetbit64(i), bit::nsetbit64_c(i));
+    i = 543821345;
     ASSERT_EQ(bit::nsetbit64(i), bit::nsetbit64_c(i));
     i += 1ul << 40;
     ASSERT_EQ(bit::nsetbit64(i), bit::nsetbit64_c(i));
@@ -224,7 +224,9 @@ TEST(UtilBit, NSetBitSoftwareImpl32) {
     uint32_t i;
     i = 0;
     ASSERT_EQ(bit::nsetbit32(i), bit::nsetbit32_c(i));
-    i = 21354;
+    i = 219354;
+    ASSERT_EQ(bit::nsetbit32(i), bit::nsetbit32_c(i));
+    i = 543821345;
     ASSERT_EQ(bit::nsetbit32(i), bit::nsetbit32_c(i));
     i += 1ul << 20;
     ASSERT_EQ(bit::nsetbit32(i), bit::nsetbit32_c(i));

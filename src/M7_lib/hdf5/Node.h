@@ -26,7 +26,7 @@ namespace hdf5 {
 
         template<typename T>
         T load_attr(const str_t& name) const {
-            T v;
+            T v {};
             auto success = Attr(m_id, name).parse(v);
             REQUIRE_TRUE(success, "HDF5 attribute load failed without default value");
             return v;
@@ -34,7 +34,7 @@ namespace hdf5 {
 
         template<typename T>
         T load_attr(const str_t& name, T default_) const {
-            T v;
+            T v {};
             Attr(m_id, name).parse(v, default_);
             return v;
         }
