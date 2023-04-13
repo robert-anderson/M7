@@ -7,6 +7,6 @@
 int main() {
     uint64_t n = 1;
     uint64_t count;
-    asm("clz %0, %1": "=r" (count): "r" (n));
+    asm("clz %x0, %x1": "=r" (count): "r" (n));
     return count;
 }

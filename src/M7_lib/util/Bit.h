@@ -134,6 +134,7 @@ namespace bit {
 
     static uint_t trailz32_tzcnt(const uint32_t &n) {
 #ifdef ENABLE_TZCNT
+        if (!n) return 32;
         uint32_t res;
         asm("tzcnt %1, %0;": "=r" (res): "r" (n));
         return res;
@@ -145,8 +146,9 @@ namespace bit {
 
     static uint_t trailz64_clz(const uint64_t &n) {
 #ifdef ENABLE_CLZ
+        if (!n) return 64;
         uint_t result;
-        asm("clz %0, %1": "=r" (result): "r" (n));
+        asm("clz %x0, %x1": "=r" (result): "r" (n));
         return 63 - result;
 #else
         (void) n;
@@ -156,12 +158,13 @@ namespace bit {
 
     static uint_t trailz32_clz(const uint32_t &n) {
 #ifdef ENABLE_CLZ
+        if (!n) return 32;
         uint32_t result;
-        asm("clz %0, %1": "=r" (result): "r" (n));
+        asm("clz %w0, %w1": "=r" (result): "r" (n));
         return 31 - result;
 #else
         (void) n;
-        return ~0u;
+        return ~0ul;
 #endif
     }
 
