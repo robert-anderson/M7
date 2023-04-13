@@ -28,12 +28,8 @@ struct FockMatrix : dense::SquareMatrix<ham_t> {
 };
 
 class FockRdm4 : public ContractedRdm {
-protected:
-
-    const bool m_zero_diagonal;
 public:
-    FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector,
-             uint_t nvalue, bool nonzero_diagonal);
+    FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector, uint_t nvalue);
 };
 
 class NonDiagFockRdm4 : public FockRdm4 {

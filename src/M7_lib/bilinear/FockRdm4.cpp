@@ -5,14 +5,13 @@
 #include "FockRdm4.h"
 
 
-FockRdm4::FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector, uint_t nvalue, bool zero_diagonal) :
+FockRdm4::FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector, uint_t nvalue) :
         ContractedRdm(opts, opsig::c_4400, opsig::c_3300, max_contrib_exsig, sector,
-            nvalue, opts.m_fock_4rdm.m_stoch_thresh.m_value, opts.m_fock_4rdm.m_neglect_tiny_contribs.m_value, "4400f"),
-        m_zero_diagonal(zero_diagonal){}
+            nvalue, opts.m_fock_4rdm.m_stoch_thresh.m_value, opts.m_fock_4rdm.m_neglect_tiny_contribs.m_value, "4400f"){}
 
 
 NonDiagFockRdm4::NonDiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue) :
-        FockRdm4(opts, opsig::c_4400, sector, nvalue, fock.diagonal_is_zero()), m_fock(fock){
+        FockRdm4(opts, opsig::c_4400, sector, nvalue), m_fock(fock){
     REQUIRE_EQ(fock.nrow(), sector.m_frm.m_basis.m_nsite, "Incorrectly-sized Fock matrix given");
     if (m_fock.is_diagonal())
         logging::warn("Performing 4RDM contraction of a diagonal Fock matrix without exploiting diagonality");
@@ -83,9 +82,9 @@ void NonDiagFockRdm4::frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOn
 }
 
 DiagFockRdm4::DiagFockRdm4(const conf::Rdms& opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue) :
-        FockRdm4(opts, opsig::c_trip, sector, nvalue, fock.diagonal_is_zero()),
+        FockRdm4(opts, opsig::c_trip, sector, nvalue),
         m_fock(dense::Vector<ham_t>(fock.get_diagonal())){
-    REQUIRE_FALSE_ALL(FockRdm4::m_zero_diagonal, "Fock matrix has no non-zero diagonal elements");
+    REQUIRE_FALSE_ALL(fock.diagonal_is_zero(), "Fock matrix has no non-zero diagonal elements");
 }
 
 void DiagFockRdm4::frm_make_contribs(const FrmOnv& src_onv, const conn::FrmOnv& conn,
