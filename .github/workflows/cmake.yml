@@ -24,8 +24,6 @@ jobs:
         password: ${{ secrets.DOCKER_REGISTRY_PAT }}
 
     steps:
-    - uses: actions/checkout@v3
-
     - name: Report Runner Resources
       run: lscpu && free -h
 
