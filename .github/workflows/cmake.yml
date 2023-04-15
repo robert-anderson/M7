@@ -27,7 +27,7 @@ jobs:
 
     - name: Checkout
       working-directory: ${{env.ROOT_DIR}}
-      run: git clone https://github.com/robert-anderson/M7.git
+      run: git clone https://github.com/robert-anderson/M7.git && mkdir ${{env.BUILD_DIR}}
 
     - name: Configure CMake
       working-directory: ${{env.BUILD_DIR}}
