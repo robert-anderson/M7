@@ -83,6 +83,15 @@ endif()
 
 target_compile_definitions(M7_lib PUBLIC MBF_TYPE=${MBF_TYPE})
 
+option(TCHINT_ROOT "")
+if(TCHINT_ROOT)
+    message(STATUS "Compiling with TCHInt support")
+    target_compile_definitions(M7_lib PUBLIC ENABLE_TCHINT)
+    target_include_directories(M7_lib PUBLIC ${TCHINT_ROOT}/src/include)
+    target_link_directories(M7_lib PUBLIC ${TCHINT_ROOT}/src)
+    target_link_libraries(M7_lib -ltchint)
+endif()
+
 option(ENABLE_COMPLEX "ENABLE_COMPLEX")
 if (ENABLE_COMPLEX)
     set(ENABLE_COMPLEX_WF 1)
@@ -104,6 +113,22 @@ if (ENABLE_LOCAL_LOGGING)
     target_compile_definitions(M7_lib PUBLIC ENABLE_LOCAL_LOGGING)
 endif ()
 
+# check for the presence of the x86 instructions
+try_compile(ENABLE_POPCNT ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/cmake/have_popcnt.cpp)
+if (ENABLE_POPCNT)
+    message("POPCNT and POPCNTQ instructions detected")
+    target_compile_definitions(M7_lib PUBLIC ENABLE_POPCNT)
+else ()
+    message("POPCNT and POPCNTQ instructions NOT detected: resorting to software implementation")
+endif()
+
+try_compile(ENABLE_TZCNT ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/cmake/have_tzcnt.cpp)
+if (ENABLE_TZCNT)
+    message("TZCNT and TZCNTQ instructions detected")
+    target_compile_definitions(M7_lib PUBLIC ENABLE_TZCNT)
+else ()
+    message("TZCNT and TZCNTQ instructions NOT detected: resorting to software implementation")
+endif()
 
 # compile and link options are compiler-dependent, so each vendor must be dealt with separately
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
