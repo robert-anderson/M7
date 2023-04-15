@@ -43,3 +43,7 @@ jobs:
     - name: SerialUnitTest
       working-directory: ${{env.BUILD_DIR}}
       run: test/unittest --gtest_filter=*
+
+    - name: ParallelUnitTest
+      working-directory: ${{env.BUILD_DIR}}
+      run: mpirun -n 2 test/unittest --gtest_filter=*
