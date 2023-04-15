@@ -9,15 +9,16 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  ROOT_DIR: /opt
-  SRC_DIR: /opt/M7
-  BUILD_DIR: /opt/build
+  ROOT_DIR: /home/tester
+  SRC_DIR: /home/tester/M7
+  BUILD_DIR: /home/tester/build
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/robert-anderson/m7_tester
+      options: --user tester
       credentials:
         username: robert-anderson
         password: ${{ secrets.DOCKER_REGISTRY_PAT }}
