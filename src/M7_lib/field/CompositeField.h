@@ -7,18 +7,33 @@
 
 #include <M7_lib/util/Tuple.h>
 
+#include "M7_lib/hdf5/DatasetTransaction.h"
 #include "FieldBase.h"
 
 struct CompositeFieldBase {
 
     str_t prefix(str_t base, str_t prefix);
 
-    virtual void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const = 0;
+    void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const {
+        save_fn(nw, name, max_nitem_per_op, this_rank);
+    }
+
+    void save(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank) const {
+        save(nw, name, hdf5::c_default_max_nitem_per_op, this_rank);
+    }
+
+    void save(const hdf5::NodeWriter& nw, bool this_rank) const {
+        // todo: get proper name
+        save(nw, "", this_rank);
+    }
 
     /*
      * functors for implementing the composite analogues of single-Field methods
      */
 protected:
+
+    virtual void save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const = 0;
+
     struct EqFn {
         bool m_and = true;
         template<typename T>
@@ -156,7 +171,8 @@ struct CompositeField : CompositeFieldBase {
         return std::get<ifield>(m_refs);
     }
 
-    void save(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const override {
+protected:
+    void save_fn(const hdf5::NodeWriter& nw, const str_t& name, uint_t max_nitem_per_op, bool this_rank) const override {
         SaveFn fn {nw, name, max_nitem_per_op, this_rank};
         tuple::foreach(m_refs, fn);
     }

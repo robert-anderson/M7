@@ -84,7 +84,7 @@ v_t<double> hf_excit_hist::Initializer::make_threshs() {
     return tmp;
 }
 
-bool hf_excit_hist::Initializer::apply(Mbf &mbf, uint_t ientry) {
+bool hf_excit_hist::Initializer::apply(field::FrmOnv &mbf, uint_t ientry) {
     const auto a = m_c2.m_inds(ientry, 0);
     const auto b = m_c2.m_inds(ientry, 1);
     const auto i = m_c2.m_inds(ientry, 2);
@@ -97,7 +97,7 @@ bool hf_excit_hist::Initializer::apply(Mbf &mbf, uint_t ientry) {
     return true;
 }
 
-bool hf_excit_hist::Initializer::undo(Mbf &mbf, uint_t ientry) {
+bool hf_excit_hist::Initializer::undo(field::FrmOnv &mbf, uint_t ientry) {
     const auto a = m_c2.m_inds(ientry, 0);
     const auto b = m_c2.m_inds(ientry, 1);
     const auto i = m_c2.m_inds(ientry, 2);
@@ -108,11 +108,6 @@ bool hf_excit_hist::Initializer::undo(Mbf &mbf, uint_t ientry) {
     mbf.set(i);
     mbf.set(j);
     return true;
-}
-
-bool hf_excit_hist::Initializer::phase(Mbf &mbf) {
-    m_work_conn.connect(m_hf, mbf);
-    return m_work_conn.phase(m_hf);
 }
 
 void hf_excit_hist::Initializer::setup(Mbf& mbf, uint_t imax, uint_t ipower, wf_t prev_product) {

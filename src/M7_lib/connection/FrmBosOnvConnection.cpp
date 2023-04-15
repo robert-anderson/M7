@@ -17,6 +17,26 @@ void FrmBosOnvConnection::clear() {
     m_bos.clear();
 }
 
+void FrmBosOnvConnection::connect(const FrmOnvField& src, const FrmOnvField& dst) {
+    m_bos.clear();
+    m_frm.connect(src, dst);
+}
+
+bool FrmBosOnvConnection::connect(const FrmOnvField& src, const FrmOnvField& dst, com_ops::Frm& com) {
+    m_bos.clear();
+    return m_frm.connect(src, dst, com);
+}
+
+void FrmBosOnvConnection::connect(const BosOnvField& src, const BosOnvField& dst) {
+    m_frm.clear();
+    m_bos.connect(src, dst);
+}
+
+bool FrmBosOnvConnection::connect(const BosOnvField& src, const BosOnvField& dst, com_ops::Bos& com) {
+    m_frm.clear();
+    return m_bos.connect(src, dst, com);
+}
+
 void FrmBosOnvConnection::connect(const FrmBosOnvField& src, const FrmBosOnvField& dst) {
     m_frm.connect(src.m_frm, dst.m_frm);
     m_bos.connect(src.m_bos, dst.m_bos);

@@ -87,9 +87,9 @@ private:
      * the initial state upon return
      */
     template<typename fn_t>
-    static void foreach_occ(const Mbf& mbf, const uintv_t& ispinorbs, const fn_t& fn) {
+    static void foreach_occ(const field::FrmOnv& mbf, const uintv_t& ispinorbs, const fn_t& fn) {
         functor::assert_prototype<void(uint_t /*ispinorb*/)>(fn);
-        auto& nc_mbf = const_cast<Mbf&>(mbf);
+        auto& nc_mbf = const_cast<field::FrmOnv&>(mbf);
         for (auto ispinorb: ispinorbs) {
             // skip when the spin orb is already vacant
             if (!mbf.get(ispinorb)) continue;
@@ -102,13 +102,21 @@ private:
         }
     }
 
+    template<typename fn_t>
+    static void foreach_occ(const field::BosOnv&, const uintv_t&, const fn_t&) {}
+
+    template<typename fn_t>
+    static void foreach_occ(const field::FrmBosOnv& mbf, const uintv_t& ispinorbs, const fn_t& fn) {
+        foreach_occ(mbf.m_frm, ispinorbs, fn);
+    }
+
     /**
      * as above but for inserting particles rather than holes
      */
     template<typename fn_t>
-    static void foreach_vac(const Mbf& mbf, const uintv_t& ispinorbs, const fn_t& fn) {
+    static void foreach_vac(const field::FrmOnv& mbf, const uintv_t& ispinorbs, const fn_t& fn) {
         functor::assert_prototype<void(uint_t /*ispinorb*/)>(fn);
-        auto& nc_mbf = const_cast<Mbf&>(mbf);
+        auto& nc_mbf = const_cast<field::FrmOnv&>(mbf);
         for (auto ispinorb: ispinorbs) {
             // skip when the spin orb is already occupied
             if (!mbf.get(ispinorb)) continue;
@@ -119,6 +127,14 @@ private:
             // reset the mbf to its state at input
             nc_mbf.clr(ispinorb);
         }
+    }
+
+    template<typename fn_t>
+    static void foreach_vac(const field::BosOnv&, const uintv_t&, const fn_t&) {}
+
+    template<typename fn_t>
+    static void foreach_vac(const field::FrmBosOnv& mbf, const uintv_t& ispinorbs, const fn_t& fn) {
+        foreach_vac(mbf.m_frm, ispinorbs, fn);
     }
 
     /**

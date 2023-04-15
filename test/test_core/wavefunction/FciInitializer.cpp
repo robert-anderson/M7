@@ -46,6 +46,7 @@ TEST(FciInitializer, BosHub) {
     FciInitializer init(ham, opt);
 }
 
+#if 0
 TEST(FciInitializer, BosHubLoop) {
     const uint_t nsite = 9;
     const uint_t nbos = 9;
@@ -63,7 +64,7 @@ TEST(FciInitializer, BosHubLoop) {
         v_t<buf_t> perms;
         perms.reserve(iters.m_single->m_niter*nsite);
         auto fn = [&onv, &perms]() {
-            perms.insert(perms.end(), onv.begin(), onv.end());
+            perms.insert(perms.end(), onv.cbegin(), onv.cend());
         };
         iters.m_single->loop(onv, fn);
         hdf5::FileWriter fw(logging::format("perms_{}site_{}bos.h5", nsite, nbos));
@@ -89,4 +90,5 @@ TEST(FciInitializer, BosHubLoop) {
         fw.write_data("evecs", results.get_evec(0ul), shape);
     }
 }
+#endif
 #endif

@@ -161,7 +161,7 @@ void BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst) {
     }
 }
 
-void BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst, BosOps &com) {
+bool BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst, BosOps &com) {
     DEBUG_ASSERT_EQ(src.nelement(), dst.nelement(), "src and dst ONVs are incompatible");
     clear();
     for (uint_t imode=0ul; imode<src.nelement(); ++imode){
@@ -169,6 +169,7 @@ void BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst, B
         else if (src[imode] < dst[imode]) m_cre.add(imode, uint_t(dst[imode]-src[imode]));
         else com.add(imode, src[imode]);
     }
+    return false; // Boson ONV connection always have even (false) fermi phase, obviously
 }
 
 void BosOnvConnection::apply(const BosOnvField &src, BosOnvField &dst) const {
