@@ -5,12 +5,12 @@ on:
     branches: [ "dev" ]
   pull_request:
     branches: [ "dev" ]
+env:
+  BUILD_TYPE: Release
+  HOME_DIR: /home/user
 jobs:
   tests:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: /home/user
     container:
       image: ghcr.io/robert-anderson/m7_tester
       options: --user user
@@ -23,16 +23,16 @@ jobs:
       run: lscpu && free -h
 
     - name: Checkout
-      run: checkout.sh
+      run: ${{env.HOME_DIR}}/checkout.sh
 
     - name: Configure CMake (Fermion, real)
-      run: cmake.sh Release fermion no
+      run: ${{env.HOME_DIR}}/cmake.sh Release fermion no
 
     - name: Build (Fermion, real)
-      run: build.sh Release fermion no 2
+      run: ${{env.HOME_DIR}}/build.sh Release fermion no 2
 
     - name: Serial unit test (Fermion, real)
-      run: unittest.sh Release fermion no 1
+      run: ${{env.HOME_DIR}}/unittest.sh Release fermion no 1
 
     - name: Parallel unit test (Fermion, real)
-      run: unittest.sh Release fermion no 2
+      run: ${{env.HOME_DIR}}/unittest.sh Release fermion no 2
