@@ -20,7 +20,7 @@ jobs:
       run: lscpu && free -h
 
     - name: Checkout
-      run: bash /home/user/checkout.sh
+      run: echo $HOME && bash /home/user/checkout.sh
 
     - name: Configure CMake (Fermion, real)
       run: bash /home/user/cmake.sh Release fermion no
