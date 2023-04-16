@@ -5,20 +5,12 @@ on:
     branches: [ "dev" ]
   pull_request:
     branches: [ "dev" ]
-
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-  ROOT_DIR: /home/tester
-  SRC_DIR: /home/tester/M7
-  BUILD_DIR: /home/tester/build
-
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/robert-anderson/m7_tester
-      options: --user tester
+      options: --user user
       credentials:
         username: robert-anderson
         password: ${{ secrets.DOCKER_REGISTRY_PAT }}
@@ -28,21 +20,18 @@ jobs:
       run: lscpu && free -h
 
     - name: Checkout
-      working-directory: ${{env.ROOT_DIR}}
-      run: git clone https://github.com/robert-anderson/M7.git && mkdir ${{env.BUILD_DIR}}
+      working-directory: ${{env.HOME_DIR}}
+      run: checkout.sh
 
+    # Fermion, real walkers
     - name: Configure CMake
-      working-directory: ${{env.BUILD_DIR}}
-      run: cmake ${{env.SRC_DIR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake.sh Release fermion no
 
     - name: Build
-      working-directory: ${{env.BUILD_DIR}}
-      run: make -j 2
+      run: build.sh Release fermion no 2
 
-    - name: SerialUnitTest
-      working-directory: ${{env.BUILD_DIR}}
-      run: test/unittest --gtest_filter=*
+    - name: Serial unit test
+      run: unittest.sh Release fermion no 1
 
-    - name: ParallelUnitTest
-      working-directory: ${{env.BUILD_DIR}}
-      run: mpirun -n 2 test/unittest --gtest_filter=*
+    - name: Parallel unit test
+      run: unittest.sh Release fermion no 2
