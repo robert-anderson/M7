@@ -20,16 +20,16 @@ jobs:
       run: lscpu && free -h
 
     - name: Checkout
-      run: bash ~/checkout.sh
+      run: bash /home/user/checkout.sh
 
     - name: Configure CMake (Fermion, real)
-      run: bash ~/cmake.sh Release fermion no
+      run: bash /home/user/cmake.sh Release fermion no
 
     - name: Build (Fermion, real)
-      run: bash ~/build.sh Release fermion no 2
+      run: bash /home/user/build.sh Release fermion no 2
 
     - name: Serial unit test (Fermion, real)
-      run: bash ~/unittest.sh Release fermion no 1
+      run: bash /home/user/unittest.sh Release fermion no 1
 
     - name: Parallel unit test (Fermion, real)
-      run: bash ~/unittest.sh Release fermion no 2
+      run: bash /home/user/unittest.sh Release fermion no 2
