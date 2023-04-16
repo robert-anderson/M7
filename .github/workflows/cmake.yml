@@ -20,18 +20,16 @@ jobs:
       run: lscpu && free -h
 
     - name: Checkout
-      working-directory: ${{env.HOME_DIR}}
       run: checkout.sh
 
-    # Fermion, real walkers
-    - name: Configure CMake
+    - name: Configure CMake (Fermion, real)
       run: cmake.sh Release fermion no
 
-    - name: Build
+    - name: Build (Fermion, real)
       run: build.sh Release fermion no 2
 
-    - name: Serial unit test
+    - name: Serial unit test (Fermion, real)
       run: unittest.sh Release fermion no 1
 
-    - name: Parallel unit test
+    - name: Parallel unit test (Fermion, real)
       run: unittest.sh Release fermion no 2
