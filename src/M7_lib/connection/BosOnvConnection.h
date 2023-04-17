@@ -132,7 +132,7 @@ struct BosOnvConnection {
 
     void connect(const BosOnvField& src, const BosOnvField& dst);
 
-    void connect(const BosOnvField& src, const BosOnvField& dst, BosOps& com);
+    bool connect(const BosOnvField& src, const BosOnvField& dst, BosOps& com);
 
     void apply(const BosOnvField &src, BosOnvField &dst) const;
 
@@ -143,6 +143,11 @@ struct BosOnvConnection {
     OpSig exsig() const;
 
     bool respects_occ_range(const BosOnvField &src, uint_t nboson_max) const;
+
+    /**
+     * fermi phase of any purely-bosonic connection is always false
+     */
+    bool phase(const BosOnvField &) const { return false; }
 
 };
 

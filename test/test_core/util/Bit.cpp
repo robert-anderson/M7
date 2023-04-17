@@ -160,7 +160,7 @@ TEST(UtilBit, NextSetByte) {
         uint64_t u64 = 0;
         for (uint i=0ul; i<CHAR_BIT; ++i) {
             // set the byte to an arbitrary value if its corresponding bit in the counter is set
-            if (bit::get(set_bytes, i)) reinterpret_cast<char*>(&u64)[i] = 'M';
+            if (bit::get(set_bytes, i)) bit::put_byte(u64, i, 'M');
         }
         const auto nsetbit_chk = bit::nsetbit(uint_t(set_bytes));
         uint_t nsetbit=0ul;
@@ -182,11 +182,11 @@ TEST(UtilBit, TrailzSoftwareImpl64) {
     /*
      * software implementation should agree with optimized implementation (if any available)
      */
-    ASSERT_EQ(bit::trailz64(0ul), bit::trailz64_c(0ul));
+    ASSERT_EQ(bit::trailz(0ul), bit::trailz_c(0ul));
     for (uint_t ibit=0ul; ibit < 64ul; ++ibit) {
-        ASSERT_EQ(bit::trailz64_c(1ul << ibit), ibit);
-        ASSERT_EQ(bit::trailz64(1ul << ibit), ibit);
-        ASSERT_EQ(bit::trailz64(1ul << ibit), bit::trailz64_c(1ul << ibit));
+        ASSERT_EQ(bit::trailz_c(1ul << ibit), ibit);
+        ASSERT_EQ(bit::trailz(1ul << ibit), ibit);
+        ASSERT_EQ(bit::trailz(1ul << ibit), bit::trailz_c(1ul << ibit));
     }
 }
 
@@ -194,11 +194,11 @@ TEST(UtilBit, TrailzSoftwareImpl32) {
     /*
      * software implementation should agree with optimized implementation (if any available)
      */
-    ASSERT_EQ(bit::trailz32(0), bit::trailz32_c(0));
+    ASSERT_EQ(bit::trailz(0u), bit::trailz_c(0u));
     for (uint_t ibit=0ul; ibit < 32ul; ++ibit) {
-        ASSERT_EQ(bit::trailz32_c(1 << ibit), ibit);
-        ASSERT_EQ(bit::trailz32(1 << ibit), ibit);
-        ASSERT_EQ(bit::trailz32(1 << ibit), bit::trailz32_c(1 << ibit));
+        ASSERT_EQ(bit::trailz_c(1u << ibit), ibit);
+        ASSERT_EQ(bit::trailz(1u << ibit), ibit);
+        ASSERT_EQ(bit::trailz(1u << ibit), bit::trailz_c(1u << ibit));
     }
 }
 
@@ -208,13 +208,13 @@ TEST(UtilBit, NSetBitSoftwareImpl64) {
      */
     uint64_t i;
     i = 0;
-    ASSERT_EQ(bit::nsetbit64(i), bit::nsetbit64_c(i));
+    ASSERT_EQ(bit::nsetbit(i), bit::nsetbit_c(i));
     i = 219354;
-    ASSERT_EQ(bit::nsetbit64(i), bit::nsetbit64_c(i));
+    ASSERT_EQ(bit::nsetbit(i), bit::nsetbit_c(i));
     i = 543821345;
-    ASSERT_EQ(bit::nsetbit64(i), bit::nsetbit64_c(i));
+    ASSERT_EQ(bit::nsetbit(i), bit::nsetbit_c(i));
     i += 1ul << 40;
-    ASSERT_EQ(bit::nsetbit64(i), bit::nsetbit64_c(i));
+    ASSERT_EQ(bit::nsetbit(i), bit::nsetbit_c(i));
 }
 
 TEST(UtilBit, NSetBitSoftwareImpl32) {
@@ -223,11 +223,11 @@ TEST(UtilBit, NSetBitSoftwareImpl32) {
      */
     uint32_t i;
     i = 0;
-    ASSERT_EQ(bit::nsetbit32(i), bit::nsetbit32_c(i));
+    ASSERT_EQ(bit::nsetbit(i), bit::nsetbit_c(i));
     i = 219354;
-    ASSERT_EQ(bit::nsetbit32(i), bit::nsetbit32_c(i));
+    ASSERT_EQ(bit::nsetbit(i), bit::nsetbit_c(i));
     i = 543821345;
-    ASSERT_EQ(bit::nsetbit32(i), bit::nsetbit32_c(i));
+    ASSERT_EQ(bit::nsetbit(i), bit::nsetbit_c(i));
     i += 1ul << 20;
-    ASSERT_EQ(bit::nsetbit32(i), bit::nsetbit32_c(i));
+    ASSERT_EQ(bit::nsetbit(i), bit::nsetbit_c(i));
 }

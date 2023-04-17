@@ -17,10 +17,6 @@ class BufferedTableArray {
         return static_cast<const TableBase &>(m_tables[0]).row_size();
     }
 
-    uint_t window_size() const {
-        return static_cast<const TableBase &>(m_tables[0]).m_bw.m_size;
-    }
-
 public:
     typedef table_impl_t table_t;
 
@@ -34,10 +30,6 @@ public:
 
     const buf_t *begin() const {
         return m_tables[0].begin();
-    }
-
-    uint_t buffer_size() const {
-        return m_buffer.size();
     }
 
     uint_t bw_size() const {

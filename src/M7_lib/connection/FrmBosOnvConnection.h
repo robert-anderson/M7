@@ -21,6 +21,15 @@ struct FrmBosOnvConnection {
 
     void clear();
 
+
+    void connect(const FrmOnvField& src, const FrmOnvField& dst);
+
+    bool connect(const FrmOnvField &src, const FrmOnvField &dst, com_ops::Frm &com);
+
+    void connect(const BosOnvField& src, const BosOnvField& dst);
+
+    bool connect(const BosOnvField &src, const BosOnvField &dst, com_ops::Bos &com);
+
     void connect(const FrmBosOnvField& src, const FrmBosOnvField& dst);
 
     bool connect(const FrmBosOnvField &src, const FrmBosOnvField &dst, com_ops::FrmBos &com);
@@ -30,6 +39,10 @@ struct FrmBosOnvConnection {
     OpSig exsig() const;
 
     bool respects_occ_range(const FrmBosOnvField& src, uint_t nboson_max) const;
+
+    bool phase(const FrmBosOnvField &src) const {
+        return m_frm.phase(src.m_frm);
+    }
 };
 
 static std::ostream &operator<<(std::ostream &os, const FrmBosOnvConnection &conn) {

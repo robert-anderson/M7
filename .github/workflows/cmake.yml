@@ -1,0 +1,35 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/robert-anderson/m7_tester
+      options: --user user
+      credentials:
+        username: robert-anderson
+        password: ${{ secrets.DOCKER_REGISTRY_PAT }}
+
+    steps:
+    - name: Report Runner Resources
+      run: lscpu && free -h
+
+    - name: Checkout
+      run: bash /home/user/checkout.sh
+
+    - name: Configure CMake (Fermion, real)
+      run: bash /home/user/cmake.sh Release fermion no
+
+    - name: Build (Fermion, real)
+      run: bash /home/user/build.sh Release fermion no 2
+
+    - name: Serial unit test (Fermion, real)
+      run: bash /home/user/unittest.sh Release fermion no 1
+
+    - name: Parallel unit test (Fermion, real)
+      run: bash /home/user/unittest.sh Release fermion no 2

@@ -114,14 +114,36 @@ namespace bit {
         return x & (T(1) << T(i));
     }
 
+    template<typename T>
+    static void put_byte(T &x, uint_t ibyte, char c) {
+        T mask;
+        // first clear the byte in x
+        mask = 0xff;
+        mask <<= ibyte * CHAR_BIT;
+        x &= ~mask;
+        // then insert the char
+        mask = c;
+        mask <<= ibyte * CHAR_BIT;
+        x |= mask;
+    }
+
+    template<typename T>
+    static void clr_byte(T &x, uint_t ibyte) {
+        put_byte(x, ibyte, 0);
+    }
+
+    template<typename T>
+    static char get_byte(const T &x, uint_t ibyte) {
+        return (x >> ibyte * CHAR_BIT) & 0xff;
+    }
+
     /*
      * "count trailing zeros" implementations for 32-bit and 64-bit unsigned integers
      * _tzcnt: inline the x86 instruction TZCNT
-     * _clz: inline the ARM instruction CLZ
-     * _c: carry out the operation in software (slow), only used when neither of the above are supported
+     * _c: carry out the operation in software
      */
 
-    static uint_t trailz64_tzcnt(const uint64_t &n) {
+    static uint_t trailz_tzcnt(const uint64_t &n) {
 #ifdef ENABLE_TZCNT
         uint_t res;
         asm("tzcntq %1, %0;": "=r" (res): "r" (n));
@@ -132,7 +154,7 @@ namespace bit {
 #endif
     }
 
-    static uint_t trailz32_tzcnt(const uint32_t &n) {
+    static uint_t trailz_tzcnt(const uint32_t &n) {
 #ifdef ENABLE_TZCNT
         if (!n) return 32;
         uint32_t res;
@@ -144,175 +166,133 @@ namespace bit {
 #endif
     }
 
-    static uint_t trailz64_clz(const uint64_t &n) {
-#ifdef ENABLE_CLZ
-        if (!n) return 64;
-        uint_t result;
-        asm("clz %x0, %x1": "=r" (result): "r" (n));
-        return 63 - result;
-#else
-        (void) n;
-        return ~0ul;
-#endif
-    }
-
-    static uint_t trailz32_clz(const uint32_t &n) {
-#ifdef ENABLE_CLZ
-        if (!n) return 32;
-        uint32_t result;
-        asm("clz %w0, %w1": "=r" (result): "r" (n));
-        return 31 - result;
-#else
-        (void) n;
-        return ~0ul;
-#endif
-    }
-
-    static uint_t trailz64_c(const uint64_t &n) {
+    static uint_t trailz_c(const uint64_t &n) {
         if (!n) return 64;
         uint8_t index;
-        for (uint_t shift = 0ul; shift != 64; shift += 8) {
-            index = (n >> shift) & 0xff;
-            if (index) return bit::trailz_c_table[index] + shift;
-        }
-        return 64;
+        if ((index = (n & 0xff))) return bit::trailz_c_table[index];
+        else if ((index = (n >> 8) & 0xff)) return bit::trailz_c_table[index] + 8;
+        else if ((index = (n >> 16) & 0xff)) return bit::trailz_c_table[index] + 16;
+        else if ((index = (n >> 24) & 0xff)) return bit::trailz_c_table[index] + 24;
+        else if ((index = (n >> 32) & 0xff)) return bit::trailz_c_table[index] + 32;
+        else if ((index = (n >> 40) & 0xff)) return bit::trailz_c_table[index] + 40;
+        else if ((index = (n >> 48) & 0xff)) return bit::trailz_c_table[index] + 48;
+        else return bit::trailz_c_table[(n >> 56) & 0xff] + 56;
     }
 
-    static uint_t trailz32_c(const uint32_t &n) {
+    static uint_t trailz_c(const uint32_t &n) {
         if (!n) return 32;
         uint8_t index;
-        for (uint_t shift = 0ul; shift != 32; shift += 8) {
-            index = (n >> shift) & 0xff;
-            if (index) return bit::trailz_c_table[index] + shift;
-        }
-        return 32;
+        if ((index = (n & 0xff))) return bit::trailz_c_table[index];
+        else if ((index = (n >> 8) & 0xff)) return bit::trailz_c_table[index] + 8;
+        else if ((index = (n >> 16) & 0xff)) return bit::trailz_c_table[index] + 16;
+        else return bit::trailz_c_table[(n >> 24) & 0xff] + 24;
     }
 
-    static uint_t trailz64(const uint64_t &n) {
+    template<typename T>
+    static uint_t trailz(const T &n) {
+        static_assert(std::is_integral<T>::value, "integral type required");
+        static_assert(sizeof(T)==4 || sizeof(T)==8, "invalid size");
+        return sizeof(T)==4 ?
+            trailz(reinterpret_cast<const uint32_t&>(n)) :
+            trailz(reinterpret_cast<const uint64_t&>(n));
+    }
+
+    static uint_t trailz(const uint64_t &n) {
 #if defined(ENABLE_TZCNT)
-        return trailz64_tzcnt(n);
-#elif defined(ENABLE_CLZ)
-        return trailz64_clz(n);
+        return trailz_tzcnt(n);
 #else
         // resort to software implementation
         return trailz64_c(n);
 #endif
     }
 
-    static uint_t trailz32(const uint32_t &n) {
+    static uint_t trailz(const uint32_t &n) {
 #if defined(ENABLE_TZCNT)
-        return trailz32_tzcnt(n);
-#elif defined(ENABLE_CLZ)
-        return trailz32_clz(n);
+        return trailz_tzcnt(n);
 #else
         // resort to software implementation
         return trailz32_c(n);
 #endif
     }
 
+    template<typename T>
+    static uint_t next_setbit(T &work) {
+        const auto result = trailz(work);
+        bit::clr(work, result);
+        return result;
+    }
+
+
+    template<typename T>
+    static uint_t next_setbyte(T &work) {
+        static_assert(std::is_integral<T>::value && std::is_unsigned<T>::value, "invalid type for bit operations");
+        const uint_t ibyte = next_setbit(work) / CHAR_BIT;
+        clr_byte(work, ibyte);
+        return ibyte;
+    }
 
     /*
      * "count number of set bits" implementations for 32-bit and 64-bit unsigned integers
      * _popcnt: inline the x86 instructions POPCNT (32-bit) and POPCNTQ (64-bit)
-     * _arm_neon: use the ARM Neon vector suite
-     * _c: carry out the operation in software (slow), only used when neither of the above are supported
+     * _c: carry out the operation in software
      */
 
-    static uint_t nsetbit64_popcnt(const uint64_t &n) {
+    static uint_t nsetbit_popcnt(const uint64_t &n) {
         uint_t res;
         asm("popcntq %1, %0;": "=r" (res): "r" (n));
         return res;
     }
 
-    static uint_t nsetbit32_popcnt(const uint32_t &n) {
+    static uint_t nsetbit_popcnt(const uint32_t &n) {
         uint32_t res;
         asm("popcnt %1, %0;": "=r" (res): "r" (n));
         return res;
     }
 
-    static uint_t nsetbit64_arm_neon(const uint64_t &n) {
-#ifdef ENABLE_ARM_NEON
-        uint8x8_t vec = vld1_u8(reinterpret_cast<const unsigned char*>(&n));
-        uint64x1_t popcount = vpaddl_u32(vpaddl_u16(vpaddl_u8(vcnt_u8(vec))));
-        return vget_lane_u64(popcount, 0);
-#else
-        (void) n;
-        return ~0ul;
-#endif
+    static uint_t nsetbit_c(const uint64_t &n) {
+        return popcnt_c_table[n & 0xff] +
+            popcnt_c_table[(n >> 8) & 0xff] +
+            popcnt_c_table[(n >> 16) & 0xff] +
+            popcnt_c_table[(n >> 24) & 0xff] +
+            popcnt_c_table[(n >> 32) & 0xff] +
+            popcnt_c_table[(n >> 40) & 0xff] +
+            popcnt_c_table[(n >> 48) & 0xff] +
+            popcnt_c_table[(n >> 56) & 0xff];
     }
 
-    static uint_t nsetbit32_arm_neon(const uint32_t &n) {
-        return nsetbit64_arm_neon(n);
+    static uint_t nsetbit_c(const uint32_t &n) {
+        return popcnt_c_table[n & 0xff] +
+            popcnt_c_table[(n >> 8) & 0xff] +
+            popcnt_c_table[(n >> 16) & 0xff] +
+            popcnt_c_table[(n >> 24) & 0xff];
     }
 
-    static uint_t nsetbit64_c(const uint64_t &n) {
-        if (!n) return 0;
-        uint_t tot = 0ul;
-        for (uint_t shift = 0ul; shift != 64; shift += 8) tot += popcnt_c_table[(n >> shift) & 0xff];
-        return tot;
+
+    template<typename T>
+    static uint_t nsetbit(const T &n) {
+        static_assert(std::is_integral<T>::value, "integral type required");
+        static_assert(sizeof(T)==4 || sizeof(T)==8, "invalid size");
+        return sizeof(T)==4 ?
+               nsetbit(reinterpret_cast<const uint32_t&>(n)) :
+               nsetbit(reinterpret_cast<const uint64_t&>(n));
     }
 
-    static uint_t nsetbit32_c(const uint32_t &n) {
-        if (!n) return 0;
-        uint_t tot = 0ul;
-        for (uint_t shift = 0ul; shift != 32; shift += 8) tot += popcnt_c_table[(n >> shift) & 0xff];
-        return tot;
-    }
-
-    static uint_t nsetbit64(const uint64_t &n) {
+    static uint_t nsetbit(const uint64_t &n) {
 #if defined(ENABLE_POPCNT)
-        return nsetbit64_popcnt(n);
-#elif defined(ENABLE_ARM_NEON)
-        return nsetbit64_arm_neon(n);
+        return nsetbit_popcnt(n);
 #else
         // resort to software implementation
         return nsetbit64_c(n);
 #endif
     }
 
-    static uint_t nsetbit32(const uint32_t &n) {
+    static uint_t nsetbit(const uint32_t &n) {
 #if defined(ENABLE_POPCNT)
-        return nsetbit32_popcnt(n);
-#elif defined(ENABLE_ARM_NEON)
-        return nsetbit32_arm_neon(n);
+        return nsetbit_popcnt(n);
 #else
         // resort to software implementation
         return nsetbit32_c(n);
 #endif
-    }
-
-    static uint_t next_setbit(uint64_t &work) {
-        static_assert(sizeof(work) == 8, "Data length not supported");
-        const auto result = trailz64(work);
-        bit::clr(work, result);
-        return result;
-    }
-
-    static uint_t next_setbit(uint32_t &work) {
-        static_assert(sizeof(work) == 4, "Data length not supported");
-        const auto result = trailz32(work);
-        bit::clr(work, result);
-        return result;
-    }
-
-    template<typename T>
-    static uint_t next_setbyte(T &work) {
-        static_assert(std::is_integral<T>::value && std::is_unsigned<T>::value, "invalid type for bit operations");
-        const uint_t ibyte = next_setbit(work) / CHAR_BIT;
-        reinterpret_cast<char*>(&work)[ibyte] = 0;
-        return ibyte;
-    }
-
-
-
-    static uint_t nsetbit(const uint64_t &work) {
-        static_assert(sizeof(work) == 8, "Data length not supported");
-        return nsetbit64(work);
-    }
-
-    static uint_t nsetbit(const uint32_t &work) {
-        static_assert(sizeof(work) == 4, "Data length not supported");
-        return nsetbit32(work);
     }
 
     /**

@@ -65,11 +65,15 @@ class OpSig {
     }
 
 public:
+
+    struct Pair {
+        uint_t m_ncre, m_nann;
+    };
     constexpr explicit OpSig(uint_t opsig): m_i(opsig){}
 
     constexpr OpSig(): OpSig(0ul){}
 
-    constexpr OpSig(uintp_t frm, uintp_t bos): m_i(encode(frm.first, frm.second, bos.first, bos.second)){}
+    constexpr OpSig(Pair frm, Pair bos): m_i(encode(frm.m_ncre, frm.m_nann, bos.m_ncre, bos.m_nann)){}
 
     constexpr OpSig(const OpSig& opsig): OpSig(opsig.m_i){}
 
@@ -203,7 +207,7 @@ public:
      * @return
      *  assuming this is a rank signature, the OpSig with the smallest nop which contributes (promotes to this ranksig)
      */
-    OpSig base() const {
+    constexpr OpSig base() const {
         return {
             {
                 nfrm_cre() - (ncontrib_frm() - 1),
@@ -224,7 +228,7 @@ public:
      * @return
      *  new OpSig with the additional operators
      */
-    OpSig add_ops(uint_t nfrm, uint_t nbos) const {
+    constexpr OpSig add_ops(uint_t nfrm, uint_t nbos) const {
         return {{nfrm_cre() + nfrm, nfrm_ann() + nfrm}, {nbos_cre() + nbos, nbos_ann() + nbos}};
     }
 
@@ -250,7 +254,7 @@ public:
      * @return
      *  the OpSig representing the hermitian conjugate of the operator represented by this OpSig
      */
-    OpSig conj() const {
+    constexpr OpSig conj() const {
         return {{nfrm_ann(), nfrm_cre()}, {nbos_ann(), nbos_cre()}};
     }
 

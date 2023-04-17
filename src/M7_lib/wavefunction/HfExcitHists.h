@@ -90,11 +90,19 @@ namespace hf_excit_hist {
 
         v_t<double> make_threshs();
 
-        bool apply(field::Mbf& mbf, uint_t ientry);
+        bool apply(field::FrmOnv& mbf, uint_t ientry);
+        bool apply(field::BosOnv&, uint_t) {return false;}
+        bool apply(field::FrmBosOnv& mbf, uint_t ientry) {return apply(mbf.m_frm, ientry);}
 
-        bool undo(field::Mbf& mbf, uint_t ientry);
+        bool undo(field::FrmOnv& mbf, uint_t ientry);
+        bool undo(field::BosOnv&, uint_t) {return false;}
+        bool undo(field::FrmBosOnv& mbf, uint_t ientry) {return undo(mbf.m_frm, ientry);}
 
-        bool phase(field::Mbf& mbf);
+        template<typename mbf_t>
+        bool phase(mbf_t& mbf) {
+            m_work_conn.connect(m_hf, mbf);
+            return m_work_conn.phase(m_hf);
+        }
 
         /**
          * recurse through coefficient tree from ielement
