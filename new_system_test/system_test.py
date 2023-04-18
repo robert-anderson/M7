@@ -22,8 +22,6 @@ RUN_DIR = DEF_DIR/'tmp'
 # assets: static assets shared by multiple test definitions are defined under this dir
 AST_DIR = Path(__file__).parent.parent/'assets'
 
-# if this test does not have a defined reference, comparative tests are skipped
-HAVE_REF = REF_DIR.exists()
 # if there is already a tmp directory, remove it
 shutil.rmtree(RUN_DIR, ignore_errors=True)
 RUN_DIR.mkdir()
@@ -32,8 +30,12 @@ assert AST_DIR.exists()
 
 parser = argparse.ArgumentParser(description='Run this M7 system test')
 parser.add_argument('m7_exe', type=str, help='path to M7 binary')
-parser.add_argument('mpirun', type=str, help='path to mpirun executable', default='mpirun')
+parser.add_argument('mpirun', type=str, help='path to mpirun executable', default='mpirun', nargs='?')
+parser.add_argument('static_only', type=int, help='if non-zero, any defined reference is ignored', default=0, nargs='?')
 args = parser.parse_args()
+
+# if this test does not have a defined reference or static only is specified, comparative tests are skipped
+DO_COMPS = REF_DIR.exists() and not bool(args.static_only)
 
 # root/path is given priority. if it doesn't exist then assume path is absolute
 def resolve_path(root, path):
@@ -88,6 +90,38 @@ def fail(static):
     # 2: comparative failure
     sys.exit(1+bool(static))
 
+
+class StatsFile:
+    fields = []
+    data = None
+    def __init__(self, fname):
+        with open(fname, 'r') as f:
+            for line in f.readlines():
+                if not line.startswith('#'): break
+                split = line[1:].strip().split('.')
+                try: i = int(split[0])-1
+                except ValueError: continue
+                self.fields.append((i, split[1].split('(')[0].strip()))
+        self.data = np.loadtxt(fname)
+
+    def ncolumn(self):
+        return self.data.shape[1]
+
+    def field_column_range(self, field_name_hint):
+        for i, field in enumerate(self.fields):
+            if field[1].lower().startswith(field_name_hint.lower()): 
+                icolumn_start = field[0]
+                try: icolumn_end = self.fields[i+1][0]
+                except IndexError: icolumn_end = ncolumn()
+                return np.arange(icolumn_start, icolumn_end)
+        return None
+
+    def stats_columns(self, field_name_hint):
+        return self.data[:, self.field_column_range(field_name_hint)]
+
+ref_stats_file = StatsFile(REF_DIR/'M7.stats') if DO_COMPS else None
+run_stats_file = None
+
 def run(config_fname='config.yaml', nrank=1, copy_deps=[], link_deps=[]):
     cmd = f'{args.mpirun} -n {nrank} {args.m7_exe} {config_fname}'
     # config is copied so that it is retained when copied to ref
@@ -95,6 +129,30 @@ def run(config_fname='config.yaml', nrank=1, copy_deps=[], link_deps=[]):
     for dep in copy_deps: bring(dep, 'copy')
     for dep in link_deps: bring(dep, 'link')
     with resource_manager.instance(nrank):
-        print(cmd)
         out, err = shell(cmd, RUN_DIR)
         assert not len(err), 'error stream non-empty'
+
+    # update stats to those of this run
+    global run_stats_file
+    run_stats_file = StatsFile(RUN_DIR/'M7.stats')
+
+def stats_columns(col_name, fname='M7.stats'):
+    stats = instance.stats(fname)
+    column = stats[0].lookup_column(col_name)
+    assert column is not None
+    if not benchmarking:
+        return stats[0].data[:,column[0]], stats[1].data[:,column[0]]
+    else:
+        return stats[0].data[:,column[0]], None
+
+def comp_fields(field_name_hint, fname='M7.stats'):
+    if not DO_COMPS: return
+    run = run_stats_file.stats_columns(field_name_hint)
+    ref = ref_stats_file.stats_columns(field_name_hint)
+    if not np.allclose(run, ref): fail(False)
+
+def comp_nw(fname='M7.stats'): comp_fields('WF L1 norm', fname)
+def comp_ref_weight(fname='M7.stats'): comp_fields('Reference weight', fname)
+def comp_shift(fname='M7.stats'): comp_fields('Diagonal shift', fname)
+def comp_ninit(fname='M7.stats'): comp_fields('Initiator', fname)
+def comp_nocc_mbf(fname='M7.stats'): comp_fields('Occupied MBFs', fname)

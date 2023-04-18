@@ -23,7 +23,7 @@ for path in args.paths: assert Path(path).exists()
 
 procs = []
 for path in args.paths:
-    cmd = [sys.executable, Path(path).resolve(), args.m7_exe, args.mpirun]
+    cmd = [sys.executable, Path(path).resolve(), args.m7_exe, args.mpirun, str(int(args.mode=='redef'))]
     procs.append(Popen(cmd, cwd=os.getcwd()))
 
 # None = not finished
