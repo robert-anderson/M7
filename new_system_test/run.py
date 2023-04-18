@@ -7,13 +7,13 @@ import numpy as np
 # this script simply dispatches a number of test scripts
 
 parser = argparse.ArgumentParser(description='Run a suite of M7 system tests')
-#parser.add_argument('--rebench', type=bool, help='path to M7 binary')
+#parser.add_argument('--refresh', type=bool, help='path to M7 binary')
 #parser.add_argument('--feature', action='store_true')
 #parser.add_argument('--no-feature', dest='feature', action='store_false')
 #parser.set_defaults(feature=True)
 
-parser.add_argument('mode', type=str, choices=['test', 'rebench'],
-        help='"test" to run tests or "rebench" to run tests and rebenchmark the static-passing ones')
+parser.add_argument('mode', type=str, choices=['test', 'redef'],
+        help='"test" to run tests or "redef" to run tests and redefine the refs of the static-passing ones')
 parser.add_argument('m7_exe', type=str, help='path to M7 binary')
 parser.add_argument('mpirun', type=str, help='path to mpirun executable', default='mpirun')
 parser.add_argument('-p', '--paths', nargs='+', default=[])
@@ -42,22 +42,22 @@ def all_procs_done():
 from resource_manager import poll_until
 poll_until(all_procs_done)
 
-def rebench(script_path):
+def redef(script_path):
     def_dir = Path(script_path).resolve().parent
     run_dir = def_dir / 'tmp'
-    bmk_dir = def_dir / 'benchmark'
+    ref_dir = def_dir / 'ref'
     # delete all symlinks in run directory
     for filename in os.listdir(run_dir):
         file_path = os.path.join(run_dir, filename)
         if os.path.islink(file_path): os.remove(file_path)
-    shutil.rmtree(bmk_dir, ignore_errors=True)
-    shutil.move(run_dir, bmk_dir)
+    shutil.rmtree(ref_dir, ignore_errors=True)
+    shutil.move(run_dir, ref_dir)
 
-if (args.mode=='rebench'):
-    print('rebenchmarking all statically-passing tests:')
+if (args.mode=='redef'):
+    print('redefining references for all statically-passing tests:')
     for i, exit_code in enumerate(failed):
         if exit_code: continue
         print(args.paths[i])
-        rebench(args.paths[i])
+        redef(args.paths[i])
         
 assert not any(failed), 'not all tests passed'

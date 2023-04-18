@@ -8,22 +8,22 @@ import resource_manager
 
 # test functionality is split into two concepts:
 # - Static: verify current test instance against some external asset
-# - Regression: verify current test instance against a previous benchmark instance
+# - Comparative: verify current test instance against a trusted reference instance
 
 # set up paths for all relevant directories
 # working directory: where the resource_manager keeps track of the number of ranks in use
 WRK_DIR = Path(os.getcwd()).resolve()
 # test definition: where the test script importing this file is located
 DEF_DIR = Path(argv[0]).parent.resolve()
-# benchmark: contains the artefacts defining a passing run
-BMK_DIR = DEF_DIR/'benchmark'
+# reference: contains the artefacts defining a passing run
+REF_DIR = DEF_DIR/'ref'
 # run: the working directory for instances of the tested program
 RUN_DIR = DEF_DIR/'tmp'
 # assets: static assets shared by multiple test definitions are defined under this dir
 AST_DIR = Path(__file__).parent.parent/'assets'
 
-# if this test does not have a defined benchmark, regression tests are skipped
-HAVE_BMK = BMK_DIR.exists()
+# if this test does not have a defined reference, comparative tests are skipped
+HAVE_REF = REF_DIR.exists()
 # if there is already a tmp directory, remove it
 shutil.rmtree(RUN_DIR, ignore_errors=True)
 RUN_DIR.mkdir()
@@ -81,9 +81,16 @@ def shell(cmd, wd):
     tmp = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True, cwd=wd).communicate()
     return str(tmp[0], 'utf8'), str(tmp[1], 'utf8')
 
+def fail(static):
+    # exit codes:
+    # 0: passed
+    # 1: static failure
+    # 2: comparative failure
+    sys.exit(1+bool(static))
+
 def run(config_fname='config.yaml', nrank=1, copy_deps=[], link_deps=[]):
     cmd = f'{args.mpirun} -n {nrank} {args.m7_exe} {config_fname}'
-    # config is copied so that it is retained when copied to benchmark
+    # config is copied so that it is retained when copied to ref
     copy_deps.append(config_fname)
     for dep in copy_deps: bring(dep, 'copy')
     for dep in link_deps: bring(dep, 'link')
