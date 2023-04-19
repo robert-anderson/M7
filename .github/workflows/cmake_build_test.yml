@@ -28,11 +28,11 @@ jobs:
     - name: Build (Fermion, real)
       run: bash /home/user/build.sh Release fermion no 2
 
+    - name: System tests (Fermion, real)
+      run: bash /home/user/system_test.sh Release fermion no
+
     - name: Serial unit tests (Fermion, real)
       run: bash /home/user/unittest.sh Release fermion no 1
 
     - name: Parallel unit tests (Fermion, real)
       run: bash /home/user/unittest.sh Release fermion no 2
-
-    - name: System tests (Fermion, real)
-      run: bash /home/user/system_test.sh Release fermion no
