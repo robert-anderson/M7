@@ -1,0 +1,28 @@
+[1681901565] [info] Reallocating buffer " send" 0B -> 32.000000KB
+[1681901565] [info] Reallocating buffer " recv" 0B -> 32.000000KB
+[1681901565] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1681901565] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1681901565] [info] Reallocating buffer " recv" 0B -> 32.000000KB
+[1681901565] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1681901565] [info] Reallocating buffer "wavefunction" 0B -> 64.000000KB
+[1681901565] [info] Reallocating buffer "wavefunction send" 0B -> 240B
+[1681901565] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
+[1681901565] [info] Reallocating buffer "reference gather send" 0B -> 32B
+[1681901565] [info] Reallocating buffer "reference all gathered rows" 0B -> 32B
+[1681901565] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
+[1681901565] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
+[1681901565] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
+[1681901565] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
+[1681901565] [info] Reallocating buffer "M7.stats" 0B -> 144B
+[1681901565] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1681901565] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
+[1681901582] [info] Reallocating buffer "wavefunction send" 240B -> 400B
+[1681901582] [info] Reallocating buffer "wavefunction recv" 240B -> 400B
+[1681901593] [info] Reallocating buffer "wavefunction send" 400B -> 616B
+[1681901593] [info] Reallocating buffer "wavefunction recv" 400B -> 616B
+[1681901608] [info] Reallocating buffer "wavefunction send" 616B -> 936B
+[1681901608] [info] Reallocating buffer "wavefunction recv" 616B -> 936B
+[1681901672] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1681901672] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1681901672] [info] Reallocating buffer "Included local rows" 0B -> 640B
+[1681901672] [info] Reallocating buffer "global top weighted" 0B -> 640B

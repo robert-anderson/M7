@@ -1,0 +1,16 @@
+---
+shift:
+  damp: 0.1
+stats:
+  period: 5
+wavefunction:
+  nw_init: 100
+propagator:
+  tau_init: 0.001
+  stochastic: yes
+  nw_target: 2000
+  nadd: 3.0
+  ncycle: 100000
+hamiltonian:
+  fermion:
+    fcidump: yes
