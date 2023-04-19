@@ -1,7 +1,6 @@
 from subprocess import Popen, PIPE
 from pathlib import Path
-from sys import argv
-import os, shutil, h5py, time, argparse
+import sys, os, shutil, h5py, argparse
 import numpy as np
 
 import resource_manager
@@ -14,7 +13,7 @@ import resource_manager
 # working directory: where the resource_manager keeps track of the number of ranks in use
 WRK_DIR = Path(os.getcwd()).resolve()
 # test definition: where the test script importing this file is located
-DEF_DIR = Path(argv[0]).parent.resolve()
+DEF_DIR = Path(sys.argv[0]).parent.resolve()
 # reference: contains the artefacts defining a passing run
 REF_DIR = DEF_DIR/'ref'
 # run: the working directory for instances of the tested program
@@ -83,13 +82,40 @@ def shell(cmd, wd):
     tmp = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True, cwd=wd).communicate()
     return str(tmp[0], 'utf8'), str(tmp[1], 'utf8')
 
+COMPILE_DEFS = None
+for line in shell(args.m7_exe, '.')[0].split('\n'):
+    if 'compile definitions' in line: COMPILE_DEFS = {}
+    elif 'Input specification' in line: break
+    if COMPILE_DEFS is None: continue
+    split = line.strip().split('|')
+    if len(split)==4: COMPILE_DEFS[split[1].strip()] = split[2].strip()
+
+# validate given paths
+assert COMPILE_DEFS is not None, "invalid M7 binary"
+MBF_TYPE = COMPILE_DEFS['many-body basis function'].split()[0]
+MBF_TYPES = ('fermion', 'boson', 'fermion-boson')
+HAM_ARITH = COMPILE_DEFS['Hamiltonian arithmetic'].split()[0]
+HAM_ARITHS = ('real', 'complex')
+
+def skip(no_ref):
+    # exit codes:
+    # 1: test not applicable to this binary
+    # 2: no ref but test contains compare_ checks
+    sys.exit(1 + bool(no_ref))
+
 def fail(static):
     # exit codes:
-    # 0: passed
-    # 1: static failure
-    # 2: comparative failure
-    sys.exit(1+bool(static))
+    # 3: static failure
+    # 4: comparative failure
+    sys.exit(3 + bool(static))
 
+def require_mbf_type(s):
+    assert s.lower() in MBF_TYPES
+    if s.lower()!=MBF_TYPE: skip(False)
+
+def require_ham_arith(s):
+    assert s.lower() in HAM_ARITHS
+    if s.lower()!=HAM_ARITH: skip(False)
 
 class StatsFile:
     fields = []
@@ -145,14 +171,49 @@ def stats_columns(col_name, fname='M7.stats'):
     else:
         return stats[0].data[:,column[0]], None
 
-def comp_fields(field_name_hint, fname='M7.stats'):
+# compare_ methods involve verification against the contents of the ref directory
+def compare_stats_field(field_name_hint, fname='M7.stats'):
     if not DO_COMPS: return
     run = run_stats_file.stats_columns(field_name_hint)
     ref = ref_stats_file.stats_columns(field_name_hint)
     if not np.allclose(run, ref): fail(False)
 
-def comp_nw(fname='M7.stats'): comp_fields('WF L1 norm', fname)
-def comp_ref_weight(fname='M7.stats'): comp_fields('Reference weight', fname)
-def comp_shift(fname='M7.stats'): comp_fields('Diagonal shift', fname)
-def comp_ninit(fname='M7.stats'): comp_fields('Initiator', fname)
-def comp_nocc_mbf(fname='M7.stats'): comp_fields('Occupied MBFs', fname)
+def compare_nw(fname='M7.stats'): compare_stats_field('WF L1 norm', fname)
+def compare_ref_weight(fname='M7.stats'): compare_stats_field('Reference weight', fname)
+def compare_shift(fname='M7.stats'): compare_stats_field('Diagonal shift', fname)
+def compare_ninit(fname='M7.stats'): compare_stats_field('Initiator', fname)
+def compare_nocc_mbf(fname='M7.stats'): compare_stats_field('Occupied MBFs', fname)
+
+
+'''
+perform crude removal of serial correlation
+'''
+def block(series, nblock):
+    avgs = np.zeros(nblock)
+    blocklen = len(series)//nblock
+    for i in range(nblock): avgs[i] = np.mean(series[i*blocklen:(i+1)*blocklen])
+    return np.mean(series), np.sqrt(np.var(avgs)/nblock)
+
+def within_error(ref_value, mean, error):
+    return (ref_value > mean - error) and (ref_value <= mean + error)
+
+class BlockOpts:
+    def __init__(self, npoint=1000, nblock=32, err_scale=2.0):
+        self.npoint, self.nblock, self.err_scale = npoint, nblock, err_scale
+
+'''
+check that a stats column is statistically correct (within errorbars)
+'''
+def check_stats_field(ref_value, field_name_hint, fname='M7.stats', opts=BlockOpts()):
+    stats = run_stats_file.stats_columns(field_name_hint)
+    mean, err = block(stats[-opts.npoint:], opts.nblock)
+    err *= opts.err_scale
+    if not within_error(ref_value, mean, err): fail(True)
+
+def check_shift(ref_value, fname='M7.stats', opts=BlockOpts()):
+    check_stats_field(ref_value, 'Diagonal shift', fname, opts)
+
+def check_proje(ref_value, fname='M7.stats', opts=BlockOpts()):
+    check_stats_field(ref_value, 'Reference-projected energy', fname, opts)
+
+

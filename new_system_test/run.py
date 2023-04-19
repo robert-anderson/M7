@@ -7,15 +7,10 @@ import numpy as np
 # this script simply dispatches a number of test scripts
 
 parser = argparse.ArgumentParser(description='Run a suite of M7 system tests')
-#parser.add_argument('--refresh', type=bool, help='path to M7 binary')
-#parser.add_argument('--feature', action='store_true')
-#parser.add_argument('--no-feature', dest='feature', action='store_false')
-#parser.set_defaults(feature=True)
-
 parser.add_argument('mode', type=str, choices=['test', 'redef'],
         help='"test" to run tests or "redef" to run tests and redefine the refs of the static-passing ones')
 parser.add_argument('m7_exe', type=str, help='path to M7 binary')
-parser.add_argument('mpirun', type=str, help='path to mpirun executable', default='mpirun')
+parser.add_argument('mpirun', type=str, help='path to mpirun executable', default='mpirun', nargs='?')
 parser.add_argument('-p', '--paths', nargs='+', default=[])
 args = parser.parse_args()
 
@@ -29,14 +24,21 @@ for path in args.paths:
 # None = not finished
 failed = [None for p in procs]
 
+def outcome_string(exit_code):
+    if exit_code < 1: return 'PASS'
+    elif exit_code < 3: return 'SKIP'
+    else: return 'FAIL'
+
 def all_procs_done():
     ndone = 0
     for i, proc in enumerate(procs):
-        if failed[i] is not None:
+        if failed[i] is not None: 
             ndone += 1
-            print(('PASSED' if not failed[i] else 'FAILED')+f': {args.paths[i]}')
             continue
         failed[i] = proc.poll()
+        if failed[i] is not None:
+            ndone += 1
+            print(f'{outcome_string(failed[i])}: {args.paths[i]}')
     return ndone == len(failed)
 
 from resource_manager import poll_until
@@ -53,11 +55,11 @@ def redef(script_path):
     shutil.rmtree(ref_dir, ignore_errors=True)
     shutil.move(run_dir, ref_dir)
 
+assert not any(failed), 'not all tests passed'
 if (args.mode=='redef'):
     print('redefining references for all statically-passing tests:')
     for i, exit_code in enumerate(failed):
-        if exit_code: continue
+        if exit_code is None: continue
         print(args.paths[i])
         redef(args.paths[i])
         
-assert not any(failed), 'not all tests passed'
