@@ -16,7 +16,7 @@ args = parser.parse_args()
 
 print(f'Total MPI slots: {os.cpu_count()}')
 
-for path in args.paths: assert Path(path).exists()
+for path in args.paths: assert Path(path).exists(), path
 
 procs = []
 for path in args.paths:
