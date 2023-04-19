@@ -102,21 +102,21 @@ A single test can be run in isolation just by executing its test script e.g.:
 ```bash
 cd <SRC_PATH>/system_test
 export PYTHONPATH=PYTHONPATH:$(pwd)
-python ./frm/real/abinitio/energy/uhf/parallel/test.py <BIN_PATH>/bin/M7
+python3 ./frm/real/abinitio/energy/uhf/parallel/test.py <BIN_PATH>/bin/M7
 ```
 will run the system test which verifies the correctness of estimating a ground state energy with integrals derived from 
 an unrestricted Hartree-Fock calculation with an MPI-parallel M7 run.
 This procedure can be extended to running several system tests in parallel using the `run.py` script, which ensures that
 the MPI slots on the testing machine are never oversubscribed. e.g.
 ```bash
-python run.py test <BIN_PATH>/bin/M7 mpirun -p $(find . -name test.py)
+python3 run.py test <BIN_PATH>/bin/M7 mpirun -p $(find . -name test.py)
 ```
 will find all system test scripts and execute them, performing both static and comparative (if reference is defined) checks
 and printing out the `PASS`/`FAIL`/`SKIP` outcome of each job as they terminate. 
 The `find` call may of course be replaced by a list of script paths, or any other command the user may decide to use in the
 selection of a subset of tests to run. Additionally, with the command
 ```bash
-python run.py redef <BIN_PATH>/bin/M7 mpirun -p <LIST_OF_SCRIPT_PATHS>
+python3 run.py redef <BIN_PATH>/bin/M7 mpirun -p <LIST_OF_SCRIPT_PATHS>
 ```
 the user signals the intent to redefine the references for every system test in the supplied list. In this case, only 
 the static checks are performed, and if every test in the set passes, the output artefacts defining the reference runs are
