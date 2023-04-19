@@ -14,6 +14,8 @@ parser.add_argument('mpirun', type=str, help='path to mpirun executable', defaul
 parser.add_argument('-p', '--paths', nargs='+', default=[])
 args = parser.parse_args()
 
+print(f'Total MPI slots: {os.cpu_count()}')
+
 for path in args.paths: assert Path(path).exists()
 
 procs = []
@@ -29,6 +31,7 @@ def outcome_string(exit_code):
     elif exit_code < 3: return 'SKIP'
     else: return 'FAIL'
 
+from resource_manager import poll_until, read_ninstance
 def all_procs_done():
     ndone = 0
     for i, proc in enumerate(procs):
@@ -39,9 +42,9 @@ def all_procs_done():
         if failed[i] is not None:
             ndone += 1
             print(f'{outcome_string(failed[i])}: {args.paths[i]}')
+            print(f'MPI slots in use: {read_ninstance()}/{os.cpu_count()}')
     return ndone == len(failed)
 
-from resource_manager import poll_until
 poll_until(all_procs_done)
 
 def redef(script_path):
