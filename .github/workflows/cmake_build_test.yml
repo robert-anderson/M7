@@ -1,4 +1,4 @@
-name: CMake
+name: "Config, build, run all tests"
 
 on:
   push:
