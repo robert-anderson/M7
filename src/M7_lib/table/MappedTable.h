@@ -17,12 +17,12 @@
 
 struct MappedTableOptions {
     static constexpr uint_t c_default_nbucket_init = 100ul;
-    double m_remap_ratio = conf::HashMapping::c_default_remap_ratio;
+    double m_max_inefficiency = conf::HashMapping::c_default_max_inefficiency;
     uint_t m_remap_nlookup = conf::HashMapping::c_default_remap_nlookup;
     uint_t m_nbucket_init = c_default_nbucket_init;
     MappedTableOptions() = default;
     MappedTableOptions(const conf::HashMapping& opts) {
-        m_remap_ratio = opts.c_default_remap_ratio;
+        m_max_inefficiency = opts.c_default_max_inefficiency;
         m_remap_nlookup = opts.m_remap_nlookup;
     }
 };
@@ -57,20 +57,17 @@ struct MappedTableBase {
      * clear all buckets
      */
     void clear_map();
+
     /**
-     * debugging only - checks that all nonzero records below the hwm of the source are mapped in the current m_buckets.
-     * Defined here to reduce bloat of the templated class MappedTable
-     * @param source
-     *  base class cast of the mapped table
      * @return
-     *  true if table passes verification
+     *  ratio of number of skips to total number of lookups
      */
-    double skip_lookup_ratio() const {
+    double inefficiency() const {
         return double(m_nskip_total)/double(m_nlookup_total);
     }
     /**
      * @return
-     *  true if enough lookups have been attempted and the ratio of skips/lookups is worse than m_remap_ratio
+     *  true if enough lookups have been attempted and the inefficiency is worse than m_max_inefficiency
      */
     bool remap_due() const;
     /**
@@ -319,20 +316,15 @@ private:
         for (uint_t i = ibegin; i < iend; ++i) post_insert(i);
     }
 public:
+
     /**
      * construct a new vector of buckets with a different size
      */
-    void remap() {
-        DEBUG_ASSERT_TRUE(all_nonzero_records_mapped(*this), "mapping is inconsistent with table row content");
-        uint_t nbucket_new = nbucket() * skip_lookup_ratio() / m_mapping_opts.m_remap_ratio;
-        // use the same expansion factor as for the Table buffer
-        nbucket_new *= 1.0 + this->m_bw.get_expansion_factor();
+    void remap(uint_t nbucket_new) {
         if (!TableBase::name().empty()) {
             logging::info_("remapping hash table for \"{}\"", TableBase::name());
-            logging::info_("current ratio of skips to total lookups ({}) exceeds set limit ({})",
-                           skip_lookup_ratio(), m_mapping_opts.m_remap_ratio);
             logging::info_("replacing current bucket vector of size {} with a new one of size {}",
-                       nbucket(), nbucket_new);
+                           nbucket(), nbucket_new);
         }
         v_t<std::forward_list<uint_t>> new_buckets(nbucket_new);
         for (const auto &old_bucket : m_buckets) {
@@ -344,13 +336,29 @@ public:
         m_buckets = std::move(new_buckets);
         DEBUG_ASSERT_EQ(nbucket(), nbucket_new, "error in bucket vector update");
     }
+
     /**
-     * if a remap is due (enough lookups + bad enough skips/lookups ratio), the remap will be executed and those
-     * counters reset
+     * assume one bucket per record
      */
-    void attempt_remap() {
+    void remap() {
+        remap(TableBase::nrow_in_use());
+    }
+
+    /**
+     * if a remap is due (enough lookups + bad enough skips/lookups "inefficiency" ratio), a new number of buckets will
+     * be computed and the MappedTable remapped with this number of buckets
+     */
+    void remap_if_due() {
         if (remap_due()) {
-            remap();
+            DEBUG_ASSERT_TRUE(all_nonzero_records_mapped(*this), "mapping is inconsistent with table row content");
+            uint_t nbucket_new = nbucket() * inefficiency() / m_mapping_opts.m_max_inefficiency;
+            // use the same expansion factor as for the Table buffer
+            nbucket_new *= 1.0 + this->m_bw.get_expansion_factor();
+            remap(nbucket_new);
+            if (!TableBase::name().empty()) {
+                logging::info_("current inefficiency ratio ({}) exceeds set limit ({})",
+                               inefficiency(), m_mapping_opts.m_max_inefficiency);
+            }
             // reset counters
             m_nskip_total = 0ul;
             m_nlookup_total = 0ul;
@@ -359,7 +367,7 @@ public:
 
     void resize(uint_t nrec, double factor=-1.0) override {
         TableBase::resize(nrec, factor);
-        attempt_remap();
+        remap_if_due();
     }
 
     void all_gatherv(const TableBase& src) override {

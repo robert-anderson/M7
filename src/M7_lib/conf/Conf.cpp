@@ -42,7 +42,7 @@ void conf::OptionalFileSeries::validate_node_contents() {
 
 conf::HashMapping::HashMapping(Group *parent) :
         Section(parent, "hash_mapping", "options relating to the behavior of hash-mapped tables"),
-        m_remap_ratio(this, "remap_ratio", c_default_remap_ratio,
+        m_max_inefficiency(this, "max_inefficiency", c_default_max_inefficiency,
             "ratio of bucket-searching skips to total lookups required to trigger remapping with a larger number of "
             "buckets"),
         m_remap_nlookup(this, "remap_nlookup", c_default_remap_nlookup,

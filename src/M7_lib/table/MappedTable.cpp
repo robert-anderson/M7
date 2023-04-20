@@ -23,7 +23,7 @@ MappedTableBase::MappedTableBase(const MappedTableBase &other) : MappedTableBase
 bool MappedTableBase::operator==(const MappedTableBase &other) const {
     if (this == &other) return true;
     if (nbucket() != other.nbucket()) return false;
-    if (m_mapping_opts.m_remap_ratio != other.m_mapping_opts.m_remap_ratio) return false;
+    if (m_mapping_opts.m_max_inefficiency != other.m_mapping_opts.m_max_inefficiency) return false;
     if (m_mapping_opts.m_remap_nlookup != other.m_mapping_opts.m_remap_nlookup) return false;
     if (m_buckets!=other.m_buckets) return false;
     return true;
@@ -42,8 +42,7 @@ void MappedTableBase::clear_map() {
 }
 
 bool MappedTableBase::remap_due() const {
-    return (m_nlookup_total >= m_mapping_opts.m_remap_nlookup) &&
-           (double(m_nskip_total) / double(m_nlookup_total)) > m_mapping_opts.m_remap_ratio;
+    return (m_nlookup_total >= m_mapping_opts.m_remap_nlookup) && (inefficiency() > m_mapping_opts.m_max_inefficiency);
 }
 
 bool MappedTableBase::all_nonzero_records_mapped(const TableBase &source) const {

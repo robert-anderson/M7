@@ -48,7 +48,7 @@ TEST(MappedTable, Remap) {
     using namespace mapped_table_test;
     MappedTableOptions mapping_opts;
     mapping_opts.m_nbucket_init = 3ul;
-    mapping_opts.m_remap_ratio = 0.5;
+    mapping_opts.m_max_inefficiency = 0.5;
     mapping_opts.m_remap_nlookup = 10ul;
     key_only_table_t table("test", {}, mapping_opts);
     ASSERT_EQ(table.nbucket(), mapping_opts.m_nbucket_init);
@@ -98,37 +98,37 @@ TEST(MappedTable, Remap) {
     // and we have 6 skips already so 9 in total
     ASSERT_EQ(table.m_nskip_total, 9);
 
-    // remap is not yet due since there have only been 4 accesses
+    // remap_by_skip_lookup_ratio is not yet due since there have only been 4 accesses
     ASSERT_FALSE(table.remap_due());
     key = 120;
     while (table.m_nlookup_total < table.m_mapping_opts.m_remap_nlookup) table.lookup(key);
     ASSERT_EQ(table.m_nlookup_total, table.m_mapping_opts.m_remap_nlookup);
-    // remap is now due since there have been enough total lookups and skips/lookups ratio exceeds thresh
+    // remap_by_skip_lookup_ratio is now due since there have been enough total lookups and skips/lookups ratio exceeds thresh
     ASSERT_TRUE(table.remap_due());
-    // do the remap
-    auto ratio = table.skip_lookup_ratio();
-    table.attempt_remap();
+    // do the remap if the table is currently too inefficient
+    auto ratio = table.inefficiency();
+    table.remap_if_due();
 
     // these counters should have been reset
     ASSERT_FALSE(table.m_nlookup_total);
     ASSERT_FALSE(table.m_nskip_total);
 
-    // remap can't be due since there haven't been any lookups since the last remap
+    // remap can't be due since there haven't been any lookups since the last remap_by_skip_lookup_ratio
     ASSERT_FALSE(table.remap_due());
 
     // make the required number of (non-skipping) lookups for remapping to be due
     key = 120;
     for (uint_t i=0ul; i<table.m_mapping_opts.m_remap_nlookup; ++i) table.lookup(key);
-    // remap still shouldn't be due since there were no skips
+    // remap_by_skip_lookup_ratio still shouldn't be due since there were no skips
     ASSERT_FALSE(table.remap_due());
 
     const auto nitem = table.nrecord();
     ASSERT_EQ(nitem, 20);
     const uint_t nbucket = mapping_opts.m_nbucket_init *
-            (ratio / table.m_mapping_opts.m_remap_ratio) * (1.0 + table.get_expansion_factor());
+                           (ratio / table.m_mapping_opts.m_max_inefficiency) * (1.0 + table.get_expansion_factor());
     ASSERT_EQ(nbucket, table.nbucket());
 
-    // check that all elements are still mapped and present after remap operation
+    // check that all elements are still mapped and present after remap_by_skip_lookup_ratio operation
     key = 100;
     while ((key++) < 120) ASSERT_TRUE(table.lookup(key));
 }

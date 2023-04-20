@@ -15,6 +15,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, sys::Particles particles, F
     buffered::Mbf mbf(h.m_basis);
 
     iters.m_single->loop(mbf, [&](){m_mbf_order_table.insert(mbf);});
+    m_mbf_order_table.remap();
 
     const auto count = m_mbf_order_table.nrow_in_use();
     const uint_t count_local = mpi::evenly_shared_count(count);
@@ -35,7 +36,7 @@ FciInitializer::FciInitializer(const Hamiltonian &h, sys::Particles particles, F
         const auto helem = h.get_element(src_mbf, conn);
         if (!ham::is_significant(helem)) return;
         conn.apply(src_mbf, dst_mbf);
-        auto lookup = m_mbf_order_table.lookup(dst_mbf);
+        auto& lookup = m_mbf_order_table.lookup(dst_mbf);
         DEBUG_ASSERT_TRUE(lookup, "connected MBF is outside generated space");
         const auto irow = row.index()-displ_local;
         if (lookup) m_sparse_ham.insert(irow, {lookup.index(), helem});

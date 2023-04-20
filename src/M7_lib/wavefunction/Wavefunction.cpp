@@ -166,7 +166,7 @@ bool wf::Vectors::ref_weights_preserved() const {
 
 void wf::Vectors::begin_cycle(uint_t icycle) {
     reduction::clear_local(m_stats.m_summed);
-    m_store.attempt_remap();
+    m_store.remap_if_due();
     m_refs.begin_cycle(icycle);
 }
 

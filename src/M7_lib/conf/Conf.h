@@ -39,9 +39,9 @@ namespace conf {
     };
 
     struct HashMapping : Section {
-        static constexpr double c_default_remap_ratio = 2.0;
+        static constexpr double c_default_max_inefficiency = 2.0;
         static constexpr uint_t c_default_remap_nlookup = 500ul;
-        Param<double> m_remap_ratio;
+        Param<double> m_max_inefficiency;
         Param<uint_t> m_remap_nlookup;
 
         explicit HashMapping(Group *parent);
