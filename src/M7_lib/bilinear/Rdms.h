@@ -32,7 +32,7 @@ class Rdms {
      * it
      */
     typedef std::array<std::forward_list<Rdm*>, opsig::c_ndistinct> exsig_to_rdms_t;
-    exsig_to_rdms_t m_exsig_to_rdms;
+    exsig_to_rdms_t m_exsig_to_rdms {};
 
     /**
      * each array element is indexed by a ranksig, and points to the pure RDM of that rank

@@ -41,6 +41,8 @@ wf_comp_t Rdms::contrib_norm(uint_t iroot) const {
 Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch) :
         m_opts(opts), m_wf(wf), m_spinfree(opts.m_spinfree), m_work_conns(m_wf.m_sector.size()),
         m_work_com_ops(m_wf.m_sector.size()), m_accum_epoch(accum_epoch) {
+    DEBUG_ASSERT_TRUE_ALL(std::none_of(m_pure_rdms.cbegin(), m_pure_rdms.cend(),
+           [](const Rdm* ptr) -> bool {return ptr;}), "bad initialization");
     for (const auto& ranksig: bilinears::parse_exsigs(opts.m_ranks)) {
         REQUIRE_FALSE(m_pure_rdms[ranksig], "No RDM rank should appear more than once in the specification");
         REQUIRE_NE(ranksig, opsig::c_invalid, "invalid RDM rank signature (perhaps too many operators for OpSig object)");
