@@ -53,7 +53,7 @@ struct HfExcits {
     /**
      * all one-exsig objects
      */
-    std::array<std::unique_ptr<HfExcitsOneExsig>, opsig::c_ndistinct> m_hf_excits;
+    std::array<std::unique_ptr<HfExcitsOneExsig>, opsig::c_ndistinct> m_hf_excits {};
     /**
      * excitation signatures for which HF excits are currently accumulated
      */

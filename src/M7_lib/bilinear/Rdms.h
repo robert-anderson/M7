@@ -38,7 +38,7 @@ class Rdms {
      * each array element is indexed by a ranksig, and points to the pure RDM of that rank
      */
     typedef std::array<Rdm*, opsig::c_ndistinct> pure_rdms_t;
-    pure_rdms_t m_pure_rdms;
+    pure_rdms_t m_pure_rdms {};
 
     suite::Conns m_work_conns;
     suite::ComOps m_work_com_ops;
