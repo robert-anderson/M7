@@ -126,6 +126,7 @@ namespace conf {
         CiPmntr m_ci_pmntr;
         OptionalFile m_save;
         OptionalFile m_load;
+        OptionalFileSeries m_chkpt;
 
         explicit Wavefunction(Group *parent);
     };

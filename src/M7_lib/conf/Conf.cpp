@@ -136,7 +136,8 @@ conf::Wavefunction::Wavefunction(Group *parent) :
         m_fci_init(this, "fci_init", false, "call the ARPACK interface to initialize the required roots to their exact values"),
         m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_pmntr(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
-        m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit){}
+        m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit),
+        m_chkpt(this, "chkpt", "wavefunction checkpoint", "M7.wf.{}.h5", Explicit){}
 
 conf::Shift::Shift(Group *parent) :
         Section(parent, "shift",

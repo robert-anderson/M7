@@ -21,6 +21,7 @@
 #include "Reference.h"
 #include "M7_lib/field/Mbf.h"
 #include "M7_lib/util/Math.h"
+#include "M7_lib/parallel/PeriodicEvent.h"
 
 namespace wf {
 
@@ -73,6 +74,11 @@ namespace wf {
          * Reference MBFs for each population
          */
         wf::Refs m_refs;
+
+        /**
+         * series of periodic wavefunction checkpoints
+         */
+        PeriodicFileSeries m_chkpt_files;
 
         Vectors(const conf::Document& opts, const Hamiltonian& ham);
 
@@ -292,6 +298,8 @@ namespace wf {
         void save(const hdf5::NodeWriter& parent) const;
 
         void save() const;
+
+        void attempt_chkpt(uint_t icycle);
 
         void load(const hdf5::NodeReader& parent);
 

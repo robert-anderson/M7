@@ -265,7 +265,7 @@ hf_excit_hist::Accumulators::Accumulators(
         m_hf(hf), m_thresh(thresh), m_work_conn(hf->mbf()),
         m_nexcits(std::move(nexcits)), m_accumulated_nexcit_inds(make_nexcit_is_accumulated(m_nexcits)),
         m_accum_epoch("HF excitation accumulation"),
-        m_save_file_path(save_file.path_if_enabled()), m_chkpt_files(m_accum_epoch, chkpt_files){
+        m_save_file_path(save_file.path_if_enabled()), m_chkpt_files(&m_accum_epoch, chkpt_files){
     if (m_nexcits.empty()) return;
     REQUIRE_TRUE(m_hf, "HF state must be defined for HF excitation accumulation");
     m_tables.reserve(m_nexcits.size());

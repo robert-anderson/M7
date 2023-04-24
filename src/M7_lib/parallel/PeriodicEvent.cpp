@@ -45,16 +45,25 @@ PeriodicEvent::Reason PeriodicEvent::get_event(uint_t icycle, uint_t& ievent) {
 
 PeriodicEvent::Reason PeriodicFileSeries::due(uint_t icycle) {
     // set the last event cycle if it has a null value but the associated epoch has already started
-    if (m_epoch && PeriodicEvent::m_icycle_last_event==~0ul)
-        PeriodicEvent::m_icycle_last_event = m_epoch.icycle_start();
+    if (m_epoch) {
+        const auto& epoch = *m_epoch;
+        if (epoch && PeriodicEvent::m_icycle_last_event==~0ul)
+            PeriodicEvent::m_icycle_last_event = epoch.icycle_start();
+    }
+    else if (PeriodicEvent::m_icycle_last_event==~0ul) {
+        // no epoch object provided: assume the series starts immediately
+        PeriodicEvent::m_icycle_last_event = 0ul;
+    }
     return PeriodicEvent::due(icycle);
 }
 
-PeriodicFileSeries::PeriodicFileSeries(const Epoch& epoch, const conf::OptionalFileSeries& series) :
-    PeriodicEvent(~0ul,
-        (series.m_enabled && series.m_mode.m_value=="cycle") ? series.m_period.m_value : 0ul,
-        (series.m_enabled && series.m_mode.m_value=="minute") ? series.m_period.m_value*60 : 0ul),
-    m_epoch(epoch), m_path_fmt(series.m_path_fmt){}
+PeriodicFileSeries::PeriodicFileSeries(const Epoch* epoch, const conf::OptionalFileSeries& series) :
+        PeriodicEvent(~0ul,
+              (series.m_enabled && series.m_mode.m_value=="cycle") ? series.m_period.m_value : 0ul,
+              (series.m_enabled && series.m_mode.m_value=="minute") ? series.m_period.m_value*60 : 0ul),
+        m_path_fmt(series.m_path_fmt), m_epoch(epoch){}
+
+PeriodicFileSeries::PeriodicFileSeries(const conf::OptionalFileSeries& series) : PeriodicFileSeries(nullptr, series){}
 
 PeriodicEvent::Reason PeriodicFileSeries::get_file_path(uint_t icycle, str_t& path) {
     uint_t ifile;

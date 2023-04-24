@@ -63,13 +63,14 @@ protected:
 };
 
 class PeriodicFileSeries : public PeriodicEvent {
-    const Epoch& m_epoch;
     const str_t m_path_fmt;
+    const Epoch* m_epoch;
 
     Reason due(uint_t icycle) override;
 
 public:
-    PeriodicFileSeries(const Epoch& epoch, const conf::OptionalFileSeries& series);
+    PeriodicFileSeries(const Epoch* epoch, const conf::OptionalFileSeries& series);
+    explicit PeriodicFileSeries(const conf::OptionalFileSeries& series);
 
     Reason get_file_path(uint_t icycle, str_t& path);
 

@@ -83,7 +83,8 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     m_sector(m_ham.m_basis, m_ham.default_particles(m_opts.m_particles)),
     m_format(m_store.m_row.m_weight.m_format),
     m_stats(m_format),
-    m_refs(opts.m_reference, *this, setup()) {
+    m_refs(opts.m_reference, *this, setup()),
+    m_chkpt_files(opts.m_wavefunction.m_chkpt){
 
     REQUIRE_TRUE(m_send_recv.recv().m_row.m_dst_mbf.belongs_to_row(), "row-field reference error");
 
@@ -171,6 +172,7 @@ void wf::Vectors::begin_cycle(uint_t icycle) {
 }
 
 void wf::Vectors::end_cycle(uint_t icycle) {
+    attempt_chkpt(icycle);
     reduction::all_sum(m_stats.m_summed);
     m_refs.end_cycle(icycle);
 }
@@ -614,4 +616,14 @@ void wf::Vectors::load() {
 
 bool wf::Vectors::was_loaded() const {
     return m_opts.m_wavefunction.m_load.m_enabled;
+}
+
+void wf::Vectors::attempt_chkpt(uint_t icycle) {
+    if (!m_chkpt_files) return;
+    auto path = m_chkpt_files.get_file_path(icycle);
+    if (path.empty()) return;
+    logging::info("Saving wavefunction to checkpoint file {} on cycle {}", path, icycle);
+    hdf5::FileWriter fw(path);
+    fw.save_attr("icycle", icycle);
+    save(fw);
 }
