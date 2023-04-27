@@ -604,8 +604,11 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
         };
         recv().foreach_row_in_use(fn);
     };
-    loader.load(5000, fill_fn);
-    logging::info("{} Walkers successfully loaded from HDF5 archive", loader.nitem());
+    const uint_t nitem_per_op = 100000;
+    logging::info("Loading walkers from HDF5 archive (upto {} items per read operation)", nitem_per_op);
+    logging::info_("Reading {} items locally, {} items globally", loader.nitem_local(), loader.nitem());
+    loader.load(nitem_per_op, fill_fn);
+    logging::info("{} wavefunction rows successfully loaded from HDF5 archive", loader.nitem());
 }
 
 void wf::Vectors::load() {
