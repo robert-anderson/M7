@@ -133,6 +133,7 @@ namespace conf {
 
     struct Shift : Section {
         Param<double> m_init;
+        Param<bool> m_init_rel_to_ref;
         Param<double> m_damp;
         Param<bool> m_target_damp;
         Param<uint_t> m_period;

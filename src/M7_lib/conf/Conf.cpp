@@ -142,7 +142,9 @@ conf::Wavefunction::Wavefunction(Group *parent) :
 conf::Shift::Shift(Group *parent) :
         Section(parent, "shift",
                         "options relating to the diagonal shift parameter and the manner in which it is varied"),
-        m_init(this, "init", 0.0, "initial shift relative to the energy of the initial reference MBF"),
+        m_init(this, "init", 0.0, "initial shift (absolute or relative to the energy of the initial reference MBF)"),
+        m_init_rel_to_ref(this, "init_rel_to_ref", true,
+              "if true, initial shift is defined relative to the energy of the initial reference MBF, otherwise it is an absolute energy"),
         m_damp(this, "damp", 0.05, "walker growth-related damping factor in shift update"),
         m_target_damp(this, "target_damp", false,
             "use damping factor in shift update related to growth relative to the target walker population. "

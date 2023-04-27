@@ -64,12 +64,17 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
         logging::info("Brillouin theorem condition not satisfied: no Hartree-Fock state assumed");
     }
 
-    /*
-     * set the shift to the initial reference-projected energy plus the user-defined offset
-     */
-    const ham_comp_t ref_energy = wf.reference_projected_energy(0);
-    m_prop.m_shift.m_values = ref_energy;
-    if (!wf.was_loaded() || m_opts.m_shift.m_cont_grow.m_value) m_prop.m_shift.m_values += opts.m_shift.m_init;
+    if (m_opts.m_shift.m_init_rel_to_ref) {
+        /*
+         * set the shift to the initial reference-projected energy plus the user-defined offset
+         */
+        const ham_comp_t ref_energy = wf.reference_projected_energy(0);
+        m_prop.m_shift.m_values = ref_energy;
+        if (!wf.was_loaded() || m_opts.m_shift.m_cont_grow.m_value) m_prop.m_shift.m_values += opts.m_shift.m_init;
+    }
+    else {
+        m_prop.m_shift.m_values = opts.m_shift.m_init;
+    }
 
     if (m_maes.m_rdms) {
         if (m_maes.m_rdms.is_energy_sufficient(m_prop.m_ham))
