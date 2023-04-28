@@ -96,7 +96,7 @@ const v_t<prob_t>& ExcitGenGroup::get_probs() const {
 
 bool ExcitGenGroup::probs_uniform() const {
     if (m_probs.empty()) return true;
-    return std::all_of(m_probs.cbegin(), m_probs.cend(), [&](prob_t p){return p==m_probs[0];})
+    return std::all_of(m_probs.cbegin(), m_probs.cend(), [&](prob_t p){return p==m_probs[0];});
 }
 
 void ExcitGenGroup::log() const {
