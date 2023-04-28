@@ -49,10 +49,11 @@ public:
     ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng);
     /*
      * ctor which also sets heterogeneous initial probabilities to cases by calling the approx_nconn method of exgens
+     * if these probs are not already set to a non-uniform value
      */
     ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng, sys::Particles particles):
             ExcitGenGroup(ham, opts, prng) {
-        set_probs(particles);
+        if (!probs_uniform()) set_probs(particles);
     }
 
     uint_t ncase() const;
@@ -78,6 +79,8 @@ public:
     prob_t get_prob(uint_t icase) const;
 
     const v_t<prob_t>& get_probs() const;
+
+    bool probs_uniform() const;
 
     /**
      * when there is strictly one excitation generator per exsig, the probability of drawing the connection is

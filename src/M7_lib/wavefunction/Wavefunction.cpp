@@ -608,6 +608,7 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
     logging::info("Loading walkers from HDF5 archive (upto {} items per read operation)", nitem_per_op);
     logging::info_("Reading {} items locally, {} items globally", loader.nitem_local(), loader.nitem());
     loader.load(nitem_per_op, fill_fn);
+    REQUIRE_EQ_ALL(mpi::all_sum(m_store.nrow_in_use()), loader.nitem(), "not all walkers loaded");
     logging::info("{} wavefunction rows successfully loaded from HDF5 archive", loader.nitem());
 }
 

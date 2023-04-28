@@ -33,6 +33,22 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian& ham, const conf::Propagator& opt
             m_probs.push_back(1.0);
         }
     }
+    if (!opts.m_exlvl_probs_init.m_value.empty()) {
+        // initial values were provided in config document
+        const auto& opt_probs = opts.m_exlvl_probs_init.m_value;
+        REQUIRE_LE_ALL(opt_probs.size(), m_probs.size(), "too many items in specified probs");
+        if (opt_probs.size() == m_probs.size()) m_probs = opt_probs;
+        else {
+            // assume input is unit normalized, and compute the final element by probability-conserving difference
+            const auto tot = std::accumulate(opt_probs.cbegin(), opt_probs.cend(), 0.0);
+            REQUIRE_GE_ALL(tot, 0.0, "probability sum out of range");
+            REQUIRE_LT_ALL(tot, 1.0, "probability sum out of range");
+            REQUIRE_EQ_ALL(opt_probs.size() + 1, m_probs.size(), "too few items in specified probs");
+            std::copy(opt_probs.cbegin(), opt_probs.cend(), m_probs.begin());
+            m_probs.back() = 1.0 - tot;
+        }
+    }
+
     m_exsig_icases.resize(opsig::c_ndistinct, uintv_t());
     // fill the map from exsigs to exgens
     for (uint_t icase=0ul; icase<m_excit_cases.size(); ++icase)
@@ -76,6 +92,11 @@ prob_t ExcitGenGroup::get_prob(uint_t icase) const {
 
 const v_t<prob_t>& ExcitGenGroup::get_probs() const {
     return m_probs;
+}
+
+bool ExcitGenGroup::probs_uniform() const {
+    if (m_probs.empty()) return true;
+    return std::all_of(m_probs.cbegin(), m_probs.cend(), [&](prob_t p){return p==m_probs[0];})
 }
 
 void ExcitGenGroup::log() const {

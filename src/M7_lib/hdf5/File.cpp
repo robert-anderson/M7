@@ -2,6 +2,7 @@
 // Created by anderson on 27/06/2022.
 //
 
+#include "M7_lib/io/FileReader.h"
 #include "File.h"
 
 bool hdf5::FileBase::is_hdf5(const str_t& fname) {
@@ -10,7 +11,8 @@ bool hdf5::FileBase::is_hdf5(const str_t& fname) {
 }
 
 void hdf5::FileBase::require_is_hdf5(const str_t& fname) {
-    REQUIRE_TRUE(is_hdf5(fname), "Specified file is not HDF5 format");
+    REQUIRE_TRUE(::FileReader::exists(fname), logging::format("Specified file \"{}\" does not exist)", fname));
+    REQUIRE_TRUE(is_hdf5(fname), logging::format("Specified file \"{}\" is not in HDF5 format", fname));
 }
 
 hid_t hdf5::FileReader::get_id(const str_t& fname) {
