@@ -8,7 +8,7 @@ void reduction::Base::to_global_send() {
     auto& send_buf = mpi::g_send_reduce_buffers[m_itype];
     m_global_reduced_offset = send_buf.size();
     auto ptr = m_local_base.cbegin();
-    send_buf.insert(send_buf.cend(), ptr, ptr + m_local_base.m_size);
+    send_buf.insert(send_buf.end(), ptr, ptr + m_local_base.m_size);
     auto& recv_buf = mpi::g_recv_reduce_buffers[m_itype];
     if (recv_buf.size() < send_buf.size()) recv_buf.resize(send_buf.size());
 }

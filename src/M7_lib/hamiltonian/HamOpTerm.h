@@ -101,14 +101,14 @@ struct HamOpTerm {
      *  forward linked list of excitation generators applicable to this HamOpTerm
      */
     virtual excit_gen_list_t make_excit_gens(PRNG& /*prng*/, const conf::Propagator& /*opts*/) const {
-        return {};
+        return excit_gen_list_t();
     }
     /**
      * @return
      *  forward linked list of foreach iterators over the connections of a given MBF
      */
     virtual conn_foreach::base_list_t make_foreach_iters() const {
-        return {};
+        return conn_foreach::base_list_t();
     }
 
     virtual bool is_hermitian() const {

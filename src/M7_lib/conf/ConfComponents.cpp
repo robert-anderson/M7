@@ -219,10 +219,7 @@ v_t<std::pair<str_t, str_t>> conf_components::Selection::help_pairs() const {
 }
 
 bool conf_components::Document::contains_tabs(const str_t& contents) {
-    std::regex r("(\\t)");
-    auto begin = std::sregex_iterator(contents.cbegin(), contents.cend(), r);
-    auto end = std::sregex_iterator();
-    return std::distance(begin, end);
+    return contents.find('\t') < contents.size();
 }
 
 YAML::Node conf_components::Document::load(const str_t& fname) {
