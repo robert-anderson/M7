@@ -6,6 +6,8 @@ target_sources(M7_lib
         DatasetFormat.h
         DatasetTransaction.cpp
         DatasetTransaction.h
+        DistTableLoader.cpp
+        DistTableLoader.h
         Field.cpp
         Field.h
         File.cpp
