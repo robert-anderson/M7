@@ -483,6 +483,9 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
     load_table_t load_table("WF load table", {m_sector.basis(), weight_shape});
     DistTableLoader loader(gr, load_table.m_row);
 
+    // total number of rows received in all communications
+    uint_t nrow_recv = 0ul;
+
     auto fill_fn = [&](uint_t nitem) {
         auto& row = load_table.m_row;
         for (row.restart(); row.in_range(nitem); ++row) {
@@ -503,6 +506,7 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
             auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
             const auto ipart = recv_row.m_ipart_dst[0];
             set_weight(store_row, ipart, recv_row.m_delta_weight);
+            ++nrow_recv;
         };
         recv().foreach_row_in_use(fn);
     };
@@ -510,7 +514,7 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
     logging::info("Loading walkers from HDF5 archive (upto {} items per read operation)", nitem_per_op);
     logging::info_("Reading {} items locally, {} items globally", loader.nitem_local(), loader.nitem());
     loader.load(nitem_per_op, fill_fn);
-    REQUIRE_EQ_ALL(mpi::all_sum(m_store.nrow_in_use()), loader.nitem(), "not all walkers loaded");
+    REQUIRE_EQ_ALL(mpi::all_sum(nrow_recv), loader.nitem(), "not all walkers loaded");
     logging::info("{} wavefunction rows successfully loaded from HDF5 archive", loader.nitem());
 }
 
