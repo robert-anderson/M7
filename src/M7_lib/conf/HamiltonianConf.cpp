@@ -92,5 +92,6 @@ conf::BosHam::BosHam(Group *parent) :
 
 conf::Hamiltonian::Hamiltonian(Group *parent) :
         Section(parent, "hamiltonian", "options relating to the Hamiltonian operator terms"),
-        m_fermion(this), m_ladder(this), m_boson(this) {}
+        m_fermion(this), m_ladder(this), m_boson(this),
+        m_stoquastic(this, "stoquastic", false, "true if the H elements are to be returned stoquastised, i.e. Hij if i==j else -|Hij|"){}
 

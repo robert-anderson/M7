@@ -97,6 +97,7 @@ namespace conf {
         FrmHam m_fermion;
         FrmBosHam m_ladder;
         BosHam m_boson;
+        Param<bool> m_stoquastic;
 
         explicit Hamiltonian(Group *parent);
     };

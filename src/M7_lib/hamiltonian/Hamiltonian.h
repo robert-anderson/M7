@@ -117,9 +117,14 @@ public:
 
     const sys::Basis m_basis;
     /**
-     * true if the Hamiltonian describes a close quantum system in the bosonic sector
+     * true if the Hamiltonian describes a closed quantum system in the bosonic sector
      */
     const bool m_boson_number_conserve;
+
+    /**
+     * true if the matrix elements are to be returned "stoquastised" i.e. (Hij where i==j else -|Hij|)
+     */
+    const bool m_stoquastic;
 
 private:
     /**
@@ -145,7 +150,8 @@ private:
      * @param frmbos
      *  nullptr if m_terms.m_frmbos is to be dereferenced, else this points to an externally allocated FrmBosHam
      */
-    explicit Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosHam* bos, const FrmBosHam* frmbos);
+    explicit Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosHam* bos, const FrmBosHam* frmbos,
+                         bool stoquastic=false);
 
     static void require_non_null(const HamOpTerm* ptr) {
         REQUIRE_TRUE(ptr, "pointer to externally-allocated term Hamiltonian must be non-null");
@@ -164,10 +170,10 @@ public:
      * ctors for initialization using externally-owned term objects (m_terms is initialized to nulls and referred to for
      * the terms
      */
-    explicit Hamiltonian(const FrmHam* frm_ham);
-    explicit Hamiltonian(const BosHam* bos_ham);
-    explicit Hamiltonian(const FrmBosHam* bos_ham);
-    Hamiltonian(const FrmHam* frm_ham, const FrmBosHam* frmbos_ham, const BosHam *bos_ham);
+    explicit Hamiltonian(const FrmHam* frm_ham, bool stoquastic=false);
+    explicit Hamiltonian(const BosHam* bos_ham, bool stoquastic=false);
+    explicit Hamiltonian(const FrmBosHam* bos_ham, bool stoquastic=false);
+    Hamiltonian(const FrmHam* frm_ham, const FrmBosHam* frmbos_ham, const BosHam *bos_ham, bool stoquastic=false);
 
 
     /*
@@ -175,7 +181,9 @@ public:
      */
 
     ham_t get_element(const FrmOnv &onv, const conn::FrmOnv &conn) const {
-        return m_frm.get_element(onv, conn);
+        const auto elem = m_frm.get_element(onv, conn);
+        if (m_stoquastic && conn.size()) return -std::abs(elem);
+        return elem;
     }
 
     ham_t get_element(const FrmOnv &onv) const {
@@ -191,7 +199,9 @@ public:
      */
 
     ham_t get_element(const BosOnv &onv, const conn::BosOnv &conn) const {
-        return m_bos.get_element(onv, conn);
+        const auto elem = m_bos.get_element(onv, conn);
+        if (m_stoquastic && conn.size()) return -std::abs(elem);
+        return elem;
     }
 
     ham_t get_element(const BosOnv &onv) const {

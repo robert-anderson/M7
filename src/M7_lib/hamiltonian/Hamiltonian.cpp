@@ -61,11 +61,11 @@ HamiltonianTerms::HamiltonianTerms(HamiltonianTerms::init_opts_t opts) :
         REQUIRE_TRUE(m_bos->m_basis==m_frmbos->m_basis.m_bos, "incompatible boson basis definitions");
 }
 
-Hamiltonian::Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosHam* bos, const FrmBosHam* frmbos) :
+Hamiltonian::Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosHam* bos, const FrmBosHam* frmbos, bool stoquastic) :
         m_terms(std::move(terms)), m_frm(frm ? *frm : *m_terms.m_frm), m_bos(bos ? *bos : *m_terms.m_bos),
         m_frmbos(frmbos ? *frmbos : *m_terms.m_frmbos),
         m_basis(frmbos ? m_frmbos.m_basis : sys::Basis(m_frm.m_basis, m_bos.m_basis)),
-        m_boson_number_conserve(boson_number_conserve()), m_work_conn(m_basis.size()){
+        m_boson_number_conserve(boson_number_conserve()), m_stoquastic(stoquastic), m_work_conn(m_basis.size()){
     REQUIRE_TRUE(m_basis, "No system defined");
     if (!m_frm) logging::info("Fermion Hamiltonian is disabled");
     if (c_enable_bosons) {
@@ -82,22 +82,23 @@ Hamiltonian::Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosH
         "Hamiltonian has a non-zero core energy {} which is included in all energy estimators", m_frm.m_e_core);
 }
 
-Hamiltonian::Hamiltonian(init_opts_t opts): Hamiltonian(HamiltonianTerms(opts), nullptr, nullptr, nullptr){}
+Hamiltonian::Hamiltonian(init_opts_t opts):
+    Hamiltonian(HamiltonianTerms(opts), nullptr, nullptr, nullptr, opts.m_ham.m_stoquastic){}
 
-Hamiltonian::Hamiltonian(const FrmHam *ham): Hamiltonian({}, ham, nullptr, nullptr){
+Hamiltonian::Hamiltonian(const FrmHam *ham, bool stoquastic): Hamiltonian({}, ham, nullptr, nullptr, stoquastic){
     require_non_null(ham);
 }
 
-Hamiltonian::Hamiltonian(const BosHam *ham) : Hamiltonian({}, nullptr, ham, nullptr){
+Hamiltonian::Hamiltonian(const BosHam *ham, bool stoquastic) : Hamiltonian({}, nullptr, ham, nullptr, stoquastic){
     require_non_null(ham);
 }
 
-Hamiltonian::Hamiltonian(const FrmBosHam *ham) : Hamiltonian({}, nullptr, nullptr, ham){
+Hamiltonian::Hamiltonian(const FrmBosHam *ham, bool stoquastic) : Hamiltonian({}, nullptr, nullptr, ham, stoquastic){
     require_non_null(ham);
 }
 
-Hamiltonian::Hamiltonian(const FrmHam *frm, const FrmBosHam *frmbos, const BosHam *bos) :
-        Hamiltonian({}, frm, bos, frmbos){
+Hamiltonian::Hamiltonian(const FrmHam *frm, const FrmBosHam *frmbos, const BosHam *bos, bool stoquastic) :
+        Hamiltonian({}, frm, bos, frmbos, stoquastic){
     require_non_null(frm);
     require_non_null(frmbos);
     require_non_null(bos);
