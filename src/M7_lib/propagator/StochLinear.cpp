@@ -20,20 +20,19 @@ StochLinear::StochLinear(const Hamiltonian& ham, const conf::Document& opts,
         m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag){
 }
 
-
-void StochLinear::diagonal(wf::Vectors& wf, Walker& walker, uint_t ipart) {
-    // do death exactly
-    Propagator::diagonal(wf, walker, ipart);
+void StochLinear::discretize(wf::Vectors& wf, Walker &walker) {
     const auto round_mag = 1.0;
     // leave weight alone if the walker is protected from deletion
     if (walker.is_protected()) return;
-    // retrieve the post-death weight
-    const auto weight = walker.m_weight[ipart];
-    // don't attempt stochastic round if the weight exceeds the threshold
-    if (std::abs(weight) >= round_mag) return;
-    // else, do the stochastic round, logging the change in magnitude
-    const auto new_weight = m_prng.stochastic_round(weight, round_mag);
-    wf.set_weight(walker, ipart, new_weight);
+    for (uint_t ipart=0ul; ipart < walker.m_wf_format.m_nelement; ++ipart) {
+        // retrieve the post-death weight
+        const auto weight = walker.m_weight[ipart];
+        // don't attempt stochastic round if the weight exceeds the threshold
+        if (std::abs(weight) >= round_mag) return;
+        // else, do the stochastic round, logging the change in magnitude
+        const auto new_weight = m_prng.stochastic_round(weight, round_mag);
+        wf.set_weight(walker, ipart, new_weight);
+    }
 }
 
 void StochLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipart, bool initiator) {

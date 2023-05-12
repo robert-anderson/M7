@@ -29,7 +29,7 @@ protected:
 public:
     StochLinear(const Hamiltonian &ham, const conf::Document &opts, const wf::Vectors& wf);
 
-    void diagonal(wf::Vectors &wf, Walker& walker, uint_t ipart) override;
+    void discretize(wf::Vectors& wf, Walker &walker) override;
 
     template<typename T>
     uint_t get_nattempt(const T &weight) {

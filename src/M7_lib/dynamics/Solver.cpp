@@ -204,11 +204,12 @@ void Solver::loop_over_occupied_mbfs() {
              */
             continue;
 
+        m_prop.discretize(m_wf, walker);
 
         if (walker.m_weight.is_zero() && !walker.is_protected()) {
             /*
              * MBF has become unoccupied in all parts and must be removed from mapped list, but it must first make all
-             * associated averaged contributions to MEVs
+             * associated averaged contributions to MAEs
              */
             m_maes.make_average_contribs(walker, m_hf.get(), m_icycle);
             m_wf.remove_row(walker);

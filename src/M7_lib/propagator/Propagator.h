@@ -51,7 +51,9 @@ public:
 
     virtual ~Propagator() {}
 
-    virtual void diagonal(wf::Vectors &wf, Walker& walker, uint_t ipart);
+    virtual void discretize(wf::Vectors& /*wf*/, Walker& /*walker*/) {}
+
+    void diagonal(wf::Vectors &wf, Walker& walker, uint_t ipart);
 
     virtual void off_diagonal(wf::Vectors &wf, const Walker& walker, uint_t ipart, bool initiator) = 0;
 
