@@ -53,7 +53,7 @@ public:
      */
     ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng, sys::Particles particles):
             ExcitGenGroup(ham, opts, prng) {
-        if (!probs_uniform()) set_probs(particles);
+        if (probs_uniform()) set_probs(particles);
     }
 
     uint_t ncase() const;
