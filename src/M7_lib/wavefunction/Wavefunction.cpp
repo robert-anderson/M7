@@ -288,6 +288,10 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1>) {
 }
 
 Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<0>) {
+    if (m_opts.m_wavefunction.m_no_row_creation) {
+        m_store.m_row.select_null();
+        return m_store.m_row;
+    }
     auto& row = create_row_(icycle, mbf, tag::Int<1>());
     for (uint_t ipart=0ul; ipart < npart(); ++ipart) {
         row.m_ref_conn.put(ipart, m_refs[ipart].connected(mbf));

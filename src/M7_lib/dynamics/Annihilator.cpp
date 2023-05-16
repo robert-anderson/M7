@@ -78,10 +78,8 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
             //m_aborted_weight += std::abs(*delta_weight);
             return;
         }
-
         auto& new_walker = m_wf.create_row_(m_icycle, dst_mbf);
-        m_wf.set_weight(new_walker, dst_ipart, delta_weight);
-
+        if (new_walker) m_wf.set_weight(new_walker, dst_ipart, delta_weight);
     } else {
         wf_t weight_before = dst_walker.m_weight[dst_ipart];
         if (weight_before == 0.0 && !allow_initiation) {

@@ -58,10 +58,12 @@ namespace wf {
         Stats m_stats;
 
     private:
+
         /**
          * when this is set to true, the reference population is maintained at the current value
          */
         bool m_ref_weights_preserved = false;
+
         /**
          * set of record indices of currently-occupied walkers connected to at least one reference MBF
          */
