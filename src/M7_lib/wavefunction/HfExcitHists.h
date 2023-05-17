@@ -52,24 +52,19 @@ namespace hf_excit_hist {
          */
         conn::Mbf m_work_conn;
         /**
+         * threshold for pmntr inclusion
+         */
+        const double m_thresh;
+        /**
+         * max excitation level with at least one pmntr as determined by the threshold
+         */
+        const uint_t m_max_exlvl;
+        /**
          * number of permanitiators created by excitation level
          */
         reduction::NdArray<uint_t, 1> m_ncreated;
-        /**
-         * k_i for each power i
-         */
-        const v_t<double> m_min_ks;
-        /**
-         * k_i + delta k_i for each power i
-         */
-        const v_t<double> m_max_ks;
-        /**
-         * C2 geometric mean to the power of max_ks for each power i
-         */
-        const v_t<double> m_threshs;
 
-        Initializer(wf::Vectors& wf, const field::Mbf& hf, str_t fname,
-                    uint_t max_exlvl, double delta_k, bool cancellation);
+        Initializer(wf::Vectors& wf, const field::Mbf& hf, str_t fname, double c2_power_thresh, bool cancellation);
 
     private:
         /**
@@ -78,17 +73,7 @@ namespace hf_excit_hist {
          */
         wf_comp_t thresh_for_first_pmntr(uint_t ipower);
 
-        /**
-         * @return
-         *  power of the C2 geometric mean corresponding to thresh_for_first_pmntr(ipower)
-         */
-        wf_comp_t gmp_for_first_pmntr(uint_t ipower);
-
-        v_t<double> make_min_ks(uint_t npower);
-
-        v_t<double> make_max_ks(double delta_k);
-
-        v_t<double> make_threshs();
+        uint find_max_power();
 
         bool apply(field::FrmOnv& mbf, uint_t ientry);
         bool apply(field::BosOnv&, uint_t) {return false;}
@@ -128,8 +113,7 @@ namespace hf_excit_hist {
         void setup();
     };
 
-    void initialize(wf::Vectors& wf, const field::Mbf& hf, str_t fname,
-                    uint_t max_exlvl, double delta_k, bool cancellation);
+    void initialize(wf::Vectors& wf, const field::Mbf& hf, str_t fname, double c2_power_thresh, bool cancellation);
 
     void initialize(wf::Vectors& wf, const field::Mbf& hf, const conf::CiPmntr& opts);
 
