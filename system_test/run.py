@@ -29,7 +29,7 @@ failed = [None for p in procs]
 def outcome_string(exit_code):
     if exit_code < 1: return 'PASS'
     elif exit_code < 3: return 'SKIP'
-    else: return 'FAIL'
+    else: return '* FAIL'
 
 from resource_manager import poll_until, read_ninstance
 def all_procs_done():

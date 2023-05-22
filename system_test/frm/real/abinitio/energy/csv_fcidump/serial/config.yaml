@@ -6,11 +6,11 @@ stats:
 wavefunction:
   nw_init: 100
 propagator:
-  tau_init: 0.001
+  tau_init: 0.01
   stochastic: yes
-  nw_target: 1000
+  nw_target: 2000
   nadd: 3.0
-  ncycle: 400000
+  ncycle: 50000
 hamiltonian:
   fermion:
     fcidump: yes
