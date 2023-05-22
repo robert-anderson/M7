@@ -2,6 +2,7 @@ from subprocess import Popen, PIPE
 from pathlib import Path
 import sys, os, shutil, h5py, argparse
 import numpy as np
+import pickle as pkl
 
 import resource_manager
 
@@ -184,6 +185,27 @@ def compare_shift(fname='M7.stats'): compare_stats_field('Diagonal shift', fname
 def compare_ninit(fname='M7.stats'): compare_stats_field('Initiator', fname)
 def compare_nocc_mbf(fname='M7.stats'): compare_stats_field('Occupied MBFs', fname)
 
+def compare_rdm_archives(fname='M7.rdm.h5'):
+    if not DO_COMPS: return
+
+    run = h5py.File(RUN_DIR/fname, 'r')
+    ref = h5py.File(REF_DIR/fname, 'r')
+    for section in ('archive', 'spinfree'):
+        if not section in ref.keys(): continue
+        b = ref[section]
+        r = run[section]
+        keys = tuple(map(str, b.keys()))
+        if set(r.keys()) != set(b.keys()):
+            # different ranks of RDM accumulated than in benchmark
+            fail(False)
+        for key in keys:
+            if key=='norm': continue
+            if not np.array_equal(r[key]['indices'], b[key]['indices']):
+                #f'index array of RDM {key} does not agree with benchmark'
+                fail(False)
+            if not np.allclose(np.array(r[key]['values']), np.array(b[key]['values'])): 
+                #f'value array of RDM {key} does not agree with benchmark'
+                fail(False)
 
 '''
 perform crude removal of serial correlation
@@ -217,3 +239,11 @@ def check_proje(ref_value, fname='M7.stats', opts=BlockOpts()):
     check_stats_field(ref_value, 'Reference-projected energy', fname, opts)
 
 
+def load_spinfree_hdf5_rdm(group):
+    inds = np.array(group['indices'])
+    values = np.array(group['values'])
+    extent = max(inds.flatten())+1
+    nind = inds.shape[1]
+    rdm = np.zeros((extent,)*nind)
+    for i, row in enumerate(inds): rdm[tuple(row)] = values[i]
+    return rdm
