@@ -124,7 +124,7 @@ public:
      *  is said to be aborted. Allow initiation is true if any of the contributing src_mbfs are initiators, or if there
      *  are multiple src_mbfs spawning to the same zero-weighted part in the same cycle
      */
-    void annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
+    void annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf_t delta_weight, uint_t src_shift_space,
                         bool allow_initiation, Walker& dst_walker);
     /**
      * given that all rows between block_start (inclusively) and current (exclusively) correspond the the same (dst_mbf,
@@ -139,8 +139,7 @@ public:
      * @param dst_walker
      *  row in m_wf.m_store which stores the dst_mbf if found
      */
-    void handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
-                          const wf_t &total_delta, Walker& dst_walker);
+    void handle_dst_block(Spawn &block_begin, Spawn &next_block_begin, wf_t total_delta, Walker& dst_walker);
 
     void handle_src_block(const Spawn &block_begin, const Walker& dst_row);
 

@@ -22,17 +22,17 @@ namespace wf {
          */
         reduction::NdArray<uint_t, c_ndim_wf> m_ninitiator;
         /**
-         * number of occupied permanitiator MBFs in each part of the WF
-         */
-        reduction::NdArray<uint_t, c_ndim_wf> m_nocc_pmntr;
-        /**
          * number of MBFs with any associated weight in any part
          */
         reduction::cyclic::Scalar<int64_t, false> m_nocc_mbf;
         /**
          * L1 norm of each part of the WF
          */
-        reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf> m_nwalker;
+        reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf> m_nw;
+        /**
+         * L1 norm of each part of the WF, and each shift space
+         */
+        reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf+1> m_nw_by_shift_space;
         /**
          * square of the L2 norm of each part of the WF
          */
@@ -46,7 +46,7 @@ namespace wf {
          */
         reduction::NdArray<wf_comp_t, c_ndim_wf> m_nannihilated;
 
-        Stats(const NdFormat<c_ndim_wf>& format);
+        Stats(const NdFormat<c_ndim_wf>& format, uint_t nshift_space);
 
         void all_sum() {
             reduction::all_sum(m_summed);

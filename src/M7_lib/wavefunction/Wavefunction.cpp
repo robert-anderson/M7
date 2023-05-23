@@ -4,7 +4,7 @@
 
 #include "M7_lib/basis/Suites.h"
 #include "Wavefunction.h"
-#include "CiInitializer.h"
+#include "FciInitializer.h"
 #include "HfExcitHists.h"
 #include "M7_lib/hdf5/DistTableLoader.h"
 
@@ -28,44 +28,29 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
     }
 
     /*
-     * if the input-specified nw is 0, assume we will initialize the WF with the target number of walkers
-     */
-    const wf_t nw_init = (m_opts.m_wavefunction.m_nw_init.m_value == 0.0) ?
-            m_opts.m_propagator.m_nw_target.m_value : m_opts.m_wavefunction.m_nw_init.m_value;
-    /*
      * insert reference MBF into the store table
      */
-    {
-        const auto ref_loc = create_row_setup(0, ref_mbf);
-        if (ref_loc.is_mine()) {
-            auto ref_walker = m_store.m_row;
-            ref_walker.jump(ref_loc.m_irec);
-            for (uint_t ipart = 0ul; ipart < npart(); ++ipart) set_weight(ref_walker, ipart, 1.0);
+    const auto ref_loc = create_row_setup(0, ref_mbf);
+    if (ref_loc.is_mine()) {
+        auto ref_walker = m_store.m_row;
+        ref_walker.jump(ref_loc.m_irec);
+        for (uint_t ipart = 0ul; ipart < npart(); ++ipart) {
+            set_weight(ref_walker, ipart, wf_t(m_opts.m_wavefunction.m_nw_init));
         }
-
-        for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
     }
 
-    const auto& init_space_kind = m_opts.m_wavefunction.m_init_space_kind.m_value;
+    for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
+
     if (m_opts.m_wavefunction.m_load.m_enabled) {
         // the wavefunction is to be loaded from HDF5 archive
         load();
     }
-    else if (init_space_kind != "ref"){
-        // the wavefunction is to be initialized using eigenvectors from the Arnoldi method
-        logging::info("Performing exact CI initialization of wavefunctions");
-        ci_init::Options opts;
-        opts.m_nroot = this->nroot();
-        if (init_space_kind == "fci") {
-            opts.m_loop_kind = ci_init::Options::Conns;
-            ci_init::FciSubspace subspace(&m_ham, m_sector.particles());
-            ci_init(subspace, opts);
-        }
-        else if (init_space_kind == "ref_conn") {
-            opts.m_loop_kind = ci_init::Options::MbfPairs;
-            ci_init::RefConnSubspace subspace(&m_ham, ref_mbf);
-            ci_init(subspace, opts);
-        }
+    else if (m_opts.m_wavefunction.m_fci_init) {
+        // the wavefunction is to be initialized using exact eigenvectors from the Arnoldi method
+        logging::info("Performing exact FCI initialization of wavefunctions");
+        FciInitOptions fci_init_opts;
+        fci_init_opts.m_nroot = this->nroot();
+        fci_init(fci_init_opts);
     }
     return ref_locs;
 }
@@ -77,19 +62,19 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
         {
             ham.m_basis,
             opts.m_wavefunction.m_nroot,
-            opts.m_av_ests.need_replication() ? 2ul:1ul, need_av_weights(opts)
+            opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)
         },
         opts.m_wavefunction.m_distribution,
         // store sizing
         {
-            uint_t(opts.m_propagator.m_nw_target),
+            uint_t(opts.m_shift.nw_target_total()),
             opts.m_wavefunction.m_buffers.m_store_exp_fac
         },
         // send/recv row
         {ham.m_basis, need_send_parents(opts)},
         // send/recv sizing
         {
-            std::max(10ul, uint_t(opts.m_propagator.m_nw_target * opts.m_propagator.m_tau_init)),
+            std::max(10ul, uint_t(opts.m_shift.nw_target_total() * opts.m_propagator.m_tau_init)),
             opts.m_wavefunction.m_buffers.m_comm_exp_fac
         }
     ),
@@ -97,7 +82,7 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     m_ham(ham),
     m_sector(m_ham.m_basis, m_ham.default_particles(m_opts.m_particles)),
     m_format(m_store.m_row.m_weight.m_format),
-    m_stats(m_format),
+    m_stats(m_format, opts.m_shift.m_nw_targets.m_value.size()),
     m_refs(opts.m_reference, *this, setup()),
     m_chkpt_files(opts.m_wavefunction.m_chkpt){
 
@@ -237,17 +222,35 @@ uint_t wf::Vectors::debug_ndeterministic(uint_t iroot) const {
     return res;
 }
 
-void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
-    DEBUG_ASSERT_FALSE(math::is_nan_or_inf(std::abs(new_weight)), "new weight is invalid");
+void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint_t new_shift_space) {
+    DEBUG_ASSERT_FALSE(std::isnan(std::abs(new_weight)), "new weight is invalid");
     if (m_ref_weights_preserved && walker.m_mbf==m_refs[ipart].mbf()) return;
     wf_t& weight = walker.m_weight[ipart];
-    m_stats.m_nwalker.delta()[ipart] += std::abs(new_weight) - std::abs(weight);
+    const auto delta = std::abs(new_weight) - std::abs(weight);
+    m_stats.m_nw.delta()[ipart] += delta;
+    {
+        // update number of walkers resolved by shift space index
+        const uint_t old_shift_space = walker.m_shift_space;
+        const auto& format = m_stats.m_nw_by_shift_space.m_format;
+        /*
+         * ipart is a compound index of root and replica, so combine with the minor index to obtain the overall flat
+         * index for the shift space
+         */
+        auto iflat_old = format.combine<2>(ipart, old_shift_space);
+        auto iflat_new = format.combine<2>(ipart, new_shift_space);
+        if (iflat_old == iflat_new) m_stats.m_nw_by_shift_space.delta()[iflat_new] += delta;
+        else {
+            m_stats.m_nw_by_shift_space.delta()[iflat_old] -= std::abs(weight);
+            m_stats.m_nw_by_shift_space.delta()[iflat_new] += std::abs(new_weight);
+        }
+
+    }
     m_stats.m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
     weight = new_weight;
 }
 
-void wf::Vectors::change_weight(Walker& walker, uint_t ipart, wf_t delta) {
-    set_weight(walker, ipart, walker.m_weight[ipart] + delta);
+void wf::Vectors::change_weight(Walker& walker, uint_t ipart, wf_t delta, uint_t new_shift_space) {
+    set_weight(walker, ipart, walker.m_weight[ipart] + delta, new_shift_space);
 }
 
 void wf::Vectors::scale_weight(Walker& walker, uint_t ipart, double factor) {
@@ -280,13 +283,14 @@ void wf::Vectors::remove_ref_conn(const Walker& walker) {
     m_irec_ref_conns.erase(walker.index());
 }
 
-Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1>) {
+Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_space, tag::Int<1>) {
     DEBUG_ASSERT_TRUE(mpi::i_am(m_dist.irank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
     auto& row = m_store.insert(mbf);
     ++m_stats.m_nocc_mbf.delta();
     DEBUG_ASSERT_EQ(row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
     row.m_hdiag = m_ham.get_energy(mbf);
+    row.m_shift_space = shift_space;
     /*
      * we need to be very careful here of off-by-one-like mistakes. the initial walker is "created" at the beginning
      * of MC cycle 0, and so the stats line output for cycle 0 will show that the number of walkers is the initial
@@ -294,17 +298,19 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1>) {
      * iteration 1 even though it is added in the annihilating call of iteration 0. so, if this method is called in
      * the annihilating process of MC cycle i, it actually "becomes occupied" on cycle i+1.
      */
-    row.m_icycle_occ = icycle+1;
-    row.m_average_weight = 0;
+    if (storing_av_weights()) {
+        row.m_icycle_occ = icycle+1;
+        row.m_average_weight = 0;
+    }
     return row;
 }
 
-Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<0>) {
+Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_space, tag::Int<0>) {
     if (m_opts.m_wavefunction.m_no_row_creation) {
         m_store.m_row.select_null();
         return m_store.m_row;
     }
-    auto& row = create_row_(icycle, mbf, tag::Int<1>());
+    auto& row = create_row_(icycle, mbf, shift_space, tag::Int<1>());
     for (uint_t ipart=0ul; ipart < npart(); ++ipart) {
         row.m_ref_conn.put(ipart, m_refs[ipart].connected(mbf));
     }
@@ -313,7 +319,7 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<0>) {
 }
 
 Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
-                              bool deterministic, uint_t dst_ipart) {
+                              bool deterministic, uint_t dst_ipart, uint_t src_shift_space) {
     auto& dst_table = send(m_dist.irank(dst_mbf));
 
     auto& spawn = dst_table.m_row;
@@ -324,12 +330,13 @@ Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initia
     spawn.m_src_initiator = initiator;
     spawn.m_src_deterministic = deterministic;
     spawn.m_ipart_dst = dst_ipart;
+    spawn.m_src_shift_space = src_shift_space;
     return spawn;
 }
 
 Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
-                              uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight) {
-    auto& spawn = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
+                              uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight, uint_t src_shift_space) {
+    auto& spawn = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart, src_shift_space);
     if (spawn.m_send_parents) {
         spawn.m_src_mbf = src_mbf;
         spawn.m_src_weight = src_weight;
@@ -357,12 +364,11 @@ void wf::Vectors::refresh_all_ref_conns() {
     m_store.foreach_row_in_use(fn);
 }
 
-void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, uint_t max_ncomm) {
+void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
     /*
      * perform the eigensolver procedure for the required number of states
      */
-    const auto& table = subspace.m_mbf_order_table;
-    ci_init::Initializer init(subspace, opts);
+    FciInitializer init(m_ham, opts);
     const auto results = init.solve();
     /*
      * compute the ratio of initial number of walkers to L1-norms of the eigenvectors to get the right scale
@@ -371,7 +377,7 @@ void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options op
     if (mpi::i_am_root()) {
         v_t<ham_t> evals;
         results.get_evals(evals);
-        logging::info("CI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
+        logging::info("FCI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
 
         const auto nw = m_opts.m_wavefunction.m_nw_init.m_value;
         for (uint_t iroot=0ul; iroot<opts.m_nroot; ++iroot)
@@ -385,22 +391,20 @@ void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options op
     char done = false;
     while (!mpi::all_land(done)) {
         if (mpi::i_am_root()) {
-            auto& row = table.m_row;
+            auto& row = init.m_mbf_order_table.m_row;
             auto& mbf = row.m_field;
-            const auto irow_end = std::min(table.nrow_in_use(), irow + max_ncomm);
+            const auto irow_end = std::min(init.m_mbf_order_table.nrow_in_use(), irow + max_ncomm);
             for (row.jump(irow); row.in_range(irow_end); ++row) {
                 for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
                     for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
                         auto ipart = m_format.flatten({iroot, ireplica});
-                        const auto weight = results.get_evec(iroot)[row.index()];
-                        if (std::abs(weight) > 1e-6) {
-                            add_spawn(mbf, weight, true, false, ipart);
-                        }
+                        const auto weight = results.get_evec(iroot)[row.index()]*scale_facs[iroot];
+                        add_spawn(mbf, weight, true, false, ipart, 0);
                     }
                 }
             }
             irow = irow_end;
-            done = (irow == table.nrow_in_use());
+            done = (irow == init.m_mbf_order_table.nrow_in_use());
         } else {
             done = true;
         }
@@ -413,14 +417,6 @@ void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options op
             auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
             store_row.m_weight = recv_row.m_delta_weight;
         }
-    }
-    /*
-     * now scale the weights so the initial number of walkers is as-specified in the config document
-     */
-    for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
-        const auto scale_fac = m_opts.m_wavefunction.m_nw_init.m_value / debug_l1_norm(ipart);
-        auto fn = [&](Walker& row) {scale_weight(row, ipart,  scale_fac);};
-        m_store.foreach_row_in_use(fn);
     }
 }
 

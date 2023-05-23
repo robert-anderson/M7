@@ -129,7 +129,7 @@ void StochLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipa
                         "probability of sampling RDM connection cannot exceed 1.0");
 
         wf.add_spawn(dst_mbf, thresh_delta, initiator, flag_deterministic,
-                     ipart, src_mbf, weight / p_succeed_at_least_once);
+                     ipart, src_mbf, weight / p_succeed_at_least_once, walker.m_shift_space);
     }
 }
 

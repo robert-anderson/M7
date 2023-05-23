@@ -69,11 +69,11 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
          * set the shift to the initial reference-projected energy plus the user-defined offset
          */
         const ham_comp_t ref_energy = wf.reference_projected_energy(0);
-        m_prop.m_shift.m_values = ref_energy;
-        if (!wf.was_loaded() || m_opts.m_shift.m_cont_grow.m_value) m_prop.m_shift.m_values += opts.m_shift.m_init;
+        m_prop.m_shifts.m_values = ref_energy;
+        if (!wf.was_loaded() || m_opts.m_shift.m_cont_grow.m_value) m_prop.m_shifts.m_values += opts.m_shift.m_init;
     }
     else {
-        m_prop.m_shift.m_values = opts.m_shift.m_init;
+        m_prop.m_shifts.m_values = opts.m_shift.m_init;
     }
 
     if (m_maes.m_rdms) {
@@ -155,17 +155,17 @@ void Solver::begin_cycle() {
     // TODO: update load balancing
     //    m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
-    if (m_wf.nroot() > 1 && m_prop.m_shift.m_variable_mode) {
+    if (m_wf.nroot() > 1 && m_prop.m_shifts.m_variable_mode) {
         m_wf.orthogonalize();
     }
     if (m_hf) m_hf->update();
 
     m_prop.update(m_icycle, m_wf);
-    if (m_prop.m_shift.m_variable_mode && m_opts.m_shift.m_fix_ref_weight)
-        m_wf.preserve_ref_weights(m_opts.m_propagator.m_nw_target);
+    if (m_prop.m_shifts.m_variable_mode && m_opts.m_shift.m_fix_ref_weight)
+        m_wf.preserve_ref_weights(m_opts.m_shift.m_nw_targets.m_value[0]);
 
     auto update_epoch = [&](uint_t ncycle_wait) {
-        const auto &epochs = m_prop.m_shift.m_variable_mode;
+        const auto &epochs = m_prop.m_shifts.m_variable_mode;
         if (!epochs) return false;
         return m_icycle > epochs.icycle_start_last() + ncycle_wait;
     };
@@ -230,7 +230,7 @@ void Solver::loop_over_occupied_mbfs() {
             if (m_wf.storing_av_weights()) walker.m_average_weight += walker.m_weight;
         }
 
-        if (m_prop.m_shift.m_variable_mode) {
+        if (m_prop.m_shifts.m_variable_mode) {
             // todo: give hf excit hists accumulation its own epoch
             if (m_hf && m_hf->m_excit_accums) m_hf->m_excit_accums.add(walker.m_mbf, walker.m_weight[0]);
         }
@@ -254,11 +254,7 @@ void Solver::loop_over_occupied_mbfs() {
                               "Stored MBF should be on its allocated rank");
 
             bool initiator = walker.exceeds_initiator_thresh(ipart, m_prop.m_nadd_initiator);
-            if (!initiator && m_opts.m_wavefunction.m_ci_pmntr.m_enabled) {
-                // the initiator criterion was not satisfied, see if this is a permanitiator
-                initiator = walker.m_pmntr.get(ipart);
-                if (initiator) m_wf.m_stats.m_nocc_pmntr.m_local[ipart]++;
-            }
+
             if (initiator) m_wf.m_stats.m_ninitiator.m_local[ipart]++;
 
             // TODO: load balancing work logging
@@ -331,7 +327,7 @@ void Solver::end_cycle() {
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator MBFs have occurred");
     m_wf.end_cycle(m_icycle);
-    REQUIRE_FALSE_ALL(m_wf.m_stats.m_nwalker.total().is_zero(), "All walkers died");
+    REQUIRE_FALSE_ALL(m_wf.m_stats.m_nw.total().is_zero(), "All walkers died");
     m_maes.end_cycle();
     m_inst_ests.end_cycle(m_icycle);
     if (m_hf && m_hf->m_excit_accums) m_hf->m_excit_accums.attempt_chkpt(m_icycle);
@@ -344,9 +340,9 @@ void Solver::output_stats() {
         auto &stats = m_stats->m_row;
         stats.m_icycle = m_icycle;
         stats.m_tau = m_prop.tau();
-        stats.m_shift = m_prop.m_shift.m_values;
-        stats.m_nwalker = m_wf.m_stats.m_nwalker.prev_total();
-        stats.m_delta_nwalker = m_wf.m_stats.m_nwalker.prev_delta().m_reduced;
+        stats.m_shift = m_prop.m_shifts.m_values;
+        stats.m_nwalker = m_wf.m_stats.m_nw.prev_total();
+        stats.m_delta_nwalker = m_wf.m_stats.m_nw.prev_delta().m_reduced;
         stats.m_nwalker_spawned = m_wf.m_stats.m_nspawned.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_stats.m_nannihilated.m_reduced;
         stats.m_ref_proj_energy_num = m_wf.m_refs.proj_energy_nums();
@@ -356,7 +352,6 @@ void Solver::output_stats() {
         stats.m_l2_norm = m_wf.m_stats.m_l2_norm_square.prev_total();
         stats.m_l2_norm.to_sqrt();
         stats.m_ninitiator = m_wf.m_stats.m_ninitiator.m_reduced;
-        stats.m_nocc_pmntr = m_wf.m_stats.m_nocc_pmntr.m_reduced;
         stats.m_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_total();
         stats.m_delta_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_delta().m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
@@ -377,7 +372,7 @@ void Solver::output_stats() {
         stats.m_icycle = m_icycle;
         stats.m_synchronization_overhead = m_synchronization_timer;
         stats.m_nblock_wf_ra = m_wf.m_dist.nblock_();
-        stats.m_nwalker_total = m_wf.m_stats.m_nwalker.prev_total().sum();
+        stats.m_nwalker_total = m_wf.m_stats.m_nw.prev_total().sum();
         stats.m_nwalker_lookup_skip = m_wf.m_store.m_nskip_total;
         stats.m_nwalker_lookup = m_wf.m_store.m_nlookup_total;
         stats.m_nrow_recv = m_wf.m_send_recv.m_last_recv_count;

@@ -16,12 +16,17 @@
 #include "M7_lib/wavefunction/Reference.h"
 #include "M7_lib/wavefunction/Wavefunction.h"
 
+
+struct Shift {
+
+};
+
 /**
  * responsible for defining and updating the shift subtracted from the diagonal H elements in
  * propagation
  */
-struct Shift {
-    const conf::Document &m_opts;
+struct Shifts {
+    const conf::Shift &m_opts;
     /**
      * the numbers of walkers on each WF part in the last period is stored so that the growth rate can be computed
      */
@@ -46,15 +51,16 @@ struct Shift {
      */
     Epochs m_variable_mode;
     /**
-     * the target walker number can be changed by the user on the fly
+     * the target walker numbers by shift space
      */
-    InteractiveVariable<wf_comp_t> m_nwalker_target;
+    v_t<wf_comp_t> m_nw_targets;
+    wf_comp_t m_nw_target = 0;
     /**
      * if using target-driven damping, this will be y^2/4 where y is the normal (static) damp factor, else it will be 0
      */
     const double m_target_damp_fac;
 
-    Shift(const conf::Document &opts, const NdFormat<c_ndim_wf>& wf_fmt);
+    Shifts(const conf::Shift &opts, const NdFormat<c_ndim_wf>& wf_fmt);
 
     const ham_comp_t & operator[](uint_t ipart);
 
@@ -74,20 +80,9 @@ struct Shift {
      */
     void update(const wf::Vectors& wf, uint_t icycle, double tau);
 
-private:
-
-    /**
-     * add the current m_values array into the average queues and update the unnormalized averages accordingly
-     */
-    void add_to_average();
-
-    /**
-     * @param ipart
-     *  part index
-     * @return
-     *  normalized average for ipart
-     */
-    ham_comp_t get_average(const uint_t& ipart) const;
+    uint_t nspace() const {
+        return m_nw_targets.size();
+    }
 
 };
 

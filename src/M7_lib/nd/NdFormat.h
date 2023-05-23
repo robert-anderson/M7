@@ -92,7 +92,7 @@ public:
 
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.m_shape, other.m_dim_names){}
 
-    NdFormat<nind+1> add_minor_dim(uint_t nelement, str_t name="") {
+    NdFormat<nind+1> add_minor_dim(uint_t nelement, str_t name="") const {
         std::array<uint_t, nind+1> shape;
         std::copy(m_shape.cbegin(), m_shape.cend(), shape.begin());
         shape.back() = nelement;
@@ -100,6 +100,9 @@ public:
         std::copy(m_dim_names.cbegin(), m_dim_names.cend(), dim_names.begin());
         dim_names.back() = name;
         return {shape, dim_names};
+    }
+    NdFormat<nind+1> operator+(uint_t n) const {
+        return add_minor_dim(n);
     }
 
     bool operator==(const NdFormat<nind> &other) const{
@@ -109,7 +112,7 @@ public:
         return true;
     }
 
-    operator const std::array<uint_t, nind>&() const{
+    operator const std::array<uint_t, nind>&() const {
         return m_shape;
     }
 
@@ -195,7 +198,7 @@ public:
     // TODO hierarchical flattening
 
     template<uint_t nmajor>
-    uint_t combine(const uint_t& iflat_major, const uint_t& iflat_minor){
+    uint_t combine(uint_t iflat_major, uint_t iflat_minor) const {
         static_assert(nmajor > 0, "major flat index must correspond to non-zero number of dimensions");
         DEBUG_ASSERT_LT(iflat_major, major_dims<nmajor>().m_nelement, "major flat index OOB");
         auto stride = m_strides[nmajor - 1];
@@ -220,7 +223,7 @@ public:
 
     template<uint_t nminor>
     typename std::enable_if<nminor!=0, uint_t>::type
-    flatten(const uint_t& iflat_major, const uint_t& iflat_minor) const {
+    flatten(uint_t iflat_major, uint_t iflat_minor) const {
         return iflat_major * m_strides[nind-nminor - 1] + iflat_minor;
     }
 
@@ -231,7 +234,7 @@ public:
     }
 
     template<typename T>
-    void decode_flat(const uint_t& iflat, std::array<T, nind>& inds) const {
+    void decode_flat(uint_t iflat, std::array<T, nind>& inds) const {
         static_assert(std::is_integral<T>::value, "index type must be integral");
         uint_t remainder = iflat;
         for (uint_t i = 0ul; i != nind; ++i){

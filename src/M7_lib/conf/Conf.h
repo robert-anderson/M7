@@ -136,11 +136,13 @@ namespace conf {
         Param<double> m_damp;
         Param<bool> m_target_damp;
         Param<uint_t> m_period;
-        Param<uint_t> m_ncycle_av;
+        Param<v_t<wf_comp_t>> m_nw_targets;
         Param<bool> m_fix_ref_weight;
         Param<bool> m_cont_grow;
 
         explicit Shift(Group *parent);
+
+        wf_comp_t nw_target_total() const;
 
     };
 
@@ -312,7 +314,6 @@ namespace conf {
         Param<uint_t> m_ncycle;
         Param<bool> m_stochastic;
         conf::ExcitGen m_excit_gen;
-        Param<double> m_nw_target;
         Param<wf_comp_t> m_max_bloom;
         Param<wf_comp_t> m_nadd;
         Param<double> m_tau_init;

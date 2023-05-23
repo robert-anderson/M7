@@ -57,7 +57,7 @@ void Annihilator::lookup_dst(const Mbf &dst_mbf, uint_t ipart_dst, bool &determi
     else m_dst_weight.assign(m_dst_weight.size(), dtype::null(m_dst_weight[0]));
 }
 
-void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_mbf, const wf_t &delta_weight,
+void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf_t delta_weight, uint_t src_shift_space,
                                  bool allow_initiation, Walker &dst_walker) {
     if (m_nadd == 0.0) {
         DEBUG_ASSERT_TRUE(allow_initiation,
@@ -70,6 +70,8 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
     if (delta_weight == 0.0) return;
 
     m_wf.m_stats.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
+
+    const auto dst_shift_space = std::min(src_shift_space+1, m_prop.m_shifts.nspace()-1);
     if (!dst_walker) {
         /*
          * the destination MBF row in m_wf.m_store is not currently occupied, so initiator rules must be applied
@@ -78,7 +80,7 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
             //m_aborted_weight += std::abs(*delta_weight);
             return;
         }
-        auto& new_walker = m_wf.create_row_(m_icycle, dst_mbf);
+        auto& new_walker = m_wf.create_row_(m_icycle, dst_mbf, dst_shift_space);
         if (new_walker) m_wf.set_weight(new_walker, dst_ipart, delta_weight);
     } else {
         wf_t weight_before = dst_walker.m_weight[dst_ipart];
@@ -88,12 +90,11 @@ void Annihilator::annihilate_row(const uint_t &dst_ipart, const field::Mbf &dst_
             return;
         }
         m_wf.m_stats.m_nannihilated.m_local[dst_ipart] += annihilated_magnitude(weight_before, delta_weight);
-        m_wf.change_weight(dst_walker, dst_ipart, delta_weight);
+        m_wf.change_weight(dst_walker, dst_ipart, delta_weight, dst_shift_space);
     }
 }
 
-void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
-                                   const wf_t &total_delta, Walker &dst_walker) {
+void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin, wf_t total_delta, Walker &dst_walker) {
     DEBUG_ASSERT_FALSE(in_same_dst_block(block_begin, next_block_begin),
                        "start of block and start of next block should not be in the same block");
     DEBUG_ASSERT_LT(block_begin.index(), next_block_begin.index(),
@@ -152,7 +153,8 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
         // contributions to unoccupied MBFs are allowed
         allow_initiation = block_begin.m_src_initiator;
     }
-    annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta, allow_initiation, dst_walker);
+    annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta,
+                   block_begin.m_src_shift_space, allow_initiation, dst_walker);
     block_begin.jump(next_block_begin);
     DEBUG_ASSERT_EQ(next_block_begin.index(), block_begin.index(), "row not set to beginning of next block");
 }
@@ -183,7 +185,7 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
     const auto ipart_replica = dst_row.ipart_replica(ipart_dst);
     wf_t contrib = m_dst_weight[ipart_replica];
     // recover pre-death value of replica population
-    contrib /= 1.0 - m_prop.tau() * (dst_row.m_hdiag - m_prop.m_shift.m_values[ipart_replica]);
+    contrib /= 1.0 - m_prop.tau() * (dst_row.m_hdiag - m_prop.m_shifts.m_values[ipart_replica]);
     contrib = arith::conj(contrib);
     contrib *= wf_t(block_begin.m_src_weight);
     m_maes.m_rdms.make_contribs(block_begin.m_src_mbf, dst_row.m_mbf, contrib);

@@ -16,9 +16,9 @@ Walker::Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool aver
         m_hdiag(this, "diagonal H element"),
         m_deterministic(this, m_root_format, "deterministic subspace flag"),
         m_ref_conn(this, m_wf_format, "reference connection flag"),
-        m_pmntr(this, m_wf_format, "is permanitiator flag"),
         m_average_weight(average_weights ? this : nullptr, m_wf_format, "unnormalized average weight"),
-        m_icycle_occ(average_weights ? this : nullptr, "cycle index at row creation")
+        m_icycle_occ(average_weights ? this : nullptr, "cycle index at row creation"),
+        m_shift_space(this, "index of the shift space")
 {}
 
 uint_t Walker::occupied_ncycle(uint_t icycle_current) const {

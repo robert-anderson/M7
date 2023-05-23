@@ -150,26 +150,40 @@ namespace wf {
          *  part index of the WF to update
          * @param new_weight
          *  value to which this part weight is to be set
+         * @param new_shift_space
+         *  new index for the shift space - if this is different to the current one, take this into account in stats
          */
-        void set_weight(Walker& walker, uint_t ipart, wf_t new_weight);
+        void set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint_t new_shift_space);
 
-        void set_weight(Walker& walker, wf_t new_weight) {
-            for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) set_weight(walker, ipart, new_weight);
+        /**
+         * assume no change in shift space
+         */
+        void set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
+            set_weight(walker, ipart, new_weight, walker.m_shift_space);
         }
 
-        void set_weight(Walker& walker, const Numbers<wf_t, c_ndim_wf>& new_weight) {
-            for (uint_t i = 0ul; i < m_format.m_nelement; ++i) set_weight(walker, i, new_weight[i]);
+        void set_weight(Walker& walker, wf_t new_weight, uint_t new_shift_space) {
+            for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart)
+                set_weight(walker, ipart, new_weight, new_shift_space);
+        }
+
+        void set_weight(Walker& walker, const Numbers<wf_t, c_ndim_wf>& new_weight, uint_t new_shift_space) {
+            for (uint_t i = 0ul; i < m_format.m_nelement; ++i)
+                set_weight(walker, i, new_weight[i], new_shift_space);
         }
 
         /**
          * convenience method to set_weight based on a difference relative to the current weight of
          * the part
-         * @param ipart
-         *  part index
-         * @param delta
-         *  change in the weight
          */
-        void change_weight(Walker& walker, uint_t ipart, wf_t delta);
+        void change_weight(Walker& walker, uint_t ipart, wf_t delta, uint_t new_shift_space);
+
+        /**
+         * assume no change in shift space
+         */
+        void change_weight(Walker& walker, uint_t ipart, wf_t delta) {
+            change_weight(walker, ipart, delta, walker.m_shift_space);
+        }
 
         /**
          * convenience method to set_weight based on a scalar factor relative to current weight
@@ -201,38 +215,38 @@ namespace wf {
          * after the setup step
          */
 
-        Walker& create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1> /*setup*/);
+        Walker& create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_space, tag::Int<1> /*setup*/);
 
-        Walker& create_row_(uint_t icycle, const Mbf& mbf, tag::Int<0> /*setup*/);
+        Walker& create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_space, tag::Int<0> /*setup*/);
 
         template<uint_t setup>
-        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf, tag::Int<setup>) {
+        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf, uint_t shift_space, tag::Int<setup>) {
             const uint_t irank = m_dist.irank(mbf);
             uint_t irec;
             if (mpi::i_am(irank)) {
-                irec = create_row_(icycle, mbf, tag::Int<setup>()).index();
+                irec = create_row_(icycle, mbf, shift_space, tag::Int<setup>()).index();
             }
             mpi::bcast(irec, irank);
             return {irank, irec};
         }
 
-        Walker& create_row_setup_(uint_t icycle, const Mbf& mbf) {
-            return create_row_(icycle, mbf, tag::Int<1>());
+        Walker& create_row_setup_(uint_t icycle, const Mbf& mbf, uint_t shift_space) {
+            return create_row_(icycle, mbf, shift_space, tag::Int<1>());
         }
 
         TableBase::Loc create_row_setup(uint_t icycle, const Mbf& mbf) {
-            return create_row(icycle, mbf, tag::Int<1>());
+            return create_row(icycle, mbf, 0, tag::Int<1>());
         }
 
         template<uint_t setup>
-        Walker& lookup_or_create_row_(uint_t icycle, const Mbf& mbf, tag::Int<setup>) {
+        Walker& lookup_or_create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_space, tag::Int<setup>) {
             auto& lookup = m_store.lookup(mbf);
             if (lookup) return lookup;
-            return create_row_(icycle, mbf, tag::Int<setup>());
+            return create_row_(icycle, mbf, shift_space, tag::Int<setup>());
         }
 
         Walker& lookup_or_create_row_setup_(uint_t icycle, const Mbf& mbf) {
-            return lookup_or_create_row_(icycle, mbf, tag::Int<1>());
+            return lookup_or_create_row_(icycle, mbf, 0, tag::Int<1>());
         }
 
     public:
@@ -246,19 +260,26 @@ namespace wf {
          * @return
          *  ref to created row
          */
-        Walker& create_row_(uint_t icycle, const Mbf& mbf) {return create_row_(icycle, mbf, tag::Int<0>());}
+        Walker& create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_space) {
+            return create_row_(icycle, mbf, shift_space, tag::Int<0>());
+        }
 
         /**
          * Called on all ranks, dispatching create_row_ on the assigned rank only
          */
-        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf) {return create_row(icycle, mbf, tag::Int<0>());}
+        TableBase::Loc create_row(uint_t icycle, const Mbf& mbf, uint_t shift_space) {
+            return create_row(icycle, mbf, shift_space, tag::Int<0>());
+        }
 
-        Walker& lookup_or_create_row_(uint_t icycle, const Mbf& mbf) {return lookup_or_create_row_(icycle, mbf, tag::Int<0>());}
+        Walker& lookup_or_create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_space) {
+            return lookup_or_create_row_(icycle, mbf, shift_space, tag::Int<0>());
+        }
 
-        Spawn& add_spawn(const Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart);
+        Spawn& add_spawn(const Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
+                         uint_t dst_ipart, uint_t src_shift_space);
 
         Spawn& add_spawn(const Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart,
-                         const Mbf& src_mbf, wf_t src_weight);
+                         const Mbf& src_mbf, wf_t src_weight, uint_t src_shift_space);
 
         uint_t npart() const {
             return m_format.m_nelement;

@@ -30,8 +30,6 @@ struct FciqmcStatsRow : StatsRow {
     statistic::Numbers<ham_comp_t, c_ndim_wf> m_l2_norm;
     statistic::Numbers<uint_t, c_ndim_wf> m_ninitiator;
     statistic::Numbers<uint_t, c_ndim_wf+1> m_ninitiator_by_exlvl;
-    statistic::Numbers<uint_t, c_ndim_wf> m_nocc_pmntr;
-    statistic::Numbers<uint_t, c_ndim_wf+1> m_nocc_pmntr_by_exlvl;
     statistic::Numbers<uint_t, c_ndim_wf> m_nocc_mbf;
     statistic::Numbers<int, c_ndim_wf> m_delta_nocc_mbf;
     statistic::Numbers<wf_t, c_ndim_wf> m_spin_square_num;

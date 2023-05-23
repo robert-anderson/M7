@@ -12,4 +12,5 @@ Spawn::Spawn(const sys::Basis& basis, bool send_parents) :
         m_delta_weight(this, "spawned walker weight"),
         m_src_initiator(this, "source initiator flag"),
         m_src_deterministic(this, "source deterministic flag"),
-        m_ipart_dst(this, "WF part index of destination") {}
+        m_ipart_dst(this, "WF part index of destination"),
+        m_src_shift_space(this, "index of the shift space to which the src MBF belongs"){}

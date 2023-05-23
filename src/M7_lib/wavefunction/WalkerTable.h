@@ -20,9 +20,9 @@ struct Walker : public Row {
     field::Number<ham_comp_t> m_hdiag;
     field::Flags<c_ndim_root> m_deterministic;
     field::Flags<c_ndim_wf> m_ref_conn;
-    field::Flags<c_ndim_wf> m_pmntr;
     field::Numbers<wf_t, c_ndim_wf> m_average_weight;
     field::Number<uint_t> m_icycle_occ;
+    field::Number<uint_t> m_shift_space;
 
     field::Mbf &key_field();
 

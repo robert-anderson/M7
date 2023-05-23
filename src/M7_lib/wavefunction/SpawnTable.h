@@ -17,6 +17,7 @@ struct Spawn : public Row {
     field::Flag m_src_initiator;
     field::Flag m_src_deterministic;
     field::Number<uint8_t> m_ipart_dst;
+    field::Number<uint8_t> m_src_shift_space;
 
     Spawn(const sys::Basis& basis, bool send_parents);
 };

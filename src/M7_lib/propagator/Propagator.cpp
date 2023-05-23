@@ -23,13 +23,13 @@ std::unique_ptr<guide::Wavefunction> Propagator::make_imp_samp_guide(const conf:
 void Propagator::diagonal(wf::Vectors &wf, Walker &walker, uint_t ipart) {
     const ham_comp_t& hdiag = walker.m_hdiag;
     DEBUG_ASSERT_NEAR_EQ(hdiag, m_ham.get_energy(walker.m_mbf), "incorrect diagonal H element cached");
-    auto death_rate = (hdiag - m_shift[ipart]) * tau();
+    auto death_rate = (hdiag - m_shifts[ipart]) * tau();
     if (death_rate == 0.0) return;
     wf.scale_weight(walker, ipart, 1.0 - death_rate);
 }
 
 void Propagator::update(uint_t icycle, const wf::Vectors& wf) {
-    m_shift.update(wf, icycle, tau());
+    m_shifts.update(wf, icycle, tau());
 }
 
 void Propagator::imp_samp_delta(wf_t& delta, ham_t src_ovlp, const Mbf& dst_mbf) const {

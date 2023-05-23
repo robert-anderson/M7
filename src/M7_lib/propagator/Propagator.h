@@ -24,7 +24,7 @@ public:
     const wf_comp_t m_nadd_initiator;
     const NdFormat<c_ndim_wf> m_wf_fmt;
     const Hamiltonian &m_ham;
-    Shift m_shift;
+    Shifts m_shifts;
     const sys::Sector m_sector;
     /**
      * guiding wavefunction used in the importance sampling
@@ -43,7 +43,7 @@ public:
             m_nadd_initiator(opts.m_propagator.m_nadd),
             m_wf_fmt(wf.m_format),
             m_ham(ham),
-            m_shift(opts, wf.m_format),
+            m_shifts(opts.m_shift, wf.m_format),
             m_sector(wf.m_sector),
             m_imp_samp_guide(make_imp_samp_guide(opts.m_propagator.m_imp_samp_guide)),
             m_dst(m_sector),

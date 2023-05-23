@@ -119,7 +119,7 @@ void hf_excit_hist::Initializer::communicate_and_insert() {
         if (!store_row) {
             // MBF not already added
             m_wf.m_store.insert(recv_row.m_dst_mbf, store_row);
-            store_row.m_pmntr.set();
+            store_row.m_shift_space = 0;
             // permanitiators cannot be deleted - need to protect
             store_row.protect();
             const auto exlvl = OpCounts(m_hf, recv_row.m_dst_mbf).m_nfrm_cre;
@@ -149,8 +149,8 @@ void hf_excit_hist::Initializer::setup() {
          * loop over the WF store table and delete any permanitiators which have fallen beneath thresh due to cancellation
          */
         for (row.restart(); row; ++row) {
-            if (row.m_pmntr.get(0)) {
-                const auto iexlvl = OpCounts(m_hf, row.m_mbf).m_nfrm_cre;
+            const auto iexlvl = OpCounts(m_hf, row.m_mbf).m_nfrm_cre;
+            if (iexlvl) {
                 if (std::abs(row.m_weight[0]) < m_thresh) {
                     ++ncancelled.m_local[iexlvl];
                     row.unprotect();

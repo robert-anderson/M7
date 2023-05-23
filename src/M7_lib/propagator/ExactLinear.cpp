@@ -29,7 +29,7 @@ void ExactLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipa
         m_mag_log.log(0, helement, 1.0);
         auto delta = -weight * tau() * helement;
         imp_samp_delta(delta, src_mbf, dst_mbf);
-        wf.add_spawn(dst_mbf, delta, initiator, src_deterministic, ipart, src_mbf, weight);
+        wf.add_spawn(dst_mbf, delta, initiator, src_deterministic, ipart, src_mbf, weight, walker.m_shift_space);
     };
     m_conn_iters.loop(conn, src_mbf, body);
 }
