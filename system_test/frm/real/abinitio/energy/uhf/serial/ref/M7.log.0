@@ -1,32 +1,32 @@
-[1684749727] [info] Reallocating buffer " send" 0B -> 32.000000KB
-[1684749727] [info] Reallocating buffer " recv" 0B -> 32.000000KB
-[1684749727] [info] Reallocating buffer " send" 0B -> 8.000000KB
-[1684749727] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1684749727] [info] Reallocating buffer " recv" 0B -> 32.000000KB
-[1684749727] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1684749727] [info] Reallocating buffer "wavefunction" 0B -> 128.000000KB
-[1684749727] [info] Reallocating buffer "wavefunction send" 0B -> 960B
-[1684749727] [info] Reallocating buffer "wavefunction recv" 0B -> 960B
-[1684749727] [info] Reallocating buffer "reference gather send" 0B -> 32B
-[1684749727] [info] Reallocating buffer "reference all gathered rows" 0B -> 32B
-[1684749727] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
-[1684749727] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
-[1684749727] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
-[1684749727] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
-[1684749727] [info] Reallocating buffer "M7.stats" 0B -> 144B
-[1684749727] [info] Reallocating buffer "M7.timing" 0B -> 40B
-[1684749727] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
-[1684749728] [info] Reallocating buffer "wavefunction send" 960B -> 1.480000KB
-[1684749728] [info] Reallocating buffer "wavefunction recv" 960B -> 1.480000KB
-[1684749728] [info] Reallocating buffer "wavefunction send" 1.480000KB -> 2.232000KB
-[1684749728] [info] Reallocating buffer "wavefunction recv" 1.480000KB -> 2.232000KB
-[1684749728] [info] Reallocating buffer "wavefunction send" 2.232000KB -> 3.384000KB
-[1684749728] [info] Reallocating buffer "wavefunction recv" 2.232000KB -> 3.424000KB
-[1684749729] [info] Reallocating buffer "wavefunction send" 3.384000KB -> 5.112000KB
-[1684749729] [info] Reallocating buffer "wavefunction recv" 3.424000KB -> 5.544000KB
-[1684749730] [info] Reallocating buffer "wavefunction send" 5.112000KB -> 7.704000KB
-[1684749730] [info] Reallocating buffer "wavefunction recv" 5.544000KB -> 8.352000KB
-[1684749751] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
-[1684749751] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
-[1684749751] [info] Reallocating buffer "Included local rows" 0B -> 640B
-[1684749751] [info] Reallocating buffer "global top weighted" 0B -> 640B
+[1684854096] [info] Reallocating buffer " send" 0B -> 40.000000KB
+[1684854096] [info] Reallocating buffer " recv" 0B -> 40.000000KB
+[1684854096] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1684854096] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1684854096] [info] Reallocating buffer " recv" 0B -> 40.000000KB
+[1684854096] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1684854096] [info] Reallocating buffer "wavefunction" 0B -> 160.000000KB
+[1684854096] [info] Reallocating buffer "wavefunction send" 0B -> 960B
+[1684854096] [info] Reallocating buffer "wavefunction recv" 0B -> 960B
+[1684854096] [info] Reallocating buffer "reference gather send" 0B -> 40B
+[1684854096] [info] Reallocating buffer "reference all gathered rows" 0B -> 40B
+[1684854096] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
+[1684854096] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
+[1684854096] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
+[1684854096] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
+[1684854096] [info] Reallocating buffer "M7.stats" 0B -> 136B
+[1684854096] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1684854096] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
+[1684854100] [info] Reallocating buffer "wavefunction send" 960B -> 1.480000KB
+[1684854100] [info] Reallocating buffer "wavefunction recv" 960B -> 1.480000KB
+[1684854101] [info] Reallocating buffer "wavefunction send" 1.480000KB -> 2.232000KB
+[1684854101] [info] Reallocating buffer "wavefunction recv" 1.480000KB -> 2.232000KB
+[1684854105] [info] Reallocating buffer "wavefunction send" 2.232000KB -> 3.384000KB
+[1684854105] [info] Reallocating buffer "wavefunction recv" 2.232000KB -> 3.424000KB
+[1684854109] [info] Reallocating buffer "wavefunction send" 3.384000KB -> 5.112000KB
+[1684854109] [info] Reallocating buffer "wavefunction recv" 3.424000KB -> 5.544000KB
+[1684854114] [info] Reallocating buffer "wavefunction send" 5.112000KB -> 7.704000KB
+[1684854114] [info] Reallocating buffer "wavefunction recv" 5.544000KB -> 8.352000KB
+[1684854237] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1684854237] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1684854237] [info] Reallocating buffer "Included local rows" 0B -> 800B
+[1684854237] [info] Reallocating buffer "global top weighted" 0B -> 800B

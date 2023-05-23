@@ -1,6 +1,7 @@
 ---
 shift:
   damp: 0.1
+  nw_targets: [4000]
 stats:
   period: 5
 wavefunction:
@@ -8,7 +9,6 @@ wavefunction:
 propagator:
   tau_init: 0.01
   stochastic: yes
-  nw_target: 4000
   nadd: 3.0
   ncycle: 40000
 hamiltonian:

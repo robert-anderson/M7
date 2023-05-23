@@ -54,7 +54,6 @@ struct Shifts {
      * the target walker numbers by shift space
      */
     v_t<wf_comp_t> m_nw_targets;
-    wf_comp_t m_nw_target = 0;
     /**
      * if using target-driven damping, this will be y^2/4 where y is the normal (static) damp factor, else it will be 0
      */

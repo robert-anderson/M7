@@ -42,16 +42,17 @@ void Shifts::update(const wf::Vectors &wf, uint_t icycle, double tau) {
          * number of cycles since last update
          */
         uint_t a = 0ul;
+        const auto nw_target = m_nw_targets[0];
         if (m_opts.m_fix_ref_weight.m_value) {
             const auto mag = std::abs(wf.m_refs[ipart].weight());
-            if (variable_mode.update(icycle, mag >= m_nw_target)) {
+            if (variable_mode.update(icycle, mag >= nw_target)) {
                 logging::info("Variable shift triggered for WF part {}. Cycle {} ref magnitude: {}",
                               ipart, icycle, mag);
                 a = icycle % m_opts.m_period;
             }
         }
         else {
-            if (variable_mode.update(icycle, nw >= m_nw_target)) {
+            if (variable_mode.update(icycle, nw >= nw_target)) {
                 if (icycle) {
                     logging::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
                                   ipart, icycle - 1, wf.m_stats.m_nw.prev_total()[ipart], icycle, nw);
@@ -74,7 +75,7 @@ void Shifts::update(const wf::Vectors &wf, uint_t icycle, double tau) {
                 auto rate = icycle ? nw / m_nwalker_last_period[ipart] : 1.0;
                 m_values[ipart] -= m_opts.m_damp * std::log(std::abs(rate)) / (tau * a);
                 if (m_target_damp_fac != 0.0) {
-                    rate = nw / m_nw_target;
+                    rate = nw / nw_target;
                     m_values[ipart] -= m_target_damp_fac * std::log(std::abs(rate)) / (tau * a);
                 }
             }
