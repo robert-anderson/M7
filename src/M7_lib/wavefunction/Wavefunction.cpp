@@ -291,6 +291,7 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_spa
     DEBUG_ASSERT_EQ(row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
     row.m_hdiag = m_ham.get_energy(mbf);
     row.m_shift_space = shift_space;
+    row.m_deathrate_ratio_prod = 1.0;
     /*
      * we need to be very careful here of off-by-one-like mistakes. the initial walker is "created" at the beginning
      * of MC cycle 0, and so the stats line output for cycle 0 will show that the number of walkers is the initial

@@ -92,6 +92,16 @@ public:
 
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.m_shape, other.m_dim_names){}
 
+    NdFormat<nind+1> add_major_dim(uint_t nelement, str_t name="") const {
+        std::array<uint_t, nind+1> shape;
+        std::copy(m_shape.cbegin(), m_shape.cend(), shape.begin()+1);
+        shape.front() = nelement;
+        std::array<str_t, nind+1> dim_names;
+        std::copy(m_dim_names.cbegin(), m_dim_names.cend(), dim_names.begin()+1);
+        dim_names.front() = name;
+        return {shape, dim_names};
+    }
+
     NdFormat<nind+1> add_minor_dim(uint_t nelement, str_t name="") const {
         std::array<uint_t, nind+1> shape;
         std::copy(m_shape.cbegin(), m_shape.cend(), shape.begin());
@@ -101,6 +111,7 @@ public:
         dim_names.back() = name;
         return {shape, dim_names};
     }
+
     NdFormat<nind+1> operator+(uint_t n) const {
         return add_minor_dim(n);
     }

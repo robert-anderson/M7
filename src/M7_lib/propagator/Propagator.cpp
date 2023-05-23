@@ -23,9 +23,15 @@ std::unique_ptr<guide::Wavefunction> Propagator::make_imp_samp_guide(const conf:
 void Propagator::diagonal(wf::Vectors &wf, Walker &walker, uint_t ipart) {
     const ham_comp_t& hdiag = walker.m_hdiag;
     DEBUG_ASSERT_NEAR_EQ(hdiag, m_ham.get_energy(walker.m_mbf), "incorrect diagonal H element cached");
-    auto death_rate = (hdiag - m_shifts[ipart]) * tau();
-    if (death_rate == 0.0) return;
-    wf.scale_weight(walker, ipart, 1.0 - death_rate);
+    auto actual_death_rate = (hdiag - m_shifts[walker].m_values[ipart]) * tau();
+    auto proper_death_rate = (hdiag - m_shifts.m_growth_based.m_values[ipart]) * tau();
+    if (actual_death_rate == 0.0) return;
+    wf.scale_weight(walker, ipart, 1.0 - actual_death_rate);
+    /*
+     * proper Ci / (1 - proper death rate) = actual Ci / (1 - actual death rate)
+     */
+    walker.m_deathrate_ratio_prod *= (1.0 - proper_death_rate);
+    walker.m_deathrate_ratio_prod /= (1.0 - actual_death_rate);
 }
 
 void Propagator::update(uint_t icycle, const wf::Vectors& wf) {

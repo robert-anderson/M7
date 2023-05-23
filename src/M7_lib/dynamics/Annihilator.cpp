@@ -192,7 +192,7 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
     const auto ipart_replica = dst_row.ipart_replica(ipart_dst);
     wf_t contrib = m_dst_weight[ipart_replica];
     // recover pre-death value of replica population
-    contrib /= 1.0 - m_prop.tau() * (dst_row.m_hdiag - m_prop.m_shifts.m_values[ipart_replica]);
+    contrib /= 1.0 - m_prop.tau() * (dst_row.m_hdiag - m_prop.m_shifts[dst_row].m_values[ipart_replica]);
     contrib = arith::conj(contrib);
     contrib *= wf_t(block_begin.m_src_weight);
     m_maes.m_rdms.make_contribs(block_begin.m_src_mbf, dst_row.m_mbf, contrib);

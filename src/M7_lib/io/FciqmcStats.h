@@ -19,7 +19,7 @@ struct FciqmcStatsRow : StatsRow {
 
     statistic::Number<uint_t> m_icycle;
     statistic::Number<double> m_tau;
-    statistic::Numbers<ham_comp_t, c_ndim_wf> m_shift;
+    statistic::Numbers<ham_comp_t, 1+c_ndim_wf> m_shift;
     statistic::Numbers<wf_comp_t, c_ndim_wf> m_nwalker;
     statistic::Numbers<wf_comp_t, c_ndim_wf> m_delta_nwalker;
     statistic::Numbers<wf_comp_t, c_ndim_wf> m_nwalker_spawned;

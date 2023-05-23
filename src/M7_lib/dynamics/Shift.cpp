@@ -5,6 +5,9 @@
 #include "Shift.h"
 #include "M7_lib/util/Math.h"
 
+
+#if 0
+
 Shifts::Shifts(const conf::Shift &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         m_opts(opts),
         m_nwalker_last_period(wf_fmt.m_shape, std::numeric_limits<wf_comp_t>::max()),
@@ -20,10 +23,6 @@ Shifts::Shifts(const conf::Shift &opts, const NdFormat<c_ndim_wf> &wf_fmt) :
         logging::info("Updating shift so as to keep the reference population fixed");
     m_nwalker_last_period.clear();
     DEBUG_ASSERT_FALSE(m_variable_mode, "Shift should not initially be in variable mode");
-}
-
-const ham_comp_t &Shifts::operator[](uint_t ipart) {
-    return m_values[ipart];
 }
 
 void Shifts::update(const wf::Vectors &wf, uint_t icycle, double tau) {
@@ -83,3 +82,4 @@ void Shifts::update(const wf::Vectors &wf, uint_t icycle, double tau) {
     }
     if (is_period_cycle) m_nwalker_last_period = wf.m_stats.m_nw.total();
 }
+#endif

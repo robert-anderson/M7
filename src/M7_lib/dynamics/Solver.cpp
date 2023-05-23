@@ -69,11 +69,11 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
          * set the shift to the initial reference-projected energy plus the user-defined offset
          */
         const ham_comp_t ref_energy = wf.reference_projected_energy(0);
-        m_prop.m_shifts.m_values = ref_energy;
-        if (!wf.was_loaded() || m_opts.m_shift.m_cont_grow.m_value) m_prop.m_shifts.m_values += opts.m_shift.m_init;
+        m_prop.m_shifts = ref_energy;
+        if (!wf.was_loaded() || m_opts.m_shift.m_cont_grow.m_value) m_prop.m_shifts += opts.m_shift.m_init;
     }
     else {
-        m_prop.m_shifts.m_values = opts.m_shift.m_init;
+        m_prop.m_shifts = opts.m_shift.m_init;
     }
 
     if (m_maes.m_rdms) {
@@ -263,6 +263,7 @@ void Solver::loop_over_occupied_mbfs() {
 //                m_spawning_timer.unpause();
 //            }
             propagate_row(walker, ipart, initiator);
+            //walker.m_log_deathrate_ratio +=
 //            if (m_wf.m_ra.is_active()) {
 //                m_spawning_timer.pause();
 //                m_wf.m_ra.record_work_time(row, m_spawning_timer);
