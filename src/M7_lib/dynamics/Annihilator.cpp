@@ -71,7 +71,9 @@ void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf
 
     m_wf.m_stats.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
 
-    const auto dst_shift_space = std::min(src_shift_space+1, m_prop.m_shifts.nspace()-1);
+    // never increase the shift space index beyond the maximum value
+    auto dst_shift_space = std::min(src_shift_space+1, m_prop.m_shifts.nspace()-1);
+
     if (!dst_walker) {
         /*
          * the destination MBF row in m_wf.m_store is not currently occupied, so initiator rules must be applied
@@ -90,7 +92,12 @@ void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf
             return;
         }
         m_wf.m_stats.m_nannihilated.m_local[dst_ipart] += annihilated_magnitude(weight_before, delta_weight);
-        m_wf.change_weight(dst_walker, dst_ipart, delta_weight, dst_shift_space);
+        /*
+         * never downgrade a walker to a more remote value of shift_space: if the value associated with this spawn is
+         * greater than the stored value, then leave the MBF in its current shift space
+         */
+        m_wf.change_weight(dst_walker, dst_ipart, delta_weight,
+                           std::min(dst_shift_space, uint_t(dst_walker.m_shift_space)));
     }
 }
 
