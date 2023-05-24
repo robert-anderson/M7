@@ -23,6 +23,11 @@ namespace shift {
      */
     struct ShiftSpace {
         /**
+         * shift space index: 0 is the index of the most senior space - the one which determines when the variable mode
+         * the epoch starts
+         */
+        const uint_t m_ispace;
+        /**
          * update period (MC cycles)
          */
         const uint_t m_period;
@@ -39,8 +44,8 @@ namespace shift {
          */
         const wf_comp_t m_nw_target;
 
-        ShiftSpace(const NdFormat<c_ndim_wf>& wf_fmt, uint_t period, ham_comp_t init, wf_comp_t nw_target) :
-            m_period(period), m_nw_last_period(wf_fmt.m_shape, std::numeric_limits<wf_comp_t>::max()),
+        ShiftSpace(const NdFormat<c_ndim_wf>& wf_fmt, uint_t ispace, uint_t period, ham_comp_t init, wf_comp_t nw_target) :
+            m_ispace(ispace), m_period(period), m_nw_last_period(wf_fmt.m_shape, std::numeric_limits<wf_comp_t>::max()),
             m_values(wf_fmt.m_shape, init), m_nw_target(nw_target) {
             m_nw_last_period.clear();
         }
@@ -52,8 +57,6 @@ namespace shift {
         bool is_period_cycle(uint_t icycle) const {
             return !(icycle % m_period);
         }
-
-        virtual bool enter_variable_mode(const wf::Vectors& wf, uint_t ipart) const = 0;
 
         virtual str_t enter_variable_mode_str(const wf::Vectors& wf, uint_t icycle, uint_t ipart) const = 0;
 
@@ -68,7 +71,7 @@ namespace shift {
          * @param variable_mode
          *  epochs begin when the shift value is to be modulated in order to satisfy some condition
          */
-        virtual void update(const wf::Vectors& wf, uint_t icycle, double tau, const Epochs& variable_mode) = 0;
+        virtual void update(const wf::Vectors& wf, uint_t icycle, double tau, Epochs& variable_mode) = 0;
     };
 
     struct GrowthBased : ShiftSpace {
@@ -77,19 +80,14 @@ namespace shift {
          */
         const double m_damp_fac;
         /**
-         * if using target-driven damping, this will be y^2/4 where y is the normal (static) damp factor, else it will be 0
+         * if using target-driven damping, this will be y^2/4 where y is m_damp_fac, else it will be 0
          */
         const double m_target_damp_fac;
 
-        GrowthBased(const NdFormat<c_ndim_wf>& wf_fmt, uint_t period, ham_comp_t init,
+        GrowthBased(const NdFormat<c_ndim_wf>& wf_fmt, uint_t ispace, uint_t period, ham_comp_t init,
                     wf_comp_t nw_target, double damp_fac, bool target_damp):
-            ShiftSpace(wf_fmt, period, init, nw_target),
-            m_damp_fac(damp_fac), m_target_damp_fac(target_damp ? math::pow<2>(m_damp_fac)/4.0 : 0.0){}
-
-        bool enter_variable_mode(const wf::Vectors& wf, uint_t ipart) const override {
-            const auto nw = wf.m_stats.m_nw.total()[ipart];
-            return nw >= m_nw_target;
-        }
+            ShiftSpace(wf_fmt, ispace, period, init, nw_target),
+            m_damp_fac(damp_fac), m_target_damp_fac(target_damp ? math::pow<2>(m_damp_fac)/1.0 : 0.0){}
 
         str_t enter_variable_mode_str(const wf::Vectors& wf, uint_t icycle, uint_t ipart) const override {
             const auto nw = wf.m_stats.m_nw.total()[ipart];
@@ -97,20 +95,29 @@ namespace shift {
                               ipart, icycle - 1, wf.m_stats.m_nw.prev_total()[ipart], icycle, nw);
         }
 
-        void update(const wf::Vectors& wf, uint_t icycle, double tau, const Epochs& variable_mode) override {
-            for (uint_t ipart=0ul; ipart < wf.m_format.m_nelement; ++ipart){
+        void update(const wf::Vectors& wf, uint_t icycle, double tau, Epochs& variable_mode) override {
+            for (uint_t ipart = 0ul; ipart < variable_mode.nelement(); ++ipart) {
                 /*
                  * at the beginning of cycle i - where this update is performed, Nw_i is not available directly since the loop
                  * over the current occupied list has yet to be performed. Nw_i is required so compute S_i, so we must get it by
                  * adding the difference in Nw due to the application of cycle i-1 propagator.
                  */
-                const auto nw = wf.m_stats.m_nw.total()[ipart];
+                auto nw = wf.m_stats.m_nw.total()[ipart];
                 /*
                  * number of cycles since last update
                  */
                 uint_t a = 0ul;
 
-                if (variable_mode[ipart]) a = icycle % m_period;
+                if (variable_mode[ipart].update(icycle, std::abs(nw) >= std::abs(m_nw_target))) {
+                    if (icycle) {
+                        logging::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
+                                      ipart, icycle - 1, wf.m_stats.m_nw.prev_total()[ipart], icycle, nw);
+                    } else {
+                        logging::info("Variable shift triggered immediately for WF part {}.", ipart);
+                    }
+                    a = icycle % m_period;
+                }
+
                 if (is_period_cycle(icycle)) a = m_period;
 
                 if (variable_mode[ipart] && a) {
@@ -146,11 +153,16 @@ struct Shifts {
      * values of the diagonal shift for each space and for each WF part
      */
     buffered::Numbers<ham_comp_t, 1+c_ndim_wf> m_values;
+    /**
+     * threshold for a shift_space > 0 MBF to be promoted to shift space 0
+     */
+    const ham_comp_t m_log_enhancement_promote_thresh;
 
     Shifts(const conf::Shift &opts, const NdFormat<c_ndim_wf>& wf_fmt):
-        m_growth_based(wf_fmt, opts.m_period, opts.m_init, opts.m_nw_targets.m_value[0], opts.m_damp, opts.m_target_damp),
+        m_growth_based(wf_fmt, 0, opts.m_period, opts.m_init, opts.m_nw_targets.m_value[0], opts.m_damp, opts.m_target_damp),
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
-        m_values(wf_fmt.add_minor_dim(nspace(), "shift space")){}
+        m_values(wf_fmt.add_major_dim(nspace(), "shift space")),
+        m_log_enhancement_promote_thresh(opts.m_log_enhancement_promote_thresh){}
 
     const shift::ShiftSpace& operator[](const Walker& walker) const {
         (void) walker;
@@ -160,18 +172,16 @@ struct Shifts {
     void update(const wf::Vectors& wf, uint_t icycle, double tau) {
         auto& first_shift_space = m_growth_based;
         // first update the variable mode epochs for all WF parts.
-        for (uint_t ipart=0ul; ipart < wf.m_format.m_nelement; ++ipart) {
-            if (!m_variable_mode[ipart]) {
-                auto entered = m_variable_mode[ipart].update(icycle, first_shift_space.enter_variable_mode(wf, ipart));
-                if (entered) {
-                    if (!icycle) logging::info("Variable shift triggered immediately for WF part {}.", ipart);
-                    else logging::info(first_shift_space.enter_variable_mode_str(wf, icycle, ipart));
-                }
-                auto& format = m_values.m_format;
-                m_values[format.combine<2>(0, ipart)] = first_shift_space.m_values[ipart];
-            }
-        }
+//        for (uint_t ipart=0ul; ipart < wf.m_format.m_nelement; ++ipart) {
+//            if (m_variable_mode[ipart].update(icycle, first_shift_space.enter_variable_mode(wf, ipart))) {
+//                if (!icycle) logging::info("Variable shift triggered immediately for WF part {}.", ipart);
+//                else logging::info(first_shift_space.enter_variable_mode_str(wf, icycle, ipart));
+//            }
+//        }
         first_shift_space.update(wf, icycle, tau, m_variable_mode);
+        auto& format = m_values.m_format;
+        for (uint_t ipart=0ul; ipart < wf.m_format.m_nelement; ++ipart)
+            m_values[format.combine<2>(0, ipart)] = first_shift_space.m_values[ipart];
     }
 
     uint_t nspace() const {

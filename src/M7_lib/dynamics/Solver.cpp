@@ -150,7 +150,7 @@ void Solver::begin_cycle() {
 
 
     m_wf.begin_cycle(m_icycle);
-    DEBUG_ASSERT_TRUE(m_wf.m_stats.m_nwalker.delta().is_zero(), "Cyclic reducibles should be zeroed before new cycle");
+    DEBUG_ASSERT_TRUE(m_wf.m_stats.m_nw.delta().is_zero(), "Cyclic reducibles should be zeroed before new cycle");
 
     // TODO: update load balancing
     //    m_wf.m_ra.update(m_icycle);

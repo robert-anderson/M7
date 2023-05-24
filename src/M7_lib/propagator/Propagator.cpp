@@ -23,15 +23,20 @@ std::unique_ptr<guide::Wavefunction> Propagator::make_imp_samp_guide(const conf:
 void Propagator::diagonal(wf::Vectors &wf, Walker &walker, uint_t ipart) {
     const ham_comp_t& hdiag = walker.m_hdiag;
     DEBUG_ASSERT_NEAR_EQ(hdiag, m_ham.get_energy(walker.m_mbf), "incorrect diagonal H element cached");
-    auto actual_death_rate = (hdiag - m_shifts[walker].m_values[ipart]) * tau();
-    auto proper_death_rate = (hdiag - m_shifts.m_growth_based.m_values[ipart]) * tau();
-    if (actual_death_rate == 0.0) return;
-    wf.scale_weight(walker, ipart, 1.0 - actual_death_rate);
+    auto death_rate = (hdiag - m_shifts[walker].m_values[ipart]) * tau();
+    if (death_rate == 0.0) return;
+    wf.scale_weight(walker, ipart, 1.0 - death_rate);
     /*
-     * proper Ci / (1 - proper death rate) = actual Ci / (1 - actual death rate)
+     * enhancement = exp (-sum_k tau_k * (S'_k - S_k))
+     * where k extends over cycle indices for which the walker lives
+     * S'_k is the shift to which the walker was exposed on cycle k
+     * S_k is the shift to which the walker should properly have been exposed on cycle k
      */
-    walker.m_deathrate_ratio_prod *= (1.0 - proper_death_rate);
-    walker.m_deathrate_ratio_prod /= (1.0 - actual_death_rate);
+    walker.m_log_enhancement_fac -= tau() * (m_shifts[walker].m_values[ipart] - m_shifts.m_growth_based.m_values[ipart]);
+    if (walker.m_shift_space > 0 && walker.m_log_enhancement_fac >= m_shifts.m_log_enhancement_fac_promote_thresh) {
+        walker.m_shift_space = 0;
+        walker.m_log_enhancement_fac = 0.0;
+    }
 }
 
 void Propagator::update(uint_t icycle, const wf::Vectors& wf) {

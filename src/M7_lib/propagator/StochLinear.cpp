@@ -84,7 +84,7 @@ void StochLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipa
         auto delta = -tau() * phase(weight) * helem / prob_gen;
         if (fptol::near_zero(delta)) continue;
         imp_samp_delta(delta, src_mbf, dst_mbf);
-        delta *= walker.m_deathrate_ratio_prod;
+        delta *= std::exp(walker.m_log_enhancement_fac);
         /*
          * the stochastically-realized spawned contribution is equal to delta if delta is not lower in magnitude than
          * the minimum magnitude, otherwise it is stochastically rounded with respect to that magnitude

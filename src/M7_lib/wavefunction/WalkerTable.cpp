@@ -19,7 +19,7 @@ Walker::Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool aver
         m_average_weight(average_weights ? this : nullptr, m_wf_format, "unnormalized average weight"),
         m_icycle_occ(average_weights ? this : nullptr, "cycle index at row creation"),
         m_shift_space(this, "index of the shift space"),
-        m_deathrate_ratio_prod(this, "death rate product ratio")
+        m_log_enhancement_fac(this, "death rate product ratio")
 {}
 
 uint_t Walker::occupied_ncycle(uint_t icycle_current) const {
