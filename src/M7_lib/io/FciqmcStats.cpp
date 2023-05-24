@@ -21,6 +21,7 @@ FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests
         m_ninitiator(this, m_wf_format, "Initiator MBFs", false),
         m_ninitiator_by_exlvl(exlvl_resolved ? this : nullptr, m_wf_exlvl_format, "Initiator MBFs by excitation level", false),
         m_nocc_mbf(this, m_wf_format, "Occupied MBFs", false),
+        m_nocc_mbf_by_shift_space(this, prop.m_shifts.m_spaces.size(), "Occupied MBFs by shift space", false),
         m_delta_nocc_mbf(this, m_wf_format, "Change in number of occupied MBFs", false),
         m_spin_square_num(inst_ests.m_spin_square ? this : nullptr, m_wf_format,
                           "Numerator of reference-projected spin square estimator"),

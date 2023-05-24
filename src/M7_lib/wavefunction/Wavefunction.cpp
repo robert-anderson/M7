@@ -242,6 +242,9 @@ void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint
         else {
             m_stats.m_nw_by_shift_space.delta()[iflat_old] -= std::abs(weight);
             m_stats.m_nw_by_shift_space.delta()[iflat_new] += std::abs(new_weight);
+            --m_stats.m_nocc_mbf_by_shift_space.delta()[old_shift_space];
+            ++m_stats.m_nocc_mbf_by_shift_space.delta()[new_shift_space];
+            walker.m_shift_space = new_shift_space;
         }
 
     }
@@ -266,6 +269,7 @@ void wf::Vectors::remove_row(Walker& walker) {
     for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
         zero_weight(walker, ipart);
         --m_stats.m_nocc_mbf.delta();
+        --m_stats.m_nocc_mbf_by_shift_space.delta()[walker.m_shift_space];
     }
     remove_ref_conn(walker);
     m_store.erase(walker.m_mbf);
@@ -288,6 +292,7 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_spa
                       "this method should only be called on the rank responsible for storing the MBF");
     auto& row = m_store.insert(mbf);
     ++m_stats.m_nocc_mbf.delta();
+    ++m_stats.m_nocc_mbf_by_shift_space.delta()[shift_space];
     DEBUG_ASSERT_EQ(row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
     row.m_hdiag = m_ham.get_energy(mbf);
     row.m_shift_space = shift_space;

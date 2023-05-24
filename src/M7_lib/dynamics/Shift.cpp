@@ -139,11 +139,11 @@ Shifts& Shifts::operator+=(const ham_comp_t& v) {
     return *this;
 }
 
-void Shifts::promote_to_s0_if_high_enhancement(Walker& walker) const {
+void Shifts::promote_to_s0_if_high_enhancement(wf::Vectors& wf, Walker& walker) const {
     // zero thresh signifies no promotion allowed
     if (m_log_enhancement_promote_thresh == 0.0) return;
     if (walker.m_shift_space > 0 && walker.m_log_enhancement_fac >= m_log_enhancement_promote_thresh) {
-        walker.m_shift_space = 0;
+        wf.change_weight(walker, 0, 0.0, 0);
         walker.m_log_enhancement_fac = 0.0;
     }
 }

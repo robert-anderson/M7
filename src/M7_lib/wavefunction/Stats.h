@@ -26,6 +26,10 @@ namespace wf {
          */
         reduction::cyclic::Scalar<int64_t, false> m_nocc_mbf;
         /**
+         * number of MBFs with any associated weight for each shift space
+         */
+        reduction::cyclic::NdArray<int64_t, 1, false> m_nocc_mbf_by_shift_space;
+        /**
          * L1 norm of each part of the WF
          */
         reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf> m_nw;
