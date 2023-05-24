@@ -245,6 +245,9 @@ void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint
             --m_stats.m_nocc_mbf_by_shift_space.delta()[old_shift_space];
             ++m_stats.m_nocc_mbf_by_shift_space.delta()[new_shift_space];
             walker.m_shift_space = new_shift_space;
+            // protect if the new space is S0 and there exist higher spaces
+            const auto nspace = m_stats.m_nocc_mbf_by_shift_space.m_format.m_nelement;
+            if (new_shift_space==0 && (nspace > 1)) walker.protect();
         }
 
     }
@@ -296,6 +299,9 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_spa
     DEBUG_ASSERT_EQ(row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
     row.m_hdiag = m_ham.get_energy(mbf);
     row.m_shift_space = shift_space;
+    // protect if the new space is S0 and there exist higher spaces
+    const auto nspace = m_stats.m_nocc_mbf_by_shift_space.m_format.m_nelement;
+    if (shift_space==0 && (nspace > 1)) row.protect();
     row.m_log_enhancement_fac = 0.0;
     /*
      * we need to be very careful here of off-by-one-like mistakes. the initial walker is "created" at the beginning
