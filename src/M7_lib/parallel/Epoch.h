@@ -90,7 +90,7 @@ public:
         return m_epochs[i];
     }
 
-    const Epoch& operator[](uint_t i) const{
+    const Epoch& operator[](uint_t i) const {
         DEBUG_ASSERT_LT(i, m_epochs.size(), "Epoch index OOB");
         return m_epochs[i];
     }

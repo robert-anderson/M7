@@ -72,7 +72,7 @@ void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf
     m_wf.m_stats.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
 
     // never increase the shift space index beyond the maximum value
-    auto dst_shift_space = std::min(src_shift_space+1, m_prop.m_shifts.nspace()-1);
+    auto dst_shift_space = std::min(src_shift_space+1, m_prop.m_shifts.m_spaces.size()-1);
 
     if (!dst_walker) {
         /*
@@ -192,7 +192,7 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
     const auto ipart_replica = dst_row.ipart_replica(ipart_dst);
     wf_t contrib = m_dst_weight[ipart_replica];
     // recover pre-death value of replica population
-    contrib /= 1.0 - m_prop.tau() * (dst_row.m_hdiag - m_prop.m_shifts[dst_row].m_values[ipart_replica]);
+    contrib /= 1.0 - m_prop.tau() * (dst_row.m_hdiag - m_prop.m_shifts[dst_row]->m_values[ipart_replica]);
     contrib = arith::conj(contrib);
     contrib *= wf_t(block_begin.m_src_weight);
     m_maes.m_rdms.make_contribs(block_begin.m_src_mbf, dst_row.m_mbf, contrib);

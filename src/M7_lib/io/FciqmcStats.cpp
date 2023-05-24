@@ -9,7 +9,7 @@ FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests
         m_wf_exlvl_format(m_wf_format.add_minor_dim(prop.m_sector.m_frm.max_exlvl(), "excit level")),
         m_icycle(this, "Cycle number", false),
         m_tau(this, "Timestep"),
-        m_shift(this, m_wf_format.add_major_dim(prop.m_shifts.nspace(), "shift space"), "Diagonal shift"),
+        m_shift(this, m_wf_format.add_major_dim(prop.m_shifts.m_spaces.size(), "shift space"), "Diagonal shift"),
         m_nwalker(this, m_wf_format, "WF L1 norm (number of walkers)"),
         m_delta_nwalker(this, m_wf_format, "Walkers added this cycle"),
         m_nwalker_spawned(this, m_wf_format, "Walkers spawned this cycle"),
