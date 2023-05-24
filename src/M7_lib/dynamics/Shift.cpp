@@ -108,6 +108,8 @@ Shifts::Shifts(const conf::Shift& opts, const NdFormat<c_ndim_wf>& wf_fmt) :
         m_spaces.emplace_back(
             new shift::GrowthBased(wf_fmt, ispace, opts.m_period,
             opts.m_init, opts.m_nw_targets.m_value[ispace], opts.m_damp, opts.m_target_damp));
+
+    logging::info("Initialized {} shift space{}", m_spaces.size(), string::plural(m_spaces.size()));
 }
 
 const shift::ShiftSpace* Shifts::operator[](const Walker& walker) const {
