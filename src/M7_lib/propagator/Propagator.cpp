@@ -33,10 +33,7 @@ void Propagator::diagonal(wf::Vectors &wf, Walker &walker, uint_t ipart) {
      * S_k is the shift to which the walker should properly have been exposed on cycle k
      */
     walker.m_log_enhancement_fac -= tau() * (m_shifts[walker].m_values[ipart] - m_shifts.m_growth_based.m_values[ipart]);
-    if (walker.m_shift_space > 0 && walker.m_log_enhancement_fac >= m_shifts.m_log_enhancement_fac_promote_thresh) {
-        walker.m_shift_space = 0;
-        walker.m_log_enhancement_fac = 0.0;
-    }
+    m_shifts.promote_to_s0_if_high_enhancement(walker);
 }
 
 void Propagator::update(uint_t icycle, const wf::Vectors& wf) {

@@ -198,6 +198,15 @@ struct Shifts {
         return *this;
     }
 
+    void promote_to_s0_if_high_enhancement(Walker& walker) const {
+        // zero thresh signifies no promotion allowed
+        if (m_log_enhancement_promote_thresh == 0.0) return;
+        if (walker.m_shift_space > 0 && walker.m_log_enhancement_fac >= m_log_enhancement_promote_thresh) {
+            walker.m_shift_space = 0;
+            walker.m_log_enhancement_fac = 0.0;
+        }
+    }
+
 };
 
 #endif //M7_SHIFT_H
