@@ -119,13 +119,17 @@ const shift::ShiftSpace* Shifts::operator[](const Walker& walker) const {
 void Shifts::update(const wf::Vectors& wf, uint_t icycle, double tau) {
     // only S0 determines when variable shift mode begins
     m_spaces[0]->update_variable_mode(wf, icycle, m_variable_mode);
-    uint_t ispace = 0ul;
-    for (auto& ptr: m_spaces) {
-        ptr->update(wf, icycle, tau, m_variable_mode);
+    for (uint_t ispace=0ul; ispace < m_spaces.size(); ++ispace) {
+        m_spaces[ispace]->update(wf, icycle, tau, m_variable_mode);
         auto& format = m_values.m_format;
-        for (uint_t ipart=0ul; ipart < wf.m_format.m_nelement; ++ipart)
+        for (uint_t ipart=0ul; ipart < wf.m_format.m_nelement; ++ipart) {
+            if (ispace > 0) {
+                // constrain shift values relative to ispace-1
+                m_spaces[ispace]->m_values[ipart] = std::min(
+                    m_spaces[ispace]->m_values[ipart], m_spaces[ispace-1]->m_values[ipart]);
+            }
             m_values[format.combine<2>(ispace, ipart)] = m_spaces[ispace]->m_values[ipart];
-        ++ispace;
+        }
     }
 }
 
