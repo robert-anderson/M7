@@ -27,7 +27,7 @@ struct Walker : public Row {
 
     field::Mbf &key_field();
 
-    Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool average_weights);
+    Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica);
 
     /**
      * if the current cycle index is the cycle on which the row became occupied, then the occupied ncycle is 1, since

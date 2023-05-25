@@ -62,7 +62,7 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
         {
             ham.m_basis,
             opts.m_wavefunction.m_nroot,
-            opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)
+            opts.m_av_ests.any_bilinears() ? 2ul:1ul
         },
         opts.m_wavefunction.m_distribution,
         // store sizing
@@ -310,10 +310,8 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_spa
      * iteration 1 even though it is added in the annihilating call of iteration 0. so, if this method is called in
      * the annihilating process of MC cycle i, it actually "becomes occupied" on cycle i+1.
      */
-    if (storing_av_weights()) {
-        row.m_icycle_occ = icycle+1;
-        row.m_average_weight = 0;
-    }
+    row.m_icycle_occ = icycle+1;
+    row.m_average_weight = 0;
     return row;
 }
 

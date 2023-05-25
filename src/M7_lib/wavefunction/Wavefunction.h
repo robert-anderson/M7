@@ -96,15 +96,6 @@ namespace wf {
             return opts.m_av_ests.m_rdm.m_ranks.m_value.size();
         }
 
-        static bool need_av_weights(const conf::Document &opts) {
-    //        if (need_send_parents(opts)) return true;
-            return need_send_parents(opts);
-        }
-
-        bool storing_av_weights() const {
-            return m_store.m_row.m_average_weight.belongs_to_row();
-        }
-
         void begin_cycle(uint_t icycle);
 
         void end_cycle(uint_t icycle);

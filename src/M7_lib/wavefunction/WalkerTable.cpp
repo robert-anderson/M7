@@ -8,7 +8,7 @@ field::Mbf &Walker::key_field() {
     return m_mbf;
 }
 
-Walker::Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool average_weights) :
+Walker::Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica) :
         m_wf_format({nroot, nreplica}, {"nroot", "nreplica"}),
         m_root_format({nroot}, {"nroot"}),
         m_mbf(this, basis, "many-body basis function"),
@@ -16,8 +16,8 @@ Walker::Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica, bool aver
         m_hdiag(this, "diagonal H element"),
         m_deterministic(this, m_root_format, "deterministic subspace flag"),
         m_ref_conn(this, m_wf_format, "reference connection flag"),
-        m_average_weight(average_weights ? this : nullptr, m_wf_format, "unnormalized average weight"),
-        m_icycle_occ(average_weights ? this : nullptr, "cycle index at row creation"),
+        m_average_weight(this, m_wf_format, "unnormalized average weight"),
+        m_icycle_occ(this, "cycle index at row creation"),
         m_shift_space(this, "index of the shift space"),
         m_log_enhancement_fac(this, "death rate product ratio")
 {}
