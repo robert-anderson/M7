@@ -5,16 +5,17 @@
 #include "Shift.h"
 #include "M7_lib/util/Math.h"
 
-shift::GrowthBased::GrowthBased(const NdFormat<c_ndim_wf>& wf_fmt, uint_t ispace, uint_t period, ham_comp_t init,
-        wf_comp_t nw_target, double damp_fac, bool target_damp) : ShiftSpace(wf_fmt, ispace, period, init, nw_target),
-        m_damp_fac(damp_fac), m_target_damp_fac(target_damp ? math::pow<2>(m_damp_fac)/1.0 : 0.0){}
-
 shift::ShiftSpace::ShiftSpace(const NdFormat<c_ndim_wf>& wf_fmt, uint_t ispace, uint_t period, ham_comp_t init,
                               wf_comp_t nw_target) :
         m_ispace(ispace), m_period(period), m_nw_last_period(wf_fmt.m_shape, std::numeric_limits<wf_comp_t>::max()),
         m_values(wf_fmt.m_shape, init), m_nw_target(nw_target) {
     m_nw_last_period.clear();
 }
+
+shift::GrowthBased::GrowthBased(const NdFormat<c_ndim_wf>& wf_fmt, uint_t ispace, uint_t period, ham_comp_t init,
+        wf_comp_t nw_target, double damp_fac, bool target_damp) : ShiftSpace(wf_fmt, ispace, period, init, nw_target),
+        m_damp_fac(damp_fac), m_target_damp_fac(target_damp ? math::pow<2>(m_damp_fac)/1.0 : 0.0){}
+
 
 uint_t shift::ShiftSpace::ncycle_this_update(uint_t ipart, uint_t icycle, const Epochs& variable_mode) const {
     if (!variable_mode[ipart]) return 0;

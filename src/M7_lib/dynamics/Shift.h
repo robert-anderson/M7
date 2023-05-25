@@ -45,6 +45,7 @@ namespace shift {
         const wf_comp_t m_nw_target;
 
         ShiftSpace(const NdFormat<c_ndim_wf>& wf_fmt, uint_t ispace, uint_t period, ham_comp_t init, wf_comp_t nw_target);
+        virtual ~ShiftSpace() = default;
 
         const ham_comp_t& operator[](uint_t ipart) const {
             return m_values[ipart];
