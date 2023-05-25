@@ -11,6 +11,7 @@ FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests
         m_tau(this, "Timestep"),
         m_shift(this, m_wf_format.add_major_dim(prop.m_shifts.m_spaces.size(), "shift space"), "Diagonal shift"),
         m_nwalker(this, m_wf_format, "WF L1 norm (number of walkers)"),
+        m_nwalker_by_shift_space(this, m_shift.m_format, "WF L1 norm (number of walkers) by shift space"),
         m_delta_nwalker(this, m_wf_format, "Walkers added this cycle"),
         m_nwalker_spawned(this, m_wf_format, "Walkers spawned this cycle"),
         m_nwalker_annihilated(this, m_wf_format, "Walkers annihilated this cycle"),

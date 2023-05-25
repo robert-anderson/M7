@@ -341,6 +341,7 @@ void Solver::output_stats() {
         stats.m_tau = m_prop.tau();
         stats.m_shift = m_prop.m_shifts.m_values;
         stats.m_nwalker = m_wf.m_stats.m_nw.prev_total();
+        stats.m_nwalker_by_shift_space = m_wf.m_stats.m_nw_by_shift_space.prev_total();
         stats.m_delta_nwalker = m_wf.m_stats.m_nw.prev_delta().m_reduced;
         stats.m_nwalker_spawned = m_wf.m_stats.m_nspawned.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_stats.m_nannihilated.m_reduced;
