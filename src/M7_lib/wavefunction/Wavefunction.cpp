@@ -223,7 +223,7 @@ uint_t wf::Vectors::debug_ndeterministic(uint_t iroot) const {
 }
 
 void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint_t new_shift_space) {
-    DEBUG_ASSERT_FALSE(std::isnan(std::abs(new_weight)), "new weight is invalid");
+    DEBUG_ASSERT_FALSE(math::is_nan_or_inf(std::abs(new_weight)), "new weight is invalid");
     if (m_ref_weights_preserved && walker.m_mbf==m_refs[ipart].mbf()) return;
     wf_t& weight = walker.m_weight[ipart];
     const auto delta = std::abs(new_weight) - std::abs(weight);
@@ -324,7 +324,11 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_spa
     }
     auto& row = create_row_(icycle, mbf, shift_space, tag::Int<1>());
     for (uint_t ipart=0ul; ipart < npart(); ++ipart) {
-        row.m_ref_conn.put(ipart, m_refs[ipart].connected(mbf));
+        auto is_ref_conn = m_refs[ipart].connected(mbf);
+        row.m_ref_conn.put(ipart, is_ref_conn);
+        // all reference connections are automatically in shift space 0
+        const auto nspace = m_stats.m_nocc_mbf_by_shift_space.m_format.m_nelement;
+        if (is_ref_conn && (nspace > 1)) change_weight(row, ipart, 0.0, 0);
     }
     add_ref_conn(row);
     return row;
