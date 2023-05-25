@@ -118,6 +118,11 @@ namespace math {
     T geo_mean(const v_t<T>& v) {
         return geo_mean(v.data(), v.size());
     }
+
+    template<typename T>
+    bool is_nan_or_inf(const T& v) {
+        return std::isnan(v) || std::isinf(v);
+    }
 }
 
 #endif //M7_UTIL_MATH_H

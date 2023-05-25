@@ -36,7 +36,8 @@ void StochLinear::discretize(wf::Vectors& wf, Walker &walker) {
 }
 
 void StochLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipart, bool initiator) {
-    const wf_t& weight = walker.m_weight[ipart];
+    wf_t weight = walker.m_weight[ipart];
+    weight *= std::exp(std::min(ham_comp_t(walker.m_log_enhancement_fac), 1.0));
     /*
      * for bilinear estimators based on the consolidated annihilation of spawned contributions
      */
@@ -84,7 +85,6 @@ void StochLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipa
         auto delta = -tau() * phase(weight) * helem / prob_gen;
         if (fptol::near_zero(delta)) continue;
         imp_samp_delta(delta, src_mbf, dst_mbf);
-        delta *= std::exp(walker.m_log_enhancement_fac);
         /*
          * the stochastically-realized spawned contribution is equal to delta if delta is not lower in magnitude than
          * the minimum magnitude, otherwise it is stochastically rounded with respect to that magnitude
