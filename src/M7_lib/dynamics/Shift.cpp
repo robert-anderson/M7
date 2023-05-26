@@ -41,7 +41,7 @@ void shift::ShiftSpace::update(const wf::Vectors& wf, uint_t icycle, double tau,
     for (uint_t ipart=0ul; ipart < variable_mode.nelement(); ++ipart){
         update_part(wf, ipart, icycle, tau, variable_mode);
         if (is_period_cycle(icycle))
-            m_nw_last_period = wf.m_stats.m_nw_by_shift_space.total()[get_iflat(wf, ipart, m_ispace)];
+            m_nw_last_period[ipart] = wf.m_stats.m_nw_by_shift_space.total()[get_iflat(wf, ipart, m_ispace)];
     }
 }
 

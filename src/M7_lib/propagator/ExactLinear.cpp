@@ -14,7 +14,8 @@ ExactLinear::ExactLinear(
 
 void ExactLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipart, bool initiator) {
     auto &src_mbf = walker.m_mbf;
-    const wf_t &weight = walker.m_weight[ipart];
+    wf_t weight = walker.m_weight[ipart];
+    weight *= std::exp(std::min(ham_comp_t(walker.m_log_enhancement_fac), 1.0));
     bool src_deterministic = walker.m_deterministic.get(wf.iroot_part(ipart));
     src_mbf.m_decoded.clear();
 
