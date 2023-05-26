@@ -150,9 +150,7 @@ conf::Shift::Shift(Group *parent) :
         m_fix_ref_weight(this, "fix_ref_weight", false,
             "ignore growth data in the 0th shift update, and instead use the reference-projected energy estimator,"
             " this fixes the reference population constant"),
-        m_log_enhancement_promote_thresh(this, "log_enhancement_promote_thresh", 0.0,
-             "threshold for the log of the enhancement factor. if this enhancement factor exceeds this threshold for a "
-             "MBF in a higher shift space then the MBF in question is moved to shift space 0"),
+        m_enhancement_damp(this, "enhancement_damp", 1.0, "damping factor for the enhancement factor"),
         m_cont_grow(this, "cont_grow", false,
             "if the calculation is restarted from a previous growth phase, the default behaviour is to enter variable"
             " shift mode immediately. with this option set to true, the shift will instead not begin to vary until the "

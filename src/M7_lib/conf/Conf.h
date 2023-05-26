@@ -138,7 +138,7 @@ namespace conf {
         Param<uint_t> m_period;
         Param<v_t<wf_comp_t>> m_nw_targets;
         Param<bool> m_fix_ref_weight;
-        Param<ham_comp_t> m_log_enhancement_promote_thresh;
+        Param<ham_comp_t> m_enhancement_damp;
         Param<bool> m_cont_grow;
 
         explicit Shift(Group *parent);

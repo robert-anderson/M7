@@ -121,9 +121,11 @@ struct Shifts {
      */
     buffered::Numbers<ham_comp_t, 1+c_ndim_wf> m_values;
     /**
-     * threshold for a shift_space > 0 MBF to be promoted to shift space 0
+     * if enhancement takes the form exp(a*delta S), then a is the quantity in the range [0, 1] that damps it.
+     * if a = 0, no enhancement is done
+     * id a = 1, full enhancement is done
      */
-    const ham_comp_t m_log_enhancement_promote_thresh;
+    const ham_comp_t m_enhancement_damp;
 
     Shifts(const conf::Shift &opts, const NdFormat<c_ndim_wf>& wf_fmt);
 

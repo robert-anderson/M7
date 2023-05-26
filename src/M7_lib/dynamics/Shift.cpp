@@ -104,7 +104,7 @@ void shift::RefWeightFixing::update_part(const wf::Vectors& wf, uint_t ipart, ui
 Shifts::Shifts(const conf::Shift& opts, const NdFormat<c_ndim_wf>& wf_fmt) :
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
         m_values(wf_fmt.add_major_dim(opts.m_nw_targets.m_value.size(), "shift space")),
-        m_log_enhancement_promote_thresh(opts.m_log_enhancement_promote_thresh){
+        m_enhancement_damp(opts.m_enhancement_damp){
 
     uint_t ispace = 0ul;
     // if the first space is of the fix ref weight type, add it explicitly
@@ -156,8 +156,8 @@ Shifts& Shifts::operator+=(const ham_comp_t& v) {
 
 void Shifts::promote_to_s0_if_high_enhancement(wf::Vectors& wf, Walker& walker) const {
     // zero thresh signifies no promotion allowed
-    if (m_log_enhancement_promote_thresh == 0.0) return;
-    if (walker.m_shift_space > 0 && walker.m_log_enhancement_fac >= m_log_enhancement_promote_thresh) {
+    if (m_enhancement_damp == 0.0) return;
+    if (walker.m_shift_space > 0 && walker.m_log_enhancement_fac >= m_enhancement_damp) {
         wf.change_weight(walker, 0, 0.0, 0);
         walker.m_log_enhancement_fac = 0.0;
     }

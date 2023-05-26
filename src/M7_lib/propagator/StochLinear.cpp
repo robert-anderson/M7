@@ -37,7 +37,11 @@ void StochLinear::discretize(wf::Vectors& wf, Walker &walker) {
 
 void StochLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipart, bool initiator) {
     wf_t weight = walker.m_weight[ipart];
-    weight *= std::exp(std::min(ham_comp_t(walker.m_log_enhancement_fac), 1.0));
+    /*
+     * truncation:
+     * weight *= std::exp(std::min(ham_comp_t(walker.m_log_enhancement_fac), 1.0));
+     */
+    weight *= std::exp(m_shifts.m_enhancement_damp * walker.m_log_enhancement_fac);
     /*
      * for bilinear estimators based on the consolidated annihilation of spawned contributions
      */
