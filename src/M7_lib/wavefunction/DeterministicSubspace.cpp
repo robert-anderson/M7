@@ -12,18 +12,21 @@ uintv_t deterministic::Subspace::make_iparts() {
     return {ipart, ipart + 1};
 }
 
-void deterministic::Subspace::make_rdm_contrib(const shared_rows::Walker *hf, const sparse::Element& elem) {
+void deterministic::Subspace::make_rdm_contrib(const shared_rows::Walker *hf, const sparse::Element& elem, uint_t icycle) {
     auto& rdms = m_maes.m_rdms;
     const auto& row = this->gathered().m_row;
     row.jump(elem);
     if (hf && (row.m_mbf == hf->mbf())) return;
+
+    wf_comp_t ncycle_occ_prod = row.occupied_ncycle(icycle) * m_local_row.occupied_ncycle(icycle);
     if (m_wf.nreplica() == 2) {
         rdms.make_contribs(m_local_row.m_mbf, row.m_mbf,
-                           m_local_row.m_weight[0] * row.m_weight[1]);
+                           m_local_row.m_average_weight[0] * row.m_average_weight[1] / ncycle_occ_prod);
         rdms.make_contribs(m_local_row.m_mbf, row.m_mbf,
-                           m_local_row.m_weight[1] * row.m_weight[0]);
+                           m_local_row.m_average_weight[1] * row.m_average_weight[0] / ncycle_occ_prod);
     } else {
-        rdms.make_contribs(m_local_row.m_mbf, row.m_mbf, m_local_row.m_weight[0] * row.m_weight[0]);
+        rdms.make_contribs(m_local_row.m_mbf, row.m_mbf,
+                           m_local_row.m_average_weight[0] * row.m_average_weight[0] / ncycle_occ_prod);
     }
 }
 
@@ -132,7 +135,7 @@ void deterministic::Subspace::make_connections(const SpecMoms &spec_moms) {
     m_frm_particle_perturbed->setup(m_wf.m_ham, gathered());
 }
 
-void deterministic::Subspace::make_rdm_contribs(const shared_rows::Walker *hf) {
+void deterministic::Subspace::make_rdm_contribs(const shared_rows::Walker *hf, uint_t icycle) {
     auto& rdms = m_maes.m_rdms;
     if (!rdms || !rdms.m_accum_epoch) return;
     uint_t iirec = ~0ul;
@@ -144,13 +147,13 @@ void deterministic::Subspace::make_rdm_contribs(const shared_rows::Walker *hf) {
          * make contributions due to hamiltonian connections
          */
         for (auto& elem : m_ham_matrix[iirec]){
-            make_rdm_contrib(hf, elem);
+            make_rdm_contrib(hf, elem, icycle);
         }
         /*
          * make contributions due to RDM-only connections
          */
         for (auto& elem : m_rdm_network[iirec]){
-            make_rdm_contrib(hf, elem);
+            make_rdm_contrib(hf, elem, icycle);
         }
     }
 }
@@ -252,9 +255,9 @@ void deterministic::Subspaces::project(double tau) {
     for (auto &detsub: m_detsubs) detsub->project(tau);
 }
 
-void deterministic::Subspaces::make_rdm_contribs(const shared_rows::Walker *hf) {
+void deterministic::Subspaces::make_rdm_contribs(const shared_rows::Walker *hf, uint_t icycle) {
     if (!*this) return;
-    for (auto &detsub: m_detsubs) detsub->make_rdm_contribs(hf);
+    for (auto &detsub: m_detsubs) detsub->make_rdm_contribs(hf, icycle);
 }
 
 void deterministic::Subspaces::make_spec_mom_contribs() {

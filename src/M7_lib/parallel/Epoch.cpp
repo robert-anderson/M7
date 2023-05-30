@@ -68,3 +68,13 @@ uint_t Epochs::icycle_start_last() const {
 Epochs::operator bool() const {
     return icycle_start_last() != ~0ul;
 }
+
+bool Epochs::last_started_this_cycle(uint_t icycle) const {
+    if (!*this) return false;
+    return icycle_start_last() == icycle;
+}
+
+bool Epochs::last_started_last_cycle(uint_t icycle) const {
+    if (!*this) return false;
+    return icycle_start_last()+1 == icycle;
+}

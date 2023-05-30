@@ -271,7 +271,7 @@ namespace deterministic {
 
         uintv_t make_iparts();
 
-        void make_rdm_contrib(const shared_rows::Walker* hf, const sparse::Element& elem);
+        void make_rdm_contrib(const shared_rows::Walker* hf, const sparse::Element& elem, uint_t icycle);
 
 
     public:
@@ -303,7 +303,7 @@ namespace deterministic {
             make_connections(m_maes.m_spec_moms);
         }
 
-        void make_rdm_contribs(const shared_rows::Walker* hf);
+        void make_rdm_contribs(const shared_rows::Walker* hf, uint_t icycle);
 
         void make_spec_mom_contribs() {
             auto& spec_moms = m_maes.m_spec_moms;
@@ -358,7 +358,7 @@ namespace deterministic {
 
         void project(double tau);
 
-        void make_rdm_contribs(const shared_rows::Walker* hf);
+        void make_rdm_contribs(const shared_rows::Walker* hf, uint_t icycle);
 
         void make_spec_mom_contribs();
     };

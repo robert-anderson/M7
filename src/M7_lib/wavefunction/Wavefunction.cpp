@@ -345,6 +345,15 @@ void wf::Vectors::refresh_all_ref_conns() {
     m_store.foreach_row_in_use(fn);
 }
 
+void wf::Vectors::reset_all_averages(uint_t icycle) {
+    auto fn = [&](Walker& row) {
+        row.m_average_weight = 0;
+        row.m_icycle_occ = icycle;
+    };
+    m_store.foreach_row_in_use(fn);
+}
+
+
 void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
     /*
      * perform the eigensolver procedure for the required number of states
