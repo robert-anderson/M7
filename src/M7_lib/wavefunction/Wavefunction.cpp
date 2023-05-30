@@ -4,7 +4,7 @@
 
 #include "M7_lib/basis/Suites.h"
 #include "Wavefunction.h"
-#include "FciInitializer.h"
+#include "CiInitializer.h"
 #include "HfExcitHists.h"
 #include "M7_lib/hdf5/DistTableLoader.h"
 
@@ -49,9 +49,9 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
     else if (m_opts.m_wavefunction.m_fci_init) {
         // the wavefunction is to be initialized using exact eigenvectors from the Arnoldi method
         logging::info("Performing exact FCI initialization of wavefunctions");
-        FciInitOptions fci_init_opts;
-        fci_init_opts.m_nroot = this->nroot();
-        fci_init(fci_init_opts);
+        ci_init::Options ci_init_opts;
+        ci_init_opts.m_nroot = this->nroot();
+        fci_init(ci_init_opts);
     }
     return ref_locs;
 }
@@ -345,11 +345,11 @@ void wf::Vectors::refresh_all_ref_conns() {
     m_store.foreach_row_in_use(fn);
 }
 
-void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
+void wf::Vectors::fci_init(ci_init::Options opts, uint_t max_ncomm) {
     /*
      * perform the eigensolver procedure for the required number of states
      */
-    FciInitializer init(m_ham, opts);
+    ci_init::Initializer init(m_ham, opts);
     const auto results = init.solve();
     /*
      * compute the ratio of initial number of walkers to L1-norms of the eigenvectors to get the right scale

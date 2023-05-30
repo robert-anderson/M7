@@ -2,8 +2,8 @@ target_sources(M7_lib
     PRIVATE
         DeterministicSubspace.cpp
         DeterministicSubspace.h
-        FciInitializer.cpp
-        FciInitializer.h
+        CiInitializer.cpp
+        CiInitializer.h
         HartreeFock.cpp
         HartreeFock.h
         HfExcitHists.cpp

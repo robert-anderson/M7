@@ -118,6 +118,7 @@ namespace conf {
         Param<double> m_nw_init;
         Param<uint_t> m_nroot;
         Param<bool> m_fci_init;
+        Param<bool> m_ref_conn_init;
         Param<bool> m_no_row_creation;
         Buffers m_buffers;
         HashMapping m_hash_mapping;

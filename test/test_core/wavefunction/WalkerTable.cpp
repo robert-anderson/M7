@@ -7,7 +7,7 @@
 
 TEST(WalkerTable, Fields){
     sys::Basis basis(5*c_enable_fermions, 7*c_enable_bosons);
-    WalkerTable table(Walker(basis, 1, 1, false));
+    WalkerTable table(Walker(basis, 1, 1));
     auto& row = table.m_row;
 
     /**

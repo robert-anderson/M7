@@ -2,7 +2,7 @@
 // Created by anderson on 18/07/2022.
 //
 
-#include <M7_lib/wavefunction/FciInitializer.h>
+#include <M7_lib/wavefunction/CiInitializer.h>
 #include <M7_lib/linalg/DenseHamiltonian.h>
 #include <M7_lib/hamiltonian/frm/J1J2FrmHam.h>
 #include "test_core/defs.h"
@@ -10,16 +10,31 @@
 #include "M7_lib/mae/MaeTable.h"
 
 #ifdef ENABLE_FERMIONS
-TEST(FciInitializer, N2) {
+TEST(FciInitializer, N2Conns) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     Hamiltonian ham(&frm_ham);
-    FciInitOptions opt;
+    ci_init::Options opt;
     opt.m_ritz_tol = 1e-7;
     DenseHamiltonian hmat(ham);
     v_t<ham_comp_t> dense_evals;
     dense::diag(hmat, dense_evals);
     ham_comp_t eval;
-    auto results = FciInitializer::solve(ham, opt);
+    auto results = ci_init::Initializer::solve(ham, opt);
+    results.get_eval(0, eval);
+    ASSERT_NEAR_EQ(eval, dense_evals[0]);
+}
+
+TEST(FciInitializer, N2MbfPairs) {
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
+    Hamiltonian ham(&frm_ham);
+    ci_init::Options opt;
+    opt.m_ritz_tol = 1e-7;
+    opt.m_loop_kind = ci_init::Options::MbfPairs;
+    DenseHamiltonian hmat(ham);
+    v_t<ham_comp_t> dense_evals;
+    dense::diag(hmat, dense_evals);
+    ham_comp_t eval;
+    auto results = ci_init::Initializer::solve(ham, opt);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, dense_evals[0]);
 }
@@ -28,7 +43,7 @@ TEST(FciInitializer, J1J2) {
     J1J2FrmHam frm_ham(0.25, lattice::make("ortho", {16}, {1}));
     Hamiltonian ham(&frm_ham);
     ham_comp_t eval;
-    auto results = FciInitializer::solve(ham);
+    auto results = ci_init::Initializer::solve(ham);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, -6.44708);
 }
@@ -36,18 +51,18 @@ TEST(FciInitializer, J1J2) {
 #endif
 
 #ifdef ENABLE_BOSONS
-TEST(FciInitializer, BosHub) {
+TEST(CiInitializer, BosHub) {
     HubbardBosHam bos_ham(-0.1, lattice::make("ortho", {10}, {1}));
     Hamiltonian ham(&bos_ham);
-    FciInitOptions opt;
+    CiInitOptions opt;
     opt.m_nroot = 12;
     opt.m_ritz_tol = 1e-10;
     opt.m_diag_shift = -91.0;
-    FciInitializer init(ham, opt);
+    CiInitializer init(ham, opt);
 }
 
 #if 0
-TEST(FciInitializer, BosHubLoop) {
+TEST(CiInitializer, BosHubLoop) {
     const uint_t nsite = 9;
     const uint_t nbos = 9;
     {
@@ -75,12 +90,12 @@ TEST(FciInitializer, BosHubLoop) {
         HubbardBosHam bos_ham(u, lattice::make("ortho", {3, 3}, {1, 1}));
         Hamiltonian ham(&bos_ham);
         const sys::Particles particles = {sys::frm::Electrons(0), sys::bos::Bosons(nbos, true)};
-        FciInitOptions opt;
+        CiInitOptions opt;
         opt.m_nroot = nsite;
         opt.m_niter_max = 1000;
         opt.m_ritz_tol = 1e-8;
         opt.m_diag_shift = -20;
-        auto results = FciInitializer::solve(ham, particles, opt);
+        auto results = CiInitializer::solve(ham, particles, opt);
         hdf5::FileWriter fw(logging::format("bos_hub_u={:.4f}.h5", u));
         v_t<double> evals;
         results.get_evals(evals);

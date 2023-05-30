@@ -129,6 +129,7 @@ conf::Wavefunction::Wavefunction(Group *parent) :
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
         m_fci_init(this, "fci_init", false, "call the ARPACK interface to initialize the required roots to their exact values"),
+        m_ref_conn_init(this, "ref_conn_init", false, "initialize to the solution vector in the space of the reference and all its connections (e.g. CISD)"),
         m_no_row_creation(this, "no_row_creation", false, "if true, prevent row creation after wavefunction setup"),
         m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_pmntr(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
