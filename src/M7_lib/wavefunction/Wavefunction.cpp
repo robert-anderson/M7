@@ -54,7 +54,7 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
         opts.m_nroot = this->nroot();
         if (init_space_kind == "fci") {
             opts.m_loop_kind = ci_init::Options::Conns;
-            ci_init::FciSubspace subspace(m_ham, m_sector.particles());
+            ci_init::FciSubspace subspace(&m_ham, m_sector.particles());
             ci_init(subspace, opts);
         }
     }
@@ -355,7 +355,7 @@ void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options op
      * perform the eigensolver procedure for the required number of states
      */
     const auto& table = subspace.m_mbf_order_table;
-    ci_init::Initializer init(m_ham, subspace, opts);
+    ci_init::Initializer init(subspace, opts);
     const auto results = init.solve();
     /*
      * compute the ratio of initial number of walkers to L1-norms of the eigenvectors to get the right scale

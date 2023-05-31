@@ -22,9 +22,9 @@ TEST(FieldDataset, FrmOnvField) {
     HeisenbergFrmHam frm_ham(1.0, lattice::make("ortho", {10}, {1}));
     Hamiltonian ham(&frm_ham);
     // generate all spin determinants
-    ci_init::FciSubspace subspace(ham);
+    ci_init::FciSubspace subspace(&ham);
     ASSERT_EQ(subspace.m_mbf_order_table.nrow_in_use(), 252ul);
-    ci_init::Initializer init(ham, subspace);
+    ci_init::Initializer init(subspace);
     const uint_t max_nitem_per_op = 12ul;
     {
         hdf5::FileWriter fw("tmp.h5");

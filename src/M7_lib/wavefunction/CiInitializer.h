@@ -28,12 +28,13 @@ namespace ci_init {
         typedef SingleFieldRow<field::Mbf> mbf_order_row_t;
         typedef buffered::MappedTable<mbf_order_row_t> mbf_order_table_t;
         mbf_order_table_t m_mbf_order_table;
-        Subspace(const Hamiltonian& h): m_mbf_order_table("MBF order table", {mbf_order_row_t(h.m_basis, "mbf")}){}
+        const Hamiltonian* m_h;
+        Subspace(const Hamiltonian* h);
     };
 
     struct FciSubspace : Subspace {
-        FciSubspace(const Hamiltonian& h, sys::Particles particles);
-        explicit FciSubspace(const Hamiltonian& h): FciSubspace(h, h.default_particles()){}
+        FciSubspace(const Hamiltonian* h, sys::Particles particles);
+        explicit FciSubspace(const Hamiltonian* h): FciSubspace(h, h->default_particles()){}
     };
 
 //    struct RefConnSubspace : Subspace {
@@ -45,19 +46,19 @@ namespace ci_init {
         const bool m_is_hermitian;
         sparse::dynamic::Matrix<ham_t> m_sparse_ham;
 
-        Initializer(const Hamiltonian& h, const Subspace& subspace, Options opts = {});
+        Initializer(const Subspace& subspace, Options opts = {});
 
     private:
 
         /**
          * build Hamiltonian in subspace by looping over mbfs and then by connections (recommended for large spaces)
          */
-        void build_ham_conns(const Hamiltonian &h, const Subspace& subspace, ham_comp_t diag_shift);
+        void build_ham_conns(const Subspace& subspace, ham_comp_t diag_shift);
 
         /**
          * build Hamiltonian in subspace by looping over pairs of mbfs (recommended for small spaces)
          */
-        void build_ham_mbfs(const Hamiltonian &h, const Subspace& subspace, ham_comp_t diag_shift);
+        void build_ham_mbfs(const Subspace& subspace, ham_comp_t diag_shift);
 
         template<uint_t sym>
         ArnoldiSolver<ham_t> solve(tag::Int<sym>) {
@@ -79,8 +80,8 @@ namespace ci_init {
         /**
          * in instances where retention of the sparse Hamiltonian is not desired
          */
-        static ArnoldiSolver<ham_t> solve(const Hamiltonian& h, const Subspace& subspace, Options opts = {}) {
-            return Initializer(h, subspace, opts).solve();
+        static ArnoldiSolver<ham_t> solve(const Subspace& subspace, Options opts = {}) {
+            return Initializer(subspace, opts).solve();
         }
     };
 }
