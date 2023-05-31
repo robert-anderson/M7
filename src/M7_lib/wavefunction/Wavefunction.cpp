@@ -57,6 +57,11 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
             ci_init::FciSubspace subspace(&m_ham, m_sector.particles());
             ci_init(subspace, opts);
         }
+        else if (init_space_kind == "ref_conn") {
+            opts.m_loop_kind = ci_init::Options::MbfPairs;
+            ci_init::RefConnSubspace subspace(&m_ham, m_refs[0].mbf());
+            ci_init(subspace, opts);
+        }
     }
     return ref_locs;
 }

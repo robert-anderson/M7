@@ -39,6 +39,22 @@ TEST(FciInitializer, N2MbfPairs) {
     ASSERT_NEAR_EQ(eval, bench);
 }
 
+TEST(FciInitializer, N2Cisd) {
+    GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
+    Hamiltonian ham(&frm_ham);
+    ci_init::Options opt;
+    opt.m_ritz_tol = 1e-7;
+    opt.m_loop_kind = ci_init::Options::MbfPairs;
+    const ham_comp_t bench = -108.89886691594;
+    ham_comp_t eval;
+    buffered::Mbf ref(ham.m_basis);
+    mbf::set_aufbau_mbf(ref, ham.default_particles());
+    ci_init::RefConnSubspace subspace(&ham, ref);
+    auto results = ci_init::Initializer::solve(subspace, opt);
+    results.get_eval(0, eval);
+    ASSERT_NEAR_EQ(eval, bench);
+}
+
 TEST(FciInitializer, J1J2) {
     J1J2FrmHam frm_ham(0.25, lattice::make("ortho", {16}, {1}));
     Hamiltonian ham(&frm_ham);

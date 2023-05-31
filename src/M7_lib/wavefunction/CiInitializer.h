@@ -37,9 +37,9 @@ namespace ci_init {
         explicit FciSubspace(const Hamiltonian* h): FciSubspace(h, h->default_particles()){}
     };
 
-//    struct RefConnSubspace : Subspace {
-//        RefConnSubspace(const Hamiltonian& h, sys::Particles particles, const Mbf& ref);
-//    };
+    struct RefConnSubspace : Subspace {
+        RefConnSubspace(const Hamiltonian* h, const Mbf& ref);
+    };
 
     struct Initializer {
         const Options m_opts;

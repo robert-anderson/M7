@@ -8,7 +8,9 @@
 #include "M7_lib/field/Mbf.h"
 
 ci_init::Subspace::Subspace(const Hamiltonian* h) :
-        m_mbf_order_table("MBF order table", {mbf_order_row_t(h->m_basis, "mbf")}), m_h(h){}
+        m_mbf_order_table("MBF order table", {mbf_order_row_t(h->m_basis, "mbf")}), m_h(h){
+    m_mbf_order_table.set_expansion_factor(2.0);
+}
 
 ci_init::Initializer::Initializer(const Subspace& subspace, Options opts):
     m_opts(opts), m_is_hermitian(subspace.m_h->is_hermitian()){
@@ -97,11 +99,16 @@ ci_init::FciSubspace::FciSubspace(const Hamiltonian* h, sys::Particles particles
     m_mbf_order_table.remap();
 }
 
-//ci_init::RefConnSubspace::RefConnSubspace(const Hamiltonian& h, sys::Particles particles, const Mbf& ref) : Subspace(h){
-//    auto iters = FciIters::make(h, particles, false);
-//    m_mbf_order_table.resize(iters.niter_single());
-//    buffered::Mbf mbf(h.m_basis);
-//
-//    iters.m_single->loop(mbf, [&](){m_mbf_order_table.insert(mbf);});
-//    m_mbf_order_table.remap();
-//}
+ci_init::RefConnSubspace::RefConnSubspace(const Hamiltonian* h, const Mbf& ref) : Subspace(h) {
+    conn::Mbf conn(ref);
+    m_mbf_order_table.insert(ref);
+    buffered::Mbf dst = ref;
+    auto body = [&]() {
+        DEBUG_ASSERT_NE(conn.exsig(), opsig::c_zero, "diagonal connection generated");
+        auto helement = h->get_element(ref, conn);
+        if (!ham::is_significant(helement)) return;
+        conn.apply(ref, dst);
+        m_mbf_order_table.insert(dst);
+    };
+    ConnForeachGroup(*h).loop(conn, ref, body);
+}
