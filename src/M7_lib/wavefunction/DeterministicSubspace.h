@@ -293,6 +293,8 @@ namespace deterministic {
 
         void select_l1_norm_fraction();
 
+        void select_ref_conns();
+
     private:
         void make_connections(const Rdms& rdms);
         void make_connections(const SpecMoms& rdms);

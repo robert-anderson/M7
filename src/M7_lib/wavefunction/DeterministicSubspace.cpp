@@ -74,6 +74,11 @@ void deterministic::Subspace::select_l1_norm_fraction() {
     }
 }
 
+void deterministic::Subspace::select_ref_conns() {
+    auto row = m_wf.m_store.m_row;
+    for (row.restart(); row; ++row) if (std::abs(row.m_ref_conn.get(m_iparts[0]))) add_(row);
+}
+
 void deterministic::Subspace::make_connections(const Rdms &rdms){
     const auto& gathered = this->gathered();
     full_update();
@@ -239,10 +244,9 @@ void deterministic::Subspaces::refresh() {
          */
         detsub->clear();
         DEBUG_ASSERT_FALSE(detsub->m_wf.debug_ndeterministic(iroot), "flags remain set");
-        if (m_opts.m_l1_fraction_cutoff.m_value < 1.0)
-            detsub->select_l1_norm_fraction();
-        else
-            detsub->select_highest_weighted();
+        if (m_opts.m_l1_fraction_cutoff.m_value < 1.0) detsub->select_l1_norm_fraction();
+        else if (m_opts.m_ref_conns) detsub->select_ref_conns();
+        else detsub->select_highest_weighted();
         detsub->make_connections();
     }
 }

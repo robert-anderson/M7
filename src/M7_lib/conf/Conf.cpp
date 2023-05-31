@@ -162,13 +162,14 @@ conf::Shift::Shift(Group *parent) :
 conf::Semistochastic::Semistochastic(Group *parent) :
         Section(parent, "semistochastic", "options related to semi-stochastic propagation", Explicit),
         m_size(this, "size", 0ul, "number of MBFs selected to comprise the semi-stochastic space"),
-        m_l1_fraction_cutoff(this, "l1_fraction_cutoff", 1.0,
-            "requisite fraction of the total number of walkers required to reside on an MBF for inclusion in the "
-            "semistochastic space"),
+        m_l1_fraction_cutoff(this, "l1_fraction_cutoff", 1.0, "requisite fraction of the total number of walkers for "
+            "inclusion of an MBF in the semistochastic space"),
+        m_ref_conns(this, "ref_conns", false,
+            "if true, make the deterministic subspaces from the references and their connections"),
         m_delay(this, "delay", 0ul,
-                "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space(s)"),
+            "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space(s)"),
         m_period(this, "period", ~0ul,
-                 "number of MC cycles between refreshes of the semi-stochastic space(s)"),
+            "number of MC cycles between refreshes of the semi-stochastic space(s)"),
         m_save(this, "save", "deterministic subspace save", "M7.detsub.h5", Explicit),
         m_load(this, "load", "deterministic subspace load", "M7.detsub.h5", Explicit){}
 

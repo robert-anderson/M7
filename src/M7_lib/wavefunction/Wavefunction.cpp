@@ -410,6 +410,14 @@ void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options op
             store_row.m_weight = recv_row.m_delta_weight;
         }
     }
+    /*
+     * now scale the weights so the initial number of walkers is as-specified in the config document
+     */
+    for (uint_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
+        const auto scale_fac = m_opts.m_wavefunction.m_nw_init.m_value / debug_l1_norm(ipart);
+        auto fn = [&](Walker& row) {scale_weight(row, ipart,  scale_fac);};
+        m_store.foreach_row_in_use(fn);
+    }
 }
 
 void wf::Vectors::orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica) {
