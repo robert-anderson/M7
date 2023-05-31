@@ -268,7 +268,7 @@ namespace wf {
 
         void refresh_all_ref_conns();
 
-        void fci_init(ci_init::Options opts, uint_t max_ncomm=1000ul);
+        void ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, uint_t max_ncomm = 1000ul);
 
         void orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica);
 

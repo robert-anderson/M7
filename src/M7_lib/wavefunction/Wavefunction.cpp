@@ -42,16 +42,21 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
 
     for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
 
+    const auto& init_space_kind = m_opts.m_wavefunction.m_init_space_kind.m_value;
     if (m_opts.m_wavefunction.m_load.m_enabled) {
         // the wavefunction is to be loaded from HDF5 archive
         load();
     }
-    else if (m_opts.m_wavefunction.m_fci_init) {
-        // the wavefunction is to be initialized using exact eigenvectors from the Arnoldi method
-        logging::info("Performing exact FCI initialization of wavefunctions");
-        ci_init::Options ci_init_opts;
-        ci_init_opts.m_nroot = this->nroot();
-        fci_init(ci_init_opts);
+    else if (init_space_kind != "ref"){
+        // the wavefunction is to be initialized using eigenvectors from the Arnoldi method
+        logging::info("Performing exact CI initialization of wavefunctions");
+        ci_init::Options opts;
+        opts.m_nroot = this->nroot();
+        if (init_space_kind == "fci") {
+            opts.m_loop_kind = ci_init::Options::Conns;
+            ci_init::FciSubspace subspace(m_ham, m_sector.particles());
+            ci_init(subspace, opts);
+        }
     }
     return ref_locs;
 }
@@ -345,11 +350,12 @@ void wf::Vectors::refresh_all_ref_conns() {
     m_store.foreach_row_in_use(fn);
 }
 
-void wf::Vectors::fci_init(ci_init::Options opts, uint_t max_ncomm) {
+void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, uint_t max_ncomm) {
     /*
      * perform the eigensolver procedure for the required number of states
      */
-    ci_init::Initializer init(m_ham, opts);
+    const auto& table = subspace.m_mbf_order_table;
+    ci_init::Initializer init(m_ham, subspace, opts);
     const auto results = init.solve();
     /*
      * compute the ratio of initial number of walkers to L1-norms of the eigenvectors to get the right scale
@@ -358,7 +364,7 @@ void wf::Vectors::fci_init(ci_init::Options opts, uint_t max_ncomm) {
     if (mpi::i_am_root()) {
         v_t<ham_t> evals;
         results.get_evals(evals);
-        logging::info("FCI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
+        logging::info("CI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
 
         const auto nw = m_opts.m_wavefunction.m_nw_init.m_value;
         for (uint_t iroot=0ul; iroot<opts.m_nroot; ++iroot)
@@ -372,9 +378,9 @@ void wf::Vectors::fci_init(ci_init::Options opts, uint_t max_ncomm) {
     char done = false;
     while (!mpi::all_land(done)) {
         if (mpi::i_am_root()) {
-            auto& row = init.m_mbf_order_table.m_row;
+            auto& row = table.m_row;
             auto& mbf = row.m_field;
-            const auto irow_end = std::min(init.m_mbf_order_table.nrow_in_use(), irow + max_ncomm);
+            const auto irow_end = std::min(table.nrow_in_use(), irow + max_ncomm);
             for (row.jump(irow); row.in_range(irow_end); ++row) {
                 for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
                     for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
@@ -385,7 +391,7 @@ void wf::Vectors::fci_init(ci_init::Options opts, uint_t max_ncomm) {
                 }
             }
             irow = irow_end;
-            done = (irow == init.m_mbf_order_table.nrow_in_use());
+            done = (irow == table.nrow_in_use());
         } else {
             done = true;
         }

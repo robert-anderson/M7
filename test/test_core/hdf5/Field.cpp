@@ -22,14 +22,15 @@ TEST(FieldDataset, FrmOnvField) {
     HeisenbergFrmHam frm_ham(1.0, lattice::make("ortho", {10}, {1}));
     Hamiltonian ham(&frm_ham);
     // generate all spin determinants
-    ci_init::Initializer init(ham);
-    ASSERT_EQ(init.m_mbf_order_table.nrow_in_use(), 252ul);
+    ci_init::FciSubspace subspace(ham);
+    ASSERT_EQ(subspace.m_mbf_order_table.nrow_in_use(), 252ul);
+    ci_init::Initializer init(ham, subspace);
     const uint_t max_nitem_per_op = 12ul;
     {
         hdf5::FileWriter fw("tmp.h5");
-        init.m_mbf_order_table.save(fw, "mbf_table", mpi::i_am_root(), max_nitem_per_op);
+        subspace.m_mbf_order_table.save(fw, "mbf_table", mpi::i_am_root(), max_nitem_per_op);
     }
-    ci_init::Initializer::mbf_order_table_t table("mbf_table_load", init.m_mbf_order_table.m_row);
+    ci_init::Subspace::mbf_order_table_t table("mbf_table_load", subspace.m_mbf_order_table.m_row);
     {
         hdf5::FileReader fr("tmp.h5");
         table.load(fr, "mbf_table", false, true);

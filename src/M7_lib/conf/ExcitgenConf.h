@@ -16,7 +16,7 @@ namespace conf {
         Param<double> m_doub_occ_u_fac;
         HubbardPreferDoubleOcc(Group* parent):
             Section(parent, "hubbard_prefer_double_occ",
-                    "prefers to select electrons from doubly-occupied sites",Explicit),
+                    "prefers to select electrons from doubly-occupied sites", Explicit),
             m_doub_occ_u_fac(this, "doub_occ_u_fac", 1.0,
                              "factor adjusting probability of trying to draw an electron from a doubly occupied site"){}
     };

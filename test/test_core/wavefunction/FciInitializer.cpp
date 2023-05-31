@@ -19,7 +19,8 @@ TEST(FciInitializer, N2Conns) {
     v_t<ham_comp_t> dense_evals;
     dense::diag(hmat, dense_evals);
     ham_comp_t eval;
-    auto results = ci_init::Initializer::solve(ham, opt);
+    ci_init::FciSubspace subspace(ham);
+    auto results = ci_init::Initializer::solve(ham, subspace, opt);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, dense_evals[0]);
 }
@@ -32,7 +33,8 @@ TEST(FciInitializer, N2MbfPairs) {
     opt.m_loop_kind = ci_init::Options::MbfPairs;
     const ham_comp_t bench = -108.916561245698;
     ham_comp_t eval;
-    auto results = ci_init::Initializer::solve(ham, opt);
+    ci_init::FciSubspace subspace(ham);
+    auto results = ci_init::Initializer::solve(ham, subspace, opt);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, bench);
 }
@@ -41,7 +43,8 @@ TEST(FciInitializer, J1J2) {
     J1J2FrmHam frm_ham(0.25, lattice::make("ortho", {16}, {1}));
     Hamiltonian ham(&frm_ham);
     ham_comp_t eval;
-    auto results = ci_init::Initializer::solve(ham);
+    ci_init::FciSubspace subspace(ham);
+    auto results = ci_init::Initializer::solve(ham, subspace);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, -6.44708);
 }

@@ -7,30 +7,21 @@
 #include "M7_lib/foreach/ConnForeachGroup.h"
 #include "M7_lib/field/Mbf.h"
 
-ci_init::Initializer::Initializer(const Hamiltonian &h, sys::Particles particles, Options opts):
-        m_opts(opts), m_is_hermitian(h.is_hermitian()),
-        m_mbf_order_table("MBF order table", {mbf_order_row_t(h.m_basis, "mbf")}){
-    auto iters = FciIters::make(h, particles, false);
-    m_mbf_order_table.resize(iters.niter_single());
-    buffered::Mbf mbf(h.m_basis);
-
-    iters.m_single->loop(mbf, [&](){m_mbf_order_table.insert(mbf);});
-    m_mbf_order_table.remap();
-
+ci_init::Initializer::Initializer(const Hamiltonian &h, const Subspace& subspace, Options opts):
+        m_opts(opts), m_is_hermitian(h.is_hermitian()) {
     switch (opts.m_loop_kind) {
         case Options::Conns:
-            build_ham_conns(h, opts.m_diag_shift);
+            build_ham_conns(h, subspace, opts.m_diag_shift);
             break;
         case Options::MbfPairs:
-            build_ham_mbfs(h, opts.m_diag_shift);
+            build_ham_mbfs(h, subspace, opts.m_diag_shift);
             break;
     }
 }
 
-ci_init::Initializer::Initializer(const Hamiltonian &h, Options opts): Initializer(h, h.default_particles(), opts){}
-
-void ci_init::Initializer::build_ham_conns(const Hamiltonian &h, ham_comp_t diag_shift) {
-    const auto count = m_mbf_order_table.nrow_in_use();
+void ci_init::Initializer::build_ham_conns(const Hamiltonian &h, const Subspace& subspace, ham_comp_t diag_shift) {
+    const auto& table = subspace.m_mbf_order_table;
+    const auto count = table.nrow_in_use();
     const uint_t count_local = mpi::evenly_shared_count(count);
     const uint_t displ_local = mpi::evenly_shared_displ(count);
 
@@ -42,7 +33,7 @@ void ci_init::Initializer::build_ham_conns(const Hamiltonian &h, ham_comp_t diag
 
     logging::info("Building sparse H matrix ({} rows)", count_local);
     ProgressMonitor pm(true, "building sparse H", "basis functions", count_local, 5);
-    auto& row = m_mbf_order_table.m_row;
+    auto& row = table.m_row;
     const auto& src_mbf = row.m_field;
     auto& dst_mbf = mbf;
 
@@ -50,7 +41,7 @@ void ci_init::Initializer::build_ham_conns(const Hamiltonian &h, ham_comp_t diag
         const auto helem = h.get_element(src_mbf, conn);
         if (!ham::is_significant(helem)) return;
         conn.apply(src_mbf, dst_mbf);
-        auto& lookup = m_mbf_order_table.lookup(dst_mbf);
+        auto& lookup = table.lookup(dst_mbf);
         DEBUG_ASSERT_TRUE(lookup, "connected MBF is outside generated space");
         const auto irow = row.index()-displ_local;
         if (lookup) m_sparse_ham.insert(irow, {lookup.index(), helem});
@@ -67,8 +58,9 @@ void ci_init::Initializer::build_ham_conns(const Hamiltonian &h, ham_comp_t diag
     }
 }
 
-void ci_init::Initializer::build_ham_mbfs(const Hamiltonian& h, ham_comp_t diag_shift) {
-    const auto count = m_mbf_order_table.nrow_in_use();
+void ci_init::Initializer::build_ham_mbfs(const Hamiltonian& h, const Subspace& subspace, ham_comp_t diag_shift) {
+    const auto& table = subspace.m_mbf_order_table;
+    const auto count = table.nrow_in_use();
     const uint_t count_local = mpi::evenly_shared_count(count);
     const uint_t displ_local = mpi::evenly_shared_displ(count);
 
@@ -78,8 +70,8 @@ void ci_init::Initializer::build_ham_mbfs(const Hamiltonian& h, ham_comp_t diag_
     logging::info("Building sparse H matrix ({} rows)", count_local);
     ProgressMonitor pm(true, "building sparse H", "basis functions", count_local, 5);
 
-    auto src = m_mbf_order_table.m_row;
-    auto dst = m_mbf_order_table.m_row;
+    auto src = table.m_row;
+    auto dst = src;
 
     for (src.jump(displ_local); src.in_range(displ_local + count_local); ++src) {
         const auto irow = src.index() - displ_local;
@@ -93,3 +85,21 @@ void ci_init::Initializer::build_ham_mbfs(const Hamiltonian& h, ham_comp_t diag_
         pm.next();
     }
 }
+
+ci_init::FciSubspace::FciSubspace(const Hamiltonian& h, sys::Particles particles) : Subspace(h) {
+    auto iters = FciIters::make(h, particles, false);
+    m_mbf_order_table.resize(iters.niter_single());
+    buffered::Mbf mbf(h.m_basis);
+
+    iters.m_single->loop(mbf, [&](){m_mbf_order_table.insert(mbf);});
+    m_mbf_order_table.remap();
+}
+
+//ci_init::RefConnSubspace::RefConnSubspace(const Hamiltonian& h, sys::Particles particles, const Mbf& ref) : Subspace(h){
+//    auto iters = FciIters::make(h, particles, false);
+//    m_mbf_order_table.resize(iters.niter_single());
+//    buffered::Mbf mbf(h.m_basis);
+//
+//    iters.m_single->loop(mbf, [&](){m_mbf_order_table.insert(mbf);});
+//    m_mbf_order_table.remap();
+//}
