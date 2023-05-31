@@ -30,13 +30,11 @@ TEST(FciInitializer, N2MbfPairs) {
     ci_init::Options opt;
     opt.m_ritz_tol = 1e-7;
     opt.m_loop_kind = ci_init::Options::MbfPairs;
-    DenseHamiltonian hmat(ham);
-    v_t<ham_comp_t> dense_evals;
-    dense::diag(hmat, dense_evals);
+    const ham_comp_t bench = -108.916561245698;
     ham_comp_t eval;
     auto results = ci_init::Initializer::solve(ham, opt);
     results.get_eval(0, eval);
-    ASSERT_NEAR_EQ(eval, dense_evals[0]);
+    ASSERT_NEAR_EQ(eval, bench);
 }
 
 TEST(FciInitializer, J1J2) {

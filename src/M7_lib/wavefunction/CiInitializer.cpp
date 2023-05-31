@@ -87,7 +87,7 @@ void ci_init::Initializer::build_ham_mbfs(const Hamiltonian& h, ham_comp_t diag_
         for (dst.restart(); dst; ++dst) {
             auto helem = h.get_element(src.m_field, dst.m_field);
             if (src.index() == dst.index()) helem += diag_shift;
-            if (!ham::is_significant(helem)) return;
+            if (!ham::is_significant(helem)) continue;
             m_sparse_ham.insert(irow, {dst.index(), helem});
         }
         pm.next();
