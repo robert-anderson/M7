@@ -289,11 +289,10 @@ void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint
             --m_stats.m_nocc_mbf_by_shift_space.delta()[old_shift_space];
             ++m_stats.m_nocc_mbf_by_shift_space.delta()[new_shift_space];
             walker.m_shift_space = new_shift_space;
-            // protect if the new space is S0 and there exist higher spaces
+            // protect if the new space is S0, there exist higher spaces, and the walker is a reference connection
             const auto nspace = m_stats.m_nocc_mbf_by_shift_space.m_format.m_nelement;
-            if (new_shift_space==0 && (nspace > 1)) walker.protect();
+            if (new_shift_space==0 && (nspace > 1) && walker.m_ref_conn.get(ipart)) walker.protect();
         }
-
     }
     m_stats.m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
     weight = new_weight;
