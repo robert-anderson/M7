@@ -137,8 +137,6 @@ struct Shifts {
 
     Shifts& operator+=(const ham_comp_t& v);
 
-    void promote_to_s0_if_high_enhancement(wf::Vectors& wf, Walker& walker) const;
-
 };
 
 #endif //M7_SHIFT_H
