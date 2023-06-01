@@ -126,6 +126,10 @@ struct Shifts {
      * id a = 1, full enhancement is done
      */
     const ham_comp_t m_enhancement_damp;
+    /**
+     * if a log enhancement factor exceeds this value, the walker is promoted to the s0 space
+     */
+    const ham_comp_t m_s0_promote_thresh;
 
     Shifts(const conf::Shift &opts, const NdFormat<c_ndim_wf>& wf_fmt);
 
@@ -136,6 +140,8 @@ struct Shifts {
     Shifts& operator=(const ham_comp_t& v);
 
     Shifts& operator+=(const ham_comp_t& v);
+
+    void promote_to_s0_if_high_enhancement(wf::Vectors& wf, Walker& walker) const;
 
 };
 

@@ -139,6 +139,7 @@ namespace conf {
         Param<v_t<wf_comp_t>> m_nw_targets;
         Param<bool> m_fix_ref_weight;
         Param<ham_comp_t> m_enhancement_damp;
+        Param<ham_comp_t> m_s0_promote_thresh;
         Param<bool> m_cont_grow;
 
         explicit Shift(Group *parent);

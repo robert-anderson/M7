@@ -155,6 +155,8 @@ conf::Shift::Shift(Group *parent) :
             "ignore growth data in the 0th shift update, and instead use the reference-projected energy estimator,"
             " this fixes the reference population constant"),
         m_enhancement_damp(this, "enhancement_damp", 1.0, "damping factor for the enhancement factor"),
+        m_s0_promote_thresh(this, "s0_promote_thresh", 0.0, "if a log enhancement factor exceeds this value, the walker is promoted to the s0 space. "
+            "A value of 0 indicates no promotion takes place"),
         m_cont_grow(this, "cont_grow", false,
             "if the calculation is restarted from a previous growth phase, the default behaviour is to enter variable"
             " shift mode immediately. with this option set to true, the shift will instead not begin to vary until the "
