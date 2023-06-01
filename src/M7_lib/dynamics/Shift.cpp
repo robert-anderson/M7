@@ -157,7 +157,8 @@ void Shifts::promote_to_s0_if_high_enhancement(wf::Vectors& wf, Walker& walker) 
     // zero thresh signifies no promotion allowed
     if (m_s0_promote_thresh == 0.0) return;
     if (walker.m_shift_space > 0 && walker.m_log_enhancement_fac >= m_s0_promote_thresh) {
-        wf.change_weight(walker, 0, 0.0, 0);
+        const auto fac = std::exp(m_enhancement_damp * walker.m_log_enhancement_fac);
+        wf.scale_weight(walker, 0, fac, 0);
         walker.m_log_enhancement_fac = 0.0;
     }
 }

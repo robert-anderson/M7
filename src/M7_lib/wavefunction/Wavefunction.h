@@ -182,7 +182,11 @@ namespace wf {
          *  part index
          * @param factor
          *  fractional change in the weight
+         * @param new_shift_space
+         *  index of the new shift space
          */
+        void scale_weight(Walker& walker, uint_t ipart, double factor, uint_t new_shift_space);
+
         void scale_weight(Walker& walker, uint_t ipart, double factor);
 
         /**

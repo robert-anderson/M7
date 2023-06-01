@@ -302,8 +302,12 @@ void wf::Vectors::change_weight(Walker& walker, uint_t ipart, wf_t delta, uint_t
     set_weight(walker, ipart, walker.m_weight[ipart] + delta, new_shift_space);
 }
 
+void wf::Vectors::scale_weight(Walker& walker, uint_t ipart, double factor, uint_t new_shift_space) {
+    set_weight(walker, ipart, factor * walker.m_weight[ipart], new_shift_space);
+}
+
 void wf::Vectors::scale_weight(Walker& walker, uint_t ipart, double factor) {
-    set_weight(walker, ipart, factor * walker.m_weight[ipart]);
+    scale_weight(walker, ipart, factor, walker.m_shift_space);
 }
 
 void wf::Vectors::zero_weight(Walker& walker, uint_t ipart) {
