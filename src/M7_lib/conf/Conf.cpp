@@ -126,9 +126,13 @@ conf::CiPmntr::CiPmntr(Group *parent) :
 conf::Wavefunction::Wavefunction(Group *parent) :
         Section(parent, "wavefunction",
                         "options relating to the storage and update of a distributed many-body wavefunction"),
-        m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
+        m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction. If this is 0, the initial L1 norm will be the target defined in the shift section"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
-        m_fci_init(this, "fci_init", false, "call the ARPACK interface to initialize the required roots to their exact values"),
+        m_init_space_kind(this, "init_space_kind",
+            {{"ref", "initialize WFs with walkers on the reference only"},
+             {"fci", "generate entire FCI space and diagonalize"},
+             {"ref_conn", "generate a subspace of the reference and its connections and diagonalize"}},
+            "specifies the means of generating the initial walker distribution"),
         m_no_row_creation(this, "no_row_creation", false, "if true, prevent row creation after wavefunction setup"),
         m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_pmntr(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
@@ -165,13 +169,14 @@ wf_comp_t conf::Shift::nw_target_total() const {
 conf::Semistochastic::Semistochastic(Group *parent) :
         Section(parent, "semistochastic", "options related to semi-stochastic propagation", Explicit),
         m_size(this, "size", 0ul, "number of MBFs selected to comprise the semi-stochastic space"),
-        m_l1_fraction_cutoff(this, "l1_fraction_cutoff", 1.0,
-            "requisite fraction of the total number of walkers required to reside on an MBF for inclusion in the "
-            "semistochastic space"),
+        m_l1_fraction_cutoff(this, "l1_fraction_cutoff", 1.0, "requisite fraction of the total number of walkers for "
+            "inclusion of an MBF in the semistochastic space"),
+        m_ref_conn(this, "ref_conn", false,
+                   "if true, make the deterministic subspaces from the references and their connections"),
         m_delay(this, "delay", 0ul,
-                "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space(s)"),
+            "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space(s)"),
         m_period(this, "period", ~0ul,
-                 "number of MC cycles between refreshes of the semi-stochastic space(s)"),
+            "number of MC cycles between refreshes of the semi-stochastic space(s)"),
         m_save(this, "save", "deterministic subspace save", "M7.detsub.h5", Explicit),
         m_load(this, "load", "deterministic subspace load", "M7.detsub.h5", Explicit){}
 
@@ -361,13 +366,15 @@ conf::Document::Document(const str_t& fname) :
 
 void conf::Document::validate_node_contents() {
     REQUIRE_FALSE_ALL(m_shift.m_nw_targets.m_value.empty(), "at least one target number of walkers must be set");
-    auto all_init_lt_target = std::all_of(
-            m_shift.m_nw_targets.m_value.cbegin(), m_shift.m_nw_targets.m_value.cend(),
-            [&](wf_comp_t v){return std::abs(v) >= std::abs(m_wavefunction.m_nw_init.m_value); });
-    REQUIRE_TRUE_ALL(all_init_lt_target, "initial number of walkers must not exceed any target population");
-    if (m_wavefunction.m_nw_init < m_propagator.m_nadd) {
-        m_wavefunction.m_nw_init.m_value = m_propagator.m_nadd.m_value;
-        logging::warn("initial number of walkers must be at least the initiator threshold");
+    if (m_wavefunction.m_nw_init.m_value != 0.0) {
+        auto all_init_lt_target = std::all_of(
+                m_shift.m_nw_targets.m_value.cbegin(), m_shift.m_nw_targets.m_value.cend(),
+                [&](wf_comp_t v) { return std::abs(v) >= std::abs(m_wavefunction.m_nw_init.m_value); });
+        REQUIRE_TRUE_ALL(all_init_lt_target, "initial number of walkers must not exceed any target population");
+        if (m_wavefunction.m_nw_init < m_propagator.m_nadd) {
+            m_wavefunction.m_nw_init.m_value = m_propagator.m_nadd.m_value;
+            logging::warn("initial number of walkers must be at least the initiator threshold");
+        }
     }
     REQUIRE_LE(m_particles.m_nboson, m_basis.m_bos_occ_cutoff,
                "number of bosons in a number-conserving system mustn't exceed the maximum occupation cutoff");

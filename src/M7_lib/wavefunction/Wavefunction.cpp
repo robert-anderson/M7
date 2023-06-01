@@ -4,7 +4,7 @@
 
 #include "M7_lib/basis/Suites.h"
 #include "Wavefunction.h"
-#include "FciInitializer.h"
+#include "CiInitializer.h"
 #include "HfExcitHists.h"
 #include "M7_lib/hdf5/DistTableLoader.h"
 
@@ -28,30 +28,74 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
     }
 
     /*
+     * if the input-specified nw is 0, assume we will initialize the WF with the target number of walkers
+     */
+    const wf_t nw_init = (m_opts.m_wavefunction.m_nw_init.m_value == 0.0) ?
+            m_opts.m_shift.m_nw_targets.m_value[0] : m_opts.m_wavefunction.m_nw_init.m_value;
+    std::cout << nw_init << std::endl;
+    /*
      * insert reference MBF into the store table
      */
-    const auto ref_loc = create_row_setup(0, ref_mbf);
-    if (ref_loc.is_mine()) {
-        auto ref_walker = m_store.m_row;
-        ref_walker.jump(ref_loc.m_irec);
-        for (uint_t ipart = 0ul; ipart < npart(); ++ipart) {
-            set_weight(ref_walker, ipart, wf_t(m_opts.m_wavefunction.m_nw_init));
+    {
+        const auto ref_loc = create_row_setup(0, ref_mbf);
+        if (ref_loc.is_mine()) {
+            auto ref_walker = m_store.m_row;
+            ref_walker.jump(ref_loc.m_irec);
+            for (uint_t ipart = 0ul; ipart < npart(); ++ipart) set_weight(ref_walker, ipart, 1.0);
         }
+
+        for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
     }
 
-    for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
-
+    const auto& init_space_kind = m_opts.m_wavefunction.m_init_space_kind.m_value;
     if (m_opts.m_wavefunction.m_load.m_enabled) {
         // the wavefunction is to be loaded from HDF5 archive
         load();
     }
-    else if (m_opts.m_wavefunction.m_fci_init) {
-        // the wavefunction is to be initialized using exact eigenvectors from the Arnoldi method
-        logging::info("Performing exact FCI initialization of wavefunctions");
-        FciInitOptions fci_init_opts;
-        fci_init_opts.m_nroot = this->nroot();
-        fci_init(fci_init_opts);
+    else if (init_space_kind != "ref"){
+        // the wavefunction is to be initialized using eigenvectors from the Arnoldi method
+        logging::info("Performing exact CI initialization of wavefunctions");
+        ci_init::Options opts;
+        opts.m_nroot = this->nroot();
+        if (init_space_kind == "fci") {
+            opts.m_loop_kind = ci_init::Options::Conns;
+            ci_init::FciSubspace subspace(&m_ham, m_sector.particles());
+            ci_init(subspace, opts);
+        }
+        else if (init_space_kind == "ref_conn") {
+            opts.m_loop_kind = ci_init::Options::MbfPairs;
+            ci_init::RefConnSubspace subspace(&m_ham, ref_mbf);
+            ci_init(subspace, opts);
+        }
     }
+
+    /*
+     * scale each part to the required initial number of walkers
+     */
+    for (uint_t ipart = 0ul; ipart < npart(); ++ipart) {
+        const auto& ref_loc = ref_locs[ipart];
+        auto scale_fac = nw_init;
+        if (m_opts.m_shift.m_fix_ref_weight) {
+            // initial and target walker numbers pertain to the reference population
+            wf_t ref_weight = 0.0;
+            if (ref_loc.is_mine()) {
+                m_store.m_row.jump(ref_loc.m_irec);
+                ref_weight = m_store.m_row.m_weight[ipart];
+                std::cout << ref_weight << std::endl;
+            }
+            mpi::bcast(ref_weight, ref_loc.m_irank);
+            REQUIRE_TRUE_ALL(ref_weight, "");
+            scale_fac /= ref_weight;
+        }
+        else {
+            // initial and target walker numbers pertain to the total population
+            scale_fac /= debug_l1_norm(ipart);
+        }
+        auto fn = [&](Walker& row) {scale_weight(row, ipart,  scale_fac);};
+        m_store.foreach_row_in_use(fn);
+        std::cout << m_store.to_string() << std::endl;
+    }
+
     return ref_locs;
 }
 
@@ -378,24 +422,20 @@ void wf::Vectors::refresh_all_ref_conns() {
     m_store.foreach_row_in_use(fn);
 }
 
-void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
+void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, uint_t max_ncomm) {
     /*
      * perform the eigensolver procedure for the required number of states
      */
-    FciInitializer init(m_ham, opts);
+    const auto& table = subspace.m_mbf_order_table;
+    ci_init::Initializer init(subspace, opts);
     const auto results = init.solve();
     /*
      * compute the ratio of initial number of walkers to L1-norms of the eigenvectors to get the right scale
      */
-    v_t<wf_t> scale_facs;
     if (mpi::i_am_root()) {
         v_t<ham_t> evals;
         results.get_evals(evals);
-        logging::info("FCI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
-
-        const auto nw = m_opts.m_wavefunction.m_nw_init.m_value;
-        for (uint_t iroot=0ul; iroot<opts.m_nroot; ++iroot)
-            scale_facs.push_back(nw / math::l1_norm(results.get_evec(iroot), results.nelement_evec()));
+        logging::info("CI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
     }
 
     uint_t irow = 0ul;
@@ -405,20 +445,22 @@ void wf::Vectors::fci_init(FciInitOptions opts, uint_t max_ncomm) {
     char done = false;
     while (!mpi::all_land(done)) {
         if (mpi::i_am_root()) {
-            auto& row = init.m_mbf_order_table.m_row;
+            auto& row = table.m_row;
             auto& mbf = row.m_field;
-            const auto irow_end = std::min(init.m_mbf_order_table.nrow_in_use(), irow + max_ncomm);
+            const auto irow_end = std::min(table.nrow_in_use(), irow + max_ncomm);
             for (row.jump(irow); row.in_range(irow_end); ++row) {
                 for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
                     for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
                         auto ipart = m_format.flatten({iroot, ireplica});
-                        const auto weight = results.get_evec(iroot)[row.index()]*scale_facs[iroot];
-                        add_spawn(mbf, weight, true, false, ipart, 0);
+                        const auto weight = results.get_evec(iroot)[row.index()];
+                        if (std::abs(weight) > 1e-6) {
+                            add_spawn(mbf, weight, true, false, ipart, 0);
+                        }
                     }
                 }
             }
             irow = irow_end;
-            done = (irow == init.m_mbf_order_table.nrow_in_use());
+            done = (irow == table.nrow_in_use());
         } else {
             done = true;
         }
