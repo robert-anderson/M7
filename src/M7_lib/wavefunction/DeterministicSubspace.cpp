@@ -76,7 +76,7 @@ void deterministic::Subspace::select_l1_norm_fraction() {
 
 void deterministic::Subspace::select_ref_conns() {
     auto row = m_wf.m_store.m_row;
-    for (row.restart(); row; ++row) if (std::abs(row.m_ref_conn.get(m_iparts[0]))) add_(row);
+    for (row.restart(); row; ++row) if (row.m_ref_conn.get(m_iparts[0])) add_(row);
 }
 
 void deterministic::Subspace::make_connections(const Rdms &rdms){
@@ -215,6 +215,8 @@ void deterministic::Subspaces::init(wf::Vectors &wf, Maes &maes, uint_t icycle) 
         if (m_opts.m_l1_fraction_cutoff.m_value < 1.0) {
             logging::info("Selecting walkers with magnitude >= {:.5f}% of the current global population "
                           "for root {} deterministic subspace", 100.0*m_opts.m_l1_fraction_cutoff.m_value, iroot);
+        } else if (m_opts.m_ref_conn.m_value) {
+            logging::info("Selecting reference-connected MBFs for root {} deterministic subspace", iroot);
         } else {
             logging::info("Selecting upto {} largest-magnitude walkers for root {} deterministic subspace",
                           m_opts.m_size, iroot);
@@ -245,7 +247,7 @@ void deterministic::Subspaces::refresh() {
         detsub->clear();
         DEBUG_ASSERT_FALSE(detsub->m_wf.debug_ndeterministic(iroot), "flags remain set");
         if (m_opts.m_l1_fraction_cutoff.m_value < 1.0) detsub->select_l1_norm_fraction();
-        else if (m_opts.m_ref_conns) detsub->select_ref_conns();
+        else if (m_opts.m_ref_conn) detsub->select_ref_conns();
         else detsub->select_highest_weighted();
         detsub->make_connections();
     }

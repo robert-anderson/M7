@@ -150,9 +150,8 @@ conf::Shift::Shift(Group *parent) :
             "use damping factor in shift update related to growth relative to the target walker population. "
             "this is set to the optimal value damp^2/4"),
         m_period(this, "period", 5, "number of MC cycles between shift updates"),
-        m_ncycle_av(this, "ncycle_av", 100ul, "number of cycles over which to maintain a rolling average"),
         m_fix_ref_weight(this, "fix_ref_weight", false,
-            "ignore growth data in the shift update, and instead use the reference-projected energy estimator,"
+            "ignore growth data in the 0th shift update, and instead use the reference-projected energy estimator,"
             " this fixes the reference population constant"),
         m_cont_grow(this, "cont_grow", false,
             "if the calculation is restarted from a previous growth phase, the default behaviour is to enter variable"
@@ -164,8 +163,8 @@ conf::Semistochastic::Semistochastic(Group *parent) :
         m_size(this, "size", 0ul, "number of MBFs selected to comprise the semi-stochastic space"),
         m_l1_fraction_cutoff(this, "l1_fraction_cutoff", 1.0, "requisite fraction of the total number of walkers for "
             "inclusion of an MBF in the semistochastic space"),
-        m_ref_conns(this, "ref_conns", false,
-            "if true, make the deterministic subspaces from the references and their connections"),
+        m_ref_conn(this, "ref_conn", false,
+                   "if true, make the deterministic subspaces from the references and their connections"),
         m_delay(this, "delay", 0ul,
             "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space(s)"),
         m_period(this, "period", ~0ul,
@@ -288,8 +287,6 @@ conf::Mae::Mae(Group *parent) :
         m_stats_period(this, "stats_period", 100ul,
             "number of MC cycles between computation and output of all contracted values computed from the averaged estimators"),
         m_stats_path(this, "stats_path", "M7.mae.stats", "output path for contracted value statistics"),
-        m_on_the_fly(this, "on_the_fly", true,
-            "if true, accumulate MAEs on-the-fly, else accumulate average CI in all protected MBFs and compute RDMs once at the end instead"),
         m_rdm(this, "rdm", "options relating to the accumulation and sampling of RDM elements"),
         m_spec_mom(this, "spec_mom", "options relating to the accumulation and sampling of spectral moments")
         {}
@@ -325,7 +322,6 @@ conf::Propagator::Propagator(Group *parent) :
         m_stochastic(this, "stochastic", true,
                      "if false, perform exact projective FCI (only practical for debugging in small systems)"),
         m_excit_gen(this),
-        m_nw_target(this, "nw_target", 10000ul, "the L1 norm of the wavefunction at which the shift should begin to vary"),
         m_max_bloom(this, "max_bloom", 0.0,
                     "the maximum acceptable magnitude for an off-diagonal propagated contribution. If tau is dynamic, it is updated to keep spawned contributions below this magnitude"),
         m_nadd(this, "nadd", 3.0, "MBFs with weight above this value are granted initiator status"),
@@ -361,8 +357,6 @@ conf::Document::Document(const str_t& fname) :
         m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this), m_hf_excits(this) {}
 
 void conf::Document::validate_node_contents() {
-    REQUIRE_LE(m_wavefunction.m_nw_init, m_propagator.m_nw_target,
-               "initial number of walkers must not exceed the target population");
     if (m_wavefunction.m_nw_init < m_propagator.m_nadd) {
         m_wavefunction.m_nw_init.m_value = m_propagator.m_nadd.m_value;
         logging::warn("initial number of walkers must be at least the initiator threshold");

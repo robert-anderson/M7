@@ -147,7 +147,7 @@ namespace conf {
     struct Semistochastic : Section {
         Param<uint_t> m_size;
         Param<double> m_l1_fraction_cutoff;
-        Param<bool> m_ref_conns;
+        Param<bool> m_ref_conn;
         Param<uint_t> m_delay;
         Param<uint_t> m_period;
         OptionalFile m_save;

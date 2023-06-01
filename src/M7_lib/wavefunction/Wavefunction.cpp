@@ -28,19 +28,23 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
     }
 
     /*
+     * if the input-specified nw is 0, assume we will initialize the WF with the target number of walkers
+     */
+    const wf_t nw_init = (m_opts.m_wavefunction.m_nw_init.m_value == 0.0) ?
+            m_opts.m_propagator.m_nw_target.m_value : m_opts.m_wavefunction.m_nw_init.m_value;
+    /*
      * insert reference MBF into the store table
      */
-    const auto ref_loc = create_row_setup(0, ref_mbf);
-    if (ref_loc.is_mine()) {
-        auto ref_walker = m_store.m_row;
-        ref_walker.jump(ref_loc.m_irec);
-        for (uint_t ipart = 0ul; ipart < npart(); ++ipart) {
-            set_weight(ref_walker, ipart, wf_t(m_opts.m_wavefunction.m_nw_init));
+    {
+        const auto ref_loc = create_row_setup(0, ref_mbf);
+        if (ref_loc.is_mine()) {
+            auto ref_walker = m_store.m_row;
+            ref_walker.jump(ref_loc.m_irec);
+            for (uint_t ipart = 0ul; ipart < npart(); ++ipart) set_weight(ref_walker, ipart, 1.0);
         }
-        if (pmntr) ref_walker.m_pmntr.set();
-    }
 
-    for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
+        for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
+    }
 
     const auto& init_space_kind = m_opts.m_wavefunction.m_init_space_kind.m_value;
     if (m_opts.m_wavefunction.m_load.m_enabled) {
@@ -59,7 +63,7 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
         }
         else if (init_space_kind == "ref_conn") {
             opts.m_loop_kind = ci_init::Options::MbfPairs;
-            ci_init::RefConnSubspace subspace(&m_ham, m_refs[0].mbf());
+            ci_init::RefConnSubspace subspace(&m_ham, ref_mbf);
             ci_init(subspace, opts);
         }
     }
@@ -143,7 +147,7 @@ void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
             row.m_mbf.to_string(),
             convert::to_string(row.m_weight[ipart], {true, 6}),
             convert::to_string(row.m_weight[ipart] / std::sqrt(l2_norm_square), {false, 4}),
-            convert::to_string(row.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd) || row.m_pmntr.get(0)),
+            convert::to_string(row.exceeds_initiator_thresh(ipart, m_opts.m_propagator.m_nadd)),
             convert::to_string(row.m_hdiag[iroot_part(ipart)]),
             convert::to_string(bool(row.m_deterministic[iroot_part(ipart)])),
             convert::to_string(m_dist.irank(row.m_mbf))
@@ -234,7 +238,7 @@ uint_t wf::Vectors::debug_ndeterministic(uint_t iroot) const {
 }
 
 void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight) {
-    DEBUG_ASSERT_FALSE(std::isnan(std::abs(new_weight)), "new weight is invalid");
+    DEBUG_ASSERT_FALSE(math::is_nan_or_inf(std::abs(new_weight)), "new weight is invalid");
     if (m_ref_weights_preserved && walker.m_mbf==m_refs[ipart].mbf()) return;
     wf_t& weight = walker.m_weight[ipart];
     m_stats.m_nwalker.delta()[ipart] += std::abs(new_weight) - std::abs(weight);
@@ -290,10 +294,8 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, tag::Int<1>) {
      * iteration 1 even though it is added in the annihilating call of iteration 0. so, if this method is called in
      * the annihilating process of MC cycle i, it actually "becomes occupied" on cycle i+1.
      */
-    if (storing_av_weights()) {
-        row.m_icycle_occ = icycle+1;
-        row.m_average_weight = 0;
-    }
+    row.m_icycle_occ = icycle+1;
+    row.m_average_weight = 0;
     return row;
 }
 
@@ -390,8 +392,10 @@ void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options op
                 for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
                     for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
                         auto ipart = m_format.flatten({iroot, ireplica});
-                        const auto weight = results.get_evec(iroot)[row.index()]*scale_facs[iroot];
-                        add_spawn(mbf, weight, true, false, ipart);
+                        const auto weight = results.get_evec(iroot)[row.index()];
+                        if (std::abs(weight) > 1e-6) {
+                            add_spawn(mbf, weight, true, false, ipart);
+                        }
                     }
                 }
             }
