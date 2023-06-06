@@ -114,6 +114,11 @@ namespace conf {
         explicit CiPmntr(Group* parent);
     };
 
+    struct LargeCiSet : OptionalFile {
+        Param<wf_comp_t> m_thresh;
+        LargeCiSet(Group* parent);
+    };
+
     struct Wavefunction : Section {
         Param<double> m_nw_init;
         Param<uint_t> m_nroot;
@@ -123,6 +128,7 @@ namespace conf {
         HashMapping m_hash_mapping;
         Distribution m_distribution;
         CiPmntr m_ci_pmntr;
+        LargeCiSet m_large_ci_set;
         OptionalFile m_save;
         OptionalFile m_load;
         OptionalFileSeries m_chkpt;

@@ -7,7 +7,7 @@
 
 #include <M7_lib/conf/Conf.h>
 #include <M7_lib/connection/OpCounts.h>
-#include "Fields.h"
+#include <M7_lib/table/BufferedTable.h>
 
 /**
  * namespace for utility methods that apply to all MBF types
@@ -58,6 +58,12 @@ namespace mbf {
     static bool get_spinorb(const field::FrmBosOnv& onv, uint_t ispinorb) {
         return get_spinorb(onv.m_frm, ispinorb);
     }
+
+    /**
+     * row and table which only hold MBFs
+     */
+    typedef SingleFieldRow<field::Mbf> row_t;
+    typedef buffered::MappedTable<row_t> table_t;
 };
 
 

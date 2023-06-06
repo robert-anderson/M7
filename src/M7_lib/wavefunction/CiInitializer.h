@@ -25,9 +25,7 @@ namespace ci_init {
         /**
          * mapped list of basis functions to aid in the setup of sparse H, and retain the physical meaning of its rows
          */
-        typedef SingleFieldRow<field::Mbf> mbf_order_row_t;
-        typedef buffered::MappedTable<mbf_order_row_t> mbf_order_table_t;
-        mbf_order_table_t m_mbf_order_table;
+        mbf::table_t m_mbf_order_table;
         const Hamiltonian* m_h;
         Subspace(const Hamiltonian* h);
     };

@@ -11,7 +11,7 @@ field::Mbf &Walker::key_field() {
 Walker::Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica) :
         m_wf_format({nroot, nreplica}, {"nroot", "nreplica"}),
         m_root_format({nroot}, {"nroot"}),
-        m_mbf(this, basis, "many-body basis function"),
+        m_mbf(this, basis, c_mbf_field_name),
         m_weight(this, m_wf_format, "weight"),
         m_hdiag(this, "diagonal H element"),
         m_deterministic(this, m_root_format, "deterministic subspace flag"),
@@ -41,3 +41,5 @@ uint_t Walker::ipart_replica(uint_t ipart) const {
 bool Walker::exceeds_initiator_thresh(uint_t ipart, wf_comp_t thresh) const {
     return std::abs(m_weight[ipart]) >= thresh;
 }
+
+const str_t Walker::c_mbf_field_name = "many-body basis function";

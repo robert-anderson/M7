@@ -122,6 +122,11 @@ conf::CiPmntr::CiPmntr(Group *parent) :
             " which sum to a value less than threshold implied by C2 list and geo_mean_power_thresh")
 {}
 
+conf::LargeCiSet::LargeCiSet(Group* parent) :
+        OptionalFile(parent, "large_ci_set",
+                     "for harvesting MBFs with high weight in the many-body wavefunction", "M7.large.h5", Explicit),
+        m_thresh(this, "thresh", 5.0, "instantaneous weight required for MBF to be added to large CI set"){}
+
 
 conf::Wavefunction::Wavefunction(Group *parent) :
         Section(parent, "wavefunction",
@@ -134,9 +139,9 @@ conf::Wavefunction::Wavefunction(Group *parent) :
              {"ref_conn", "generate a subspace of the reference and its connections and diagonalize"}},
             "specifies the means of generating the initial walker distribution"),
         m_no_row_creation(this, "no_row_creation", false, "if true, prevent row creation after wavefunction setup"),
-        m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_pmntr(this),
+        m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_pmntr(this), m_large_ci_set(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
-        m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit),
+        m_load(this, "load", "wavefunction load, can also be a CI set (no weights)", "M7.wf.h5", conf_components::Explicit),
         m_chkpt(this, "chkpt", "wavefunction checkpoint", "M7.wf.{}.h5", Explicit){}
 
 conf::Shift::Shift(Group *parent) :

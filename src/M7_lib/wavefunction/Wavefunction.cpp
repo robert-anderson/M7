@@ -93,7 +93,6 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
         }
         auto fn = [&](Walker& row) {scale_weight(row, ipart,  scale_fac);};
         m_store.foreach_row_in_use(fn);
-        std::cout << m_store.to_string() << std::endl;
     }
 
     return ref_locs;
@@ -127,6 +126,8 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     m_sector(m_ham.m_basis, m_ham.default_particles(m_opts.m_particles)),
     m_format(m_store.m_row.m_weight.m_format),
     m_stats(m_format, opts.m_shift.m_nw_targets.m_value.size()),
+    m_large_ci_set(m_opts.m_wavefunction.m_large_ci_set.m_enabled ?
+        new mbf::table_t("large CI set", mbf::row_t({m_ham.m_basis, Walker::c_mbf_field_name})) : nullptr),
     m_refs(opts.m_reference, *this, setup()),
     m_chkpt_files(opts.m_wavefunction.m_chkpt){
 
@@ -134,6 +135,11 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
 
     logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
                   string::plural(m_dist.nblock()));
+    if (m_large_ci_set) {
+        logging::info("Keeping list of all MBFs which attain instantaneous weight >= {} at any cycle",
+                      m_opts.m_wavefunction.m_large_ci_set.m_thresh);
+        m_large_ci_set->set_expansion_factor(m_store.get_expansion_factor());
+    }
     refresh_all_hdiags();
     refresh_all_ref_conns();
 }
@@ -188,6 +194,11 @@ void wf::Vectors::log_top_weighted(uint_t ipart, uint_t nrow) {
 wf::Vectors::~Vectors() {
     for (uint_t ipart=0ul; ipart<npart(); ++ipart) log_top_weighted(ipart);
     if (m_opts.m_wavefunction.m_save.m_enabled) save();
+    if (m_large_ci_set) {
+        auto& row = m_large_ci_set->m_row;
+        hdf5::FileWriter fw(m_opts.m_wavefunction.m_large_ci_set.m_path);
+        row.m_field.save(fw, true);
+    }
 }
 
 void wf::Vectors::preserve_ref_weights(wf_comp_t mag) {
@@ -296,6 +307,8 @@ void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint
     }
     m_stats.m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
     weight = new_weight;
+    if (m_large_ci_set && (std::abs(new_weight) >= m_opts.m_wavefunction.m_large_ci_set.m_thresh.m_value))
+        m_large_ci_set->lookup_or_insert(walker.m_mbf);
 }
 
 void wf::Vectors::change_weight(Walker& walker, uint_t ipart, wf_t delta, uint_t new_shift_space) {

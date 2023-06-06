@@ -8,7 +8,7 @@
 #include "M7_lib/field/Mbf.h"
 
 ci_init::Subspace::Subspace(const Hamiltonian* h) :
-        m_mbf_order_table("MBF order table", {mbf_order_row_t(h->m_basis, "mbf")}), m_h(h){
+        m_mbf_order_table("MBF order table", {mbf::row_t(h->m_basis, "mbf")}), m_h(h){
     m_mbf_order_table.set_expansion_factor(2.0);
 }
 

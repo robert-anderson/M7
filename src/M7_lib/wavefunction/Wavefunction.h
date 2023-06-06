@@ -56,6 +56,10 @@ namespace wf {
          * walker updates need to be logged for the stats file and shift updates etc
          */
         Stats m_stats;
+        /**
+         * if enabled in config doc, keep a list of all MBFs which attain a given occupation at any point in the calculation
+         */
+        std::unique_ptr<mbf::table_t> m_large_ci_set;
 
     private:
 

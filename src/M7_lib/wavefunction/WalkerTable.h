@@ -13,6 +13,7 @@
 
 
 struct Walker : public Row {
+    static const str_t c_mbf_field_name;
     const NdFormat<c_ndim_wf> m_wf_format;
     const NdFormat<c_ndim_root> m_root_format;
     field::Mbf m_mbf;
