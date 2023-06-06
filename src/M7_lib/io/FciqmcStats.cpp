@@ -4,7 +4,7 @@
 
 #include "FciqmcStats.h"
 
-FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests, bool exlvl_resolved) :
+FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests, bool exlvl_resolved, bool large_ci_set) :
         m_wf_format(prop.m_wf_fmt),
         m_wf_exlvl_format(m_wf_format.add_minor_dim(prop.m_sector.m_frm.max_exlvl(), "excit level")),
         m_icycle(this, "Cycle number", false),
@@ -24,6 +24,7 @@ FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests
         m_nocc_mbf(this, m_wf_format, "Occupied MBFs", false),
         m_nocc_mbf_by_shift_space(this, {{prop.m_shifts.m_spaces.size()}, {"shift space"}},
                                   "Occupied MBFs by shift space", false),
+        m_nlarge_ci(large_ci_set ? this : nullptr, "Number of MBFs in large CI set", false),
         m_delta_nocc_mbf(this, m_wf_format, "Change in number of occupied MBFs", false),
         m_spin_square_num(inst_ests.m_spin_square ? this : nullptr, m_wf_format,
                           "Numerator of reference-projected spin square estimator"),

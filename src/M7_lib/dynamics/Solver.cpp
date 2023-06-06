@@ -37,7 +37,9 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
 
     if (mpi::i_am_root()) {
         m_stats = ptr::smart::make_unique<FciqmcStats>(
-            "M7.stats", "FCIQMC", FciqmcStatsRow(m_prop, m_inst_ests, m_opts.m_stats.m_exlvl_resolved), m_opts.m_stats.m_period);
+            "M7.stats", "FCIQMC",
+            FciqmcStatsRow(m_prop, m_inst_ests, m_opts.m_stats.m_exlvl_resolved,
+                           m_opts.m_wavefunction.m_large_ci_set.m_enabled), m_opts.m_stats.m_period);
         m_timing_stats = ptr::smart::make_unique<TimingStats>(
             "M7.timing", "FCIQMC Timings", TimingStatsRow(), m_opts.m_stats.m_period);
     }
@@ -354,6 +356,7 @@ void Solver::output_stats() {
         stats.m_ninitiator = m_wf.m_stats.m_ninitiator.m_reduced;
         stats.m_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_total();
         stats.m_nocc_mbf_by_shift_space = m_wf.m_stats.m_nocc_mbf_by_shift_space.prev_total();
+        stats.m_nlarge_ci = m_wf.m_stats.m_nlarge_ci.prev_total();
         stats.m_delta_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_delta().m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         if (m_inst_ests.m_spin_square) stats.m_spin_square_num = m_inst_ests.m_spin_square->m_est.m_proj_num.m_reduced;

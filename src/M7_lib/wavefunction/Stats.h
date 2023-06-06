@@ -49,6 +49,10 @@ namespace wf {
          * number of walkers annihilated in the loop_over_spawned method for each part
          */
         reduction::NdArray<wf_comp_t, c_ndim_wf> m_nannihilated;
+        /**
+         * number of MBFs in the large CI set
+         */
+        reduction::cyclic::Scalar<uint_t> m_nlarge_ci;
 
         Stats(const NdFormat<c_ndim_wf>& format, uint_t nshift_space);
 

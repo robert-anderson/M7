@@ -307,8 +307,12 @@ void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint
     }
     m_stats.m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
     weight = new_weight;
-    if (m_large_ci_set && (std::abs(new_weight) >= m_opts.m_wavefunction.m_large_ci_set.m_thresh.m_value))
-        m_large_ci_set->lookup_or_insert(walker.m_mbf);
+    if (m_large_ci_set && (std::abs(new_weight) >= m_opts.m_wavefunction.m_large_ci_set.m_thresh.m_value)) {
+        if (!m_large_ci_set->lookup(walker.m_mbf)) {
+            ++m_stats.m_nlarge_ci.delta();
+            m_large_ci_set->insert(walker.m_mbf);
+        }
+    }
 }
 
 void wf::Vectors::change_weight(Walker& walker, uint_t ipart, wf_t delta, uint_t new_shift_space) {
