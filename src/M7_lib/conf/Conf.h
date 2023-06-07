@@ -115,7 +115,8 @@ namespace conf {
     };
 
     struct LargeCiSet : OptionalFile {
-        Param<wf_comp_t> m_thresh;
+        Param<uint_t> m_ncycle_thresh;
+        Param<wf_comp_t> m_av_weight_thresh;
         LargeCiSet(Group* parent);
     };
 

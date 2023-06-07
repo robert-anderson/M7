@@ -124,8 +124,11 @@ conf::CiPmntr::CiPmntr(Group *parent) :
 
 conf::LargeCiSet::LargeCiSet(Group* parent) :
         OptionalFile(parent, "large_ci_set",
-                     "for harvesting MBFs with high weight in the many-body wavefunction", "M7.large.h5", Explicit),
-        m_thresh(this, "thresh", 5.0, "instantaneous weight required for MBF to be added to large CI set"){}
+             "for keeping a list of MBFs with high weight in the many-body wavefunction", "M7.large.h5", Explicit),
+        m_ncycle_thresh(this, "ncycle_thresh", 5,
+            "number of cycles for which an MBF must be continuously occupied in order to be added to large CI set"),
+        m_av_weight_thresh(this, "av_weight_thresh", 1.0,
+            "average weight requirement for MBF in order to be added to large CI set"){}
 
 
 conf::Wavefunction::Wavefunction(Group *parent) :

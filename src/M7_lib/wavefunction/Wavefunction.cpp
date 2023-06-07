@@ -136,8 +136,9 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     logging::info("Distributing wavefunction rows in {} block{}", m_dist.nblock(),
                   string::plural(m_dist.nblock()));
     if (m_large_ci_set) {
-        logging::info("Keeping list of all MBFs which attain instantaneous weight >= {} at any cycle",
-                      m_opts.m_wavefunction.m_large_ci_set.m_thresh);
+        logging::info("Keeping list of all MBFs which at any point remain occupied for >= {} with average weight >= {}",
+                      string::plural("cycle", m_opts.m_wavefunction.m_large_ci_set.m_ncycle_thresh),
+                      m_opts.m_wavefunction.m_large_ci_set.m_av_weight_thresh);
         m_large_ci_set->set_expansion_factor(m_store.get_expansion_factor());
     }
     refresh_all_hdiags();
@@ -307,12 +308,6 @@ void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint
     }
     m_stats.m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
     weight = new_weight;
-    if (m_large_ci_set && (std::abs(new_weight) >= m_opts.m_wavefunction.m_large_ci_set.m_thresh.m_value)) {
-        if (!m_large_ci_set->lookup(walker.m_mbf)) {
-            ++m_stats.m_nlarge_ci.delta();
-            m_large_ci_set->insert(walker.m_mbf);
-        }
-    }
 }
 
 void wf::Vectors::change_weight(Walker& walker, uint_t ipart, wf_t delta, uint_t new_shift_space) {
@@ -340,6 +335,17 @@ void wf::Vectors::remove_row(Walker& walker) {
     }
     remove_ref_conn(walker);
     m_store.erase(walker.m_mbf);
+}
+
+void wf::Vectors::try_add_to_large_ci_set(Walker& walker, uint_t icycle) {
+    if (!m_large_ci_set) return;
+    const auto occ_ncycle = walker.occupied_ncycle(icycle);
+    if (occ_ncycle < m_opts.m_wavefunction.m_large_ci_set.m_ncycle_thresh.m_value) return;
+    const auto av_weight = walker.m_average_weight[0] / occ_ncycle;
+    if (std::abs(av_weight) < m_opts.m_wavefunction.m_large_ci_set.m_av_weight_thresh.m_value) return;
+    if (m_large_ci_set->lookup(walker.m_mbf)) return;
+    m_large_ci_set->insert(walker.m_mbf);
+    ++m_stats.m_nlarge_ci.delta();
 }
 
 void wf::Vectors::add_ref_conn(const Walker& walker) {

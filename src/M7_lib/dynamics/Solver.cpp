@@ -218,6 +218,8 @@ void Solver::loop_over_occupied_mbfs() {
             continue;
         }
 
+        m_wf.try_add_to_large_ci_set(walker, m_icycle);
+
         /*
          * if the accumulation of MAEs has just started, treat the row as though it became occupied in the annihilation
          * loop of the last MC cycle.
@@ -228,7 +230,7 @@ void Solver::loop_over_occupied_mbfs() {
             walker.m_average_weight = 0;
         }
 
-        if (m_maes.m_accum_epoch) walker.m_average_weight += walker.m_weight;
+        walker.m_average_weight += walker.m_weight;
 
         if (m_prop.m_shifts.m_variable_mode) {
             // todo: give hf excit hists accumulation its own epoch

@@ -203,6 +203,8 @@ namespace wf {
 
         void remove_row(Walker& walker);
 
+        void try_add_to_large_ci_set(Walker& walker, uint_t icycle);
+
     private:
 
         void add_ref_conn(const Walker& walker);
