@@ -126,6 +126,11 @@ void Solver::execute(uint_t ncycle) {
         m_maes.output(m_icycle, m_prop.m_ham);
         ++m_icycle;
 
+        if (m_wf.m_large_ci_set && m_wf.m_stats.m_nlarge_ci.prev_total()[0] >= m_opts.m_wavefunction.m_large_ci_set.m_max_size.m_value){
+            logging::info("Maximum number of large CI MBFs reached, terminating solver loop at MC cycle {}", i);
+            break;
+        }
+
         if (m_exit.read() && m_exit.m_v) {
             logging::info("exit requested from file, terminating solver loop at MC cycle {}", i);
             break;
@@ -358,7 +363,7 @@ void Solver::output_stats() {
         stats.m_ninitiator = m_wf.m_stats.m_ninitiator.m_reduced;
         stats.m_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_total();
         stats.m_nocc_mbf_by_shift_space = m_wf.m_stats.m_nocc_mbf_by_shift_space.prev_total();
-        stats.m_nlarge_ci = m_wf.m_stats.m_nlarge_ci.prev_total();
+        if (m_wf.m_large_ci_set) stats.m_nlarge_ci = m_wf.m_stats.m_nlarge_ci.prev_total();
         stats.m_delta_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_delta().m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         if (m_inst_ests.m_spin_square) stats.m_spin_square_num = m_inst_ests.m_spin_square->m_est.m_proj_num.m_reduced;

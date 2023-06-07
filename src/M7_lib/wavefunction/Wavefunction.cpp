@@ -48,9 +48,16 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
     }
 
     const auto& init_space_kind = m_opts.m_wavefunction.m_init_space_kind.m_value;
+
+    if (m_opts.m_wavefunction.m_load_large_ci.m_enabled) {
+        // the wavefunction (MBFs only) is to be loaded from HDF5 archive
+        hdf5::FileReader fr(m_opts.m_wavefunction.m_load_large_ci.m_path);
+        load(fr);
+    }
     if (m_opts.m_wavefunction.m_load.m_enabled) {
         // the wavefunction is to be loaded from HDF5 archive
-        load();
+        hdf5::FileReader fr(m_opts.m_wavefunction.m_load.m_path);
+        load(fr);
     }
     else if (init_space_kind != "ref"){
         // the wavefunction is to be initialized using eigenvectors from the Arnoldi method
@@ -198,7 +205,8 @@ wf::Vectors::~Vectors() {
     if (m_large_ci_set) {
         auto& row = m_large_ci_set->m_row;
         hdf5::FileWriter fw(m_opts.m_wavefunction.m_large_ci_set.m_path);
-        row.m_field.save(fw, true);
+        hdf5::GroupWriter gw(fw, "wf");
+        row.m_field.save(gw, true);
     }
 }
 
@@ -555,18 +563,24 @@ void wf::Vectors::save() const {
 
 void wf::Vectors::load(const hdf5::NodeReader& parent) {
     hdf5::GroupReader gr(parent, "wf");
-    const auto weight_shape = hdf5::DatasetLoader::read_format(gr, "weight", true, true).m_local.m_item.m_shape;
-    const auto nreplica = this->nreplica();
-    const auto nreplica_on_file = weight_shape.back();
+    uintv_t weight_shape = this->m_store.m_row.m_weight.m_format.shape_vector();
+    const uint_t nreplica = this->nreplica();
+    auto nreplica_on_file = nreplica;
+    const auto have_weights = gr.child_exists("weight");
 
-    REQUIRE_EQ_ALL(weight_shape.front(), nroot(), "incompatible number of roots in file");
+    if (have_weights) {
+        weight_shape = hdf5::DatasetLoader::read_format(gr, "weight", true, true).m_local.m_item.m_shape;
+        nreplica_on_file = weight_shape.back();
 
-    if (nreplica > nreplica_on_file) {
-        logging::info("Loading non-replicated wavefunctions for a replica calculation: duplicating weights");
+        REQUIRE_EQ_ALL(weight_shape.front(), nroot(), "incompatible number of roots in file");
+
+        if (nreplica > nreplica_on_file) {
+            logging::info("Loading non-replicated wavefunctions for a replica calculation: duplicating weights");
+        } else if (nreplica < nreplica_on_file) {
+            logging::warn("Loading replicated wavefunctions for a non-replica calculation: discarding second replica");
+        }
     }
-    else if (nreplica < nreplica_on_file) {
-        logging::warn("Loading replicated wavefunctions for a non-replica calculation: discarding second replica");
-    }
+    else logging::info("Loading file with only MBFs specified, no weights");
 
     auto file_ipart_fn = [&nreplica, &nreplica_on_file](uint_t ipart) {
         if (nreplica == nreplica_on_file) return ipart;
@@ -580,13 +594,16 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
         field::Numbers<wf_t, c_ndim_wf> m_weight;
         LoadRow(sys::Basis basis, uintv_t weight_shape):
             m_format(array::from_vector<uint_t, c_ndim_wf>(weight_shape)),
-            m_mbf(this, basis, "many-body basis function"),
+            m_mbf(this, basis, Walker::c_mbf_field_name),
             m_weight(this, m_format, "weight"){}
     };
 
     typedef buffered::Table<LoadRow> load_table_t;
     load_table_t load_table("WF load table", {m_sector.basis(), weight_shape});
-    DistTableLoader loader(gr, load_table.m_row);
+
+    v_t<FieldBase*> fields = {&load_table.m_row.m_mbf};
+    if (have_weights) fields.push_back(&load_table.m_row.m_weight);
+    DistTableLoader loader(gr, fields);
 
     // total number of rows received in all communications
     uint_t nrow_recv = 0ul;
@@ -602,7 +619,7 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
                 send_row.m_dst_mbf = row.m_mbf;
                 send_row.m_ipart_dst = ipart;
                 const auto file_ipart = file_ipart_fn(ipart);
-                send_row.m_delta_weight = row.m_weight[file_ipart];
+                if (have_weights) send_row.m_delta_weight = row.m_weight[file_ipart];
             }
         }
         m_send_recv.communicate();
@@ -610,7 +627,7 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
         auto fn = [&](const Spawn& recv_row) {
             auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
             const auto ipart = recv_row.m_ipart_dst[0];
-            set_weight(store_row, ipart, recv_row.m_delta_weight);
+            if (have_weights) set_weight(store_row, ipart, recv_row.m_delta_weight);
             ++nrow_recv;
         };
         recv().foreach_row_in_use(fn);
@@ -621,12 +638,6 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
     loader.load(nitem_per_op, fill_fn);
     REQUIRE_EQ_ALL(mpi::all_sum(nrow_recv), loader.nitem(), "not all walkers loaded");
     logging::info("{} wavefunction rows successfully loaded from HDF5 archive", loader.nitem());
-}
-
-void wf::Vectors::load() {
-    REQUIRE_TRUE_ALL(m_opts.m_wavefunction.m_load.m_enabled, "wavefunction loading is disabled in config document");
-    hdf5::FileReader fr(m_opts.m_wavefunction.m_load.m_path);
-    load(fr);
 }
 
 bool wf::Vectors::was_loaded() const {

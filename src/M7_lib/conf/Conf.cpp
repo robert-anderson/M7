@@ -128,7 +128,9 @@ conf::LargeCiSet::LargeCiSet(Group* parent) :
         m_ncycle_thresh(this, "ncycle_thresh", 5,
             "number of cycles for which an MBF must be continuously occupied in order to be added to large CI set"),
         m_av_weight_thresh(this, "av_weight_thresh", 1.0,
-            "average weight requirement for MBF in order to be added to large CI set"){}
+            "average weight requirement for MBF in order to be added to large CI set"),
+        m_max_size(this, "max_size", ~0ul,
+            "maximum size for the set of large CI MBFs. calculation terminates when this limit is reached or surpassed"){}
 
 
 conf::Wavefunction::Wavefunction(Group *parent) :
@@ -144,7 +146,9 @@ conf::Wavefunction::Wavefunction(Group *parent) :
         m_no_row_creation(this, "no_row_creation", false, "if true, prevent row creation after wavefunction setup"),
         m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_pmntr(this), m_large_ci_set(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
-        m_load(this, "load", "wavefunction load, can also be a CI set (no weights)", "M7.wf.h5", conf_components::Explicit),
+        m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit),
+        m_load_large_ci(this, "load_large_ci", "load set of MBFs with large CI weight expected and protect their rows from deletion",
+                            "M7.large.h5", conf_components::Explicit),
         m_chkpt(this, "chkpt", "wavefunction checkpoint", "M7.wf.{}.h5", Explicit){}
 
 conf::Shift::Shift(Group *parent) :

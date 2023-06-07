@@ -327,8 +327,6 @@ namespace wf {
 
         void load(const hdf5::NodeReader& parent);
 
-        void load();
-
         bool was_loaded() const;
     };
 }

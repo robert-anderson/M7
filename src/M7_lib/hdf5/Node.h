@@ -14,9 +14,7 @@ namespace hdf5 {
         Node(hid_t id);
         operator hid_t() const;
 
-        bool child_exists(const str_t& name) const {
-            return H5Oexists_by_name(m_id, name.c_str(), H5P_DEFAULT);
-        }
+        bool child_exists(const str_t& name) const;
     };
 
     H5O_info_t get_object_info(hid_t obj_id);
