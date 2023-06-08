@@ -88,7 +88,6 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
             if (ref_loc.is_mine()) {
                 m_store.m_row.jump(ref_loc.m_irec);
                 ref_weight = m_store.m_row.m_weight[ipart];
-                std::cout << ref_weight << std::endl;
             }
             mpi::bcast(ref_weight, ref_loc.m_irank);
             REQUIRE_TRUE_ALL(ref_weight, "");
@@ -103,6 +102,20 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
     }
 
     return ref_locs;
+}
+
+uint_t wf::Vectors::nshift_space() const {
+    return m_opts.m_shift.m_nw_targets.m_value.size();
+}
+
+v_t<double> wf::Vectors::make_stoch_thresh_mags() const {
+    const auto& input = m_opts.m_wavefunction.m_stoch_thresh_mags.m_value;
+    if (input.empty()) return v_t<double>(nshift_space(), 1.0);
+    REQUIRE_EQ_ALL(input.size(), nshift_space(),
+                   "if stochastic threshold magnitudes are specified at input, there must be one per shift space");
+    auto any_neg = std::any_of(input.cbegin(), input.cend(), [](double v){return v<0;});
+    REQUIRE_FALSE_ALL(any_neg, "all specified stochastic threshold magnitudes should be non-negative");
+    return input;
 }
 
 wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
@@ -132,9 +145,10 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     m_ham(ham),
     m_sector(m_ham.m_basis, m_ham.default_particles(m_opts.m_particles)),
     m_format(m_store.m_row.m_weight.m_format),
-    m_stats(m_format, opts.m_shift.m_nw_targets.m_value.size()),
+    m_stats(m_format, nshift_space()),
     m_large_ci_set(m_opts.m_wavefunction.m_large_ci_set.m_enabled ?
         new mbf::table_t("large CI set", mbf::row_t({m_ham.m_basis, Walker::c_mbf_field_name})) : nullptr),
+    m_stoch_round_mags(make_stoch_thresh_mags()),
     m_refs(opts.m_reference, *this, setup()),
     m_chkpt_files(opts.m_wavefunction.m_chkpt){
 
@@ -309,9 +323,9 @@ void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint
             --m_stats.m_nocc_mbf_by_shift_space.delta()[old_shift_space];
             ++m_stats.m_nocc_mbf_by_shift_space.delta()[new_shift_space];
             walker.m_shift_space = new_shift_space;
-            // protect if the new space is S0 and there exist higher spaces
+            // protect if the new space is S0, there exist higher spaces, and the walker is a reference connection
             const auto nspace = m_stats.m_nocc_mbf_by_shift_space.m_format.m_nelement;
-            if (new_shift_space==0 && (nspace > 1)) walker.protect();
+            if (new_shift_space==0 && (nspace > 1) && walker.m_ref_conn.get(ipart)) walker.protect();
         }
     }
     m_stats.m_l2_norm_square.delta()[ipart] += std::pow(std::abs(new_weight), 2.0) - std::pow(std::abs(weight), 2.0);
@@ -354,6 +368,23 @@ void wf::Vectors::try_add_to_large_ci_set(Walker& walker, uint_t icycle) {
     if (m_large_ci_set->lookup(walker.m_mbf)) return;
     m_large_ci_set->insert(walker.m_mbf);
     ++m_stats.m_nlarge_ci.delta();
+}
+
+void wf::Vectors::discretize(Walker& walker, PRNG& prng) {
+    const auto round_mag = m_stoch_round_mags[walker.m_shift_space];
+    // no rounding to be done if the thresh is 0
+    if (round_mag == 0.0) return;
+    // leave weight alone if the walker is protected from deletion
+    if (walker.is_protected()) return;
+    for (uint_t ipart=0ul; ipart < walker.m_wf_format.m_nelement; ++ipart) {
+        // retrieve the post-death weight
+        const auto weight = walker.m_weight[ipart];
+        // don't attempt stochastic round if the weight exceeds the threshold
+        if (std::abs(weight) >= round_mag) return;
+        // else, do the stochastic round, logging the change in magnitude
+        const auto new_weight = prng.stochastic_round(weight, round_mag);
+        set_weight(walker, ipart, new_weight);
+    }
 }
 
 void wf::Vectors::add_ref_conn(const Walker& walker) {

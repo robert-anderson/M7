@@ -144,6 +144,7 @@ conf::Wavefunction::Wavefunction(Group *parent) :
              {"ref_conn", "generate a subspace of the reference and its connections and diagonalize"}},
             "specifies the means of generating the initial walker distribution"),
         m_no_row_creation(this, "no_row_creation", false, "if true, prevent row creation after wavefunction setup"),
+        m_stoch_thresh_mags(this, "stoch_thresh_mags", {}, "magnitudes to use in stochastic thresholding of walker weights by shift space"),
         m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_pmntr(this), m_large_ci_set(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
         m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit),
@@ -163,9 +164,10 @@ conf::Shift::Shift(Group *parent) :
             "this is set to the optimal value damp^2/4"),
         m_period(this, "period", 5, "number of MC cycles between shift updates"),
         m_nw_targets(this, "nw_targets", {10000.0}, "target walker numbers in each shift space"),
-        m_fix_ref_weight(this, "fix_ref_weight", false,
-            "ignore growth data in the 0th shift update, and instead use the reference-projected energy estimator,"
-            " this fixes the reference population constant"),
+        m_fix_s0(this, "fix_s0", false, "ignore all walker data in the 0th shift update, and instead instead fix s0, "
+            "but allow higher shift values in higher-index spaces to vary"),
+        m_fix_ref_weight(this, "fix_ref_weight", false, "ignore growth data in the 0th shift update, and instead use the "
+            "reference-projected energy estimator, this fixes the reference population constant"),
         m_enhancement_damp(this, "enhancement_damp", 1.0, "damping factor for the enhancement factor"),
         m_s0_promote_thresh(this, "s0_promote_thresh", 0.0, "if a log enhancement factor exceeds this value, the walker is promoted to the s0 space. "
             "A value of 0 indicates no promotion takes place"),

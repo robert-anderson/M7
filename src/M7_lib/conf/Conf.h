@@ -126,6 +126,7 @@ namespace conf {
         Param<uint_t> m_nroot;
         SingleChoice<str_t> m_init_space_kind;
         Param<bool> m_no_row_creation;
+        Param<v_t<double>> m_stoch_thresh_mags;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Distribution m_distribution;
@@ -146,6 +147,7 @@ namespace conf {
         Param<bool> m_target_damp;
         Param<uint_t> m_period;
         Param<v_t<wf_comp_t>> m_nw_targets;
+        Param<bool> m_fix_s0;
         Param<bool> m_fix_ref_weight;
         Param<ham_comp_t> m_enhancement_damp;
         Param<ham_comp_t> m_s0_promote_thresh;

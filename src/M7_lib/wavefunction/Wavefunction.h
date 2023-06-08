@@ -64,6 +64,11 @@ namespace wf {
     private:
 
         /**
+         * magnitudes about which stochastic threshold is applied to walker weights
+         */
+        const v_t<double> m_stoch_round_mags;
+
+        /**
          * when this is set to true, the reference population is maintained at the current value
          */
         bool m_ref_weights_preserved = false;
@@ -74,6 +79,10 @@ namespace wf {
         std::set<uint_t> m_irec_ref_conns;
 
         v_t<TableBase::Loc> setup();
+
+        uint_t nshift_space() const;
+
+        v_t<double> make_stoch_thresh_mags() const;
 
     public:
         /**
@@ -204,6 +213,15 @@ namespace wf {
         void remove_row(Walker& walker);
 
         void try_add_to_large_ci_set(Walker& walker, uint_t icycle);
+
+        /**
+         * stochastically threshold unprotected weights about specified thresholds
+         * @param walker
+         *  row in the store table to act upon
+         * @param prng
+         *  random number generator to perform stochastic thresholding of weights
+         */
+        void discretize(Walker &walker, PRNG& prng);
 
     private:
 
