@@ -105,6 +105,15 @@ namespace shift {
     protected:
         void update_part(const wf::Vectors& wf, uint_t ipart, uint_t icycle, double, const Epochs& variable_mode) override;
     };
+
+    struct ValueFixing : ShiftSpace {
+        ValueFixing(const NdFormat<c_ndim_wf>& wf_fmt, uint_t ispace, uint_t period, ham_comp_t init);
+
+        void update_variable_mode(const wf::Vectors& wf, uint_t icycle, Epochs& variable_mode) override;
+
+    protected:
+        void update_part(const wf::Vectors&, uint_t, uint_t, double, const Epochs&) override {}
+    };
 }
 
 /**

@@ -101,24 +101,35 @@ void shift::RefWeightFixing::update_part(const wf::Vectors& wf, uint_t ipart, ui
     }
 }
 
+shift::ValueFixing::ValueFixing(const NdFormat<c_ndim_wf>& wf_fmt, uint_t ispace, uint_t period, ham_comp_t init) :
+        ShiftSpace(wf_fmt, ispace, period, init, 0.0){}
+
+void shift::ValueFixing::update_variable_mode(const wf::Vectors&, uint_t icycle, Epochs& variable_mode) {
+    for (uint_t ipart = 0ul; ipart < variable_mode.nelement(); ++ipart) {
+        if (variable_mode[ipart].update(icycle, true))
+            logging::info("Fixing shift immediately in shift space {} for WF part {}.", m_ispace, ipart);
+    }
+}
+
 Shifts::Shifts(const conf::Shift& opts, const NdFormat<c_ndim_wf>& wf_fmt) :
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
         m_values(wf_fmt.add_major_dim(opts.m_nw_targets.m_value.size(), "shift space")),
         m_enhancement_damp(opts.m_enhancement_damp), m_s0_promote_thresh(opts.m_s0_promote_thresh){
-    uint_t ispace = 0ul;
-    // if the first space is of the fix ref weight type, add it explicitly
-    if (opts.m_fix_ref_weight) {
-        m_spaces.emplace_back(
-            new shift::RefWeightFixing(wf_fmt, 0, opts.m_period, opts.m_init, opts.m_nw_targets.m_value[0]));
-        ispace = 1ul;
-    }
+    // if the first space is of the "fix ref weight" or "fix s0" type, add it explicitly
+    if (opts.m_fix_s0)
+        m_spaces.emplace_back(new shift::ValueFixing(wf_fmt, 0, opts.m_period, opts.m_init));
+    else if (opts.m_fix_ref_weight)
+        m_spaces.emplace_back(new shift::RefWeightFixing(wf_fmt, 0, opts.m_period, opts.m_init, opts.m_nw_targets.m_value[0]));
+
+    uint_t ispace = m_spaces.size();
+
     // add all remaining spaces as growth-based shifts
     for (; ispace<opts.m_nw_targets.m_value.size(); ++ispace)
         m_spaces.emplace_back(
             new shift::GrowthBased(wf_fmt, ispace, opts.m_period,
             opts.m_init, opts.m_nw_targets.m_value[ispace], opts.m_damp, opts.m_target_damp));
 
-    logging::info("Initialized {} shift space{}", m_spaces.size(), string::plural(m_spaces.size()));
+    logging::info("Initialized {}", string::plural("shift space", m_spaces.size()));
 }
 
 const shift::ShiftSpace* Shifts::operator[](const Walker& walker) const {
