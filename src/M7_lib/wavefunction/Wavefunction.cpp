@@ -32,7 +32,6 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
      */
     const wf_t nw_init = (m_opts.m_wavefunction.m_nw_init.m_value == 0.0) ?
             m_opts.m_shift.m_nw_targets.m_value[0] : m_opts.m_wavefunction.m_nw_init.m_value;
-    std::cout << nw_init << std::endl;
     /*
      * insert reference MBF into the store table
      */
@@ -90,7 +89,7 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
                 ref_weight = m_store.m_row.m_weight[ipart];
             }
             mpi::bcast(ref_weight, ref_loc.m_irank);
-            REQUIRE_TRUE_ALL(ref_weight, "");
+            REQUIRE_TRUE_ALL(ref_weight, "reference should have been found with non-zero weight");
             scale_fac /= ref_weight;
         }
         else {
