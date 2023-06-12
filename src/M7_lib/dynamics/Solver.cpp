@@ -24,7 +24,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
         m_opts(opts), m_prop(prop), m_wf(wf),
         m_hf(make_hf()), m_exit("exit"), m_maes(opts.m_av_ests, m_wf),
         m_inst_ests(m_wf.m_sector, &m_wf.m_refs, opts.m_inst_ests),
-        m_annihilator(m_wf, m_prop, m_hf.get(), m_maes, m_icycle, opts.m_propagator.m_nadd),
+        m_annihilator(m_wf, m_prop, m_hf.get(), m_maes.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_detsubs(opts.m_propagator.m_semistochastic) {
 
     logging::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
@@ -214,13 +214,18 @@ void Solver::loop_over_occupied_mbfs() {
         m_prop.discretize(m_wf, walker);
 
         if (walker.m_weight.is_zero() && !walker.is_protected()) {
-            /*
-             * MBF has become unoccupied in all parts and must be removed from mapped list, but it must first make all
-             * associated averaged contributions to MAEs
-             */
-            m_maes.make_otf_average_contribs(walker, m_hf.get(), m_icycle);
-            m_wf.remove_row(walker);
-            continue;
+            if (walker.m_icycle_grace_period_expiry == 0ul && uint8_t(walker.m_shift_space) == 0) {
+                walker.m_icycle_grace_period_expiry = m_icycle + m_opts.m_wavefunction.m_grace_period;
+            }
+            if (walker.m_icycle_grace_period_expiry < m_icycle) {
+                /*
+                 * MBF has become unoccupied in all parts and must be removed from mapped list, but it must first make all
+                 * associated averaged contributions to MAEs
+                 */
+                m_maes.make_average_contribs(walker, m_hf.get(), m_icycle);
+                m_wf.remove_row(walker);
+                continue;
+            }
         }
 
         m_wf.try_add_to_large_ci_set(walker, m_icycle);
@@ -247,7 +252,7 @@ void Solver::loop_over_occupied_mbfs() {
              * this is the end of a planned block-averaging cycle, therefore there may be unaccounted-for contributions
              * which need to be included in the average
              */
-            m_maes.make_otf_average_contribs(walker, m_hf.get(), m_icycle);
+            m_maes.make_average_contribs(walker, m_hf.get(), m_icycle);
         }
 
         m_wf.m_refs.contrib_row(walker);
@@ -284,16 +289,11 @@ void Solver::loop_over_occupied_mbfs() {
 }
 
 void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
-    if (!m_maes.m_on_the_fly){
-        m_maes.fill_from_averaged_walkers(m_wf);
-    }
-    else {
-        if (!m_maes.m_accum_epoch || m_maes.is_period_cycle(icycle)) return;
-        auto& walker = m_wf.m_store.m_row;
-        for (walker.restart(); walker; ++walker) {
-            if (walker.m_mbf.is_clear()) continue;
-            m_maes.make_otf_average_contribs(walker, m_hf.get(), icycle);
-        }
+    if (!m_maes.m_accum_epoch || m_maes.is_period_cycle(icycle)) return;
+    auto& walker = m_wf.m_store.m_row;
+    for (walker.restart(); walker; ++walker) {
+        if (walker.m_mbf.is_clear()) continue;
+        m_maes.make_average_contribs(walker, m_hf.get(), icycle);
     }
     m_maes.end_cycle();
     m_maes.output(m_icycle, m_prop.m_ham, true);

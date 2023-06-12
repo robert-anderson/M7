@@ -18,6 +18,7 @@ Walker::Walker(const sys::Basis& basis, uint_t nroot, uint_t nreplica) :
         m_ref_conn(this, m_wf_format, "reference connection flag"),
         m_average_weight(this, m_wf_format, "unnormalized average weight"),
         m_icycle_occ(this, "cycle index at row creation"),
+        m_icycle_grace_period_expiry(this, "cycle index at which the grace period expires"),
         m_shift_space(this, "index of the shift space"),
         m_log_enhancement_fac(this, "death rate product ratio")
 {}

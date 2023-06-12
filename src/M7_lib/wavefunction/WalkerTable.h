@@ -23,6 +23,7 @@ struct Walker : public Row {
     field::Flags<c_ndim_wf> m_ref_conn;
     field::Numbers<wf_t, c_ndim_wf> m_average_weight;
     field::Number<uint_t> m_icycle_occ;
+    field::Number<uint_t> m_icycle_grace_period_expiry;
     field::Number<uint8_t> m_shift_space;
     field::Number<ham_comp_t> m_log_enhancement_fac;
 
