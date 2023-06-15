@@ -101,7 +101,8 @@ void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf
     }
 }
 
-void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin, wf_t total_delta, Walker &dst_walker) {
+void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin, wf_t total_delta,
+                                   uint_t min_src_shift_space, Walker &dst_walker) {
     DEBUG_ASSERT_FALSE(in_same_dst_block(block_begin, next_block_begin),
                        "start of block and start of next block should not be in the same block");
     DEBUG_ASSERT_LT(block_begin.index(), next_block_begin.index(),
@@ -160,8 +161,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin, 
         // contributions to unoccupied MBFs are allowed
         allow_initiation = block_begin.m_src_initiator;
     }
-    annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta,
-                   block_begin.m_src_shift_space, allow_initiation, dst_walker);
+    annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta, min_src_shift_space, allow_initiation, dst_walker);
     block_begin.jump(next_block_begin);
     DEBUG_ASSERT_EQ(next_block_begin.index(), block_begin.index(), "row not set to beginning of next block");
 }
@@ -207,7 +207,14 @@ void Annihilator::loop_over_dst_mbfs() {
     block_begin.restart();
 
     bool dst_deterministic = false;
+    /*
+     * total change in weight on the dst MBF due to all spawns onto it
+     */
     wf_t total_delta = 0.0;
+    /*
+     * most senior (lowest index) shift space spawning onto the dst MBF
+     */
+    uint_t min_src_shift_space = m_wf.nshift_space();
     m_dst_walker.select_null();
 
     /*
@@ -223,7 +230,7 @@ void Annihilator::loop_over_dst_mbfs() {
              * different (dst_mbf, ipart_dst) pair. In either case, we have reached the end of a block of the major
              * sorting field, so we must handle the block just finished
              */
-            handle_dst_block(block_begin, current, total_delta, m_dst_walker);
+            handle_dst_block(block_begin, current, total_delta, min_src_shift_space, m_dst_walker);
             DEBUG_ASSERT_EQ(block_begin.index(), current.index(),
                             "block_begin should have been pointed to the beginning of the next block");
             /*
@@ -252,6 +259,7 @@ void Annihilator::loop_over_dst_mbfs() {
         if (!dst_deterministic || !current.m_src_deterministic) {
             // this is not a determ->determ connection, so include it
             total_delta += current.m_delta_weight;
+            if (current.m_src_shift_space < min_src_shift_space) min_src_shift_space = current.m_src_shift_space;
         }
     }
 }

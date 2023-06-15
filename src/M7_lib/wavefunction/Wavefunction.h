@@ -80,11 +80,11 @@ namespace wf {
 
         v_t<TableBase::Loc> setup();
 
-        uint_t nshift_space() const;
-
         v_t<double> make_stoch_thresh_mags() const;
 
     public:
+
+        uint_t nshift_space() const;
         /**
          * Reference MBFs for each population
          */

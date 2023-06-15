@@ -102,11 +102,6 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
 
     return ref_locs;
 }
-
-uint_t wf::Vectors::nshift_space() const {
-    return m_opts.m_shift.m_nw_targets.m_value.size();
-}
-
 v_t<double> wf::Vectors::make_stoch_thresh_mags() const {
     const auto& input = m_opts.m_wavefunction.m_stoch_thresh_mags.m_value;
     if (input.empty()) return v_t<double>(nshift_space(), 1.0);
@@ -115,6 +110,10 @@ v_t<double> wf::Vectors::make_stoch_thresh_mags() const {
     auto any_neg = std::any_of(input.cbegin(), input.cend(), [](double v){return v<0;});
     REQUIRE_FALSE_ALL(any_neg, "all specified stochastic threshold magnitudes should be non-negative");
     return input;
+}
+
+uint_t wf::Vectors::nshift_space() const {
+    return m_opts.m_shift.m_nw_targets.m_value.size();
 }
 
 wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):

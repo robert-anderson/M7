@@ -139,7 +139,7 @@ public:
      * @param dst_walker
      *  row in m_wf.m_store which stores the dst_mbf if found
      */
-    void handle_dst_block(Spawn &block_begin, Spawn &next_block_begin, wf_t total_delta, Walker& dst_walker);
+    void handle_dst_block(Spawn &block_begin, Spawn &next_block_begin, wf_t total_delta, uint_t min_src_shift_space, Walker& dst_walker);
 
     void handle_src_block(const Spawn &block_begin, const Walker& dst_row);
 
