@@ -144,11 +144,8 @@ void Shifts::update(const wf::Vectors& wf, uint_t icycle, double tau) {
         auto& format = m_values.m_format;
         for (uint_t ipart=0ul; ipart < wf.m_format.m_nelement; ++ipart) {
             DEBUG_ASSERT_FALSE(math::is_nan_or_inf(std::abs(m_spaces[ispace]->m_values[ipart])), "new shift is invalid");
-            if (ispace > 0) {
-                // constrain shift values relative to ispace-1
-                m_spaces[ispace]->m_values[ipart] = std::min(
-                    m_spaces[ispace]->m_values[ipart], m_spaces[ispace-1]->m_values[ipart]);
-            }
+            // constrain shift values relative to ispace 0
+            m_spaces[ispace]->m_values[ipart] = std::min(m_spaces[ispace]->m_values[ipart], m_spaces[0]->m_values[ipart]);
             m_values[format.combine<2>(ispace, ipart)] = m_spaces[ispace]->m_values[ipart];
         }
     }
