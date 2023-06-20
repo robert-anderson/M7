@@ -103,7 +103,8 @@ void Maes::fill_from_averaged_walkers(const wf::Vectors& wf) {
         }
     }
 
-    buffered::Table<ShortRow> gathered_averaged(local_averaged.m_row, true);
+    // TODO: node-shared gathered_averaged
+    buffered::Table<ShortRow> gathered_averaged(local_averaged.m_row, false);
     gathered_averaged.all_gatherv(local_averaged);
 
     const auto displ = mpi::evenly_shared_displ(gathered_averaged.nrow_in_use());
