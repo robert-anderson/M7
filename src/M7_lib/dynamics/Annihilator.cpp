@@ -69,10 +69,20 @@ void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf
     // zero magnitude weights should not have been communicated
     if (delta_weight == 0.0) return;
 
+    const auto enhancement_fac = dst_walker ? std::exp(dst_walker.m_log_enhancement_fac) : 1.0;
+    /*
+     * delta corresponds to the physical scaling, but the stored weight does not, so the stored weight should be scaled
+     * up before the delta is summed, and then the result scaled back to the unenhanced value:
+     * w := (delta + enhancement * w) / enhancement = w + delta / enhancement
+     * so scale the incoming delta down by the local enhancement factor
+     */
+    delta_weight /= enhancement_fac;
+
     m_wf.m_stats.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
 
     DEBUG_ASSERT_LT(dst_shift_space, m_prop.m_shifts.m_spaces.size(),
                     "should never increase the shift space index beyond the maximum value");
+
 
     if (!dst_walker) {
         /*

@@ -312,8 +312,8 @@ void wf::Vectors::set_weight(Walker& walker, uint_t ipart, wf_t new_weight, uint
          * ipart is a compound index of root and replica, so combine with the minor index to obtain the overall flat
          * index for the shift space
          */
-        auto iflat_old = format.combine<2>(ipart, old_shift_space);
-        auto iflat_new = format.combine<2>(ipart, new_shift_space);
+        auto iflat_old = format.combine<1>(old_shift_space, ipart);
+        auto iflat_new = format.combine<1>(new_shift_space, ipart);
         if (iflat_old == iflat_new) m_stats.m_nw_by_shift_space.delta()[iflat_new] += delta;
         else {
             m_stats.m_nw_by_shift_space.delta()[iflat_old] -= std::abs(weight);

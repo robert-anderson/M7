@@ -34,9 +34,9 @@ namespace wf {
          */
         reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf> m_nw;
         /**
-         * L1 norm of each part of the WF, and each shift space
+         * L1 norm of each shift space, and each part of the WF
          */
-        reduction::cyclic::NdArray<wf_comp_t, c_ndim_wf+1> m_nw_by_shift_space;
+        reduction::cyclic::NdArray<wf_comp_t, 1+c_ndim_wf> m_nw_by_shift_space;
         /**
          * square of the L2 norm of each part of the WF
          */

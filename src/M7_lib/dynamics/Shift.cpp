@@ -34,12 +34,14 @@ uint_t shift::ShiftSpace::ncycle_this_update(uint_t ipart, uint_t icycle, const 
 
 uint_t get_iflat(const wf::Vectors& wf, uint_t ipart, uint_t ispace) {
     const auto& format = wf.m_stats.m_nw_by_shift_space.m_format;
-    return format.combine<2>(ipart, ispace);
+    return format.combine<1>(ispace, ipart);
 }
 
 void shift::ShiftSpace::update(const wf::Vectors& wf, uint_t icycle, double tau, const Epochs& variable_mode) {
     for (uint_t ipart=0ul; ipart < variable_mode.nelement(); ++ipart){
         update_part(wf, ipart, icycle, tau, variable_mode);
+        const auto& value = m_values[ipart];
+        DEBUG_ASSERT_FALSE(math::is_nan_or_inf(std::abs(value)), "new shift is invalid");
         if (is_period_cycle(icycle))
             m_nw_last_period[ipart] = wf.m_stats.m_nw_by_shift_space.total()[get_iflat(wf, ipart, m_ispace)];
     }
@@ -63,8 +65,9 @@ void shift::GrowthBased::update_part(const wf::Vectors& wf, uint_t ipart, uint_t
     const auto nw = wf.m_stats.m_nw_by_shift_space.total()[get_iflat(wf, ipart, m_ispace)];
     const auto a = ncycle_this_update(ipart, icycle, variable_mode);
     if (a) {
-        // if this is the first cycle, or we otherwise have inf growth rate, so set it to 1 i.e. "unchanged"
-        auto rate = std::abs(m_nw_last_period[ipart]) == 0.0 ? 1.0 : nw / m_nw_last_period[ipart];
+        // if this is the first cycle, or we otherwise have inf growth rate, skip the update
+        if (nw == 0.0 || m_nw_last_period[ipart]==0.0) return;
+        auto rate = nw / m_nw_last_period[ipart];
         m_values[ipart] -= m_damp_fac * std::log(std::abs(rate)) / (tau * a);
         if (m_target_damp_fac != 0.0) {
             rate = nw / m_nw_target;
@@ -143,10 +146,10 @@ void Shifts::update(const wf::Vectors& wf, uint_t icycle, double tau) {
         m_spaces[ispace]->update(wf, icycle, tau, m_variable_mode);
         auto& format = m_values.m_format;
         for (uint_t ipart=0ul; ipart < wf.m_format.m_nelement; ++ipart) {
-            DEBUG_ASSERT_FALSE(math::is_nan_or_inf(std::abs(m_spaces[ispace]->m_values[ipart])), "new shift is invalid");
+            auto& value = m_spaces[ispace]->m_values[ipart];
             // constrain shift values relative to ispace 0
-            m_spaces[ispace]->m_values[ipart] = std::min(m_spaces[ispace]->m_values[ipart], m_spaces[0]->m_values[ipart]);
-            m_values[format.combine<2>(ispace, ipart)] = m_spaces[ispace]->m_values[ipart];
+            value = std::min(value, m_spaces[0]->m_values[ipart]);
+            m_values[format.combine<1>(ispace, ipart)] = value;
         }
     }
 }
