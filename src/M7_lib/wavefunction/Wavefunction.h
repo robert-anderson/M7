@@ -295,10 +295,10 @@ namespace wf {
         }
 
         Spawn& add_spawn(const Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
-                         uint_t dst_ipart, uint_t src_shift_space);
+                         uint_t dst_ipart, uint_t dst_shift_space);
 
         Spawn& add_spawn(const Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic, uint_t dst_ipart,
-                         const Mbf& src_mbf, wf_t src_weight, uint_t src_shift_space);
+                         const Mbf& src_mbf, wf_t src_weight, uint_t dst_shift_space);
 
         uint_t npart() const {
             return m_format.m_nelement;

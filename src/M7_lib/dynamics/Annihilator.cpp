@@ -57,7 +57,7 @@ void Annihilator::lookup_dst(const Mbf &dst_mbf, uint_t ipart_dst, bool &determi
     else m_dst_weight.assign(m_dst_weight.size(), dtype::null(m_dst_weight[0]));
 }
 
-void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf_t delta_weight, uint_t src_shift_space,
+void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf_t delta_weight, uint_t dst_shift_space,
                                  bool allow_initiation, Walker &dst_walker) {
     if (m_nadd == 0.0) {
         DEBUG_ASSERT_TRUE(allow_initiation,
@@ -71,8 +71,8 @@ void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf
 
     m_wf.m_stats.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
 
-    // never increase the shift space index beyond the maximum value
-    auto dst_shift_space = std::min(src_shift_space+1, m_prop.m_shifts.m_spaces.size()-1);
+    DEBUG_ASSERT_LT(dst_shift_space, m_prop.m_shifts.m_spaces.size(),
+                    "should never increase the shift space index beyond the maximum value");
 
     if (!dst_walker) {
         /*
@@ -92,6 +92,12 @@ void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf
             return;
         }
         m_wf.m_stats.m_nannihilated.m_local[dst_ipart] += annihilated_magnitude(weight_before, delta_weight);
+
+        if (dst_shift_space == 0ul) {
+            // promote and include enhancement factor
+            const auto fac = std::exp(dst_walker.m_log_enhancement_fac);
+            m_wf.scale_weight(dst_walker, dst_ipart, fac, 0);
+        }
         /*
          * never downgrade a walker to a more remote value of shift_space: if the value associated with this spawn is
          * greater than the stored value, then leave the MBF in its current shift space
@@ -102,7 +108,7 @@ void Annihilator::annihilate_row(uint_t dst_ipart, const field::Mbf &dst_mbf, wf
 }
 
 void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin, wf_t total_delta,
-                                   uint_t min_src_shift_space, Walker &dst_walker) {
+                                   uint_t min_dst_shift_space, Walker &dst_walker) {
     DEBUG_ASSERT_FALSE(in_same_dst_block(block_begin, next_block_begin),
                        "start of block and start of next block should not be in the same block");
     DEBUG_ASSERT_LT(block_begin.index(), next_block_begin.index(),
@@ -161,7 +167,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin, 
         // contributions to unoccupied MBFs are allowed
         allow_initiation = block_begin.m_src_initiator;
     }
-    annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta, min_src_shift_space, allow_initiation, dst_walker);
+    annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta, min_dst_shift_space, allow_initiation, dst_walker);
     block_begin.jump(next_block_begin);
     DEBUG_ASSERT_EQ(next_block_begin.index(), block_begin.index(), "row not set to beginning of next block");
 }
@@ -214,7 +220,7 @@ void Annihilator::loop_over_dst_mbfs() {
     /*
      * most senior (lowest index) shift space spawning onto the dst MBF
      */
-    uint_t min_src_shift_space = m_wf.nshift_space();
+    uint_t min_dst_shift_space = m_wf.nshift_space()-1;
     m_dst_walker.select_null();
 
     /*
@@ -230,7 +236,7 @@ void Annihilator::loop_over_dst_mbfs() {
              * different (dst_mbf, ipart_dst) pair. In either case, we have reached the end of a block of the major
              * sorting field, so we must handle the block just finished
              */
-            handle_dst_block(block_begin, current, total_delta, min_src_shift_space, m_dst_walker);
+            handle_dst_block(block_begin, current, total_delta, min_dst_shift_space, m_dst_walker);
             DEBUG_ASSERT_EQ(block_begin.index(), current.index(),
                             "block_begin should have been pointed to the beginning of the next block");
             /*
@@ -259,7 +265,7 @@ void Annihilator::loop_over_dst_mbfs() {
         if (!dst_deterministic || !current.m_src_deterministic) {
             // this is not a determ->determ connection, so include it
             total_delta += current.m_delta_weight;
-            if (current.m_src_shift_space < min_src_shift_space) min_src_shift_space = current.m_src_shift_space;
+            if (current.m_dst_shift_space < min_dst_shift_space) min_dst_shift_space = current.m_dst_shift_space;
         }
     }
 }

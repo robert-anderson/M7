@@ -440,7 +440,7 @@ Walker& wf::Vectors::create_row_(uint_t icycle, const Mbf& mbf, uint_t shift_spa
 }
 
 Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator,
-                              bool deterministic, uint_t dst_ipart, uint_t src_shift_space) {
+                              bool deterministic, uint_t dst_ipart, uint_t dst_shift_space) {
     auto& dst_table = send(m_dist.irank(dst_mbf));
 
     auto& spawn = dst_table.m_row;
@@ -451,13 +451,13 @@ Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initia
     spawn.m_src_initiator = initiator;
     spawn.m_src_deterministic = deterministic;
     spawn.m_ipart_dst = dst_ipart;
-    spawn.m_src_shift_space = src_shift_space;
+    spawn.m_dst_shift_space = dst_shift_space;
     return spawn;
 }
 
 Spawn& wf::Vectors::add_spawn(const field::Mbf& dst_mbf, wf_t delta, bool initiator, bool deterministic,
-                              uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight, uint_t src_shift_space) {
-    auto& spawn = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart, src_shift_space);
+                              uint_t dst_ipart, const field::Mbf& src_mbf, wf_t src_weight, uint_t dst_shift_space) {
+    auto& spawn = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart, dst_shift_space);
     if (spawn.m_send_parents) {
         spawn.m_src_mbf = src_mbf;
         spawn.m_src_weight = src_weight;

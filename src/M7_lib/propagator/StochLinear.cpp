@@ -122,8 +122,15 @@ void StochLinear::off_diagonal(wf::Vectors& wf, const Walker& walker, uint_t ipa
         DEBUG_ASSERT_LE(p_succeed_at_least_once, 1.0,
                         "probability of sampling RDM connection cannot exceed 1.0");
 
+        // generally, dst shift space is incremented from the src
+        uint_t dst_shift_space = walker.m_shift_space + 1;
+        // but if the spawning walker is in S0 and above a critical magnitude, then its child will be in S0 too
+        // if (dst_shift_space == 1 && (std::abs(weight) > m_nadd_s0)) dst_shift_space =  0;
+        // don't increment beyond allocated shift spaces
+        if (dst_shift_space > m_shifts.m_spaces.size()) dst_shift_space = m_shifts.m_spaces.size()-1;
+
         wf.add_spawn(dst_mbf, thresh_delta, initiator, flag_deterministic,
-                     ipart, src_mbf, weight / p_succeed_at_least_once, walker.m_shift_space);
+                     ipart, src_mbf, weight / p_succeed_at_least_once, dst_shift_space);
     }
 }
 

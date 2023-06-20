@@ -30,7 +30,7 @@ TEST(FieldDataset, FrmOnvField) {
         hdf5::FileWriter fw("tmp.h5");
         subspace.m_mbf_order_table.save(fw, "mbf_table", mpi::i_am_root(), max_nitem_per_op);
     }
-    ci_init::Subspace::mbf_order_table_t table("mbf_table_load", subspace.m_mbf_order_table.m_row);
+    mbf::table_t table("mbf_table_load", subspace.m_mbf_order_table.m_row);
     {
         hdf5::FileReader fr("tmp.h5");
         table.load(fr, "mbf_table", false, true);
