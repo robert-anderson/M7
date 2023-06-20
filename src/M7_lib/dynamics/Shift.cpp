@@ -40,8 +40,7 @@ uint_t get_iflat(const wf::Vectors& wf, uint_t ipart, uint_t ispace) {
 void shift::ShiftSpace::update(const wf::Vectors& wf, uint_t icycle, double tau, const Epochs& variable_mode) {
     for (uint_t ipart=0ul; ipart < variable_mode.nelement(); ++ipart){
         update_part(wf, ipart, icycle, tau, variable_mode);
-        const auto& value = m_values[ipart];
-        DEBUG_ASSERT_FALSE(math::is_nan_or_inf(std::abs(value)), "new shift is invalid");
+        DEBUG_ASSERT_FALSE(math::is_nan_or_inf(std::abs(m_values[ipart])), "new shift is invalid");
         if (is_period_cycle(icycle))
             m_nw_last_period[ipart] = wf.m_stats.m_nw_by_shift_space.total()[get_iflat(wf, ipart, m_ispace)];
     }

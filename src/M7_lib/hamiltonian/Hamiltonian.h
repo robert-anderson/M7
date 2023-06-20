@@ -251,7 +251,7 @@ public:
 
     template<typename mbf_t>
     bool connected(const mbf_t &src, const mbf_t &dst) const {
-        return ham::is_significant(get_element(src, dst));
+        return ham::is_significant(get_element(src, dst)) || src == dst;
     }
 
     bool complex_valued() const;

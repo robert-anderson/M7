@@ -36,7 +36,7 @@ void ci_init::Initializer::build_ham_conns(const Subspace& subspace, ham_comp_t 
 
     m_sparse_ham.resize(count_local);
 
-    logging::info("Building sparse H matrix ({} rows)", count_local);
+    logging::info("Building sparse H matrix ({} rows) by looping over MBFs and their connections", count_local);
     ProgressMonitor pm(true, "building sparse H", "basis functions", count_local, 5);
     auto& row = table.m_row;
     const auto& src_mbf = row.m_field;
@@ -72,7 +72,7 @@ void ci_init::Initializer::build_ham_mbfs(const Subspace& subspace, ham_comp_t d
     m_sparse_ham.resize(count_local);
     conn::Mbf conn(subspace.m_h->m_basis.size());
 
-    logging::info("Building sparse H matrix ({} rows)", count_local);
+    logging::info("Building sparse H matrix ({} rows) by looping over MBF pairs", count_local);
     ProgressMonitor pm(true, "building sparse H", "basis functions", count_local, 5);
 
     auto src = table.m_row;
@@ -111,4 +111,5 @@ ci_init::RefConnSubspace::RefConnSubspace(const Hamiltonian* h, const Mbf& ref) 
         m_mbf_order_table.insert(dst);
     };
     ConnForeachGroup(*h).loop(conn, ref, body);
+    m_mbf_order_table.remap();
 }
