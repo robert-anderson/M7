@@ -274,6 +274,13 @@ public:
         return m_evecs.data()+(m_root_ordering[iroot]*m_nelement_evec);
     }
 
+    v_t<const kry_t*> get_evecs() const {
+        if (m_evecs.empty()) return {};
+        v_t<const kry_t*> evecs;
+        for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) evecs.push_back(get_evec(iroot));
+        return evecs;
+    }
+
     bool i_have_evecs() const {
         return !m_evecs.empty();
     }

@@ -59,6 +59,14 @@ namespace mbf {
         return get_spinorb(onv.m_frm, ispinorb);
     }
 
+
+    static void ms2_flip(field::FrmOnv& onv) {
+        onv.ms2_flip();
+    }
+    static void ms2_flip(field::BosOnv&) {}
+    static void ms2_flip(field::FrmBosOnv& onv) {onv.m_frm.ms2_flip();}
+
+
     /**
      * row and table which only hold MBFs
      */

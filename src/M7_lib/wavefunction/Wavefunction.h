@@ -308,7 +308,41 @@ namespace wf {
 
         void refresh_all_ref_conns();
 
+    private:
+        /**
+         * general function to distribute new MBFs whether or not they are associated with non-zero weights.
+         * @param subspace
+         *  CI subspace-specifying object
+         * @param weight_vecs
+         *  vector of pointers to each root from the eigensolver. if this is empty on the root rank, assume no
+         *  eigensolver results are used and the space is simply being initialized without solving
+         * @param ms2_flip_fac
+         *  0 for none, 1 for even, -1 for odd
+         * @param max_ncomm
+         *  max number of rows in the communication send table before the block is sent to all ranks
+         */
+        void ci_init(const ci_init::Subspace& subspace, v_t<const wf_t*> weight_vecs, int ms2_flip_fac, uint_t max_ncomm);
+
+    public:
+        /**
+         * diagonalize in the given subspace and initialize with the resulting weights
+         */
         void ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, uint_t max_ncomm = 1000ul);
+
+        /**
+         * no solve, just initialize the subspace
+         */
+        void ci_init(const ci_init::Subspace& subspace, uint_t max_ncomm = 1000ul);
+
+        /**
+         * optionally solve before initializing space
+         */
+        void ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, bool solve, uint_t max_ncomm = 1000ul) {
+            if (solve) ci_init(subspace, opts, max_ncomm);
+            else ci_init(subspace, max_ncomm);
+        }
+
+    private:
 
         void orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica);
 

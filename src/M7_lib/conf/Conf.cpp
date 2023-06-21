@@ -133,20 +133,28 @@ conf::LargeCiSet::LargeCiSet(Group* parent) :
             "maximum size for the set of large CI MBFs. calculation terminates when this limit is reached or surpassed"){}
 
 
+conf::InitSpace::InitSpace(Group *parent) :
+        Section(parent, "init_space", "options relating to the initial space of MBFs", Explicit),
+        m_type(this, "type",
+           {{"ref", "initialize WFs with walkers on the reference only"},
+            {"fci", "generate entire FCI space"},
+            {"ref_conn", "generate a subspace of the reference and its connections"}},
+           "specifies the means of generating the initial walker distribution"),
+        m_ms2_flip(this, "ms2_flip", 0,
+                   "a positive value enforces spin-flipped partners have the same weight, negative enforces same "
+                   "magnitude but opposite signs, and 0 enforces such symmetry"),
+        m_solve(this, "solve", true, "if true, diagonalize H projected into the subspace"){}
+
 conf::Wavefunction::Wavefunction(Group *parent) :
         Section(parent, "wavefunction",
                         "options relating to the storage and update of a distributed many-body wavefunction"),
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction. If this is 0, the initial L1 norm will be the target defined in the shift section"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
-        m_init_space_kind(this, "init_space_kind",
-            {{"ref", "initialize WFs with walkers on the reference only"},
-             {"fci", "generate entire FCI space and diagonalize"},
-             {"ref_conn", "generate a subspace of the reference and its connections and diagonalize"}},
-            "specifies the means of generating the initial walker distribution"),
         m_no_row_creation(this, "no_row_creation", false, "if true, prevent row creation after wavefunction setup"),
         m_stoch_thresh_mags(this, "stoch_thresh_mags", {}, "magnitudes to use in stochastic thresholding of walker weights by shift space"),
         m_grace_period(this, "grace_period", {}, "number of cycles to wait before removing row of killed walker"),
-        m_buffers(this), m_hash_mapping(this), m_distribution(this), m_ci_pmntr(this), m_large_ci_set(this),
+        m_buffers(this), m_hash_mapping(this), m_distribution(this),
+        m_ci_pmntr(this), m_large_ci_set(this), m_init_space(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
         m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit),
         m_load_large_ci(this, "load_large_ci", "load set of MBFs with large CI weight expected and protect their rows from deletion",

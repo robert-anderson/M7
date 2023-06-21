@@ -284,3 +284,18 @@ TEST(FrmOnvField, ForeachUnoccupiedSite) {
     };
     frm_onv_field_test::site_foreach(include_fn, count_fn, test_fn);
 }
+
+TEST(FrmOnvField, Ms2Flip) {
+    const uint_t nsite = 123;
+    buffered::FrmOnv mbf1(nsite);
+    buffered::FrmOnv mbf2(nsite);
+    uintv_t alphas = {4, 7, 10, 55, 100, 122};
+    uintv_t betas = {4, 6, 11, 55, 104, 120};
+    mbf1.set(alphas, betas);
+    std::cout << mbf1.to_string() << std::endl;
+    mbf1.ms2_flip();
+    mbf2.set(betas, alphas);
+    std::cout << mbf1.to_string() << std::endl;
+    std::cout << mbf2.to_string() << std::endl;
+    ASSERT_EQ(mbf1, mbf2);
+}

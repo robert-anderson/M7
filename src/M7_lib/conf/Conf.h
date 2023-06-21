@@ -121,10 +121,16 @@ namespace conf {
         LargeCiSet(Group* parent);
     };
 
+    struct InitSpace : Section {
+        SingleChoice<str_t> m_type;
+        Param<int> m_ms2_flip;
+        Param<bool> m_solve;
+        InitSpace(Group *parent);
+    };
+
     struct Wavefunction : Section {
         Param<double> m_nw_init;
         Param<uint_t> m_nroot;
-        SingleChoice<str_t> m_init_space_kind;
         Param<bool> m_no_row_creation;
         Param<v_t<double>> m_stoch_thresh_mags;
         Param<uint_t> m_grace_period;
@@ -133,6 +139,7 @@ namespace conf {
         Distribution m_distribution;
         CiPmntr m_ci_pmntr;
         LargeCiSet m_large_ci_set;
+        InitSpace m_init_space;
         OptionalFile m_save;
         OptionalFile m_load;
         OptionalFile m_load_large_ci;

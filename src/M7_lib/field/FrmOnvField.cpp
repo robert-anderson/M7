@@ -207,3 +207,17 @@ uint_t FrmOnvField::nunoccupied_site() const {
     return m_basis.m_nsite-noccupied_site();
 }
 
+void FrmOnvField::ms2_flip() {
+    auto fn = [&](uint_t isite){
+        if (get({0, isite})) {
+            clr({0, isite});
+            set({1, isite});
+        }
+        else {
+            clr({1, isite});
+            set({0, isite});
+        }
+    };
+    foreach_open_shell(fn);
+}
+

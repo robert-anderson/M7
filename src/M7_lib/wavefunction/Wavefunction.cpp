@@ -46,7 +46,8 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
         for (auto ipart=0ul; ipart<npart(); ++ipart) ref_locs.push_back(ref_loc);
     }
 
-    const auto& init_space_kind = m_opts.m_wavefunction.m_init_space_kind.m_value;
+    const auto& init_space_type = m_opts.m_wavefunction.m_init_space.m_type.m_value;
+    const auto init_space_solve = m_opts.m_wavefunction.m_init_space.m_solve.m_value;
 
     if (m_opts.m_wavefunction.m_load_large_ci.m_enabled) {
         // the wavefunction (MBFs only) is to be loaded from HDF5 archive
@@ -58,20 +59,35 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
         hdf5::FileReader fr(m_opts.m_wavefunction.m_load.m_path);
         load(fr);
     }
-    else if (init_space_kind != "ref"){
+    else if (init_space_type != "ref") {
         // the wavefunction is to be initialized using eigenvectors from the Arnoldi method
         logging::info("Performing exact CI initialization of wavefunctions");
+    }
+    {
         ci_init::Options opts;
         opts.m_nroot = this->nroot();
-        if (init_space_kind == "fci") {
+        if (init_space_type == "fci") {
             opts.m_loop_kind = ci_init::Options::Conns;
             ci_init::FciSubspace subspace(&m_ham, m_sector.particles());
-            ci_init(subspace, opts);
+            ci_init(subspace, opts, init_space_solve);
         }
-        else if (init_space_kind == "ref_conn") {
+        else if (init_space_type == "ref_conn") {
             opts.m_loop_kind = ci_init::Options::MbfPairs;
             ci_init::RefConnSubspace subspace(&m_ham, ref_mbf);
-            ci_init(subspace, opts);
+            ci_init(subspace, opts, init_space_solve);
+        }
+        else if (init_space_type == "ref") {
+            auto flipped = ref_mbf;
+            flipped.ms2_flip();
+            const auto flip_fac = m_opts.m_wavefunction.m_init_space.m_ms2_flip;
+            if (flip_fac && flipped != ref_mbf) {
+                const auto flipped_loc = create_row_setup(0, flipped);
+                if (flipped_loc.is_mine()) {
+                    auto flipped_walker = m_store.m_row;
+                    flipped_walker.jump(flipped_loc.m_irec);
+                    for (uint_t ipart = 0ul; ipart < npart(); ++ipart) set_weight(flipped_walker, ipart, flip_fac);
+                }
+            }
         }
     }
 
@@ -485,21 +501,12 @@ void wf::Vectors::refresh_all_ref_conns() {
     m_store.foreach_row_in_use(fn);
 }
 
-void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, uint_t max_ncomm) {
-    /*
-     * perform the eigensolver procedure for the required number of states
-     */
+void wf::Vectors::ci_init(const ci_init::Subspace& subspace, v_t<const wf_t*> weight_vecs, int ms2_flip_fac, uint_t max_ncomm) {
+    char have_weights = !weight_vecs.empty();
+    mpi::bcast(have_weights);
+
     const auto& table = subspace.m_mbf_order_table;
-    ci_init::Initializer init(subspace, opts);
-    const auto results = init.solve();
-    /*
-     * compute the ratio of initial number of walkers to L1-norms of the eigenvectors to get the right scale
-     */
-    if (mpi::i_am_root()) {
-        v_t<ham_t> evals;
-        results.get_evals(evals);
-        logging::info("CI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
-    }
+    buffered::Mbf flipped(m_sector);
 
     uint_t irow = 0ul;
     /*
@@ -513,11 +520,17 @@ void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options op
             const auto irow_end = std::min(table.nrow_in_use(), irow + max_ncomm);
             for (row.jump(irow); row.in_range(irow_end); ++row) {
                 for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) {
+                    const auto weight_vec = weight_vecs.empty() ? nullptr : weight_vecs[iroot];
                     for (uint_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
                         auto ipart = m_format.flatten({iroot, ireplica});
-                        const auto weight = results.get_evec(iroot)[row.index()];
-                        if (std::abs(weight) > 1e-6) {
+                        const auto weight = weight_vec ? weight_vec[row.index()] : 0.0;
+                        if (!have_weights || std::abs(weight) > 1e-6) {
                             add_spawn(mbf, weight, true, false, ipart, 0);
+                            if (ms2_flip_fac) {
+                                flipped = mbf;
+                                mbf::ms2_flip(flipped);
+                                if (flipped != mbf) add_spawn(flipped, ms2_flip_fac * weight, true, false, ipart, 0);
+                            }
                         }
                     }
                 }
@@ -534,9 +547,28 @@ void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options op
         auto& recv_row = m_send_recv.recv().m_row;
         for (recv_row.restart(); recv_row; ++recv_row) {
             auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
-            store_row.m_weight = recv_row.m_delta_weight;
+            if (have_weights) store_row.m_weight = recv_row.m_delta_weight;
         }
     }
+}
+
+void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, uint_t max_ncomm) {
+    /*
+     * perform the eigensolver procedure for the required number of states
+     */
+    ci_init::Initializer init(subspace, opts);
+    const auto results = init.solve();
+
+    if (mpi::i_am_root()) {
+        v_t<ham_t> evals;
+        results.get_evals(evals);
+        logging::info("CI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
+    }
+    ci_init(subspace, results.get_evecs(), m_opts.m_wavefunction.m_init_space.m_ms2_flip, max_ncomm);
+}
+
+void wf::Vectors::ci_init(const ci_init::Subspace& subspace, uint_t max_ncomm) {
+    ci_init(subspace, v_t<const wf_t*>(), m_opts.m_wavefunction.m_init_space.m_ms2_flip, max_ncomm);
 }
 
 void wf::Vectors::orthogonalize(reduction::NdArray<wf_t, 3>& overlaps, uint_t iroot, uint_t jroot, uint_t ireplica) {

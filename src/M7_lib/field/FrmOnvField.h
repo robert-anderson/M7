@@ -261,6 +261,7 @@ public:
 
     uint_t nunoccupied_site() const;
 
+    void ms2_flip();
 };
 
 
