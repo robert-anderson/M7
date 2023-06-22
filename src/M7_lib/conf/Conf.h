@@ -153,7 +153,7 @@ namespace conf {
         Param<bool> m_init_rel_to_ref;
         Param<double> m_damp;
         Param<bool> m_target_damp;
-        Param<uint_t> m_period;
+        Param<uintv_t> m_periods;
         Param<v_t<wf_comp_t>> m_nw_targets;
         Param<v_t<ham_comp_t>> m_floors;
         Param<bool> m_fix_s0;

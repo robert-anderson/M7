@@ -120,17 +120,20 @@ Shifts::Shifts(const conf::Shift& opts, const NdFormat<c_ndim_wf>& wf_fmt) :
         m_floors(opts.m_floors){
     // if the first space is of the "fix ref weight" or "fix s0" type, add it explicitly
     if (opts.m_fix_s0)
-        m_spaces.emplace_back(new shift::ValueFixing(wf_fmt, 0, opts.m_period, opts.m_init));
+        m_spaces.emplace_back(new shift::ValueFixing(wf_fmt, 0, opts.m_periods.m_value[0], opts.m_init));
     else if (opts.m_fix_ref_weight)
-        m_spaces.emplace_back(new shift::RefWeightFixing(wf_fmt, 0, opts.m_period, opts.m_init, opts.m_nw_targets.m_value[0]));
+        m_spaces.emplace_back(new shift::RefWeightFixing(wf_fmt, 0, opts.m_periods.m_value[0], opts.m_init, opts.m_nw_targets.m_value[0]));
 
     uint_t ispace = m_spaces.size();
 
     // add all remaining spaces as growth-based shifts
-    for (; ispace<opts.m_nw_targets.m_value.size(); ++ispace)
+    for (; ispace<opts.m_nw_targets.m_value.size(); ++ispace) {
+        const auto period = opts.m_periods.m_value[opts.m_periods.m_value.size() == 1 ? 0 : ispace];
         m_spaces.emplace_back(
-            new shift::GrowthBased(wf_fmt, ispace, opts.m_period,
-            opts.m_init, opts.m_nw_targets.m_value[ispace], opts.m_damp, opts.m_target_damp));
+                new shift::GrowthBased(wf_fmt, ispace, period,
+                       opts.m_init, opts.m_nw_targets.m_value[ispace], opts.m_damp,
+                       opts.m_target_damp));
+    }
 
     logging::info("Initialized {}", string::plural("shift space", m_spaces.size()));
 }
