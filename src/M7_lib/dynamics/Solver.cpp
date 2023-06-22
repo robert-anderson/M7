@@ -367,6 +367,7 @@ void Solver::output_stats() {
         stats.m_delta_nocc_mbf = m_wf.m_stats.m_nocc_mbf.prev_delta().m_reduced;
         if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         if (m_inst_ests.m_spin_square) stats.m_spin_square_num = m_inst_ests.m_spin_square->m_est.m_proj_num.m_reduced;
+        stats.m_s0_growth_based = m_prop.m_shifts.m_s0_growth_based.m_values[0];
         m_stats->commit();
 
         auto &timing_stats = m_timing_stats->m_row;

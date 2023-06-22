@@ -117,7 +117,7 @@ Shifts::Shifts(const conf::Shift& opts, const NdFormat<c_ndim_wf>& wf_fmt) :
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
         m_values(wf_fmt.add_major_dim(opts.m_nw_targets.m_value.size(), "shift space")),
         m_enhancement_damp(opts.m_enhancement_damp), m_s0_promote_thresh(opts.m_s0_promote_thresh),
-        m_floors(opts.m_floors){
+        m_floors(opts.m_floors), m_s0_growth_based(wf_fmt, 0, 1, 0, 0, 1.0, false){
     // if the first space is of the "fix ref weight" or "fix s0" type, add it explicitly
     if (opts.m_fix_s0)
         m_spaces.emplace_back(new shift::ValueFixing(wf_fmt, 0, opts.m_periods.m_value[0], opts.m_init));
@@ -157,10 +157,10 @@ void Shifts::update(const wf::Vectors& wf, uint_t icycle, double tau) {
                 const auto floor = m_floors.size() == 1 ? m_floors[0] : m_floors[ispace];
                 value = std::max(value, floor);
             }
-
             m_values[format.combine<1>(ispace, ipart)] = value;
         }
     }
+    m_s0_growth_based.update(wf, icycle, tau, m_variable_mode);
 }
 
 Shifts& Shifts::operator=(const ham_comp_t& v) {

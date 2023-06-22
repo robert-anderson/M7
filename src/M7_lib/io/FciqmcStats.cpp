@@ -30,5 +30,6 @@ FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests
                           "Numerator of reference-projected spin square estimator"),
         m_exlvl_probs(prop.ncase_excit_gen() ? this : nullptr,
                       {{prop.ncase_excit_gen()}, {"excitation generator index"}},
-                      "Probability of attempting to draw excitation level")
+                      "Probability of attempting to draw excitation level"),
+        m_s0_growth_based(this, "S0 growth-based shift")
 {}

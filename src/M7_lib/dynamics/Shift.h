@@ -141,6 +141,8 @@ struct Shifts {
     const ham_comp_t m_s0_promote_thresh;
     const v_t<ham_comp_t> m_floors;
 
+    shift::GrowthBased m_s0_growth_based;
+
     Shifts(const conf::Shift &opts, const NdFormat<c_ndim_wf>& wf_fmt);
 
     const shift::ShiftSpace* operator[](const Walker& walker) const;
