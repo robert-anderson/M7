@@ -155,6 +155,7 @@ namespace conf {
         Param<bool> m_target_damp;
         Param<uint_t> m_period;
         Param<v_t<wf_comp_t>> m_nw_targets;
+        Param<v_t<ham_comp_t>> m_floors;
         Param<bool> m_fix_s0;
         Param<bool> m_fix_ref_weight;
         Param<ham_comp_t> m_enhancement_damp;

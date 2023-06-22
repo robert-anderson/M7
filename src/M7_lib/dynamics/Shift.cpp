@@ -116,7 +116,8 @@ void shift::ValueFixing::update_variable_mode(const wf::Vectors&, uint_t icycle,
 Shifts::Shifts(const conf::Shift& opts, const NdFormat<c_ndim_wf>& wf_fmt) :
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
         m_values(wf_fmt.add_major_dim(opts.m_nw_targets.m_value.size(), "shift space")),
-        m_enhancement_damp(opts.m_enhancement_damp), m_s0_promote_thresh(opts.m_s0_promote_thresh){
+        m_enhancement_damp(opts.m_enhancement_damp), m_s0_promote_thresh(opts.m_s0_promote_thresh),
+        m_floors(opts.m_floors){
     // if the first space is of the "fix ref weight" or "fix s0" type, add it explicitly
     if (opts.m_fix_s0)
         m_spaces.emplace_back(new shift::ValueFixing(wf_fmt, 0, opts.m_period, opts.m_init));
@@ -148,6 +149,12 @@ void Shifts::update(const wf::Vectors& wf, uint_t icycle, double tau) {
             auto& value = m_spaces[ispace]->m_values[ipart];
             // constrain shift values relative to ispace 0
             value = std::min(value, m_spaces[0]->m_values[ipart]);
+            // constrain shift values relative to floor if defined
+            if (!m_floors.empty()) {
+                const auto floor = m_floors.size() == 1 ? m_floors[0] : m_floors[ispace];
+                value = std::max(value, floor);
+            }
+
             m_values[format.combine<1>(ispace, ipart)] = value;
         }
     }
