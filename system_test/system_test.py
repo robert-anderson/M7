@@ -37,10 +37,12 @@ args = parser.parse_args()
 # if this test does not have a defined reference or static only is specified, comparative tests are skipped
 DO_COMPS = REF_DIR.exists() and not bool(args.static_only)
 
-# root/path is given priority. if it doesn't exist then assume path is absolute
-def resolve_path(root, path):
-    tmp = root/path
-    if tmp.exists(): return tmp.resolve()
+# loop through root paths, if path is not found under any of these, then assume path is absolute
+def resolve(root_order, path):
+    for root in root_order:
+        tmp = root/path
+        if tmp.exists(): return tmp.resolve()
+    if path.exists(): return path.resolve()
     return None
 
 def is_vector(obj):
@@ -66,11 +68,8 @@ def bring(path_or_pair, kind):
 
     # dst_path is always relative to the temporary run directory
     dst_path = RUN_DIR/dst_path
-    # first look in this test's definition directory
-    src = resolve_path(DEF_DIR, src_path)
-    # if not found, try the assets directory
-    if src is None:
-        src = resolve_path(AST_DIR, src_path)
+    src = resolve([DEF_DIR, AST_DIR], src_path)
+
     assert src is not None, f'file dependency "{src_path}" not found'
     dst = Path(dst_path).resolve()
     if dst.exists(): os.unlink(dst)
@@ -238,7 +237,6 @@ def check_shift(ref_value, fname='M7.stats', opts=BlockOpts()):
 def check_proje(ref_value, fname='M7.stats', opts=BlockOpts()):
     check_stats_field(ref_value, 'Reference-projected energy', fname, opts)
 
-
 def load_spinfree_hdf5_rdm(group):
     inds = np.array(group['indices'])
     values = np.array(group['values'])
@@ -247,3 +245,14 @@ def load_spinfree_hdf5_rdm(group):
     rdm = np.zeros((extent,)*nind)
     for i, row in enumerate(inds): rdm[tuple(row)] = values[i]
     return rdm
+
+def check_spinfree_rdms(h5_path, pkl_path, keys):
+    h5_file = h5py.File(resolve([RUN_DIR], h5_path), 'r')
+    pkl_fname = resolve([AST_DIR], pkl_path)
+    with open(pkl_fname, 'rb') as f: pkl_rdms = pkl.load(f)
+
+    for key in keys:
+        h5_rdm = load_spinfree_hdf5_rdm(h5_file[f'spinfree/{key}'])
+        pkl_rdm = pkl_rdms[key]
+        max_diff = max(np.abs(h5_rdm - pkl_rdm).flatten())
+        if max_diff > 1e-5: fail(True)
