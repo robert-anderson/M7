@@ -8,12 +8,17 @@ Maes::Maes(const conf::Mae &opts, const wf::Vectors& wf) :
         m_accum_epoch("MAE accumulation"),
         m_rdms(opts.m_rdm, wf, m_accum_epoch),
         m_spec_moms(opts.m_spec_mom, wf, m_accum_epoch),
-        m_period(opts.m_stats_period) {
+        m_period(opts.m_stats_period), m_on_the_fly(opts.m_on_the_fly) {
     if (*this) {
         m_stats = ptr::smart::make_unique<MaeStats>(
                 opts.m_stats_path, "FCIQMC Multidimensional Averaged Estimators",
                 MaeStatsRow(m_rdms), 1ul);
     }
+}
+
+Maes::~Maes() {
+    REQUIRE_TRUE_ALL(all_stores_empty() || m_on_the_fly,
+         "at finalization, should have empty stores unless the MAEs are being accumulated on the fly");
 }
 
 Maes::operator bool() const {
@@ -39,6 +44,7 @@ void Maes::end_cycle() {
 }
 
 void Maes::make_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle) {
+    if (!m_on_the_fly) return;
     if (!m_accum_epoch) return;
     // the current cycle should be included in the denominator
     if (!row.occupied_ncycle(icycle)) {

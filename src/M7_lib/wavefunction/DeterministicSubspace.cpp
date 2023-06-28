@@ -133,6 +133,7 @@ void deterministic::Subspace::make_connections(const SpecMoms &spec_moms) {
 }
 
 void deterministic::Subspace::make_rdm_contribs(const shared_rows::Walker *hf) {
+    if (!m_maes.m_on_the_fly) return;
     auto& rdms = m_maes.m_rdms;
     if (!rdms || !rdms.m_accum_epoch) return;
     uint_t iirec = ~0ul;
@@ -153,6 +154,18 @@ void deterministic::Subspace::make_rdm_contribs(const shared_rows::Walker *hf) {
             make_rdm_contrib(hf, elem);
         }
     }
+}
+
+void deterministic::Subspace::make_spec_mom_contribs() {
+    if (!m_maes.m_on_the_fly) return;
+    auto& spec_moms = m_maes.m_spec_moms;
+    if (!spec_moms || !spec_moms.m_accum_epoch) return;
+    REQUIRE_TRUE(m_frm_hole_perturbed.get(), "uninitialized");
+    REQUIRE_TRUE(m_frm_particle_perturbed.get(), "uninitialized");
+    m_frm_hole_perturbed->make_contribs(spec_moms, gathered(), 0, 1);
+    m_frm_hole_perturbed->make_contribs(spec_moms, gathered(), 1, 0);
+    m_frm_particle_perturbed->make_contribs(spec_moms, gathered(), 0, 1);
+    m_frm_particle_perturbed->make_contribs(spec_moms, gathered(), 1, 0);
 }
 
 void deterministic::Subspace::project(double tau) {

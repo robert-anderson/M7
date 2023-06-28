@@ -247,12 +247,14 @@ namespace conf {
         Param<uint_t> m_ncycle;
         Param<uint_t> m_stats_period;
         Param<str_t> m_stats_path;
+        Param<bool> m_on_the_fly;
         Rdms m_rdm;
         SpecMoms m_spec_mom;
 
         explicit Mae(Group *parent);
 
-        bool any_bilinears() const {
+        bool need_replication() const {
+            if (!m_on_the_fly) return false;
             return !m_rdm.m_ranks.m_value.empty() || m_spec_mom.m_enabled;
         }
     };

@@ -38,8 +38,14 @@ struct Maes {
      * stats output object
      */
     std::unique_ptr<MaeStats> m_stats = nullptr;
+    /**
+     * true if MAEs are to be accumulated on the fly, else they should be created from a single (averaged) WF
+     */
+    const bool m_on_the_fly;
 
     Maes(const conf::Mae &opts, const wf::Vectors& wf);
+
+    ~Maes();
 
     operator bool() const;
 

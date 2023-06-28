@@ -5,7 +5,7 @@
 #include "Annihilator.h"
 
 comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
-    if (m_rdms) {
+    if (m_maes && m_maes.m_on_the_fly) {
         return [&](const uint_t &irow1, const uint_t &irow2) {
             m_work_row1.jump(irow1);
             m_work_row2.jump(irow2);
@@ -32,11 +32,11 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
 }
 
 Annihilator::Annihilator(wf::Vectors &wf, const Propagator &prop,
-                         const shared_rows::Walker* hf, Rdms &rdms, const uint_t &icycle, wf_comp_t nadd) :
-        m_wf(wf), m_prop(prop), m_hf(hf), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
+                         const shared_rows::Walker* hf, Maes &maes, const uint_t &icycle, wf_comp_t nadd) :
+        m_wf(wf), m_prop(prop), m_hf(hf), m_maes(maes), m_nadd(nadd), m_icycle(icycle),
         m_work_row1(wf.m_send_recv.m_row), m_work_row2(wf.m_send_recv.m_row), m_dst_walker(m_wf.m_store.m_row),
         m_dst_weight(m_wf.npart(), wf_t{}), m_sort_cmp_fn(make_sort_cmp_fn()) {
-    REQUIRE_TRUE_ALL(bool(m_rdms)==m_work_row1.m_send_parents,
+    REQUIRE_TRUE_ALL(bool(m_maes)==m_work_row1.m_send_parents,
                      "cannot sample RDMs through annihilation unless parent MBFs are communicated");
 }
 
@@ -102,7 +102,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
     /*
      * only consider RDM contributions if there are any RDMs being accumulated and the destination exists
      */
-    if (m_rdms && m_rdms.m_accum_epoch && dst_walker) {
+    if (m_maes && m_maes.m_on_the_fly && m_maes.m_accum_epoch && dst_walker) {
         DEBUG_ASSERT_TRUE(block_begin.m_send_parents, "RDM sampling requires that parent MBFs are communicated");
         /*
          * store the original positions of the row objects in the recv table
@@ -186,7 +186,7 @@ void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_r
     contrib /= 1.0 - m_prop.tau() * (dst_row.m_hdiag - m_prop.m_shift.m_values[ipart_replica]);
     contrib = arith::conj(contrib);
     contrib *= wf_t(block_begin.m_src_weight);
-    m_rdms.make_contribs(block_begin.m_src_mbf, dst_row.m_mbf, contrib);
+    m_maes.m_rdms.make_contribs(block_begin.m_src_mbf, dst_row.m_mbf, contrib);
 }
 
 void Annihilator::loop_over_dst_mbfs() {

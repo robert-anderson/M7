@@ -305,16 +305,7 @@ namespace deterministic {
 
         void make_rdm_contribs(const shared_rows::Walker* hf);
 
-        void make_spec_mom_contribs() {
-            auto& spec_moms = m_maes.m_spec_moms;
-            if (!spec_moms || !spec_moms.m_accum_epoch) return;
-            REQUIRE_TRUE(m_frm_hole_perturbed.get(), "uninitialized");
-            REQUIRE_TRUE(m_frm_particle_perturbed.get(), "uninitialized");
-            m_frm_hole_perturbed->make_contribs(spec_moms, gathered(), 0, 1);
-            m_frm_hole_perturbed->make_contribs(spec_moms, gathered(), 1, 0);
-            m_frm_particle_perturbed->make_contribs(spec_moms, gathered(), 0, 1);
-            m_frm_particle_perturbed->make_contribs(spec_moms, gathered(), 1, 0);
-        }
+        void make_spec_mom_contribs();
 
         /**
           * for every deterministically-propagated row on this MPI rank, update its value.

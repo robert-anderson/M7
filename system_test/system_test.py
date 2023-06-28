@@ -154,7 +154,7 @@ def run(config_fname='config.yaml', nrank=1, copy_deps=[], link_deps=[]):
     for dep in link_deps: bring(dep, 'link')
     with resource_manager.instance(nrank):
         out, err = shell(cmd, RUN_DIR)
-        assert not len(err), f'error stream non-empty: {err}'
+        if len(err): fail(True, 'M7 runtime error')
 
 def stats_columns(col_name, fname='M7.stats'):
     stats = instance.stats(fname)

@@ -7,7 +7,7 @@
 
 #include <M7_lib/wavefunction/Wavefunction.h>
 #include <M7_lib/wavefunction/Reference.h>
-#include <M7_lib/bilinear/Rdms.h>
+#include <M7_lib/mae/Maes.h>
 
 /**
  * updates the state of the stored wavefunction subject to the new walkers in the receive buffer,
@@ -28,9 +28,9 @@ struct Annihilator {
      */
     const shared_rows::Walker* m_hf;
     /**
-     * all RDM objects, including contracted tensors
+     * all Multidimensional Averaging estimator objects, including pure RDMs and contracted tensors
      */
-    Rdms& m_rdms;
+    Maes& m_maes;
     /**
      * initiator threshold
      */
@@ -89,7 +89,7 @@ private:
 public:
 
     Annihilator(wf::Vectors &wf, const Propagator& prop,
-                const shared_rows::Walker* hf, Rdms& rdms, const uint_t& icycle, wf_comp_t nadd);
+                const shared_rows::Walker* hf, Maes& maes, const uint_t& icycle, wf_comp_t nadd);
 
     /**
      * using the comparator implementation, sort the m_recv table of the referenced wavefunction
