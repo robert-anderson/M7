@@ -99,15 +99,16 @@ HAM_ARITHS = ('real', 'complex')
 
 def skip(no_ref):
     # exit codes:
-    # 1: test not applicable to this binary
-    # 2: no ref but test contains compare_ checks
-    sys.exit(1 + bool(no_ref))
+    # 2: test not applicable to this binary
+    # 3: no ref but test contains compare_ checks
+    sys.exit(2 + bool(no_ref))
 
-def fail(static):
+def fail(static, msg):
     # exit codes:
-    # 3: static failure
-    # 4: comparative failure
-    sys.exit(3 + bool(static))
+    # 4: static failure
+    # 5: comparative failure
+    print(f'{"STATIC" if static else "COMPARATIVE"} failure: {msg}')
+    sys.exit(4 + bool(static))
 
 def require_mbf_type(s):
     assert s.lower() in MBF_TYPES
@@ -167,7 +168,7 @@ def compare_stats_field(field_name_hint, fname='M7.stats'):
     if not DO_COMPS: return
     run = run_stats_file.stats_columns(field_name_hint)
     ref = ref_stats_file.stats_columns(field_name_hint)
-    if not np.allclose(run, ref): fail(False)
+    if not np.allclose(run, ref): fail(False, f'stats field "{field_name_hint}"')
 
 def compare_nw(fname='M7.stats'): compare_stats_field('WF L1 norm', fname)
 def compare_ref_weight(fname='M7.stats'): compare_stats_field('Reference weight', fname)
@@ -187,15 +188,13 @@ def compare_rdm_archives(fname='M7.rdm.h5'):
         keys = tuple(map(str, b.keys()))
         if set(r.keys()) != set(b.keys()):
             # different ranks of RDM accumulated than in benchmark
-            fail(False)
+            fail(False, f'RDM "{section}" groups contain different keys')
         for key in keys:
             if key=='norm': continue
             if not np.array_equal(r[key]['indices'], b[key]['indices']):
-                #f'index array of RDM {key} does not agree with benchmark'
-                fail(False)
+                fail(False, f'index array of RDM {key}')
             if not np.allclose(np.array(r[key]['values']), np.array(b[key]['values'])): 
-                #f'value array of RDM {key} does not agree with benchmark'
-                fail(False)
+                fail(False, f'value array of RDM {key}')
 
 '''
 perform crude removal of serial correlation
@@ -220,7 +219,8 @@ def check_stats_field(ref_value, field_name_hint, opts=BlockOpts()):
     stats = run_stats_file.stats_columns(field_name_hint)
     mean, err = block(stats[-opts.npoint:], opts.nblock)
     err *= opts.err_scale
-    if not within_error(ref_value, mean, err): fail(True)
+    if not within_error(ref_value, mean, err): 
+        fail(True, f'stats field "{field_name_hint}" has mean and error {mean:.5e} +/- {err:.3e}, but ref is {ref_value:.5e}')
 
 def check_shift(ref_value, opts=BlockOpts()):
     check_stats_field(ref_value, 'Diagonal shift', opts)
@@ -237,7 +237,7 @@ def load_spinfree_hdf5_rdm(group):
     for i, row in enumerate(inds): rdm[tuple(row)] = values[i]
     return rdm
 
-def check_spinfree_rdms(h5_path, pkl_path, keys):
+def check_spinfree_rdms(h5_path, pkl_path, keys, tol=1e-5):
     h5_file = h5py.File(resolve([RUN_DIR], h5_path), 'r')
     pkl_fname = resolve([AST_DIR], pkl_path)
     with open(pkl_fname, 'rb') as f: pkl_rdms = pkl.load(f)
@@ -245,5 +245,10 @@ def check_spinfree_rdms(h5_path, pkl_path, keys):
     for key in keys:
         h5_rdm = load_spinfree_hdf5_rdm(h5_file[f'spinfree/{key}'])
         pkl_rdm = pkl_rdms[key]
-        max_diff = max(np.abs(h5_rdm - pkl_rdm).flatten())
-        if max_diff > 1e-5: fail(True)
+        abs_err = np.abs(h5_rdm - pkl_rdm)
+        max_indices = np.unravel_index(np.argmax(abs_err), abs_err.shape)
+        max_diff = abs_err[max_indices]
+        if max_diff > tol:
+            run_val = h5_rdm[max_indices]
+            pkl_val = pkl_rdm[max_indices]
+            fail(True, f'RDM {key} element {max_indices} value {run_val:.5e} does not equal reference {pkl_val:.5e} within tol {tol:.1e}')
