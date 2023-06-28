@@ -9,5 +9,5 @@ exact_e0 =-99.9421389039332
 compare_nw()
 compare_ninit()
 
-check_shift(exact_e0, 10000)
-check_proje(exact_e0, 10000)
+check_shift(exact_e0)
+check_proje(exact_e0)
