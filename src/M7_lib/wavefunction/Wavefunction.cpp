@@ -139,7 +139,7 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
         {
             ham.m_basis,
             opts.m_wavefunction.m_nroot,
-            opts.m_av_ests.any_bilinears() ? 2ul:1ul
+            opts.m_av_ests.need_replication() ? 2ul:1ul
         },
         opts.m_wavefunction.m_distribution,
         // store sizing

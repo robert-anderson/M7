@@ -45,6 +45,8 @@ struct Maes {
 
     Maes(const conf::Mae &opts, const wf::Vectors& wf);
 
+    ~Maes();
+
     operator bool() const;
 
     bool all_stores_empty() const;

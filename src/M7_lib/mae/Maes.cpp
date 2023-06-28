@@ -16,6 +16,11 @@ Maes::Maes(const conf::Mae &opts, const wf::Vectors& wf) :
     }
 }
 
+Maes::~Maes() {
+    REQUIRE_TRUE_ALL(all_stores_empty() || m_on_the_fly,
+         "at finalization, should have empty stores unless the MAEs are being accumulated on the fly");
+}
+
 Maes::operator bool() const {
     return m_rdms || m_spec_moms;
 }
@@ -25,7 +30,6 @@ bool Maes::all_stores_empty() const {
 }
 
 bool Maes::is_period_cycle(uint_t icycle) {
-    if (!m_on_the_fly) return false;
     if (!m_accum_epoch) return false;
     if (!m_period) return false;
     if (m_icycle_period_start == ~0ul || m_icycle_period_start == icycle) {
@@ -39,7 +43,7 @@ void Maes::end_cycle() {
     m_rdms.end_cycle();
 }
 
-void Maes::make_otf_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle) {
+void Maes::make_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle) {
     if (!m_on_the_fly) return;
     if (!m_accum_epoch) return;
     // the current cycle should be included in the denominator
@@ -79,45 +83,6 @@ void Maes::make_otf_average_contribs(Walker &row, const shared_rows::Walker* hf,
     }
     row.m_average_weight = 0;
     row.m_icycle_occ = icycle + 1;
-}
-
-void Maes::fill_from_averaged_walkers(const wf::Vectors& wf) {
-    REQUIRE_TRUE_ALL(all_stores_empty(), "stores should be empty if no on-the-fly contributions have been made");
-
-    struct ShortRow : Row {
-        field::Mbf m_mbf;
-        field::Numbers<wf_t, c_ndim_wf> m_weight;
-        ShortRow(const Walker& walker): Row(),
-            m_mbf(this, walker.m_mbf.m_basis),
-            m_weight(this, walker.m_average_weight.m_format){}
-    };
-    auto walker = wf.m_store.m_row;
-    buffered::Table<ShortRow> local_averaged(ShortRow{walker});
-    auto local_row = local_averaged.m_row;
-    local_row.restart();
-    for (walker.restart(); walker; ++walker) {
-        if (walker.is_protected()) {
-            local_row.push_back_jump();
-            local_row.m_mbf = walker.m_mbf;
-            local_row.m_weight = walker.m_average_weight;
-        }
-    }
-
-    // todo: node-shared gathered_average
-    buffered::Table<ShortRow> gathered_averaged(local_averaged.m_row, false);
-    gathered_averaged.all_gatherv(local_averaged);
-
-    const auto displ = mpi::evenly_shared_displ(gathered_averaged.nrow_in_use());
-    const auto count = mpi::evenly_shared_count(gathered_averaged.nrow_in_use());
-
-    auto bra = gathered_averaged.m_row;
-    auto ket = bra;
-    for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
-        for (ket.restart(); ket; ++ket) {
-            const auto contrib = bra.m_weight[0]*ket.m_weight[0];
-            m_rdms.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
-        }
-    }
 }
 
 void Maes::output(uint_t icycle, const Hamiltonian &ham, bool final) {
