@@ -143,8 +143,6 @@ namespace wf {
 
         uint_t debug_ndeterministic(uint_t iroot) const;
 
-        void reset_all_averages(uint_t icycle);
-
         /**
          * all changes in the m_weight member of any row associated with m_store should occur through
          * this function so that changes can be properly recorded

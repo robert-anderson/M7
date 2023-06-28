@@ -115,9 +115,6 @@ public:
      */
     operator bool() const;
 
-    bool last_started_this_cycle(uint_t icycle) const;
-
-    bool last_started_last_cycle(uint_t icycle) const;
 };
 
 

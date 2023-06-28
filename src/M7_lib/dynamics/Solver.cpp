@@ -98,7 +98,7 @@ void Solver::execute(uint_t ncycle) {
         m_propagate_timer.unpause();
         if (m_detsubs) {
             m_detsubs.update(i);
-            m_detsubs.make_rdm_contribs(m_hf.get(), m_icycle);
+            m_detsubs.make_rdm_contribs(m_hf.get());
             m_detsubs.make_spec_mom_contribs();
         }
         loop_over_occupied_mbfs();
@@ -174,7 +174,6 @@ void Solver::begin_cycle() {
         if (m_maes.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_av_ests.m_delay))) {
             REQUIRE_TRUE_ALL(m_maes.all_stores_empty(),
                              "MAEs only beginning to be accumulated, but not all store tables are empty");
-            m_wf.reset_all_averages(m_icycle);
         }
     }
     if (m_hf && m_hf->m_excit_accums) {
