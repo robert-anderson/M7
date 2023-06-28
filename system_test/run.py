@@ -1,4 +1,4 @@
-from subprocess import Popen, PIPE
+from subprocess import Popen
 from pathlib import Path
 import sys
 import os, shutil, h5py, time, argparse
@@ -26,10 +26,26 @@ for path in args.paths:
 # None = not finished
 failed = [None for p in procs]
 
-def outcome_string(exit_code):
-    if exit_code < 1: return 'PASS'
-    elif exit_code < 3: return 'SKIP'
-    else: return '* FAIL'
+def colored(text, name):
+    try:
+        code = dict(
+            BLACK = '\033[30m',
+            RED = '\033[31m',
+            GREEN = '\033[32m',
+            YELLOW = '\033[33m',
+            BLUE = '\033[34m',
+            MAGENTA = '\033[35m',
+            CYAN = '\033[36m',
+            WHITE = '\033[37m'
+        )[name.upper()]
+    except KeyError: return name
+    return f'{code}{text}\033[0m'
+
+def outcome_string(exit_code, path):
+    if exit_code < 1: return colored('PASS: '+path, 'green')
+    elif exit_code < 2: return colored('SCRIPT ERROR: '+path, 'red')
+    elif exit_code < 4: return colored('SKIP: '+path, 'yellow')
+    else: return colored('FAIL: '+path, 'cyan')
 
 from resource_manager import poll_until, read_ninstance
 def all_procs_done():
@@ -41,7 +57,7 @@ def all_procs_done():
         failed[i] = proc.poll()
         if failed[i] is not None:
             ndone += 1
-            print(f'{outcome_string(failed[i])}: {args.paths[i]}')
+            print(outcome_string(failed[i], args.paths[i]))
             print(f'MPI slots in use: {read_ninstance()}/{os.cpu_count()}')
     return ndone == len(failed)
 
