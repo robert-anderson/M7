@@ -139,15 +139,12 @@ class StatsFile:
             if field[1].lower().startswith(field_name_hint.lower()): 
                 icolumn_start = field[0]
                 try: icolumn_end = self.fields[i+1][0]
-                except IndexError: icolumn_end = ncolumn()
+                except IndexError: icolumn_end = self.ncolumn()
                 return np.arange(icolumn_start, icolumn_end)
         return None
 
     def stats_columns(self, field_name_hint):
         return self.data[:, self.field_column_range(field_name_hint)]
-
-ref_stats_file = StatsFile(REF_DIR/'M7.stats') if DO_COMPS else None
-run_stats_file = None
 
 def run(config_fname='config.yaml', nrank=1, copy_deps=[], link_deps=[]):
     cmd = f'{args.mpirun} -n {nrank} {args.m7_exe} {config_fname}'
@@ -158,10 +155,6 @@ def run(config_fname='config.yaml', nrank=1, copy_deps=[], link_deps=[]):
     with resource_manager.instance(nrank):
         out, err = shell(cmd, RUN_DIR)
         assert not len(err), f'error stream non-empty: {err}'
-
-    # update stats to those of this run
-    global run_stats_file
-    run_stats_file = StatsFile(RUN_DIR/'M7.stats')
 
 def stats_columns(col_name, fname='M7.stats'):
     stats = instance.stats(fname)
@@ -175,8 +168,8 @@ def stats_columns(col_name, fname='M7.stats'):
 # compare_ methods involve verification against the contents of the ref directory
 def compare_stats_field(field_name_hint, fname='M7.stats'):
     if not DO_COMPS: return
-    run = run_stats_file.stats_columns(field_name_hint)
-    ref = ref_stats_file.stats_columns(field_name_hint)
+    run = StatsFile(RUN_DIR/fname).stats_columns(field_name_hint)
+    ref = StatsFile(REF_DIR/fname).stats_columns(field_name_hint)
     if not np.allclose(run, ref): fail(False, f'stats field "{field_name_hint}"')
 
 def compare_nw(fname='M7.stats'): compare_stats_field('WF L1 norm', fname)
@@ -225,7 +218,7 @@ class BlockOpts:
 check that a stats column is statistically correct (within errorbars)
 '''
 def check_stats_field(ref_value, field_name_hint, fname='M7.stats', opts=BlockOpts()):
-    stats = run_stats_file.stats_columns(field_name_hint)
+    stats = StatsFile(RUN_DIR/fname).stats_columns(field_name_hint)
     mean, err = block(stats[-opts.npoint:], opts.nblock)
     err *= opts.err_scale
     if not within_error(ref_value, mean, err): 
@@ -236,6 +229,12 @@ def check_shift(ref_value, fname='M7.stats', opts=BlockOpts()):
 
 def check_proje(ref_value, fname='M7.stats', opts=BlockOpts()):
     check_stats_field(ref_value, 'Reference-projected energy', fname, opts)
+
+def check_rdm_energy(ref_value, fname='M7.mae.stats', rtol=1e-5, atol=1e-8):
+    stats = StatsFile(RUN_DIR/fname).stats_columns('Energy estimate from RDMs').ravel()
+    mean = stats[-1]
+    if not np.isclose(ref_value, mean, rtol, atol):
+        fail(True, f'RDM energy has mean {mean:.5e}, but ref is {ref_value:.5e}')
 
 def load_spinfree_hdf5_rdm(group):
     inds = np.array(group['indices'])
