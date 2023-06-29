@@ -1,0 +1,22 @@
+---
+shift:
+  damp: 0.5
+  nw_targets: [200]
+stats:
+  period: 5
+wavefunction:
+  nw_init: 100
+  large_ci_set:
+    ncycle_thresh: 1
+    av_weight_thresh: 0.5
+    max_size: 11
+reference:
+  assume_hf_like: yes
+propagator:
+  tau_init: 0.1
+  stochastic: no
+  ncycle: 500000
+hamiltonian:
+  fermion:
+    fcidump:
+      path: FCIDUMP
