@@ -1,28 +1,26 @@
-[1684854096] [info] Reallocating buffer " send" 0B -> 40.000000KB
-[1684854096] [info] Reallocating buffer " recv" 0B -> 40.000000KB
-[1684854096] [info] Reallocating buffer " send" 0B -> 8.000000KB
-[1684854096] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1684854096] [info] Reallocating buffer " recv" 0B -> 40.000000KB
-[1684854096] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1684854096] [info] Reallocating buffer "wavefunction" 0B -> 80.000000KB
-[1684854096] [info] Reallocating buffer "wavefunction send" 0B -> 480B
-[1684854096] [info] Reallocating buffer "wavefunction recv" 0B -> 480B
-[1684854096] [info] Reallocating buffer "reference gather send" 0B -> 40B
-[1684854096] [info] Reallocating buffer "reference all gathered rows" 0B -> 40B
-[1684854096] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
-[1684854096] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
-[1684854096] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
-[1684854096] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
-[1684854096] [info] Reallocating buffer "M7.stats" 0B -> 136B
-[1684854096] [info] Reallocating buffer "M7.timing" 0B -> 40B
-[1684854096] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
-[1684854098] [info] Reallocating buffer "wavefunction send" 480B -> 760B
-[1684854098] [info] Reallocating buffer "wavefunction recv" 480B -> 760B
-[1684854100] [info] Reallocating buffer "wavefunction send" 760B -> 1.152000KB
-[1684854100] [info] Reallocating buffer "wavefunction recv" 760B -> 1.192000KB
-[1684854138] [info] Reallocating buffer "wavefunction send" 1.152000KB -> 1.768000KB
-[1684854138] [info] Reallocating buffer "wavefunction recv" 1.192000KB -> 1.800000KB
-[1684854170] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
-[1684854170] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
-[1684854170] [info] Reallocating buffer "Included local rows" 0B -> 800B
-[1684854170] [info] Reallocating buffer "global top weighted" 0B -> 800B
+[1688041816] [info] Reallocating buffer " send" 0B -> 72.000000KB
+[1688041816] [info] Reallocating buffer " recv" 0B -> 72.000000KB
+[1688041816] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1688041816] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1688041816] [info] Reallocating buffer " recv" 0B -> 72.000000KB
+[1688041816] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1688041816] [info] Reallocating buffer "wavefunction" 0B -> 144.000000KB
+[1688041816] [info] Reallocating buffer "wavefunction send" 0B -> 480B
+[1688041816] [info] Reallocating buffer "wavefunction recv" 0B -> 480B
+[1688041816] [info] Reallocating buffer "reference gather send" 0B -> 72B
+[1688041816] [info] Reallocating buffer "reference all gathered rows" 0B -> 72B
+[1688041816] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
+[1688041816] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
+[1688041816] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
+[1688041816] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
+[1688041816] [info] Reallocating buffer "M7.stats" 0B -> 160B
+[1688041816] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1688041816] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
+[1688041818] [info] Reallocating buffer "wavefunction send" 480B -> 760B
+[1688041818] [info] Reallocating buffer "wavefunction recv" 480B -> 760B
+[1688041820] [info] Reallocating buffer "wavefunction send" 760B -> 1.152000KB
+[1688041820] [info] Reallocating buffer "wavefunction recv" 760B -> 1.152000KB
+[1688041892] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1688041892] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1688041892] [info] Reallocating buffer "Included local rows" 0B -> 1.440000KB
+[1688041892] [info] Reallocating buffer "global top weighted" 0B -> 1.440000KB

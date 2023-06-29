@@ -1,6 +1,6 @@
 ---
 shift:
-  damp: 0.1
+  damp: 0.05
   nw_targets: [10000]
 stats:
   period: 5
@@ -10,7 +10,7 @@ propagator:
   tau_init: 0.001
   stochastic: yes
   nadd: 3.0
-  ncycle: 80000
+  ncycle: 100000
 hamiltonian:
   fermion:
     fcidump: yes

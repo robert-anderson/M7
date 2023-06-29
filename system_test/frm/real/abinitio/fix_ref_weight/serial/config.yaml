@@ -3,7 +3,7 @@ shift:
   damp: 0.5
   fix_ref_weight: yes
   nw_targets: [50.1]
-  period: 1
+  periods: [1]
 stats:
   period: 5
 wavefunction:

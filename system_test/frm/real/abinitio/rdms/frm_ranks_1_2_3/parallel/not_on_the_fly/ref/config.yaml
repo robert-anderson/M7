@@ -1,6 +1,7 @@
 ---
 shift:
   damp: 0.5
+  nw_targets: [200]
 stats:
   period: 5
 wavefunction:
@@ -10,7 +11,6 @@ reference:
 propagator:
   tau_init: 0.1
   stochastic: no
-  nw_target: 200
   ncycle: 500000
   semistochastic:
     size: 28
