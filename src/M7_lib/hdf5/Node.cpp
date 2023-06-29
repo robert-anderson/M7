@@ -11,7 +11,7 @@ hdf5::Node::operator hid_t() const {
 }
 
 bool hdf5::Node::child_exists(const str_t& name) const {
-    return H5Oexists_by_name(m_id, name.c_str(), H5P_DEFAULT) > 0;
+    return H5Lexists(m_id, name.c_str(), H5P_DEFAULT) > 0;
 }
 
 H5O_info_t hdf5::get_object_info(hid_t obj_id) {
