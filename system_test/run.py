@@ -42,6 +42,7 @@ def colored(text, name):
     return f'{code}{text}\033[0m'
 
 def outcome_string(exit_code, path):
+    path = str(path)
     if exit_code < 1: return colored('PASS: '+path, 'green')
     elif exit_code < 2: return colored('SCRIPT ERROR: '+path, 'red')
     elif exit_code < 4: return colored('SKIP: '+path, 'yellow')
@@ -57,7 +58,7 @@ def all_procs_done():
         failed[i] = proc.poll()
         if failed[i] is not None:
             ndone += 1
-            print(outcome_string(failed[i], args.paths[i]))
+            print(outcome_string(failed[i], Path(args.paths[i]).parent))
             print(f'MPI slots in use: {read_ninstance()}/{os.cpu_count()}')
     return ndone == len(failed)
 
