@@ -71,7 +71,8 @@ def bring(path_or_pair, kind):
     src = resolve([DEF_DIR, AST_DIR], src_path)
 
     assert src is not None, f'file dependency "{src_path}" not found'
-    dst = Path(dst_path).resolve()
+    dst = Path(dst_path).absolute()
+    assert src != dst
     if dst.exists(): os.unlink(dst)
     if kind=='copy':
         shutil.copy(src, dst)
@@ -130,6 +131,8 @@ class StatsFile:
                 except ValueError: continue
                 self.fields.append((i, split[1][:-4].strip()))
         self.data = np.loadtxt(fname)
+        # make sure self.data is always 2D, even if there's only one row
+        if len(self.data.shape)==1: self.data = self.data.reshape((1, -1))
 
     def ncolumn(self):
         return self.data.shape[1]
@@ -154,7 +157,9 @@ def run(config_fname='config.yaml', nrank=1, copy_deps=[], link_deps=[]):
     for dep in link_deps: bring(dep, 'link')
     with resource_manager.instance(nrank):
         out, err = shell(cmd, RUN_DIR)
-        if len(err): fail(True, 'M7 runtime error')
+        if len(err): 
+            print(err)
+            fail(True, 'M7 runtime error')
 
     # update stats to those of this run
     global run_stats_file
