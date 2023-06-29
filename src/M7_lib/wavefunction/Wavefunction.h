@@ -212,7 +212,7 @@ namespace wf {
 
         void remove_row(Walker& walker);
 
-        void try_add_to_large_ci_set(Walker& walker, uint_t icycle);
+        void try_add_to_large_ci_set(Walker& walker, uint_t icycle, Epochs& shift_epoch);
 
         /**
          * stochastically threshold unprotected weights about specified thresholds

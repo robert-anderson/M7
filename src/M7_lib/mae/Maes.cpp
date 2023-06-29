@@ -107,6 +107,8 @@ void Maes::fill_from_averaged_walkers(const wf::Vectors& wf) {
     buffered::Table<ShortRow> gathered_averaged(local_averaged.m_row, false);
     gathered_averaged.all_gatherv(local_averaged);
 
+    logging::info("Filling MAEs using averaged partial CI vector composed of {} MBFs", gathered_averaged.nrow_in_use());
+
     const auto displ = mpi::evenly_shared_displ(gathered_averaged.nrow_in_use());
     const auto count = mpi::evenly_shared_count(gathered_averaged.nrow_in_use());
 

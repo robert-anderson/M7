@@ -373,8 +373,9 @@ void wf::Vectors::remove_row(Walker& walker) {
     m_store.erase(walker.m_mbf);
 }
 
-void wf::Vectors::try_add_to_large_ci_set(Walker& walker, uint_t icycle) {
+void wf::Vectors::try_add_to_large_ci_set(Walker& walker, uint_t icycle, Epochs& shift_epoch) {
     if (!m_large_ci_set) return;
+    if (icycle < shift_epoch.icycle_start_last() + m_opts.m_wavefunction.m_large_ci_set.m_delay) return;
     const auto occ_ncycle = walker.occupied_ncycle(icycle);
     if (occ_ncycle < m_opts.m_wavefunction.m_large_ci_set.m_ncycle_thresh.m_value) return;
     const auto av_weight = walker.m_average_weight[0] / occ_ncycle;
@@ -687,6 +688,7 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
 
         auto fn = [&](const Spawn& recv_row) {
             auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
+            store_row.protect();
             const auto ipart = recv_row.m_ipart_dst[0];
             if (have_weights) set_weight(store_row, ipart, recv_row.m_delta_weight);
             ++nrow_recv;
@@ -699,6 +701,8 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
     loader.load(nitem_per_op, fill_fn);
     REQUIRE_EQ_ALL(mpi::all_sum(nrow_recv), loader.nitem(), "not all walkers loaded");
     logging::info("{} wavefunction rows successfully loaded from HDF5 archive", loader.nitem());
+    logging::info("{} total wavefunction rows", mpi::all_sum(m_store.nrow_in_use()));
+    logging::info(m_store.to_string());
 }
 
 bool wf::Vectors::was_loaded() const {

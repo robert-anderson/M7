@@ -129,6 +129,8 @@ conf::LargeCiSet::LargeCiSet(Group* parent) :
             "number of cycles for which an MBF must be continuously occupied in order to be added to large CI set"),
         m_av_weight_thresh(this, "av_weight_thresh", 1.0,
             "average weight requirement for MBF in order to be added to large CI set"),
+        m_delay(this, "delay", 0ul,
+                "number of MC cycles to wait after the onset of variable shift mode before beginning to look for large CI coefficients"),
         m_max_size(this, "max_size", ~0ul,
             "maximum size for the set of large CI MBFs. calculation terminates when this limit is reached or surpassed"){}
 

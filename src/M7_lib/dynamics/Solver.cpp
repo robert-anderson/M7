@@ -228,7 +228,7 @@ void Solver::loop_over_occupied_mbfs() {
             }
         }
 
-        m_wf.try_add_to_large_ci_set(walker, m_icycle);
+        m_wf.try_add_to_large_ci_set(walker, m_icycle, m_prop.m_shifts.m_variable_mode);
 
         /*
          * if the accumulation of MAEs has just started, treat the row as though it became occupied in the annihilation
