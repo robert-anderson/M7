@@ -158,7 +158,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin,
 }
 
 void Annihilator::handle_src_block(const Spawn &block_begin, const Walker &dst_row) {
-    DEBUG_ASSERT_TRUE(m_rdms.m_accum_epoch, "shouldn't be sampling RDMs yet");
+    DEBUG_ASSERT_TRUE(m_maes.m_rdms.m_accum_epoch, "shouldn't be sampling RDMs yet");
     DEBUG_ASSERT_EQ(block_begin.m_dst_mbf, dst_row.m_mbf, "wrong dst_row found");
 
     uint_t ipart_dst = block_begin.m_ipart_dst;

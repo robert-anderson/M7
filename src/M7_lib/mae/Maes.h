@@ -45,8 +45,6 @@ struct Maes {
 
     Maes(const conf::Mae &opts, const wf::Vectors& wf);
 
-    ~Maes();
-
     operator bool() const;
 
     bool all_stores_empty() const;
@@ -56,7 +54,7 @@ struct Maes {
     void end_cycle();
 
     /**
-     * Make all contributions to MAEs from the current occupied MBF row.
+     * Make all on-the-fly contributions to MAEs from the current occupied MBF row.
      *
      * Currently MAEs consist of the average HF excitations and the bilinears, of which the latter entail the
      * most careful handling.
@@ -113,7 +111,9 @@ struct Maes {
      *     be added in a special "finalizing" loop over occupied MBFs. crucially, this is done *before* the
      *     instantaneous weight is summed into the average, since this was already done in the previous iteration.
      */
-    void make_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle);
+    void make_otf_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle);
+
+    void fill_from_averaged_walkers(const wf::Vectors& wf);
 
     void output(uint_t icycle, const Hamiltonian& ham, bool final=false);
 };
