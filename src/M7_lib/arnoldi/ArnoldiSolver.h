@@ -8,11 +8,6 @@
 #include <M7_lib/linalg/DistMvProd.h>
 #include <M7_lib/util/Pointer.h>
 
-#include <arpackf.h>
-#include <arrssym.h>
-#include <arlnsmat.h>
-#include <arrsnsym.h>
-#include <arrscomp.h>
 #include <numeric>
 #include <M7_lib/util/Sort.h>
 
@@ -58,10 +53,12 @@ public:
     ArnoldiSolverBase(uint_t nroot, uint_t nelement_evec): m_nroot(nroot), m_nelement_evec(nelement_evec){}
     template<typename comp_t, bool real, bool sym> struct SolverSelector {};
 
+    /*
     template<typename comp_t> struct SolverSelector<comp_t, true, true>{ typedef ARrcSymStdEig<comp_t> type;};
     template<typename comp_t> struct SolverSelector<comp_t, true, false>{ typedef ARrcNonSymStdEig<comp_t> type;};
     template<typename comp_t> struct SolverSelector<comp_t, false, true>{ typedef ARrcCompStdEig<comp_t> type;};
     template<typename comp_t> struct SolverSelector<comp_t, false, false>{ typedef ARrcCompStdEig<comp_t> type;};
+     */
 
     /**
      * @return
@@ -88,6 +85,7 @@ public:
 protected:
     bool solve(const std::function<void()> &product_fn, bool dist);
 
+    /*
     template<class arfloat_t, class ar_t>
     void begin_log(ARrcStdEig<arfloat_t, ar_t>* solver, bool sym) {
         REQUIRE_TRUE(solver, "solver object must be allocated");
@@ -107,6 +105,7 @@ protected:
                       success ? "converged" : "failed to converge",
                       niter, string::plural(niter));
     }
+    */
 };
 
 template<typename kry_t>
@@ -121,7 +120,8 @@ protected:
     v_t<comp_t> m_real_evals;
     v_t<comp_t> m_imag_evals;
     v_t<kry_t> m_evecs;
-    ARrcStdEig<comp_t, kry_t>* m_ar_base = nullptr;
+
+    //ARrcStdEig<comp_t, kry_t>* m_ar_base = nullptr;
 
 private:
     void set_results(const comp_t* real_evals, const comp_t* imag_evals, const kry_t* raw_evecs){
@@ -141,6 +141,7 @@ private:
         });
     }
 
+    /*
     void set_results(ARrcSymStdEig<comp_t>* ar) {
         if (!ar) return;
         set_results(ar->RawEigenvalues(), nullptr, ar->RawEigenvectors());
@@ -162,6 +163,7 @@ private:
         }
         set_results(evals_re.data(), evals_im.data(), ar->RawEigenvectors());
     }
+     */
 
     /**
      * send the eigenvalues to each process
@@ -177,30 +179,34 @@ private:
     template<uint_t sym>
     ArnoldiSolver(std::function<void()> prod_fn, bool dist, uint_t nelement_evec, ArnoldiOptions opts, tag::Int<sym>):
             ArnoldiSolver(opts.m_nroot, nelement_evec) {
+        /*
         constexpr bool real = !dtype::is_complex<kry_t>();
         typedef typename ArnoldiSolverBase::SolverSelector<comp_t, real, sym>::type ar_t;
         std::unique_ptr<ar_t> m_ar;
         if (mpi::i_am_root() || !dist) {
             m_ar = ptr::smart::make_unique<ar_t>(
                     m_nelement_evec, opts.m_nroot, "LM", opts.m_narnoldi_vector, opts.m_ritz_tol, opts.m_niter_max);
-            m_ar_base = m_ar.get();
-            ArnoldiSolverBase::begin_log(m_ar_base, sym);
+            //m_ar_base = m_ar.get();
+            //ArnoldiSolverBase::begin_log(m_ar_base, sym);
         }
 
         const auto success = ArnoldiSolverBase::solve(prod_fn, dist);
-        if (mpi::i_am_root()) ArnoldiSolverBase::end_log(m_ar_base, success);
+        //if (mpi::i_am_root()) ArnoldiSolverBase::end_log(m_ar_base, success);
         if (success) set_results(m_ar.get());
         bcast();
+         */
     }
 
     /*
      * get and put vectors only exist on ranks with a solver instance
      */
     const kry_t* get_vector() {
-        return m_ar_base ? m_ar_base->GetVector() : nullptr;
+        return nullptr;
+        //return m_ar_base ? m_ar_base->GetVector() : nullptr;
     }
     kry_t* put_vector() {
-        return m_ar_base ? m_ar_base->PutVector() : nullptr;
+        return nullptr;
+        //return m_ar_base ? m_ar_base->PutVector() : nullptr;
     }
 
 public:
@@ -216,16 +222,16 @@ public:
                 mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector());
             }, true, mv_prod.m_nrow, opts, tag::Int<sym>()) {}
 
-    bool basis_found() override { return m_ar_base->ArnoldiBasisFound(); }
+    bool basis_found() override { return false;}
 
-    void take_step() override { m_ar_base->TakeStep(); }
+    void take_step() override {}
 
     bool do_another_mv_call() override {
-        return (m_ar_base->GetIdo() == 1) || (m_ar_base->GetIdo() == -1);
+        return false;
     }
 
     bool find_eigenvectors() override {
-        return m_ar_base->FindEigenvectors();
+        return false;
     }
 
     void get_eval(uint_t iroot, comp_t& eval) const {

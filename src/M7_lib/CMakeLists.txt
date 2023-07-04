@@ -1,5 +1,4 @@
 include(${CMAKE_SOURCE_DIR}/cmake/build_or_find_hdf5.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/build_or_find_arpack.cmake)
 
 add_library(M7_lib STATIC defs.h)
 target_include_directories(M7_lib
@@ -54,7 +53,6 @@ target_link_libraries(M7_lib spdlog)
 find_package(LAPACK REQUIRED)
 target_link_libraries(M7_lib ${LAPACK_LIBRARIES})
 
-add_arpack(M7_lib)
 add_parallel_hdf5(M7_lib)
 
 
@@ -132,7 +130,6 @@ endif()
 
 # compile and link options are compiler-dependent, so each vendor must be dealt with separately
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
              -g
@@ -159,7 +156,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
              -march=core-avx2 -g
@@ -186,7 +182,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     endif()
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
              -g
