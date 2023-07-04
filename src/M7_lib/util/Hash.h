@@ -13,7 +13,7 @@
 
 namespace hash {
 
-    typedef uint64_t digest_t;
+    typedef uint_t digest_t;
 
     template<typename T>
     static T fnv_prime() {
@@ -64,9 +64,21 @@ namespace hash {
      * @return
      *  hash value
      */
-    digest_t in_range(digest_t v, digest_t lo, digest_t hi);
+    digest_t digest_in_range(digest_t v, digest_t lo, digest_t hi);
 
-    digest_t in_range(const v_t<digest_t> &v, digest_t lo, digest_t hi);
+    digest_t digest_in_range(const v_t<digest_t> &v, digest_t lo, digest_t hi);
+
+    template<typename T=digest_t>
+    T in_range(digest_t v, digest_t lo, digest_t hi) {
+        static_assert(std::is_integral<T>::value, "digest can only be converted to integer");
+        return convert::safe_narrow<T>(digest_in_range(v, lo, hi));
+    }
+
+    template<typename T=digest_t>
+    T in_range(const v_t<digest_t> &v, digest_t lo, digest_t hi) {
+        static_assert(std::is_integral<T>::value, "digest can only be converted to integer");
+        return convert::safe_narrow<T>(digest_in_range(v, lo, hi));
+    }
 
     /**
      * deterministically generate arbitrary testing data: NOT a random number generator
@@ -83,9 +95,25 @@ namespace hash {
      * @return
      *  arbitrary integers with repetition allowed in the [lo, hi) range
      */
-    v_t<digest_t> in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    template<typename T=digest_t>
+    v_t<T> in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false) {
+        v_t<T> out;
+        out.reserve(ngen);
+        auto vatt = v;
+        vatt.push_back(0);
+        while (out.size() != ngen) {
+            auto r = digest_in_range(vatt, lo, hi);
+            out.push_back(r);
+            ++vatt.back();
+        }
+        if (sorted) std::sort(out.begin(), out.end());
+        return out;
+    }
 
-    v_t<digest_t> in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
+    template<typename T=digest_t>
+    v_t<T> in_range(const digest_t &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false) {
+        return in_range({v}, ngen, lo, hi, sorted);
+    }
 
     /**
      * deterministically generate arbitrary testing data: NOT a random number generator
@@ -102,16 +130,24 @@ namespace hash {
      * @return
      *  unrepeated arbitrary integers in the [lo, hi) range
      */
-    v_t<digest_t> unique_digest_in_range(const v_t<digest_t> &v, uint_t ngen,
-                                         digest_t lo, digest_t hi, bool sorted = false);
-
-
-    v_t<digest_t> unique_digest_in_range(digest_t v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false);
-
     template<typename T=digest_t>
-    v_t<T> unique_in_range(const v_t<digest_t> &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false) {
-        static_assert(std::is_integral<T>::value, "vector of unique digests can only be converted to integers");
-        return convert::safe_narrow<T>(unique_digest_in_range(v, ngen, lo, hi, sorted));
+    v_t<T> unique_in_range(const v_t<digest_t> &v, uint_t ngen,
+                                         digest_t lo, digest_t hi, bool sorted = false) {
+        REQUIRE_LE(lo + ngen, hi, "number of unique values can't exceed the range of allowed values");
+        v_t<T> out;
+        out.reserve(ngen);
+        std::set<digest_t> set;
+        auto vatt = v;
+        vatt.push_back(0);
+        while (set.size() != ngen) {
+            auto r = in_range(vatt, lo, hi);
+            while (set.find(r) != set.end()) if (++r == hi) r = lo;
+            out.push_back(r);
+            set.insert(r);
+            ++vatt.back();
+        }
+        if (sorted) std::sort(out.begin(), out.end());
+        return out;
     }
 
     template<typename T=digest_t>

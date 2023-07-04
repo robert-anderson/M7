@@ -25,7 +25,7 @@ function(add_parallel_hdf5 target)
                 -DHDF5_BUILD_TOOLS=OFF
                 -DHDF5_BUILD_EXAMPLES=OFF
                 -DBUILD_TESTING=OFF
-                -DCMAKE_C_FLAGS="-w"
+                -DCMAKE_C_FLAGS="-Wno-error=implicit-function-declaration"
                 -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
             SOURCE_DIR
                 ${OWN_HDF5_BUILD}/src/hdf5-${HDF5_VERSION}

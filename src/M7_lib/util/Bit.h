@@ -188,31 +188,31 @@ namespace bit {
         else return bit::trailz_c_table[(n >> 24) & 0xff] + 24;
     }
 
+    static uint_t trailz_64(const uint64_t &n) {
+#if defined(ENABLE_TZCNT)
+        return trailz_tzcnt(n);
+#else
+        // resort to software implementation
+        return trailz_c(n);
+#endif
+    }
+
+    static uint_t trailz_32(const uint32_t &n) {
+#if defined(ENABLE_TZCNT)
+        return trailz_tzcnt(n);
+#else
+        // resort to software implementation
+        return trailz_c(n);
+#endif
+    }
+
     template<typename T>
     static uint_t trailz(const T &n) {
         static_assert(std::is_integral<T>::value, "integral type required");
         static_assert(sizeof(T)==4 || sizeof(T)==8, "invalid size");
         return sizeof(T)==4 ?
-            trailz(reinterpret_cast<const uint32_t&>(n)) :
-            trailz(reinterpret_cast<const uint64_t&>(n));
-    }
-
-    static uint_t trailz(const uint64_t &n) {
-#if defined(ENABLE_TZCNT)
-        return trailz_tzcnt(n);
-#else
-        // resort to software implementation
-        return trailz64_c(n);
-#endif
-    }
-
-    static uint_t trailz(const uint32_t &n) {
-#if defined(ENABLE_TZCNT)
-        return trailz_tzcnt(n);
-#else
-        // resort to software implementation
-        return trailz32_c(n);
-#endif
+               trailz_32(reinterpret_cast<const uint32_t&>(n)) :
+               trailz_64(reinterpret_cast<const uint64_t&>(n));
     }
 
     template<typename T>
@@ -238,15 +238,25 @@ namespace bit {
      */
 
     static uint_t nsetbit_popcnt(const uint64_t &n) {
+#ifdef ENABLE_POPCNT
         uint_t res;
         asm("popcntq %1, %0;": "=r" (res): "r" (n));
         return res;
+#else
+        (void) n;
+        return ~0ul;
+#endif
     }
 
     static uint_t nsetbit_popcnt(const uint32_t &n) {
+#ifdef ENABLE_POPCNT
         uint32_t res;
         asm("popcnt %1, %0;": "=r" (res): "r" (n));
         return res;
+#else
+        (void) n;
+        return ~0u;
+#endif
     }
 
     static uint_t nsetbit_c(const uint64_t &n) {
@@ -267,32 +277,31 @@ namespace bit {
             popcnt_c_table[(n >> 24) & 0xff];
     }
 
+    static uint_t nsetbit_64(const uint64_t &n) {
+#if defined(ENABLE_POPCNT)
+        return nsetbit_popcnt(n);
+#else
+        // resort to software implementation
+        return nsetbit_c(n);
+#endif
+    }
+
+    static uint_t nsetbit_32(const uint32_t &n) {
+#if defined(ENABLE_POPCNT)
+        return nsetbit_popcnt(n);
+#else
+        // resort to software implementation
+        return nsetbit_c(n);
+#endif
+    }
 
     template<typename T>
     static uint_t nsetbit(const T &n) {
         static_assert(std::is_integral<T>::value, "integral type required");
         static_assert(sizeof(T)==4 || sizeof(T)==8, "invalid size");
         return sizeof(T)==4 ?
-               nsetbit(reinterpret_cast<const uint32_t&>(n)) :
-               nsetbit(reinterpret_cast<const uint64_t&>(n));
-    }
-
-    static uint_t nsetbit(const uint64_t &n) {
-#if defined(ENABLE_POPCNT)
-        return nsetbit_popcnt(n);
-#else
-        // resort to software implementation
-        return nsetbit64_c(n);
-#endif
-    }
-
-    static uint_t nsetbit(const uint32_t &n) {
-#if defined(ENABLE_POPCNT)
-        return nsetbit_popcnt(n);
-#else
-        // resort to software implementation
-        return nsetbit32_c(n);
-#endif
+               nsetbit_32(reinterpret_cast<const uint32_t&>(n)) :
+               nsetbit_64(reinterpret_cast<const uint64_t&>(n));
     }
 
     /**

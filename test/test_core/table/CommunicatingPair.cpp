@@ -40,7 +40,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
     auto& row = comm_pair.recv().m_row;
     for (row.restart(); row; ++row) {
         auto irank_src = row.index();
-        ASSERT_EQ(row.m_field, hash::in_range({mpi::irank(), irank_src}, hash_lo, hash_hi));
+        ASSERT_EQ(row.m_field, hash::in_range<uint_t>({mpi::irank(), irank_src}, hash_lo, hash_hi));
     }
 }
 

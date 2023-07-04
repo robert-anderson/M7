@@ -114,7 +114,7 @@ TEST(BufferedFields, NdBitset){
     const uinta_t<3> shape {4, 3, 2};
     const uint_t nbit = 4*3*2;
     const uint_t nsetbit = 8;
-    const auto setbits = hash::unique_in_range(0, nsetbit, 0, nbit, true);
+    const auto setbits = hash::unique_in_range<uint_t>(0, nsetbit, 0, nbit, true);
 
     //  1. constructable via argument forwarding to T::T
     buffered::NdBitset<uint_t, 3> direct(shape);
@@ -159,7 +159,7 @@ TEST(BufferedFields, NdBitset){
 TEST(BufferedFields, Bitset){
     const uint_t nbit = 20;
     const uint_t nsetbit = 8;
-    auto setbits = hash::unique_in_range(0, nsetbit, 0, nbit, true);
+    auto setbits = hash::unique_in_range<uint_t>(0, nsetbit, 0, nbit, true);
 
     //  1. constructable via argument forwarding to T::T
     buffered::Bitset<uint_t> direct(nbit);
