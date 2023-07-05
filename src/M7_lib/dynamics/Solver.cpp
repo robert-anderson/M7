@@ -360,6 +360,8 @@ void Solver::output_stats() {
         stats.m_nwalker_spawned = m_wf.m_stats.m_nspawned.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_stats.m_nannihilated.m_reduced;
         stats.m_ref_proj_energy_num = m_wf.m_refs.proj_energy_nums();
+        stats.m_ref_proj_energy_num_pos = m_wf.m_refs.proj_energy_nums_pos();
+        stats.m_ref_proj_energy_num_neg = m_wf.m_refs.proj_energy_nums_neg();
         stats.m_ref_weight = m_wf.m_refs.weights();
         stats.m_ref_proj_energy = stats.m_ref_proj_energy_num;
         stats.m_ref_proj_energy /= stats.m_ref_weight;

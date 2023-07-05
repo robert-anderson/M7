@@ -41,6 +41,8 @@ namespace wf {
         const double m_redefinition_thresh;
 
         reduction::Scalar<ham_t> m_proj_energy_num;
+        reduction::Scalar<ham_t> m_proj_energy_num_pos;
+        reduction::Scalar<ham_t> m_proj_energy_num_neg;
 
     public:
         Ref(const conf::Reference& opts, Vectors& wf, uint_t ipart, TableBase::Loc loc);
@@ -94,6 +96,8 @@ namespace wf {
         void make_numerator_contribs(const Mbf& mbf, const wf_t& weight);
 
         const ham_t& proj_energy_num() const;
+        const ham_t& proj_energy_num_pos() const;
+        const ham_t& proj_energy_num_neg() const;
 
     };
 
@@ -104,6 +108,8 @@ namespace wf {
     struct Refs {
         v_t<Ref> m_refs;
         buffered::Numbers<ham_t, c_ndim_wf> m_proj_energy_nums;
+        buffered::Numbers<ham_t, c_ndim_wf> m_proj_energy_nums_pos;
+        buffered::Numbers<ham_t, c_ndim_wf> m_proj_energy_nums_neg;
         buffered::Numbers<wf_t, c_ndim_wf> m_weights;
 
         Refs(const conf::Reference& opts, Vectors& wf, v_t<TableBase::Loc> locs);
@@ -119,6 +125,8 @@ namespace wf {
         v_t<bool> connected(const Mbf& mbf) const;
 
         const Numbers<ham_t, c_ndim_wf>& proj_energy_nums();
+        const Numbers<ham_t, c_ndim_wf>& proj_energy_nums_pos();
+        const Numbers<ham_t, c_ndim_wf>& proj_energy_nums_neg();
 
         const Numbers<wf_t, c_ndim_wf>& weights();
 

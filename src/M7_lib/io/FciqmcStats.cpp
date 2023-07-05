@@ -16,6 +16,8 @@ FciqmcStatsRow::FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests
         m_nwalker_spawned(this, m_wf_format, "Walkers spawned this cycle"),
         m_nwalker_annihilated(this, m_wf_format, "Walkers annihilated this cycle"),
         m_ref_proj_energy_num(this, m_wf_format, "Numerator of reference-projected energy estimator"),
+        m_ref_proj_energy_num_pos(this, m_wf_format, "Positive contribs to numerator of reference-projected energy estimator"),
+        m_ref_proj_energy_num_neg(this, m_wf_format, "Negative contribs to numerator of reference-projected energy estimator"),
         m_ref_weight(this, m_wf_format, "Reference weight"),
         m_ref_proj_energy(this, m_wf_format, "Reference-projected energy"),
         m_l2_norm(this, m_wf_format, "L2 norm of the wavefunction"),

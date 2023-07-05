@@ -26,6 +26,8 @@ struct FciqmcStatsRow : StatsRow {
     statistic::Numbers<wf_comp_t, c_ndim_wf> m_nwalker_spawned;
     statistic::Numbers<wf_comp_t, c_ndim_wf> m_nwalker_annihilated;
     statistic::Numbers<ham_t, c_ndim_wf> m_ref_proj_energy_num;
+    statistic::Numbers<ham_t, c_ndim_wf> m_ref_proj_energy_num_pos;
+    statistic::Numbers<ham_t, c_ndim_wf> m_ref_proj_energy_num_neg;
     statistic::Numbers<wf_t, c_ndim_wf> m_ref_weight;
     statistic::Numbers<ham_t, c_ndim_wf> m_ref_proj_energy;
     statistic::Numbers<ham_comp_t, c_ndim_wf> m_l2_norm;

@@ -57,11 +57,15 @@ void wf::Ref::begin_cycle(uint_t icycle) {
     accept_candidate(icycle);
     m_candidate_weight = 0.0;
     m_proj_energy_num.m_local.clear();
+    m_proj_energy_num_pos.m_local.clear();
+    m_proj_energy_num_neg.m_local.clear();
     update();
 }
 
 void wf::Ref::end_cycle(uint_t /*icycle*/) {
     m_proj_energy_num.all_sum();
+    m_proj_energy_num_pos.all_sum();
+    m_proj_energy_num_neg.all_sum();
 }
 
 bool wf::Ref::connected(const field::Mbf &mbf) const {
@@ -69,15 +73,21 @@ bool wf::Ref::connected(const field::Mbf &mbf) const {
 }
 
 void wf::Ref::make_numerator_contribs(const field::Mbf &mbf, const wf_t& weight) {
-    m_proj_energy_num.m_local += m_wf.m_ham.get_element(mbf, this->mbf()) * weight;
+    const auto contrib = m_wf.m_ham.get_element(mbf, this->mbf()) * weight;
+    m_proj_energy_num.m_local += contrib;
+    m_proj_energy_num_pos.m_local += contrib > 0 ? contrib : 0.0;
+    m_proj_energy_num_neg.m_local += contrib < 0 ? -contrib : 0.0;
 }
 
-const ham_t& wf::Ref::proj_energy_num() const {
-    return m_proj_energy_num.m_reduced;
-}
+const ham_t& wf::Ref::proj_energy_num() const {return m_proj_energy_num.m_reduced;}
+const ham_t& wf::Ref::proj_energy_num_pos() const {return m_proj_energy_num_pos.m_reduced;}
+const ham_t& wf::Ref::proj_energy_num_neg() const {return m_proj_energy_num_neg.m_reduced;}
 
 wf::Refs::Refs(const conf::Reference &opts, wf::Vectors &wf, v_t<TableBase::Loc> locs) :
-        m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
+        m_proj_energy_nums(wf.m_format.m_shape),
+        m_proj_energy_nums_pos(wf.m_format.m_shape),
+        m_proj_energy_nums_neg(wf.m_format.m_shape),
+        m_weights(wf.m_format.m_shape){
     DEBUG_ASSERT_EQ(locs.size(), wf.m_format.m_nelement,
                     "there should be a parallel table location specifying each reference row");
     m_refs.reserve(wf.m_format.m_nelement);
@@ -113,6 +123,16 @@ const field::Numbers<ham_t, c_ndim_wf> & wf::Refs::proj_energy_nums() {
     uint_t ipart = 0ul;
     for (auto& ref: m_refs) m_proj_energy_nums[ipart++] = ref.proj_energy_num();
     return m_proj_energy_nums;
+}
+const field::Numbers<ham_t, c_ndim_wf> & wf::Refs::proj_energy_nums_pos() {
+    uint_t ipart = 0ul;
+    for (auto& ref: m_refs) m_proj_energy_nums_pos[ipart++] = ref.proj_energy_num_pos();
+    return m_proj_energy_nums_pos;
+}
+const field::Numbers<ham_t, c_ndim_wf> & wf::Refs::proj_energy_nums_neg() {
+    uint_t ipart = 0ul;
+    for (auto& ref: m_refs) m_proj_energy_nums_neg[ipart++] = ref.proj_energy_num_neg();
+    return m_proj_energy_nums_neg;
 }
 
 const field::Numbers<wf_t, c_ndim_wf> & wf::Refs::weights() {
