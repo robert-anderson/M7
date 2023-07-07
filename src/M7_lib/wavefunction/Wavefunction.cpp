@@ -702,7 +702,6 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
     REQUIRE_EQ_ALL(mpi::all_sum(nrow_recv), loader.nitem(), "not all walkers loaded");
     logging::info("{} wavefunction rows successfully loaded from HDF5 archive", loader.nitem());
     logging::info("{} total wavefunction rows", mpi::all_sum(m_store.nrow_in_use()));
-    logging::info(m_store.to_string());
 }
 
 bool wf::Vectors::was_loaded() const {
