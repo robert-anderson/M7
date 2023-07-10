@@ -5,7 +5,7 @@
 #include "Annihilator.h"
 
 comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
-    if (m_maes && m_maes.m_on_the_fly) {
+    if (m_maes && m_maes.m_opts.m_on_the_fly) {
         return [&](const uint_t &irow1, const uint_t &irow2) {
             m_work_row1.jump(irow1);
             m_work_row2.jump(irow2);
@@ -127,7 +127,7 @@ void Annihilator::handle_dst_block(Spawn &block_begin, Spawn &next_block_begin, 
     /*
      * only consider RDM contributions if there are any RDMs being accumulated and the destination exists
      */
-    if (m_maes && m_maes.m_on_the_fly && m_maes.m_accum_epoch && dst_walker) {
+    if (m_maes && m_maes.m_opts.m_on_the_fly && m_maes.m_accum_epoch && dst_walker) {
         DEBUG_ASSERT_TRUE(block_begin.m_send_parents, "RDM sampling requires that parent MBFs are communicated");
         /*
          * store the original positions of the row objects in the recv table

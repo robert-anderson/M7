@@ -138,7 +138,7 @@ void deterministic::Subspace::make_connections(const SpecMoms &spec_moms) {
 }
 
 void deterministic::Subspace::make_rdm_contribs(const shared_rows::Walker *hf) {
-    if (!m_maes.m_on_the_fly) return;
+    if (!m_maes.m_opts.m_on_the_fly) return;
     auto& rdms = m_maes.m_rdms;
     if (!rdms || !rdms.m_accum_epoch) return;
     uint_t iirec = ~0ul;
@@ -162,7 +162,7 @@ void deterministic::Subspace::make_rdm_contribs(const shared_rows::Walker *hf) {
 }
 
 void deterministic::Subspace::make_spec_mom_contribs() {
-    if (!m_maes.m_on_the_fly) return;
+    if (!m_maes.m_opts.m_on_the_fly) return;
     auto& spec_moms = m_maes.m_spec_moms;
     if (!spec_moms || !spec_moms.m_accum_epoch) return;
     REQUIRE_TRUE(m_frm_hole_perturbed.get(), "uninitialized");

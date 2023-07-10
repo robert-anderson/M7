@@ -27,9 +27,9 @@ struct Maes {
      */
     SpecMoms m_spec_moms;
     /**
-     * number of cycles between consecutive averaging operations and stats output
+     * ref to options object
      */
-    const uint_t m_period;
+    const conf::Mae &m_opts;
     /**
      * cycle on which the current period started
      */
@@ -38,10 +38,6 @@ struct Maes {
      * stats output object
      */
     std::unique_ptr<MaeStats> m_stats = nullptr;
-    /**
-     * true if MAEs are to be accumulated on the fly, else they should be created from a single (averaged) WF
-     */
-    const bool m_on_the_fly;
 
     Maes(const conf::Mae &opts, const wf::Vectors& wf);
 
@@ -113,7 +109,7 @@ struct Maes {
      */
     void make_otf_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle);
 
-    void fill_from_averaged_walkers(const wf::Vectors& wf);
+    void fill_from_averaged_walkers(const wf::Vectors& wf, uint_t icycle);
 
     void output(uint_t icycle, const Hamiltonian& ham, bool final=false);
 };

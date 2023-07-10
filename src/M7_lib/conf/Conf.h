@@ -274,6 +274,7 @@ namespace conf {
         Param<uint_t> m_stats_period;
         Param<str_t> m_stats_path;
         Param<bool> m_on_the_fly;
+        Param<wf_comp_t> m_notf_fill_discard_thresh;
         Rdms m_rdm;
         SpecMoms m_spec_mom;
 

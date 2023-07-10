@@ -289,8 +289,8 @@ void Solver::loop_over_occupied_mbfs() {
 }
 
 void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
-    if (!m_maes.m_on_the_fly){
-        m_maes.fill_from_averaged_walkers(m_wf);
+    if (!m_maes.m_opts.m_on_the_fly){
+        m_maes.fill_from_averaged_walkers(m_wf, icycle);
     }
     else {
         if (!m_maes.m_accum_epoch || m_maes.is_period_cycle(icycle)) return;

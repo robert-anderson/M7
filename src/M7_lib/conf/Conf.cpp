@@ -325,6 +325,8 @@ conf::Mae::Mae(Group *parent) :
         m_stats_path(this, "stats_path", "M7.mae.stats", "output path for contracted value statistics"),
         m_on_the_fly(this, "on_the_fly", true,
             "if true, accumulate MAEs on-the-fly, else accumulate average CI in all protected MBFs and compute RDMs once at the end instead"),
+        m_notf_fill_discard_thresh(this, "notf_fill_discard_thresh", 0.0,
+            "if an average histogrammed walker has a weight below this magnitude, it is excluded from not-on-the-fly MAE filling"),
         m_rdm(this, "rdm", "options relating to the accumulation and sampling of RDM elements"),
         m_spec_mom(this, "spec_mom", "options relating to the accumulation and sampling of spectral moments")
         {}
