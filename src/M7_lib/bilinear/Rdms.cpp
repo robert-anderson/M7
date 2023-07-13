@@ -120,7 +120,7 @@ void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_op
         }
         if (rdm->m_stoch_thresh_contribs){
             const auto norm = this->contrib_norm(0);
-            const auto rdm_contrib = m_stoch_thresh_prng->stochastic_threshold(contrib / norm, m_opts.m_stoch_thresh_mag.m_value);
+            rdm_contrib = m_stoch_thresh_prng->stochastic_threshold(contrib / norm, m_opts.m_stoch_thresh_mag.m_value);
             // skip this contribution if it was stochastically rounded to zero
             if (rdm_contrib == 0.0) continue;
         }
