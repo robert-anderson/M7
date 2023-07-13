@@ -80,50 +80,15 @@ void Maes::make_otf_average_contribs(Walker &row, const shared_rows::Walker* hf,
     row.m_icycle_occ = icycle + 1;
 }
 
-void Maes::fill_from_averaged_walkers(const wf::Vectors& wf, uint_t icycle) {
+void Maes::fill_from_wf_hist(const Table<MbfWeightRow>& hist) {
     REQUIRE_TRUE_ALL(all_stores_empty(), "stores should be empty if no on-the-fly contributions have been made");
 
-    struct ShortRow : Row {
-        field::Mbf m_mbf;
-        field::Numbers<wf_t, c_ndim_wf> m_weight;
-        ShortRow(const Walker& walker): Row(),
-            m_mbf(this, walker.m_mbf.m_basis),
-            m_weight(this, walker.m_average_weight.m_format){}
-    };
+    logging::info("Filling MAEs using histogrammed partial CI vector composed of {} MBFs", hist.nrow_in_use());
 
-    logging::info("Gathering histogrammed CI weights for MAE filling");
-    logging::info("Discarding average weights < {}", m_opts.m_notf_fill_discard_thresh.m_value);
+    const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
+    const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
 
-    uint_t ndiscard = 0ul;
-    auto walker = wf.m_store.m_row;
-    buffered::Table<ShortRow> local_averaged(ShortRow{walker});
-    auto local_row = local_averaged.m_row;
-    local_row.restart();
-    for (walker.restart(); walker; ++walker) {
-        const auto av_weight = walker.m_average_weight[0] / walker.occupied_ncycle(icycle);
-        if (walker.is_protected()) {
-            if (std::abs(av_weight) < m_opts.m_notf_fill_discard_thresh) {
-                ++ndiscard;
-                continue;
-            }
-            local_row.push_back_jump();
-            local_row.m_mbf = walker.m_mbf;
-            local_row.m_weight = walker.m_average_weight;
-        }
-    }
-
-    // TODO: node-shared gathered_averaged
-    buffered::Table<ShortRow> gathered_averaged(local_averaged.m_row, false);
-    gathered_averaged.all_gatherv(local_averaged);
-
-    ndiscard = mpi::all_sum(ndiscard);
-    if (ndiscard) logging::info("Discarded {} low-weight MBFs", ndiscard);
-    logging::info("Filling MAEs using averaged partial CI vector composed of {} MBFs", gathered_averaged.nrow_in_use());
-
-    const auto displ = mpi::evenly_shared_displ(gathered_averaged.nrow_in_use());
-    const auto count = mpi::evenly_shared_count(gathered_averaged.nrow_in_use());
-
-    auto bra = gathered_averaged.m_row;
+    auto bra = hist.m_row;
     auto ket = bra;
     for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
         for (ket.restart(); ket; ++ket) {

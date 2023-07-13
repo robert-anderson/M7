@@ -109,7 +109,7 @@ struct Maes {
      */
     void make_otf_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle);
 
-    void fill_from_averaged_walkers(const wf::Vectors& wf, uint_t icycle);
+    void fill_from_wf_hist(const Table<MbfWeightRow>& hist);
 
     void output(uint_t icycle, const Hamiltonian& ham, bool final=false);
 };

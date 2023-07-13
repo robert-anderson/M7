@@ -72,6 +72,12 @@ struct OnvRow : public Row {
     OnvRow(const sys::Sector& sector) : m_mbf(this, sector), m_nparent(this) {}
 };
 
+struct MbfWeightRow : Row {
+    field::Mbf m_mbf;
+    field::Numbers<wf_t, c_ndim_wf> m_weight;
+    MbfWeightRow(const Walker& walker):
+        Row(), m_mbf(this, walker.m_mbf.m_basis), m_weight(this, walker.m_wf_format){}
+};
 
 typedef MappedTable<Walker> WalkerTable;
 

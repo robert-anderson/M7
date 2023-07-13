@@ -162,6 +162,7 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     m_stats(m_format, nshift_space()),
     m_large_ci_set(m_opts.m_wavefunction.m_large_ci_set.m_enabled ?
         new mbf::table_t("large CI set", mbf::row_t({m_ham.m_basis, Walker::c_mbf_field_name})) : nullptr),
+    m_gathered_hist(MbfWeightRow(m_store.m_row), false),
     m_stoch_round_mags(make_stoch_thresh_mags()),
     m_refs(opts.m_reference, *this, setup()),
     m_chkpt_files(opts.m_wavefunction.m_chkpt){
@@ -716,4 +717,54 @@ void wf::Vectors::attempt_chkpt(uint_t icycle) {
     hdf5::FileWriter fw(path);
     fw.save_attr("icycle", icycle);
     save(fw);
+}
+
+void wf::Vectors::update_gathered_hist(wf_comp_t thresh, uint_t icycle) {
+    logging::info("Gathering histogrammed CI weights");
+    if (thresh == 0.0) logging::info("Not discarding based on average weight");
+    else logging::info("Discarding MBFs with average weight < {} from histogrammed set", thresh);
+
+    uint_t ndiscard = 0ul;
+    auto walker = m_store.m_row;
+    buffered::Table<MbfWeightRow> local_averaged(MbfWeightRow{walker});
+    auto local_row = local_averaged.m_row;
+    local_row.restart();
+    for (walker.restart(); walker; ++walker) {
+        const auto av_weight = walker.m_average_weight[0] / walker.occupied_ncycle(icycle);
+        if (walker.is_protected()) {
+            if (std::abs(av_weight) < thresh) {
+                ++ndiscard;
+                continue;
+            }
+            local_row.push_back_jump();
+            local_row.m_mbf = walker.m_mbf;
+            local_row.m_weight = walker.m_average_weight;
+        }
+    }
+
+    // TODO: node-shared gathered_averaged
+    m_gathered_hist.all_gatherv(local_averaged);
+
+    ndiscard = mpi::all_sum(ndiscard);
+    if (ndiscard) logging::info("Discarded {} low-weight MBFs from the histogrammed set", ndiscard);
+
+    m_last_gathered_hist_thresh = thresh;
+    m_last_gathered_hist_icycle = icycle;
+}
+
+void wf::Vectors::update_gathered_hist_if_changed(wf_comp_t thresh, uint_t icycle) {
+    if (m_gathered_hist.empty() ||
+        thresh != m_last_gathered_hist_thresh ||
+        icycle != m_last_gathered_hist_icycle)
+        update_gathered_hist(thresh, icycle);
+}
+
+void wf::Vectors::attempt_gathered_hist_save(uint_t icycle) {
+    if (!m_opts.m_wavefunction.m_save_hist.m_enabled) return;
+    update_gathered_hist_if_changed(m_opts.m_wavefunction.m_save_hist.m_thresh, icycle);
+    hdf5::FileWriter fw(m_opts.m_wavefunction.m_save_hist.m_path);
+    auto& row = m_gathered_hist.m_row;
+    hdf5::GroupWriter gw(fw, "wf");
+    row.m_mbf.save(gw, true);
+    row.m_weight.save(gw, true);
 }

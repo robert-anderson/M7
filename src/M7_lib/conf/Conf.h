@@ -129,6 +129,11 @@ namespace conf {
         InitSpace(Group *parent);
     };
 
+    struct WfHistFile : OptionalFile {
+        Param<wf_comp_t> m_thresh;
+        WfHistFile(Group* parent);
+    };
+
     struct Wavefunction : Section {
         Param<double> m_nw_init;
         Param<uint_t> m_nroot;
@@ -140,6 +145,7 @@ namespace conf {
         Distribution m_distribution;
         CiPmntr m_ci_pmntr;
         LargeCiSet m_large_ci_set;
+        WfHistFile m_save_hist;
         InitSpace m_init_space;
         OptionalFile m_save;
         OptionalFile m_load;

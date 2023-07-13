@@ -147,6 +147,12 @@ conf::InitSpace::InitSpace(Group *parent) :
                    "magnitude but opposite signs, and 0 enforces such symmetry"),
         m_solve(this, "solve", true, "if true, diagonalize H projected into the subspace"){}
 
+conf::WfHistFile::WfHistFile(Group *parent) :
+        OptionalFile(parent, "save_hist",
+                     "file in which to save histogrammed wavefunction", "M7.hist.h5", Explicit),
+        m_thresh(this, "thresh", 0.0,
+                 "threshold below which histogrammed MBF-weights should be discarded"){}
+
 conf::Wavefunction::Wavefunction(Group *parent) :
         Section(parent, "wavefunction",
                         "options relating to the storage and update of a distributed many-body wavefunction"),
@@ -156,7 +162,7 @@ conf::Wavefunction::Wavefunction(Group *parent) :
         m_stoch_thresh_mags(this, "stoch_thresh_mags", {}, "magnitudes to use in stochastic thresholding of walker weights by shift space"),
         m_grace_period(this, "grace_period", {}, "number of cycles to wait before removing row of killed walker"),
         m_buffers(this), m_hash_mapping(this), m_distribution(this),
-        m_ci_pmntr(this), m_large_ci_set(this), m_init_space(this),
+        m_ci_pmntr(this), m_large_ci_set(this), m_save_hist(this), m_init_space(this),
         m_save(this, "save", "wavefunction save", "M7.wf.h5", conf_components::Explicit),
         m_load(this, "load", "wavefunction load", "M7.wf.h5", conf_components::Explicit),
         m_load_large_ci(this, "load_large_ci", "load set of MBFs with large CI weight expected and protect their rows from deletion",

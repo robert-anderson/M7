@@ -145,6 +145,7 @@ void Solver::execute(uint_t ncycle) {
         }
         logging::flush();
     }
+    m_wf.attempt_gathered_hist_save(m_icycle);
     if (m_icycle == ncycle) logging::info("maximum cycle number ({}) reached", m_icycle);
     if (m_maes.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
@@ -290,7 +291,9 @@ void Solver::loop_over_occupied_mbfs() {
 
 void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
     if (!m_maes.m_opts.m_on_the_fly){
-        m_maes.fill_from_averaged_walkers(m_wf, icycle);
+        m_wf.update_gathered_hist_if_changed(
+                m_maes.m_opts.m_notf_fill_discard_thresh, icycle);
+        m_maes.fill_from_wf_hist(m_wf.m_gathered_hist);
     }
     else {
         if (!m_maes.m_accum_epoch || m_maes.is_period_cycle(icycle)) return;

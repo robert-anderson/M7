@@ -60,6 +60,15 @@ namespace wf {
          * if enabled in config doc, keep a list of all MBFs which attain a given occupation at any point in the calculation
          */
         std::unique_ptr<mbf::table_t> m_large_ci_set;
+        /**
+         * MBFs and weights of all averaged, histogrammed rows gathered gaplessly into a single table
+         */
+        buffered::Table<MbfWeightRow> m_gathered_hist;
+        /**
+         * threshold and cycle index of last histogram gather (to determine whether m_gathered_hist must be updated)
+         */
+        wf_comp_t m_last_gathered_hist_thresh = 0.0;
+        uint_t m_last_gathered_hist_icycle = 0;
 
     private:
 
@@ -380,6 +389,12 @@ namespace wf {
         void load(const hdf5::NodeReader& parent);
 
         bool was_loaded() const;
+
+        void update_gathered_hist(wf_comp_t thresh, uint_t icycle);
+
+        void update_gathered_hist_if_changed(wf_comp_t thresh, uint_t icycle);
+
+        void attempt_gathered_hist_save(uint_t icycle);
     };
 }
 
