@@ -765,6 +765,6 @@ void wf::Vectors::attempt_gathered_hist_save(uint_t icycle) {
     hdf5::FileWriter fw(m_opts.m_wavefunction.m_save_hist.m_path);
     auto& row = m_gathered_hist.m_row;
     hdf5::GroupWriter gw(fw, "wf");
-    row.m_mbf.save(gw, true);
-    row.m_weight.save(gw, true);
+    row.m_mbf.save(gw, mpi::i_am_root());
+    row.m_weight.save(gw, mpi::i_am_root());
 }
