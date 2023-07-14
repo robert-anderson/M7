@@ -723,30 +723,35 @@ void wf::Vectors::update_gathered_hist(wf_comp_t thresh, uint_t icycle) {
     logging::info("Gathering histogrammed CI weights");
     if (thresh == 0.0) logging::info("Not discarding based on average weight");
     else logging::info("Discarding MBFs with average weight < {} from histogrammed set", thresh);
+    logging::flush_all();
 
     uint_t ndiscard = 0ul;
-    auto walker = m_store.m_row;
-    buffered::Table<MbfWeightRow> local_averaged(MbfWeightRow{walker});
-    auto local_row = local_averaged.m_row;
+    buffered::Table<MbfWeightRow> local_averaged(MbfWeightRow{m_store.m_row});
+    auto& local_row = local_averaged.m_row;
     local_row.restart();
-    for (walker.restart(); walker; ++walker) {
-        const auto av_weight = walker.m_average_weight[0] / walker.occupied_ncycle(icycle);
+
+    auto add_local_hist_walker_fn = [&ndiscard, &thresh, &local_row, &icycle](const Walker& walker){
         if (walker.is_protected()) {
+            const auto av_weight = walker.m_average_weight[0] / walker.occupied_ncycle(icycle);
             if (std::abs(av_weight) < thresh) {
                 ++ndiscard;
-                continue;
+                return;
             }
             local_row.push_back_jump();
             local_row.m_mbf = walker.m_mbf;
             local_row.m_weight = walker.m_average_weight;
         }
-    }
+    };
+    m_store.foreach_row_in_use(add_local_hist_walker_fn);
 
+    logging::info("Local histogrammed rows collected - performing all MPI all gatherv");
+    logging::flush_all();
     // TODO: node-shared gathered_averaged
     m_gathered_hist.all_gatherv(local_averaged);
 
     ndiscard = mpi::all_sum(ndiscard);
     if (ndiscard) logging::info("Discarded {} low-weight MBFs from the histogrammed set", ndiscard);
+    logging::flush_all();
 
     m_last_gathered_hist_thresh = thresh;
     m_last_gathered_hist_icycle = icycle;
