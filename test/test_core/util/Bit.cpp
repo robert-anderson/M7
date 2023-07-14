@@ -182,11 +182,11 @@ TEST(UtilBit, TrailzSoftwareImpl64) {
     /*
      * software implementation should agree with optimized implementation (if any available)
      */
-    ASSERT_EQ(bit::trailz(0ull), bit::trailz_c(0ull));
+    ASSERT_EQ(bit::trailz(0ul), bit::trailz_c(0ul));
     for (uint_t ibit=0ul; ibit < 64ul; ++ibit) {
-        ASSERT_EQ(bit::trailz_c(1ull << ibit), ibit);
+        ASSERT_EQ(bit::trailz_c(1ul << ibit), ibit);
         ASSERT_EQ(bit::trailz(1ull << ibit), ibit);
-        ASSERT_EQ(bit::trailz(1ull << ibit), bit::trailz_c(1ull << ibit));
+        ASSERT_EQ(bit::trailz(1ull << ibit), bit::trailz_c(1ul << ibit));
     }
 }
 

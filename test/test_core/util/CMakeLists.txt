@@ -7,6 +7,7 @@ target_sources(unittest
         ForeachVirtual.cpp
         FpTol.cpp
         Hashing.cpp
+        IndexSet.cpp
         Integer.cpp
         Math.cpp
         MeanStd.cpp
