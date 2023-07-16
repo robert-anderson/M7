@@ -3,6 +3,7 @@ target_sources(unittest
         Array.cpp
         BasicForeach.cpp
         Bit.cpp
+        BitsetIntersection.cpp
         Convert.cpp
         ForeachVirtual.cpp
         FpTol.cpp

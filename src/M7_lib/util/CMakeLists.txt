@@ -3,6 +3,8 @@ target_sources(M7_lib
         Arith.h
         Array.h
         Bit.h
+        BitsetIntersection.cpp
+        BitsetIntersection.h
         FpTol.h
         Convert.h
         Datatype.h
