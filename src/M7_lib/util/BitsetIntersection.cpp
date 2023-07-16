@@ -53,6 +53,22 @@ void bitset_isect::make_isect(const uintv_t& bitset, v_t<uintp_t>& isect) {
     make_isect(bitset, bitset, isect);
 }
 
+v_t<v_t<uintp_t>> bitset_isect::make_isects(const v_t<uintv_t>& bitsets1, const v_t<uintv_t>& bitsets2,
+                          uint_t iword_begin, uint_t iword_end) {
+    v_t<v_t<uintp_t>> isects;
+    DEBUG_ASSERT_EQ(bitsets1.size(), bitsets2.size(), "numbers of bitsets should match");
+    isects.reserve(bitsets1.size());
+    while (isects.size() != isects.capacity()) {
+        isects.push_back({});
+        make_isect(bitsets1[isects.size()-1], bitsets2[isects.size()-1], iword_begin, iword_end, isects.back());
+    }
+    return isects;
+}
+
+v_t<v_t<uintp_t>> bitset_isect::make_isects(const v_t<uintv_t>& bitsets, uint_t iword_begin, uint_t iword_end) {
+    return make_isects(bitsets, bitsets, iword_begin, iword_end);
+}
+
 void bitset_isect::isect(v_t<uintp_t>& isect, const uintv_t& bitset) {
     auto ifill = 0ul;
     for (auto& pair: isect) {

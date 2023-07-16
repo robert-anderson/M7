@@ -68,6 +68,16 @@ namespace bitset_isect {
     void make_isect(const uintv_t& bitset, v_t<uintp_t>& isect);
 
     /**
+     * repeat above process for many pairs of bitsets
+     */
+    v_t<v_t<uintp_t>> make_isects(const v_t<uintv_t>& bitsets1, const v_t<uintv_t>& bitsets2, uint_t iword_begin, uint_t iword_end);
+    /**
+     * as above but take intersections of the bitsets with themselves (i.e. convert to intersection vectors)
+     */
+    v_t<v_t<uintp_t>> make_isects(const v_t<uintv_t>& bitsets, uint_t iword_begin, uint_t iword_end);
+
+
+    /**
      * update isect in-place by taking its intersection with the given bitset
      */
     void isect(v_t<uintp_t>& isect, const uintv_t& bitset);
