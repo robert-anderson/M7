@@ -40,7 +40,7 @@ uint_t Walker::ipart_replica(uint_t ipart) const {
 }
 
 bool Walker::exceeds_initiator_thresh(uint_t ipart, wf_comp_t thresh) const {
-    return std::abs(m_weight[ipart]) >= thresh;
+    return std::abs(m_weight[ipart]) > thresh;
 }
 
 const str_t Walker::c_mbf_field_name = "many-body basis function";
