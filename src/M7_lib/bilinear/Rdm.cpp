@@ -38,6 +38,10 @@ void Rdm::add_to_send_table(const RdmInds &inds, wf_t contrib) {
     m_send_row.m_values[0] += contrib;
 }
 
+void Rdm::make_full_contrib(const RdmInds& full_inds, const OpSig& /*exsig*/, const wf_t& contrib, bool phase) {
+    add_to_send_table(full_inds, phase ? -contrib : contrib);
+}
+
 Rdm::Rdm(OpSig ranksig, OpSig indsig, sys::Sector sector, uint_t nvalue,
          bool stoch_thresh_contribs, bool neglect_tiny_contribs,
          DistribOptions dist_opts, Sizing store_sizing, Sizing comm_sizing, str_t name) :
@@ -107,7 +111,8 @@ PureRdm::PureRdm(const conf::Rdms& opts, OpSig ranksig, sys::Sector sector, uint
             mag_opt_enabled(ranksig, opts.m_neglect_contribs_mag, opts.m_neglect_tiny_contribs_ranks), name){}
 
 void PureRdm::frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv& conn, const FrmOps& com, wf_t contrib) {
-    const auto exlvl = conn.m_cre.size();
+    const auto exsig = conn.exsig();
+    const auto exlvl = exsig.nfrm_cre();
     DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
                       "this method should not have been delegated given the exsig of the contribution");
     const auto rank = m_ranksig.nfrm_cre();
@@ -128,7 +133,7 @@ void PureRdm::frm_make_contribs(const field::FrmOnv& src_onv, const conn::FrmOnv
          * include the Fermi phase of the excitation
          */
         phase ^= conn.phase(src_onv);
-        add_to_send_table(m_full_inds, phase ? -contrib : contrib);
+        PureRdm::make_full_contrib(m_full_inds, exsig, contrib, phase);
     }
 }
 

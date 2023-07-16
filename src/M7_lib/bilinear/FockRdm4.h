@@ -42,6 +42,8 @@ public:
 
     NonDiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue);
 
+    void make_full_contrib(const RdmInds& full_inds, const OpSig& /*exsig*/, const wf_t& contrib, bool phase) override;
+
     /**
      * override the default method to implement on-the-fly contraction
      */
@@ -58,6 +60,8 @@ class DiagFockRdm4 : public FockRdm4 {
 public:
 
     DiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue);
+
+    void make_full_contrib(const RdmInds& full_inds, const OpSig& exsig, const wf_t& contrib, bool phase) override;
 
     /**
      * override the default method to implement on-the-fly, diagonal-only contraction

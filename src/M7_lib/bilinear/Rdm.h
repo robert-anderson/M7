@@ -81,6 +81,18 @@ protected:
 
 public:
 
+    /**
+     * a "full" contribution is one in which all SQ operators in the contribution are determined, as opposed to the
+     * make_contribs methods which involve computing all full contributions from a pair of determinants
+     * @param full_inds
+     *  all SQ operators in RDM contribution (not necessarily the same as stored indices: see contracted tensors)
+     * @param contrib
+     *  Ci * Cj
+     * @param phase
+     *  antisymmetric Fermi-phase associated with the contribution
+     */
+    virtual void make_full_contrib(const field::RdmInds& full_inds, const OpSig& /*exsig*/, const wf_t& contrib, bool phase);
+
     bool approx_contribs() const {
         return m_stoch_thresh_contribs || m_neglect_tiny_contribs;
     }
