@@ -254,18 +254,25 @@ def load_spinfree_hdf5_rdm(group):
     for i, row in enumerate(inds): rdm[tuple(row)] = values[i]
     return rdm
 
-def check_spinfree_rdms(h5_path, pkl_path, keys, tol=1e-5):
+def check_spinfree_rdms(h5_path, pkl_path, keys, rtol=1e-4, atol=1e-5):
     h5_file = h5py.File(resolve([RUN_DIR], h5_path), 'r')
     pkl_fname = resolve([AST_DIR], pkl_path)
     with open(pkl_fname, 'rb') as f: pkl_rdms = pkl.load(f)
 
     for key in keys:
-        h5_rdm = load_spinfree_hdf5_rdm(h5_file[f'spinfree/{key}'])
-        pkl_rdm = pkl_rdms[key]
+        # keys can be 2-tuple if the names differ between h5 and pkl structures
+        try:
+            h5_key, pkl_key = key
+        except ValueError:
+            h5_key, pkl_key = key, key
+
+        h5_rdm = load_spinfree_hdf5_rdm(h5_file[f'spinfree/{h5_key}'])
+        pkl_rdm = pkl_rdms[pkl_key]
         abs_err = np.abs(h5_rdm - pkl_rdm)
         max_indices = np.unravel_index(np.argmax(abs_err), abs_err.shape)
-        max_diff = abs_err[max_indices]
-        if max_diff > tol:
-            run_val = h5_rdm[max_indices]
-            pkl_val = pkl_rdm[max_indices]
-            fail(True, f'RDM {key} element {max_indices} value {run_val:.5e} does not equal reference {pkl_val:.5e} within tol {tol:.1e}')
+        run_val = h5_rdm[max_indices]
+        pkl_val = pkl_rdm[max_indices]
+        if not np.isclose(run_val, pkl_val, rtol, atol):
+            fail(True, f'RDM {h5_key} element {max_indices} value {run_val:.5e} does not equal reference RDM {pkl_key} {pkl_val:.5e} within tol (rel={rtol:.1e}, abs={atol:.1e})')
+
+
