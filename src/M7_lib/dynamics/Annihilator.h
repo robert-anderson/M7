@@ -36,6 +36,10 @@ struct Annihilator {
      */
     const wf_comp_t m_nadd;
     /**
+     * threshold below which a Walker is considered unoccupied
+     */
+    const wf_comp_t m_nadd_child;
+    /**
      * reference to the current cycle counter of the Solver class
      */
     const uint_t& m_icycle;
@@ -88,8 +92,8 @@ private:
 
 public:
 
-    Annihilator(wf::Vectors &wf, const Propagator& prop,
-                const shared_rows::Walker* hf, Maes& maes, const uint_t& icycle, wf_comp_t nadd);
+    Annihilator(wf::Vectors &wf, const Propagator& prop, const shared_rows::Walker* hf,
+                Maes& maes, const uint_t& icycle, wf_comp_t nadd, wf_comp_t nadd_child);
 
     /**
      * using the comparator implementation, sort the m_recv table of the referenced wavefunction

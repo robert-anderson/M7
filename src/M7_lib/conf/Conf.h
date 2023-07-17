@@ -346,6 +346,7 @@ namespace conf {
         conf::ExcitGen m_excit_gen;
         Param<wf_comp_t> m_max_bloom;
         Param<wf_comp_t> m_nadd;
+        Param<wf_comp_t> m_nadd_child;
         Param<double> m_tau_init;
         Param<double> m_tau_min;
         Param<double> m_tau_max;

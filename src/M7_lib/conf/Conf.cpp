@@ -371,6 +371,7 @@ conf::Propagator::Propagator(Group *parent) :
         m_max_bloom(this, "max_bloom", 0.0,
                     "the maximum acceptable magnitude for an off-diagonal propagated contribution. If tau is dynamic, it is updated to keep spawned contributions below this magnitude"),
         m_nadd(this, "nadd", 3.0, "MBFs with weight above this value are granted initiator status"),
+        m_nadd_child(this, "nadd_child", 0.0, "MBFs with weight below this value are considered unoccupied for initiator purposes"),
         m_tau_init(this, "tau_init", 1e-3, "initial value for the timestep"),
         m_tau_min(this, "tau_min", 1e-5, "minimum allowed value for the dynamic timestep"),
         m_tau_max(this, "tau_max", 1e-2, "maximum allowed value for the dynamic timestep"),
