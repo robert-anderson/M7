@@ -1,24 +1,24 @@
-[1688041812] [info] Reallocating buffer " send" 0B -> 72.000000KB
-[1688041812] [info] Reallocating buffer " recv" 0B -> 72.000000KB
-[1688041812] [info] Reallocating buffer " send" 0B -> 8.000000KB
-[1688041812] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1688041812] [info] Reallocating buffer " recv" 0B -> 72.000000KB
-[1688041812] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1688041812] [info] Reallocating buffer "wavefunction" 0B -> 3.600000KB
-[1688041812] [info] Reallocating buffer "wavefunction send" 0B -> 240B
-[1688041812] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
-[1688041812] [info] Reallocating buffer "reference gather send" 0B -> 72B
-[1688041812] [info] Reallocating buffer "reference all gathered rows" 0B -> 72B
-[1688041812] [info] Reallocating buffer "Hartree-Fock ONV gather send" 0B -> 72B
-[1688041812] [info] Reallocating buffer "Hartree-Fock ONV all gathered rows" 0B -> 72B
-[1688041812] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
-[1688041812] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
-[1688041812] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
-[1688041812] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
-[1688041812] [info] Reallocating buffer "M7.stats" 0B -> 152B
-[1688041812] [info] Reallocating buffer "M7.timing" 0B -> 40B
-[1688041812] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
-[1688041906] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
-[1688041906] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
-[1688041906] [info] Reallocating buffer "Included local rows" 0B -> 1.440000KB
-[1688041906] [info] Reallocating buffer "global top weighted" 0B -> 1.440000KB
+[1689551854] [info] Reallocating buffer " send" 0B -> 72.000000KB
+[1689551854] [info] Reallocating buffer " recv" 0B -> 72.000000KB
+[1689551854] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1689551854] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1689551854] [info] Reallocating buffer " recv" 0B -> 72.000000KB
+[1689551854] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1689551854] [info] Reallocating buffer "wavefunction" 0B -> 3.600000KB
+[1689551854] [info] Reallocating buffer "wavefunction send" 0B -> 240B
+[1689551854] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
+[1689551854] [info] Reallocating buffer "reference gather send" 0B -> 72B
+[1689551854] [info] Reallocating buffer "reference all gathered rows" 0B -> 72B
+[1689551854] [info] Reallocating buffer "Hartree-Fock ONV gather send" 0B -> 72B
+[1689551854] [info] Reallocating buffer "Hartree-Fock ONV all gathered rows" 0B -> 72B
+[1689551854] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
+[1689551854] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
+[1689551854] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
+[1689551854] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
+[1689551854] [info] Reallocating buffer "M7.stats" 0B -> 168B
+[1689551854] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1689551854] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
+[1689551873] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1689551873] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1689551873] [info] Reallocating buffer "Included local rows" 0B -> 1.440000KB
+[1689551873] [info] Reallocating buffer "global top weighted" 0B -> 1.440000KB
