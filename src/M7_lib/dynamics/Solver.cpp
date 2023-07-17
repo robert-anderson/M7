@@ -215,18 +215,13 @@ void Solver::loop_over_occupied_mbfs() {
         m_prop.discretize(m_wf, walker);
 
         if (walker.m_weight.is_zero() && !walker.is_protected()) {
-            if (walker.m_icycle_grace_period_expiry == 0ul && uint8_t(walker.m_shift_space) == 0) {
-                walker.m_icycle_grace_period_expiry = m_icycle + m_opts.m_wavefunction.m_grace_period;
-            }
-            if (walker.m_icycle_grace_period_expiry < m_icycle) {
-                /*
-                 * MBF has become unoccupied in all parts and must be removed from mapped list, but it must first make all
-                 * associated averaged contributions to MAEs
-                 */
-                m_maes.make_otf_average_contribs(walker, m_hf.get(), m_icycle);
-                m_wf.remove_row(walker);
-                continue;
-            }
+            /*
+             * MBF has become unoccupied in all parts and must be removed from mapped list, but it must first make all
+             * associated averaged contributions to MAEs
+             */
+            m_maes.make_otf_average_contribs(walker, m_hf.get(), m_icycle);
+            m_wf.remove_row(walker);
+            continue;
         }
 
         m_wf.try_add_to_large_ci_set(walker, m_icycle, m_prop.m_shifts.m_variable_mode);

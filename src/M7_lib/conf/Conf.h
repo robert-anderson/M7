@@ -139,7 +139,6 @@ namespace conf {
         Param<uint_t> m_nroot;
         Param<bool> m_no_row_creation;
         Param<v_t<double>> m_stoch_thresh_mags;
-        Param<uint_t> m_grace_period;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Distribution m_distribution;
