@@ -92,6 +92,8 @@ void Maes::fill_from_wf_hist(const Table<MbfWeightRow>& hist) {
     auto ket = bra;
     for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
         for (ket.restart(); ket; ++ket) {
+            const auto exsig = mbf::exsig(bra.m_mbf, ket.m_mbf);
+            if (!m_rdms.takes_contribs_from(exsig)) continue;
             const auto contrib = bra.m_weight[0]*ket.m_weight[0];
             m_rdms.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
         }
