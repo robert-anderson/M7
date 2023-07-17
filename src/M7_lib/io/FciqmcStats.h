@@ -39,7 +39,6 @@ struct FciqmcStatsRow : StatsRow {
     statistic::Numbers<int, c_ndim_wf> m_delta_nocc_mbf;
     statistic::Numbers<wf_t, c_ndim_wf> m_spin_square_num;
     statistic::Numbers<prob_t, 1ul> m_exlvl_probs;
-    statistic::Number<ham_comp_t> m_s0_growth_based;
 
     FciqmcStatsRow(const Propagator& prop, const InstEsts& inst_ests, bool exlvl_resolved, bool large_ci_set);
 };
