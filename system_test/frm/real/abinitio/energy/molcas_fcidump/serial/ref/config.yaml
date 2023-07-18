@@ -1,6 +1,6 @@
 ---
 shift:
-  damp: 0.05
+  damp: 0.5
   nw_targets: [10000]
 stats:
   period: 5

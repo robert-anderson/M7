@@ -1,214 +1,215 @@
-[1688041806] [info] +----------------------------+-------------------------+
-[1688041806] [info] |                 compile definitions                  |
-[1688041806] [info] +----------------------------+-------------------------+
-[1688041806] [info] |  git revision              |  #3fb8697c              |
-[1688041806] [info] +----------------------------+-------------------------+
-[1688041806] [info] |  build mode                |  RELEASE                |
-[1688041806] [info] +----------------------------+-------------------------+
-[1688041806] [info] |  compilation timestamp     |  2023-06-29 14:11:22    |
-[1688041806] [info] +----------------------------+-------------------------+
-[1688041806] [info] |  many-body basis function  |  fermion (determinant)  |
-[1688041806] [info] +----------------------------+-------------------------+
-[1688041806] [info] |  walker arithmetic         |  real                   |
-[1688041806] [info] +----------------------------+-------------------------+
-[1688041806] [info] |  Hamiltonian arithmetic    |  real                   |
-[1688041806] [info] +----------------------------+-------------------------+
-[1688041806] [info] |  TCHINT interface          |  disabled               |
-[1688041806] [info] +----------------------------+-------------------------+
-[1688041806] [info] |  rank-resolved logging     |  enabled                |
-[1688041806] [info] +----------------------------+-------------------------+
-[1688041806] [info] Number of MPI ranks in world communicator: 1
-[1688041806] [info] Number of MPI ranks per node: 1
-[1688041806] [info] formatting token found in M7.wf.{}.h5 path format, successive write operations will not overwrite previously written files from the same run
-[1688041806] [warning] propagator.max_bloom was zero, defaulting to the specified value of propagator.nadd
-[1688041806] [info] formatting token found in M7.hf_excit.{}.h5 path format, successive write operations will not overwrite previously written files from the same run
-[1688041806] [info] prng (enabled)
-[1688041806] [info] prng.seed                                         | 123
-[1688041806] [info] prng.ngen_block                                   | 10000
-[1688041806] [info] basis (enabled)
-[1688041806] [info] basis.bos_occ_cutoff                              | 255
-[1688041806] [info] particles (enabled)
-[1688041806] [info] particles.nelec                                   | 0
-[1688041806] [info] particles.ms2                                     | inf
-[1688041806] [info] particles.nboson                                  | 0
-[1688041806] [info] wavefunction (enabled)
-[1688041806] [info] wavefunction.nw_init                              | 1.000000e+02
-[1688041806] [info] wavefunction.nroot                                | 1
-[1688041806] [info] wavefunction.no_row_creation                      | false
-[1688041806] [info] wavefunction.stoch_thresh_mags                    | []
-[1688041806] [info] wavefunction.grace_period                         | 0
-[1688041806] [info] wavefunction.buffers (enabled)
-[1688041806] [info] wavefunction.buffers.store_fac_init               | 1.000000e+00
-[1688041806] [info] wavefunction.buffers.store_expand_fac             | 5.000000e-01
-[1688041806] [info] wavefunction.buffers.comm_fac_init                | 1.000000e+00
-[1688041806] [info] wavefunction.buffers.comm_expand_fac              | 5.000000e-01
-[1688041806] [info] wavefunction.hash_mapping (enabled)
-[1688041806] [info] wavefunction.hash_mapping.max_inefficiency        | 2.000000e+00
-[1688041806] [info] wavefunction.hash_mapping.remap_nlookup           | 500
-[1688041806] [info] wavefunction.distribution (enabled)
-[1688041806] [info] wavefunction.distribution.nblock_per_rank         | 6
-[1688041806] [info] wavefunction.distribution.period                  | 10
-[1688041806] [info] wavefunction.distribution.imbalance_thresh        | 5.000000e-02
-[1688041806] [info] wavefunction.ci_pmntr (disabled)
-[1688041806] [info] wavefunction.large_ci_set (disabled)
-[1688041806] [info] wavefunction.init_space (disabled)
-[1688041806] [info] wavefunction.save (disabled)
-[1688041806] [info] wavefunction.load (disabled)
-[1688041806] [info] wavefunction.load_large_ci (disabled)
-[1688041806] [info] wavefunction.chkpt (disabled)
-[1688041806] [info] reference (enabled)
-[1688041806] [info] reference.mbf_init (disabled)
-[1688041806] [info] reference.redef_thresh                            | 2.000000e+00
-[1688041806] [info] reference.assume_hf_like                          | false
-[1688041806] [info] shift (enabled)
-[1688041806] [info] shift.init                                        | 0.000000e+00
-[1688041806] [info] shift.init_rel_to_ref                             | true
-[1688041806] [info] shift.damp                                        | 5.000000e-02
-[1688041806] [info] shift.target_damp                                 | false
-[1688041806] [info] shift.periods                                     | [5]
-[1688041806] [info] shift.nw_targets                                  | [1.000000e+04]
-[1688041806] [info] shift.floors                                      | []
-[1688041806] [info] shift.fix_s0                                      | false
-[1688041806] [info] shift.fix_ref_weight                              | false
-[1688041806] [info] shift.enhancement_damp                            | 1.000000e+00
-[1688041806] [info] shift.s0_promote_thresh                           | 0.000000e+00
-[1688041806] [info] shift.cont_grow                                   | false
-[1688041806] [info] propagator (enabled)
-[1688041806] [info] propagator.ncycle                                 | 100000
-[1688041806] [info] propagator.stochastic                             | true
-[1688041806] [info] propagator.excit_gen (enabled)
-[1688041806] [info] propagator.excit_gen.hubbard_prefer_double_occ (disabled)
-[1688041806] [info] propagator.max_bloom                              | 3.000000e+00
-[1688041806] [info] propagator.nadd                                   | 3.000000e+00
-[1688041806] [info] propagator.tau_init                               | 1.000000e-03
-[1688041806] [info] propagator.tau_min                                | 1.000000e-05
-[1688041806] [info] propagator.tau_max                                | 1.000000e-02
-[1688041806] [info] propagator.static_tau                             | true
-[1688041806] [info] propagator.static_probs                           | true
-[1688041806] [info] propagator.min_spawn_mag                          | 4.000000e-01
-[1688041806] [info] propagator.min_exlvl_prob                         | 1.000000e-03
-[1688041806] [info] propagator.exlvl_probs_init                       | []
-[1688041806] [info] propagator.ndraw_min_for_dynamic                  | 1000
-[1688041806] [info] propagator.period                                 | 10
-[1688041806] [info] propagator.imp_samp_guide.gutzwiller_like (disabled)
-[1688041806] [info] propagator.imp_samp_guide.suppress_multi_occ (disabled)
-[1688041806] [info] propagator.semistochastic (disabled)
-[1688041806] [info] hamiltonian (enabled)
-[1688041806] [info] hamiltonian.fermion (enabled)
-[1688041806] [info] hamiltonian.fermion.fcidump (enabled)
-[1688041806] [info] hamiltonian.fermion.fcidump.path                  | "FCIDUMP"
-[1688041806] [info] hamiltonian.fermion.fcidump.unrestrict_style      | "minor"
-[1688041806] [info] hamiltonian.fermion.fcidump.init_2e_perm_sym      | "DHR"
-[1688041806] [info] hamiltonian.fermion.hubbard (disabled)
-[1688041806] [info] hamiltonian.fermion.heisenberg (disabled)
-[1688041806] [info] hamiltonian.fermion.spin_penalty_j                | 0.000000e+00
-[1688041806] [info] hamiltonian.ladder (disabled)
-[1688041806] [info] hamiltonian.boson (disabled)
-[1688041806] [info] hamiltonian.stoquastic                            | false
-[1688041806] [info] stats (enabled)
-[1688041806] [info] stats.path                                        | "M7.stats"
-[1688041806] [info] stats.period                                      | 5
-[1688041806] [info] stats.parallel                                    | false
-[1688041806] [info] stats.exlvl_resolved                              | false
-[1688041806] [info] inst_ests (disabled)
-[1688041806] [info] mae (disabled)
-[1688041806] [info] hf_excits (disabled)
-[1688041806] [info] Reading fermion Hamiltonian coefficients from Molcas HDF5 binary file "FCIDUMP"...
-[1688041806] [info] initially assuming hermitian permutational symmetry for 1e integrals
-[1688041806] [info] initially assuming 8-fold permutational symmetry for 2e integrals
-[1688041806] [info] this storage scheme assumes that ["<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>", "<aj|ib>", "<ab|ij>", "<bi|ja>", "<ji|ba>"] integrals are equivalent
-[1688041806] [info] FCIDUMP loading complete.
-[1688041806] [info] 1-electron term has no single-excitation contributions
-[1688041806] [info] Hamiltonian is hermitian
-[1688041806] [info] Hamiltonian has a non-zero core energy -97.54868920281902 which is included in all energy estimators
-[1688041806] [info] Initially allocating 72.000000KB per rank for each communicating buffer of "" (send and recv)
-[1688041806] [info] Reallocating buffer " send" 0B -> 72.000000KB
-[1688041806] [info] Reallocating buffer " recv" 0B -> 72.000000KB
-[1688041806] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
-[1688041806] [info] Reallocating buffer " send" 0B -> 8.000000KB
-[1688041806] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1688041806] [info] Reallocating buffer " recv" 0B -> 72.000000KB
-[1688041806] [info] Reallocating buffer " recv" 0B -> 8.000000KB
-[1688041806] [info] Initially allocating 720.000000KB per rank for "wavefunction" buffer
-[1688041806] [info] Reallocating buffer "wavefunction" 0B -> 720.000000KB
-[1688041806] [info] Initially allocating 240B per rank for each communicating buffer of "wavefunction" (send and recv)
-[1688041806] [info] Reallocating buffer "wavefunction send" 0B -> 240B
-[1688041806] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
-[1688041806] [info] Reallocating buffer "reference gather send" 0B -> 72B
-[1688041806] [info] Reallocating buffer "reference all gathered rows" 0B -> 72B
-[1688041806] [info] Initial reference MBF for WF part 0 is (111000,111000) with energy -1.089541e+02 
-[1688041806] [info] Distributing wavefunction rows in 6 blocks
-[1688041806] [info] Initialized 1 shift space
-[1688041806] [info] Initializing pre-computed heat bath sampling weights for doubles...
-[1688041806] [info] +------------------------+-----------------------------------------+-----------------+
-[1688041806] [info] |                          Excitation generation breakdown                           |
-[1688041806] [info] +------------------------+-----------------------------------------+-----------------+
-[1688041806] [info] |  Excitation Signature  |  Description                            |  Probability    |
-[1688041806] [info] +========================+=========================================+=================+
-[1688041806] [info] |   2200                 |  precomputed heat-bath fermion doubles  |   5.000000e-01  |
-[1688041806] [info] +------------------------+-----------------------------------------+-----------------+
-[1688041806] [info] |   1100                 |  uniform                                |   5.000000e-01  |
-[1688041806] [info] +------------------------+-----------------------------------------+-----------------+
-[1688041806] [info] Initializing magnitude logger with max_bloom 3 for 2 excitation levels
-[1688041806] [info] Dynamic tau optimization: false
-[1688041806] [info] Dynamic excitation level probability optimization: false
-[1688041806] [info] Reallocating buffer "Hartree-Fock ONV gather send" 0B -> 72B
-[1688041806] [info] Reallocating buffer "Hartree-Fock ONV all gathered rows" 0B -> 72B
-[1688041806] [info] Listening for changes to interactive variable "exit" in file "exit.var"
-[1688041806] [info] Initially allocating 24.000000KB per rank for each communicating buffer of "hole moment dst finder" (send and recv)
-[1688041806] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
-[1688041806] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
-[1688041806] [info] Initially allocating 24.000000KB per rank for each communicating buffer of "particle moment dst finder" (send and recv)
-[1688041806] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
-[1688041806] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
-[1688041806] [info] Hamiltonian is hermitian
-[1688041806] [info] Replicating walker populations: false
-[1688041806] [info] Reallocating buffer "M7.stats" 0B -> 160B
-[1688041806] [info] Reallocating buffer "M7.timing" 0B -> 40B
-[1688041806] [info] Global PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
-[1688041806] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
-[1688041806] [info] Brillouin theorem condition satisfied: assuming (111000,111000) as HF state
-[1688041806] [info] Beginning solver loop...
-[1688041838] [info] Reallocating buffer "wavefunction send" 240B -> 400B
-[1688041838] [info] Reallocating buffer "wavefunction recv" 240B -> 432B
-[1688041864] [info] Reallocating buffer "wavefunction send" 400B -> 616B
-[1688041871] [info] Reallocating buffer "wavefunction recv" 432B -> 720B
-[1688041910] [info] Reallocating buffer "wavefunction send" 616B -> 936B
-[1688041927] [info] Reallocating buffer "wavefunction recv" 720B -> 1.152000KB
-[1688041956] [info] Reallocating buffer "wavefunction send" 936B -> 1.440000KB
-[1688041964] [info] Entering "variable shift mode (WF part 0)" epoch on cycle 58721 
-[1688041964] [info] Variable shift triggered for WF part 0. Cycle 58720 nw: 9999.840832576061, cycle 58721 nw: 10002.49951139574
-[1688042101] [info] maximum cycle number (100000) reached
-[1688042101] [warning] semistochastic epoch was never reached
-[1688042101] [warning] MAE accumulation epoch was never reached
-[1688042101] [warning] HF excitation accumulation epoch was never reached
-[1688042101] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
-[1688042101] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
-[1688042101] [info] Reallocating buffer "Included local rows" 0B -> 1.440000KB
-[1688042101] [info] Reallocating buffer "global top weighted" 0B -> 1.440000KB
-[1688042101] [info] +-----+--------------------------+---------------+-------------+-----------+---------------+-----------+----------+
-[1688042101] [info] |                                       Top-weighted WF elements for part 0                                       |
-[1688042101] [info] +-----+--------------------------+---------------+-------------+-----------+---------------+-----------+----------+
-[1688042101] [info] |     | many-body basis function | walkers       | coefficient | initiator | energy        | semistoch | MPI rank |
-[1688042101] [info] +=====+==========================+===============+=============+===========+===============+===========+==========+
-[1688042101] [info] |  0  | (111000,111000)          |  4.936594e+03 |  0.9721     | true      | -1.089541e+02 | false     |  0       |
-[1688042101] [info] |  1  | (110010,110010)          | -6.292376e+02 | -0.1239     | true      | -1.080925e+02 | false     |  0       |
-[1688042101] [info] |  2  | (101100,101100)          | -5.844667e+02 | -0.1151     | true      | -1.080925e+02 | false     |  0       |
-[1688042101] [info] |  3  | (110010,101100)          |  3.887163e+02 |  0.07654    | true      | -1.081090e+02 | false     |  0       |
-[1688042101] [info] |  4  | (101100,110010)          |  3.756051e+02 |  0.07396    | true      | -1.081090e+02 | false     |  0       |
-[1688042101] [info] |  5  | (111000,100110)          | -2.822539e+02 | -0.05558    | true      | -1.081143e+02 | false     |  0       |
-[1688042101] [info] |  6  | (100110,111000)          | -2.731860e+02 | -0.05379    | true      | -1.081143e+02 | false     |  0       |
-[1688042101] [info] |  7  | (011100,011100)          | -1.949960e+02 | -0.0384     | true      | -1.081609e+02 | false     |  0       |
-[1688042101] [info] |  8  | (011010,011010)          | -1.785125e+02 | -0.03515    | true      | -1.081609e+02 | false     |  0       |
-[1688042101] [info] |  9  | (100110,100110)          |  1.728614e+02 |  0.03404    | true      | -1.071405e+02 | false     |  0       |
-[1688042101] [info] |  10 | (110100,110010)          | -1.074346e+02 | -0.02115    | true      | -1.081773e+02 | false     |  0       |
-[1688042101] [info] |  11 | (101010,110100)          |  1.064424e+02 |  0.02096    | true      | -1.083384e+02 | false     |  0       |
-[1688042101] [info] |  12 | (110100,101010)          |  1.060544e+02 |  0.02088    | true      | -1.083384e+02 | false     |  0       |
-[1688042101] [info] |  13 | (110100,110100)          | -9.922120e+01 | -0.01954    | true      | -1.081892e+02 | false     |  0       |
-[1688042101] [info] |  14 | (110010,101010)          | -9.619258e+01 | -0.01894    | true      | -1.081872e+02 | false     |  0       |
-[1688042101] [info] |  15 | (110010,110100)          | -9.309286e+01 | -0.01833    | true      | -1.081773e+02 | false     |  0       |
-[1688042101] [info] |  16 | (101100,101010)          |  9.259846e+01 |  0.01823    | true      | -1.081773e+02 | false     |  0       |
-[1688042101] [info] |  17 | (101100,110100)          |  9.206899e+01 |  0.01813    | true      | -1.081872e+02 | false     |  0       |
-[1688042101] [info] |  18 | (101010,101010)          | -9.196649e+01 | -0.01811    | true      | -1.081892e+02 | false     |  0       |
-[1688042101] [info] |  19 | (101010,110010)          | -9.165373e+01 | -0.01805    | true      | -1.081872e+02 | false     |  0       |
-[1688042101] [info] +-----+--------------------------+---------------+-------------+-----------+---------------+-----------+----------+
+[1689682070] [info] +----------------------------+-------------------------+
+[1689682070] [info] |                 compile definitions                  |
+[1689682070] [info] +----------------------------+-------------------------+
+[1689682070] [info] |  git revision              |  #8b257b5f              |
+[1689682070] [info] +----------------------------+-------------------------+
+[1689682070] [info] |  build mode                |  RELEASE                |
+[1689682070] [info] +----------------------------+-------------------------+
+[1689682070] [info] |  compilation timestamp     |  2023-07-18 08:40:48    |
+[1689682070] [info] +----------------------------+-------------------------+
+[1689682070] [info] |  many-body basis function  |  fermion (determinant)  |
+[1689682070] [info] +----------------------------+-------------------------+
+[1689682070] [info] |  walker arithmetic         |  real                   |
+[1689682070] [info] +----------------------------+-------------------------+
+[1689682070] [info] |  Hamiltonian arithmetic    |  real                   |
+[1689682070] [info] +----------------------------+-------------------------+
+[1689682070] [info] |  TCHINT interface          |  disabled               |
+[1689682070] [info] +----------------------------+-------------------------+
+[1689682070] [info] |  rank-resolved logging     |  enabled                |
+[1689682070] [info] +----------------------------+-------------------------+
+[1689682070] [info] Number of MPI ranks in world communicator: 1
+[1689682070] [info] Number of MPI ranks per node: 1
+[1689682070] [info] formatting token found in M7.wf.{}.h5 path format, successive write operations will not overwrite previously written files from the same run
+[1689682070] [warning] propagator.max_bloom was zero, defaulting to the specified value of propagator.nadd
+[1689682070] [info] formatting token found in M7.hf_excit.{}.h5 path format, successive write operations will not overwrite previously written files from the same run
+[1689682070] [info] prng (enabled)
+[1689682070] [info] prng.seed                                         | 123
+[1689682070] [info] prng.ngen_block                                   | 10000
+[1689682070] [info] basis (enabled)
+[1689682070] [info] basis.bos_occ_cutoff                              | 255
+[1689682070] [info] particles (enabled)
+[1689682070] [info] particles.nelec                                   | 0
+[1689682070] [info] particles.ms2                                     | inf
+[1689682070] [info] particles.nboson                                  | 0
+[1689682070] [info] wavefunction (enabled)
+[1689682070] [info] wavefunction.nw_init                              | 1.000000e+02
+[1689682070] [info] wavefunction.nroot                                | 1
+[1689682070] [info] wavefunction.no_row_creation                      | false
+[1689682070] [info] wavefunction.stoch_thresh_mags                    | []
+[1689682070] [info] wavefunction.buffers (enabled)
+[1689682070] [info] wavefunction.buffers.store_fac_init               | 1.000000e+00
+[1689682070] [info] wavefunction.buffers.store_expand_fac             | 5.000000e-01
+[1689682070] [info] wavefunction.buffers.comm_fac_init                | 1.000000e+00
+[1689682070] [info] wavefunction.buffers.comm_expand_fac              | 5.000000e-01
+[1689682070] [info] wavefunction.hash_mapping (enabled)
+[1689682070] [info] wavefunction.hash_mapping.max_inefficiency        | 2.000000e+00
+[1689682070] [info] wavefunction.hash_mapping.remap_nlookup           | 500
+[1689682070] [info] wavefunction.distribution (enabled)
+[1689682070] [info] wavefunction.distribution.nblock_per_rank         | 6
+[1689682070] [info] wavefunction.distribution.period                  | 10
+[1689682070] [info] wavefunction.distribution.imbalance_thresh        | 5.000000e-02
+[1689682070] [info] wavefunction.ci_pmntr (disabled)
+[1689682070] [info] wavefunction.large_ci_set (disabled)
+[1689682070] [info] wavefunction.save_hist (disabled)
+[1689682070] [info] wavefunction.init_space (disabled)
+[1689682070] [info] wavefunction.save (disabled)
+[1689682070] [info] wavefunction.load (disabled)
+[1689682070] [info] wavefunction.load_large_ci (disabled)
+[1689682070] [info] wavefunction.chkpt (disabled)
+[1689682070] [info] reference (enabled)
+[1689682070] [info] reference.mbf_init (disabled)
+[1689682070] [info] reference.redef_thresh                            | 2.000000e+00
+[1689682070] [info] reference.assume_hf_like                          | false
+[1689682070] [info] shift (enabled)
+[1689682070] [info] shift.init                                        | 0.000000e+00
+[1689682070] [info] shift.init_rel_to_ref                             | true
+[1689682070] [info] shift.damp                                        | 5.000000e-01
+[1689682070] [info] shift.target_damp                                 | false
+[1689682070] [info] shift.periods                                     | [5]
+[1689682070] [info] shift.nw_targets                                  | [1.000000e+04]
+[1689682070] [info] shift.floors                                      | []
+[1689682070] [info] shift.fix_s0                                      | false
+[1689682070] [info] shift.fix_ref_weight                              | false
+[1689682070] [info] shift.enhancement_damp                            | 1.000000e+00
+[1689682070] [info] shift.s0_promote_thresh                           | 0.000000e+00
+[1689682070] [info] shift.cont_grow                                   | false
+[1689682070] [info] propagator (enabled)
+[1689682070] [info] propagator.ncycle                                 | 100000
+[1689682070] [info] propagator.stochastic                             | true
+[1689682070] [info] propagator.excit_gen (enabled)
+[1689682070] [info] propagator.excit_gen.hubbard_prefer_double_occ (disabled)
+[1689682070] [info] propagator.max_bloom                              | 3.000000e+00
+[1689682070] [info] propagator.nadd                                   | 3.000000e+00
+[1689682070] [info] propagator.nadd_child                             | 0.000000e+00
+[1689682070] [info] propagator.tau_init                               | 1.000000e-03
+[1689682070] [info] propagator.tau_min                                | 1.000000e-05
+[1689682070] [info] propagator.tau_max                                | 1.000000e-02
+[1689682070] [info] propagator.static_tau                             | true
+[1689682070] [info] propagator.static_probs                           | true
+[1689682070] [info] propagator.min_spawn_mag                          | 4.000000e-01
+[1689682070] [info] propagator.min_exlvl_prob                         | 1.000000e-03
+[1689682070] [info] propagator.exlvl_probs_init                       | []
+[1689682070] [info] propagator.ndraw_min_for_dynamic                  | 1000
+[1689682070] [info] propagator.period                                 | 10
+[1689682070] [info] propagator.imp_samp_guide.gutzwiller_like (disabled)
+[1689682070] [info] propagator.imp_samp_guide.suppress_multi_occ (disabled)
+[1689682070] [info] propagator.semistochastic (disabled)
+[1689682070] [info] hamiltonian (enabled)
+[1689682070] [info] hamiltonian.fermion (enabled)
+[1689682070] [info] hamiltonian.fermion.fcidump (enabled)
+[1689682070] [info] hamiltonian.fermion.fcidump.path                  | "FCIDUMP"
+[1689682070] [info] hamiltonian.fermion.fcidump.unrestrict_style      | "minor"
+[1689682070] [info] hamiltonian.fermion.fcidump.init_2e_perm_sym      | "DHR"
+[1689682070] [info] hamiltonian.fermion.hubbard (disabled)
+[1689682070] [info] hamiltonian.fermion.heisenberg (disabled)
+[1689682070] [info] hamiltonian.fermion.spin_penalty_j                | 0.000000e+00
+[1689682070] [info] hamiltonian.ladder (disabled)
+[1689682070] [info] hamiltonian.boson (disabled)
+[1689682070] [info] hamiltonian.stoquastic                            | false
+[1689682070] [info] stats (enabled)
+[1689682070] [info] stats.path                                        | "M7.stats"
+[1689682070] [info] stats.period                                      | 5
+[1689682070] [info] stats.parallel                                    | false
+[1689682070] [info] stats.exlvl_resolved                              | false
+[1689682070] [info] inst_ests (disabled)
+[1689682070] [info] mae (disabled)
+[1689682070] [info] hf_excits (disabled)
+[1689682070] [info] Reading fermion Hamiltonian coefficients from Molcas HDF5 binary file "FCIDUMP"...
+[1689682070] [info] initially assuming hermitian permutational symmetry for 1e integrals
+[1689682070] [info] initially assuming 8-fold permutational symmetry for 2e integrals
+[1689682070] [info] this storage scheme assumes that ["<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>", "<aj|ib>", "<ab|ij>", "<bi|ja>", "<ji|ba>"] integrals are equivalent
+[1689682070] [info] FCIDUMP loading complete.
+[1689682070] [info] 1-electron term has no single-excitation contributions
+[1689682070] [info] Hamiltonian is hermitian
+[1689682070] [info] Hamiltonian has a non-zero core energy -97.54868920281902 which is included in all energy estimators
+[1689682070] [info] Initially allocating 64.000000KB per rank for each communicating buffer of "" (send and recv)
+[1689682070] [info] Reallocating buffer " send" 0B -> 64.000000KB
+[1689682070] [info] Reallocating buffer " recv" 0B -> 64.000000KB
+[1689682070] [info] Initially allocating 8.000000KB per rank for each communicating buffer of "" (send and recv)
+[1689682070] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1689682070] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1689682070] [info] Reallocating buffer " recv" 0B -> 64.000000KB
+[1689682070] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1689682070] [info] Initially allocating 640.000000KB per rank for "wavefunction" buffer
+[1689682070] [info] Reallocating buffer "wavefunction" 0B -> 640.000000KB
+[1689682070] [info] Initially allocating 240B per rank for each communicating buffer of "wavefunction" (send and recv)
+[1689682070] [info] Reallocating buffer "wavefunction send" 0B -> 240B
+[1689682070] [info] Reallocating buffer "wavefunction recv" 0B -> 240B
+[1689682070] [info] Reallocating buffer "reference gather send" 0B -> 64B
+[1689682070] [info] Reallocating buffer "reference all gathered rows" 0B -> 64B
+[1689682070] [info] Initial reference MBF for WF part 0 is (111000,111000) with energy -1.089541e+02 
+[1689682070] [info] Distributing wavefunction rows in 6 blocks
+[1689682070] [info] Initialized 1 shift space
+[1689682070] [info] Initializing pre-computed heat bath sampling weights for doubles...
+[1689682070] [info] +------------------------+-----------------------------------------+-----------------+
+[1689682070] [info] |                          Excitation generation breakdown                           |
+[1689682070] [info] +------------------------+-----------------------------------------+-----------------+
+[1689682070] [info] |  Excitation Signature  |  Description                            |  Probability    |
+[1689682070] [info] +========================+=========================================+=================+
+[1689682070] [info] |   2200                 |  precomputed heat-bath fermion doubles  |   5.000000e-01  |
+[1689682070] [info] +------------------------+-----------------------------------------+-----------------+
+[1689682070] [info] |   1100                 |  uniform                                |   5.000000e-01  |
+[1689682070] [info] +------------------------+-----------------------------------------+-----------------+
+[1689682070] [info] Initializing magnitude logger with max_bloom 3 for 2 excitation levels
+[1689682070] [info] Dynamic tau optimization: false
+[1689682070] [info] Dynamic excitation level probability optimization: false
+[1689682070] [info] Reallocating buffer "Hartree-Fock ONV gather send" 0B -> 64B
+[1689682070] [info] Reallocating buffer "Hartree-Fock ONV all gathered rows" 0B -> 64B
+[1689682070] [info] Listening for changes to interactive variable "exit" in file "exit.var"
+[1689682070] [info] Initially allocating 24.000000KB per rank for each communicating buffer of "hole moment dst finder" (send and recv)
+[1689682070] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
+[1689682070] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
+[1689682070] [info] Initially allocating 24.000000KB per rank for each communicating buffer of "particle moment dst finder" (send and recv)
+[1689682070] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
+[1689682070] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
+[1689682070] [info] Hamiltonian is hermitian
+[1689682070] [info] Replicating walker populations: false
+[1689682070] [info] Reallocating buffer "M7.stats" 0B -> 168B
+[1689682070] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1689682070] [info] Global PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
+[1689682070] [info] Local PRNG state checksum of stochastic propagator: 13ef367bd363b6c7
+[1689682070] [info] Brillouin theorem condition satisfied: assuming (111000,111000) as HF state
+[1689682070] [info] Beginning solver loop...
+[1689682074] [info] Reallocating buffer "wavefunction send" 240B -> 400B
+[1689682074] [info] Reallocating buffer "wavefunction recv" 240B -> 400B
+[1689682078] [info] Reallocating buffer "wavefunction send" 400B -> 616B
+[1689682078] [info] Reallocating buffer "wavefunction recv" 400B -> 648B
+[1689682086] [info] Reallocating buffer "wavefunction send" 616B -> 936B
+[1689682088] [info] Reallocating buffer "wavefunction recv" 648B -> 1.224000KB
+[1689682095] [info] Reallocating buffer "wavefunction send" 936B -> 1.440000KB
+[1689682096] [info] Entering "variable shift mode (WF part 0)" epoch on cycle 59287 
+[1689682096] [info] Variable shift triggered for WF part 0. Cycle 59286 nw: 9999.160939799885, cycle 59287 nw: 10001.351003600981
+[1689682158] [info] maximum cycle number (100000) reached
+[1689682158] [warning] semistochastic epoch was never reached
+[1689682158] [warning] MAE accumulation epoch was never reached
+[1689682158] [warning] HF excitation accumulation epoch was never reached
+[1689682158] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1689682158] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1689682158] [info] Reallocating buffer "Included local rows" 0B -> 1.280000KB
+[1689682158] [info] Reallocating buffer "global top weighted" 0B -> 1.280000KB
+[1689682158] [info] +-----+--------------------------+---------------+-------------+-----------+---------------+-----------+----------+
+[1689682158] [info] |                                       Top-weighted WF elements for part 0                                       |
+[1689682158] [info] +-----+--------------------------+---------------+-------------+-----------+---------------+-----------+----------+
+[1689682158] [info] |     | many-body basis function | walkers       | coefficient | initiator | energy        | semistoch | MPI rank |
+[1689682158] [info] +=====+==========================+===============+=============+===========+===============+===========+==========+
+[1689682158] [info] |  0  | (111000,111000)          |  4.950690e+03 |  0.9731     | true      | -1.089541e+02 | false     |  0       |
+[1689682158] [info] |  1  | (101100,101100)          | -6.087785e+02 | -0.1197     | true      | -1.080925e+02 | false     |  0       |
+[1689682158] [info] |  2  | (110010,110010)          | -5.758729e+02 | -0.1132     | true      | -1.080925e+02 | false     |  0       |
+[1689682158] [info] |  3  | (101100,110010)          |  3.878723e+02 |  0.07624    | true      | -1.081090e+02 | false     |  0       |
+[1689682158] [info] |  4  | (110010,101100)          |  3.778344e+02 |  0.07426    | true      | -1.081090e+02 | false     |  0       |
+[1689682158] [info] |  5  | (100110,111000)          | -2.857417e+02 | -0.05616    | true      | -1.081143e+02 | false     |  0       |
+[1689682158] [info] |  6  | (111000,100110)          | -2.592062e+02 | -0.05095    | true      | -1.081143e+02 | false     |  0       |
+[1689682158] [info] |  7  | (011010,011010)          | -1.812480e+02 | -0.03562    | true      | -1.081609e+02 | false     |  0       |
+[1689682158] [info] |  8  | (011100,011100)          | -1.755791e+02 | -0.03451    | true      | -1.081609e+02 | false     |  0       |
+[1689682158] [info] |  9  | (100110,100110)          |  1.633917e+02 |  0.03211    | true      | -1.071405e+02 | false     |  0       |
+[1689682158] [info] |  10 | (110100,101100)          |  1.050441e+02 |  0.02065    | true      | -1.081872e+02 | false     |  0       |
+[1689682158] [info] |  11 | (101010,101010)          | -1.035062e+02 | -0.02034    | true      | -1.081892e+02 | false     |  0       |
+[1689682158] [info] |  12 | (101100,110100)          |  1.030811e+02 |  0.02026    | true      | -1.081872e+02 | false     |  0       |
+[1689682158] [info] |  13 | (110100,110100)          | -1.028384e+02 | -0.02021    | true      | -1.081892e+02 | false     |  0       |
+[1689682158] [info] |  14 | (110100,101010)          |  1.005665e+02 |  0.01977    | true      | -1.083384e+02 | false     |  0       |
+[1689682158] [info] |  15 | (101010,110100)          |  9.960869e+01 |  0.01958    | true      | -1.083384e+02 | false     |  0       |
+[1689682158] [info] |  16 | (101010,110010)          | -9.790665e+01 | -0.01924    | true      | -1.081872e+02 | false     |  0       |
+[1689682158] [info] |  17 | (110100,110010)          | -9.647205e+01 | -0.01896    | true      | -1.081773e+02 | false     |  0       |
+[1689682158] [info] |  18 | (101010,101100)          |  9.561303e+01 |  0.01879    | true      | -1.081773e+02 | false     |  0       |
+[1689682158] [info] |  19 | (110010,110100)          | -9.519997e+01 | -0.01871    | true      | -1.081773e+02 | false     |  0       |
+[1689682158] [info] +-----+--------------------------+---------------+-------------+-----------+---------------+-----------+----------+
