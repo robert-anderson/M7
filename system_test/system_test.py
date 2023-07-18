@@ -179,7 +179,8 @@ def compare_stats_field(field_name_hint, fname='M7.stats'):
     if not DO_COMPS: return
     run = StatsFile(RUN_DIR/fname).stats_columns(field_name_hint)
     ref = StatsFile(REF_DIR/fname).stats_columns(field_name_hint)
-    if not np.allclose(run, ref): fail(False, f'stats field "{field_name_hint}"')
+    if len(run.ravel()) != len(ref.ravel()): fail(False, f'stats field "{field_name_hint}" dimensions')
+    if not np.allclose(run, ref): fail(False, f'stats field "{field_name_hint}" values')
 
 def compare_nw(fname='M7.stats'): compare_stats_field('WF L1 norm', fname)
 def compare_ref_weight(fname='M7.stats'): compare_stats_field('Reference weight', fname)

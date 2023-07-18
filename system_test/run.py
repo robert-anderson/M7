@@ -75,6 +75,14 @@ def redef(script_path):
     shutil.rmtree(ref_dir, ignore_errors=True)
     shutil.move(run_dir, ref_dir)
 
+if any(failed):
+    nfailed = sum(np.array(failed)!=0)
+    print(f'FAILED TESTS: {nfailed} / {len(failed)}')
+    for i, path in enumerate(args.paths):
+        if (failed[i]): print(path)
+else:
+    print(f'ALL {len(failed)} TESTS PASSED')
+
 assert not any(failed), 'not all tests passed'
 if (args.mode=='redef'):
     print('redefining references for all statically-passing tests:')
