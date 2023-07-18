@@ -81,7 +81,7 @@ if any(failed):
     for i, path in enumerate(args.paths):
         if (failed[i]): print(path)
 else:
-    print(f'ALL {len(failed)} TESTS PASSED')
+    print(f'ALL TESTS ({len(failed)}) PASSED')
 
 assert not any(failed), 'not all tests passed'
 if (args.mode=='redef'):
