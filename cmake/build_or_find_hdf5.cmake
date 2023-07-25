@@ -9,6 +9,8 @@ function(add_parallel_hdf5 target)
         set(HDF5_USE_STATIC_LIBRARIES 1)
         set(HDF5_VERSION "1.10.5")
 
+        set(HDF5_C_FLAG_LIST "-w -Wno-implicit-function-declaration")
+
         file(MAKE_DIRECTORY ${OWN_HDF5_ROOT})
         file(MAKE_DIRECTORY ${OWN_HDF5_BUILD})
         ExternalProject_Add(built_hdf5
@@ -25,7 +27,7 @@ function(add_parallel_hdf5 target)
                 -DHDF5_BUILD_TOOLS=OFF
                 -DHDF5_BUILD_EXAMPLES=OFF
                 -DBUILD_TESTING=OFF
-                -DCMAKE_C_FLAGS="-Wno-error=implicit-function-declaration"
+                -DCMAKE_C_FLAGS=${HDF5_C_FLAG_LIST}
                 -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
             SOURCE_DIR
                 ${OWN_HDF5_BUILD}/src/hdf5-${HDF5_VERSION}
