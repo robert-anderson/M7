@@ -138,18 +138,18 @@ conf::LargeCiSet::LargeCiSet(Group* parent) :
 conf::InitSpace::InitSpace(Group *parent) :
         Section(parent, "init_space", "options relating to the initial space of MBFs", Explicit),
         m_type(this, "type",
-           {{"ref", "initialize WFs with walkers on the reference only"},
-            {"fci", "generate entire FCI space"},
-            {"ref_conn", "generate a subspace of the reference and its connections"}},
-           "specifies the means of generating the initial walker distribution"),
-        m_ms2_flip(this, "ms2_flip", 0,
-                   "a positive value enforces spin-flipped partners have the same weight, negative enforces same "
-                   "magnitude but opposite signs, and 0 enforces such symmetry"),
+            {{"ref", "initialize WFs with walkers on the reference only"},
+             {"fci", "generate entire FCI space"},
+             {"ref_conn", "generate a subspace of the reference and its connections"}
+            },"specifies the means of generating the initial walker distribution"),
         m_solver(this, "solver",
-                 {{"none", "no eigensolver - initial space is created with zero weight"},
-                  {"davidson", "invoke the built-in Davidson method for hermitian Hamiltonians"},
-                  {"arnoldi", "invoke the ARPACK solvers for hermitian and non-hermitian Hamiltonians. the binary must be built with BUILD_ARPACK option on"},
-                 }, "if true, diagonalize H projected into the subspace"){}
+             {{"none", "no eigensolver - initial space is created with zero weight"},
+              {"davidson", "invoke the built-in Davidson method for hermitian Hamiltonians"},
+              {"arnoldi", "invoke the ARPACK solvers for hermitian and non-hermitian Hamiltonians. the binary must be built with BUILD_ARPACK option on"},
+             }, "if true, diagonalize H projected into the subspace"),
+        m_ms2_flip(this, "ms2_flip", 0,
+        "a positive value enforces spin-flipped partners have the same weight, negative enforces same "
+        "magnitude but opposite signs, and 0 enforces such symmetry"){}
 
 void conf::InitSpace::validate_node_contents() {
     if (!c_enable_arpack) {
