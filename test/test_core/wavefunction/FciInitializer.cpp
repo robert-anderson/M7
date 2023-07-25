@@ -10,6 +10,7 @@
 #include "M7_lib/mae/MaeTable.h"
 
 #ifdef ENABLE_FERMIONS
+#ifdef ENABLE_ARPACK
 TEST(FciInitializer, N2Conns) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     Hamiltonian ham(&frm_ham);
@@ -65,6 +66,7 @@ TEST(FciInitializer, J1J2) {
     ASSERT_NEAR_EQ(eval, -6.44708);
 }
 
+#endif
 #endif
 
 #ifdef ENABLE_BOSONS

@@ -8,6 +8,7 @@
 #include "M7_lib/arnoldi/ArnoldiSolver.h"
 #include "M7_lib/hdf5/File.h"
 
+#ifdef ENABLE_ARPACK
 TEST(ArnoldiSolver, SymNonDist) {
     const uint_t nrow = 20;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
@@ -155,3 +156,4 @@ TEST(ArnoldiSolver, ComplexDist) {
         }
     }
 }
+#endif
