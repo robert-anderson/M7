@@ -47,7 +47,7 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
     }
 
     const auto& init_space_type = m_opts.m_wavefunction.m_init_space.m_type.m_value;
-    const auto init_space_solve = m_opts.m_wavefunction.m_init_space.m_solve.m_value;
+    const auto& init_space_solver = m_opts.m_wavefunction.m_init_space.m_solver.m_value;
 
     if (m_opts.m_wavefunction.m_load_large_ci.m_enabled) {
         // the wavefunction (MBFs only) is to be loaded from HDF5 archive
@@ -66,15 +66,18 @@ v_t<TableBase::Loc> wf::Vectors::setup() {
     {
         ci_init::Options opts;
         opts.m_nroot = this->nroot();
+        if (init_space_solver == "davidson") opts.m_solver_kind = ci_init::Options::Davidson;
+        else if (init_space_solver == "arnoldi") opts.m_solver_kind = ci_init::Options::Arnoldi;
+
         if (init_space_type == "fci") {
             opts.m_loop_kind = ci_init::Options::Conns;
             ci_init::FciSubspace subspace(&m_ham, m_sector.particles());
-            ci_init(subspace, opts, init_space_solve);
+            ci_init(subspace, opts);
         }
         else if (init_space_type == "ref_conn") {
             opts.m_loop_kind = ci_init::Options::MbfPairs;
             ci_init::RefConnSubspace subspace(&m_ham, ref_mbf);
-            ci_init(subspace, opts, init_space_solve);
+            ci_init(subspace, opts);
         }
         else if (init_space_type == "ref") {
             auto flipped = ref_mbf;
@@ -555,6 +558,13 @@ void wf::Vectors::ci_init(const ci_init::Subspace& subspace, v_t<const wf_t*> we
 }
 
 void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, uint_t max_ncomm) {
+    if (opts.m_solver_kind == ci_init::Options::NoSolve) {
+        ci_init(subspace, max_ncomm);
+        return;
+    }
+
+    //TODO: dispatch either Davidson or Arnoldi here
+#if 0
     /*
      * perform the eigensolver procedure for the required number of states
      */
@@ -567,6 +577,8 @@ void wf::Vectors::ci_init(const ci_init::Subspace& subspace, ci_init::Options op
         logging::info("CI energies ({} root{}): {}", nroot(), string::plural(nroot()), convert::to_string(evals));
     }
     ci_init(subspace, results.get_evecs(), m_opts.m_wavefunction.m_init_space.m_ms2_flip, max_ncomm);
+
+#endif
 }
 
 void wf::Vectors::ci_init(const ci_init::Subspace& subspace, uint_t max_ncomm) {

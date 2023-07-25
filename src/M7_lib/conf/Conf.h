@@ -124,9 +124,12 @@ namespace conf {
 
     struct InitSpace : Section {
         SingleChoice<str_t> m_type;
+        SingleChoice<str_t> m_solver;
         Param<int> m_ms2_flip;
-        Param<bool> m_solve;
         InitSpace(Group *parent);
+
+    protected:
+        void validate_node_contents() override;
     };
 
     struct WfHistFile : OptionalFile {

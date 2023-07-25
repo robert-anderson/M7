@@ -5,6 +5,7 @@
 #include "ArnoldiSolver.h"
 #include "M7_lib/util/String.h"
 
+#ifdef ENABLE_ARPACK
 
 bool ArnoldiSolverBase::solve(const std::function<void()> &product_fn, bool dist) {
     bool i_am_solver_rank = mpi::i_am_root() || !dist;
@@ -31,3 +32,4 @@ bool ArnoldiSolverBase::solve(const std::function<void()> &product_fn, bool dist
     if (dist) mpi::bcast(success);
     return success;
 }
+#endif

@@ -222,6 +222,7 @@ strv_t logging::make_defs_table() {
         {"walker arithmetic", c_enable_complex_wf ? "complex" : "real"},
         {"Hamiltonian arithmetic", c_enable_complex_ham ? "complex" : "real"},
         {"TCHINT interface", c_enable_tchint ? "enabled" : "disabled"},
+        {"ARPACK interface", c_enable_arpack ? "enabled" : "disabled"},
         {"rank-resolved logging", c_enable_local_logging ? "enabled" : "disabled"},
     });
 }

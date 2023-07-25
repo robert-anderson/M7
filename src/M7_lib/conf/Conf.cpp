@@ -145,7 +145,17 @@ conf::InitSpace::InitSpace(Group *parent) :
         m_ms2_flip(this, "ms2_flip", 0,
                    "a positive value enforces spin-flipped partners have the same weight, negative enforces same "
                    "magnitude but opposite signs, and 0 enforces such symmetry"),
-        m_solve(this, "solve", true, "if true, diagonalize H projected into the subspace"){}
+        m_solver(this, "solver",
+                 {{"none", "no eigensolver - initial space is created with zero weight"},
+                  {"davidson", "invoke the built-in Davidson method for hermitian Hamiltonians"},
+                  {"arnoldi", "invoke the ARPACK solvers for hermitian and non-hermitian Hamiltonians. the binary must be built with BUILD_ARPACK option on"},
+                 }, "if true, diagonalize H projected into the subspace"){}
+
+void conf::InitSpace::validate_node_contents() {
+    if (!c_enable_arpack) {
+        REQUIRE_NE(m_solver.m_value, "arnoldi", "Arnoldi solver requires BUILD_ARPACK to be enabled at compile time");
+    }
+}
 
 conf::WfHistFile::WfHistFile(Group *parent) :
         OptionalFile(parent, "save_hist",

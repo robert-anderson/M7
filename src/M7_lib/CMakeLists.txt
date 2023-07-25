@@ -132,7 +132,6 @@ endif()
 
 # compile and link options are compiler-dependent, so each vendor must be dealt with separately
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
              -g
@@ -159,7 +158,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
              -march=core-avx2 -g
@@ -186,7 +184,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     endif()
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
              -g

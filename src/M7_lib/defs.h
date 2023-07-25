@@ -138,6 +138,12 @@ constexpr bool c_enable_tchint = true;
 constexpr bool c_enable_tchint = false;
 #endif
 
+#ifdef ENABLE_ARPACK
+constexpr bool c_enable_arpack = true;
+#else
+constexpr bool c_enable_arpack = false;
+#endif
+
 #ifdef ENABLE_LOCAL_LOGGING
 constexpr bool c_enable_local_logging = true;
 #else

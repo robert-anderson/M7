@@ -5,26 +5,28 @@
 #ifndef M7_ARNOLDISOLVER_H
 #define M7_ARNOLDISOLVER_H
 
-#include <M7_lib/linalg/DistMvProd.h>
-#include <M7_lib/util/Pointer.h>
+#include <numeric>
 
+
+struct KrylovOptions {
+
+};
+
+#ifdef ENABLE_ARPACK
 #include <arpackf.h>
 #include <arrssym.h>
 #include <arlnsmat.h>
 #include <arrsnsym.h>
 #include <arrscomp.h>
-#include <numeric>
-#include <M7_lib/util/Sort.h>
 
+#include <M7_lib/linalg/DistMvProd.h>
+#include <M7_lib/util/Pointer.h>
+#include <M7_lib/util/Sort.h>
 
 /**
  * options to pass to the ARPACK solver
  */
 struct ArnoldiOptions {
-    /**
-     * number of eigenpairs be computed
-     */
-    uint_t m_nroot = 2ul;
     /**
      * number of arnoldi vectors to be generated at each iteration
      */
@@ -285,5 +287,6 @@ public:
         return !m_evecs.empty();
     }
 };
+#endif
 
 #endif //M7_ARNOLDISOLVER_H

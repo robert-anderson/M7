@@ -334,7 +334,7 @@ namespace wf {
 
     public:
         /**
-         * diagonalize in the given subspace and initialize with the resulting weights
+         * if opts.m_solver_kind is not NoSolve, diagonalize in the given subspace and initialize with the resulting weights
          */
         void ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, uint_t max_ncomm = 1000ul);
 
@@ -342,14 +342,6 @@ namespace wf {
          * no solve, just initialize the subspace
          */
         void ci_init(const ci_init::Subspace& subspace, uint_t max_ncomm = 1000ul);
-
-        /**
-         * optionally solve before initializing space
-         */
-        void ci_init(const ci_init::Subspace& subspace, ci_init::Options opts, bool solve, uint_t max_ncomm = 1000ul) {
-            if (solve) ci_init(subspace, opts, max_ncomm);
-            else ci_init(subspace, max_ncomm);
-        }
 
     private:
 
