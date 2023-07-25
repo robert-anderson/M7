@@ -182,11 +182,11 @@ TEST(UtilBit, TrailzSoftwareImpl64) {
     /*
      * software implementation should agree with optimized implementation (if any available)
      */
-    ASSERT_EQ(bit::trailz(0ul), bit::trailz_c(0ul));
+    ASSERT_EQ(bit::trailz(0ul), bit::trailz_64_c(0ul));
     for (uint_t ibit=0ul; ibit < 64ul; ++ibit) {
-        ASSERT_EQ(bit::trailz_c(1ul << ibit), ibit);
+        ASSERT_EQ(bit::trailz_64_c(1ul << ibit), ibit);
         ASSERT_EQ(bit::trailz(1ull << ibit), ibit);
-        ASSERT_EQ(bit::trailz(1ull << ibit), bit::trailz_c(1ul << ibit));
+        ASSERT_EQ(bit::trailz(1ull << ibit), bit::trailz_64_c(1ul << ibit));
     }
 }
 
@@ -194,11 +194,11 @@ TEST(UtilBit, TrailzSoftwareImpl32) {
     /*
      * software implementation should agree with optimized implementation (if any available)
      */
-    ASSERT_EQ(bit::trailz(0u), bit::trailz_c(0u));
+    ASSERT_EQ(bit::trailz(0u), bit::trailz_32_c(0u));
     for (uint_t ibit=0ul; ibit < 32ul; ++ibit) {
-        ASSERT_EQ(bit::trailz_c(1u << ibit), ibit);
+        ASSERT_EQ(bit::trailz_32_c(1u << ibit), ibit);
         ASSERT_EQ(bit::trailz(1u << ibit), ibit);
-        ASSERT_EQ(bit::trailz(1u << ibit), bit::trailz_c(1u << ibit));
+        ASSERT_EQ(bit::trailz(1u << ibit), bit::trailz_32_c(1u << ibit));
     }
 }
 

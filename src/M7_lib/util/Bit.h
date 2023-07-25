@@ -166,7 +166,7 @@ namespace bit {
 #endif
     }
 
-    static uint_t trailz_c(const uint64_t &n) {
+    static uint_t trailz_64_c(const uint64_t &n) {
         if (!n) return 64;
         uint8_t index;
         if ((index = (n & 0xff))) return bit::trailz_c_table[index];
@@ -179,7 +179,7 @@ namespace bit {
         else return bit::trailz_c_table[(n >> 56) & 0xff] + 56;
     }
 
-    static uint_t trailz_c(const uint32_t &n) {
+    static uint_t trailz_32_c(const uint32_t &n) {
         if (!n) return 32;
         uint8_t index;
         if ((index = (n & 0xff))) return bit::trailz_c_table[index];
@@ -193,7 +193,7 @@ namespace bit {
         return trailz_tzcnt(n);
 #else
         // resort to software implementation
-        return trailz_c(n);
+        return trailz_64_c(n);
 #endif
     }
 
@@ -202,7 +202,7 @@ namespace bit {
         return trailz_tzcnt(n);
 #else
         // resort to software implementation
-        return trailz_c(n);
+        return trailz_32_c(n);
 #endif
     }
 
