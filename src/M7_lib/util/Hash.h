@@ -112,7 +112,9 @@ namespace hash {
 
     template<typename T=digest_t>
     v_t<T> in_range(const digest_t &v, uint_t ngen, digest_t lo, digest_t hi, bool sorted = false) {
-        return in_range({v}, ngen, lo, hi, sorted);
+        v_t<digest_t> vec;
+        vec.push_back(v);
+        return in_range(vec, ngen, lo, hi, sorted);
     }
 
     /**
