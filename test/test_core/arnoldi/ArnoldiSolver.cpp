@@ -11,13 +11,13 @@
 #ifdef ENABLE_ARPACK
 TEST(ArnoldiSolver, SymNonDist) {
     const uint_t nrow = 20;
+    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
     auto sym = mat.symmetrized(false);
 
     ArnoldiOptions opts;
-    opts.m_nroot = 3ul;
 
-    ArnoldiSolver<double> solver(sym, nrow, opts, ArnoldiSolverBase::c_sym);
+    ArnoldiSolver<double> solver(sym, nroot, nrow, opts, ArnoldiSolverBase::c_sym);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
@@ -28,7 +28,7 @@ TEST(ArnoldiSolver, SymNonDist) {
     // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
     sort::inplace(evals, false, true);
     double eval;
-    for (uint_t iroot=0ul; iroot<opts.m_nroot; ++iroot){
+    for (uint_t iroot=0ul; iroot < nroot; ++iroot){
         solver.get_eval(iroot, eval);
         ASSERT_NEAR_EQ(eval, evals[iroot]);
     }
@@ -36,14 +36,14 @@ TEST(ArnoldiSolver, SymNonDist) {
 
 TEST(ArnoldiSolver, SymDist) {
     const uint_t nrow = 20;
+    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
     auto sym = mat.symmetrized(false);
     dist_mv_prod::Sparse<double> prod(sym);
 
     ArnoldiOptions opts;
-    opts.m_nroot = 3ul;
 
-    ArnoldiSolver<double> solver(prod, opts, ArnoldiSolverBase::c_sym);
+    ArnoldiSolver<double> solver(prod, nroot, opts, ArnoldiSolverBase::c_sym);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
@@ -56,7 +56,7 @@ TEST(ArnoldiSolver, SymDist) {
         sort::inplace(evals, false, true);
         auto dense_eval_it = evals.cbegin();
         double eval;
-        for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
+        for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
             solver.get_eval(iroot, eval);
             ASSERT_NEAR_EQ(eval, dense_eval_it[iroot]);
         }
@@ -65,11 +65,11 @@ TEST(ArnoldiSolver, SymDist) {
 
 TEST(ArnoldiSolver, NonSymNonDist) {
     const uint_t nrow = 20;
+    const uint_t nroot = 2;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
 
     ArnoldiOptions opts;
-    opts.m_nroot = 2ul;
-    ArnoldiSolver<double> solver(mat, nrow, opts, ArnoldiSolverBase::c_nonsym);
+    ArnoldiSolver<double> solver(mat, nroot, nrow, opts, ArnoldiSolverBase::c_nonsym);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
@@ -82,7 +82,7 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     sort::inplace(evals, false, true);
     auto dense_eval_it = evals.cbegin();
     std::complex<double> eval;
-    for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
+    for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
         solver.get_eval(iroot, eval);
         ASSERT_NEAR_EQ(eval, dense_eval_it[iroot]);
     }
@@ -91,12 +91,12 @@ TEST(ArnoldiSolver, NonSymNonDist) {
 
 TEST(ArnoldiSolver, NonSymDist) {
     const uint_t nrow = 20;
+    const uint_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
     dist_mv_prod::Sparse<double> prod(mat);
 
     ArnoldiOptions opts;
-    opts.m_nroot = 3ul;
-    ArnoldiSolver<double> solver(prod, opts, ArnoldiSolverBase::c_nonsym);
+    ArnoldiSolver<double> solver(prod, nroot, opts, ArnoldiSolverBase::c_nonsym);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
@@ -110,7 +110,7 @@ TEST(ArnoldiSolver, NonSymDist) {
         auto dense_eval_it = evals.cbegin();
         std::complex<double> eval;
 
-        for (uint_t iroot = 0ul; iroot < opts.m_nroot; ++iroot) {
+        for (uint_t iroot = 0ul; iroot < nroot; ++iroot) {
             solver.get_eval(iroot, eval);
             ASSERT_NEAR_EQ(eval, arith::real(dense_eval_it[iroot]));
         }
@@ -119,12 +119,12 @@ TEST(ArnoldiSolver, NonSymDist) {
 
 TEST(ArnoldiSolver, ComplexNonDist) {
     const uint_t nrow = 20;
+    const uint_t nroot = 4;
     auto mat = sparse_matrix_examples::rect_double_complex(nrow, nrow, 2);
     typedef std::complex<double> T;
 
     ArnoldiOptions opts;
-    opts.m_nroot = 4ul;
-    ArnoldiSolver<T> solver(mat, nrow, opts, ArnoldiSolverBase::c_nonsym);
+    ArnoldiSolver<T> solver(mat, nroot, nrow, opts, ArnoldiSolverBase::c_nonsym);
 
     v_t<T> bench_evals = {{6, 0}, {2.594171028, 3.881855803}, {4, 2}, {-1, -3}};
     T eval;
@@ -136,13 +136,13 @@ TEST(ArnoldiSolver, ComplexNonDist) {
 
 TEST(ArnoldiSolver, ComplexDist) {
     const uint_t nrow = 20;
+    const uint_t nroot = 4;
     auto mat = sparse_matrix_examples::rect_double_complex(nrow, nrow, 2);
     typedef std::complex<double> T;
     dist_mv_prod::Sparse<T> prod(mat);
 
     ArnoldiOptions opts;
-    opts.m_nroot = 4ul;
-    ArnoldiSolver<T> solver(prod, opts, ArnoldiSolverBase::c_nonsym);
+    ArnoldiSolver<T> solver(prod, nroot, opts, ArnoldiSolverBase::c_nonsym);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization

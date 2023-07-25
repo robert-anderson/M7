@@ -67,9 +67,9 @@ namespace ci_init {
 
 #ifdef ENABLE_ARPACK
         template<uint_t sym>
-        ArnoldiSolver<ham_t> solve_arnoldi(tag::Int<sym>) {
+        ArnoldiSolver<ham_t> solve_arnoldi(ArnoldiOptions ar_opts, tag::Int<sym>) {
             dist_mv_prod::Sparse<ham_t> dist(m_sparse_ham);
-            ArnoldiSolver<ham_t> solver(dist, m_opts, tag::Int<sym>());
+            ArnoldiSolver<ham_t> solver(dist, m_opts.m_nroot, ar_opts, tag::Int<sym>());
             /*
              * once the ARPACK procedure is complete, the eigenvalues must be adjusted to undo the diagonal shift
              */
@@ -81,15 +81,16 @@ namespace ci_init {
     public:
 
 #ifdef ENABLE_ARPACK
-        ArnoldiSolver<ham_t> solve_arnoldi() {
-            return m_is_hermitian ? solve(ArnoldiSolverBase::c_sym) : solve(ArnoldiSolverBase::c_nonsym);
+        ArnoldiSolver<ham_t> solve_arnoldi(ArnoldiOptions ar_opts) {
+            return m_is_hermitian ? solve_arnoldi(ar_opts, ArnoldiSolverBase::c_sym) :
+                                    solve_arnoldi(ar_opts, ArnoldiSolverBase::c_nonsym);
         }
 
         /**
          * in instances where retention of the sparse Hamiltonian is not desired
          */
-        static ArnoldiSolver<ham_t> solve(const Subspace& subspace, Options opts = {}) {
-            return Initializer(subspace, opts).solve_arnoldi();
+        static ArnoldiSolver<ham_t> solve(const Subspace& subspace, ArnoldiOptions ar_opts = {}, Options opts = {}) {
+            return Initializer(subspace, opts).solve_arnoldi(ar_opts);
         }
 #endif
     };

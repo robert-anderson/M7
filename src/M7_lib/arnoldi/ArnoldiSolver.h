@@ -177,14 +177,14 @@ private:
     ArnoldiSolver(uint_t nroot, uint_t nelement_evec): ArnoldiSolverBase(nroot, nelement_evec){}
 
     template<uint_t sym>
-    ArnoldiSolver(std::function<void()> prod_fn, bool dist, uint_t nelement_evec, ArnoldiOptions opts, tag::Int<sym>):
-            ArnoldiSolver(opts.m_nroot, nelement_evec) {
+    ArnoldiSolver(std::function<void()> prod_fn, bool dist, uint_t nroot, uint_t nelement_evec, ArnoldiOptions opts, tag::Int<sym>):
+            ArnoldiSolver(nroot, nelement_evec) {
         constexpr bool real = !dtype::is_complex<kry_t>();
         typedef typename ArnoldiSolverBase::SolverSelector<comp_t, real, sym>::type ar_t;
         std::unique_ptr<ar_t> m_ar;
         if (mpi::i_am_root() || !dist) {
             m_ar = ptr::smart::make_unique<ar_t>(
-                    m_nelement_evec, opts.m_nroot, "LM", opts.m_narnoldi_vector, opts.m_ritz_tol, opts.m_niter_max);
+                    m_nelement_evec, nroot, "LM", opts.m_narnoldi_vector, opts.m_ritz_tol, opts.m_niter_max);
             m_ar_base = m_ar.get();
             ArnoldiSolverBase::begin_log(m_ar_base, sym);
         }
@@ -207,16 +207,16 @@ private:
 
 public:
     template<uint_t sym>
-    ArnoldiSolver(sparse::dynamic::Matrix<kry_t> &sparse_mat, uint_t nelement_evec, ArnoldiOptions opts, tag::Int<sym>):
+    ArnoldiSolver(sparse::dynamic::Matrix<kry_t> &sparse_mat, uint_t nroot, uint_t nelement_evec, ArnoldiOptions opts, tag::Int<sym>):
             ArnoldiSolver([&](){
                 sparse_mat.multiply(get_vector(), put_vector(), nelement_evec);
-            }, false, nelement_evec, opts, tag::Int<sym>()) {}
+            }, false, nroot, nelement_evec, opts, tag::Int<sym>()) {}
 
     template<uint_t sym>
-    ArnoldiSolver(dist_mv_prod::Base<kry_t> &mv_prod, ArnoldiOptions opts, tag::Int<sym>):
+    ArnoldiSolver(dist_mv_prod::Base<kry_t> &mv_prod, uint_t nroot, ArnoldiOptions opts, tag::Int<sym>):
             ArnoldiSolver([&](){
                 mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector());
-            }, true, mv_prod.m_nrow, opts, tag::Int<sym>()) {}
+            }, true, nroot, mv_prod.m_nrow, opts, tag::Int<sym>()) {}
 
     bool basis_found() override { return m_ar_base->ArnoldiBasisFound(); }
 

@@ -14,14 +14,14 @@
 TEST(FciInitializer, N2Conns) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     Hamiltonian ham(&frm_ham);
-    ci_init::Options opt;
-    opt.m_ritz_tol = 1e-7;
+    ArnoldiOptions ar_opts;
+    ar_opts.m_ritz_tol = 1e-7;
     DenseHamiltonian hmat(ham);
     v_t<ham_comp_t> dense_evals;
     dense::diag(hmat, dense_evals);
     ham_comp_t eval;
     ci_init::FciSubspace subspace(&ham);
-    auto results = ci_init::Initializer::solve(subspace, opt);
+    auto results = ci_init::Initializer::solve(subspace, ar_opts);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, dense_evals[0]);
 }
@@ -29,13 +29,17 @@ TEST(FciInitializer, N2Conns) {
 TEST(FciInitializer, N2MbfPairs) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     Hamiltonian ham(&frm_ham);
-    ci_init::Options opt;
-    opt.m_ritz_tol = 1e-7;
-    opt.m_loop_kind = ci_init::Options::MbfPairs;
+
+    ArnoldiOptions ar_opts;
+    ar_opts.m_ritz_tol = 1e-7;
+
+    ci_init::Options ci_opts;
+    ci_opts.m_loop_kind = ci_init::Options::MbfPairs;
+
     const ham_comp_t bench = -108.916561245698;
     ham_comp_t eval;
     ci_init::FciSubspace subspace(&ham);
-    auto results = ci_init::Initializer::solve(subspace, opt);
+    auto results = ci_init::Initializer::solve(subspace, ar_opts, ci_opts);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, bench);
 }
@@ -43,15 +47,19 @@ TEST(FciInitializer, N2MbfPairs) {
 TEST(FciInitializer, N2Cisd) {
     GeneralFrmHam frm_ham({PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP"});
     Hamiltonian ham(&frm_ham);
-    ci_init::Options opt;
-    opt.m_ritz_tol = 1e-7;
-    opt.m_loop_kind = ci_init::Options::MbfPairs;
+
+    ArnoldiOptions ar_opts;
+    ar_opts.m_ritz_tol = 1e-7;
+
+    ci_init::Options ci_opts;
+    ci_opts.m_loop_kind = ci_init::Options::MbfPairs;
+
     const ham_comp_t bench = -108.89886691594;
     ham_comp_t eval;
     buffered::Mbf ref(ham.m_basis);
     mbf::set_aufbau_mbf(ref, ham.default_particles());
     ci_init::RefConnSubspace subspace(&ham, ref);
-    auto results = ci_init::Initializer::solve(subspace, opt);
+    auto results = ci_init::Initializer::solve(subspace, ar_opts, ci_opts);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, bench);
 }
@@ -59,9 +67,17 @@ TEST(FciInitializer, N2Cisd) {
 TEST(FciInitializer, J1J2) {
     J1J2FrmHam frm_ham(0.25, lattice::make("ortho", {16}, {1}));
     Hamiltonian ham(&frm_ham);
+
+    ArnoldiOptions ar_opts;
+    ar_opts.m_ritz_tol = 1e-7;
+
+    ci_init::Options ci_opts;
+    ci_opts.m_loop_kind = ci_init::Options::Conns;
+    ci_opts.m_nroot = 2;
+
     ham_comp_t eval;
     ci_init::FciSubspace subspace(&ham);
-    auto results = ci_init::Initializer::solve(subspace);
+    auto results = ci_init::Initializer::solve(subspace, ar_opts, ci_opts);
     results.get_eval(0, eval);
     ASSERT_NEAR_EQ(eval, -6.44708);
 }
