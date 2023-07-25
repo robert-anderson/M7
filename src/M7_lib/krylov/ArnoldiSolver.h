@@ -5,13 +5,6 @@
 #ifndef M7_ARNOLDISOLVER_H
 #define M7_ARNOLDISOLVER_H
 
-#include <numeric>
-
-
-struct KrylovOptions {
-
-};
-
 #ifdef ENABLE_ARPACK
 #include <arpackf.h>
 #include <arrssym.h>
@@ -21,35 +14,22 @@ struct KrylovOptions {
 
 #include <M7_lib/linalg/DistMvProd.h>
 #include <M7_lib/util/Pointer.h>
-#include <M7_lib/util/Sort.h>
+#include "KrylovSolver.h"
 
 /**
  * options to pass to the ARPACK solver
  */
-struct ArnoldiOptions {
+struct ArnoldiOptions : KrylovOptions {
     /**
      * number of arnoldi vectors to be generated at each iteration
      */
     uint_t m_narnoldi_vector = 0ul;
-    /**
-     * maximum iteration number
-     */
-    uint_t m_niter_max = 0ul;
-    /**
-     * ritz vector tolerance determining convergence criterion
-     */
-    double m_ritz_tol = 1e-9;
 };
 
 /**
  * put all type-independent operations in this un-templated base class
  */
 struct ArnoldiSolverBase {
-protected:
-    const uint_t m_nroot;
-    const uint_t m_nelement_evec;
-
-public:
 
     /**
      * tags to statically specify symmetric or non-symmetric ARPACK algorithms
@@ -57,7 +37,6 @@ public:
     static constexpr tag::Int<1> c_sym = {};
     static constexpr tag::Int<0> c_nonsym = {};
 
-    ArnoldiSolverBase(uint_t nroot, uint_t nelement_evec): m_nroot(nroot), m_nelement_evec(nelement_evec){}
     template<typename comp_t, bool real, bool sym> struct SolverSelector {};
 
     template<typename comp_t> struct SolverSelector<comp_t, true, true>{ typedef ARrcSymStdEig<comp_t> type;};
@@ -112,36 +91,24 @@ protected:
 };
 
 template<typename kry_t>
-struct ArnoldiSolver : ArnoldiSolverBase {
+struct ArnoldiSolver : ArnoldiSolverBase, KrylovSolver<kry_t> {
     typedef arith::comp_t<kry_t> comp_t;
     /*
      * eigenvectors are by definition kry_t, but eigenvalues can be real or complex depending on symmetry, so their
      * real/imag parts are stored separately
      */
 protected:
-    uintv_t m_root_ordering;
-    v_t<comp_t> m_real_evals;
-    v_t<comp_t> m_imag_evals;
-    v_t<kry_t> m_evecs;
+    using KrylovSolver<kry_t>::m_nroot;
+    using KrylovSolver<kry_t>::m_nelement_evec;
+    using KrylovSolver<kry_t>::m_root_ordering;
+    using KrylovSolver<kry_t>::m_real_evals;
+    using KrylovSolver<kry_t>::m_imag_evals;
+    using KrylovSolver<kry_t>::m_evecs;
+    using KrylovSolver<kry_t>::set_results;
+
     ARrcStdEig<comp_t, kry_t>* m_ar_base = nullptr;
 
 private:
-    void set_results(const comp_t* real_evals, const comp_t* imag_evals, const kry_t* raw_evecs){
-        if (!real_evals) return;
-
-        m_real_evals = {real_evals, real_evals + m_nroot};
-        if (imag_evals) m_imag_evals = {imag_evals, imag_evals + m_nroot};
-        else m_imag_evals.assign(m_nroot, 0.0);
-        m_evecs = {raw_evecs, raw_evecs+(m_nroot*m_nelement_evec)};
-        m_root_ordering.resize(m_nroot);
-        std::iota(m_root_ordering.begin(), m_root_ordering.end(), 0);
-        // sort with largest-magnitude eval first
-        std::sort(m_root_ordering.begin(), m_root_ordering.end(), [&](uint_t i, uint_t j) {
-            std::complex<comp_t> zi = {m_real_evals[i], m_imag_evals[i]};
-            std::complex<comp_t> zj = {m_real_evals[j], m_imag_evals[j]};
-            return std::abs(zi) > std::abs(zj);
-        });
-    }
 
     void set_results(ARrcSymStdEig<comp_t>* ar) {
         if (!ar) return;
@@ -165,16 +132,7 @@ private:
         set_results(evals_re.data(), evals_im.data(), ar->RawEigenvectors());
     }
 
-    /**
-     * send the eigenvalues to each process
-     */
-    void bcast(uint_t irank=0ul) {
-        mpi::bcast(m_root_ordering, irank);
-        mpi::bcast(m_real_evals, irank);
-        mpi::bcast(m_imag_evals, irank);
-    }
-
-    ArnoldiSolver(uint_t nroot, uint_t nelement_evec): ArnoldiSolverBase(nroot, nelement_evec){}
+    ArnoldiSolver(uint_t nroot, uint_t nelement_evec): KrylovSolver<kry_t>(nroot, nelement_evec){}
 
     template<uint_t sym>
     ArnoldiSolver(std::function<void()> prod_fn, bool dist, uint_t nroot, uint_t nelement_evec, ArnoldiOptions opts, tag::Int<sym>):
@@ -192,7 +150,7 @@ private:
         const auto success = ArnoldiSolverBase::solve(prod_fn, dist);
         if (mpi::i_am_root()) ArnoldiSolverBase::end_log(m_ar_base, success);
         if (success) set_results(m_ar.get());
-        bcast();
+        KrylovSolver<kry_t>::bcast();
     }
 
     /*
@@ -230,62 +188,6 @@ public:
         return m_ar_base->FindEigenvectors();
     }
 
-    void get_eval(uint_t iroot, comp_t& eval) const {
-        REQUIRE_NEAR_ZERO(m_imag_evals[m_root_ordering[iroot]], "non-zero imaginary part");
-        eval = m_real_evals[m_root_ordering[iroot]];
-    }
-
-    void get_eval(uint_t iroot, std::complex<comp_t>& eval) const {
-        eval = {m_real_evals[m_root_ordering[iroot]], m_imag_evals[m_root_ordering[iroot]]};
-    }
-
-private:
-    /*
-     * final arg is a dummy to enable static dispatch in the arithmetic-resolving methods below
-     */
-    template<bool real>
-    void get_evals(v_t<arith::num_t<comp_t, real>>& evals, int) const {
-        evals.clear();
-        for (size_t iroot = 0ul; iroot < nroot(); ++iroot) {
-            evals.push_back({});
-            get_eval(m_root_ordering[iroot], evals.back());
-        }
-    }
-
-public:
-
-    void shift_evals(comp_t shift) {
-        if (m_real_evals.empty()) return;
-        for (auto& it: m_real_evals) it+=shift;
-    }
-
-    void get_evals(v_t<comp_t>& evals) const { get_evals<true>(evals, 0); }
-    void get_evals(v_t<std::complex<comp_t>>& evals) const { get_evals<false>(evals, 0); }
-
-    uint_t nroot() const {
-        return m_real_evals.size();
-    }
-
-    uint_t nelement_evec() const {
-        return m_nelement_evec;
-    }
-
-    const kry_t* get_evec(uint_t iroot) const {
-        if (m_evecs.empty()) return nullptr;
-        REQUIRE_LT(iroot, nroot(), "root index OOB");
-        return m_evecs.data()+(m_root_ordering[iroot]*m_nelement_evec);
-    }
-
-    v_t<const kry_t*> get_evecs() const {
-        if (m_evecs.empty()) return {};
-        v_t<const kry_t*> evecs;
-        for (uint_t iroot = 0ul; iroot < nroot(); ++iroot) evecs.push_back(get_evec(iroot));
-        return evecs;
-    }
-
-    bool i_have_evecs() const {
-        return !m_evecs.empty();
-    }
 };
 #endif
 
