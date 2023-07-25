@@ -7,7 +7,7 @@ target_include_directories(M7_lib
         ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
-add_subdirectory(arnoldi)
+add_subdirectory(krylov)
 add_subdirectory(basis)
 add_subdirectory(bilinear)
 add_subdirectory(caches)

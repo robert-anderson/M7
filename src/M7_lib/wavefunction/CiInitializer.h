@@ -6,7 +6,7 @@
 #define M7_CIINITIALIZER_H
 
 #include <M7_lib/linalg/FciIters.h>
-#include <M7_lib/arnoldi/ArnoldiSolver.h>
+#include <M7_lib/krylov/ArnoldiSolver.h>
 
 namespace ci_init {
     struct Options {

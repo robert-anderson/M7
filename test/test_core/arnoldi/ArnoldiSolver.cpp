@@ -5,8 +5,7 @@
 #include "test_core/defs.h"
 #include <test_core/sparse/Examples.h>
 #include <M7_lib/linalg/Dense.h>
-#include "M7_lib/arnoldi/ArnoldiSolver.h"
-#include "M7_lib/hdf5/File.h"
+#include "M7_lib/krylov/ArnoldiSolver.h"
 
 #ifdef ENABLE_ARPACK
 TEST(ArnoldiSolver, SymNonDist) {
