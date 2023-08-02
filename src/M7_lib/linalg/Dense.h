@@ -82,6 +82,17 @@ extern "C" void zgemm_(const char *transa, const char *transb,
                        std::complex<double> *c, const int *ldc);
 
 
+extern "C" void sgeqrf_(int* m, int* n, float* a, int* lda, float* tau, float* work, int* lwork, int* info);
+extern "C" void dgeqrf_(int* m, int* n, double* a, int* lda, double* tau, double* work, int* lwork, int* info);
+extern "C" void cgeqrf_(int* m, int* n, std::complex<float>* a, int* lda, std::complex<float>* tau, std::complex<float>* work, int* lwork, int* info);
+extern "C" void zgeqrf_(int* m, int* n, std::complex<double>* a, int* lda, std::complex<double>* tau, std::complex<double>* work, int* lwork, int* info);
+
+extern "C" void sorgqr_(int* m, int* n, int* k, float* a, int* lda, float* tau, float* work, int* lwork, int* info);
+extern "C" void dorgqr_(int* m, int* n, int* k, double* a, int* lda, double* tau, double* work, int* lwork, int* info);
+extern "C" void cungqr_(int* m, int* n, int* k, std::complex<float>* a, int* lda, std::complex<float>* tau, std::complex<float>* work, int* lwork, int* info);
+extern "C" void zungqr_(int* m, int* n, int* k, std::complex<double>* a, int* lda, std::complex<double>* tau, std::complex<double>* work, int* lwork, int* info);
+
+
 namespace dense {
 
     template<typename T>
@@ -211,7 +222,12 @@ namespace dense {
         void zero();
 
         /**
-         * in-place physical transposition via out-of-place buffer procedure
+         * out-of-place physical transposition
+         */
+        void transpose_to(dense::MatrixBase& other) const;
+
+        /**
+         * in-place physical transposition via out-of-place buffer
          */
         void transpose();
 
@@ -863,6 +879,14 @@ namespace dense {
 
     bool diag(const dense::SquareMatrix<std::complex<double>> &mat, v_t<std::complex<double>> &evals);
 
+    /*
+     * QR factorization interfaces
+     */
+
+    bool qr(const dense::Matrix<float> &mat, dense::Matrix<float> &q, dense::Matrix<float> &r);
+    bool qr(const dense::Matrix<double> &mat, dense::Matrix<double> &q, dense::Matrix<double> &r);
+    bool qr(const dense::Matrix<std::complex<float>> &mat, dense::Matrix<std::complex<float>> &q, dense::Matrix<std::complex<float>> &r);
+    bool qr(const dense::Matrix<std::complex<double>> &mat, dense::Matrix<std::complex<double>> &q, dense::Matrix<std::complex<double>> &r);
 }
 
 #endif //M7_DENSE_H

@@ -476,6 +476,41 @@ TEST(Dense, RealSymEig) {
     ASSERT_TRUE(evecs.nearly_equal(evecs_chk));
 }
 
+TEST(Dense, RealQr) {
+    typedef double T;
+    const uint_t nrow = 5;
+    const uint_t ncol = 3;
+    dense::Matrix<T> mat(nrow, ncol);
+
+    mat.set_row<T>(0, { 0, -1,  2});
+    mat.set_row<T>(1, { 2, -1, -2});
+    mat.set_row<T>(2, {-1,  1, -5});
+    mat.set_row<T>(3, { 1, -2,  1});
+    mat.set_row<T>(4, { 2, -5,  4});
+    dense::Matrix<T> q(nrow, ncol);
+    dense::Matrix<T> r(nrow, ncol);
+    dense::qr(mat, q, r);
+
+    dense::Matrix<T> r_chk(ncol,
+    {-3.1622776601683795, 4.743416490252569,  -3.16227766016838,
+            0.0,                -3.082207001484488,  3.8933141071383,
+            0.0,                 0.0,                4.984185516527038});
+
+    dense::Matrix<T> q_chk(nrow,
+        {0.0,                 0.32444284226152514,  0.14783601108342911,
+             -0.6324555320336759, -0.6488856845230501,  -0.2956720221668581,
+              0.31622776601683794, 0.16222142113076257, -0.9292549268101257,
+             -0.31622776601683794, 0.16222142113076254, -0.12671658092865348,
+             -0.6324555320336759,  0.6488856845230502,  -0.1055971507738778});
+
+    ASSERT_TRUE(r.nearly_equal(r_chk));
+    ASSERT_TRUE(q.nearly_equal(q_chk));
+
+    dense::Matrix<T> mat_chk(nrow, ncol);
+    dense::multiply(q, r, mat_chk);
+    ASSERT_TRUE(mat.nearly_equal(mat_chk));
+}
+
 #if 0
 
 TEST(Dense, ComplexHermEig) {

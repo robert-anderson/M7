@@ -63,13 +63,17 @@ void dense::MatrixBase::zero() {
     m_bw.set_end(m_nrow);
 }
 
+void dense::MatrixBase::transpose_to(dense::MatrixBase& other) const {
+    other.set_sizes(m_ncol, m_nrow);
+    if (other.i_can_globally_modify()) {
+        for (uint_t icol = 0ul; icol < other.m_ncol; ++icol) other.set_col(icol, cbegin(icol));
+    }
+    if (other.m_bw.node_shared()) mpi::barrier_on_node();
+}
+
 void dense::MatrixBase::transpose() {
     auto tmp = *this;
-    set_sizes(m_ncol, m_nrow);
-    if (i_can_globally_modify()) {
-        for (uint_t icol = 0ul; icol < m_ncol; ++icol) set_col(icol, tmp.cbegin(icol));
-    }
-    if (m_bw.node_shared()) mpi::barrier_on_node();
+    tmp.transpose_to(*this);
 }
 
 void dense::MatrixBase::reorder_rows(const uintv_t &order) {
@@ -260,4 +264,79 @@ bool dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, v_t<std::
     zgeev_("N", "N", &n, a.tbegin(), &n, evals.data(),
            nullptr, &n, nullptr, &n, work.data(), &lwork, rwork.data(), &info);
     return !info;
+}
+
+void geqrf(int* m, int* n, float* a, int* lda, float* tau, float* work, int* lwork, int* info) {
+    sgeqrf_(m, n, a, m, tau, work, lwork, info);
+}
+void geqrf(int* m, int* n, double* a, int* lda, double* tau, double* work, int* lwork, int* info) {
+    dgeqrf_(m, n, a, m, tau, work, lwork, info);
+}
+void geqrf(int* m, int* n, std::complex<float>* a, int* lda, std::complex<float>* tau, std::complex<float>* work, int* lwork, int* info) {
+    cgeqrf_(m, n, a, m, tau, work, lwork, info);
+}
+void geqrf(int* m, int* n, std::complex<double>* a, int* lda, std::complex<double>* tau, std::complex<double>* work, int* lwork, int* info) {
+    zgeqrf_(m, n, a, m, tau, work, lwork, info);
+}
+
+void orgqr(int* m, int* n, int* k, float* a, int* lda, float* tau, float* work, int* lwork, int* info) {
+    sorgqr_(m, n, k, a, m, tau, work, lwork, info);
+}
+void orgqr(int* m, int* n, int* k, double* a, int* lda, double* tau, double* work, int* lwork, int* info) {
+    dorgqr_(m, n, k, a, m, tau, work, lwork, info);
+}
+void orgqr(int* m, int* n, int* k, std::complex<float>* a, int* lda, std::complex<float>* tau, std::complex<float>* work, int* lwork, int* info) {
+    cungqr_(m, n, k, a, m, tau, work, lwork, info);
+}
+void orgqr(int* m, int* n, int* k, std::complex<double>* a, int* lda, std::complex<double>* tau, std::complex<double>* work, int* lwork, int* info) {
+    zungqr_(m, n, k, a, m, tau, work, lwork, info);
+}
+
+template<typename T>
+bool qr(const dense::Matrix<T> &mat, dense::Matrix<T> &q, dense::Matrix<T> &r) {
+    mat.transpose_to(q);
+    int n = q.nrow();
+    int m = q.ncol();
+    int k = std::min(n, m);
+    r.resize(n, n);
+    int info;
+    v_t<T> work(1, 0.0);
+    int lwork = -1;
+    geqrf(&m, &n, nullptr, &m, nullptr, work.data(), &lwork, &info);
+    lwork = int(arith::real(work[0]));
+    work.resize(lwork);
+    v_t<T> tau(k);
+    geqrf(&m, &n, q.tbegin(), &m, tau.data(), work.data(), &lwork, &info);
+    if (info) return false;
+    r.zero();
+    /*
+     * q has what is supposed to be the upper right triangle of r in its lower left triangle
+     */
+    for (uint_t irow = 0ul; irow < r.nrow(); ++irow) {
+        for (uint_t icol = irow; icol < r.ncol(); ++icol) {
+            r(irow, icol) = q(icol, irow);
+        }
+    }
+    orgqr(&m, &n, &k, q.tbegin(), &m, tau.data(), work.data(), &lwork, &info);
+    q.transpose();
+    return !info;
+}
+
+
+bool dense::qr(const dense::Matrix<float> &mat, dense::Matrix<float> &q, dense::Matrix<float> &r) {
+    return ::qr(mat, q, r);
+}
+
+bool dense::qr(const dense::Matrix<double> &mat, dense::Matrix<double> &q, dense::Matrix<double> &r) {
+    return ::qr(mat, q, r);
+}
+
+bool dense::qr(const dense::Matrix<std::complex<float>> &mat, dense::Matrix<std::complex<float>> &q,
+               dense::Matrix<std::complex<float>> &r) {
+    return ::qr(mat, q, r);
+}
+
+bool dense::qr(const dense::Matrix<std::complex<double>> &mat, dense::Matrix<std::complex<double>> &q,
+               dense::Matrix<std::complex<double>> &r) {
+    return ::qr(mat, q, r);
 }
