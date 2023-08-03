@@ -113,6 +113,11 @@ void shift::ValueFixing::update_variable_mode(const wf::Vectors&, uint_t icycle,
     }
 }
 
+wf_comp_t get_target(const conf::Shift& opts, uint_t ishift_space) {
+    const auto tmp = opts.m_nw_targets.m_value[ishift_space];
+    return tmp < 0 ? std::numeric_limits<wf_comp_t>::max() : tmp;
+}
+
 Shifts::Shifts(const conf::Shift& opts, const NdFormat<c_ndim_wf>& wf_fmt) :
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
         m_values(wf_fmt.add_major_dim(opts.m_nw_targets.m_value.size(), "shift space")),
@@ -122,17 +127,16 @@ Shifts::Shifts(const conf::Shift& opts, const NdFormat<c_ndim_wf>& wf_fmt) :
     if (opts.m_fix_s0)
         m_spaces.emplace_back(new shift::ValueFixing(wf_fmt, 0, opts.m_periods.m_value[0], opts.m_init));
     else if (opts.m_fix_ref_weight)
-        m_spaces.emplace_back(new shift::RefWeightFixing(wf_fmt, 0, opts.m_periods.m_value[0], opts.m_init, opts.m_nw_targets.m_value[0]));
+        m_spaces.emplace_back(new shift::RefWeightFixing(
+            wf_fmt, 0, opts.m_periods.m_value[0], opts.m_init, get_target(opts, 0)));
 
     uint_t ispace = m_spaces.size();
 
     // add all remaining spaces as growth-based shifts
     for (; ispace<opts.m_nw_targets.m_value.size(); ++ispace) {
         const auto period = opts.m_periods.m_value[opts.m_periods.m_value.size() == 1 ? 0 : ispace];
-        m_spaces.emplace_back(
-                new shift::GrowthBased(wf_fmt, ispace, period,
-                       opts.m_init, opts.m_nw_targets.m_value[ispace], opts.m_damp,
-                       opts.m_target_damp));
+        m_spaces.emplace_back(new shift::GrowthBased(
+                wf_fmt, ispace, period,opts.m_init, get_target(opts, ispace), opts.m_damp,opts.m_target_damp));
     }
 
     logging::info("Initialized {}", string::plural("shift space", m_spaces.size()));

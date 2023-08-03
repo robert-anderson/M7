@@ -189,7 +189,8 @@ conf::Shift::Shift(Group *parent) :
             "use damping factor in shift update related to growth relative to the target walker population. "
             "this is set to the optimal value damp^2/4"),
         m_periods(this, "periods", {5}, "number of MC cycles between shift updates"),
-        m_nw_targets(this, "nw_targets", {10000.0}, "target walker numbers in each shift space"),
+        m_nw_targets(this, "nw_targets", {10000.0},
+                     "target walker numbers in each shift space, negative values are interpreted as a maximum float value"),
         m_floors(this, "floors", {}, "minimum allowed shift values"),
         m_fix_s0(this, "fix_s0", false, "ignore all walker data in the 0th shift update, and instead instead fix s0, "
             "but allow higher shift values in higher-index spaces to vary"),
