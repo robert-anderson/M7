@@ -74,6 +74,8 @@ struct OnvRow : public Row {
 struct MbfWeightRow : Row {
     field::Mbf m_mbf;
     field::Numbers<wf_t, c_ndim_wf> m_weight;
+    MbfWeightRow(const sys::Basis& basis, const NdFormat<c_ndim_wf>& weight_fmt);
+
     MbfWeightRow(const Walker& walker);
 };
 

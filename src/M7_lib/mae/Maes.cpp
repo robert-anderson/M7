@@ -101,7 +101,7 @@ void Maes::fill_from_wf_hist(const Table<MbfWeightRow>& hist) {
         }
     }
 #else
-    NotfMaeFiller::fill(hist, m_rdms);
+    NotfMaeFiller::fill(hist, &m_rdms);
 #endif
 
 }

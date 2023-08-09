@@ -18,7 +18,7 @@ class NotfMaeFiller {
     /**
      * Wrapper around all RDM and MRPT2 intermediate objects filled by this class
      */
-    Rdms& m_rdms;
+    Rdms* m_rdms;
     /**
      * offset from beginning of hist MBFs for the local MPI rank
      */
@@ -69,7 +69,7 @@ class NotfMaeFiller {
      */
     void resolve_identity(const uintv_t& /*ann_ispinorbs*/, const v_t<uintp_t>& /*ann_isect*/,
                           const uintv_t& /*cre_ispinorbs*/, const v_t<uintp_t>& /*cre_isect*/) {
-
+        REQUIRE_TRUE_ALL(m_rdms, "RDMs object must be non-null");
     }
 
 
@@ -86,7 +86,7 @@ class NotfMaeFiller {
     }
 
 public:
-    NotfMaeFiller(const Table<MbfWeightRow>& hist, Rdms& rdms):
+    NotfMaeFiller(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr):
         m_hist(hist), m_rdms(rdms),
         m_ind_displ(mpi::evenly_shared_displ(m_hist.nrow_in_use())),
         m_ind_count(mpi::evenly_shared_count(m_hist.nrow_in_use())),
@@ -97,7 +97,7 @@ public:
 
     }
 
-    static void fill(const Table<MbfWeightRow>& hist, Rdms& rdms) {
+    static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr) {
         NotfMaeFiller filler(hist, rdms);
         filler.fill();
     }
