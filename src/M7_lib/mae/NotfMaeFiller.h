@@ -18,7 +18,7 @@ class NotfMaeFiller {
     /**
      * Wrapper around all RDM and MRPT2 intermediate objects filled by this class
      */
-    Rdms* m_rdms;
+    Rdms* m_rdms;  // uninitialised pointer to RDM object?
     /**
      * offset from beginning of hist MBFs for the local MPI rank
      */
@@ -43,14 +43,14 @@ class NotfMaeFiller {
     /**
      * m_occ_bitsets expressed in isect form
      */
-    const v_t<v_t<uintp_t>> m_occ_isects;
+    const v_t<v_t<uintp_t>> m_occ_isects;  // these exclude the zero words, e.g. 0010 | 0011 | 0000 | 1010 -> [[0, 0010], [1, 0011], [3, 1010]]
     /**
      * m_partial_occ_bitsets expressed in isect form
      */
     const v_t<v_t<uintp_t>> m_partial_occ_isects;
 
 
-    v_t<uintv_t> make_occ_bitsets(uint_t displ, uint_t count) const;
+    v_t<uintv_t> make_occ_bitsets(uint_t displ, uint_t count) const;  // declare existence of member function?
 
     v_t<uintv_t> make_occ_bitsets() const;
 
@@ -76,9 +76,11 @@ class NotfMaeFiller {
     /**
      * enumerate all normal-ordered products of fermion spinorb SQ operators which contribute to the RDMs to be filled.
      * for each of these combinations, dispatch resolve identity which matches the creation and annihilation set intersections
+      // what does the above line mean exactly? Does the definition of resolve_identity change depending on the input? It always receives the same types?
      * and fills the non-zero contributions to all RDMs
      */
     void fill() {
+        // [&] => every argument to this lambda can be found by reference outside its scope
         auto fn = [&](const uintv_t& ao, const v_t<uintp_t>& ais, const uintv_t& co, const v_t<uintp_t>& cis) {
             resolve_identity(ao, ais, co, cis);
         };
@@ -86,6 +88,7 @@ class NotfMaeFiller {
     }
 
 public:
+    // what is this? Neither a variable nor a function nor an enum? A constructor?
     NotfMaeFiller(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr):
         m_hist(hist), m_rdms(rdms),
         m_ind_displ(mpi::evenly_shared_displ(m_hist.nrow_in_use())),
@@ -97,8 +100,9 @@ public:
 
     }
 
+    // `static` avoids namespace conflict by restricting linkage to this translation unit
     static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr) {
-        NotfMaeFiller filler(hist, rdms);
+        NotfMaeFiller filler(hist, rdms);  // initialiase a filler
         filler.fill();
     }
 
