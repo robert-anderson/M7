@@ -68,9 +68,10 @@ class NotfMaeFiller {
      *  result of intersecting all bitsets corresponding to the cre_ispinorbs
      */
     void resolve_identity(const uintv_t& /*ann_ispinorbs*/, const v_t<uintp_t>& /*ann_isect*/,
-                          const uintv_t& /*cre_ispinorbs*/ ,const v_t<uintp_t>& /*cre_isect*/) {
+                          const uintv_t& /*cre_ispinorbs*/, const v_t<uintp_t>& /*cre_isect*/) {
 
     }
+
 
     /**
      * enumerate all normal-ordered products of fermion spinorb SQ operators which contribute to the RDMs to be filled.
@@ -78,7 +79,10 @@ class NotfMaeFiller {
      * and fills the non-zero contributions to all RDMs
      */
     void fill() {
-
+        auto fn = [&](const uintv_t& ao, const v_t<uintp_t>& ais, const uintv_t& co, const v_t<uintp_t>& cis) {
+            resolve_identity(ao, ais, co, cis);
+        };
+        fill_foreach_isect_pair(fn);
     }
 
 public:
@@ -96,6 +100,21 @@ public:
     static void fill(const Table<MbfWeightRow>& hist, Rdms& rdms) {
         NotfMaeFiller filler(hist, rdms);
         filler.fill();
+    }
+
+    template<typename fn_t>
+    void fill_foreach_isect_pair(const fn_t& fn) {
+        functor::assert_prototype<void(const uintv_t& /*ann_ispinorbs*/, const v_t<uintp_t>& /*ann_isect*/,
+                                       const uintv_t& /*cre_ispinorbs*/, const v_t<uintp_t>& /*cre_isect*/)>(fn);
+
+        // todo: Arta
+        // uintv_t ann_ispinorbs;
+        // v_t<uintp_t> ann_isect;
+        // uintv_t cre_ispinorbs;
+        // v_t<uintp_t> cre_isect;
+        // some body of iterative or recursive code that enumerates and forms sets {
+        //      fn(ann_ispinorbs, ann_isect, cre_ispinorbs, cre_isect);
+        // }
     }
 
 };
