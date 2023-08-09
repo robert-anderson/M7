@@ -65,6 +65,10 @@ v_t<v_t<uintp_t>> bitset_isect::make_isects(const v_t<uintv_t>& bitsets1, const 
     return isects;
 }
 
+v_t<v_t<uintp_t>> bitset_isect::make_isects(const v_t<uintv_t> &bitsets) {
+    return make_isects(bitsets, 0, bitsets[0].size());
+}
+
 v_t<v_t<uintp_t>> bitset_isect::make_isects(const v_t<uintv_t>& bitsets, uint_t iword_begin, uint_t iword_end) {
     return make_isects(bitsets, bitsets, iword_begin, iword_end);
 }

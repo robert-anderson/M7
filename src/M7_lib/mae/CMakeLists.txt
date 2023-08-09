@@ -4,4 +4,6 @@ target_sources(M7_lib
         MaeTable.h
         Maes.cpp
         Maes.h
+        NotfMaeFiller.cpp
+        NotfMaeFiller.h
 )

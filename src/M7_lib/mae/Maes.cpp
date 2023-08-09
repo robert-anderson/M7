@@ -3,6 +3,7 @@
 //
 
 #include "Maes.h"
+#include "NotfMaeFiller.h"
 
 Maes::Maes(const conf::Mae &opts, const wf::Vectors& wf) :
         m_accum_epoch("MAE accumulation"),
@@ -85,6 +86,7 @@ void Maes::fill_from_wf_hist(const Table<MbfWeightRow>& hist) {
 
     logging::info("Filling MAEs using histogrammed partial CI vector composed of {} MBFs", hist.nrow_in_use());
 
+#if 0
     const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
     const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
 
@@ -98,6 +100,10 @@ void Maes::fill_from_wf_hist(const Table<MbfWeightRow>& hist) {
             m_rdms.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
         }
     }
+#else
+    NotfMaeFiller::fill(hist, m_rdms);
+#endif
+
 }
 
 void Maes::output(uint_t icycle, const Hamiltonian &ham, bool final) {

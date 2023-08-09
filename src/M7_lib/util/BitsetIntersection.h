@@ -75,6 +75,10 @@ namespace bitset_isect {
      * as above but take intersections of the bitsets with themselves (i.e. convert to intersection vectors)
      */
     v_t<v_t<uintp_t>> make_isects(const v_t<uintv_t>& bitsets, uint_t iword_begin, uint_t iword_end);
+    /**
+     * as above, but infer the begin and end words from the size in words of the first bitset in the given vector
+     */
+    v_t<v_t<uintp_t>> make_isects(const v_t<uintv_t>& bitsets);
 
 
     /**
