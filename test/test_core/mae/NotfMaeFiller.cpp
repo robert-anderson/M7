@@ -13,12 +13,16 @@ TEST(NotfMaeFiller, AllIsects) {
     const v_t<uintv_t> setbits_vec = {
         { 0,  1,  4,   6,  8, 11},
         { 1,  4,  5,   7,  8,  9},
-        { 0,  1,  3,   6, 10, 11}
+        { 0,  1,  3,   6, 10, 11},
+        { 0,  2,  3,   6, 10, 11},
+        { 0,  2,  4,   8,  9, 11},
+        { 0,  3,  5,   6,  9, 11},
+        { 0,  1,  5,   7,  8, 10},
+        { 1,  2,  4,   7,  9, 10},
+        { 3,  4,  5,   6,  8, 11},
+        { 1,  3,  5,   9,  8, 11}
     };
 
-    /*
-     * input the set bit data into the hist table as determinant bitstrings
-     */
     for (auto& setbits: setbits_vec) {
         hist.m_row.push_back_jump();
         hist.m_row.m_mbf = setbits;
@@ -26,7 +30,6 @@ TEST(NotfMaeFiller, AllIsects) {
 
 #if 0
     std::cout << hist.to_string() << std::endl;
-
     NotfMaeFiller filler(hist);
 
     auto test_fn = [&](const uintv_t& /*ann_ispinorbs*/, const v_t<uintp_t>& /*ann_isect*/,

@@ -88,7 +88,7 @@ class NotfMaeFiller {
     }
 
 public:
-    // what is this? Neither a variable nor a function nor an enum? A constructor?
+    // what is this?
     NotfMaeFiller(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr):
         m_hist(hist), m_rdms(rdms),
         m_ind_displ(mpi::evenly_shared_displ(m_hist.nrow_in_use())),
@@ -119,6 +119,22 @@ public:
         // some body of iterative or recursive code that enumerates and forms sets {
         //      fn(ann_ispinorbs, ann_isect, cre_ispinorbs, cre_isect);
         // }
+        //
+        // ???
+        v_t<uintp_t> ann_isect{sets[ann_ispinorbs[0]]};
+        for (uint i{1} : ann_ispinorbs) {
+            ann_isect = make_isect(ann_isect, sets[i]);
+            if (ann_isect.empty()) {return nullptr;}
+        }
+
+        /* v_t<uintp_t> intersect(const uintv_t& ispinorbs, const v_t<uintp_t> sets) */
+        /*     if (ispinorbs.size() == 1) { */
+        /*         return sets[ispinorbs[0]]; */
+        /*     } else if (intersection.empty()) { */
+        /*         return v_t<uintp_t> {}; */
+        /*     } */
+        /*     return make_isect(sets[ispinorb[0]], intersect(&{ispinorbs.cbegin() + 1, ispinorbs.cend()}, &sets)); */
+
     }
 
 };
