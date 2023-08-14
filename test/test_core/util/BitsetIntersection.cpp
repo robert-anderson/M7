@@ -14,7 +14,7 @@ TEST(BitsetIntersection, TwoSetIntersection) {
     std::set_intersection(v1.cbegin(), v1.cend(), v2.cbegin(), v2.cend(), std::inserter(v3, v3.begin()));
     auto b1 = bitset_isect::make_bitset(v1);
     auto b2 = bitset_isect::make_bitset(v2);
-    auto b_isect = bitset_isect::make_isect(b1, b2);
+    auto b_isect = bitset_isect::isect(b1, b2);
     const auto b3 = bitset_isect::to_std_vector(b_isect);
     ASSERT_EQ(v3, b3);
 }
@@ -32,7 +32,7 @@ TEST(BitsetIntersection, EnumerateAllUniqueIsects) {
     for (uint_t iset = 0ul; iset < nset; ++iset) {
         vs.emplace_back(hash::unique_in_range<uint_t>(iset, nelem, 0, nvalue, true));
         bitsets.emplace_back(bitset_isect::make_bitset(vs.back(), nvalue));
-        isects.emplace_back(bitset_isect::make_isect(bitsets.back()));
+        isects.emplace_back(bitset_isect::bitset_to_siv(bitsets.back()));
     }
 
     auto fn = [&](const uintv_t& isets, const v_t<uintp_t>& isect) {

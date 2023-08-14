@@ -28,14 +28,19 @@ TEST(NotfMaeFiller, AllIsects) {
         hist.m_row.m_mbf = setbits;
     }
 
-#if 0
     std::cout << hist.to_string() << std::endl;
     NotfMaeFiller filler(hist);
 
-    auto test_fn = [&](const uintv_t& /*ann_ispinorbs*/, const v_t<uintp_t>& /*ann_isect*/,
-                       const uintv_t& /*cre_ispinorbs*/, const v_t<uintp_t>& /*cre_isect*/) -> void {
-
+    auto test_fn = [&](const uintv_t& ann_ispinorbs, const v_t<uintp_t>& /*ann_isect*/,
+                       const uintv_t& cre_ispinorbs, const v_t<uintp_t>& /*cre_isect*/) -> void {
+        if (ann_ispinorbs.size()==2) {
+            std::cout << ann_ispinorbs[0] << " " << ann_ispinorbs[1] << "   " << cre_ispinorbs[0] << " " << cre_ispinorbs[1] << std::endl;
+        }
+        else {
+            std::cout << ann_ispinorbs[0] << "   " << cre_ispinorbs[0] << std::endl;
+        }
     };
-    filler.fill_foreach_isect_pair(test_fn);
-#endif
+    v_t<OpSig> rdm_exsigs;
+    rdm_exsigs.emplace_back(opsig::c_sing);
+    filler.fill_foreach_set_pair(test_fn, rdm_exsigs);
 }
