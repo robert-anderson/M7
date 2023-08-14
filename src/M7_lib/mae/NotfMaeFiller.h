@@ -48,6 +48,10 @@ class NotfMaeFiller {
      * m_partial_occ_bitsets expressed in siv form
      */
     const v_t<v_t<uintp_t>> m_partial_occ_sivs;
+    /**
+     * working object for MBF connections
+     */
+    conn::Mbf m_work_conn;
 
 
     v_t<uintv_t> make_occ_bitsets(uint_t displ, uint_t count) const;  // declare existence of member function?
@@ -70,27 +74,6 @@ class NotfMaeFiller {
     void resolve_identity(const uintv_t& /*ann_ispinorbs*/, const v_t<uintp_t>& /*ann_siv*/,
                           const uintv_t& /*cre_ispinorbs*/, const v_t<uintp_t>& /*cre_siv*/) {
         REQUIRE_TRUE_ALL(m_rdms, "RDMs object must be non-null");
-    }
-
-    /**
-     * compute the Fermi phase associated with a "half excitation" i.e. either the creation or annihilation strings.
-     * Regardless of whether the operators are creation or annihilation in the RDM matrix element definition, they
-     * are always applied to histogrammed determinants as annihilation operators
-     * @param ispinorbs
-     *  indices of the spin orbitals in the given MBF
-     * @param ihist_mbf
-     *  integer index of the MBF as a row in the m_hist table.
-     * @return
-     *  true if the Fermi phase of the "half excitation" is -1
-     */
-    bool half_excit_phase(const uintv_t& ispinorbs, uint_t ihist_mbf) {
-        // todo: Arta
-        m_hist.m_row.jump(ihist_mbf);
-        const auto& mbf = m_hist.m_row.m_mbf;
-        auto fn = [&](uint_t isetbit){
-
-        };
-        mbf.foreach_setbit(fn);
     }
 
     /**
@@ -117,8 +100,8 @@ public:
         m_occ_bitsets(make_occ_bitsets()),
         m_partial_occ_bitsets(make_occ_bitsets(m_ind_displ, m_ind_count)),
         m_occ_sivs(bitset_isect::bitset_to_siv_many(m_occ_bitsets)),
-        m_partial_occ_sivs(bitset_isect::bitset_to_siv_many(m_partial_occ_bitsets)) {
-
+        m_partial_occ_sivs(bitset_isect::bitset_to_siv_many(m_partial_occ_bitsets)),
+        m_work_conn(m_hist.m_row.m_mbf.m_basis){
     }
 
     static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr) {
@@ -141,6 +124,24 @@ public:
             };
             foreach_unique(m_occ_bitsets, m_partial_occ_sivs, rank, cre_fn);
         }
+    }
+
+    /**
+     * compute the Fermi phase associated with a "half excitation" i.e. either the creation or annihilation strings.
+     * Regardless of whether the operators are creation or annihilation in the RDM matrix element definition, they
+     * are always applied to histogrammed determinants as annihilation operators
+     * @param ispinorbs
+     *  indices of the spin orbitals in the given MBF
+     * @param ihist_mbf
+     *  integer index of the MBF as a row in the m_hist table.
+     * @return
+     *  true if the Fermi phase of the "half excitation" is -1
+     */
+    bool half_excit_phase(const uintv_t& ispinorbs, uint_t ihist_mbf) {
+        m_hist.m_row.jump(ihist_mbf);
+        const auto& mbf = m_hist.m_row.m_mbf;
+        for (auto& i: ispinorbs) m_work_conn.m_ann.add(i);
+        return m_work_conn.phase(mbf);
     }
 };
 

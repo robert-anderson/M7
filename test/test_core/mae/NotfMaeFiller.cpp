@@ -28,6 +28,22 @@ TEST(NotfMaeFiller, AllIsects) {
         hist.m_row.m_mbf = setbits;
     }
 
+    hist.m_row.restart();
+    auto& mbf = hist.m_row.m_mbf;
+    conn::Mbf conn(mbf);
+    conn.m_ann.add(2);
+    conn.m_ann.add(5);
+    conn.m_ann.add(9);
+
+    std::cout << conn.phase(mbf) << std::endl;
+
+
+    //bit::c_trunc_mask_64[]
+//    for (uint_t i=0; i<=64; ++i) {
+//        std::cout << bit::to_string(bit::c_trunc_mask_64[i]) << std::endl;
+//    }
+
+    exit(0);
     std::cout << hist.to_string() << std::endl;
     NotfMaeFiller filler(hist);
 

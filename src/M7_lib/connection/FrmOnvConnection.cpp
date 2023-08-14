@@ -186,19 +186,18 @@ bool FrmOnvConnection::phase(const FrmOnvField &src) const {
     const auto cre_end = m_cre.cend();
 
     while (ann_iter != ann_end || cre_iter != cre_end) {
-        if (cre_iter!=cre_end && (ann_iter==ann_end || *cre_iter < *ann_iter)) {
-            bool ann_remain_phase = std::distance(ann_iter, ann_end)&1l;
+        if (cre_iter != cre_end && (ann_iter == ann_end || *cre_iter < *ann_iter)) {
+            bool ann_remain_phase = std::distance(ann_iter, ann_end) & 1l;
             out ^= independent_phase(src, *cre_iter++) ^ ann_remain_phase;
-        }
-        else {
-            DEBUG_ASSERT_FALSE(ann_iter==ann_end, "should not have reached the end of annihilation indices");
-            DEBUG_ASSERT_TRUE(cre_iter==cre_end || *ann_iter < *cre_iter, "invalid connection");
+        } else {
+            DEBUG_ASSERT_FALSE(ann_iter == ann_end, "should not have reached the end of annihilation indices");
+            DEBUG_ASSERT_TRUE(cre_iter == cre_end || *ann_iter < *cre_iter, "invalid connection");
             out ^= independent_phase(src, *ann_iter++);
         }
     }
-    out ^= (m_ann.size()/2)&1ul;
+    out ^= (m_ann.size() / 2) & 1ul;
     // m*n is odd if both are odd
-    out ^= (m_ann.size()&1ul) & (m_cre.size()&1ul);
+    out ^= (m_ann.size() & 1ul) & (m_cre.size() & 1ul);
     return out;
 }
 
