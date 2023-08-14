@@ -5,6 +5,7 @@
 #include <test_core/defs.h>
 #include <M7_lib/mae/NotfMaeFiller.h>
 
+// todo: this test fails for me
 TEST(NotfMaeFiller, AllIsects) {
     const sys::Basis basis = {{6ul}, {0ul}};
     const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
@@ -27,26 +28,7 @@ TEST(NotfMaeFiller, AllIsects) {
         hist.m_row.push_back_jump();
         hist.m_row.m_mbf = setbits;
     }
-
-    hist.m_row.restart();
-    auto& mbf = hist.m_row.m_mbf;
-    conn::Mbf conn(mbf);
-    conn.m_ann.add(2);
-    conn.m_ann.add(5);
-    conn.m_ann.add(9);
-
-    std::cout << conn.phase(mbf) << std::endl;
-
-
-    //bit::c_trunc_mask_64[]
-//    for (uint_t i=0; i<=64; ++i) {
-//        std::cout << bit::to_string(bit::c_trunc_mask_64[i]) << std::endl;
-//    }
-
-    exit(0);
-    std::cout << hist.to_string() << std::endl;
     NotfMaeFiller filler(hist);
-
     auto test_fn = [&](const uintv_t& ann_ispinorbs, const v_t<uintp_t>& /*ann_isect*/,
                        const uintv_t& cre_ispinorbs, const v_t<uintp_t>& /*cre_isect*/) -> void {
         if (ann_ispinorbs.size()==2) {
@@ -59,4 +41,37 @@ TEST(NotfMaeFiller, AllIsects) {
     v_t<OpSig> rdm_exsigs;
     rdm_exsigs.emplace_back(opsig::c_sing);
     filler.fill_foreach_set_pair(test_fn, rdm_exsigs);
+}
+
+
+TEST(NotfMaeFiller, HalfExcitPhase) {
+    const sys::Basis basis = {{6ul}, {0ul}};
+    const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
+    buffered::Table<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
+
+    const v_t<uintv_t> setbits_vec = {
+        { 0,  1,  4,   6,  8, 11},
+    };
+
+    for (auto& setbits: setbits_vec) {
+        hist.m_row.push_back_jump();
+        hist.m_row.m_mbf = setbits;
+    }
+
+    hist.m_row.restart();
+    auto& mbf = hist.m_row.m_mbf;
+    conn::Mbf conn(mbf);
+
+    // 0 1 4 6 8 11
+    conn.m_ann.add(0);
+    ASSERT_EQ(conn.phase(mbf), false);
+    // 1 4 6 8 11
+    conn.m_ann.add(4);
+    ASSERT_EQ(conn.phase(mbf), true);
+    // 1 6 8 11
+    conn.m_ann.add(6);
+    ASSERT_EQ(conn.phase(mbf), true);
+    // 1 8 11
+    conn.m_ann.add(11);
+    ASSERT_EQ(conn.phase(mbf), false);
 }
