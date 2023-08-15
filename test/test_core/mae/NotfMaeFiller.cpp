@@ -45,20 +45,10 @@ TEST(NotfMaeFiller, AllIsects) {
 
 TEST(NotfMaeFiller, HalfExcitPhase) {
     const sys::Basis basis = {{6ul}, {0ul}};
-    const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
-    buffered::Table<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
+    buffered::Mbf mbf(basis);
+    const uintv_t setbits_vec = { 0,  1,  4,   6,  8, 11};
 
-    const v_t<uintv_t> setbits_vec = {
-        { 0,  1,  4,   6,  8, 11},
-    };
-
-    for (auto& setbits: setbits_vec) {
-        hist.m_row.push_back_jump();
-        hist.m_row.m_mbf = setbits;
-    }
-
-    hist.m_row.restart();
-    auto& mbf = hist.m_row.m_mbf;
+    mbf = setbits_vec;
     conn::Mbf conn(mbf);
 
     // 0 1 4 6 8 11
