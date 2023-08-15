@@ -47,7 +47,7 @@ TEST(BitsetIntersection, EnumerateAllUniqueIsects) {
         ASSERT_EQ(chk, bitset_isect::to_std_vector(isect));
     };
 
-    bitset_isect::foreach_unique(bitsets, isects, 5, fn);
+    bitset_isect::foreach_unique(bitsets, isects, 5, true, fn);
 }
 
 

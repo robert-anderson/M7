@@ -130,27 +130,31 @@ namespace bitset_isect {
      *  result of taking the intersection of all sets indexed in isets as a sparse intersection vector
      * @param bitsets
      *  all sets in bitset form
+     * @param max_only
+     *  if true, only call the fn on a intersection when the size and capacity of the isets vector are identical
      * @param fn
      *  function to be called each time a non-empty set is formed with n sets with n in [1, isets.capacity()]
      */
     template<typename fn_t>
-    void foreach_unique_one_level(uintv_t& isets, const siv_t& siv, const v_t<uintv_t>& bitsets, const fn_t& fn) {
+    void foreach_unique_one_level(uintv_t& isets, const siv_t& siv, const v_t<uintv_t>& bitsets, bool max_only, const fn_t& fn) {
         functor::assert_prototype<void(const uintv_t& /*isets*/, const siv_t& /*siv*/)>(fn);
         // handle the current set combination which have intersection siv
-        fn(isets, siv);
+        if (!max_only || (isets.size() == isets.capacity())) fn(isets, siv);
         // capacity of the vector gives the maximum number of sets to consider intersecting
         if (isets.size() == isets.capacity()) return;
         const auto size = isets.size();
         // set index of this level is constrained to be less than that of the next most senior level
         const auto iset_max = isets.back();
+        // total number of sets from which the unique intersections are being prepared
+        const auto nset = bitsets.size();
         siv_t next_siv;
         // add another level to the vector or set indices
-        isets.push_back(0ul);
-        for (; isets.back() < iset_max; ++isets.back()) {
+        isets.push_back(iset_max+1);
+        for (; isets.back() < nset; ++isets.back()) {
             // compute intersection and store result in next_siv
             bitset_isect::isect(siv, bitsets[isets.back()], next_siv);
             // if there are any elements in the result, go another level deeper
-            if (!next_siv.empty()) foreach_unique_one_level(isets, next_siv, bitsets, fn);
+            if (!next_siv.empty()) foreach_unique_one_level(isets, next_siv, bitsets, max_only, fn);
         }
         // revert to initial level
         isets.resize(size);
@@ -167,11 +171,13 @@ namespace bitset_isect {
      *  achieving parallel partitioning
      * @param nmax
      *  maximum number of sets between which to form intersection
+     * @param max_only
+     *  if true, only call the fn on a intersection of exactly nmax sets
      * @param fn
      *  function to be called each time a non-empty set is formed with n sets with n in [1, isets.capacity()]
      */
     template<typename fn_t>
-    void foreach_unique(const v_t<uintv_t>& bitsets, const vsiv_t& top_sivs, uint_t nmax, const fn_t& fn) {
+    void foreach_unique(const v_t<uintv_t>& bitsets, const vsiv_t& top_sivs, uint_t nmax, bool max_only, const fn_t& fn) {
         functor::assert_prototype<void(const uintv_t& /*isets*/, const siv_t& /*siv*/)>(fn);
         const auto nset = bitsets.size();
         DEBUG_ASSERT_EQ(top_sivs.size(), nset, "incompatible number of top-level intersections");
@@ -181,7 +187,7 @@ namespace bitset_isect {
             isets.clear();
             isets.push_back(iset);
             const auto& siv = top_sivs[iset];
-            foreach_unique_one_level(isets, siv, bitsets, fn);
+            foreach_unique_one_level(isets, siv, bitsets, max_only, fn);
         }
     }
 }

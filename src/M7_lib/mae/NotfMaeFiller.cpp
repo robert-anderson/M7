@@ -4,26 +4,23 @@
 
 #include "NotfMaeFiller.h"
 
-// constructor 1?
 v_t<uintv_t> NotfMaeFiller::make_occ_bitsets(uint_t displ, uint_t count) const {
-    // initialised to empty
-    v_t<uintv_t> bitsets;  // {} ?
-    const auto nspinorb = m_hist.m_row.m_mbf.m_basis.m_nspinorb;  // get a spinorb
-    for (uint_t ispinorb=0ul; ispinorb < nspinorb; ++ispinorb) {  // ul = unsigned long
+    v_t<uintv_t> bitsets;
+    const auto nspinorb = m_hist.m_row.m_mbf.m_basis.m_nspinorb;
+    for (uint_t ispinorb=0ul; ispinorb < nspinorb; ++ispinorb) {
         uintv_t inds;
         auto row = m_hist.m_row;
-        // get chunk of histdets on rank
+        // restrict iteration to chunk of histogrammed MBFs to which this rank is assigned
         for (row.restart(displ); row.in_range(displ + count); ++row) {
-            // if spinorb occ append to set
+            // if spinorb occ append MBF index to this ispinorb's set of MBFs which have it occupied
             if (row.m_mbf.get(ispinorb)) inds.push_back(row.index());
         }
-        // append vector to vector of vectors
+        // convert vector of set positions to a multiword bitset and append to vector of such bitsets
         bitsets.emplace_back(bitset_isect::make_bitset(inds, m_hist.nrow_in_use()));
     }
     return bitsets;
 }
 
-// constructor 2?
 v_t<uintv_t> NotfMaeFiller::make_occ_bitsets() const {
     return make_occ_bitsets(0, m_hist.nrow_in_use());
 }

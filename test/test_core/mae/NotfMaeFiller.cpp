@@ -38,7 +38,7 @@ TEST(NotfMaeFiller, AllIsects) {
         }
     };
     v_t<OpSig> rdm_exsigs;
-    rdm_exsigs.emplace_back(opsig::c_sing);
+    rdm_exsigs.emplace_back(opsig::c_doub);
     filler.fill_foreach_set_pair(test_fn, rdm_exsigs);
 }
 

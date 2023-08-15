@@ -10,7 +10,6 @@
 #include "M7_lib/util/BitsetIntersection.h"
 
 class NotfMaeFiller {
-
     /**
      * Histogrammable set of determinants of which to compute the outer product in filling the MAEs
      */
@@ -18,7 +17,7 @@ class NotfMaeFiller {
     /**
      * Wrapper around all RDM and MRPT2 intermediate objects filled by this class
      */
-    Rdms* m_rdms;  // uninitialised pointer to RDM object?
+    Rdms* m_rdms = nullptr;
     /**
      * offset from beginning of hist MBFs for the local MPI rank
      */
@@ -43,7 +42,7 @@ class NotfMaeFiller {
     /**
      * m_occ_bitsets expressed in siv form
      */
-    const v_t<v_t<uintp_t>> m_occ_sivs;  // these exclude the zero words, e.g. 0010 | 0011 | 0000 | 1010 -> [[0, 0010], [1, 0011], [3, 1010]]
+    const v_t<v_t<uintp_t>> m_occ_sivs;
     /**
      * m_partial_occ_bitsets expressed in siv form
      */
@@ -54,7 +53,7 @@ class NotfMaeFiller {
     conn::Mbf m_work_conn;
 
 
-    v_t<uintv_t> make_occ_bitsets(uint_t displ, uint_t count) const;  // declare existence of member function?
+    v_t<uintv_t> make_occ_bitsets(uint_t displ, uint_t count) const;
 
     v_t<uintv_t> make_occ_bitsets() const;
 
@@ -105,7 +104,7 @@ public:
     }
 
     static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr) {
-        NotfMaeFiller filler(hist, rdms);  // initialiase a filler
+        NotfMaeFiller filler(hist, rdms);
         filler.fill();
     }
 
@@ -120,9 +119,9 @@ public:
                 auto ann_fn = [&](const uintv_t &ann_ispinorbs, const siv_t &ann_siv) -> void {
                     fn(ann_ispinorbs, ann_siv, cre_ispinorbs, cre_siv);
                 };
-                foreach_unique(m_occ_bitsets, m_occ_sivs, rank, ann_fn);
+                foreach_unique(m_occ_bitsets, m_occ_sivs, rank, true, ann_fn);
             };
-            foreach_unique(m_occ_bitsets, m_partial_occ_sivs, rank, cre_fn);
+            foreach_unique(m_occ_bitsets, m_partial_occ_sivs, rank, true, cre_fn);
         }
     }
 
