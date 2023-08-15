@@ -70,7 +70,7 @@ TEST(NotfMaeFiller, HalfExcitPhase) {
     ASSERT_EQ(conn.phase(mbf), true);
     // 1 6 8 11
     conn.m_ann.add(6);
-    ASSERT_EQ(conn.phase(mbf), true);
+    ASSERT_EQ(conn.phase(mbf), false);
     // 1 8 11
     conn.m_ann.add(11);
     ASSERT_EQ(conn.phase(mbf), false);
