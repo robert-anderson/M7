@@ -140,20 +140,20 @@ namespace bitset_isect {
         fn(isets, siv);
         // capacity of the vector gives the maximum number of sets to consider intersecting
         if (isets.size() == isets.capacity()) return;
+        const auto size = isets.size();
         // set index of this level is constrained to be less than that of the next most senior level
         const auto iset_max = isets.back();
         siv_t next_siv;
         // add another level to the vector or set indices
-        isets.push_back(99999);//~0ul);
-        for (isets.back()=0ul; isets.back() < iset_max; ++isets.back()) {
+        isets.push_back(0ul);
+        for (; isets.back() < iset_max; ++isets.back()) {
             // compute intersection and store result in next_siv
             bitset_isect::isect(siv, bitsets[isets.back()], next_siv);
             // if there are any elements in the result, go another level deeper
             if (!next_siv.empty()) foreach_unique_one_level(isets, next_siv, bitsets, fn);
         }
         // revert to initial level
-        auto new_size = std::max(isets.size(), 1ul);
-        isets.resize(new_size-1);
+        isets.resize(size);
     }
 
     /**

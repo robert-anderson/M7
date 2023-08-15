@@ -5,7 +5,6 @@
 #include <test_core/defs.h>
 #include <M7_lib/mae/NotfMaeFiller.h>
 
-// todo: this test fails for me
 TEST(NotfMaeFiller, AllIsects) {
     const sys::Basis basis = {{6ul}, {0ul}};
     const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
