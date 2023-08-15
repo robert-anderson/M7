@@ -52,10 +52,18 @@ class NotfMaeFiller {
      */
     conn::Mbf m_work_conn;
 
+    /**
+     * hash table used in the resolution of the identity in the (nelectron - rank) electron Hilbert space
+     */
+    buffered::MappedTable<MbfWeightRow> m_ri_map;
 
     v_t<uintv_t> make_occ_bitsets(uint_t displ, uint_t count) const;
 
     v_t<uintv_t> make_occ_bitsets() const;
+
+    void refresh_ann_map(const uintv_t& ann_ispinorbs, const v_t<uintp_t>& ann_siv, field::RdmInds& rdm_inds);
+
+    void probe_ann_map(const uintv_t& cre_ispinorbs, const v_t<uintp_t>& cre_siv, field::RdmInds& rdm_inds);
 
     /**
      * creates a hash table of the (nelec - rank)-electron determinants which resolve the identity between the creation
@@ -70,9 +78,11 @@ class NotfMaeFiller {
      * @param cre_siv
      *  result of intersecting all bitsets corresponding to the cre_ispinorbs
      */
-    void resolve_identity(const uintv_t& /*ann_ispinorbs*/, const v_t<uintp_t>& /*ann_siv*/,
-                          const uintv_t& /*cre_ispinorbs*/, const v_t<uintp_t>& /*cre_siv*/) {
+    void resolve_identity(const uintv_t& ann_ispinorbs, const v_t<uintp_t>& ann_siv,
+                          const uintv_t& cre_ispinorbs, const v_t<uintp_t>& cre_siv, field::RdmInds& rdm_inds) {
         REQUIRE_TRUE_ALL(m_rdms, "RDMs object must be non-null");
+        refresh_ann_map(ann_ispinorbs, ann_siv, rdm_inds);
+        probe_ann_map(cre_ispinorbs, cre_siv, rdm_inds);
     }
 
     /**
@@ -83,8 +93,8 @@ class NotfMaeFiller {
      */
     void fill() {
         // [&] => every argument to this lambda can be found by reference outside its scope
-        auto fn = [&](const uintv_t& ao, const v_t<uintp_t>& ais, const uintv_t& co, const v_t<uintp_t>& cis) {
-            resolve_identity(ao, ais, co, cis);
+        auto fn = [&](const uintv_t& ao, const v_t<uintp_t>& ais, const uintv_t& co, const v_t<uintp_t>& cis, field::RdmInds& rdm_inds) {
+            resolve_identity(ao, ais, co, cis, rdm_inds);
         };
         v_t<OpSig> rdm_exsigs;
         rdm_exsigs.emplace_back(opsig::c_sing);
@@ -100,7 +110,7 @@ public:
         m_partial_occ_bitsets(make_occ_bitsets(m_ind_displ, m_ind_count)),
         m_occ_sivs(bitset_isect::bitset_to_siv_many(m_occ_bitsets)),
         m_partial_occ_sivs(bitset_isect::bitset_to_siv_many(m_partial_occ_bitsets)),
-        m_work_conn(m_hist.m_row.m_mbf.m_basis){
+        m_work_conn(m_hist.m_row.m_mbf.m_basis), m_ri_map(m_hist.m_row) {
     }
 
     static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr) {
@@ -109,15 +119,17 @@ public:
     }
 
     template<typename fn_t>
-    void fill_foreach_set_pair(const fn_t& fn, const v_t<OpSig>& rdm_exsigs) {
+    void fill_foreach_set_pair(const fn_t& fn, const v_t<OpSig>& rdm_opsigs) {
         functor::assert_prototype<void(const uintv_t &ann_ispinorbs, const v_t<uintp_t> &ann_siv,
-                                       const uintv_t &cre_ispinorbs, const v_t<uintp_t> &cre_siv)>(fn);
+                                       const uintv_t &cre_ispinorbs, const v_t<uintp_t> &cre_siv,
+                                       field::RdmInds& rdm_inds)>(fn);
         using namespace bitset_isect;
-        for (const auto& exsig: rdm_exsigs) {
-            const auto rank = exsig.nfrm_cre();
+        for (const auto& opsig: rdm_opsigs) {
+            buffered::RdmInds rdm_inds(opsig);
+            const auto rank = opsig.nfrm_cre();
             auto cre_fn = [&](const uintv_t &cre_ispinorbs, const siv_t &cre_siv) -> void {
                 auto ann_fn = [&](const uintv_t &ann_ispinorbs, const siv_t &ann_siv) -> void {
-                    fn(ann_ispinorbs, ann_siv, cre_ispinorbs, cre_siv);
+                    fn(ann_ispinorbs, ann_siv, cre_ispinorbs, cre_siv, rdm_inds);
                 };
                 foreach_unique(m_occ_bitsets, m_occ_sivs, rank, true, ann_fn);
             };
@@ -136,11 +148,18 @@ public:
      * @return
      *  true if the Fermi phase of the "half excitation" is -1
      */
+    bool half_excit_phase(const uintv_t& ispinorbs, const field::Mbf& mbf) {
+        for (auto& i: ispinorbs) m_work_conn.m_ann.add(i);
+        return m_work_conn.phase(mbf);
+    }
+    /**
+     * @param ihist_mbf
+     *  integer index of the MBF as a row in the m_hist table.
+     */
     bool half_excit_phase(const uintv_t& ispinorbs, uint_t ihist_mbf) {
         m_hist.m_row.jump(ihist_mbf);
         const auto& mbf = m_hist.m_row.m_mbf;
-        for (auto& i: ispinorbs) m_work_conn.m_ann.add(i);
-        return m_work_conn.phase(mbf);
+        return half_excit_phase(ispinorbs, mbf);
     }
 };
 

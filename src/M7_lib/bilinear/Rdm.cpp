@@ -27,7 +27,7 @@ str_t Rdm::name(str_t str, OpSig ranksig) const {
 }
 
 void Rdm::add_to_send_table(const RdmInds &inds, wf_t contrib) {
-    DEBUG_ASSERT_EQ(inds.m_exsig, m_indsig, "incorrect number of operators in MAE indices");
+    DEBUG_ASSERT_EQ(inds.m_ranksig, m_indsig, "incorrect number of operators in MAE indices");
     const auto irank_send = m_dist.irank(inds);
     DEBUG_ASSERT_TRUE(!m_ordered_inds || inds.is_ordered(),
                       "operators of each kind should be stored in ascending order of their orbital (or mode) index");

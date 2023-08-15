@@ -90,12 +90,12 @@ void bitset_isect::isect(const siv_t& siv_in, const uintv_t& bitset, siv_t& siv_
 
 std::set<uint_t> bitset_isect::to_std_set(const siv_t& siv) {
     std::set<uint_t> s;
-    foreach_in_isect(siv, [&s](uint_t i){s.insert(i);});
+    foreach_in_siv(siv, [&s](uint_t i) { s.insert(i); });
     return s;
 }
 
 uintv_t bitset_isect::to_std_vector(const siv_t& siv) {
     uintv_t v;
-    foreach_in_isect(siv, [&v](uint_t i){v.push_back(i);});
+    foreach_in_siv(siv, [&v](uint_t i) { v.push_back(i); });
     return v;
 }

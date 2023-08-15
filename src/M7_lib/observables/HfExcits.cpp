@@ -26,11 +26,11 @@ strv_t HfExcitsOneExsig::h5_field_names() const {
 }
 
 void HfExcitsOneExsig::save(const hdf5::NodeWriter& gw) const {
-    Table<RdmRow>::save(gw, m_working_inds.m_exsig.to_string(), h5_field_names(), true);
+    Table<RdmRow>::save(gw, m_working_inds.m_ranksig.to_string(), h5_field_names(), true);
 }
 
 void HfExcitsOneExsig::make_contribs(const conn::FrmOnv& conn, const wf_t& contrib, uint_t iroot) {
-    DEBUG_ASSERT_EQ(conn.exsig(), m_working_inds.m_exsig, "incompatible connection");
+    DEBUG_ASSERT_EQ(conn.exsig(), m_working_inds.m_ranksig, "incompatible connection");
     if (!this->lookup(conn)) this->insert(conn);
     m_row.m_values[iroot]+=contrib;
 }

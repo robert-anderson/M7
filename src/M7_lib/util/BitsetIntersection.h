@@ -97,7 +97,7 @@ namespace bitset_isect {
      *  function to call each set bit in the intersection vector
      */
     template<typename fn_t>
-    void foreach_in_isect(const siv_t& siv, const fn_t& fn) {
+    void foreach_in_siv(const siv_t& siv, const fn_t& fn) {
         functor::assert_prototype<void(uint_t)>(fn);
         for (auto& pair: siv) {
             auto work = pair.second;

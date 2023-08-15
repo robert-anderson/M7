@@ -29,7 +29,7 @@ TEST(NotfMaeFiller, AllIsects) {
     }
     NotfMaeFiller filler(hist);
     auto test_fn = [&](const uintv_t& ann_ispinorbs, const v_t<uintp_t>& /*ann_isect*/,
-                       const uintv_t& cre_ispinorbs, const v_t<uintp_t>& /*cre_isect*/) -> void {
+                       const uintv_t& cre_ispinorbs, const v_t<uintp_t>& /*cre_isect*/, field::RdmInds& /*rdm_inds*/) -> void {
         if (ann_ispinorbs.size()==2) {
             std::cout << ann_ispinorbs[0] << " " << ann_ispinorbs[1] << "   " << cre_ispinorbs[0] << " " << cre_ispinorbs[1] << std::endl;
         }

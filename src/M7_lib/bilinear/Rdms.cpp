@@ -108,7 +108,7 @@ bool Rdms::takes_contribs_from(OpSig exsig) const {
 }
 
 void Rdms::make_full_contrib(const RdmInds& full_inds, const OpSig& exsig, const wf_t& contrib, bool phase) {
-    auto ranksig = full_inds.m_exsig;
+    auto ranksig = full_inds.m_ranksig;
     auto pure_rdm = m_pure_rdms[ranksig];
     if (pure_rdm) {
         pure_rdm->make_full_contrib(full_inds, exsig, contrib, phase);
@@ -118,6 +118,10 @@ void Rdms::make_full_contrib(const RdmInds& full_inds, const OpSig& exsig, const
             rdm->make_full_contrib(full_inds, exsig, contrib, phase);
         }
     }
+}
+
+void Rdms::make_full_contrib(const RdmInds& full_inds, const wf_t& contrib, bool phase) {
+    make_full_contrib(full_inds, full_inds.exsig(), contrib, phase);
 }
 
 void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_ops::Mbf& com, const wf_t& contrib) {

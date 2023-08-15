@@ -5,7 +5,7 @@
 #include "RdmIndsField.h"
 
 uinta_t<4> RdmIndsField::make_nops() const {
-    return {m_exsig.nfrm_cre(), m_exsig.nfrm_ann(), m_exsig.nbos_cre(), m_exsig.nbos_ann()};
+    return {m_ranksig.nfrm_cre(), m_ranksig.nfrm_ann(), m_ranksig.nbos_cre(), m_ranksig.nbos_ann()};
 }
 
 uinta_t<4> RdmIndsField::make_nop_offsets() const {
@@ -14,14 +14,14 @@ uinta_t<4> RdmIndsField::make_nop_offsets() const {
     return nop_offsets;
 }
 
-RdmIndsField::RdmIndsField(Row *row, OpSig exsig, str_t name) :
-    NdNumberField<rdm_ind_t, 1>(row, {exsig.nop()}, name),
-    m_exsig(exsig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
-    m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
-    m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}
+RdmIndsField::RdmIndsField(Row *row, OpSig ranksig, str_t name) :
+        NdNumberField<rdm_ind_t, 1>(row, {ranksig.nop()}, name),
+        m_ranksig(ranksig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
+        m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
+        m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}
 
 RdmIndsField::RdmIndsField(const RdmIndsField &other) :
-        NdNumberField<rdm_ind_t, 1>(other), m_exsig(other.m_exsig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
+        NdNumberField<rdm_ind_t, 1>(other), m_ranksig(other.m_ranksig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
         m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
         m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}
 
@@ -77,4 +77,27 @@ void RdmIndsField::common_frm_inds(uintv_t &common) const {
             ++icre; ++iann;
         }
     }
+}
+
+uint_t RdmIndsField::ncommon_frm_inds() const {
+    uint_t ncommon = 0ul;
+    uint_t icre = 0ul;
+    uint_t iann = 0ul;
+    DEBUG_ASSERT_TRUE(is_ordered(), "indices are not properly ordered");
+    while (icre < m_nops[0] && iann < m_nops[1]) {
+        if (m_frm.m_cre[icre] > m_frm.m_ann[iann]) ++icre;
+        else if (m_frm.m_cre[icre] < m_frm.m_ann[iann]) ++iann;
+        else {
+            // common element found
+            ++ncommon;
+            ++icre; ++iann;
+        }
+    }
+    return ncommon;
+}
+
+OpSig RdmIndsField::exsig() const {
+    // todo: extend to bosons
+    auto ncommon_frm = ncommon_frm_inds();
+    return {{m_nops[0] - ncommon_frm, m_nops[1] - ncommon_frm}, {m_nops[2], m_nops[3]}};
 }

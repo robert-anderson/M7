@@ -72,6 +72,8 @@ public:
 
     void make_full_contrib(const field::RdmInds& full_inds, const OpSig& exsig, const wf_t& contrib, bool phase);
 
+    void make_full_contrib(const field::RdmInds& full_inds, const wf_t& contrib, bool phase);
+
     void make_contribs(const field::Mbf& src_onv, const conn::Mbf& conn,
                        const com_ops::Mbf& com, const wf_t& contrib);
 
