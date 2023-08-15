@@ -20,12 +20,6 @@ uintv_t bitset_isect::make_bitset(const uintv_t& isetbits, uint_t nbit) {
     return bitset;
 }
 
-uintv_t bitset_isect::make_bitset(const uintv_t& isetbits) {
-    if (isetbits.empty()) return {};
-    const auto it = std::max_element(isetbits.cbegin(), isetbits.cend());
-    return make_bitset(isetbits, *it);
-}
-
 void bitset_isect::isect(const uintv_t& bitset1, const uintv_t& bitset2, uint_t iword_begin, uint_t iword_end, siv_t& siv) {
     DEBUG_ASSERT_EQ(bitset1.size(), bitset2.size(), "incompatible bitsets");
     DEBUG_ASSERT_LE(iword_begin, iword_end, "nonsensical word range");

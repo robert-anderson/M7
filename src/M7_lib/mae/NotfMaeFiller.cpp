@@ -18,7 +18,7 @@ v_t<uintv_t> NotfMaeFiller::make_occ_bitsets(uint_t displ, uint_t count) const {
             if (row.m_mbf.get(ispinorb)) inds.push_back(row.index());
         }
         // append vector to vector of vectors
-        bitsets.emplace_back(bitset_isect::make_bitset(inds));
+        bitsets.emplace_back(bitset_isect::make_bitset(inds, m_hist.nrow_in_use()));
     }
     return bitsets;
 }

@@ -28,11 +28,6 @@ namespace bitset_isect {
     uintv_t make_bitset(const uintv_t& isetbits, uint_t nbit);
 
     /**
-     * as above, but infer bitset length
-     */
-    uintv_t make_bitset(const uintv_t& isetbits);
-
-    /**
      * compute the intersection on the word range [iword_begin, iword_end) of two bitsets as a sparse intersection
      * vector "siv" whose elements are of the form:
      *  {non-zero word index, bitwise AND of the words at that index in bitset1 and bitset2}
@@ -149,7 +144,7 @@ namespace bitset_isect {
         const auto iset_max = isets.back();
         siv_t next_siv;
         // add another level to the vector or set indices
-        isets.push_back(~0ul);
+        isets.push_back(99999);//~0ul);
         for (isets.back()=0ul; isets.back() < iset_max; ++isets.back()) {
             // compute intersection and store result in next_siv
             bitset_isect::isect(siv, bitsets[isets.back()], next_siv);
@@ -157,7 +152,8 @@ namespace bitset_isect {
             if (!next_siv.empty()) foreach_unique_one_level(isets, next_siv, bitsets, fn);
         }
         // revert to initial level
-        isets.resize(isets.size()-1);
+        auto new_size = std::max(isets.size(), 1ul);
+        isets.resize(new_size-1);
     }
 
     /**
