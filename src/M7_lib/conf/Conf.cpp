@@ -338,8 +338,11 @@ conf::Mae::Mae(Group *parent) :
         m_stats_period(this, "stats_period", 100ul,
             "number of MC cycles between computation and output of all contracted values computed from the averaged estimators"),
         m_stats_path(this, "stats_path", "M7.mae.stats", "output path for contracted value statistics"),
-        m_on_the_fly(this, "on_the_fly", true,
-            "if true, accumulate MAEs on-the-fly, else accumulate average CI in all protected MBFs and compute RDMs once at the end instead"),
+        m_filling_algorithm(this, "filling_algorithm", {
+                {"on_the_fly", "fill RDMs from replicated walker populations at each sampling MC cycle"},
+                {"bitset_isect", "from histogrammed WF, construct intersections MBF index sets for each contributing tuple of creation and annihilation operators"},
+                {"outer_product", "from histogrammed WF, loop over bra and ket MBFs making all contributions due to each pair of MBFs"}
+        }, "method to use in filling the RDMs and MRPT2 intermediates"),
         m_notf_fill_discard_thresh(this, "notf_fill_discard_thresh", 0.0,
             "if an average histogrammed walker has a weight below this magnitude, it is excluded from not-on-the-fly MAE filling"),
         m_rdm(this, "rdm", "options relating to the accumulation and sampling of RDM elements"),

@@ -66,8 +66,9 @@ class NotfMaeFiller {
     void probe_ann_map(const uintv_t& cre_ispinorbs, const v_t<uintp_t>& cre_siv, field::RdmInds& rdm_inds);
 
     /**
-     * creates a hash table of the (nelec - rank)-electron determinants which resolve the identity between the creation
-     * and annihilation SQ operators in the normal-ordered product
+     * creates a hash table of the (nelec - rank)-electron determinants due to the annihilation operators acting on the
+     * ket hist vector, then probes this table with the result of the creation operators acting on the bra which
+     * resolves the identity between the creation and annihilation SQ operators in the normal-ordered product
      * @param ann_ispinorbs
      *  strictly ascending order vector of spinorb indices in the annihilation operators taken only from MBFs in the
      *  index range [m_ind_displ, m_ind_displ + m_ind_count) of m_hist
@@ -76,6 +77,8 @@ class NotfMaeFiller {
      * @param cre_ispinorbs
      *  strictly ascending order vector of spinorb indices in the annihilation operators taken from the entirety of m_hist
      * @param cre_siv
+     *  result of intersecting all bitsets corresponding to the cre_ispinorbs
+     * @param rdm_inds
      *  result of intersecting all bitsets corresponding to the cre_ispinorbs
      */
     void resolve_identity(const uintv_t& ann_ispinorbs, const v_t<uintp_t>& ann_siv,

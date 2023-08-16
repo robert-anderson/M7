@@ -31,6 +31,10 @@ struct Maes {
      */
     const conf::Mae &m_opts;
     /**
+     * true if the MAEs are being filled at each iteration, false if they are created once from histogrammed WF
+     */
+    const bool m_on_the_fly;
+    /**
      * cycle on which the current period started
      */
     uint_t m_icycle_period_start = ~0ul;

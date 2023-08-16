@@ -31,7 +31,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
     if (m_wf.nreplica() == 2 && !m_prop.ncase_excit_gen())
         logging::warn("Replica populations are redundant when doing exact propagation");
 
-    if (m_maes.m_rdms && m_maes.m_opts.m_on_the_fly && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
+    if (m_maes.m_rdms && m_maes.m_on_the_fly && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
         logging::warn("Attempting a stochastic propagation estimation of bilinear MAEs without replication, "
                   "this is biased");
 
@@ -285,7 +285,7 @@ void Solver::loop_over_occupied_mbfs() {
 }
 
 void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
-    if (!m_maes.m_opts.m_on_the_fly){
+    if (!m_maes.m_on_the_fly){
         m_wf.update_gathered_hist_if_changed(
                 m_maes.m_opts.m_notf_fill_discard_thresh, icycle);
         m_maes.fill_from_wf_hist(m_wf.m_gathered_hist);
