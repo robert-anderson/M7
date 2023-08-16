@@ -46,21 +46,44 @@ TEST(NotfMaeFiller, AllIsects) {
 TEST(NotfMaeFiller, HalfExcitPhase) {
     const sys::Basis basis = {{6ul}, {0ul}};
     buffered::Mbf mbf(basis);
-    const uintv_t setbits_vec = { 0,  1,  4,   6,  8, 11};
+    const uintv_t setbits_vec  = { 0,  1,  4,  6,  8, 11};
+    const uintv_t setbits_vec2 = { 1,  2,  5,  7,  9, 10};
+    const uintv_t setbits_vec3 = { 1,  2,  3,  4,  5,  6};
 
     mbf = setbits_vec;
-    conn::Mbf conn(mbf);
+    conn::Mbf conn1(mbf);
+    ASSERT_EQ(conn1.phase(mbf), false);  // no operator added
+    conn1.m_ann.add(0);
+    ASSERT_EQ(conn1.phase(mbf), false);
+    conn1.m_ann.add(4);
+    ASSERT_EQ(conn1.phase(mbf), true);
+    conn1.m_ann.add(6);
+    ASSERT_EQ(conn1.phase(mbf), false);
+    conn1.m_ann.add(11);
+    ASSERT_EQ(conn1.phase(mbf), false);
 
-    // 0 1 4 6 8 11
-    conn.m_ann.add(0);
-    ASSERT_EQ(conn.phase(mbf), false);
-    // 1 4 6 8 11
-    conn.m_ann.add(4);
-    ASSERT_EQ(conn.phase(mbf), true);
-    // 1 6 8 11
-    conn.m_ann.add(6);
-    ASSERT_EQ(conn.phase(mbf), false);
-    // 1 8 11
-    conn.m_ann.add(11);
-    ASSERT_EQ(conn.phase(mbf), false);
+    mbf = setbits_vec2;
+    conn::Mbf conn2(mbf);
+    conn2.m_ann.add(5);
+    ASSERT_EQ(conn2.phase(mbf), false);
+    conn2.m_ann.add(9);
+    ASSERT_EQ(conn2.phase(mbf), true);
+    conn2.m_ann.add(10);
+    ASSERT_EQ(conn2.phase(mbf), false);
+
+    mbf = setbits_vec3;
+    conn::Mbf conn3(mbf);
+    conn3.m_ann.add(1);
+    // adding them sequentially should always give false
+    ASSERT_EQ(conn3.phase(mbf), false);
+    conn3.m_ann.add(2);
+    ASSERT_EQ(conn3.phase(mbf), false);
+    conn3.m_ann.add(3);
+    ASSERT_EQ(conn3.phase(mbf), false);
+    conn3.m_ann.add(4);
+    ASSERT_EQ(conn3.phase(mbf), false);
+    conn3.m_ann.add(5);
+    ASSERT_EQ(conn3.phase(mbf), false);
+    conn3.m_ann.add(6);
+    ASSERT_EQ(conn3.phase(mbf), false);
 }
