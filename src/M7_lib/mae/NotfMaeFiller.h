@@ -88,11 +88,9 @@ class NotfMaeFiller {
     /**
      * enumerate all normal-ordered products of fermion spinorb SQ operators which contribute to the RDMs to be filled.
      * for each of these combinations, dispatch resolve identity which matches the creation and annihilation set intersections
-      // what does the above line mean exactly? Does the definition of resolve_identity change depending on the input? It always receives the same types?
      * and fills the non-zero contributions to all RDMs
      */
     void fill() {
-        // [&] => every argument to this lambda can be found by reference outside its scope
         auto fn = [&](const uintv_t& ao, const v_t<uintp_t>& ais, const uintv_t& co, const v_t<uintp_t>& cis, field::RdmInds& rdm_inds) {
             resolve_identity(ao, ais, co, cis, rdm_inds);
         };
@@ -127,13 +125,13 @@ public:
         for (const auto& opsig: rdm_opsigs) {
             buffered::RdmInds rdm_inds(opsig);
             const auto rank = opsig.nfrm_cre();
-            auto cre_fn = [&](const uintv_t &cre_ispinorbs, const siv_t &cre_siv) -> void {
-                auto ann_fn = [&](const uintv_t &ann_ispinorbs, const siv_t &ann_siv) -> void {
+            auto ann_fn = [&](const uintv_t &ann_ispinorbs, const siv_t &ann_siv) -> void {
+                auto cre_fn = [&](const uintv_t &cre_ispinorbs, const siv_t &cre_siv) -> void {
                     fn(ann_ispinorbs, ann_siv, cre_ispinorbs, cre_siv, rdm_inds);
                 };
-                foreach_unique(m_occ_bitsets, m_occ_sivs, rank, true, ann_fn);
+                foreach_unique(m_occ_bitsets, m_occ_sivs, rank, true, cre_fn);
             };
-            foreach_unique(m_occ_bitsets, m_partial_occ_sivs, rank, true, cre_fn);
+            foreach_unique(m_occ_bitsets, m_partial_occ_sivs, rank, true, ann_fn);
         }
     }
 
