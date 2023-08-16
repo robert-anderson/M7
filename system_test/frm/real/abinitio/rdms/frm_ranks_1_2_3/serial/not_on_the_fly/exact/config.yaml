@@ -20,7 +20,7 @@ hamiltonian:
     fcidump:
       path: FCIDUMP
 mae:
-  on_the_fly: no
+  filling_algorithm: outer_product
   rdm:
     save: yes
     ranks: [1, 2, 3]
