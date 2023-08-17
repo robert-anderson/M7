@@ -109,7 +109,9 @@ public:
             buffered::RdmInds rdm_inds(opsig);
             const auto rank = opsig.nfrm_cre();
             auto ann_fn = [&](const uintv_t &ann_ispinorbs, const siv_t &ann_siv) -> void {
+                if (ann_siv.empty()) return;
                 auto cre_fn = [&](const uintv_t &cre_ispinorbs, const siv_t &cre_siv) -> void {
+                    if (cre_siv.empty()) return;
                     fn(ann_ispinorbs, ann_siv, cre_ispinorbs, cre_siv, rdm_inds);
                 };
                 foreach_unique(m_occ_bitsets, m_occ_sivs, rank, true, cre_fn);
