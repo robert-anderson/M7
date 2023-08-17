@@ -110,7 +110,12 @@ NotfMaeFiller::NotfMaeFiller(const Table<MbfWeightRow> &hist, Rdms *rdms) :
         m_partial_occ_bitsets(make_occ_bitsets(m_ind_displ, m_ind_count)),
         m_occ_sivs(bitset_isect::bitset_to_siv_many(m_occ_bitsets)),
         m_partial_occ_sivs(bitset_isect::bitset_to_siv_many(m_partial_occ_bitsets)),
-        m_work_conn(m_hist.m_row.m_mbf.m_basis), m_ri_map(m_hist.m_row) {
+        m_work_conn(m_hist.m_row.m_mbf.m_basis),
+        m_ri_map("notf ri map", m_hist.m_row) {
+    // generously assume an RI map will have the total number of entries equally shared among MPI ranks
+    const auto nrow = m_hist.nrow_in_use() / mpi::nrank();
+    m_ri_map.resize(nrow);
+    m_ri_map.remap(nrow);
 }
 
 void NotfMaeFiller::fill(const Table<MbfWeightRow> &hist, Rdms *rdms) {

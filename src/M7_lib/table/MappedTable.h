@@ -321,6 +321,7 @@ public:
      * construct a new vector of buckets with a different size
      */
     void remap(uint_t nbucket_new) {
+        DEBUG_ASSERT_TRUE(nbucket_new, "can't remap to zero buckets");
         if (!TableBase::name().empty()) {
             logging::info_("remapping hash table for \"{}\"", TableBase::name());
             logging::info_("replacing current bucket vector of size {} with a new one of size {}",
