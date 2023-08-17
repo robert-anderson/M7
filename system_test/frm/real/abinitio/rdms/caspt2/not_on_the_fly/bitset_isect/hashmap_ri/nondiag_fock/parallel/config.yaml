@@ -20,7 +20,7 @@ hamiltonian:
     fcidump:
       path: FCIDUMP
 mae:
-  filling_algorithm: bitset_isect
+  filling_algorithm: bitset_isect_hashmap_ri
   rdm:
     save: yes
     ranks: [1, 2, 3]
