@@ -57,13 +57,30 @@ class NotfMaeFiller {
      */
     buffered::MappedTable<MbfWeightRow> m_ri_map;
 
+    /**
+     * working rows to enable pair loop
+     */
+    MbfWeightRow m_work_hist_row1;
+    MbfWeightRow m_work_hist_row2;
+
+public:
+    enum RiStrategy {
+        Hashmap, PairLoop
+    };
+
+private:
+    const RiStrategy m_ri_strat;
+
     v_t<uintv_t> make_occ_bitsets(uint_t displ, uint_t count) const;
 
     v_t<uintv_t> make_occ_bitsets() const;
 
-    void refresh_ann_map(const uintv_t& ann_ispinorbs, const v_t<uintp_t>& ann_siv, field::RdmInds& rdm_inds);
+    void refresh_ann_hashmap(const uintv_t& ann_ispinorbs, const v_t<uintp_t>& ann_siv, field::RdmInds& rdm_inds);
 
-    void probe_ann_map(const uintv_t& cre_ispinorbs, const v_t<uintp_t>& cre_siv, field::RdmInds& rdm_inds);
+    void probe_ann_hashmap(const uintv_t& cre_ispinorbs, const v_t<uintp_t>& cre_siv, field::RdmInds& rdm_inds);
+
+    void pair_loop_ri(const uintv_t& ann_ispinorbs, const v_t<uintp_t>& ann_siv,
+                      const uintv_t& cre_ispinorbs, const v_t<uintp_t>& cre_siv, field::RdmInds& rdm_inds);
 
     /**
      * creates a hash table of the (nelec - rank)-electron determinants due to the annihilation operators acting on the
@@ -94,9 +111,9 @@ class NotfMaeFiller {
     wf_comp_t get_norm() const;
 
 public:
-    explicit NotfMaeFiller(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr);
+    NotfMaeFiller(const Table<MbfWeightRow>& hist, RiStrategy ri_strat, Rdms* rdms=nullptr);
 
-    static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr);
+    static void fill(const Table<MbfWeightRow>& hist, RiStrategy ri_strat, Rdms* rdms=nullptr);
 
     template<typename fn_t>
     void fill_foreach_set_pair(const fn_t& fn, const v_t<OpSig>& rdm_opsigs) {

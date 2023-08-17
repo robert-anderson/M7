@@ -41,7 +41,7 @@ void undo_annihilation(const uintv_t &ispinorbs, const field::FrmOnv& mbf) {
     for (auto& i: ispinorbs) ref.set(i);
 }
 
-void NotfMaeFiller::refresh_ann_map(const uintv_t &ann_ispinorbs, const v_t<uintp_t> &ann_siv, field::RdmInds& rdm_inds) {
+void NotfMaeFiller::refresh_ann_hashmap(const uintv_t &ann_ispinorbs, const v_t<uintp_t> &ann_siv, field::RdmInds& rdm_inds) {
     /*
      * don't refresh unless the outer indices have changed. in the first usage all spinorbs will be zero so if the
      * largest value is 0, it may be assumed that this is the first refresh
@@ -61,7 +61,7 @@ void NotfMaeFiller::refresh_ann_map(const uintv_t &ann_ispinorbs, const v_t<uint
     rdm_inds.m_frm.m_ann = ann_ispinorbs;
 }
 
-void NotfMaeFiller::probe_ann_map(const uintv_t &cre_ispinorbs, const v_t<uintp_t> &cre_siv, field::RdmInds& rdm_inds) {
+void NotfMaeFiller::probe_ann_hashmap(const uintv_t &cre_ispinorbs, const v_t<uintp_t> &cre_siv, field::RdmInds& rdm_inds) {
     rdm_inds.m_frm.m_cre = cre_ispinorbs;
     // if no RDMs take contribs from this exsig, skip this cre_ispinorbs vector
     if (!m_rdms->takes_contribs_from(rdm_inds.exsig())) return;
@@ -78,12 +78,63 @@ void NotfMaeFiller::probe_ann_map(const uintv_t &cre_ispinorbs, const v_t<uintp_
     bitset_isect::foreach_in_siv(cre_siv, fn);
 }
 
+
+void NotfMaeFiller::pair_loop_ri(const uintv_t &ann_ispinorbs, const v_t<uintp_t> &ann_siv, const uintv_t &cre_ispinorbs,
+                                 const v_t<uintp_t> &cre_siv, RdmInds &rdm_inds) {
+    rdm_inds.m_frm.m_cre = cre_ispinorbs;
+    rdm_inds.m_frm.m_ann = ann_ispinorbs;
+    const auto exsig = rdm_inds.exsig();
+    // if no RDMs take contribs from this exsig, skip this cre_ispinorbs vector
+    if (!m_rdms->takes_contribs_from(exsig)) return;
+
+    auto& ann_row = m_work_hist_row1;
+    if (!exsig) {
+        // ann and cre spinorb inds are the same
+        auto fn = [&](uint_t imbf){
+            ann_row.jump(imbf);
+            const auto contrib = math::pow<2>(ann_row.m_weight[0]);
+            m_rdms->make_full_contrib(rdm_inds, contrib, false);
+        };
+        bitset_isect::foreach_in_siv(ann_siv, fn);
+        return;
+    }
+
+    auto& cre_row = m_work_hist_row2;
+
+    auto ann_fn = [&](uint_t imbf_ann){
+        ann_row.jump(imbf_ann);
+        const auto ann_phase = half_excit_phase(ann_ispinorbs, ann_row.m_mbf);
+        const auto ann_contrib = ann_row.m_weight[0] * (ann_phase ? -1.0 : 1.0);
+        do_annihilation(ann_ispinorbs, ann_row.m_mbf);
+        auto cre_fn = [&](uint_t imbf_cre){
+            if (imbf_ann == imbf_cre) return;
+            cre_row.jump(imbf_cre);
+            do_annihilation(cre_ispinorbs, cre_row.m_mbf);
+            DEBUG_ASSERT_EQ(cre_row.m_mbf.nsetbit(), ann_row.m_mbf.nsetbit(), "nsetbits should match after annihilations applied");
+            const auto match = cre_row.m_mbf == ann_row.m_mbf;
+            undo_annihilation(cre_ispinorbs, cre_row.m_mbf);
+            if (!match) return;
+            const auto cre_phase = half_excit_phase(cre_ispinorbs, cre_row.m_mbf);
+            const auto cre_contrib = cre_row.m_weight[0] * (cre_phase ? -1.0 : 1.0);
+            m_rdms->make_full_contrib(rdm_inds, ann_contrib * cre_contrib, false);
+        };
+        bitset_isect::foreach_in_siv(cre_siv, cre_fn);
+        undo_annihilation(ann_ispinorbs, ann_row.m_mbf);
+    };
+    bitset_isect::foreach_in_siv(ann_siv, ann_fn);
+}
+
 void NotfMaeFiller::resolve_identity(const uintv_t &ann_ispinorbs, const v_t<uintp_t> &ann_siv, const uintv_t &cre_ispinorbs,
                                      const v_t<uintp_t> &cre_siv, RdmInds &rdm_inds) {
     REQUIRE_TRUE(m_rdms, "RDMs object must be non-null");
-    refresh_ann_map(ann_ispinorbs, ann_siv, rdm_inds);
-    if (m_ri_map.empty()) return; // no need to continue RI if there are no mapped MBFs
-    probe_ann_map(cre_ispinorbs, cre_siv, rdm_inds);
+    if (m_ri_strat == Hashmap) {
+        refresh_ann_hashmap(ann_ispinorbs, ann_siv, rdm_inds);
+        if (m_ri_map.empty()) return; // no need to continue RI if there are no mapped MBFs
+        probe_ann_hashmap(cre_ispinorbs, cre_siv, rdm_inds);
+    }
+    else if (m_ri_strat == PairLoop) {
+        pair_loop_ri(ann_ispinorbs, ann_siv, cre_ispinorbs, cre_siv, rdm_inds);
+    }
 }
 
 void NotfMaeFiller::fill() {
@@ -102,7 +153,7 @@ wf_comp_t NotfMaeFiller::get_norm() const {
     return norm;
 }
 
-NotfMaeFiller::NotfMaeFiller(const Table<MbfWeightRow> &hist, Rdms *rdms) :
+NotfMaeFiller::NotfMaeFiller(const Table<MbfWeightRow> &hist, RiStrategy ri_strat, Rdms *rdms) :
         m_hist(hist), m_rdms(rdms),
         m_ind_displ(mpi::evenly_shared_displ(m_hist.nrow_in_use())),
         m_ind_count(mpi::evenly_shared_count(m_hist.nrow_in_use())),
@@ -111,15 +162,18 @@ NotfMaeFiller::NotfMaeFiller(const Table<MbfWeightRow> &hist, Rdms *rdms) :
         m_occ_sivs(bitset_isect::bitset_to_siv_many(m_occ_bitsets)),
         m_partial_occ_sivs(bitset_isect::bitset_to_siv_many(m_partial_occ_bitsets)),
         m_work_conn(m_hist.m_row.m_mbf.m_basis),
-        m_ri_map("notf ri map", m_hist.m_row) {
-    // generously assume an RI map will have the total number of entries equally shared among MPI ranks
-    const auto nrow = m_hist.nrow_in_use() / mpi::nrank();
-    m_ri_map.resize(nrow);
-    m_ri_map.remap(nrow);
+        m_ri_map("notf ri map", m_hist.m_row), m_ri_strat(ri_strat),
+        m_work_hist_row1(m_hist.m_row), m_work_hist_row2(m_hist.m_row) {
+    if (m_ri_strat == Hashmap) {
+        // generously assume an RI map will have the total number of entries equally shared among MPI ranks
+        const auto nrow = m_hist.nrow_in_use() / mpi::nrank();
+        m_ri_map.resize(nrow);
+        m_ri_map.remap(nrow);
+    }
 }
 
-void NotfMaeFiller::fill(const Table<MbfWeightRow> &hist, Rdms *rdms) {
-    NotfMaeFiller filler(hist, rdms);
+void NotfMaeFiller::fill(const Table<MbfWeightRow> &hist, RiStrategy ri_strat, Rdms *rdms) {
+    NotfMaeFiller filler(hist, ri_strat, rdms);
     filler.fill();
 }
 
