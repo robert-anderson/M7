@@ -162,8 +162,9 @@ NotfMaeFiller::NotfMaeFiller(const Table<MbfWeightRow> &hist, RiStrategy ri_stra
         m_occ_sivs(bitset_isect::bitset_to_siv_many(m_occ_bitsets)),
         m_partial_occ_sivs(bitset_isect::bitset_to_siv_many(m_partial_occ_bitsets)),
         m_work_conn(m_hist.m_row.m_mbf.m_basis),
-        m_ri_map("notf ri map", m_hist.m_row), m_ri_strat(ri_strat),
-        m_work_hist_row1(m_hist.m_row), m_work_hist_row2(m_hist.m_row) {
+        m_ri_map("notf ri map", m_hist.m_row),
+        m_work_hist_row1(m_hist.m_row), m_work_hist_row2(m_hist.m_row),
+        m_ri_strat(ri_strat) {
     if (m_ri_strat == Hashmap) {
         // generously assume an RI map will have the total number of entries equally shared among MPI ranks
         const auto nrow = m_hist.nrow_in_use() / mpi::nrank();
