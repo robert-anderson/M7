@@ -82,42 +82,21 @@ class NotfMaeFiller {
      *  result of intersecting all bitsets corresponding to the cre_ispinorbs
      */
     void resolve_identity(const uintv_t& ann_ispinorbs, const v_t<uintp_t>& ann_siv,
-                          const uintv_t& cre_ispinorbs, const v_t<uintp_t>& cre_siv, field::RdmInds& rdm_inds) {
-        REQUIRE_TRUE_ALL(m_rdms, "RDMs object must be non-null");
-        refresh_ann_map(ann_ispinorbs, ann_siv, rdm_inds);
-        probe_ann_map(cre_ispinorbs, cre_siv, rdm_inds);
-    }
+                          const uintv_t& cre_ispinorbs, const v_t<uintp_t>& cre_siv, field::RdmInds& rdm_inds);
 
     /**
      * enumerate all normal-ordered products of fermion spinorb SQ operators which contribute to the RDMs to be filled.
      * for each of these combinations, dispatch resolve identity which matches the creation and annihilation set intersections
      * and fills the non-zero contributions to all RDMs
      */
-    void fill() {
-        auto fn = [&](const uintv_t& ao, const v_t<uintp_t>& ais, const uintv_t& co, const v_t<uintp_t>& cis, field::RdmInds& rdm_inds) {
-            resolve_identity(ao, ais, co, cis, rdm_inds);
-        };
-        v_t<OpSig> rdm_exsigs;
-        rdm_exsigs.emplace_back(opsig::c_sing);
-        fill_foreach_set_pair(fn, rdm_exsigs);
-    }
+    void fill();
+
+    wf_comp_t get_norm() const;
 
 public:
-    NotfMaeFiller(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr):
-        m_hist(hist), m_rdms(rdms),
-        m_ind_displ(mpi::evenly_shared_displ(m_hist.nrow_in_use())),
-        m_ind_count(mpi::evenly_shared_count(m_hist.nrow_in_use())),
-        m_occ_bitsets(make_occ_bitsets()),
-        m_partial_occ_bitsets(make_occ_bitsets(m_ind_displ, m_ind_count)),
-        m_occ_sivs(bitset_isect::bitset_to_siv_many(m_occ_bitsets)),
-        m_partial_occ_sivs(bitset_isect::bitset_to_siv_many(m_partial_occ_bitsets)),
-        m_work_conn(m_hist.m_row.m_mbf.m_basis), m_ri_map(m_hist.m_row) {
-    }
+    explicit NotfMaeFiller(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr);
 
-    static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr) {
-        NotfMaeFiller filler(hist, rdms);
-        filler.fill();
-    }
+    static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms=nullptr);
 
     template<typename fn_t>
     void fill_foreach_set_pair(const fn_t& fn, const v_t<OpSig>& rdm_opsigs) {
@@ -126,6 +105,7 @@ public:
                                        field::RdmInds& rdm_inds)>(fn);
         using namespace bitset_isect;
         for (const auto& opsig: rdm_opsigs) {
+            if (!opsig) continue;
             buffered::RdmInds rdm_inds(opsig);
             const auto rank = opsig.nfrm_cre();
             auto ann_fn = [&](const uintv_t &ann_ispinorbs, const siv_t &ann_siv) -> void {
@@ -149,19 +129,12 @@ public:
      * @return
      *  true if the Fermi phase of the "half excitation" is -1
      */
-    bool half_excit_phase(const uintv_t& ispinorbs, const field::Mbf& mbf) {
-        for (auto& i: ispinorbs) m_work_conn.m_ann.add(i);
-        return m_work_conn.phase(mbf);
-    }
+    bool half_excit_phase(const uintv_t& ispinorbs, const field::Mbf& mbf);
     /**
      * @param ihist_mbf
      *  integer index of the MBF as a row in the m_hist table.
      */
-    bool half_excit_phase(const uintv_t& ispinorbs, uint_t ihist_mbf) {
-        m_hist.m_row.jump(ihist_mbf);
-        const auto& mbf = m_hist.m_row.m_mbf;
-        return half_excit_phase(ispinorbs, mbf);
-    }
+    bool half_excit_phase(const uintv_t& ispinorbs, uint_t ihist_mbf);
 };
 
 

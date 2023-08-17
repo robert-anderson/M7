@@ -263,6 +263,20 @@ public:
         return std::to_string(nfrm_cre()) + std::to_string(nfrm_ann()) +
                std::to_string(nbos_cre()) + std::to_string(nbos_ann());
     }
+
+    template<typename fn_t>
+    static void foreach(const fn_t& fn) {
+        functor::assert_prototype<void(const OpSig&)>(fn);
+        for (uint_t ifrm_cre = 0ul; ifrm_cre <= opsig::c_nop_mask_frm; ++ifrm_cre) {
+            for (uint_t ifrm_ann = 0ul; ifrm_ann <= opsig::c_nop_mask_frm; ++ifrm_ann) {
+                for (uint_t ibos_cre = 0ul; ibos_cre <= opsig::c_nop_mask_bos; ++ibos_cre) {
+                    for (uint_t ibos_ann = 0ul; ibos_ann <= opsig::c_nop_mask_bos; ++ibos_ann) {
+                        fn(OpSig({ifrm_cre, ifrm_ann}, {ibos_cre, ibos_ann}));
+                    }
+                }
+            }
+        }
+    }
 };
 
 namespace opsig {

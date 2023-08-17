@@ -28,22 +28,26 @@ v_t<uintv_t> NotfMaeFiller::make_occ_bitsets() const {
 /**
  * helper to temporarily violate const correctness so as to modify the MBF in place
  */
-void do_annihilation(const uintv_t &ann_ispinorbs, const field::FrmOnv& mbf) {
+void do_annihilation(const uintv_t &ispinorbs, const field::FrmOnv& mbf) {
     auto& ref = const_cast<field::FrmOnv&>(mbf);
-    for (auto& i: ann_ispinorbs) ref.clr(i);
+    for (auto& i: ispinorbs) ref.clr(i);
 }
 
 /**
  * helper to undo the above so as to leave the MBF unchanged
  */
-void undo_annihilation(const uintv_t &ann_ispinorbs, const field::FrmOnv& mbf) {
+void undo_annihilation(const uintv_t &ispinorbs, const field::FrmOnv& mbf) {
     auto& ref = const_cast<field::FrmOnv&>(mbf);
-    for (auto& i: ann_ispinorbs) ref.set(i);
+    for (auto& i: ispinorbs) ref.set(i);
 }
 
 void NotfMaeFiller::refresh_ann_map(const uintv_t &ann_ispinorbs, const v_t<uintp_t> &ann_siv, field::RdmInds& rdm_inds) {
-    // don't refresh unless the outer indices have changed
-    if (rdm_inds.m_frm.m_ann == ann_ispinorbs) return;
+    /*
+     * don't refresh unless the outer indices have changed. in the first usage all spinorbs will be zero so if the
+     * largest value is 0, it may be assumed that this is the first refresh
+     */
+    if (rdm_inds.m_frm.m_ann == ann_ispinorbs && ann_ispinorbs.back() != 0ul) return;
+    m_ri_map.clear();
     auto fn = [&](uint_t imbf){
         m_hist.m_row.jump(imbf);
         auto has_phase = half_excit_phase(ann_ispinorbs, imbf);
@@ -53,10 +57,12 @@ void NotfMaeFiller::refresh_ann_map(const uintv_t &ann_ispinorbs, const v_t<uint
         ri_row.m_weight[0] = m_hist.m_row.m_weight[0] * (has_phase ? -1.0 : 1.0);
     };
     bitset_isect::foreach_in_siv(ann_siv, fn);
+    m_ri_map.remap_if_due();
     rdm_inds.m_frm.m_ann = ann_ispinorbs;
 }
 
 void NotfMaeFiller::probe_ann_map(const uintv_t &cre_ispinorbs, const v_t<uintp_t> &cre_siv, field::RdmInds& rdm_inds) {
+    rdm_inds.m_frm.m_cre = cre_ispinorbs;
     auto fn = [&](uint_t imbf){
         m_hist.m_row.jump(imbf);
         auto has_phase = half_excit_phase(cre_ispinorbs, imbf);
@@ -68,4 +74,55 @@ void NotfMaeFiller::probe_ann_map(const uintv_t &cre_ispinorbs, const v_t<uintp_
         m_rdms->make_full_contrib(rdm_inds, contrib, false);
     };
     bitset_isect::foreach_in_siv(cre_siv, fn);
+}
+
+void NotfMaeFiller::resolve_identity(const uintv_t &ann_ispinorbs, const v_t<uintp_t> &ann_siv, const uintv_t &cre_ispinorbs,
+                                     const v_t<uintp_t> &cre_siv, RdmInds &rdm_inds) {
+    REQUIRE_TRUE_ALL(m_rdms, "RDMs object must be non-null");
+    refresh_ann_map(ann_ispinorbs, ann_siv, rdm_inds);
+    probe_ann_map(cre_ispinorbs, cre_siv, rdm_inds);
+}
+
+void NotfMaeFiller::fill() {
+    auto fn = [&](const uintv_t& ao, const v_t<uintp_t>& ais, const uintv_t& co, const v_t<uintp_t>& cis, field::RdmInds& rdm_inds) {
+        resolve_identity(ao, ais, co, cis, rdm_inds);
+    };
+    fill_foreach_set_pair(fn, m_rdms->all_ranksigs());
+    // set the entire norm on the root rank
+    if (mpi::i_am_root()) m_rdms->m_total_norm.m_local = get_norm();
+}
+
+wf_comp_t NotfMaeFiller::get_norm() const {
+    auto& row = m_hist.m_row;
+    wf_comp_t norm = 0.0;
+    for (row.restart(); row; ++row) norm += math::pow<2>(std::abs(row.m_weight[0]));
+    return norm;
+}
+
+NotfMaeFiller::NotfMaeFiller(const Table<MbfWeightRow> &hist, Rdms *rdms) :
+        m_hist(hist), m_rdms(rdms),
+        m_ind_displ(mpi::evenly_shared_displ(m_hist.nrow_in_use())),
+        m_ind_count(mpi::evenly_shared_count(m_hist.nrow_in_use())),
+        m_occ_bitsets(make_occ_bitsets()),
+        m_partial_occ_bitsets(make_occ_bitsets(m_ind_displ, m_ind_count)),
+        m_occ_sivs(bitset_isect::bitset_to_siv_many(m_occ_bitsets)),
+        m_partial_occ_sivs(bitset_isect::bitset_to_siv_many(m_partial_occ_bitsets)),
+        m_work_conn(m_hist.m_row.m_mbf.m_basis), m_ri_map(m_hist.m_row) {
+}
+
+void NotfMaeFiller::fill(const Table<MbfWeightRow> &hist, Rdms *rdms) {
+    NotfMaeFiller filler(hist, rdms);
+    filler.fill();
+}
+
+bool NotfMaeFiller::half_excit_phase(const uintv_t &ispinorbs, const Mbf &mbf) {
+    m_work_conn.m_ann.clear();
+    for (auto& i: ispinorbs) m_work_conn.m_ann.add(i);
+    return m_work_conn.phase(mbf);
+}
+
+bool NotfMaeFiller::half_excit_phase(const uintv_t &ispinorbs, uint_t ihist_mbf) {
+    m_hist.m_row.jump(ihist_mbf);
+    const auto& mbf = m_hist.m_row.m_mbf;
+    return half_excit_phase(ispinorbs, mbf);
 }

@@ -69,8 +69,8 @@ void RdmIndsField::common_frm_inds(uintv_t &common) const {
     uint_t iann = 0ul;
     DEBUG_ASSERT_TRUE(is_ordered(), "indices are not properly ordered");
     while (icre < m_nops[0] && iann < m_nops[1]) {
-        if (m_frm.m_cre[icre] > m_frm.m_ann[iann]) ++icre;
-        else if (m_frm.m_cre[icre] < m_frm.m_ann[iann]) ++iann;
+        if (m_frm.m_cre[icre] > m_frm.m_ann[iann]) ++iann;
+        else if (m_frm.m_cre[icre] < m_frm.m_ann[iann]) ++icre;
         else {
             // common element found
             common.push_back(m_frm.m_cre[icre]);
@@ -85,8 +85,8 @@ uint_t RdmIndsField::ncommon_frm_inds() const {
     uint_t iann = 0ul;
     DEBUG_ASSERT_TRUE(is_ordered(), "indices are not properly ordered");
     while (icre < m_nops[0] && iann < m_nops[1]) {
-        if (m_frm.m_cre[icre] > m_frm.m_ann[iann]) ++icre;
-        else if (m_frm.m_cre[icre] < m_frm.m_ann[iann]) ++iann;
+        if (m_frm.m_cre[icre] > m_frm.m_ann[iann]) ++iann;
+        else if (m_frm.m_cre[icre] < m_frm.m_ann[iann]) ++icre;
         else {
             // common element found
             ++ncommon;

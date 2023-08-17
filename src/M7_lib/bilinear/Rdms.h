@@ -40,6 +40,11 @@ class Rdms {
     typedef std::array<Rdm*, opsig::c_ndistinct> pure_rdms_t;
     pure_rdms_t m_pure_rdms {};
 
+    /**
+     * pointer to fock * 4RDM if allocated
+     */
+    Rdm* m_fock_4rdm = nullptr;
+
     suite::Conns m_work_conns;
     suite::ComOps m_work_com_ops;
 
@@ -69,6 +74,8 @@ public:
     operator bool() const;
 
     bool takes_contribs_from(OpSig exsig) const;
+
+    v_t<OpSig> all_ranksigs() const;
 
     void make_full_contrib(const field::RdmInds& full_inds, const OpSig& exsig, const wf_t& contrib, bool phase);
 

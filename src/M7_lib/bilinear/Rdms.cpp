@@ -66,6 +66,7 @@ Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epo
 
         if (!diag) m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, NonDiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
         else m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, DiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
+        m_fock_4rdm = m_rdms.front().get();
     }
     m_exsig_to_rdms = make_exsig_to_rdms();
 
@@ -107,17 +108,20 @@ bool Rdms::takes_contribs_from(OpSig exsig) const {
     return (exsig != opsig::c_invalid) && !m_exsig_to_rdms[exsig].empty();
 }
 
+v_t<OpSig> Rdms::all_ranksigs() const {
+    std::set<OpSig> set;
+    for (auto& ptr: m_rdms) set.insert(ptr->m_ranksig);
+    return {set.cbegin(), set.cend()};
+}
+
 void Rdms::make_full_contrib(const RdmInds& full_inds, const OpSig& exsig, const wf_t& contrib, bool phase) {
     auto ranksig = full_inds.m_ranksig;
     auto pure_rdm = m_pure_rdms[ranksig];
     if (pure_rdm) {
         pure_rdm->make_full_contrib(full_inds, exsig, contrib, phase);
     }
-    else {
-        for (auto& rdm: m_exsig_to_rdms[ranksig]) {
-            rdm->make_full_contrib(full_inds, exsig, contrib, phase);
-        }
-    }
+    else if (m_fock_4rdm && full_inds.m_ranksig==opsig::c_quad && takes_contribs_from(exsig))
+        m_fock_4rdm->make_full_contrib(full_inds, exsig, contrib, phase);
 }
 
 void Rdms::make_full_contrib(const RdmInds& full_inds, const wf_t& contrib, bool phase) {
@@ -305,4 +309,3 @@ void Rdms::save() {
     REQUIRE_TRUE(m_opts.m_save.m_enabled, "save() called on Rdms object but saving was not enabled");
     save(hdf5::FileWriter(m_opts.m_save.m_path));
 }
-
