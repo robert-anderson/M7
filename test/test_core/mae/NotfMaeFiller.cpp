@@ -27,7 +27,7 @@ TEST(NotfMaeFiller, AllIsects) {
         hist.m_row.push_back_jump();
         hist.m_row.m_mbf = setbits;
     }
-    NotfMaeFiller filler(hist);
+    NotfMaeFiller filler(hist, NotfMaeFiller::Hashmap);
     auto test_fn = [&](const uintv_t& ann_ispinorbs, const v_t<uintp_t>& /*ann_isect*/,
                        const uintv_t& cre_ispinorbs, const v_t<uintp_t>& /*cre_isect*/, field::RdmInds& /*rdm_inds*/) -> void {
         if (ann_ispinorbs.size()==2) {

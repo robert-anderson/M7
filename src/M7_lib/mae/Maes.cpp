@@ -102,8 +102,10 @@ void Maes::fill_from_wf_hist(const Table<MbfWeightRow>& hist) {
             }
         }
     }
-    else if (m_opts.m_filling_algorithm.m_value == "bitset_isect")
-        NotfMaeFiller::fill(hist, &m_rdms);
+    else if (m_opts.m_filling_algorithm.m_value == "bitset_isect_hashmap_ri")
+        NotfMaeFiller::fill(hist, NotfMaeFiller::Hashmap, &m_rdms);
+    else if (m_opts.m_filling_algorithm.m_value == "bitset_isect_pair_loop_ri")
+        NotfMaeFiller::fill(hist, NotfMaeFiller::PairLoop, &m_rdms);
 
 }
 
