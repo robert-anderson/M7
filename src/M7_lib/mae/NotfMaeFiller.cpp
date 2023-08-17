@@ -78,8 +78,9 @@ void NotfMaeFiller::probe_ann_map(const uintv_t &cre_ispinorbs, const v_t<uintp_
 
 void NotfMaeFiller::resolve_identity(const uintv_t &ann_ispinorbs, const v_t<uintp_t> &ann_siv, const uintv_t &cre_ispinorbs,
                                      const v_t<uintp_t> &cre_siv, RdmInds &rdm_inds) {
-    REQUIRE_TRUE_ALL(m_rdms, "RDMs object must be non-null");
+    REQUIRE_TRUE(m_rdms, "RDMs object must be non-null");
     refresh_ann_map(ann_ispinorbs, ann_siv, rdm_inds);
+    if (m_ri_map.empty()) return; // no need to continue RI if there are no mapped MBFs
     probe_ann_map(cre_ispinorbs, cre_siv, rdm_inds);
 }
 

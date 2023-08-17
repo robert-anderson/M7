@@ -120,7 +120,6 @@ void DiagFockRdm4::make_full_contrib(const RdmInds& full_inds, const OpSig& exsi
             add_to_send_table(m_uncontracted_inds, contrib * fock_element);
         }
     } else {
-        logging::info("{} {}", full_inds.to_string(), exsig.to_string());
         for (uint_t icre_contract = 0ul; icre_contract < 4ul; ++icre_contract) {
             const uint_t icre = full_inds.m_frm.m_cre[icre_contract];
             const auto isite = m_sector.m_frm.m_basis.isite(icre);
