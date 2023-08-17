@@ -63,6 +63,8 @@ void NotfMaeFiller::refresh_ann_map(const uintv_t &ann_ispinorbs, const v_t<uint
 
 void NotfMaeFiller::probe_ann_map(const uintv_t &cre_ispinorbs, const v_t<uintp_t> &cre_siv, field::RdmInds& rdm_inds) {
     rdm_inds.m_frm.m_cre = cre_ispinorbs;
+    // if no RDMs take contribs from this exsig, skip this cre_ispinorbs vector
+    if (!m_rdms->takes_contribs_from(rdm_inds.exsig())) return;
     auto fn = [&](uint_t imbf){
         m_hist.m_row.jump(imbf);
         auto has_phase = half_excit_phase(cre_ispinorbs, imbf);
