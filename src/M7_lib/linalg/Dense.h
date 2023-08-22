@@ -564,6 +564,25 @@ namespace dense {
             shape.push_back(m_ncol);
             hdf5::DatasetSaver::save_array(nw, name, ctbegin(), shape, {"row", "col"}, irank);
         }
+
+        /**
+         * @tparam fn_t
+         *  function type to call
+         * @param fn
+         *  function to dispatch each time an item greater in magnitude than the given tol is iterated over
+         * @param tol
+         *  minimum elemental magnitude for which to dispatch fn
+         */
+        template<typename fn_t>
+        void foreach(const fn_t& fn, arith::comp_t<T> tol=0.0) const {
+            functor::assert_prototype<void(uint_t, uint_t, T)>(fn);
+            for (uint_t irow=0ul; irow<nrow(); ++irow) {
+                for (uint_t icol=0ul; icol<ncol(); ++icol) {
+                    const auto elem = this->operator()(irow, icol);
+                    if (std::abs(elem) >= tol) fn(irow, icol, elem);
+                }
+            }
+        }
     };
 
     template<typename T>

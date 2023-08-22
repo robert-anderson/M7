@@ -143,6 +143,12 @@ bool FrmOnvConnection::apply(const FrmOnvField &src, FrmOnvField &dst, FrmOps &c
     return apply(src, com);
 }
 
+bool FrmOnvConnection::destroys(const FrmOnvField &mbf) const {
+    for (auto& ind: m_cre.inds()) if (mbf.get(ind)) return true;
+    for (auto& ind: m_ann.inds()) if (!mbf.get(ind)) return true;
+    return false;
+}
+
 void FrmOnvConnection::clear() {
     m_cre.clear();
     m_ann.clear();

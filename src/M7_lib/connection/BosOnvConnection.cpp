@@ -194,6 +194,13 @@ void BosOnvConnection::apply(const BosOnvField &src, BosOnvField &dst, BosOps &c
     apply(src, com);
 }
 
+bool BosOnvConnection::destroys(const BosOnvField &mbf) const {
+    for (auto& pair: m_ann.pairs()) {
+        if (mbf[pair.m_imode] < pair.m_nop) return true;
+    }
+    return false;
+}
+
 OpSig BosOnvConnection::exsig() const {
     return opsig::bos(m_cre.size(), m_ann.size());
 }

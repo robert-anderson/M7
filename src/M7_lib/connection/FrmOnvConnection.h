@@ -241,6 +241,9 @@ public:
      *  antisymmetric phase of the connection
      */
     bool apply(const FrmOnvField &src, FrmOnvField &dst, FrmOps &com) const;
+
+    bool destroys(const FrmOnvField& mbf) const;
+
     /**
      * reset the internal state that to of a null excitation
      */
