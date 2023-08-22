@@ -130,14 +130,19 @@ void SpinFreeRdm::make_contribs_from_one_row(const RdmRow& row, wf_t norm) {
     }
 }
 
-SpinFreeRdm::SpinFreeRdm(const Rdm& src, wf_t norm, uint_t nelem_per_comm) :
+SpinFreeRdm::SpinFreeRdm(const Rdm& src, uint_t nelem_per_comm) :
         Rdm(src.m_ranksig, src.m_indsig, src.m_sector, src.m_store.m_row.m_values.nelement(),
             false, false, src.m_store.m_dist_opts,
             {src.m_store.nrow_in_use(), src.m_store.m_bw.get_expansion_factor()},
-            {nelem_per_comm, 1.0}, src.name()), m_insert_inds(src.m_indsig) {
+            {4000ul, 1.0}, src.name()),
+            m_insert_inds(src.m_indsig), m_nelem_per_comm(4000ul) {
     REQUIRE_EQ_ALL(m_nfrm_cre, m_nfrm_ann, "spin tracing requires fermion number conservation");
     REQUIRE_LE_ALL(m_nfrm_cre_ind, 3ul, "spin tracing is only implemented upto rank 3 fermion operators");
     m_ordered_inds = false;
+}
+
+void SpinFreeRdm::fill(const Rdm &src, wf_t norm) {
+    m_store.clear();
     logging::info("computing the normalized spin-trace of {}", src.name());
     /*
      * loop over rows involves communication, so make sure each rank executes the loop body the same number of times
@@ -150,7 +155,7 @@ SpinFreeRdm::SpinFreeRdm(const Rdm& src, wf_t norm, uint_t nelem_per_comm) :
             make_contribs_from_one_row(row, norm);
             ++row;
         }
-        if (irow && !(irow % nelem_per_comm)){
+        if (irow && !(irow % m_nelem_per_comm)){
             // time to communicate
             Rdm::end_cycle();
         }

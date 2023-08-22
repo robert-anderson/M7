@@ -16,6 +16,11 @@ class SpinFreeRdm : public Rdm {
      */
     buffered::RdmInds m_insert_inds;
 
+    /**
+     * number of src elements to contribute to spin-traces before communicating
+     */
+    const uint_t m_nelem_per_comm;
+
     static uint_t nspinsig(uint_t rank){
         using namespace spin_free_rdm_arrays;
         return rank==2 ? c_nspinsig_2 : c_nspinsig_3;
@@ -58,7 +63,9 @@ public:
      * @param nelem_per_comm
      *  number of elements of src RDM to process before performing an all-to-allv
      */
-    SpinFreeRdm(const Rdm& src, wf_t norm, uint_t nelem_per_comm=4000ul);
+    SpinFreeRdm(const Rdm& src, uint_t nelem_per_comm=4000ul);
+
+    void fill(const Rdm& src, wf_t norm);
 };
 
 

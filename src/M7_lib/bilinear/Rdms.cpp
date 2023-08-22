@@ -297,7 +297,11 @@ void Rdms::save(const hdf5::NodeWriter& parent) {
          * create and save the spinfree versions of all RDMs and intermediates
          */
         hdf5::GroupWriter gw(parent, "spinfree");
-        for (const auto& rdm: m_rdms) SpinFreeRdm(*rdm, m_total_norm.m_reduced).save(gw);
+        for (const auto& rdm: m_rdms) {
+            SpinFreeRdm sf(*rdm);
+            sf.fill(*rdm, m_total_norm.m_reduced);
+            sf.save(gw);
+        }
     }
 }
 
