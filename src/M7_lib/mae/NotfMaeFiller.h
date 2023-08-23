@@ -128,28 +128,17 @@ public:
             return tot;
         };
 
-        auto indicator = [&](const uintv_t &ispinorbs) -> v_t<bool> {
-            v_t<bool> indicator = {};
-            for (auto& ispinorb: ispinorbs) {
-                indicator.push_back(m_hist.m_row.m_mbf.m_basis.ispin(ispinorb));
-            }
-            return indicator;
-        };
-
         for (const auto& opsig: rdm_opsigs) {
             if (!opsig) continue;
             buffered::RdmInds rdm_inds(opsig);
             const auto rank = opsig.nfrm_cre();
             auto ann_fn = [&](const uintv_t &ann_ispinorbs, const siv_t &ann_siv) -> void {
                 if (ann_siv.empty()) return;
-                // auto ann_ms2 = tot_ms2_fn(ann_ispinorbs);
-                auto ann_spinindicators = indicator(ann_ispinorbs);
+                auto ann_ms2 = tot_ms2_fn(ann_ispinorbs);
                 auto cre_fn = [&](const uintv_t &cre_ispinorbs, const siv_t &cre_siv) -> void {
                     if (cre_siv.empty()) return;
-                    // auto cre_ms2 = tot_ms2_fn(cre_ispinorbs);
-                    auto cre_spinindicators = indicator(cre_ispinorbs);
-                    // if (cre_ms2 != ann_ms2) return;
-                    if (cre_spinindicators != ann_spinindicators) return;
+                    auto cre_ms2 = tot_ms2_fn(cre_ispinorbs);
+                    if (cre_ms2 != ann_ms2) return;
                     fn(ann_ispinorbs, ann_siv, cre_ispinorbs, cre_siv, rdm_inds);
                 };
                 foreach_unique(m_occ_bitsets, m_occ_sivs, rank, true, cre_fn);
