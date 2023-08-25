@@ -226,6 +226,12 @@ struct BitsetField : FieldBase {
         setbit_foreach::single<T>(m_dsize, fn, get_work_fn);
     }
 
+    template<typename fn_t>
+    void foreach_clrbit(const fn_t& fn) const {
+        auto get_work_fn = [this](uint_t idataword){return get_antidataword(idataword);};
+        setbit_foreach::single<T>(m_dsize, fn, get_work_fn);
+    }
+
     template<typename fn_outer_t, typename fn_inner_t>
     void foreach_setbit_pair(const fn_outer_t& fn_outer, const fn_inner_t& fn_inner) const {
         auto get_work_fn = [this](uint_t idataword){return get_dataword(idataword);};

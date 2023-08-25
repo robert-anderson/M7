@@ -340,6 +340,7 @@ conf::Mae::Mae(Group *parent) :
         m_stats_path(this, "stats_path", "M7.mae.stats", "output path for contracted value statistics"),
         m_filling_algorithm(this, "filling_algorithm", {
                 {"on_the_fly", "fill RDMs from replicated walker populations at each sampling MC cycle"},
+                {"caspt2", "from histogrammed WF, construct perturbed vectors so that only transition 2RDMs are needed"},
                 {"bitset_isect_hashmap_ri", "from histogrammed WF, construct intersections of MBF index sets for each contributing tuple of "
                                          "creation and annihilation operators and use hashmap resolution of the lower-body identity"},
                 {"bitset_isect_pair_loop_ri", "as bitset_isect_hashmap_ri, but for use a double loop over the intersections for "
