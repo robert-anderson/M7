@@ -234,7 +234,7 @@ class Caspt2Filler {
     communicator::BasicSend<MbfWeightRow, MbfWeightRow> m_psi_fock;
 
     pose::Rdm m_rdm;
-    const FockMatrix m_fock_mat;
+    const std::unique_ptr<FockMatrix> m_fock_mat;
 
     typedef std::pair<std::pair<uint_t, uint_t>, ham_t> pq_val_t;
     void make_psi1(communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const v_t<pq_val_t>& pq_vals) {
@@ -341,20 +341,11 @@ public:
         m_psi_pq("excit-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0}),
         m_psi_fock("Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0}),
         m_rdm("CASPT2 transition 2RDM", mbf::get_basis(hist.m_row.m_mbf)),
-        m_fock_mat(hist.m_row.m_mbf.m_size, opts.m_fock_4rdm.m_fock_path){
+        m_fock_mat(opts.m_fock_4rdm.m_enabled ? new FockMatrix(hist.m_row.m_mbf.m_basis.m_nsite, opts.m_fock_4rdm.m_fock_path) : nullptr){
     }
 
-    void fill_and_save() {
+    void fill_and_save(hdf5::GroupWriter* gw_3300, hdf5::GroupWriter* gw_4400f) {
         const auto nsite = m_hist.m_row.m_mbf.m_basis.m_nsite;
-
-        hdf5::FileWriter fw("M7.pose.h5");
-        hdf5::GroupWriter gw_sf(fw, "spinfree");
-        hdf5::GroupWriter gw_3300(gw_sf, "3300");
-        hdf5::GroupWriter gw_4400f(gw_sf, "4400f");
-
-        logging::info("preparing F |0> for CASPT2 intermediate");
-        make_psi1(m_psi_fock, m_fock_mat);
-
         v_t<pq_val_t> pq_vals(1ul);
         pq_vals.back().second = 1.0;
         for (uint_t p = 0ul; p < nsite; ++p) {
@@ -362,13 +353,33 @@ public:
                 pq_vals.back().first = {p, q};
                 logging::info("preparing E_pq |0> with spatial orbital indices p={}, q={}", p, q);
                 make_psi1(m_psi_pq, pq_vals);
-                logging::info("created E_pq |0> with {} total rows", mpi::all_sum(m_psi_pq.m_store.nrow_in_use()));
-                fill(m_psi_pq.m_store, m_hist);
-                m_rdm.m_store.save(gw_3300, logging::format("{},{}", p, q), true);
-                fill(m_psi_pq.m_store, m_psi_fock.m_store);
-                m_rdm.m_store.save(gw_4400f, logging::format("{},{}", p, q), true);
+                logging::info("successfully prepared E_pq |0> with {} total rows", mpi::all_sum(m_psi_pq.m_store.nrow_in_use()));
+                if (gw_3300) {
+                    fill(m_psi_pq.m_store, m_hist);
+                    m_rdm.m_store.save(*gw_3300, logging::format("{},{}", p, q), true);
+                }
+                if (gw_4400f) {
+                    fill(m_psi_pq.m_store, m_psi_fock.m_store);
+                    m_rdm.m_store.save(*gw_4400f, logging::format("{},{}", p, q), true);
+                }
             }
         }
+    }
+
+    void fill_and_save() {
+
+        hdf5::FileWriter fw("M7.pose.h5");
+        hdf5::GroupWriter gw_sf(fw, "spinfree");
+        hdf5::GroupWriter gw_3300(gw_sf, "3300");
+
+        if (m_fock_mat) {
+            hdf5::GroupWriter gw_4400f(gw_sf, "4400f");
+            logging::info("preparing F |0> for CASPT2 intermediate");
+            make_psi1(m_psi_fock, *m_fock_mat);
+            logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(m_psi_fock.m_store.nrow_in_use()));
+            fill_and_save(&gw_3300, &gw_4400f);
+        }
+        fill_and_save(&gw_3300, nullptr);
     }
 
 };

@@ -198,16 +198,45 @@ struct BitsetField : FieldBase {
         put(m_format.flatten(inds), v);
     }
 
+    /**
+     * @param buf
+     *  pointer to the beginning of the T-typed buffer
+     * @param idataword
+     *  dataword index
+     * @return
+     *  true if the indexed dataword is not the last one, or if the trailing part is correctly cleared
+     */
+    bool trailing_bits_clear(const T* buf, uint_t idataword) const {
+        if (idataword + 1 != m_dsize) return true;
+        const auto tmp = buf[idataword];
+        return tmp == bit::truncate(tmp, m_nbit_in_last_dword);
+    }
+
+    /**
+     * as above but assume the index of the final dataword
+     */
+    bool trailing_bits_clear(const T* buf) const {
+        return trailing_bits_clear(buf, m_dsize-1);
+    }
+
+    /**
+     * as above but assume ctbegin pointer as the buffer
+     */
+    bool trailing_bits_clear(uint_t idataword) const {
+        return trailing_bits_clear(ctbegin(), idataword);
+    }
+
+    /**
+     * as above but assume the index of the final dataword
+     */
+    bool trailing_bits_clear() const {
+        return trailing_bits_clear(m_dsize-1);
+    }
+
     T get_dataword(uint_t idataword) const {
         DEBUG_ASSERT_LT(idataword, m_dsize, "dataword index OOB");
-        auto tptr = ctbegin();
-        auto tmp = tptr[idataword];
-        if (idataword + 1 == m_dsize) {
-            DEBUG_ASSERT_EQ(tmp, bit::truncate(tmp, m_nbit_in_last_dword),
-                       "trailing bits were not clear: possible corruption");
-            tmp = bit::truncate(tmp, m_nbit_in_last_dword);
-        }
-        return tmp;
+        DEBUG_ASSERT_TRUE(trailing_bits_clear(idataword), "trailing bits were not clear: possible corruption");
+        return ctbegin()[idataword];
     }
 
     T get_antidataword(uint_t idataword) const {
@@ -270,6 +299,10 @@ struct BitsetField : FieldBase {
         for (uint_t i = 0ul; i < nbit(); ++i)
             res += get(i) ? "1" : "0";
         return res;
+    }
+
+    bool check_buffer(const buf_t *buf) override {
+        return trailing_bits_clear(reinterpret_cast<const T*>(buf));
     }
 
     void save_fn(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const override {

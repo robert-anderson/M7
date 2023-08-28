@@ -164,6 +164,10 @@ public:
         std::memcpy(dst, src, m_size);
     }
 
+    virtual bool check_buffer(const buf_t* buf) {
+        return true;
+    }
+
     void from_buffer(const buf_t* src, uint_t irow) {
         DEBUG_ASSERT_LT(irow, m_row->m_table->nrow_in_use(), "row index OOB");
         DEBUG_ASSERT_FALSE(m_row->m_table->is_freed(irow), "copying a freed row to buffer");
