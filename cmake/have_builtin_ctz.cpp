@@ -9,7 +9,7 @@ int main() {
     uint64_t n64 = 0;
     uint32_t res32;
     uint64_t res64;
-    asm("tzcnt %1, %0;": "=r" (res32): "r" (n32));
-    asm("tzcntq %1, %0;": "=r" (res64): "r" (n64));
+    res32 = __builtin_ctz(n32);
+    res64 = __builtin_ctzl(n64);
     return n32 && n64;
 }

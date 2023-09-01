@@ -144,10 +144,8 @@ namespace bit {
      */
 
     static uint_t trailz_tzcnt(const uint64_t &n) {
-#ifdef ENABLE_TZCNT
-        uint_t res;
-        asm("tzcntq %1, %0;": "=r" (res): "r" (n));
-        return res;
+#ifdef ENABLE_BUILTIN_CTZ
+        return __builtin_ctzl(n);
 #else
         (void) n;
         return ~0ul;
@@ -155,11 +153,8 @@ namespace bit {
     }
 
     static uint_t trailz_tzcnt(const uint32_t &n) {
-#ifdef ENABLE_TZCNT
-        if (!n) return 32;
-        uint32_t res;
-        asm("tzcnt %1, %0;": "=r" (res): "r" (n));
-        return res;
+#ifdef ENABLE_BUILTIN_CTZ
+        return __builtin_ctz(n);
 #else
         (void) n;
         return ~0ul;
@@ -189,7 +184,7 @@ namespace bit {
     }
 
     static uint_t trailz_64(const uint64_t &n) {
-#if defined(ENABLE_TZCNT)
+#if defined(ENABLE_BUILTIN_CTZ)
         return trailz_tzcnt(n);
 #else
         // resort to software implementation
@@ -198,7 +193,7 @@ namespace bit {
     }
 
     static uint_t trailz_32(const uint32_t &n) {
-#if defined(ENABLE_TZCNT)
+#if defined(ENABLE_BUILTIN_CTZ)
         return trailz_tzcnt(n);
 #else
         // resort to software implementation
@@ -238,10 +233,8 @@ namespace bit {
      */
 
     static uint_t nsetbit_popcnt(const uint64_t &n) {
-#ifdef ENABLE_POPCNT
-        uint_t res;
-        asm("popcntq %1, %0;": "=r" (res): "r" (n));
-        return res;
+#ifdef ENABLE_BUILTIN_POPCOUNT
+        return __builtin_popcountl(n);
 #else
         (void) n;
         return ~0ul;
@@ -249,10 +242,8 @@ namespace bit {
     }
 
     static uint_t nsetbit_popcnt(const uint32_t &n) {
-#ifdef ENABLE_POPCNT
-        uint32_t res;
-        asm("popcnt %1, %0;": "=r" (res): "r" (n));
-        return res;
+#ifdef ENABLE_BUILTIN_POPCOUNT
+        return __builtin_popcount(n);
 #else
         (void) n;
         return ~0u;
@@ -278,7 +269,7 @@ namespace bit {
     }
 
     static uint_t nsetbit_64(const uint64_t &n) {
-#if defined(ENABLE_POPCNT)
+#if defined(ENABLE_POPCN)
         return nsetbit_popcnt(n);
 #else
         // resort to software implementation
@@ -287,7 +278,7 @@ namespace bit {
     }
 
     static uint_t nsetbit_32(const uint32_t &n) {
-#if defined(ENABLE_POPCNT)
+#if defined(ENABLE_BUILTIN_POPCOUNT)
         return nsetbit_popcnt(n);
 #else
         // resort to software implementation
