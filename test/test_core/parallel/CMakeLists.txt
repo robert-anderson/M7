@@ -2,6 +2,7 @@ target_sources(unittest
     PRIVATE
         Gatherable.cpp
         LoadBalancer.cpp
+        Lock.cpp
         MPIWrapper.cpp
         PeriodicEvent.cpp
         Reduction.cpp
