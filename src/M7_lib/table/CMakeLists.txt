@@ -14,4 +14,5 @@ target_sources(M7_lib
         Table.h
         TableBase.cpp
         TableBase.h
+        VecIndsTable.h
 )

@@ -267,7 +267,6 @@ class Caspt2Filler {
                 Mbf* dst = &hist_row.m_mbf;
                 if (conn.size()) {
                     if (mbf::destroys(conn, hist_row.m_mbf)) continue;
-                    const auto &val = conn_val.second;
                     conn.apply(hist_row.m_mbf, work_mbf);
                     phase = conn.phase(hist_row.m_mbf);
                     dst = &work_mbf;

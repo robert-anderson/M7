@@ -164,7 +164,7 @@ public:
         std::memcpy(dst, src, m_size);
     }
 
-    virtual bool check_buffer(const buf_t* buf) {
+    virtual bool check_buffer(const buf_t*) {
         return true;
     }
 
