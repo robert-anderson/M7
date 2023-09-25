@@ -7,6 +7,87 @@
 
 #include "M7_lib/util/Integer.h"
 
+
+#if 0
+struct OpSign {
+    uint_t m_i;
+    uint_t m_nfrm;
+    uint_t m_npos;
+    uint_t m_nbos_cre;
+    uint_t m_nbos_ann;
+
+};
+
+
+namespace opsign {
+    static constexpr uint_t c_nsig = 15;
+
+    static constexpr uint_t c_1f = 1ul;
+    static constexpr uint_t c_2f = 2ul;
+    static constexpr uint_t c_3f = 3ul;
+    static constexpr uint_t c_4f = 4ul;
+    static constexpr uint_t c_11b = 5ul;
+    static constexpr uint_t c_22b = 6ul;
+    static constexpr uint_t c_01b = 7ul;
+    static constexpr uint_t c_10b = 8ul;
+    static constexpr uint_t c_1f_01b = 9ul;
+    static constexpr uint_t c_1f_10b = 10ul;
+    static constexpr uint_t c_1p = 11ul;
+    static constexpr uint_t c_1f_1p = 12ul;
+    static constexpr uint_t c_2f_1p = 13ul;
+
+    static constexpr uint_t c_sing = c_1f;
+    static constexpr uint_t c_doub = c_2f;
+    static constexpr uint_t c_trip = c_3f;
+    static constexpr uint_t c_quad = c_4f;
+
+    //                                                        0  1  2  3  4  5  6  7  8  9  10 11 12 13 14
+    static constexpr std::array<uint_t, c_nsig> c_nfrm     = {0, 1, 2, 3, 4, 0, 0, 0, 0, 1, 1, 0, 1, 2, ~0ul};
+    static constexpr std::array<uint_t, c_nsig> c_npos     = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, ~0ul};
+    static constexpr std::array<uint_t, c_nsig> c_nbos_cre = {0, 0, 0, 0, 0, 1, 2, 0, 1, 0, 1, 0, 0, 0, ~0ul};
+    static constexpr std::array<uint_t, c_nsig> c_nbos_ann = {0, 0, 0, 0, 0, 1, 2, 1, 0, 1, 0, 0, 0, 0, ~0ul};
+
+    static constexpr std::array<bool, c_nsig>   c_pure_frm = {1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    static constexpr std::array<bool, c_nsig>   c_pure_pos = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
+    static constexpr std::array<bool, c_nsig>   c_pure_bos = {1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0};
+    static constexpr std::array<uint_t, c_nsig> c_iconj    = {0, 1, 2, 3, 4, 0, 0, 0, 0, 1, 1, 0, 1, 2, ~0ul};
+
+    static constexpr uint_t c_ncontribs_to_ranksigs = 38;
+    static constexpr std::array<uint_t, c_ncontribs_to_ranksigs> c_ranksigs = { 
+        // exsig                                          end offset
+        /*  0 */   0,  1,  2,  3,  4,  5,  6, 11, 12, 13,  // 10
+        /*  1 */   1,  2,  3,  4, 12, 13,                  // 16
+        /*  2 */   2,  3,  4, 13,                          // 20
+        /*  3 */   3,  4,                                  // 22
+        /*  4 */   4,                                      // 23
+        /*  5 */   5,  6,                                  // 25
+        /*  6 */   6,                                      // 26
+        /*  7 */   7,  9,                                  // 28
+        /*  8 */   8,  10,                                 // 30
+        /*  9 */   9,                                      // 31
+        /* 10 */  10,                                      // 32
+        /* 11 */  11, 12, 13,                              // 35
+        /* 12 */  12, 13,                                  // 37
+        /* 13 */  13                                       // 38
+        /* 14 */                                           // 38
+    };
+    static constexpr std::array<uint_t, c_nsig> c_ranksig_end_offsets = {10, 16, 20, 22, 23, 25, 26, 28, 30, 31, 32, 35, 37, 38, 38};
+
+    const uint_t* ranksig_cbegin(uint_t exsig) {
+        return c_ranksigs.data() + (exsig ? c_ranksig_end_offsets[exsig-1] : 0ul);
+    }
+
+    const uint_t* ranksig_cend(uint_t exsig) {
+        return c_ranksigs.data() + c_ranksig_end_offsets[exsig];
+    }
+
+    constexpr uint_t nranksig(uint_t exsig) {
+        return c_ranksig_end_offsets[exsig] - (exsig ? c_ranksig_end_offsets[exsig-1] : 0ul);
+    }
+
+}
+#endif
+
 namespace opsig {
     /**
      * number of bits in the signature representing each number of fermion SQ operators
