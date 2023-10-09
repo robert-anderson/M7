@@ -143,10 +143,14 @@ void mpi::setup_mpi_globals() {
             if (it == tmp_map.end()) it = tmp_map.insert({irank_shmem_root, {}}).first;
             it->second.insert(irank);
         }
+        g_ishmems.resize(nrank());
+        uint_t ishmem = 0ul;
         for (auto pair: tmp_map) {
             g_irank_root_in_shmem_realms.push_back(pair.first);
             g_iranks_world_in_shmem_realms.emplace_back(pair.second.cbegin(), pair.second.cend());
+            for (auto irank: g_iranks_world_in_shmem_realms.back()) g_ishmems[irank] = ishmem;
             g_nrank_in_shmem_realms.push_back(g_iranks_world_in_shmem_realms.back().size());
+            ++ishmem;
         }
     }
 }
@@ -180,6 +184,8 @@ uintv_t mpi::g_shmem_root_iranks_world = {};
 uintv_t mpi::g_irank_root_in_shmem_realms = {};
 v_t<uintv_t> mpi::g_iranks_world_in_shmem_realms = {};
 uintv_t mpi::g_nrank_in_shmem_realms = {};
+uintv_t mpi::g_ishmems = {};
+
 int mpi::g_p2p_tag = 0;
 std::array<v_t<buf_t>, mpi::g_types.size()> mpi::g_send_reduce_buffers = {};
 std::array<v_t<buf_t>, mpi::g_types.size()> mpi::g_recv_reduce_buffers = {};

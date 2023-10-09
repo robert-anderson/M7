@@ -6,92 +6,6 @@
 #include "M7_lib/table/Smuvi.h"
 #include "M7_lib/table/BufferedFields.h"
 #include "M7_lib/communication/Communicator.h"
-#include "M7_lib/foreach/BasicForeach.h"
-
-TEST(Smuvi, LocalTable) {
-    typedef SingleFieldRow<field::Number<uint_t>> row_t;
-    buffered::smuvi::LocalTable<row_t> table("test", row_t(), {});
-    buffered::Number<uint_t> work;
-    v_t<uintp_t> pairs = {
-        {5, 11}, {3, 15}, {4, 19}, {3, 18}, {4, 18}, {5, 15}, {5, 14}, {3, 17}, {4, 17}
-    };
-    std::map<uint_t, uintv_t> combined_pairs;
-    for (const auto& pair: pairs) {
-        auto it = combined_pairs.find(pair.first);
-        if (it==combined_pairs.end()) it = combined_pairs.insert({pair.first, {}}).first;
-        it->second.push_back(pair.second);
-    }
-
-    for (const auto& pair : pairs) {
-        work = pair.first;
-        table.append(work, pair.second);
-    }
-
-    auto row = table.m_row;
-    for (row.restart(); row; ++row) {
-        const uint_t key = row.m_field;
-        auto inds_ptr = table.inds(row);
-        ASSERT_TRUE(inds_ptr);
-        ASSERT_EQ(*inds_ptr, combined_pairs[key]);
-    }
-}
-
-
-template<typename key_t>
-struct Smuvi {
-
-    struct InsertRow : Row {
-        key_t m_key;
-        field::Number<uint_t> m_entry;
-
-        template<typename ...Args>
-        InsertRow(const Args&... key_ctor_args): m_key(this, key_ctor_args...), m_entry(this){}
-
-        key_t &key_field() {
-            return m_key;
-        };
-    };
-
-    communicator::BasicSend<InsertRow, InsertRow> m_inserter;
-    v_t<buffered::MappedTable<InsertRow>> m_accessors;
-
-    template<typename ...Args>
-    Smuvi(str_t name, const Args&... key_ctor_args):
-        m_inserter(
-            name,
-            InsertRow(key_ctor_args...),
-            DistribOptions(),
-            {100, 1.0},
-            InsertRow(key_ctor_args...),
-            {100, 1.0}){
-
-//        for (uint_t irank=0ul; irank < mpi::nrank(); ++irank) {
-//
-//        }
-//        m_accessors(name, InsertRow(key_ctor_args...), true) {}
-//
-//        m_accessors(name, InsertRow(key_ctor_args...), true)
-
-    }
-
-
-
-    void insert(const key_t& key, const uint_t& entry) {
-        const auto irank_dst = m_inserter.m_dist.irank(key);
-        Table<InsertRow>& send = m_inserter.m_send_recv.send(irank_dst);
-        send.m_row.push_back_jump();
-        send.m_row.m_key = key;
-        send.m_row.m_entry = entry;
-    }
-
-    void collate() {
-        m_inserter.communicate();
-//        for (auto&)
-    }
-
-
-
-};
 
 TEST(Smuvi, Comms) {
     const sys::frm::Basis basis(4);
@@ -148,13 +62,20 @@ TEST(Smuvi, Comms) {
         const auto& beta_string = all_channel_setbits[data.first.second];
         const auto& entry = data.second;
         mbf = {alpha_string, beta_string};
-        if (mpi::i_am_root()) {
-            std::cout << Distribution::one_irank_in_each_shmem_region(mbf) << std::endl;
-        }
         smuvi.insert(mbf, entry);
     }
-#if 0
+
+    std::cout << smuvi.m_inserter.send().to_string() << std::endl;
     smuvi.collate();
+
+#if 0
+    std::cout << mbf << std::endl;
+    std::cout << smuvi.nitem(mbf) << std::endl;
+    std::cout << "++++++++++" << std::endl;
+    for (uint_t iitem = 0; iitem < smuvi.nitem(mbf); ++iitem){
+        std::cout << smuvi.item_cbegin(mbf)[iitem] << std::endl;
+    }
+
     if (mpi::i_am_root()) {
 //        std::cout << smuvi.m_inserter.m_send_recv.recv().to_string() << std::endl;
         std::cout << convert::to_string(mpi::g_nrank_in_shmem_realms) << std::endl;

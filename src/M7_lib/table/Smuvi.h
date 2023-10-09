@@ -7,6 +7,8 @@
 
 #include "MappedTable.h"
 #include "BufferedTable.h"
+#include "M7_lib/communication/SendRecv.h"
+#include "M7_lib/communication/Distribution.h"
 
 /**
  * Shared Memory Unordered map to Vectors of Indices(/Items) "SMUVI"
@@ -36,119 +38,144 @@
  *
  * The SMUVI state is transformed from insert to access in the collate operation. This proceeds by collecting the keys
  * from each insertion map into a local array which is then sorted. These sorted local keys are then gathered
- * contiguously into a shared memory buffer. The values are also transferred. The gathered keys are then globally sorted
- * via a K-way merge and duplicate keys are eliminated
- *
- * 1. each rank initializes a private MappedTable<row_t>, in which keys of the type row_t::key_t index the entries
- * 2. when a previously un-inserted
- *
+ * contiguously into a shared memory buffer.
  */
 
-namespace smuvi {
-    template<typename row_t>
-    struct LocalTable : MappedTable<row_t> {
-        /**
-         * vector of index vectors
-         */
-        v_t<uintv_t> m_inds;
 
-        /**
-         * won't compile unless the row defines a key_field_t;
-         */
-        typedef typename row_fields::Key<row_t>::type key_field_t;
+template<typename key_t>
+struct Smuvi {
 
-        LocalTable(const row_t &row, MappedTableOptions opts) : MappedTable<row_t>(row, opts) {}
+    struct InsertRow : Row {
+        key_t m_key;
+        field::Number<uint_t> m_entry;
 
-        LocalTable(const row_t &row) : LocalTable(row, MappedTableOptions()) {}
+        template<typename ...Args>
+        InsertRow(const Args&... key_ctor_args): m_key(this, key_ctor_args...), m_entry(this){}
 
-        LocalTable &operator=(const LocalTable &other) {
-            *this = static_cast<const MappedTable<row_t> &>(other);
-            return *this;
-        }
-
-        LocalTable(const LocalTable &other) : LocalTable(other.m_row, other.m_mapping_opts) {
-            m_inds = other.m_inds;
-        }
-
-        bool operator==(const LocalTable &other) const {
-            if (m_inds != other.m_inds) return false;
-            if (!MappedTable<row_t>::operator==(other)) return false;
-            return true;
-        }
-
-        const uintv_t *inds(const row_t &row) const {
-            return m_inds.data() + row.index();
-        }
-
-        const uintv_t *lookup(const key_field_t &key) const {
-            auto &res = MappedTable<row_t>::lookup(key);
-            if (!res) return nullptr;
-            return inds(res);
-        }
-
-        void clear() override {
-            MappedTable<row_t>::clear();
-            m_inds.clear();
-        }
-
-        void erase(Lookup lookup) {
-            m_inds.erase(m_inds.begin() + lookup.irow());
-            MappedTable<row_t>::erase(lookup);
-        }
-
-        void erase(const key_field_t &key) {
-            erase(lookup(key, MappedTable<row_t>::m_erase_row));
-        }
-
-        const uintv_t *append(const key_field_t &key, uint_t ind) {
-            const auto i = MappedTable<row_t>::lookup_or_insert(key).index();
-            auto ptr = m_inds.data() + i;
-            ptr->push_back(ind);
-            return ptr;
-        }
-
-        const uintv_t *append(const row_t &src, uint_t ind) {
-            auto ptr = m_inds.data() + MappedTable<row_t>::lookup_or_insert(src).index();
-            ptr->push_back(ind);
-            return ptr;
-        }
-
-        void resize(uint_t nrec, double factor = -1.0) override {
-            MappedTable<row_t>::resize(nrec, factor);
-            m_inds.resize(this->m_bw.m_nrow);
-        }
-    };
-}
-
-namespace buffered {
-    namespace smuvi {
-        template<typename row_t>
-        struct LocalTable : BufferedTable<row_t, ::smuvi::LocalTable<row_t>> {
-            typedef BufferedTable<row_t, ::smuvi::LocalTable<row_t>> base_t;
-
-            LocalTable(str_t name, const row_t &row, MappedTableOptions opts) :
-                base_t(name, ::smuvi::LocalTable<row_t>(row, opts), false) {}
-
-            LocalTable(const row_t &row): LocalTable("", row, {}) {}
-
-            LocalTable(str_t name, const row_t &row) : LocalTable(name, row, {}) {}
-
-            LocalTable(const row_t &row, MappedTableOptions opts): LocalTable("", row, opts) {}
+        key_t &key_field() {
+            return m_key;
         };
+    };
+
+    struct AccessRow : Row {
+        key_t m_key;
+        field::Number<uint_t> m_entry_count;
+        field::Number<uint_t> m_entry_displ;
+
+        template<typename ...Args>
+        AccessRow(const Args&... key_ctor_args):
+                m_key(this, key_ctor_args...), m_entry_count(this), m_entry_displ(this){}
+
+        key_t &key_field() {
+            return m_key;
+        };
+    };
+
+    send_recv::BasicSend<InsertRow> m_inserter;
+    uintv_t m_irank_world_to_iaccessor;
+    v_t<buffered::MappedTable<AccessRow>> m_accessors;
+    v_t<SharedArray<uint_t>> m_entries;
+
+    template<typename ...Args>
+    Smuvi(str_t name, const Args&... key_ctor_args):
+            m_inserter(name, InsertRow(key_ctor_args...), {100, 2.0}),
+            m_irank_world_to_iaccessor(mpi::nrank(), ~0ul) {
+        // index of the shared memory realm
+        const auto ishmem = mpi::g_ishmems[mpi::irank()];
+        // iterate over the rank indices in this shmem realm and create an accessor table for each one
+        for (auto& irank_world: mpi::g_iranks_world_in_shmem_realms[ishmem]) {
+            m_irank_world_to_iaccessor[irank_world] = m_accessors.size();
+            m_accessors.emplace_back(AccessRow(key_ctor_args...), true);
+        }
     }
-}
+
+private:
+    const MappedTable<AccessRow>& accessor(const key_t& key) const {
+        // get the world rank index associated with the storage of this key
+        auto irank = Distribution::irank_in_shmem_region(key);
+        DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
+        return m_accessors[m_irank_world_to_iaccessor[irank]];
+    }
+
+    const SharedArray<uint_t>& entries(const key_t& key) const {
+        // get the world rank index associated with the storage of this key
+        auto irank = Distribution::irank_in_shmem_region(key);
+        DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
+        return m_entries[m_irank_world_to_iaccessor[irank]];
+    }
+
+public:
+    void insert(const key_t& key, const uint_t& entry) {
+        // send a copy to one rank in each shared memory realm
+        for (auto irank_dst: Distribution::one_irank_in_each_shmem_region(key)) {
+            Table<InsertRow> &send = m_inserter.send(irank_dst);
+            send.m_row.push_back_jump();
+            send.m_row.m_key = key;
+            send.m_row.m_entry = entry;
+        }
+    }
+
+    uint_t nitem(const key_t& key) const {
+        const MappedTable<AccessRow>& accessor = this->accessor(key);
+        auto& entries_vec = m_entries[m_irank_world_to_iaccessor[mpi::irank()]];
+        const AccessRow& lookup_row = accessor.lookup(key);
+        if (!lookup_row) return ~0ul; // failed lookup
+        return lookup_row.m_entry_count;
+    }
+
+    const uint_t* item_cbegin(const key_t& key) const {
+        const MappedTable<AccessRow>& accessor = this->accessor(key);
+        const AccessRow& lookup_row = accessor.lookup(key);
+        if (!lookup_row) return nullptr; // failed lookup
+        return entries(key).cbegin() + lookup_row.m_entry_displ;
+    }
+
+    void collate() {
+        m_inserter.communicate();
+        MappedTable<AccessRow>& accessor = m_accessors[m_irank_world_to_iaccessor[mpi::irank()]];
+        v_t<std::set<uint_t>> entries;
+
+        auto& recv_row = m_inserter.recv().m_row;
+        for (recv_row.restart(); recv_row; ++recv_row) {
+            auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);
+            if (entries.size() < accessor.nrecord()) entries.resize(accessor.nrecord());
+            entries[accessor_row.index()].insert(recv_row.m_entry);
+        }
 
 
-//namespace smuvi {
-//
-//    template<typename row_t>
-//    struct Smuvi {
-//
-//        void update(LocalTable<row_t>& local_table) {
-//
-//        }
-//    };
-//
-//}
+        uintv_t nentries;
+        {
+            uint_t displ = 0ul;
+            auto& accessor_row = accessor.m_row;
+            auto entry_it = entries.cbegin();
+            for (accessor_row.restart(); accessor_row; ++accessor_row) {
+                accessor_row.m_entry_displ = displ;
+                accessor_row.m_entry_count = entry_it->size();
+                displ += accessor_row.m_entry_count;
+                ++entry_it;
+            }
+            mpi::all_gather(displ, nentries);
+        }
+
+
+        m_entries.clear();
+        m_entries.reserve(m_accessors.size());
+
+        const auto ishmem = mpi::g_ishmems[mpi::irank()];
+        for (auto& irank_world: mpi::g_iranks_world_in_shmem_realms[ishmem]) {
+            m_entries.emplace_back(SharedArray<uint_t>(nentries[irank_world]));
+        }
+
+
+        {
+            auto& accessor_row = accessor.m_row;
+            auto& entries_vec = m_entries[m_irank_world_to_iaccessor[mpi::irank()]];
+            uint_t iitem = 0;
+            for (auto items : entries) {
+                for (auto item: items) entries_vec.set_(iitem++, item);
+            }
+        }
+    }
+};
 
 #endif //M7_SMUVI_H

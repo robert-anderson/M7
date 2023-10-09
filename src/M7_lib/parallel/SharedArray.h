@@ -113,6 +113,10 @@ public:
         DEBUG_ASSERT_LT(i, size(), "SharedArray element OOB");
         return reinterpret_cast<const T*>(m_data)[i];
     }
+
+    const T* cbegin() const {
+        return reinterpret_cast<const T*>(m_data);
+    }
 };
 
 

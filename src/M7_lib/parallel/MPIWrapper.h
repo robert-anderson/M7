@@ -97,6 +97,10 @@ namespace mpi {
      * number of ranks in each shared memory realm
      */
     extern uintv_t g_nrank_in_shmem_realms;
+    /**
+     * index of the shared memory realm for each rank
+     */
+    extern uintv_t g_ishmems;
 
     /**
      * todo: delete - point to point comms no longer used
