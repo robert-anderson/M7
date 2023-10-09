@@ -42,6 +42,19 @@ public:
     uint_t irank(const field_t& field) const {
         return m_block_iranks[iblock(field)];
     }
+
+    template<typename field_t>
+    static uintv_t one_irank_in_each_shmem_region(const field_t& field) {
+        const auto hash = field.hash();
+        uintv_t out(mpi::nshmem());
+        uint_t ishmem = 0ul;
+        for (auto& elem: out) {
+            const auto i = hash % mpi::g_nrank_in_shmem_realms[ishmem];
+            elem = mpi::g_iranks_world_in_shmem_realms[ishmem][i];
+            ++ishmem;
+        }
+        return out;
+    }
 };
 
 #endif //M7_DISTRIBUTION_H
