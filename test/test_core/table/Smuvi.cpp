@@ -92,6 +92,7 @@ struct Smuvi {
 
 
 };
+
 TEST(Smuvi, Comms) {
     const sys::frm::Basis basis(4);
     const uint_t nelec_per_channel = 2;
@@ -147,9 +148,23 @@ TEST(Smuvi, Comms) {
         const auto& beta_string = all_channel_setbits[data.first.second];
         const auto& entry = data.second;
         mbf = {alpha_string, beta_string};
+        if (mpi::i_am_root()) {
+            std::cout << Distribution::one_irank_in_each_shmem_region(mbf) << std::endl;
+        }
         smuvi.insert(mbf, entry);
     }
+#if 0
     smuvi.collate();
-
-    std::cout << smuvi.m_inserter.m_send_recv.recv().to_string() << std::endl;
+    if (mpi::i_am_root()) {
+//        std::cout << smuvi.m_inserter.m_send_recv.recv().to_string() << std::endl;
+        std::cout << convert::to_string(mpi::g_nrank_in_shmem_realms) << std::endl;
+        std::cout << convert::to_string(mpi::g_irank_root_in_shmem_realms) << std::endl;
+    }
+    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) {
+        if (mpi::i_am(irank)) {
+            std::cout << mpi::irank() << " " << mpi::irank(mpi::SharedMemory) << std::endl;
+        }
+        mpi::barrier();
+    }
+#endif
 }

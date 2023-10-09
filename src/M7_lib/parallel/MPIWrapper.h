@@ -50,37 +50,54 @@
 
 namespace mpi {
     /**
+     * communicator among all ranks
+     */
+    extern MPI_Comm g_world_comm;
+    /**
      * rank index in the world communicator
      */
-    extern uint_t g_irank;
+    extern uint_t g_irank_world;
     /**
      * number of ranks in the world communicator
      */
-    extern uint_t g_nrank;
+    extern uint_t g_nrank_world;
     /**
      * name of this rank
      */
     extern str_t g_processor_name;
     /**
-     * communicator among ranks on the same node, where a "node" is a group of ranks with access to the same main memory
+     * communicator among ranks in the same shared-memory realm
      */
-    extern MPI_Comm g_node_comm;
+    extern MPI_Comm g_shmem_comm;
     /**
-     * rank index within this node
+     * rank index within this shared-memory realm
      */
-    extern uint_t g_irank_on_node;
+    extern uint_t g_irank_shmem;
     /**
-     * number of ranks on this node
+     * number of ranks in this shared-memory realm
      */
-    extern uint_t g_nrank_on_node;
+    extern uint_t g_nrank_shmem;
     /**
-     * list of world communicator rank indices of the node roots
+     * each rank's index in the associated shared memory realm (indexed by world rank)
      */
-    extern v_t<char> g_node_roots;
+    extern uintv_t g_iranks_shmem;
     /**
-     * world communicator rank index of the node root of this rank
+     * world communicator rank index of each rank's shared memory realm root rank (indexed by world rank)
      */
-    extern uint_t g_my_node_root_irank;
+    extern uintv_t g_shmem_root_iranks_world;
+    /**
+     * world communicator root rank indices of all shared memory realms (in ascending order)
+     */
+    extern uintv_t g_irank_root_in_shmem_realms;
+    /**
+     * list of world communicator-indexed ranks for each shared memory realm
+     */
+    extern v_t<uintv_t> g_iranks_world_in_shmem_realms;
+    /**
+     * number of ranks in each shared memory realm
+     */
+    extern uintv_t g_nrank_in_shmem_realms;
+
     /**
      * todo: delete - point to point comms no longer used
      */
@@ -209,51 +226,50 @@ namespace mpi {
 
     void setup_mpi_globals();
 
-    static uint_t nrank() {
-        return g_nrank;
+
+    enum Realm {World, SharedMemory};
+
+    static uint_t nrank(Realm realm=World) {
+        return realm==World ? g_nrank_world : g_nrank_shmem;
     }
 
-    static uint_t irank() {
-        return g_irank;
+    static uint_t irank(Realm realm=World) {
+        return realm==World ? g_irank_world : g_irank_shmem;
     }
 
-    static uint_t nrank_on_node() {
-        return g_nrank_on_node;
-    }
-
-    static uint_t irank_on_node() {
-        return g_irank_on_node;
-    }
-
-    static uint_t my_node_root_irank() {
-        return g_my_node_root_irank;
+    /**
+     * @return
+     *  index in the world communicator of the root rank of the shared memory realm of this rank
+     */
+    static uint_t irank_world_shmem_root() {
+        return g_shmem_root_iranks_world[irank()];
     }
 
     static const str_t &processor_name() {
         return g_processor_name;
     }
 
-    static MPI_Comm *node_communicator() {
-        return &g_node_comm;
+    static MPI_Comm* communicator(Realm realm) {
+        return realm==World ? &g_world_comm : &g_shmem_comm;
     }
 
-    /*
-     * NODE INDEXING
+    bool i_am(uint_t irank, Realm realm=World);
+
+    bool i_am_root(Realm realm=World);
+
+    uint_t nshmem();
+
+    /**
+     * @param irank_world
+     *  rank index in the world realm
+     * @param realm
+     *  the realm in which to determine whether this rank is root
+     * @return
+     *  true if root in the given realm
      */
+    bool is_root(uint_t irank_world, Realm realm=World);
 
-    bool i_am(uint_t irank);
-
-    bool on_node_i_am(uint_t irank);
-
-    bool i_am_root();
-
-    bool on_node_i_am_root();
-
-    bool is_node_root(uint_t irank);
-
-    void barrier();
-
-    void barrier_on_node();
+    void barrier(Realm realm=World);
 
     static count_t snrw(uint_t i) {
         return convert::safe_narrow<count_t>(i);
@@ -813,13 +829,6 @@ namespace mpi {
      *  string to output to error log
      */
     void abort(str_t message);
-
-    /**
-     * debugging: each rank waits till the one before has finished before starting
-     * @param str
-     *  string to output to stdout
-     */
-    void blocking_print(const str_t &str);
 
 }
 

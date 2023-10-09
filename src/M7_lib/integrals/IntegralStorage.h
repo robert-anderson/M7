@@ -55,7 +55,7 @@ private:
 
 public:
     bool set_data_(uint_t iflat, T elem){
-        DEBUG_ASSERT_TRUE(mpi::on_node_i_am_root(), "integral elements should only be set from node root ranks");
+        DEBUG_ASSERT_TRUE(mpi::i_am_root(mpi::SharedMemory), "integral elements should only be set from root ranks of shared memory realms");
         return set_data_(m_data, iflat, elem);
     }
 

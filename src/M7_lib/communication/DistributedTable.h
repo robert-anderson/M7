@@ -73,7 +73,7 @@ public:
 
     DistributedTable(const row_t &row, DistribOptions dist_opts) :
             MappedTable<row_t>(row), m_dist_opts(dist_opts),
-            m_dist(m_dist_opts.m_nblock_per_rank*mpi::nrank()),
+            m_dist(m_dist_opts.m_nblock_per_rank * mpi::nrank()),
             m_redist("", row, {1000ul, 1.0}),
             m_prot_level("", {}, {1000ul, 1.0}),
             m_block_work_figures(m_dist.nblock()) {

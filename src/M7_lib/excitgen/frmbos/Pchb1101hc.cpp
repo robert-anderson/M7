@@ -13,7 +13,7 @@ exgen::Pchb1101hc::Pchb1101hc(const FrmBosHam& h, PRNG& prng) :
     v_t<prob_t> weights(nmode, 0.0);
     uint_t pq = 0ul;
     logging::info("Initializing pre-computed samplers for fermion-boson kinetic term...");
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         for (uint_t p = 0ul; p < nspinorb; ++p) {
             for (uint_t q = 0ul; q < nspinorb; ++q) {
                 weights.assign(nmode, 0.0);

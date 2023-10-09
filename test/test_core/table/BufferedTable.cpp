@@ -36,12 +36,12 @@ TEST(BufferedTable, NodeShared) {
         table.m_row.push_back_jump();
         table.m_row.m_field = hash::in_range({irow, mpi::irank()}, 12, 190);
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
     /*
      * check there is no data corruption from race conditions, and that the saved values are those from the node roots
      */
     for (table.m_row.restart(); table.m_row; ++table.m_row){
-        ASSERT_EQ(table.m_row.m_field, hash::in_range({table.m_row.index(), mpi::my_node_root_irank()}, 12, 190));
+        ASSERT_EQ(table.m_row.m_field, hash::in_range({table.m_row.index(), mpi::irank_world_shmem_root()}, 12, 190));
     }
 }
 
@@ -58,12 +58,12 @@ TEST(BufferedTable, AllGatherv) {
      * if there is more than one rank, have the second one (arbitrary choice) be empty to test the ability of the
      * gathering functionality to deal with nullptr buffer dbegins.
      */
-    const uint_t irank_empty = mpi::nrank()==1 ? ~0ul: 1ul;
+    const uint_t irank_empty = mpi::nrank() == 1 ? ~0ul : 1ul;
     auto get_nrow = [irank_empty](uint_t irank){return irank==irank_empty ? 0ul : hash::in_range(irank, 3, 10);};
     auto get_value = [](uint_t irank, uint_t irow){return int(hash::in_range(irow * (irank+1), 0, 100));};
     const uint_t nrow_local = get_nrow(mpi::irank());
     uint_t nrow_global = 0ul;
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) nrow_global+=get_nrow(irank);
+    for (uint_t irank=0ul; irank< mpi::nrank(); ++irank) nrow_global+=get_nrow(irank);
     ASSERT_EQ(nrow_global,mpi::all_sum(nrow_local));
 
     typedef SingleFieldRow<field::Number<int>> row_t;
@@ -80,7 +80,7 @@ TEST(BufferedTable, AllGatherv) {
     ASSERT_EQ(dst_table.nrow_in_use(), nrow_global);
     auto& row = dst_table.m_row;
     row.restart();
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank){
+    for (uint_t irank=0ul; irank< mpi::nrank(); ++irank){
         auto nrow = get_nrow(irank);
         for (uint_t irow=0ul; irow<nrow; ++irow){
             ASSERT_EQ(row.m_field, get_value(irank, irow));
@@ -94,12 +94,12 @@ TEST(BufferedTable, Gatherv) {
      * if there is more than one rank, have the second one (arbitrary choice) be empty to test the ability of the
      * gathering functionality to deal with nullptr buffer dbegins.
      */
-    const uint_t irank_empty = mpi::nrank()==1 ? ~0ul: 1ul;
+    const uint_t irank_empty = mpi::nrank() == 1 ? ~0ul : 1ul;
     auto get_nrow = [irank_empty](uint_t irank){return irank==irank_empty ? 0ul : hash::in_range(irank, 3, 10);};
     auto get_value = [](uint_t irank, uint_t irow){return int(hash::in_range(irow * (irank+1), 0, 100));};
     const uint_t nrow_local = get_nrow(mpi::irank());
     uint_t nrow_global = 0ul;
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) nrow_global+=get_nrow(irank);
+    for (uint_t irank=0ul; irank< mpi::nrank(); ++irank) nrow_global+=get_nrow(irank);
     ASSERT_EQ(nrow_global,mpi::all_sum(nrow_local));
 
     typedef SingleFieldRow<field::Number<int>> row_t;

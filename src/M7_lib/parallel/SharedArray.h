@@ -47,7 +47,7 @@ public:
 
 protected:
     void set_(uint_t i, uint_t n, const void* src) {
-        DEBUG_ASSERT_TRUE(mpi::on_node_i_am_root(), "element-modifying access should only take place on the root rank");
+        DEBUG_ASSERT_TRUE(mpi::i_am_root(mpi::SharedMemory), "element-modifying access should only take place on the root rank");
         DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
         DEBUG_ASSERT_LE(i+n, m_nelement, "end OOB");
         std::memcpy(m_data+(i*m_element_size), src, n*m_element_size);
@@ -123,8 +123,8 @@ public:
     SharedScalar() : SharedArray<T>(1ul){}
 
     explicit SharedScalar(const T& v) : SharedScalar() {
-        if (mpi::on_node_i_am_root()) set_(v);
-        mpi::barrier_on_node();
+        if (mpi::i_am_root(mpi::SharedMemory)) set_(v);
+        mpi::barrier(mpi::SharedMemory);
     }
 
     void set_(const T &v) {

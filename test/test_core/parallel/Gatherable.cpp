@@ -9,7 +9,7 @@ TEST(Gatherable, Test){
     Gatherable<uint_t> gatherable;
     gatherable = mpi::irank();
     auto result = gatherable.mpi_gather();
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank){
+    for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank){
         ASSERT_EQ(irank, result[irank]);
     }
 }

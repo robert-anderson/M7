@@ -4,18 +4,15 @@
 
 
 #include <utility>
+#include <set>
 #include "M7_lib/util/Integer.h"
 #include "M7_lib/io/Logging.h"
 
 #include "SharedArray.h"
 #include "MPIWrapper.h"
 
-void mpi::barrier() {
-    MPI_Barrier(MPI_COMM_WORLD);
-}
-
-void mpi::barrier_on_node() {
-    MPI_Barrier(g_node_comm);
+void mpi::barrier(mpi::Realm realm) {
+    realm == World ? MPI_Barrier(MPI_COMM_WORLD) : MPI_Barrier(g_shmem_comm);
 }
 
 mpi::count_t mpi::evenly_shared_count(uint_t nitem_global, uint_t irank) {
@@ -29,7 +26,7 @@ mpi::count_t mpi::evenly_shared_count(uint_t nitem_global) {
 mpi::countv_t mpi::evenly_shared_counts(uint_t nitem_global) {
     mpi::countv_t tmp;
     tmp.reserve(nrank());
-    for (uint_t irank=0ul; irank<nrank(); ++irank) tmp.push_back(evenly_shared_count(nitem_global, irank));
+    for (uint_t irank = 0ul; irank < nrank(); ++irank) tmp.push_back(evenly_shared_count(nitem_global, irank));
     return tmp;
 }
 
@@ -44,7 +41,7 @@ uint_t mpi::evenly_shared_displ(uint_t nitem_global) {
 mpi::countv_t mpi::evenly_shared_displs(uint_t nitem_global) {
     mpi::countv_t tmp;
     tmp.reserve(nrank());
-    for (uint_t irank=0ul; irank<nrank(); ++irank) tmp.push_back(evenly_shared_displ(nitem_global, irank));
+    for (uint_t irank = 0ul; irank < nrank(); ++irank) tmp.push_back(evenly_shared_displ(nitem_global, irank));
     return tmp;
 }
 
@@ -73,24 +70,20 @@ void mpi::finalize() {
     }
 }
 
-bool mpi::i_am(uint_t i) {
-    return irank() == i;
+bool mpi::i_am(uint_t i, Realm realm) {
+    return irank(realm) == i;
 }
 
-bool mpi::i_am_root() {
-    return i_am(0);
+bool mpi::i_am_root(Realm realm) {
+    return i_am(0, realm);
 }
 
-bool mpi::on_node_i_am(uint_t i) {
-    return irank_on_node() == i;
+uint_t mpi::nshmem() {
+    return g_iranks_world_in_shmem_realms.size();
 }
 
-bool mpi::on_node_i_am_root() {
-    return on_node_i_am(0);
-}
-
-bool mpi::is_node_root(uint_t irank) {
-    return g_node_roots[irank];
+bool mpi::is_root(uint_t irank_world, Realm realm) {
+    return realm == World ? !irank_world : !g_iranks_shmem[irank_world];
 }
 
 void mpi::abort_(str_t message) {
@@ -98,12 +91,12 @@ void mpi::abort_(str_t message) {
     //logging::error_backtrace_();
     logging::finalize();
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
-    if (mpi::nrank()==1) std::abort();
+    if (mpi::nrank() == 1) std::abort();
     MPI_Abort(MPI_COMM_WORLD, -1);
 }
 
 void mpi::abort(str_t message){
-    if (mpi::nrank()==1)
+    if (mpi::nrank() == 1)
         logging::error("Reason: {}", std::move(message));
     else
         logging::error_("Reason: {}", std::move(message));
@@ -111,38 +104,50 @@ void mpi::abort(str_t message){
     logging::finalize();
     MPI_Barrier(MPI_COMM_WORLD);
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
-    if (mpi::nrank()==1) std::abort();
+    if (mpi::nrank() == 1) std::abort();
     MPI_Abort(MPI_COMM_WORLD, -1);
 }
 
 
 void mpi::setup_mpi_globals() {
     int tmp;
-    MPI_Comm_size(MPI_COMM_WORLD, &tmp);
-    g_nrank = tmp;
-    ASSERT(g_nrank > 0)
-    MPI_Comm_rank(MPI_COMM_WORLD, &tmp);
-    g_irank = tmp;
+    g_world_comm = MPI_COMM_WORLD;
+    MPI_Comm_size(g_world_comm, &tmp);
+    g_nrank_world = tmp;
+    ASSERT(g_nrank_world > 0)
+    MPI_Comm_rank(g_world_comm, &tmp);
+    g_irank_world = tmp;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     MPI_Get_processor_name(processor_name, &tmp);
     g_processor_name = str_t(processor_name, tmp);
-    MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, irank(), MPI_INFO_NULL, &g_node_comm);
-    MPI_Comm_size(g_node_comm, &tmp);
-    g_nrank_on_node = tmp;
-    MPI_Comm_rank(g_node_comm, &tmp);
-    g_irank_on_node = tmp;
-    mpi::all_gather(char(on_node_i_am_root()), g_node_roots);
+    MPI_Comm_split_type(g_world_comm, MPI_COMM_TYPE_SHARED, irank(), MPI_INFO_NULL, &g_shmem_comm);
+    MPI_Comm_size(g_shmem_comm, &tmp);
+    g_nrank_shmem = tmp;
+    MPI_Comm_rank(g_shmem_comm, &tmp);
+    g_irank_shmem = tmp;
 
+    mpi::all_gather(g_irank_world, g_iranks_shmem);
+
+    SharedScalar<uint_t> tmp_shared;
     // only the node roots write their world communicator indices to the shared array
-    g_my_node_root_irank = SharedScalar<uint_t>(mpi::irank());
-}
+    if (i_am_root(mpi::SharedMemory)) tmp_shared.set_(g_irank_world);
+    mpi::barrier(SharedMemory);
+    mpi::all_gather(uint_t(tmp_shared), g_shmem_root_iranks_world);
 
-void mpi::blocking_print(const str_t &str) {
-    for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) {
-        if (mpi::i_am(irank)) {
-            std::cout << str << std::endl;
+    {
+        // use map to get a unique, ordered vector of realms with their ranks
+        std::map<uint_t, std::set<uint_t>> tmp_map;
+        for (uint_t irank = 0ul; irank < nrank(); ++irank) {
+            const auto irank_shmem_root = g_shmem_root_iranks_world[irank];
+            auto it = tmp_map.find(irank_shmem_root);
+            if (it == tmp_map.end()) it = tmp_map.insert({irank_shmem_root, {}}).first;
+            it->second.insert(irank);
         }
-        mpi::barrier();
+        for (auto pair: tmp_map) {
+            g_irank_root_in_shmem_realms.push_back(pair.first);
+            g_iranks_world_in_shmem_realms.emplace_back(pair.second.cbegin(), pair.second.cend());
+            g_nrank_in_shmem_realms.push_back(g_iranks_world_in_shmem_realms.back().size());
+        }
     }
 }
 
@@ -163,14 +168,18 @@ uintv_t mpi::filter(bool cond) {
     return ranks;
 }
 
-uint_t mpi::g_irank = 0;
-uint_t mpi::g_nrank = 1;
+MPI_Comm mpi::g_world_comm;
+uint_t mpi::g_irank_world = 0;
+uint_t mpi::g_nrank_world = 1;
 str_t mpi::g_processor_name = "";
-MPI_Comm mpi::g_node_comm;
-uint_t mpi::g_irank_on_node = 0;
-uint_t mpi::g_nrank_on_node = 1;
-v_t<char> mpi::g_node_roots = {};
-uint_t mpi::g_my_node_root_irank = 0;
+MPI_Comm mpi::g_shmem_comm;
+uint_t mpi::g_irank_shmem = 0;
+uint_t mpi::g_nrank_shmem = 1;
+uintv_t mpi::g_iranks_shmem = {};
+uintv_t mpi::g_shmem_root_iranks_world = {};
+uintv_t mpi::g_irank_root_in_shmem_realms = {};
+v_t<uintv_t> mpi::g_iranks_world_in_shmem_realms = {};
+uintv_t mpi::g_nrank_in_shmem_realms = {};
 int mpi::g_p2p_tag = 0;
 std::array<v_t<buf_t>, mpi::g_types.size()> mpi::g_send_reduce_buffers = {};
 std::array<v_t<buf_t>, mpi::g_types.size()> mpi::g_recv_reduce_buffers = {};

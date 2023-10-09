@@ -13,12 +13,12 @@ namespace lock {
         v_t<MPI_Win> m_wins;
         void resize(uint_t n) {
             for (auto& win: m_wins) MPI_Win_free(&win);
-            mpi::barrier_on_node();
+            mpi::barrier(mpi::SharedMemory);
             m_wins.resize(n);
             uint_t buffer;
             auto ptr = reinterpret_cast<void*>(&buffer);
             for (auto& win: m_wins)
-                MPI_Win_allocate(0, sizeof(int), MPI_INFO_NULL, mpi::g_node_comm, ptr, &win);
+                MPI_Win_allocate(0, sizeof(int), MPI_INFO_NULL, mpi::g_shmem_comm, ptr, &win);
         }
 
         void acquire(uint_t i) {

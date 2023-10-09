@@ -35,7 +35,7 @@ void dense::MatrixBase::resize(uint_t nrow, uint_t ncol) {
         for (uint_t irow = 0ul; irow < nrow; ++irow)
             std::copy(old.cbegin(irow), old.cbegin(irow) + ncol * m_element_size, begin(irow));
     }
-    if (m_bw.node_shared()) mpi::barrier_on_node();
+    if (m_bw.node_shared()) mpi::barrier(mpi::SharedMemory);
 }
 
 dense::MatrixBase::MatrixBase(uint_t nrow, uint_t ncol, uint_t element_size, bool node_shared) :
@@ -69,18 +69,18 @@ void dense::MatrixBase::transpose() {
     if (i_can_globally_modify()) {
         for (uint_t icol = 0ul; icol < m_ncol; ++icol) set_col(icol, tmp.cbegin(icol));
     }
-    if (m_bw.node_shared()) mpi::barrier_on_node();
+    if (m_bw.node_shared()) mpi::barrier(mpi::SharedMemory);
 }
 
 void dense::MatrixBase::reorder_rows(const uintv_t &order) {
     if (i_can_globally_modify())
         sort::reorder(begin(), m_row_size, order);
-    if (m_bw.node_shared()) mpi::barrier_on_node();
+    if (m_bw.node_shared()) mpi::barrier(mpi::SharedMemory);
 }
 
 void dense::MatrixBase::set(const void *src) {
     if (i_can_globally_modify()) std::memcpy(begin(), src, m_size);
-    if (m_bw.node_shared()) mpi::barrier_on_node();
+    if (m_bw.node_shared()) mpi::barrier(mpi::SharedMemory);
 }
 
 void dense::MatrixBase::set_row(uint_t irow, const void *src) {

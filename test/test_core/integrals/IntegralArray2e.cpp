@@ -10,7 +10,7 @@ TEST(IntegralArray2e, SymNone_real) {
     typedef double T;
     integrals_2e::SymNone<T> ints(6);
     const std::array<T, 8> v = {0.123, 0.234, 0.345, 0.456, 0.567, 0.678, 0.789, 0.890};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
         // D
@@ -28,7 +28,7 @@ TEST(IntegralArray2e, SymNone_real) {
         // DRH
         ASSERT_TRUE(ints.set_(2, 3, 1, 0, v[7]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -52,7 +52,7 @@ TEST(IntegralArray2e, SymH_real) {
     typedef double T;
     integrals_2e::SymH<T> ints(6);
     const std::array<T, 4> v = {0.123, 0.234, 0.345, 0.456};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
         // D
@@ -62,7 +62,7 @@ TEST(IntegralArray2e, SymH_real) {
         // DR
         ASSERT_TRUE(ints.set_(1, 0, 2, 3, v[3]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -86,7 +86,7 @@ TEST(IntegralArray2e, SymD_real) {
     typedef double T;
     integrals_2e::SymD<T> ints(6);
     const std::array<T, 4> v = {0.123, 0.234, 0.345, 0.456};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
         // R
@@ -96,7 +96,7 @@ TEST(IntegralArray2e, SymD_real) {
         // HR
         ASSERT_TRUE(ints.set_(3, 2, 0, 1, v[3]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -120,13 +120,13 @@ TEST(IntegralArray2e, SymDH_real) {
     typedef double T;
     integrals_2e::SymDH<T> ints(6);
     const std::array<T, 2> v = {0.123, 0.234};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
         // R
         ASSERT_TRUE(ints.set_(0, 3, 2, 1, v[1]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -150,13 +150,13 @@ TEST(IntegralArray2e, SymDR_real) {
     typedef double T;
     integrals_2e::SymDR<T> ints(6);
     const std::array<T, 2> v = {0.123, 0.234};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
         // H
         ASSERT_TRUE(ints.set_(2, 3, 0, 1, v[1]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -180,11 +180,11 @@ TEST(IntegralArray2e, SymDHR_real) {
     typedef double T;
     integrals_2e::SymDHR<T> ints(6);
     const std::array<T, 1> v = {0.123};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -210,7 +210,7 @@ TEST(IntegralArray2e, SymNone_complex) {
     integrals_2e::SymNone<T> ints(6);
     const std::array<T, 8> v = {T(0.123, -1), T(0.234, 2), T(0.345, -3), T(0.456, 4),
                                 T(0.567, -5), T(0.678, 6), T(0.789, -7), T(0.890, 8)};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
         // D
@@ -228,7 +228,7 @@ TEST(IntegralArray2e, SymNone_complex) {
         // DRH
         ASSERT_TRUE(ints.set_(2, 3, 1, 0, v[7]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -253,7 +253,7 @@ TEST(IntegralArray2e, SymH_complex) {
     integrals_2e::SymH<T> ints(6);
     const std::array<T, 4> v  = {T(0.123, -1), T(0.234, 2), T(0.345, -3), T(0.456, 4)};
     const std::array<T, 4> cv = {T(0.123, 1), T(0.234, -2), T(0.345, 3), T(0.456, -4)};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
         // D
@@ -263,7 +263,7 @@ TEST(IntegralArray2e, SymH_complex) {
         // DR
         ASSERT_TRUE(ints.set_(1, 0, 2, 3, v[3]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -287,7 +287,7 @@ TEST(IntegralArray2e, SymD_complex) {
     typedef std::complex<double> T;
     integrals_2e::SymD<T> ints(6);
     const std::array<T, 4> v  = {T(0.123, -1), T(0.234, 2), T(0.345, -3), T(0.456, 4)};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
         // R
@@ -297,7 +297,7 @@ TEST(IntegralArray2e, SymD_complex) {
         // HR
         ASSERT_TRUE(ints.set_(3, 2, 0, 1, v[3]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -322,13 +322,13 @@ TEST(IntegralArray2e, SymDH_complex) {
     integrals_2e::SymDH<T> ints(6);
     const std::array<T, 2> v  = {T(0.123, -1), T(0.234, 2)};
     const std::array<T, 2> cv  = {T(0.123, 1), T(0.234, -2)};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
         // R
         ASSERT_TRUE(ints.set_(0, 3, 2, 1, v[1]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -352,13 +352,13 @@ TEST(IntegralArray2e, SymDR_complex) {
     typedef std::complex<double> T;
     integrals_2e::SymDR<T> ints(6);
     const std::array<T, 2> v  = {T(0.123, -1), T(0.234, 2)};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
         // H
         ASSERT_TRUE(ints.set_(2, 3, 0, 1, v[1]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);
@@ -382,11 +382,11 @@ TEST(IntegralArray2e, SymDHR_complex) {
     typedef std::complex<double> T;
     integrals_2e::SymDHR<T> ints(6);
     const std::array<T, 1> v = {T(0.123, -1)};
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         // -
         ASSERT_TRUE(ints.set_(0, 1, 2, 3, v[0]));
     }
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
 
     // -
     ASSERT_NEAR_EQ(ints.get(0, 1, 2, 3), v[0]);

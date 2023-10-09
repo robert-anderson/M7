@@ -8,13 +8,13 @@ SharedArrayBase::SharedArrayBase(uint_t element_size) : m_element_size(element_s
 
 void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, void **data) {
     const auto nbyte = nelement * element_size;
-    const auto local_nbyte = mpi::on_node_i_am_root() ? nbyte : 0ul;
-    auto ierr = MPI_Win_allocate_shared(local_nbyte, element_size, MPI_INFO_NULL, mpi::g_node_comm, data, win);
+    const auto local_nbyte = mpi::i_am_root(mpi::SharedMemory) ? nbyte : 0ul;
+    auto ierr = MPI_Win_allocate_shared(local_nbyte, element_size, MPI_INFO_NULL, mpi::g_shmem_comm, data, win);
     REQUIRE_EQ(ierr, MPI_SUCCESS, "MPI Shared memory error");
     DEBUG_ASSERT_TRUE(*data, "data pointer not set");
     MPI_Win_lock_all(0, *win);
     MPI_Win_sync(*win);
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
     int disp_unit;
     MPI_Aint alloc_size;
     ierr = MPI_Win_shared_query(*win, 0, &alloc_size, &disp_unit, data);
@@ -22,8 +22,8 @@ void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, 
     REQUIRE_EQ(uint_t(disp_unit), element_size, "incorrect window element size");
     REQUIRE_EQ(uint_t(alloc_size), nbyte, "incorrect total window size");
     MPI_Win_unlock_all(*win);
-    if (mpi::on_node_i_am_root()) std::memset(*data, 0, nbyte);
-    mpi::barrier_on_node();
+    if (mpi::i_am_root(mpi::SharedMemory)) std::memset(*data, 0, nbyte);
+    mpi::barrier(mpi::SharedMemory);
 }
 
 void SharedArrayBase::free(MPI_Win *win, void **data) {
@@ -55,7 +55,7 @@ SharedArrayBase &SharedArrayBase::operator=(const SharedArrayBase &other) {
         free();
         alloc(other.m_nelement);
     }
-    if (mpi::on_node_i_am_root()) std::memcpy(m_data, other.m_data, m_nbyte);
+    if (mpi::i_am_root(mpi::SharedMemory)) std::memcpy(m_data, other.m_data, m_nbyte);
     return *this;
 }
 

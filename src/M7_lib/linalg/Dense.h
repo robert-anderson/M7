@@ -134,7 +134,7 @@ namespace dense {
          *  true if this rank participates in globally-modifying operations of the buffer
          */
         bool i_can_globally_modify() const {
-            return !m_buffer.m_node_shared || mpi::on_node_i_am_root();
+            return !m_buffer.m_node_shared || mpi::i_am_root(mpi::SharedMemory);
         }
 
         void set_sizes(uint_t nrow, uint_t ncol);
@@ -606,19 +606,19 @@ namespace dense {
         void reorder(const uintv_t& order) {
             if (i_can_globally_modify())
                 sort::reorder(MatrixBase::begin(), MatrixBase::m_element_size, order);
-            if (m_bw.node_shared()) mpi::barrier_on_node();
+            if (m_bw.node_shared()) mpi::barrier(mpi::SharedMemory);
         }
 
         void sort_inplace(bool asc, bool absval) {
             if (i_can_globally_modify())
                 sort::inplace(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
-            if (m_bw.node_shared()) mpi::barrier_on_node();
+            if (m_bw.node_shared()) mpi::barrier(mpi::SharedMemory);
         }
 
         Vector<T>& sorted(bool asc, bool absval) {
             if (i_can_globally_modify())
                 sort::inplace(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
-            if (m_bw.node_shared()) mpi::barrier_on_node();
+            if (m_bw.node_shared()) mpi::barrier(mpi::SharedMemory);
             return *this;
         }
 

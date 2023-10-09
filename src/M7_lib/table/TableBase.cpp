@@ -207,17 +207,17 @@ void TableBase::all_gatherv(const TableBase &src) {
          * all_gatherv (all ranks gather), so we have to use the general all_to_allv
          */
         // initially, assume all ranks receive all data from this rank
-        uintv_t sendcounts(mpi::nrank(), src.nrow_in_use()*row_size());
+        uintv_t sendcounts(mpi::nrank(), src.nrow_in_use() * row_size());
         // set to zero all sendcounts for ranks that are not node-roots
-        for (uint_t irank=0ul; irank<mpi::nrank(); ++irank){
-            if (!mpi::is_node_root(irank)) sendcounts[irank] = 0;
+        for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank){
+            if (!mpi::is_root(irank, mpi::SharedMemory)) sendcounts[irank] = 0;
         }
         // all send displacements remain at 0ul
         uintv_t senddispls(mpi::nrank(), 0ul);
         uintv_t recvcounts(mpi::nrank(), 0ul);
         uintv_t recvdispls(mpi::nrank(), 0ul);
         // only node-roots receive non-zero counts from senders
-        if (mpi::on_node_i_am_root()) recvcounts = counts;
+        if (mpi::i_am_root(mpi::SharedMemory)) recvcounts = counts;
         recvdispls = mpi::counts_to_displs_consec(recvcounts);
         mpi::all_to_allv(src.cbegin(), sendcounts, senddispls, begin(), recvcounts, recvdispls);
     }

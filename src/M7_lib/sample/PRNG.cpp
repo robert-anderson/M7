@@ -7,14 +7,14 @@
 #include "PRNG.h"
 
 PRNG::PRNG(uint_t seed, uint_t block_size) :
-        m_data(block_size, 0u), m_seed(seed+mpi::irank()) {
+        m_data(block_size, 0u), m_seed(seed + mpi::irank()) {
     ASSERT(block_size > 0);
     m_i = m_data.size();
     refresh();
 }
 
 void PRNG::refresh() {
-    std::mt19937 mt19937(m_seed+(mpi::irank()+1)*m_nrefresh);
+    std::mt19937 mt19937(m_seed + (mpi::irank() + 1) * m_nrefresh);
     std::uniform_int_distribution<uint32_t> dist(mt19937.min(), mt19937.max());
     std::generate(m_data.begin(), m_data.end(), [&]() { return dist(mt19937); });
     m_i = 0;

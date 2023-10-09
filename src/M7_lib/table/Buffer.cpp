@@ -49,7 +49,7 @@ bool Buffer::Window::node_shared() const {
 }
 
 bool Buffer::Window::i_can_modify() const {
-    return m_buffer && (!node_shared() || mpi::on_node_i_am_root());
+    return m_buffer && (!node_shared() || mpi::i_am_root(mpi::SharedMemory));
 }
 
 bool Buffer::Window::allocated() const {

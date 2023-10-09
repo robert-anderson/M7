@@ -19,7 +19,7 @@ GeneralLadderHam::GeneralLadderHam(sys::Basis basis, const EbdumpInfo& info):
     REQUIRE_EQ(file_reader.m_info.m_nmode, m_basis.m_bos.m_nmode, "EBDUMP has incorrect number of modes");
 
     logging::info( "Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         while (file_reader.next(inds, value)) {
             if (!ham::is_significant(value)) continue;
             auto ranksig = file_reader.ranksig(inds);
