@@ -104,6 +104,10 @@ Rdms::operator bool() const {
     return !m_rdms.empty();
 }
 
+PureRdm *Rdms::get_pure_rdm(OpSig opsig) {
+    return m_pure_rdms[opsig];
+}
+
 bool Rdms::takes_contribs_from(OpSig exsig) const {
     return (exsig != opsig::c_invalid) && !m_exsig_to_rdms[exsig].empty();
 }
