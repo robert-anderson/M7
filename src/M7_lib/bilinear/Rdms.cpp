@@ -51,7 +51,7 @@ Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epo
         REQUIRE_LE(ranksig.nbos(), 1ul, "RDMs with more than one boson operator are not yet supported");
         m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, PureRdm>(opts, ranksig, m_wf.m_sector, 1ul));
         auto rdm_ptr = m_rdms.front().get();
-        m_pure_rdms[ranksig] = rdm_ptr;
+        m_pure_rdms[ranksig] = dynamic_cast<PureRdm*>(rdm_ptr);
     }
     if (opts.m_fock_4rdm.m_enabled) {
         logging::info("Loading generalized Fock matrix for accumulation of its contraction with the 4RDM");
@@ -66,7 +66,7 @@ Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epo
 
         if (!diag) m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, NonDiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
         else m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, DiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
-        m_fock_4rdm = m_rdms.front().get();
+        m_fock_4rdm = dynamic_cast<FockRdm4*>(m_rdms.front().get());
     }
     m_exsig_to_rdms = make_exsig_to_rdms();
 
@@ -102,6 +102,10 @@ Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epo
 
 Rdms::operator bool() const {
     return !m_rdms.empty();
+}
+
+PureRdm *Rdms::get_pure_rdm(OpSig opsig) {
+    return m_pure_rdms[opsig];
 }
 
 bool Rdms::takes_contribs_from(OpSig exsig) const {

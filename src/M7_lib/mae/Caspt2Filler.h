@@ -11,8 +11,10 @@
 #include "M7_lib/bilinear/Rdm.h"
 #include "M7_lib/bilinear/SpinfreeRdm.h"
 #include "M7_lib/bilinear/FockRdm4.h"
+#include "M7_lib/bilinear/Rdms.h"
+#include "M7_lib/table/Smuvi.h"
 
-
+#if 0
 namespace pose {
     struct Row : public ::Row {
         field::Numbers<uint8_t, 1> m_inds;
@@ -208,8 +210,8 @@ namespace pose {
             }
         }
     };
-
 }
+#endif
 
 
 /**
@@ -227,16 +229,23 @@ class Caspt2Filler {
      * Histogrammable set of determinants of which to compute the outer product in filling the MAEs
      */
     const Table<MbfWeightRow>& m_hist;
-
-    const conf::Rdms& m_opts;
-
-    communicator::BasicSend<MbfWeightRow, MbfWeightRow> m_psi_pq;
-    communicator::BasicSend<MbfWeightRow, MbfWeightRow> m_psi_fock;
-
-    pose::Rdm m_rdm;
-    const std::unique_ptr<FockMatrix> m_fock_mat;
+    /**
+     * the result of F * m_hist where F = sum_pq f_pq E_pq
+     */
+    communicator::BasicSend<MbfWeightRow, MbfWeightRow> m_fock_x_hist;
+    /**
+     * normal ordered, spin-resolved RDMs being filled
+     */
+    Rdms& m_rdms;
 
     typedef std::pair<std::pair<uint_t, uint_t>, ham_t> pq_val_t;
+    /**
+     * make a linear combination psi1 = G * psi where G = sum_pq g_pq E_pq and psi is m_hist
+     * @param psi1
+     *  the output of G * psi
+     * @param pq_vals
+     *  a sparse representation of the elements of the contraction ((p, q), g_pq)
+     */
     void make_psi1(communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const v_t<pq_val_t>& pq_vals) {
         psi1.m_store.clear();
         const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
@@ -292,95 +301,86 @@ class Caspt2Filler {
         }
     }
 
-    void make_psi1(communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const dense::SquareMatrix<ham_t>& mat, ham_comp_t tol=1e-10) {
+    /**
+     * overload to make psi1 = G * psi where g_ij are elements of a dense matrix
+     */
+    void make_psi1(communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const dense::SquareMatrix<ham_t>& coeffs, ham_comp_t tol=1e-10) {
         v_t<pq_val_t> pq_vals;
         auto fn = [&pq_vals](uint_t irow, uint_t icol, ham_t elem) {
             pq_vals.emplace_back(uintp_t(irow, icol), elem);
         };
-        mat.foreach(fn, tol);
+        coeffs.foreach(fn, tol);
         make_psi1(psi1, pq_vals);
     }
 
-    void fill(const Table<MbfWeightRow>& bra, uint_t bra_displ, uint_t bra_count, const Table<MbfWeightRow>& ket) {
-        m_rdm.m_store.clear();
-        auto bra_row = bra.m_row;
-        auto ket_row = ket.m_row;
-        conn::Mbf conn(bra_row.m_mbf);
-        for (bra_row.restart(bra_displ); bra_row.in_range(bra_displ + bra_count); ++bra_row) {
-            for (ket_row.restart(); ket_row; ++ket_row) {
-                auto exsig = mbf::exsig(bra_row.m_mbf, ket_row.m_mbf);
-                if (exsig == opsig::c_invalid) continue;
-                if (exsig.nfrm_cre() > 2) continue;
-                const auto contrib = bra_row.m_weight[0] * ket_row.m_weight[0];
-                m_rdm.make_contribs(bra_row.m_mbf, ket_row.m_mbf, contrib);
-            }
-        }
-        m_rdm.communicate();
-        auto& recv_row = m_rdm.m_send_recv.recv().m_row;
-        for (recv_row.restart(); recv_row; ++recv_row) {
-            auto& store_row = m_rdm.m_store.lookup_or_insert(recv_row.m_inds);
-            store_row.m_values += recv_row.m_values;
-        }
+    /**
+     * overload to make psi1 = G * psi where g_ii are elements of a dense vector
+     */
+    void make_psi1(communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const dense::Vector<ham_t>& coeffs, ham_comp_t tol=1e-10) {
+        v_t<pq_val_t> pq_vals;
+        for (uint_t ielem = 0ul; ielem < coeffs.nelement(); ++ielem)
+            pq_vals.emplace_back(uintp_t(ielem, ielem), coeffs[ielem]);
+        make_psi1(psi1, pq_vals);
     }
 
-    void fill(const Table<MbfWeightRow>& bra, const Table<MbfWeightRow>& ket) {
-        fill(bra, 0ul, bra.nrow_in_use(), ket);
+private:
+
+    void fill_rdm2(PureRdm& rdm) {
+        REQUIRE_TRUE(rdm.m_ranksig == opsig::c_doub, "RDM object should be two-body");
+        // todo
+        // Smuvi<FrmOnvField> indices_alpha("alpha indices hash map", m_hist.m_row.m_mbf.m_basis);
     }
 
-    sys::Sector get_sector() const {
-        const auto& row = m_hist.m_row;
-        row.restart();
-        auto nelec = row.m_mbf.nsetbit();
-        return {mbf::get_basis(row.m_mbf), {nelec, {}}};
+    void fill_rdm3(PureRdm& rdm) {
+        REQUIRE_TRUE(rdm.m_ranksig == opsig::c_trip, "RDM object should be three-body");
+        // todo
+    }
+
+    void fill_fock_rdm4(FockRdm4& rdm) {
+        // todo
     }
 
 public:
-    Caspt2Filler(const Table<MbfWeightRow>& hist, const conf::Rdms& opts):
-        m_hist(hist), m_opts(opts),
-        m_psi_pq("excit-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0}),
-        m_psi_fock("Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0}),
-        m_rdm("CASPT2 transition 2RDM", mbf::get_basis(hist.m_row.m_mbf)),
-        m_fock_mat(opts.m_fock_4rdm.m_enabled ? new FockMatrix(hist.m_row.m_mbf.m_basis.m_nsite, opts.m_fock_4rdm.m_fock_path) : nullptr){
-    }
 
-    void fill_and_save(hdf5::GroupWriter* gw_3300, hdf5::GroupWriter* gw_4400f) {
-        const auto nsite = m_hist.m_row.m_mbf.m_basis.m_nsite;
-        v_t<pq_val_t> pq_vals(1ul);
-        pq_vals.back().second = 1.0;
-        for (uint_t p = 0ul; p < nsite; ++p) {
-            for (uint_t q = 0ul; q < nsite; ++q) {
-                pq_vals.back().first = {p, q};
-                logging::info("preparing E_pq |0> with spatial orbital indices p={}, q={}", p, q);
-                make_psi1(m_psi_pq, pq_vals);
-                logging::info("successfully prepared E_pq |0> with {} total rows", mpi::all_sum(m_psi_pq.m_store.nrow_in_use()));
-                if (gw_3300) {
-                    fill(m_psi_pq.m_store, m_hist);
-                    m_rdm.m_store.save(*gw_3300, logging::format("{},{}", p, q), true);
-                }
-                if (gw_4400f) {
-                    fill(m_psi_pq.m_store, m_psi_fock.m_store);
-                    m_rdm.m_store.save(*gw_4400f, logging::format("{},{}", p, q), true);
-                }
-            }
+    /**
+     * fill all RDMs
+     */
+    void fill() {
+        {
+            auto ptr = m_rdms.get_pure_rdm(opsig::c_doub);
+            if (ptr) fill_rdm2(*ptr);
+        }
+        {
+            auto ptr = m_rdms.get_pure_rdm(opsig::c_trip);
+            if (ptr) fill_rdm3(*ptr);
+        }
+        {
+            auto ptr = m_rdms.m_fock_4rdm;
+            if (ptr) fill_fock_rdm4(*ptr);
         }
     }
 
-    void fill_and_save() {
 
-        hdf5::FileWriter fw("M7.pose.h5");
-        hdf5::GroupWriter gw_sf(fw, "spinfree");
-        hdf5::GroupWriter gw_3300(gw_sf, "3300");
-
-        if (m_fock_mat) {
-            hdf5::GroupWriter gw_4400f(gw_sf, "4400f");
-            logging::info("preparing F |0> for CASPT2 intermediate");
-            make_psi1(m_psi_fock, *m_fock_mat);
-            logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(m_psi_fock.m_store.nrow_in_use()));
-            fill_and_save(&gw_3300, &gw_4400f);
+public:
+    Caspt2Filler(const Table<MbfWeightRow>& hist, Rdms& rdms):
+        m_hist(hist),
+        m_fock_x_hist("Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0}),
+        m_rdms(rdms) {
+        // if there's no Fock*4RDM object allocated, there's nothing left to do
+        if (!m_rdms.m_fock_4rdm) return;
+        logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
+        {
+            // if the Fock object is non-diagonal, construct F*psi using the dense matrix overlaod
+            auto ptr = dynamic_cast<const NonDiagFockRdm4*>(m_rdms.m_fock_4rdm);
+            if (ptr) make_psi1(m_fock_x_hist, ptr->m_fock);
         }
-        fill_and_save(&gw_3300, nullptr);
+        {
+            // if the Fock object is non-diagonal, construct F*psi using the dense vector overlaod
+            auto ptr = dynamic_cast<const DiagFockRdm4*>(m_rdms.m_fock_4rdm);
+            make_psi1(m_fock_x_hist, ptr->m_fock);
+        }
+        logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(m_fock_x_hist.m_store.nrow_in_use()));
     }
-
 };
 
 #endif //M7_CASPT2FILLER_H

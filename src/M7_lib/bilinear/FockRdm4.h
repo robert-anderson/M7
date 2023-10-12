@@ -33,12 +33,12 @@ public:
 };
 
 class NonDiagFockRdm4 : public FockRdm4 {
+public:
+
     /**
      * Generalized Fock in the active space
      */
     const dense::SquareMatrix<ham_t> m_fock;
-
-public:
 
     NonDiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue);
 
@@ -52,12 +52,11 @@ public:
 };
 
 class DiagFockRdm4 : public FockRdm4 {
+public:
     /**
      * Diagonal elements of the generalized Fock in the active space
      */
     const dense::Vector<ham_t> m_fock;
-
-public:
 
     DiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue);
 
