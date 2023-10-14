@@ -168,6 +168,20 @@ uint_t FrmOnvField::nbeta() const {
     return count;
 }
 
+uint_t FrmOnvField::nalpha_not_in(const FrmOnvField &other) const {
+    uint_t count = 0ul;
+    auto fn = [&count](uint_t){++count;};
+    foreach_alpha_not_in(other, fn);
+    return count;
+}
+
+uint_t FrmOnvField::nbeta_not_in(const FrmOnvField &other) const {
+    uint_t count = 0ul;
+    auto fn = [&count](uint_t){++count;};
+    foreach_beta_not_in(other, fn);
+    return count;
+}
+
 uint_t FrmOnvField::nopen_shell() const {
     uint_t count = 0ul;
     auto fn = [&count](uint_t){++count;};

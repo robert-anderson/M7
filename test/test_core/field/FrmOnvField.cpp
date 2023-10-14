@@ -299,3 +299,51 @@ TEST(FrmOnvField, Ms2Flip) {
     std::cout << mbf2.to_string() << std::endl;
     ASSERT_EQ(mbf1, mbf2);
 }
+
+TEST(FrmOnvField, HammingDistance) {
+    const uint_t nsite = 10;
+    buffered::FrmOnv bra(nsite);
+    buffered::FrmOnv ket(nsite);
+
+    bra = {{0, 4, 6, 7}, {0, 6, 7, 9}};
+    ket = {{0, 7, 8, 9}, {1, 2, 4, 7}};
+
+    ASSERT_EQ(bra.nalpha_not_in(ket), 2ul);
+    ASSERT_EQ(ket.nalpha_not_in(bra), 2ul);
+
+    ASSERT_EQ(bra.nbeta_not_in(ket), 3ul);
+    ASSERT_EQ(ket.nbeta_not_in(bra), 3ul);
+
+    /*
+     * working vector for expected output vectors
+     */
+    uintv_t ind_vec_chk;
+    /*
+     * working vector for output vectors from the foreach iterator
+     */
+    uintv_t ind_vec;
+    auto fill_vec_fn = [&ind_vec](uint_t ibit) {
+        ind_vec.push_back(ibit);
+    };
+
+    ind_vec.clear();
+    bra.foreach_alpha_not_in(ket, fill_vec_fn);
+    ind_vec_chk = {4, 6};
+    ASSERT_EQ(ind_vec, ind_vec_chk);
+
+    ind_vec.clear();
+    ket.foreach_alpha_not_in(bra, fill_vec_fn);
+    ind_vec_chk = {8, 9};
+    ASSERT_EQ(ind_vec, ind_vec_chk);
+
+    ind_vec.clear();
+    bra.foreach_beta_not_in(ket, fill_vec_fn);
+    ind_vec_chk = {0, 6, 9};
+    ASSERT_EQ(ind_vec, ind_vec_chk);
+
+    ind_vec.clear();
+    ket.foreach_beta_not_in(bra, fill_vec_fn);
+    ind_vec_chk = {1, 2, 4};
+    ASSERT_EQ(ind_vec, ind_vec_chk);
+
+}
