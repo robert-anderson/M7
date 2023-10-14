@@ -285,6 +285,26 @@ struct BitsetField : FieldBase {
         setbit_foreach::triple<T>(m_dsize, fn_inner, get_work_fn);
     }
 
+    /**
+     * foreach iterator over the set bits in this BitsetField which are not also set in the given other BitsetField
+     */
+    template<typename body_fn_t>
+    void foreach_setbit_not_in(const BitsetField<T, nind>& other, const body_fn_t& fn) const {
+        DEBUG_ASSERT_EQ(m_dsize, other.m_dsize, "incompatible bitset sizes");
+        DEBUG_ASSERT_EQ(m_format, other.m_format, "incompatible bitset formats");
+        auto get_work_fn = [&](uint_t idataword){
+            return this->get_dataword(idataword) &~ other.get_dataword(idataword);
+        };
+        setbit_foreach::single<uint_t>(m_dsize, fn, get_work_fn);
+    }
+
+    uint_t nsetbit_not_in(const FrmOnvField& other) const {
+        uint_t count = 0ul;
+        auto fn = [&count](uint_t){++count;};
+        foreach_setbit_not_in(other, fn);
+        return count;
+    }
+
     uint_t nsetbit() const {
         uint_t result = 0;
         for (uint_t idataword = 0ul; idataword < m_dsize; ++idataword) {

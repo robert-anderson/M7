@@ -154,6 +154,20 @@ uint_t FrmOnvField::get_beta_dataword(uint_t idataword) const {
     }
 }
 
+void FrmOnvField::copy_alpha_to(FrmOnvSpinChannelField &spin_channel) {
+    DEBUG_ASSERT_EQ(spin_channel.m_format, m_format.major_dims<1>(), "incompatible formats");
+    for (uint_t idataword = 0ul; idataword < m_dsize_spin_channel; ++idataword) {
+        spin_channel.tbegin()[idataword] = get_alpha_dataword(idataword);
+    }
+}
+
+void FrmOnvField::copy_beta_to(FrmOnvSpinChannelField &spin_channel) {
+    DEBUG_ASSERT_EQ(spin_channel.m_format, m_format.major_dims<1>(), "incompatible formats");
+    for (uint_t idataword = 0ul; idataword < m_dsize_spin_channel; ++idataword) {
+        spin_channel.tbegin()[idataword] = get_beta_dataword(idataword);
+    }
+}
+
 uint_t FrmOnvField::nalpha() const {
     uint_t count = 0ul;
     auto fn = [&count](uint_t){++count;};
@@ -234,4 +248,3 @@ void FrmOnvField::ms2_flip() {
     };
     foreach_open_shell(fn);
 }
-

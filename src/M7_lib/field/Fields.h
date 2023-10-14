@@ -28,6 +28,7 @@ namespace field {
     using Flags = BitsetField<uint8_t, nind>;
     using Flag = BitField<uint8_t>;
 
+    using FrmOnvSpinChannel = FrmOnvSpinChannelField;
     using FrmOnv = FrmOnvField;
 
     using BosOnv = BosOnvField;

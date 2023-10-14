@@ -118,6 +118,7 @@ namespace buffered {
             return *this;
         }
     };
+    using FrmOnvSpinChannel = Bitset<uint_t>;
 
     struct FrmOnv : BufferedField<field::FrmOnv> {
         using field::FrmOnv::operator=;

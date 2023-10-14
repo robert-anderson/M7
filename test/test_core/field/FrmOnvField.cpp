@@ -347,3 +347,42 @@ TEST(FrmOnvField, HammingDistance) {
     ASSERT_EQ(ind_vec, ind_vec_chk);
 
 }
+
+TEST(FrmOnvField, SpinChannelBitsets) {
+    const uint_t nsite = 10;
+    buffered::FrmOnv mbf(nsite);
+
+    const std::pair<uintv_t, uintv_t> setbits = {{0, 2, 4, 6, 7}, {0, 6, 7, 8, 9}};
+    mbf = setbits;
+
+    buffered::FrmOnvSpinChannel alpha_channel(nsite);
+    buffered::FrmOnvSpinChannel beta_channel(nsite);
+    buffered::FrmOnvSpinChannel channel_chk(nsite);
+
+    mbf.copy_alpha_to(alpha_channel);
+    channel_chk = setbits.first;
+    ASSERT_EQ(alpha_channel, channel_chk);
+
+    mbf.copy_beta_to(beta_channel);
+    channel_chk = setbits.second;
+    ASSERT_EQ(beta_channel, channel_chk);
+
+    uintv_t ind_vec_chk;
+    /*
+     * working vector for output vectors from the foreach iterator
+     */
+    uintv_t ind_vec;
+    auto fill_vec_fn = [&ind_vec](uint_t ibit) {
+        ind_vec.push_back(ibit);
+    };
+
+    ind_vec.clear();
+    alpha_channel.foreach_setbit_not_in(beta_channel, fill_vec_fn);
+    ind_vec_chk = {2, 4};
+    ASSERT_EQ(ind_vec, ind_vec_chk);
+
+    ind_vec.clear();
+    beta_channel.foreach_setbit_not_in(alpha_channel, fill_vec_fn);
+    ind_vec_chk = {8, 9};
+    ASSERT_EQ(ind_vec, ind_vec_chk);
+}

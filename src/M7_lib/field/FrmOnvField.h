@@ -10,6 +10,8 @@
 
 #include "BitsetField.h"
 
+using FrmOnvSpinChannelField = BitsetField<uint_t, 1ul>;
+
 struct FrmOnvField : BitsetField<uint_t, 2> {
     typedef BitsetField<uint_t, 2> base_t;
     using base_t::get;
@@ -128,6 +130,10 @@ public:
      *  raw dataword representing a portion of the beta spin channel of the FrmOnv
      */
     uint_t get_beta_dataword(uint_t idataword) const;
+
+    void copy_alpha_to(FrmOnvSpinChannelField& spin_channel);
+
+    void copy_beta_to(FrmOnvSpinChannelField& spin_channel);
 
     template<typename body_fn_t>
     void foreach_alpha(const body_fn_t& fn) const {
