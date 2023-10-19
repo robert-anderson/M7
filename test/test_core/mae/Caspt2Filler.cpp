@@ -17,11 +17,11 @@ TEST(Caspt2Filler, Rdm1) {
     const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
     buffered::Table<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
 
-    const v_t<uintv_t> setbits_vec = {
-            { 0,  1,  4,   6,  8, 11},
-            { 1,  4,  5,   7,  8,  9},
-            { 0,  1,  3,   6, 10, 11},
-            { 0,  2,  3,   6, 10, 11},
+    // todo: add more weights
+    const v_t<std::pair<wf_t, uintv_t>> weights_setbits_vec = {
+            {1.0, { 0,  1,  4,   6,  8, 11}},
+            {1.3, { 1,  4,  5,   7,  8,  9}},
+            {-0.2, { 0,  1,  3,   6, 10, 11}},
             { 0,  2,  4,   8,  9, 11},
             { 0,  3,  5,   6,  9, 11},
             { 0,  1,  5,   7,  8, 10},
@@ -30,9 +30,10 @@ TEST(Caspt2Filler, Rdm1) {
             { 1,  3,  5,   9,  8, 11}
     };
 
-    for (auto& setbits: setbits_vec) {
+    for (auto& pair: weights_setbits_vec) {
         hist.m_row.push_back_jump();
-        hist.m_row.m_mbf = setbits;
+        hist.m_row.m_weight = pair.first;
+        hist.m_row.m_mbf = pair.second;
     }
 
     Caspt2Filler filler(hist, nullptr);
