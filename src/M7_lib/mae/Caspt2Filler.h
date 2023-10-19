@@ -236,7 +236,22 @@ class Caspt2Filler {
     /**
      * normal ordered, spin-resolved RDMs being filled
      */
-    Rdms& m_rdms;
+    Rdms* m_rdms = nullptr;
+    /**
+     * Lists of unique alpha / beta strings in histogrammed set.
+     */
+    std::vector<uintv_t> m_alphas;
+    std::vector<uintv_t> m_betas;
+    /**
+     * Hash tables containing the index of a given alpha / beta string in m_Alphas / m_Betas.
+     */
+    Smuvi<field::FrmOnvSpinChannel> m_indices_alpha;
+    Smuvi<field::FrmOnvSpinChannel> m_indices_beta;
+    /**
+     * Lists of determinants in the histogrammed set containing a given alpha / beta string.
+     */
+    std::vector<uintv_t> m_dets_contain_alpha;
+    std::vector<uintv_t> m_dets_contain_beta;
 
     typedef std::pair<std::pair<uint_t, uint_t>, ham_t> pq_val_t;
     /**
@@ -323,24 +338,8 @@ class Caspt2Filler {
         make_psi1(psi1, pq_vals);
     }
 
-private:
 
-    /**
-     * Lists of unique alpha / beta strings in histogrammed set.
-     */
-    std::vector<uintv_t> m_Alphas;
-    std::vector<uintv_t> m_Betas;
-    /**
-     * Hash tables containing the index of a given alpha / beta string in m_Alphas / m_Betas.
-     */
-    Smuvi<field::FrmOnv> m_IndicesAlpha;
-    Smuvi<field::FrmOnv> m_IndicesBeta;
-    /**
-     * Lists of determinants in the histogrammed set containing a given alpha / beta string.
-     */
-    std::vector<uintv_t> m_DetsContainAlpha;
-    std::vector<uintv_t> m_DetsContainBeta;
-
+#if 0
     const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
     const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
     auto bra = m_hist.m_row;
@@ -353,11 +352,16 @@ private:
             m_DetsContainAlpha.emplace_back();
         }
     }
+#endif
 
+    // todo: make private again
+public:
 
-    void fill_rdm1(PureRdm& rdm) {
-        REQUIRE_TRUE(rdm.m_ranksig == opsig::c_sing, "RDM object should be one-body");
+    void fill_rdm1(PureRdm* rdm) const {
+        REQUIRE_TRUE(rdm, "RDM pointer should not be null");
+        REQUIRE_TRUE(rdm->m_ranksig == opsig::c_sing, "RDM object should be one-body");
 
+#if 0
         const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
         const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
         auto bra = m_hist.m_row;
@@ -383,20 +387,24 @@ private:
                 }
             }
         }
+#endif
     }
 
-    void fill_rdm2(PureRdm& rdm) {
-        REQUIRE_TRUE(rdm.m_ranksig == opsig::c_doub, "RDM object should be two-body");
+    void fill_rdm2(PureRdm* rdm) const {
+        REQUIRE_TRUE(rdm, "RDM pointer should not be null");
+        REQUIRE_TRUE(rdm->m_ranksig == opsig::c_doub, "RDM object should be two-body");
         // todo
         // Smuvi<FrmOnvField> indices_alpha("alpha indices hash map", m_hist.m_row.m_mbf.m_basis);
     }
 
-    void fill_rdm3(PureRdm& rdm) {
-        REQUIRE_TRUE(rdm.m_ranksig == opsig::c_trip, "RDM object should be three-body");
+    void fill_rdm3(PureRdm* rdm) const {
+        REQUIRE_TRUE(rdm, "RDM pointer should not be null");
+        REQUIRE_TRUE(rdm->m_ranksig == opsig::c_trip, "RDM object should be three-body");
         // todo
     }
 
-    void fill_fock_rdm4(FockRdm4& rdm) {
+    void fill_fock_rdm4(FockRdm4* rdm) const {
+        REQUIRE_TRUE(rdm, "RDM pointer should not be null");
         // todo
     }
 
@@ -407,40 +415,42 @@ public:
      */
     void fill() {
         {
-            auto ptr = m_rdms.get_pure_rdm(opsig::c_sing);
-            if (ptr) fill_rdm1(*ptr);
+            auto ptr = m_rdms->get_pure_rdm(opsig::c_sing);
+            if (ptr) fill_rdm1(ptr);
         }
         {
-            auto ptr = m_rdms.get_pure_rdm(opsig::c_doub);
-            if (ptr) fill_rdm2(*ptr);
+            auto ptr = m_rdms->get_pure_rdm(opsig::c_doub);
+            if (ptr) fill_rdm2(ptr);
         }
         {
-            auto ptr = m_rdms.get_pure_rdm(opsig::c_trip);
-            if (ptr) fill_rdm3(*ptr);
+            auto ptr = m_rdms->get_pure_rdm(opsig::c_trip);
+            if (ptr) fill_rdm3(ptr);
         }
         {
-            auto ptr = m_rdms.m_fock_4rdm;
-            if (ptr) fill_fock_rdm4(*ptr);
+            auto ptr = m_rdms->m_fock_4rdm;
+            if (ptr) fill_fock_rdm4(ptr);
         }
     }
 
 
 public:
-    Caspt2Filler(const Table<MbfWeightRow>& hist, Rdms& rdms):
+    Caspt2Filler(const Table<MbfWeightRow>& hist, Rdms* rdms):
         m_hist(hist),
         m_fock_x_hist("Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0}),
-        m_rdms(rdms) {
+        m_rdms(rdms),
+        m_indices_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.major_dims<1>()),
+        m_indices_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.major_dims<1>()) {
         // if there's no Fock*4RDM object allocated, there's nothing left to do
-        if (!m_rdms.m_fock_4rdm) return;
+        if (!m_rdms || !m_rdms->m_fock_4rdm) return;
         logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
         {
             // if the Fock object is non-diagonal, construct F*psi using the dense matrix overlaod
-            auto ptr = dynamic_cast<const NonDiagFockRdm4*>(m_rdms.m_fock_4rdm);
+            auto ptr = dynamic_cast<const NonDiagFockRdm4*>(m_rdms->m_fock_4rdm);
             if (ptr) make_psi1(m_fock_x_hist, ptr->m_fock);
         }
         {
             // if the Fock object is non-diagonal, construct F*psi using the dense vector overlaod
-            auto ptr = dynamic_cast<const DiagFockRdm4*>(m_rdms.m_fock_4rdm);
+            auto ptr = dynamic_cast<const DiagFockRdm4*>(m_rdms->m_fock_4rdm);
             make_psi1(m_fock_x_hist, ptr->m_fock);
         }
         logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(m_fock_x_hist.m_store.nrow_in_use()));
