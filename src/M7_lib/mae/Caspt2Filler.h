@@ -325,6 +325,66 @@ class Caspt2Filler {
 
 private:
 
+    /**
+     * Lists of unique alpha / beta strings in histogrammed set.
+     */
+    std::vector<uintv_t> m_Alphas;
+    std::vector<uintv_t> m_Betas;
+    /**
+     * Hash tables containing the index of a given alpha / beta string in m_Alphas / m_Betas.
+     */
+    Smuvi<field::FrmOnv> m_IndicesAlpha;
+    Smuvi<field::FrmOnv> m_IndicesBeta;
+    /**
+     * Lists of determinants in the histogrammed set containing a given alpha / beta string.
+     */
+    std::vector<uintv_t> m_DetsContainAlpha;
+    std::vector<uintv_t> m_DetsContainBeta;
+
+    const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
+    const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
+    auto bra = m_hist.m_row;
+    for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
+        const auto& alpha_string = bra.m_mbf.nopen_shell_alpha;
+        const auto& beta_string = bra.m_mbf.nopen_shell_beta;
+        if (std::find(m_Alphas.begin(), m_Alphas.end(), alpha_string) == m_Alphas.end()) {
+            m_Alphas.emplace_back(alpha_string);
+            m_IndicesAlpha.insert(alpha_string, m_Alphas.size() - 1);
+            m_DetsContainAlpha.emplace_back();
+        }
+    }
+
+
+    void fill_rdm1(PureRdm& rdm) {
+        REQUIRE_TRUE(rdm.m_ranksig == opsig::c_sing, "RDM object should be one-body");
+
+        const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
+        const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
+        auto bra = m_hist.m_row;
+        auto ket = bra;
+
+        for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
+            // alpha-alpha block
+            auto& ibeta = m_IndicesBeta[bbra];
+            for (auto& iket : m_DetsContainBeta[ibeta]) {
+                ket.restart();
+                if (bra.nbeta_not_in(ket + iket) <= rdm.m_ranksig) {
+                   const auto contrib = bra.m_weight[0] * ket.m_weight[0];
+                   m_rdms.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
+                }
+            }
+            // beta-beta block
+            auto& ialpha = m_IndicesAlpha[abra];
+            for (auto& iket : m_DetsContainAlpha[ialpha]) {
+                // do not double-count diagonal contributions bra.nalpha_not_in(ket) == 0
+                if (bra.nalpha_not_in(ket) > 0ul && bra.nalpha_not_in(ket) <= rdm.m_ranksig) {
+                    const auto contrib = bra.m_weight[0] * ket.m_weight[0];
+                    m_rdms.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
+                }
+            }
+        }
+    }
+
     void fill_rdm2(PureRdm& rdm) {
         REQUIRE_TRUE(rdm.m_ranksig == opsig::c_doub, "RDM object should be two-body");
         // todo
@@ -346,6 +406,10 @@ public:
      * fill all RDMs
      */
     void fill() {
+        {
+            auto ptr = m_rdms.get_pure_rdm(opsig::c_sing);
+            if (ptr) fill_rdm1(*ptr);
+        }
         {
             auto ptr = m_rdms.get_pure_rdm(opsig::c_doub);
             if (ptr) fill_rdm2(*ptr);
