@@ -252,6 +252,11 @@ class Caspt2Filler {
      */
     std::vector<uintv_t> m_dets_contain_alpha;
     std::vector<uintv_t> m_dets_contain_beta;
+    /**
+     * Indices of alpha / beta strings occuring with a given beta / alpha string.
+     */
+     std::vector<uintv_t> m_beta_with_alpha;
+     std::vector<uintv_t> m_alpha_with_beta;
 
     typedef std::pair<std::pair<uint_t, uint_t>, ham_t> pq_val_t;
     /**
@@ -338,22 +343,6 @@ class Caspt2Filler {
         make_psi1(psi1, pq_vals);
     }
 
-
-#if 0
-    const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
-    const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
-    auto bra = m_hist.m_row;
-    for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
-        const auto& alpha_string = bra.m_mbf.nopen_shell_alpha;
-        const auto& beta_string = bra.m_mbf.nopen_shell_beta;
-        if (std::find(m_Alphas.begin(), m_Alphas.end(), alpha_string) == m_Alphas.end()) {
-            m_Alphas.emplace_back(alpha_string);
-            m_IndicesAlpha.insert(alpha_string, m_Alphas.size() - 1);
-            m_DetsContainAlpha.emplace_back();
-        }
-    }
-#endif
-
     // todo: make private again
 public:
 
@@ -361,33 +350,33 @@ public:
         REQUIRE_TRUE(rdm, "RDM pointer should not be null");
         REQUIRE_TRUE(rdm->m_ranksig == opsig::c_sing, "RDM object should be one-body");
 
-#if 0
-        const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
-        const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
-        auto bra = m_hist.m_row;
-        auto ket = bra;
+        // const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
+        // const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
+        // auto bra = m_hist.m_row;
+        // auto ket = bra;
 
-        for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
-            // alpha-alpha block
-            auto& ibeta = m_IndicesBeta[bbra];
-            for (auto& iket : m_DetsContainBeta[ibeta]) {
-                ket.restart();
-                if (bra.nbeta_not_in(ket + iket) <= rdm.m_ranksig) {
-                   const auto contrib = bra.m_weight[0] * ket.m_weight[0];
-                   m_rdms.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
-                }
-            }
-            // beta-beta block
-            auto& ialpha = m_IndicesAlpha[abra];
-            for (auto& iket : m_DetsContainAlpha[ialpha]) {
-                // do not double-count diagonal contributions bra.nalpha_not_in(ket) == 0
-                if (bra.nalpha_not_in(ket) > 0ul && bra.nalpha_not_in(ket) <= rdm.m_ranksig) {
-                    const auto contrib = bra.m_weight[0] * ket.m_weight[0];
-                    m_rdms.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
-                }
-            }
-        }
-#endif
+        // for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
+        //     // alpha-alpha block
+        //     auto& ibeta = m_indices_beta.item_cbegin(bra.m_mbf.nopen_shell_beta());
+        //     for (auto& iket : m_dets_contain_beta[ibeta]) {
+        //         ket.restart();
+        //         ket += iket;
+        //         if (bra.m_mbf.nalpha_not_in(ket.m_mbf) <= rdm.m_ranksig) {
+        //            const auto contrib = bra.m_weight[0] * ket.m_weight[0];
+        //            rdm.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
+        //         }
+        //     }
+        //     // beta-beta block
+        //     auto& ialpha = m_indices_alpha.item_cbegin(bra.m_mbf.nopen_shell_alpha());
+        //     for (auto& iket : m_dets_contain_alpha[ialpha]) {
+        //         ket.restart();
+        //         ket += iket;
+        //         if (bra.m_mbf.nbeta_not_in(ket.m_mbf) > 0ul && bra.m_mbf.nbeta_not_in(ket.m_mbf) <= rdm.m_ranksig) {
+        //             const auto contrib = bra.m_weight[0] * ket.m_weight[0];
+        //             rdm.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
+        //         }
+        //     }
+        // }
     }
 
     void fill_rdm2(PureRdm* rdm) const {
@@ -440,6 +429,41 @@ public:
         m_rdms(rdms),
         m_indices_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.major_dims<1>()),
         m_indices_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.major_dims<1>()) {
+
+        logging::info("constructing auxiliary arrays for RDM calculation");
+        const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
+        const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
+        auto bra = m_hist.m_row;
+        for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
+            const buffered::FrmOnvSpinChannel alpha_channel();
+            const buffered::FrmOnvSpinChannel beta_channel();
+            bra.m_mbf.copy_alpha_to(alpha_channel);
+            bra.m_mbf.copy_beta_to(beta_channel);
+
+            auto alpha_idx = std::find(m_alphas.begin(), m_alphas.end(), alpha_channel);
+            if (m_alphas.end() == alpha_idx) {
+                m_alphas.emplace_back(alpha_channel);
+                m_indices_alpha.insert(alpha_channel, m_alphas.size() - 1);
+                m_dets_contain_alpha.emplace_back({});
+                m_beta_with_alpha.emplace_back({});
+            }
+            auto beta_idx = std::find(m_betas.begin(), m_betas.end(), beta_channel);
+            if (m_betas.end() == beta_idx) {
+                m_betas.emplace_back(beta_channel);
+                m_indices_beta.insert(&beta_channel, m_betas.size() - 1);
+                m_dets_contain_beta.emplace_back({});
+                m_alpha_with_beta.emplace_back({});
+            }
+            // Smuvis m_indices_alpha/beta * are still in write-only mode, use index from search above.
+            m_dets_contain_alpha[alpha_idx].emplace_back(bra);
+            m_dets_contain_beta[beta_idx].emplace_back(bra);
+            m_beta_with_alpha[alpha_idx].emplace_back(beta_idx);
+            m_alpha_with_beta[beta_idx].emplace_back(alpha_idx);
+        }
+        m_indices_alpha.collate();
+        m_indices_beta.collate();
+        logging::info("successfully constructed auxiliary arrays for RDM calculation");
+
         // if there's no Fock*4RDM object allocated, there's nothing left to do
         if (!m_rdms || !m_rdms->m_fock_4rdm) return;
         logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
