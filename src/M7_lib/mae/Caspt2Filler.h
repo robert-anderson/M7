@@ -240,8 +240,9 @@ class Caspt2Filler {
     /**
      * Lists of unique alpha / beta strings in histogrammed set.
      */
-    std::vector<uintv_t> m_alphas;
-    std::vector<uintv_t> m_betas;
+     // todo: is it valid to omit the field scope resolution operator?
+    std::vector<field::FrmOnvSpinChannel> m_alphas;
+    std::vector<field::FrmOnvSpinChannel> m_betas;
     /**
      * Hash tables containing the index of a given alpha / beta string in m_Alphas / m_Betas.
      */
@@ -350,33 +351,26 @@ public:
         REQUIRE_TRUE(rdm, "RDM pointer should not be null");
         REQUIRE_TRUE(rdm->m_ranksig == opsig::c_sing, "RDM object should be one-body");
 
-        // const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
-        // const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
-        // auto bra = m_hist.m_row;
-        // auto ket = bra;
+        const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
+        const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
+        auto bra = m_hist.m_row;
+        auto ket = bra;
 
-        // for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
-        //     // alpha-alpha block
-        //     auto& ibeta = m_indices_beta.item_cbegin(bra.m_mbf.nopen_shell_beta());
-        //     for (auto& iket : m_dets_contain_beta[ibeta]) {
-        //         ket.restart();
-        //         ket += iket;
-        //         if (bra.m_mbf.nalpha_not_in(ket.m_mbf) <= rdm.m_ranksig) {
-        //            const auto contrib = bra.m_weight[0] * ket.m_weight[0];
-        //            rdm.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
-        //         }
-        //     }
-        //     // beta-beta block
-        //     auto& ialpha = m_indices_alpha.item_cbegin(bra.m_mbf.nopen_shell_alpha());
-        //     for (auto& iket : m_dets_contain_alpha[ialpha]) {
-        //         ket.restart();
-        //         ket += iket;
-        //         if (bra.m_mbf.nbeta_not_in(ket.m_mbf) > 0ul && bra.m_mbf.nbeta_not_in(ket.m_mbf) <= rdm.m_ranksig) {
-        //             const auto contrib = bra.m_weight[0] * ket.m_weight[0];
-        //             rdm.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
-        //         }
-        //     }
-        // }
+        for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
+            // alpha-alpha
+            // todo: m_indices_beta requires keys of type field::FrmOnvSpinChannel, but nopen_shell_beta is uintv_t
+            // auto& ibeta = m_indices_beta.item_cbegin(static_cast <field::FrmOnvSpinChannel> (bra.m_mbf.nopen_shell_beta()));
+            // for (auto& iket : m_dets_contain_beta[ibeta]) {
+            //     ket.restart();
+            //     ket += iket;
+            //     if (bra.m_mbf.nalpha_not_in(ket.m_mbf) <= rdm->m_ranksig) {
+            //        const auto contrib = bra.m_weight[0] * ket.m_weight[0];
+            //        // rdm.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
+            //     }
+            // }
+            // beta-beta
+            // if (bra.m_mbf.nbeta_not_in(ket.m_mbf) > 0ul && bra.m_mbf.nbeta_not_in(ket.m_mbf) <= rdm.m_ranksig) {
+        }
     }
 
     void fill_rdm2(PureRdm* rdm) const {
@@ -430,35 +424,40 @@ public:
         m_indices_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.major_dims<1>()),
         m_indices_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.major_dims<1>()) {
 
-        logging::info("constructing auxiliary arrays for RDM calculation");
+        logging::info("Constructing auxiliary arrays for RDM calculation");
         const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
         const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
         auto bra = m_hist.m_row;
         for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
-            const buffered::FrmOnvSpinChannel alpha_channel();
-            const buffered::FrmOnvSpinChannel beta_channel();
+            buffered::FrmOnvSpinChannel alpha_channel(6ul);
+            buffered::FrmOnvSpinChannel beta_channel(bra.m_mbf.m_basis.m_nsite);
             bra.m_mbf.copy_alpha_to(alpha_channel);
-            bra.m_mbf.copy_beta_to(beta_channel);
+            // bra.m_mbf.copy_beta_to(beta_channel);
+            // std::cout << bra.m_mbf.m_basis.m_nspinorb << " " << std::endl;
 
             auto alpha_idx = std::find(m_alphas.begin(), m_alphas.end(), alpha_channel);
             if (m_alphas.end() == alpha_idx) {
-                m_alphas.emplace_back(alpha_channel);
+                m_alphas.push_back(alpha_channel);
                 m_indices_alpha.insert(alpha_channel, m_alphas.size() - 1);
-                m_dets_contain_alpha.emplace_back({});
-                m_beta_with_alpha.emplace_back({});
+                m_dets_contain_alpha.push_back({});
+                m_beta_with_alpha.push_back({});
             }
             auto beta_idx = std::find(m_betas.begin(), m_betas.end(), beta_channel);
             if (m_betas.end() == beta_idx) {
-                m_betas.emplace_back(beta_channel);
-                m_indices_beta.insert(&beta_channel, m_betas.size() - 1);
-                m_dets_contain_beta.emplace_back({});
-                m_alpha_with_beta.emplace_back({});
+                m_betas.push_back(beta_channel);
+                m_indices_beta.insert(beta_channel, m_betas.size() - 1);
+                m_dets_contain_beta.push_back({});
+                m_alpha_with_beta.push_back({});
             }
-            // Smuvis m_indices_alpha/beta * are still in write-only mode, use index from search above.
-            m_dets_contain_alpha[alpha_idx].emplace_back(bra);
-            m_dets_contain_beta[beta_idx].emplace_back(bra);
-            m_beta_with_alpha[alpha_idx].emplace_back(beta_idx);
-            m_alpha_with_beta[beta_idx].emplace_back(alpha_idx);
+            // Smuvis m_indices_alpha/beta * are still in insert mode, use index from search above.
+            // todo: if element not found, std::find returns iterator pointing to last element + 1,
+            //  which should be the position new elements are appended to.
+            int64_t aidx = std::distance(m_alphas.begin(), alpha_idx);
+            int64_t bidx = std::distance(m_betas.begin(), beta_idx);
+            m_dets_contain_alpha[aidx].emplace_back(bra);
+            m_dets_contain_beta[bidx].emplace_back(bra);
+            m_beta_with_alpha[aidx].emplace_back(bidx);
+            m_alpha_with_beta[bidx].emplace_back(aidx);
         }
         m_indices_alpha.collate();
         m_indices_beta.collate();
