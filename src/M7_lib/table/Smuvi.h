@@ -17,9 +17,9 @@
  * expressed using STL containers as std::unordered_map<T, std::vector<unsigned long>>.
  *
  * Primary among which is that the map is never simultaneously modified and read; it is at any given time in one of two
- * "insert" or "access"
+ * states, "insert" or "access".
  *
- * The required data structure need not support some operations commonly implemented in serial and concurrent hash maps:
+ * The implemented data structure need not support some operations commonly required by serial and concurrent hash maps:
  *  - Reassignment of existing elements. Newly inserted scalar values are appended to the existing list of values
  *    corresponding to the key
  *  - Deletion. No key or element of a value array may be removed after it has been added
@@ -29,21 +29,101 @@
  * synchronisation overhead, to then be accessed for reading in constant time among all ranks in a communicator with a
  * common shared memory window.
  *
- * In the insert state, each rank initialises a private hash map and this is filled according to the workload of
- * insertions allotted to the rank. For access, shared-memory implementations of hash maps usually need to allow for the
- * possibility that a bin of keys can be written to or deleted from while the read operation is being carried out, and
- * as such a lock must be acquired before a read can take place, which results in sychronisation overhead. However, if
- * the SMUVI is in access state, each rank in a shared memory realm can lookup elements without the need to lock a
- * region of the buffer.
+ * The working of this data structure is perhaps best explained by an example:
  *
- * The SMUVI state is transformed from insert to access in the collate operation. This proceeds by collecting the keys
- * from each insertion map into a local array which is then sorted. These sorted local keys are then gathered
- * contiguously into a shared memory buffer.
+ * Suppose we have 4 MPI ranks in 2 shared memory realms initially in the insert state
+ * rank 0 (shmem 0, irank_shmem 0)
+ * rank 1 (shmem 0, irank_shmem 1)
+ * rank 2 (shmem 1, irank_shmem 0)
+ * rank 3 (shmem 1, irank_shmem 1)
+ *
+ * Suppose we have the following insertion workloads on each rank:
+ *  rank 0: [(C, 1), (B, 2), (A, 4), (B, 3), (A, 2) ]
+ *  rank 1: [(A, 3), (C, 0), (A, 0), (D, 4) ]
+ *  rank 2: [(A, 5), (D, 0), (B, 1), (C, 4) ]
+ *  rank 3: [(B, 5), (D, 1), (D, 3), (C, 2) ]
+ *
+ * The final data accessible data structure must be equivalent to a copy of the following map:
+ *  {
+ *      A : [0, 2, 3, 4, 5 ],
+ *      B : [1, 2, 3, 5 ],
+ *      C : [0, 1, 2, 4 ],
+ *      D : [0, 1, 3, 4 ]
+ *  }
+ *
+ * Each key must be allotted a destination rank number in each shared memory region, suppose we have
+ *  A -> [1, 3 ], B -> [0, 2 ], C -> [1, 2], D -> [0, 2]
+ * these are determined by Distribution::one_irank_in_each_shmem_region
+ *
+ * Now consider the insertion procedure on a single process, say rank 0.
+ * The inserter object is a communicating pair with nrank(=4) send tables and one receiving table
+ * Initially the inserter send tables are empty:
+ *  inserter send = [[], [], [], []]
+ * then after the first key-index pair in the rank 0 workload - (C, 1) - they become
+ *  inserter send = [[], [(C, 1)], [(C, 1)], []]
+ * since those are the rank indices associated with key C.
+ * repeating this process for the entire insertion workload of rank 0 we have
+ *  inserter send = [[(B, 2), (B, 3)], [(C, 1), (A, 4), (A, 2)], [(C, 1), (B, 2), (B, 3)], [(A, 4), (A, 2)]]
+ *
+ * and on the other ranks:
+ * rank 1:
+ *  inserter send = [[(D, 4)], [(A, 3), (C, 0), (A, 0)], [(C, 0), (D, 4)], [(A, 3), (A, 0)]]
+ * rank 2:
+ *  inserter send = [[(D, 0), (B, 1)], [(A, 5), (C, 4)], [(D, 0), (B, 1), (C, 4)], [(A, 5)]]
+ * rank 3:
+ *  inserter send = [[(B, 5), (D, 1), (D, 3)], [(C, 2)], [(B, 5), (D, 1), (D, 3), (C, 2)], []]
+ *
+ * once the insertion is done, the collate method is called. The first process of which is to communicate the inserted
+ * data to the receiving tables. This yields the following receiving tables
+ * rank 0:
+ *  inserter recv = [(B, 2), (B, 3), (D, 4), (D, 0), (B, 1), (B, 5), (D, 1), (D, 3)]
+ * rank 1:
+ *  inserter recv = [(C, 1), (A, 4), (A, 2), (A, 3), (C, 0), (A, 0), (A, 5), (C, 4), (C, 2)]
+ * rank 2:
+ *  inserter recv = [(C, 1), (B, 2), (B, 3), (C, 0), (D, 4), (D, 0), (B, 1), (C, 4), (B, 5), (D, 1), (D, 3), (C, 2)]
+ * rank 3:
+ *  inserter recv = [(A, 4), (A, 2), (A, 3), (A, 0), (A, 5)]
+ *
+ * Notice that each shared memory region (0, 1) and (2, 3) contains all key-index pairs between its constituent ranks.
+ * Now each rank creates a key-(sorted indices) hash table *in shared memory* so that the rank can write without data
+ * races, but once the collate step is complete, all ranks in the shared memory region can read from the created hash tables
+ *
+ * shmem 0:
+ *  accessors = [
+ *      { B: [1, 2, 3, 5 ], D : [0, 1, 3, 4 ] },
+ *      { A: [0, 2, 3, 4, 5 ], C: [0, 1, 2, 4 ] }
+ *  ]
+ * shmem 1:
+ *  accessors = [
+ *      { C: [0, 1, 2, 4 ], B: [1, 2, 3, 5 ], D : [0, 1, 3, 4 ] },
+ *      { A: [0, 2, 3, 4, 5 ] }
+ *  ]
+ * Each shared memory region also has a rank_offset array which determines the total number of keys in the ranks with
+ * index less than the indexed rank. This is to make it possible to attribute a contiguous index to each key. In the
+ * given example we would have the following rank_offsets:
+ * shmem 0:
+ *  rank_offsets = [0, 2 ]
+ * shmem 1:
+ *  rank_offsets = [0, 3 ]
+ *
+ * at this point, the collate step is complete.
+ *
+ * Note that the key -> indices map is equivalent across all shared memory regions, but the key -> offset map is not.
+ * In the example the offsets of each key are:
+ * shmem 0:
+ *  key_offsets = {A: 2, B: 0, C: 3, D: 1 }
+ * shmem 1:
+ *  key_offsets = {A: 3, B: 1, C: 0, D: 2 }
+ *
+ * This could be amended by a sort of the key fields, but this is not implemented currently
+ *
+ * After collation, the entries corresponding to each accessor table are stored in a flat shared memory array. Accesses
+ * are
  */
 
 
 template<typename key_t>
-struct Smuvi {
+class Smuvi {
 
     struct InsertRow : Row {
         key_t m_key;
@@ -75,6 +155,8 @@ struct Smuvi {
     uintv_t m_irank_world_to_iaccessor;
     v_t<buffered::MappedTable<AccessRow>> m_accessors;
     v_t<SharedArray<uint_t>> m_entries;
+    v_t<uint_t> m_rank_offsets;
+public:
 
     template<typename ...Args>
     Smuvi(str_t name, const Args&... key_ctor_args):
@@ -89,22 +171,6 @@ struct Smuvi {
         }
     }
 
-private:
-    const MappedTable<AccessRow>& accessor(const key_t& key) const {
-        // get the world rank index associated with the storage of this key
-        auto irank = Distribution::irank_in_shmem_region(key);
-        DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
-        return m_accessors[m_irank_world_to_iaccessor[irank]];
-    }
-
-    const SharedArray<uint_t>& entries(const key_t& key) const {
-        // get the world rank index associated with the storage of this key
-        auto irank = Distribution::irank_in_shmem_region(key);
-        DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
-        return m_entries[m_irank_world_to_iaccessor[irank]];
-    }
-
-public:
     void insert(const key_t& key, const uint_t& entry) {
         // send a copy to one rank in each shared memory realm
         for (auto irank_dst: Distribution::one_irank_in_each_shmem_region(key)) {
@@ -115,19 +181,43 @@ public:
         }
     }
 
-    uint_t nitem(const key_t& key) const {
-        const MappedTable<AccessRow>& accessor = this->accessor(key);
-        auto& entries_vec = m_entries[m_irank_world_to_iaccessor[mpi::irank()]];
-        const AccessRow& lookup_row = accessor.lookup(key);
-        if (!lookup_row) return ~0ul; // failed lookup
-        return lookup_row.m_entry_count;
-    }
+    struct AccessResult {
+        /**
+         * number of entries stored against the accessed key
+         */
+        const uint_t m_nentry;
+        /**
+         * offset of the accessed key among all in this shared memory region
+         */
+        const uint_t m_offset;
+        /**
+         * pointer to the first element of m_entries that is mapped-to by the accessed key
+         */
+        const uint_t* m_entry_cbegin;
 
-    const uint_t* item_cbegin(const key_t& key) const {
-        const MappedTable<AccessRow>& accessor = this->accessor(key);
+        AccessResult(uint_t nentry, uint_t offset, const uint_t* entry_cbegin):
+            m_nentry(nentry), m_offset(offset), m_entry_cbegin(entry_cbegin){}
+
+        AccessResult(): AccessResult(0, ~0ul, nullptr){}
+
+        operator bool() const {
+            return m_entry_cbegin;
+        }
+    };
+
+    AccessResult access(const key_t& key) const {
+        // get the world rank index associated with the storage of this key
+        auto irank = Distribution::irank_in_shmem_region(key);
+        DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
+        auto& accessor = m_accessors[m_irank_world_to_iaccessor[irank]];
+        auto& entries = m_entries[m_irank_world_to_iaccessor[irank]];
         const AccessRow& lookup_row = accessor.lookup(key);
-        if (!lookup_row) return nullptr; // failed lookup
-        return entries(key).cbegin() + lookup_row.m_entry_displ;
+        if (!lookup_row) return {}; // failed lookup
+        return {
+            lookup_row.m_entry_count,
+            m_rank_offsets[irank] + lookup_row.index(),
+            entries(key).cbegin() + lookup_row.m_entry_displ
+        };
     }
 
     void collate() {
@@ -141,7 +231,6 @@ public:
             if (entries.size() < accessor.nrecord()) entries.resize(accessor.nrecord());
             entries[accessor_row.index()].insert(recv_row.m_entry);
         }
-
 
         uintv_t nentries;
         {
@@ -157,6 +246,12 @@ public:
             mpi::all_gather(displ, nentries);
         }
 
+        m_rank_offsets.clear();
+        m_rank_offsets.push_back(0);
+        for (auto it = m_accessors.cbegin(); it != m_accessors.cend()-1; ++it) {
+            m_rank_offsets.push_back(m_rank_offsets.back() + it->nrow_in_use());
+        }
+
 
         m_entries.clear();
         m_entries.reserve(m_accessors.size());
@@ -166,15 +261,15 @@ public:
             m_entries.emplace_back(SharedArray<uint_t>(nentries[irank_world]));
         }
 
-
         {
-            auto& accessor_row = accessor.m_row;
             auto& entries_vec = m_entries[m_irank_world_to_iaccessor[mpi::irank()]];
             uint_t iitem = 0;
-            for (auto items : entries) {
+            for (auto& items : entries) {
                 for (auto item: items) entries_vec.set_(iitem++, item);
             }
         }
+
+
     }
 };
 

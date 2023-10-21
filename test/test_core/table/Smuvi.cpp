@@ -65,7 +65,6 @@ TEST(Smuvi, Comms) {
         smuvi.insert(mbf, entry);
     }
 
-    std::cout << smuvi.m_inserter.send().to_string() << std::endl;
     smuvi.collate();
 
 #if 0
