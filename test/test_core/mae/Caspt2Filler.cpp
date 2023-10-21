@@ -5,6 +5,47 @@
 #include "test_core/defs.h"
 #include "M7_lib/mae/Caspt2Filler.h"
 
+
+/*
+ * todo: Arta, add some brief commentary explaining why this inheritance is done and how the testing data is filled
+ */
+struct FillerTestPureRdm : public PureRdm {
+    suite::Mbfs m_work_mbfs;
+    struct Result {
+        uintv_t m_abra, m_bbra, m_aket, m_bket;
+    };
+    v_t<Result> m_gen_strings;
+
+    FillerTestPureRdm(const conf::Rdms& opts, OpSig ranksig, sys::Sector sector) :
+        PureRdm(opts, ranksig, sector, 1, "test_rdm"), m_work_mbfs(sector){}
+
+protected:
+
+    static void fill_setbits_vec(uintv_t& v, const field::FrmOnvSpinChannel& spin_channel) {
+        v.clear();
+        auto fn = [&v](uint_t ibit) { v.push_back(ibit);};
+        spin_channel.foreach_setbit(fn);
+    }
+
+    void frm_make_contribs(const FrmOnv &src_onv, const conn::FrmOnv &conn, const com_ops::Frm &, wf_t) override {
+        buffered::FrmOnvSpinChannel spin_channel(src_onv.m_basis.m_nsite);
+        auto& dst_onv = m_work_mbfs[src_onv];
+        conn.apply(src_onv, dst_onv);
+
+        Result res;
+        src_onv.copy_alpha_to(spin_channel);
+        fill_setbits_vec(res.m_abra, spin_channel);
+        src_onv.copy_beta_to(spin_channel);
+        fill_setbits_vec(res.m_bbra, spin_channel);
+        dst_onv.copy_alpha_to(spin_channel);
+        fill_setbits_vec(res.m_aket, spin_channel);
+        dst_onv.copy_beta_to(spin_channel);
+        fill_setbits_vec(res.m_bket, spin_channel);
+
+        m_gen_strings.push_back(std::move(res));
+    }
+};
+
 TEST(Caspt2Filler, Rdm1) {
     conf::Document doc;
     doc.m_av_ests.m_rdm.m_ranks = {"1"};
@@ -17,15 +58,18 @@ TEST(Caspt2Filler, Rdm1) {
     const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
     buffered::Table<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
 
+    /*
+     * todo: Arta, fill this with python script data
+     */
     const v_t<std::pair<wf_t, uintv_t>> weights_setbits_vec = {
             { 1.0, { 0,  1,  4,   6,  8, 11}},
             { 1.3, { 1,  4,  5,   7,  8,  9}},
             {-0.2, { 0,  1,  3,   6, 10, 11}},
             { 1.0, { 0,  2,  4,   8,  9, 11}},
-            {-0.2, { 3,  5,  6,   6,  9, 11}},
+            {-0.2, { 2,  3,  4,   6,  9, 11}},
             { 1.5, { 0,  1,  5,   7,  8, 10}},
             { 0.2, { 1,  2,  4,   7,  9, 10}},
-            {-0.9, { 3,  4,  5,   6,  8, 11}},
+            {-0.9, { 0,  4,  5,   6,  8, 11}},
             {-0.1, { 1,  3,  5,   9,  8, 11}}
     };
 
@@ -37,8 +81,20 @@ TEST(Caspt2Filler, Rdm1) {
 
     Caspt2Filler filler(hist, nullptr);
 
-    PureRdm rdm1(doc.m_av_ests.m_rdm, opsig::c_sing, sector, 1, "1RDM_test") ;
+    FillerTestPureRdm rdm1(doc.m_av_ests.m_rdm, opsig::c_sing, sector);
 
     filler.fill_rdm1(&rdm1);
     rdm1.end_cycle();
+
+    for (const auto& res: rdm1.m_gen_strings) {
+        std::cout << res.m_abra << res.m_bbra << res.m_aket << res.m_bket << std::endl;
+    }
+
+    /*
+     * todo: Arta, fill this with python script data corresponding to the 1rdm-contributing pairs of the above hist WF data
+     *  (in arbitrary order, this will be sorted in a std::set soon)
+    std::vector<FillerTestPureRdm::Result> {
+            {{1, 3, 4}, {0, 4, 5}, {}, {} },
+    };
+    */
 }

@@ -131,9 +131,9 @@ public:
      */
     uint_t get_beta_dataword(uint_t idataword) const;
 
-    void copy_alpha_to(FrmOnvSpinChannelField& spin_channel);
+    void copy_alpha_to(FrmOnvSpinChannelField& spin_channel) const;
 
-    void copy_beta_to(FrmOnvSpinChannelField& spin_channel);
+    void copy_beta_to(FrmOnvSpinChannelField& spin_channel) const;
 
     template<typename body_fn_t>
     void foreach_alpha(const body_fn_t& fn) const {
