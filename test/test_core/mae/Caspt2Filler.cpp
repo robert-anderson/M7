@@ -40,4 +40,5 @@ TEST(Caspt2Filler, Rdm1) {
     PureRdm rdm1(doc.m_av_ests.m_rdm, opsig::c_sing, sector, 1, "1RDM_test") ;
 
     filler.fill_rdm1(&rdm1);
+    rdm1.end_cycle();
 }
