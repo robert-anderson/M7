@@ -13,8 +13,28 @@ struct FillerTestPureRdm : public PureRdm {
     suite::Mbfs m_work_mbfs;
     struct Result {
         uintv_t m_abra, m_bbra, m_aket, m_bket;
+        bool operator < (const Result& other) const {
+            /**
+             * not the true lexicographic ordering operator of two size_t vecs, but good enough to uniquely order a set
+             */
+            auto lt_v = [](const uintv_t& v1, const uintv_t& v2) -> bool {
+                if (v1.size() < v2.size()) return true;
+                if (v1.size() > v2.size()) return false;
+                return std::memcmp(v1.data(), v2.data(), v1.size() * sizeof(uint_t)) < 0;
+            };
+            // try to decide order by abra
+            if (m_abra != other.m_abra) return (lt_v(m_abra, other.m_abra));
+            // order couldn't be decided by abra, move on to bbra
+            if (m_bbra != other.m_bbra) return (lt_v(m_bbra, other.m_bbra));
+            // order couldn't be decided by bbra, move on to aket
+            if (m_aket != other.m_aket) return (lt_v(m_aket, other.m_aket));
+            // order couldn't be decided by aket, move on to bket
+            if (m_bket != other.m_bket) return (lt_v(m_bket, other.m_bket));
+            // order couldn't be decided by bket, so results are actually equal
+            return false;
+        }
     };
-    v_t<Result> m_gen_strings;
+    std::set<Result> m_gen_strings;
 
     FillerTestPureRdm(const conf::Rdms& opts, OpSig ranksig, sys::Sector sector) :
         PureRdm(opts, ranksig, sector, 1, "test_rdm"), m_work_mbfs(sector){}
@@ -42,7 +62,7 @@ protected:
         dst_onv.copy_beta_to(spin_channel);
         fill_setbits_vec(res.m_bket, spin_channel);
 
-        m_gen_strings.push_back(std::move(res));
+        m_gen_strings.emplace(std::move(res));
     }
 };
 
@@ -93,7 +113,7 @@ TEST(Caspt2Filler, Rdm1) {
     /*
      * todo: Arta, fill this with python script data corresponding to the 1rdm-contributing pairs of the above hist WF data
      *  (in arbitrary order, this will be sorted in a std::set soon)
-    std::vector<FillerTestPureRdm::Result> {
+    std::set<FillerTestPureRdm::Result> {
             {{1, 3, 4}, {0, 4, 5}, {}, {} },
     };
     */
