@@ -194,9 +194,11 @@ public:
          * pointer to the first element of m_entries that is mapped-to by the accessed key
          */
         const uint_t* m_entry_cbegin;
+        const uint_t* m_entry_cend;
 
         AccessResult(uint_t nentry, uint_t offset, const uint_t* entry_cbegin):
-            m_nentry(nentry), m_offset(offset), m_entry_cbegin(entry_cbegin){}
+            m_nentry(nentry), m_offset(offset), m_entry_cbegin(entry_cbegin),
+            m_entry_cend(entry_cbegin ? (entry_cbegin + nentry) : nullptr){}
 
         AccessResult(): AccessResult(0, ~0ul, nullptr){}
 
@@ -216,7 +218,7 @@ public:
         return {
             lookup_row.m_entry_count,
             m_rank_offsets[irank] + lookup_row.index(),
-            entries(key).cbegin() + lookup_row.m_entry_displ
+            entries.cbegin() + lookup_row.m_entry_displ
         };
     }
 

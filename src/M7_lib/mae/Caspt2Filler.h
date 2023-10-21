@@ -238,6 +238,11 @@ class Caspt2Filler {
      */
     Rdms* m_rdms = nullptr;
     /**
+     * working objects for connections and common indices
+     */
+    mutable suite::Conns m_work_conns;
+    mutable suite::ComOps m_work_com_ops;
+    /**
      *
      */
     Smuvi<field::FrmOnvSpinChannel> m_dets_contain_alpha;
@@ -340,31 +345,48 @@ class Caspt2Filler {
     // todo: make private again
 public:
 
+    void make_contribs(PureRdm* rdm, const field::Mbf& src, const field::Mbf& dst, wf_t contrib) const {
+        auto& conn = m_work_conns[src];
+        auto& com_ops = m_work_com_ops[src];
+        conn.connect(src, dst, com_ops);
+        rdm->make_contribs(src, conn, com_ops, contrib);
+    }
+
     void fill_rdm1(PureRdm* rdm) const {
         REQUIRE_TRUE(rdm, "RDM pointer should not be null");
         REQUIRE_TRUE(rdm->m_ranksig == opsig::c_sing, "RDM object should be one-body");
 
         const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
         const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
-        auto bra = m_hist.m_row;
-        auto ket = bra;
+        auto bra_row = m_hist.m_row;
+        auto ket_row = bra_row;
 
-        buffered::FrmOnvSpinChannel alpha_channel(bra.m_mbf.m_basis.m_nsite);
-        buffered::FrmOnvSpinChannel beta_channel(bra.m_mbf.m_basis.m_nsite);
-        for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
-            bra.m_mbf.copy_alpha_to(alpha_channel);
-            bra.m_mbf.copy_beta_to(beta_channel);
+        auto make_contrib_fn = [&]() {
+            const auto contrib = bra_row.m_weight[0] * ket_row.m_weight[0];
+            make_contribs(rdm, bra_row.m_mbf, ket_row.m_mbf, contrib);
+        };
+
+        buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
+        buffered::FrmOnvSpinChannel beta_channel(bra_row.m_mbf.m_basis.m_nsite);
+        for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
+            bra_row.m_mbf.copy_alpha_to(alpha_channel);
+            bra_row.m_mbf.copy_beta_to(beta_channel);
             // alpha-alpha
-            for (auto& iket : m_dets_contain_beta.item_cbegin(beta_channel)) {
-                ket.restart();
-                ket += iket;
-                if (bra.m_mbf.nalpha_not_in(ket.m_mbf) <= rdm->m_ranksig) {
-                   const auto contrib = bra.m_weight[0] * ket.m_weight[0];
-                   // rdm.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
+            if (auto access = m_dets_contain_beta.access(beta_channel)) {
+                for (auto iket_ptr = access.m_entry_cbegin; iket_ptr != access.m_entry_cend; ++iket_ptr) {
+                    ket_row.jump(*iket_ptr);
+                    const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
+                    if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
                 }
             }
             // beta-beta
-            // if (bra.m_mbf.nbeta_not_in(ket.m_mbf) > 0ul && bra.m_mbf.nbeta_not_in(ket.m_mbf) <= rdm.m_ranksig) {}
+            if (auto access = m_dets_contain_alpha.access(alpha_channel)) {
+                for (auto iket_ptr = access.m_entry_cbegin; iket_ptr != access.m_entry_cend; ++iket_ptr) {
+                    ket_row.jump(*iket_ptr);
+                    const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
+                    if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
+                }
+            }
         }
     }
 
@@ -416,6 +438,8 @@ public:
         m_hist(hist),
         m_fock_x_hist("Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0}),
         m_rdms(rdms),
+        m_work_conns(mbf::get_basis(hist.m_row.m_mbf).size()),
+        m_work_com_ops(mbf::get_basis(hist.m_row.m_mbf).size()),
         m_dets_contain_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.minor_dims<1>()),
         m_dets_contain_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.minor_dims<1>()) {
         // m_beta_with_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.minor_dims<1>()),
@@ -431,8 +455,8 @@ public:
         for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
             bra.m_mbf.copy_alpha_to(alpha_channel);
             bra.m_mbf.copy_beta_to(beta_channel);
-            m_dets_contain_alpha.insert(alpha_channel, bra);
-            m_dets_contain_beta.insert(beta_channel, bra);
+            m_dets_contain_alpha.insert(alpha_channel, bra.index());
+            m_dets_contain_beta.insert(beta_channel, bra.index());
         }
         m_dets_contain_alpha.collate();
         m_dets_contain_beta.collate();
