@@ -238,26 +238,19 @@ class Caspt2Filler {
      */
     Rdms* m_rdms = nullptr;
     /**
-     * Lists of unique alpha / beta strings in histogrammed set.
+     *
      */
-     // todo: is it valid to omit the field scope resolution operator?
-    std::vector<field::FrmOnvSpinChannel> m_alphas;
-    std::vector<field::FrmOnvSpinChannel> m_betas;
-    /**
-     * Hash tables containing the index of a given alpha / beta string in m_Alphas / m_Betas.
-     */
-    Smuvi<field::FrmOnvSpinChannel> m_indices_alpha;
-    Smuvi<field::FrmOnvSpinChannel> m_indices_beta;
-    /**
-     * Lists of determinants in the histogrammed set containing a given alpha / beta string.
-     */
-    std::vector<uintv_t> m_dets_contain_alpha;
-    std::vector<uintv_t> m_dets_contain_beta;
-    /**
-     * Indices of alpha / beta strings occuring with a given beta / alpha string.
-     */
-     std::vector<uintv_t> m_beta_with_alpha;
-     std::vector<uintv_t> m_alpha_with_beta;
+    Smuvi<field::FrmOnvSpinChannel> m_dets_contain_alpha;
+    Smuvi<field::FrmOnvSpinChannel> m_dets_contain_beta;
+
+    // Smuvi<field::FrmOnvSpinChannel> m_beta_with_alpha;
+    // Smuvi<field::FrmOnvSpinChannel> m_alpha_with_beta;
+
+    // Smuvi<field::FrmOnvSpinChannel> m_alpha_single_dict;
+    // Smuvi<field::FrmOnvSpinChannel> m_beta_single_dict;
+
+    // Smuvi<field::FrmOnvSpinChannel> m_alpha_singles;
+    // Smuvi<field::FrmOnvSpinChannel> m_beta_singles;
 
     typedef std::pair<std::pair<uint_t, uint_t>, ham_t> pq_val_t;
     /**
@@ -356,20 +349,22 @@ public:
         auto bra = m_hist.m_row;
         auto ket = bra;
 
+        buffered::FrmOnvSpinChannel alpha_channel(bra.m_mbf.m_basis.m_nsite);
+        buffered::FrmOnvSpinChannel beta_channel(bra.m_mbf.m_basis.m_nsite);
         for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
+            bra.m_mbf.copy_alpha_to(alpha_channel);
+            bra.m_mbf.copy_beta_to(beta_channel);
             // alpha-alpha
-            // todo: m_indices_beta requires keys of type field::FrmOnvSpinChannel, but nopen_shell_beta is uintv_t
-            // auto& ibeta = m_indices_beta.item_cbegin(static_cast <field::FrmOnvSpinChannel> (bra.m_mbf.nopen_shell_beta()));
-            // for (auto& iket : m_dets_contain_beta[ibeta]) {
-            //     ket.restart();
-            //     ket += iket;
-            //     if (bra.m_mbf.nalpha_not_in(ket.m_mbf) <= rdm->m_ranksig) {
-            //        const auto contrib = bra.m_weight[0] * ket.m_weight[0];
-            //        // rdm.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
-            //     }
-            // }
+            for (auto& iket : m_dets_contain_beta.item_cbegin(beta_channel)) {
+                ket.restart();
+                ket += iket;
+                if (bra.m_mbf.nalpha_not_in(ket.m_mbf) <= rdm->m_ranksig) {
+                   const auto contrib = bra.m_weight[0] * ket.m_weight[0];
+                   // rdm.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
+                }
+            }
             // beta-beta
-            // if (bra.m_mbf.nbeta_not_in(ket.m_mbf) > 0ul && bra.m_mbf.nbeta_not_in(ket.m_mbf) <= rdm.m_ranksig) {
+            // if (bra.m_mbf.nbeta_not_in(ket.m_mbf) > 0ul && bra.m_mbf.nbeta_not_in(ket.m_mbf) <= rdm.m_ranksig) {}
         }
     }
 
@@ -421,46 +416,26 @@ public:
         m_hist(hist),
         m_fock_x_hist("Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0}),
         m_rdms(rdms),
-        m_indices_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.major_dims<1>()),
-        m_indices_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.major_dims<1>()) {
+        m_dets_contain_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.minor_dims<1>()),
+        m_dets_contain_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.minor_dims<1>()) {
+        // m_beta_with_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.minor_dims<1>()),
+        // m_alpha_with_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.minor_dims<1>())
 
         logging::info("Constructing auxiliary arrays for RDM calculation");
         const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
         const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
         auto bra = m_hist.m_row;
-        for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
-            buffered::FrmOnvSpinChannel alpha_channel(6ul);
-            buffered::FrmOnvSpinChannel beta_channel(bra.m_mbf.m_basis.m_nsite);
-            bra.m_mbf.copy_alpha_to(alpha_channel);
-            // bra.m_mbf.copy_beta_to(beta_channel);
-            // std::cout << bra.m_mbf.m_basis.m_nspinorb << " " << std::endl;
+        buffered::FrmOnvSpinChannel alpha_channel(bra.m_mbf.m_basis.m_nsite);
+        buffered::FrmOnvSpinChannel beta_channel(bra.m_mbf.m_basis.m_nsite);
 
-            auto alpha_idx = std::find(m_alphas.begin(), m_alphas.end(), alpha_channel);
-            if (m_alphas.end() == alpha_idx) {
-                m_alphas.push_back(alpha_channel);
-                m_indices_alpha.insert(alpha_channel, m_alphas.size() - 1);
-                m_dets_contain_alpha.push_back({});
-                m_beta_with_alpha.push_back({});
-            }
-            auto beta_idx = std::find(m_betas.begin(), m_betas.end(), beta_channel);
-            if (m_betas.end() == beta_idx) {
-                m_betas.push_back(beta_channel);
-                m_indices_beta.insert(beta_channel, m_betas.size() - 1);
-                m_dets_contain_beta.push_back({});
-                m_alpha_with_beta.push_back({});
-            }
-            // Smuvis m_indices_alpha/beta * are still in insert mode, use index from search above.
-            // todo: if element not found, std::find returns iterator pointing to last element + 1,
-            //  which should be the position new elements are appended to.
-            int64_t aidx = std::distance(m_alphas.begin(), alpha_idx);
-            int64_t bidx = std::distance(m_betas.begin(), beta_idx);
-            m_dets_contain_alpha[aidx].emplace_back(bra);
-            m_dets_contain_beta[bidx].emplace_back(bra);
-            m_beta_with_alpha[aidx].emplace_back(bidx);
-            m_alpha_with_beta[bidx].emplace_back(aidx);
+        for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
+            bra.m_mbf.copy_alpha_to(alpha_channel);
+            bra.m_mbf.copy_beta_to(beta_channel);
+            m_dets_contain_alpha.insert(alpha_channel, bra);
+            m_dets_contain_beta.insert(beta_channel, bra);
         }
-        m_indices_alpha.collate();
-        m_indices_beta.collate();
+        m_dets_contain_alpha.collate();
+        m_dets_contain_beta.collate();
         logging::info("successfully constructed auxiliary arrays for RDM calculation");
 
         // if there's no Fock*4RDM object allocated, there's nothing left to do
