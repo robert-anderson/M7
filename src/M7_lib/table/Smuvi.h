@@ -131,6 +131,9 @@ struct SmuviEntries {
 template<typename key_t>
 class Smuvi {
 
+    /**
+     * Row type for the inserter tables
+     */
     struct InsertRow : Row {
         key_t m_key;
         field::Number<uint_t> m_entry;
@@ -142,7 +145,9 @@ class Smuvi {
             return m_key;
         };
     };
-
+    /**
+     * Row type for the accessor tables
+     */
     struct AccessRow : Row {
         key_t m_key;
         field::Number<uint_t> m_entry_count;
@@ -156,12 +161,20 @@ class Smuvi {
             return m_key;
         };
     };
-
+    /**
+     * send and receive tables for the key-value pair insertion
+     */
     send_recv::BasicSend<InsertRow> m_inserter;
     uintv_t m_irank_world_to_iaccessor;
+    /**
+     * one shared-memory MappedTable for each rank in the shared memory region
+     */
     v_t<buffered::MappedTable<AccessRow>> m_accessors;
+    /**
+     * a single flat storage for all the entries associated with all keys in the shared memory region
+     */
     v_t<SharedArray<uint_t>> m_entries;
-    v_t<uint_t> m_rank_offsets;
+
 public:
 
     template<typename ...Args>
@@ -205,55 +218,124 @@ public:
     }
 
     void collate() {
+        /*
+         * first send the inserted key-index pairs to the receiving ranks
+         */
         m_inserter.communicate();
+        /*
+         * a shared memory MappedTable is set up for each rank, so that they can be set up without dataraces by a single
+         * rank, and thereafter accessed by all ranks in the shared memory region
+         */
         MappedTable<AccessRow>& accessor = m_accessors[m_irank_world_to_iaccessor[mpi::irank()]];
-        v_t<std::set<uint_t>> entries;
-
+        /*
+         * initialize a private vector of sets, once set for each key sent to this rank. The sets are used to build
+         * up an ordered list of the unique entry_sets associated with each key in the accessor, which will later be copied
+         * into the shared memory m_entries arrays
+         */
+        v_t<std::set<uint_t>> entry_sets;
+        /*
+         * loop over the received rows
+         */
         auto& recv_row = m_inserter.recv().m_row;
         for (recv_row.restart(); recv_row; ++recv_row) {
+            /*
+             * lookup the received key in the accessor table, or insert it if this is the first instance
+             */
             auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);
-            if (entries.size() < accessor.nrecord()) entries.resize(accessor.nrecord());
-            entries[accessor_row.index()].insert(recv_row.m_entry);
+            /*
+             * if there aren't enough entry sets for the current size of the accessor, allocate more
+             */
+            if (entry_sets.size() < accessor.nrecord()) entry_sets.resize(accessor.nrecord());
+            /*
+             * get the set of entry_sets corresponding to recv_row.m_key, and insert the new entry if it doesn't exist
+             */
+            entry_sets[accessor_row.index()].insert(recv_row.m_entry);
         }
 
+        /*
+         * a vector storing the number of entry_sets associated with each MPI rank
+         */
         uintv_t nentries;
         {
+            // the displacement from the beginning of the entry_sets
             uint_t displ = 0ul;
+            /*
+             * iterator initially pointing to the beginning of the entry sets (i.e. the first key in the accessor
+             * created by this rank)
+             */
+            auto entry_sets_it = entry_sets.cbegin();
+            // loop over all the rows in the accessor created by this rank
             auto& accessor_row = accessor.m_row;
-            auto entry_it = entries.cbegin();
             for (accessor_row.restart(); accessor_row; ++accessor_row) {
+                /*
+                 * set the displacement that will denote the index in the entry_sets array at which the entry_sets
+                 * corresponding to the current row in the accessor (i.e. the key) begin
+                 */
                 accessor_row.m_entry_displ = displ;
-                accessor_row.m_entry_count = entry_it->size();
+                /*
+                 * set the number of entry_sets corresponding to the key
+                 */
+                accessor_row.m_entry_count = entry_sets_it->size();
+                /*
+                 * increment the rank-private displ count
+                 */
                 displ += accessor_row.m_entry_count;
-                ++entry_it;
+                /*
+                 * advance the entry iterator
+                 */
+                ++entry_sets_it;
             }
+            DEBUG_ASSERT_TRUE(entry_sets_it == entry_sets.end(), "should have iterated through all entry sets");
+            /*
+             * gather the final displs (i.e. the total number of entries across all keys sent to this rank)
+             */
             mpi::all_gather(displ, nentries);
         }
 
-        m_rank_offsets.clear();
-        m_rank_offsets.push_back(0);
-        for (auto it = m_accessors.cbegin(); it != m_accessors.cend()-1; ++it) {
-            m_rank_offsets.push_back(m_rank_offsets.back() + it->nrow_in_use());
-        }
-
-
+        /*
+         * clear the entries shared memory arrays in case this is not the first call to collate
+         */
         m_entries.clear();
+        /*
+         * make sure enough elements are allocated for all the accessor tables
+         */
         m_entries.reserve(m_accessors.size());
-
+        /*
+         * get the shared memory region index of this rank
+         */
         const auto ishmem = mpi::g_ishmems[mpi::irank()];
+        /*
+         * loop over all the world-realm rank indices in this rank's shared memory region
+         */
         for (auto& irank_world: mpi::g_iranks_world_in_shmem_realms[ishmem]) {
+            /*
+             * create a new shared memory array of indices with sufficient elements to store all the entries associated
+             * with all the keys sent to irank_world
+             */
             m_entries.emplace_back(SharedArray<uint_t>(nentries[irank_world]));
         }
 
+        /*
+         * now write the sets of entries stored privately on this rank to the shared memory arrays accessible by all
+         * ranks on the same shared memory region
+         */
         {
-            auto& entries_vec = m_entries[m_irank_world_to_iaccessor[mpi::irank()]];
-            uint_t iitem = 0;
-            for (auto& items : entries) {
-                for (auto item: items) entries_vec.set_(iitem++, item);
+            /*
+             * get a reference to the entries array updated by this rank
+             */
+            auto& entries_array = m_entries[m_irank_world_to_iaccessor[mpi::irank()]];
+            uint_t ientry = 0;
+            for (const auto& entry_set : entry_sets) {
+                /*
+                 * loop over all values in all entry sets, copying them contiguously to the entries array
+                 */
+                for (const auto& entry: entry_set) entries_array.set_(ientry++, entry);
             }
         }
-
-
+        /*
+         * now the accessor tables are updated with the keys, and the entries arrays are updated with their
+         * corresponding sorted and unique index values
+         */
     }
 };
 
