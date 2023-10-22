@@ -10,6 +10,28 @@
 #include "M7_lib/communication/SendRecv.h"
 #include "M7_lib/communication/Distribution.h"
 
+
+struct SmuviEntries {
+    /**
+     * pointer to first element mapped to by a given key
+     */
+    const size_t* m_cbegin;
+    /**
+     * pointer to first element after m_cbegin not mapped to by the given key
+     */
+    const size_t* m_cend;
+
+    operator bool () const {
+        return m_cbegin && m_cend && (m_cbegin != m_cend);
+    }
+
+    template<typename fn_t>
+    void foreach(const fn_t& fn) const {
+        functor::assert_prototype<void(uint_t)>(fn);
+        for (auto ptr = m_cbegin; ptr != m_cend; ++ptr) fn(*ptr);
+    }
+};
+
 /**
  * Shared Memory Unordered map to Vectors of Indices(/Items) "SMUVI"
  * The SMUVI is a type of parallel hash map from a key domain to a variable-length vector of indices which has fewer
@@ -98,27 +120,11 @@
  *      { C: [0, 1, 2, 4 ], B: [1, 2, 3, 5 ], D : [0, 1, 3, 4 ] },
  *      { A: [0, 2, 3, 4, 5 ] }
  *  ]
- * Each shared memory region also has a rank_offset array which determines the total number of keys in the ranks with
- * index less than the indexed rank. This is to make it possible to attribute a contiguous index to each key. In the
- * given example we would have the following rank_offsets:
- * shmem 0:
- *  rank_offsets = [0, 2 ]
- * shmem 1:
- *  rank_offsets = [0, 3 ]
  *
  * at this point, the collate step is complete.
  *
- * Note that the key -> indices map is equivalent across all shared memory regions, but the key -> offset map is not.
- * In the example the offsets of each key are:
- * shmem 0:
- *  key_offsets = {A: 2, B: 0, C: 3, D: 1 }
- * shmem 1:
- *  key_offsets = {A: 3, B: 1, C: 0, D: 2 }
- *
- * This could be amended by a sort of the key fields, but this is not implemented currently
- *
  * After collation, the entries corresponding to each accessor table are stored in a flat shared memory array. Accesses
- * are
+ * return a pointer to the beginning of the entries to which the key corresponds
  */
 
 
@@ -181,45 +187,21 @@ public:
         }
     }
 
-    struct AccessResult {
-        /**
-         * number of entries stored against the accessed key
-         */
-        const uint_t m_nentry;
-        /**
-         * offset of the accessed key among all in this shared memory region
-         */
-        const uint_t m_offset;
-        /**
-         * pointer to the first element of m_entries that is mapped-to by the accessed key
-         */
-        const uint_t* m_entry_cbegin;
-        const uint_t* m_entry_cend;
-
-        AccessResult(uint_t nentry, uint_t offset, const uint_t* entry_cbegin):
-            m_nentry(nentry), m_offset(offset), m_entry_cbegin(entry_cbegin),
-            m_entry_cend(entry_cbegin ? (entry_cbegin + nentry) : nullptr){}
-
-        AccessResult(): AccessResult(0, ~0ul, nullptr){}
-
-        operator bool() const {
-            return m_entry_cbegin;
-        }
-    };
-
-    AccessResult access(const key_t& key) const {
+    SmuviEntries access(const key_t& key) const {
         // get the world rank index associated with the storage of this key
         auto irank = Distribution::irank_in_shmem_region(key);
         DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
         auto& accessor = m_accessors[m_irank_world_to_iaccessor[irank]];
         auto& entries = m_entries[m_irank_world_to_iaccessor[irank]];
         const AccessRow& lookup_row = accessor.lookup(key);
-        if (!lookup_row) return {}; // failed lookup
-        return {
-            lookup_row.m_entry_count,
-            m_rank_offsets[irank] + lookup_row.index(),
-            entries.cbegin() + lookup_row.m_entry_displ
-        };
+        if (!lookup_row) return {nullptr, nullptr}; // failed lookup
+        const auto cbegin = entries.cbegin() + lookup_row.m_entry_displ;
+        return {cbegin, cbegin + lookup_row.m_entry_count};
+    }
+
+    template<typename fn_t>
+    void foreach_entry(const key_t& key, const fn_t& fn) const {
+        access(key).foreach(fn);
     }
 
     void collate() {

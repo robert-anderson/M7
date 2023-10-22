@@ -371,9 +371,12 @@ public:
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
+            /*
+             * previous implementation (still works) where the loop over entries is explicit
+             *
             // alpha-alpha
             if (auto access = m_dets_contain_beta.access(beta_channel)) {
-                for (auto iket_ptr = access.m_entry_cbegin; iket_ptr != access.m_entry_cend; ++iket_ptr) {
+                for (auto iket_ptr = access.m_cbegin; iket_ptr != access.m_cend; ++iket_ptr) {
                     ket_row.jump(*iket_ptr);
                     const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
                     if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
@@ -381,12 +384,31 @@ public:
             }
             // beta-beta
             if (auto access = m_dets_contain_alpha.access(alpha_channel)) {
-                for (auto iket_ptr = access.m_entry_cbegin; iket_ptr != access.m_entry_cend; ++iket_ptr) {
+                for (auto iket_ptr = access.m_cbegin; iket_ptr != access.m_cend; ++iket_ptr) {
                     ket_row.jump(*iket_ptr);
                     const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
                     if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
                 }
             }
+            */
+
+            /*
+             * new implementation passing a callable to loop over all the entries associated with a key in the SMUVIs
+             */
+
+            // alpha-alpha
+            m_dets_contain_beta.foreach_entry(beta_channel, [&](uint_t iket){
+                ket_row.jump(iket);
+                const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
+                if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
+            });
+
+            // beta-beta
+            m_dets_contain_alpha.foreach_entry(alpha_channel, [&](uint_t iket){
+                ket_row.jump(iket);
+                const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
+                if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
+            });
         }
     }
 
