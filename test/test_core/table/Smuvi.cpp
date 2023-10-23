@@ -7,6 +7,36 @@
 #include "M7_lib/table/BufferedFields.h"
 #include "M7_lib/communication/Communicator.h"
 
+TEST(Smuvi, LookupKeysIndices) {
+    const uint_t nsite = 6;
+    Smuvi<field::FrmOnvSpinChannel> smuvi("test smuvi", nsite);
+    buffered::FrmOnvSpinChannel tmp_key(nsite);
+    const v_t<std::pair<uintv_t, uint_t>> insertions = {
+        {{0, 3, 5}, 4},
+        {{0, 2, 5}, 3},
+        {{1, 3, 5}, 6},
+        {{0, 3, 4}, 7},
+        {{0, 3, 5}, 9},
+        {{0, 1, 5}, 8},
+        {{0, 3, 5}, 2},
+    };
+
+    for (auto& insertion: insertions) {
+        tmp_key = insertion.first;
+        smuvi.insert(tmp_key, insertion.second);
+    }
+
+    smuvi.collate();
+
+    for (auto& insertion: insertions) {
+        tmp_key = insertion.first;
+        auto key_lookup_result = smuvi.access_by_key(tmp_key);
+        auto index_lookup_result = smuvi.access_by_index(key_lookup_result.m_key_index);
+        ASSERT_EQ(index_lookup_result.m_key_row.m_key, tmp_key);
+    }
+
+}
+
 TEST(Smuvi, Comms) {
     const sys::frm::Basis basis(4);
     const uint_t nelec_per_channel = 2;

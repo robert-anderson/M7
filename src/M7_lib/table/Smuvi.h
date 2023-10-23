@@ -32,6 +32,14 @@ struct SmuviEntries {
     }
 };
 
+struct SmuviEntriesWithIndex {
+    const SmuviEntries m_entries;
+    const size_t m_key_index;
+    operator bool() const {
+        return m_entries;
+    }
+};
+
 /**
  * Shared Memory Unordered map to Vectors of Indices(/Items) "SMUVI"
  * The SMUVI is a type of parallel hash map from a key domain to a variable-length vector of indices which has fewer
@@ -200,21 +208,55 @@ public:
         }
     }
 
-    SmuviEntries access(const key_t& key) const {
+    /**
+     * lookup entries (a vector of indices) and the key index given a key
+     */
+    SmuviEntriesWithIndex access_by_key(const key_t& key) const {
         // get the world rank index associated with the storage of this key
         auto irank = Distribution::irank_in_shmem_region(key);
         DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
         auto& accessor = m_accessors[m_irank_world_to_iaccessor[irank]];
         auto& entries = m_entries[m_irank_world_to_iaccessor[irank]];
         const AccessRow& lookup_row = accessor.lookup(key);
-        if (!lookup_row) return {nullptr, nullptr}; // failed lookup
+        if (!lookup_row) return {{nullptr, nullptr}, ~0ul}; // failed lookup
         const auto cbegin = entries.cbegin() + lookup_row.m_entry_displ;
-        return {cbegin, cbegin + lookup_row.m_entry_count};
+        // todo: rja, make index global wrt shared memory region offsets
+        return {{cbegin, cbegin + lookup_row.m_entry_count}, lookup_row.index()};
+    }
+
+    struct SmuviEntriesWithKey {
+        const SmuviEntries m_entries;
+        const AccessRow& m_key_row;
+        operator bool() const {
+            return m_entries;
+        }
+    };
+    /**
+     * lookup entries and the corresponding key given an index
+     */
+    SmuviEntriesWithKey access_by_index(size_t index) const {
+        // todo: rja, make shmem-region aware
+        // get the world rank index associated with the storage of this key
+        auto irank = 0ul;
+        DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
+        auto& accessor = m_accessors[m_irank_world_to_iaccessor[irank]];
+        auto& entries = m_entries[m_irank_world_to_iaccessor[irank]];
+        const auto& lookup_row = accessor.m_lookup_row;
+        if (index >= accessor.nrow_in_use()) return {{nullptr, nullptr}, lookup_row}; // failed lookup, out of bounds
+        lookup_row.jump(index);
+        const auto cbegin = entries.cbegin() + lookup_row.m_entry_displ;
+        // todo: rja, make index global wrt shared memory region offsets
+        return {{cbegin, cbegin + lookup_row.m_entry_count}, lookup_row};
     }
 
     template<typename fn_t>
-    void foreach_entry(const key_t& key, const fn_t& fn) const {
-        access(key).foreach(fn);
+    void foreach_entry_by_key(const key_t& key, const fn_t& fn) const {
+        access_by_key(key).m_entries.foreach(fn);
+    }
+
+    template<typename fn_t>
+    void foreach_entry_by_index(uint_t index, const fn_t& fn) const {
+        access_by_index(index).m_entries.foreach(fn);
     }
 
     void collate() {
