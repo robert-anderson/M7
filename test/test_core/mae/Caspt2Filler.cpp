@@ -37,7 +37,7 @@ struct FillerTestPureRdm : public PureRdm {
         }
 
         bool operator ==(const Result& other) const {
-            return m_abra == other.m_abra && m_bbra == other.m_bbra && m_aket == other.m_aket && m_bket == other.m_bket;
+            return (m_abra == other.m_abra) && (m_bbra == other.m_bbra) && (m_aket == other.m_aket) && (m_bket == other.m_bket);
         }
 
     };
@@ -115,7 +115,7 @@ TEST(Caspt2Filler, Rdm1) {
         std::cout << res.m_abra << res.m_bbra << res.m_aket << res.m_bket << std::endl;
     }
 
-    std::set<FillerTestPureRdm::Result> {
+    std::set<FillerTestPureRdm::Result> gen_strings_chk = {
         {{0, 1, 2, 5, 6, 8}, {10, 11, 12, 14, 15, 16}, {0, 1, 2, 5, 6, 8}, {10, 11, 12, 14, 15, 16}},
         {{0, 2, 3, 6, 7, 8}, { 9, 10, 11, 12, 14, 15}, {0, 2, 3, 6, 7, 8}, { 9, 10, 11, 12, 14, 15}},
         {{1, 2, 4, 6, 7, 8}, {11, 12, 13, 15, 16, 17}, {1, 2, 4, 6, 7, 8}, {11, 12, 13, 15, 16, 17}},
@@ -129,6 +129,9 @@ TEST(Caspt2Filler, Rdm1) {
         {{0, 1, 4, 5, 6, 8}, { 9, 10, 13, 14, 16, 17}, {0, 1, 4, 5, 6, 8}, { 9, 10, 13, 14, 16, 17}},
         {{0, 1, 2, 3, 4, 5}, { 9, 11, 12, 14, 15, 16}, {0, 1, 2, 3, 4, 5}, { 9, 11, 12, 14, 15, 16}}
     };
+
+    ASSERT_EQ(rdm1.m_gen_strings.size(), gen_strings_chk.size());
+    ASSERT_EQ(rdm1.m_gen_strings, gen_strings_chk);
 }
 
 // doubles
