@@ -35,7 +35,14 @@ TEST(Smuvi, LookupKeysIndices) {
         ASSERT_EQ(index_lookup_result.m_key_row.m_key, tmp_key);
     }
 
+    auto fn = [&](uint_t index, const Smuvi<field::FrmOnvSpinChannel>::SmuviEntriesWithKey& entries) {
+        auto index_chk = smuvi.access_by_key(entries.m_key_row.m_key).m_key_index;
+        ASSERT_EQ(index, index_chk);
+    };
+    smuvi.foreach(fn);
+
 }
+
 
 TEST(Smuvi, Comms) {
     const sys::frm::Basis basis(4);

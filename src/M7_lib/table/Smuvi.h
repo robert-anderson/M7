@@ -259,6 +259,19 @@ public:
         access_by_index(index).m_entries.foreach(fn);
     }
 
+    template<typename fn_t>
+    void foreach(const fn_t& fn) {
+        functor::assert_prototype<void(uint_t, const SmuviEntriesWithKey&)>(fn);
+        uint_t index = 0;
+        for (auto& accessor: m_accessors) {
+            auto& row = accessor.m_row;
+            for (row.restart(); row; ++row) {
+                fn(index, access_by_index(index));
+                ++index;
+            }
+        }
+    }
+
     void collate() {
         /*
          * first send the inserted key-index pairs to the receiving ranks
