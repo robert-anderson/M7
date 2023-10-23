@@ -35,6 +35,11 @@ struct FillerTestPureRdm : public PureRdm {
             // order couldn't be decided by bket, so results are actually equal
             return false;
         }
+
+        bool operator ==(const Result& other) const {
+            return m_abra == other.m_abra && m_bbra == other.m_bbra && m_aket == other.m_aket && m_bket == other.m_bket;
+        }
+
     };
     std::set<Result> m_gen_strings;
 
