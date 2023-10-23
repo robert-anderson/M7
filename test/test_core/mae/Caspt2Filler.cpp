@@ -7,7 +7,9 @@
 
 
 /*
- * todo: Arta, add some brief commentary explaining why this inheritance is done and how the testing data is filled
+ * Inherits from FillerPureRDM and adds a function to print out all contributing pairs of MBF contributing * to a
+ * RDM instead of just adding the contribution. These are ordered in a std::set to allow comparison with the reference
+ * data from * python irrespective of the ordering of the generated pairs.
  */
 struct FillerTestPureRdm : public PureRdm {
     suite::Mbfs m_work_mbfs;
@@ -69,28 +71,26 @@ protected:
 TEST(Caspt2Filler, Rdm1) {
     conf::Document doc;
     doc.m_av_ests.m_rdm.m_ranks = {"1"};
-    const uint_t nelec = 6ul;
+    const uint_t nelec = 12ul;
     const sys::frm::Electrons electrons(nelec);
     const sys::Particles particles {electrons, sys::bos::Bosons(0ul, true)};
-    const sys::Basis basis = {{6ul}, {0ul}};
+    const sys::Basis basis = {{9ul}, {0ul}};
     const sys::Sector sector(basis, particles);
 
     const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
     buffered::Table<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
 
-    /*
-     * todo: Arta, fill this with python script data
-     */
     const v_t<std::pair<wf_t, uintv_t>> weights_setbits_vec = {
-            { 1.0, { 0,  1,  4,   6,  8, 11}},
-            { 1.3, { 1,  4,  5,   7,  8,  9}},
-            {-0.2, { 0,  1,  3,   6, 10, 11}},
-            { 1.0, { 0,  2,  4,   8,  9, 11}},
-            {-0.2, { 2,  3,  4,   6,  9, 11}},
-            { 1.5, { 0,  1,  5,   7,  8, 10}},
-            { 0.2, { 1,  2,  4,   7,  9, 10}},
-            {-0.9, { 0,  4,  5,   6,  8, 11}},
-            {-0.1, { 1,  3,  5,   9,  8, 11}}
+            { 1.0, { 0, 1, 2, 5, 6, 8,   10, 11, 12, 14, 15, 16 }},
+            { 1.0, { 0, 2, 3, 6, 7, 8,    9, 10, 11, 12, 14, 15 }},
+            { 1.0, { 1, 2, 4, 6, 7, 8,   11, 12, 13, 15, 16, 17 }},
+            { 1.0, { 0, 1, 5, 6, 7, 8,   10, 11, 13, 15, 16, 17 }},
+            { 1.0, { 0, 3, 5, 6, 7, 8,   10, 11, 12, 13, 14, 16 }},
+            { 1.0, { 1, 2, 4, 6, 7, 8,    9, 10, 12, 15, 16, 17 }},
+            { 1.0, { 1, 4, 5, 6, 7, 8,   10, 11, 13, 14, 16, 17 }},
+            { 1.0, { 0, 3, 5, 6, 7, 8,    9, 10, 11, 13, 14, 16 }},
+            { 1.0, { 0, 1, 4, 5, 6, 8,    9, 10, 13, 14, 16, 17 }},
+            { 1.0, { 0, 1, 2, 3, 4, 5,    9, 11, 12, 14, 15, 16 }}
     };
 
     for (auto& pair: weights_setbits_vec) {
@@ -110,11 +110,18 @@ TEST(Caspt2Filler, Rdm1) {
         std::cout << res.m_abra << res.m_bbra << res.m_aket << res.m_bket << std::endl;
     }
 
-    /*
-     * todo: Arta, fill this with python script data corresponding to the 1rdm-contributing pairs of the above hist WF data
-     *  (in arbitrary order, this will be sorted in a std::set soon)
     std::set<FillerTestPureRdm::Result> {
-            {{1, 3, 4}, {0, 4, 5}, {}, {} },
+        {{0, 1, 2, 5, 6, 8}, {10, 11, 12, 14, 15, 16}, {0, 1, 2, 5, 6, 8}, {10, 11, 12, 14, 15, 16}},
+        {{0, 2, 3, 6, 7, 8}, { 9, 10, 11, 12, 14, 15}, {0, 2, 3, 6, 7, 8}, { 9, 10, 11, 12, 14, 15}},
+        {{1, 2, 4, 6, 7, 8}, {11, 12, 13, 15, 16, 17}, {1, 2, 4, 6, 7, 8}, {11, 12, 13, 15, 16, 17}},
+        {{0, 1, 5, 6, 7, 8}, {10, 11, 13, 15, 16, 17}, {0, 1, 5, 6, 7, 8}, {10, 11, 13, 15, 16, 17}},
+        {{0, 3, 5, 6, 7, 8}, {10, 11, 12, 13, 14, 16}, {0, 3, 5, 6, 7, 8}, {10, 11, 12, 13, 14, 16}},
+        {{0, 3, 5, 6, 7, 8}, {10, 11, 12, 13, 14, 16}, {0, 3, 5, 6, 7, 8}, { 9, 10, 11, 13, 14, 16}},
+        {{1, 2, 4, 6, 7, 8}, { 9, 10, 12, 15, 16, 17}, {1, 2, 4, 6, 7, 8}, { 9, 10, 12, 15, 16, 17}},
+        {{1, 4, 5, 6, 7, 8}, {10, 11, 13, 14, 16, 17}, {1, 4, 5, 6, 7, 8}, {10, 11, 13, 14, 16, 17}},
+        {{0, 3, 5, 6, 7, 8}, { 9, 10, 11, 13, 14, 16}, {0, 3, 5, 6, 7, 8}, {10, 11, 12, 13, 14, 16}},
+        {{0, 3, 5, 6, 7, 8}, { 9, 10, 11, 13, 14, 16}, {0, 3, 5, 6, 7, 8}, { 9, 10, 11, 13, 14, 16}},
+        {{0, 1, 4, 5, 6, 8}, { 9, 10, 13, 14, 16, 17}, {0, 1, 4, 5, 6, 8}, { 9, 10, 13, 14, 16, 17}},
+        {{0, 1, 2, 3, 4, 5}, { 9, 11, 12, 14, 15, 16}, {0, 1, 2, 3, 4, 5}, { 9, 11, 12, 14, 15, 16}}
     };
-    */
 }
