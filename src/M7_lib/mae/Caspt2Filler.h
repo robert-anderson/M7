@@ -242,11 +242,17 @@ class Caspt2Filler {
      */
     mutable suite::Conns m_work_conns;
     mutable suite::ComOps m_work_com_ops;
+
+
+    struct SpinChannelToIndsMap : Smuvi<field::FrmOnvSpinChannel> {
+        SpinChannelToIndsMap(str_t name, size_t nsite):
+            Smuvi<field::FrmOnvSpinChannel>(std::move(name), field::FrmOnvSpinChannel(nullptr, nsite)){}
+    };
     /**
      *
      */
-    Smuvi<field::FrmOnvSpinChannel> m_dets_contain_alpha;
-    Smuvi<field::FrmOnvSpinChannel> m_dets_contain_beta;
+    SpinChannelToIndsMap m_dets_contain_alpha;
+    SpinChannelToIndsMap m_dets_contain_beta;
 
     // Smuvi<field::FrmOnvSpinChannel> m_beta_with_alpha;
     // Smuvi<field::FrmOnvSpinChannel> m_alpha_with_beta;
@@ -462,8 +468,8 @@ public:
         m_rdms(rdms),
         m_work_conns(mbf::get_basis(hist.m_row.m_mbf).size()),
         m_work_com_ops(mbf::get_basis(hist.m_row.m_mbf).size()),
-        m_dets_contain_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.minor_dims<1>()),
-        m_dets_contain_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.minor_dims<1>()) {
+        m_dets_contain_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.m_shape[1]),
+        m_dets_contain_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.m_shape[1]) {
         // m_beta_with_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.minor_dims<1>()),
         // m_alpha_with_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.minor_dims<1>())
 

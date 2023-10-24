@@ -9,7 +9,7 @@
 
 TEST(Smuvi, LookupKeysIndices) {
     const uint_t nsite = 6;
-    Smuvi<field::FrmOnvSpinChannel> smuvi("test smuvi", nsite);
+    Smuvi<field::FrmOnvSpinChannel> smuvi("test smuvi", field::FrmOnvSpinChannel(nullptr, nsite));
     buffered::FrmOnvSpinChannel tmp_key(nsite);
     const v_t<std::pair<uintv_t, uint_t>> insertions = {
         {{0, 3, 5}, 4},
@@ -91,7 +91,7 @@ TEST(Smuvi, Comms) {
         std::swap(input_data[shuffle_pair[0]], input_data[shuffle_pair[1]]);
     }
 
-    Smuvi<field::FrmOnv> smuvi("my_smuvi", basis);
+    Smuvi<field::FrmOnv> smuvi("my_smuvi", field::FrmOnv(nullptr, basis));
     buffered::FrmOnv mbf(basis);
 
     for (const auto& data: input_data) {

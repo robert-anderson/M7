@@ -41,7 +41,7 @@ struct SmuviEntriesWithIndex {
 };
 
 /**
- * Shared Memory Unordered map to Vectors of Indices(/Items) "SMUVI"
+ * Shared Memory Unordered map to Vectors of Items "SMUVI"
  * The SMUVI is a type of parallel hash map from a key domain to a variable-length vector of indices which has fewer
  * requirements than a parallelised generalization of a map from type T to a arbitrarily sized array of type U elements,
  * expressed using STL containers as std::unordered_map<T, std::vector<unsigned long>>.
@@ -146,8 +146,9 @@ class Smuvi {
         key_t m_key;
         field::Number<uint_t> m_entry;
 
-        template<typename ...Args>
-        InsertRow(const Args&... key_ctor_args): m_key(this, key_ctor_args...), m_entry(this){}
+        explicit InsertRow(const key_t& key): m_key(key), m_entry(this){
+            static_cast<FieldBase&>(m_key).add_to_row(this);
+        }
 
         key_t &key_field() {
             return m_key;
@@ -161,9 +162,9 @@ class Smuvi {
         field::Number<uint_t> m_entry_count;
         field::Number<uint_t> m_entry_displ;
 
-        template<typename ...Args>
-        AccessRow(const Args&... key_ctor_args):
-                m_key(this, key_ctor_args...), m_entry_count(this), m_entry_displ(this){}
+        explicit AccessRow(const key_t& key): m_key(key), m_entry_count(this), m_entry_displ(this){
+            static_cast<FieldBase&>(m_key).add_to_row(this);
+        }
 
         key_t &key_field() {
             return m_key;
@@ -185,16 +186,15 @@ class Smuvi {
 
 public:
 
-    template<typename ...Args>
-    Smuvi(str_t name, const Args&... key_ctor_args):
-            m_inserter(name, InsertRow(key_ctor_args...), {100, 2.0}),
+    Smuvi(str_t name, const key_t& key):
+            m_inserter(name, InsertRow(key), {100, 2.0}),
             m_irank_world_to_iaccessor(mpi::nrank(), ~0ul) {
         // index of the shared memory realm
         const auto ishmem = mpi::g_ishmems[mpi::irank()];
         // iterate over the rank indices in this shmem realm and create an accessor table for each one
         for (auto& irank_world: mpi::g_iranks_world_in_shmem_realms[ishmem]) {
             m_irank_world_to_iaccessor[irank_world] = m_accessors.size();
-            m_accessors.emplace_back(AccessRow(key_ctor_args...), true);
+            m_accessors.emplace_back(AccessRow(key), true);
         }
     }
 

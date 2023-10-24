@@ -96,6 +96,8 @@ public:
         return *this;
     }
 
+    void add_to_row(Row* row);
+
     bool is_comparable(const FieldBase &other) const;
 
     bool belongs_to_row() const;
