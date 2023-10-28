@@ -244,9 +244,12 @@ class Caspt2Filler {
     mutable suite::ComOps m_work_com_ops;
 
 
-    struct SpinChannelToIndsMap : Smuvi<field::FrmOnvSpinChannel> {
+    struct SpinChannelToIndsMap : Smuvi<field::FrmOnvSpinChannel, field::Number<uint_t>> {
         SpinChannelToIndsMap(str_t name, size_t nsite):
-            Smuvi<field::FrmOnvSpinChannel>(std::move(name), field::FrmOnvSpinChannel(nullptr, nsite)){}
+            Smuvi<field::FrmOnvSpinChannel, field::Number<uint_t>>(
+                std::move(name),
+                field::FrmOnvSpinChannel(nullptr, nsite),
+                field::Number<uint_t>(nullptr)){}
     };
     /**
      *
@@ -403,14 +406,14 @@ public:
              */
 
             // alpha-alpha
-            m_dets_contain_beta.foreach_entry_by_key(beta_channel, [&](uint_t iket){
+            m_dets_contain_beta.foreach_value(beta_channel, [&](uint_t iket){
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
                 if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
             });
 
             // beta-beta
-            m_dets_contain_alpha.foreach_entry_by_key(alpha_channel, [&](uint_t iket){
+            m_dets_contain_alpha.foreach_value(alpha_channel, [&](uint_t iket){
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
                 if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
