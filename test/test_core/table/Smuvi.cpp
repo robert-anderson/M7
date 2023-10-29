@@ -9,7 +9,8 @@
 
 TEST(Smuvi, LookupKeysIndices) {
     const uint_t nsite = 6;
-    Smuvi<field::FrmOnvSpinChannel> smuvi("test smuvi", nsite);
+    using smuvi_t = Smuvi<field::FrmOnvSpinChannel, field::Number<uint_t>>;
+    smuvi_t smuvi("test smuvi", field::FrmOnvSpinChannel(nullptr, nsite), field::Number<uint_t>(nullptr));
     buffered::FrmOnvSpinChannel tmp_key(nsite);
     const v_t<std::pair<uintv_t, uint_t>> insertions = {
         {{0, 3, 5}, 4},
@@ -28,18 +29,11 @@ TEST(Smuvi, LookupKeysIndices) {
 
     smuvi.collate();
 
-    for (auto& insertion: insertions) {
-        tmp_key = insertion.first;
-        auto key_lookup_result = smuvi.access_by_key(tmp_key);
-        auto index_lookup_result = smuvi.access_by_index(key_lookup_result.m_key_index);
-        ASSERT_EQ(index_lookup_result.m_key_row.m_key, tmp_key);
-    }
-
-    auto fn = [&](uint_t index, const Smuvi<field::FrmOnvSpinChannel>::SmuviEntriesWithKey& entries) {
-        auto index_chk = smuvi.access_by_key(entries.m_key_row.m_key).m_key_index;
-        ASSERT_EQ(index, index_chk);
+    auto fn = [&smuvi](const field::FrmOnvSpinChannel& key, smuvi_t::AccessResult values) -> void {
+        auto lookup_values = smuvi.access(key);
+        ASSERT_EQ(lookup_values, values);
     };
-    smuvi.foreach(fn);
+    smuvi.foreach_key(fn);
 
 }
 
@@ -91,7 +85,7 @@ TEST(Smuvi, Comms) {
         std::swap(input_data[shuffle_pair[0]], input_data[shuffle_pair[1]]);
     }
 
-    Smuvi<field::FrmOnv> smuvi("my_smuvi", basis);
+    Smuvi<field::FrmOnv, field::Number<uint_t>> smuvi("my_smuvi", field::FrmOnv(nullptr, basis), field::Number<uint_t>(nullptr));
     buffered::FrmOnv mbf(basis);
 
     for (const auto& data: input_data) {
