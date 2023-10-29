@@ -272,9 +272,8 @@ class Caspt2Filler {
      */
     SpinChannelToIndsSmuvi m_dets_contain_alpha;
     SpinChannelToIndsSmuvi m_dets_contain_beta;
-
-    // Smuvi<field::FrmOnvSpinChannel> m_beta_with_alpha;
-    // Smuvi<field::FrmOnvSpinChannel> m_alpha_with_beta;
+    SpinChannelToSpinChannelSmuvi m_beta_with_alpha;
+    SpinChannelToSpinChannelSmuvi m_alpha_with_beta;
 
     // Smuvi<field::FrmOnvSpinChannel> m_alpha_single_dict;
     // Smuvi<field::FrmOnvSpinChannel> m_beta_single_dict;
@@ -396,38 +395,12 @@ public:
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
-            /*
-             * previous implementation (still works) where the loop over entries is explicit
-             *
-            // alpha-alpha
-            if (auto access = m_dets_contain_beta.access(beta_channel)) {
-                for (auto iket_ptr = access.m_cbegin; iket_ptr != access.m_cend; ++iket_ptr) {
-                    ket_row.jump(*iket_ptr);
-                    const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
-                    if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
-                }
-            }
-            // beta-beta
-            if (auto access = m_dets_contain_alpha.access(alpha_channel)) {
-                for (auto iket_ptr = access.m_cbegin; iket_ptr != access.m_cend; ++iket_ptr) {
-                    ket_row.jump(*iket_ptr);
-                    const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
-                    if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
-                }
-            }
-            */
-
-            /*
-             * new implementation passing a callable to loop over all the entries associated with a key in the SMUVIs
-             */
-
             // alpha-alpha
             m_dets_contain_beta.foreach_value(beta_channel, [&](const field::Number<uint_t>& iket){
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
                 if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
             });
-
             // beta-beta
             m_dets_contain_alpha.foreach_value(alpha_channel, [&](const field::Number<uint_t>& iket){
                 ket_row.jump(iket);
@@ -440,9 +413,65 @@ public:
     void fill_rdm2(PureRdm* rdm) const {
         REQUIRE_TRUE(rdm, "RDM pointer should not be null");
         REQUIRE_TRUE(rdm->m_ranksig == opsig::c_doub, "RDM object should be two-body");
-        // todo
-        // Smuvi<FrmOnvField> indices_alpha("alpha indices hash map", m_hist.m_row.m_mbf.m_basis);
-    }
+
+        const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
+        const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
+        auto bra_row = m_hist.m_row;
+        auto ket_row = bra_row;
+
+        auto make_contrib_fn = [&]() {
+            const auto contrib = bra_row.m_weight[0] * ket_row.m_weight[0];
+            make_contribs(rdm, bra_row.m_mbf, ket_row.m_mbf, contrib);
+        };
+
+        buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
+        buffered::FrmOnvSpinChannel beta_channel(bra_row.m_mbf.m_basis.m_nsite);
+        for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
+            bra_row.m_mbf.copy_alpha_to(alpha_channel);
+            bra_row.m_mbf.copy_beta_to(beta_channel);
+        }
+
+            // m_dets_contain_beta.foreach_entry_by_key(beta_channel, [&](uint_t iket){
+            //     ket_row.jump(iket);
+            //     const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
+            //     if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
+            // });
+
+            // m_dets_contain_alpha.foreach_entry_by_key(alpha_channel, [&](uint_t iket){
+            //     ket_row.jump(iket);
+            //     const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
+            //     if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
+            // });
+
+            /** Python
+             *  for alpha_string in AlphaSingles[abra]:
+             *     for beta_string in set(BetaWithAlpha[alpha_string]) & set(BetaSingles[bbra]):
+             *         for iket in set(DetsContainBeta[beta_string]) & set(DetsContainAlpha[alpha_string]):
+             *             yield ibra, iket
+            */
+            // todo: uncomment when all auxiliary arrays are defined
+            // m_alpha_singles.foreach_entry_by_key(alpha_channel, [&](uint_t alpha_string){
+            //     v_t<FrmOnvField> valid_beta_strings = {};
+            //     auto access_beta_with_alpha = m_beta_with_alpha.access(alpha_string);
+            //     auto access_beta_singles = m_beta_singles.access(beta_channel);
+            //     std::set_intersection(access_beta_with_alpha.m_entry_cbegin, access_beta_with_alpha.m_entry_cend,
+            //                           access_beta_singles.m_entry_cbegin, access_beta_singles.m_entry_cend,
+            //                           std::back_inserter(valid_beta_strings));
+            //     for (auto& beta_string : valid_beta_strings) {
+            //         uintv_t dets = {};
+            //         auto access_dets_contain_alpha = m_dets_contain_alpha.access(alpha_string);
+            //         auto access_dets_contain_beta = m_dets_contain_beta.access(beta_string);
+            //         std::set_intersection(access_dets_contain_beta.m_entry_cbegin, access_dets_contain_beta.m_entry_cend,
+            //                               access_dets_contain_alpha.m_entry_cbegin, access_dets_contain_alpha.m_entry_cend,
+            //                               std::back_inserter(dets));
+            //         for (auto& iket : dets){
+            //             ket_row.jump(iket);
+            //             make_contrib_fn();
+            //         }
+            //     }
+            // });
+
+        }
 
     void fill_rdm3(PureRdm* rdm) const {
         REQUIRE_TRUE(rdm, "RDM pointer should not be null");
@@ -488,9 +517,10 @@ public:
         m_work_conns(mbf::get_basis(hist.m_row.m_mbf).size()),
         m_work_com_ops(mbf::get_basis(hist.m_row.m_mbf).size()),
         m_dets_contain_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_dets_contain_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.m_shape[1]) {
-        // m_beta_with_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.minor_dims<1>()),
-        // m_alpha_with_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.minor_dims<1>())
+        m_dets_contain_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_with_alpha("spin channel to spin channel map (alpha)", hist.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_with_beta("spin channel to spin channel map (beta)", hist.m_row.m_mbf.m_format.m_shape[1])
+        {
 
         logging::info("Constructing auxiliary arrays for RDM calculation");
         const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
@@ -504,9 +534,27 @@ public:
             bra.m_mbf.copy_beta_to(beta_channel);
             m_dets_contain_alpha.insert(alpha_channel, bra.index());
             m_dets_contain_beta.insert(beta_channel, bra.index());
+            m_beta_with_alpha.insert(alpha_channel, beta_channel);
+            m_alpha_with_beta.insert(beta_channel, alpha_channel);
         }
         m_dets_contain_alpha.collate();
         m_dets_contain_beta.collate();
+        // m_beta_with_alpha.collate();
+        // m_alpha_with_beta.collate();
+
+        // {
+        //     auto outer_fn = [&](uint_t index, const Smuvi<field::FrmOnvSpinChannel>::SmuviEntriesWithKey &alpha_channel) {
+        //         auto tmp_alpha = alpha_channel;
+        //         auto inner_fn = [&](uint_t isite) {
+        //             tmp_alpha.clr(isite);
+        //             m_alpha_single_dict.insert(tmp_alpha, alpha_channel);
+        //             tmp_alpha.set(isite);
+        //         };
+        //         alpha_channel.foreach_setbit(inner_fn);
+        //     };
+        //     m_dets_contain_alpha.foreach(outer_fn);
+        // }
+
         logging::info("successfully constructed auxiliary arrays for RDM calculation");
 
         // if there's no Fock*4RDM object allocated, there's nothing left to do
