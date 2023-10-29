@@ -205,7 +205,7 @@ public:
         }
     }
 
-    void insert(const key_t& key, const uint_t& value) {
+    void insert(const key_t& key, const value_t& value) {
         // send a copy to one rank in each shared memory realm
         for (auto irank_dst: Distribution::one_irank_in_each_shmem_region(key)) {
             Table<InsertRow> &send = m_inserter.send(irank_dst);
