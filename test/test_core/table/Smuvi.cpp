@@ -22,9 +22,11 @@ TEST(Smuvi, LookupKeysIndices) {
         {{0, 3, 5}, 2},
     };
 
+    buffered::Number<uint_t> tmp_val;
     for (auto& insertion: insertions) {
         tmp_key = insertion.first;
-        smuvi.insert(tmp_key, insertion.second);
+        tmp_val = insertion.second;
+        smuvi.insert(tmp_key, tmp_val);
     }
 
     smuvi.collate();
@@ -36,6 +38,29 @@ TEST(Smuvi, LookupKeysIndices) {
     smuvi.foreach_key(fn);
 
 }
+
+TEST(Smuvi, BitsetToBitset) {
+    const uint_t nsite = 6;
+    using smuvi_t = Smuvi<field::FrmOnvSpinChannel, field::FrmOnvSpinChannel>;
+    smuvi_t smuvi("test smuvi", field::FrmOnvSpinChannel(nullptr, nsite), field::FrmOnvSpinChannel(nullptr, nsite));
+    buffered::FrmOnvSpinChannel tmp_key(nsite);
+    buffered::FrmOnvSpinChannel tmp_val(nsite);
+
+    tmp_key = uintv_t{0, 3, 5};
+    tmp_val = uintv_t{0, 3, 4};
+
+    smuvi.insert(tmp_key, tmp_key);
+
+    smuvi.collate();
+
+    auto fn = [&smuvi](const field::FrmOnvSpinChannel& key, smuvi_t::AccessResult values) -> void {
+        auto lookup_values = smuvi.access(key);
+        ASSERT_EQ(lookup_values, values);
+    };
+    smuvi.foreach_key(fn);
+
+}
+
 
 
 TEST(Smuvi, Comms) {
@@ -88,12 +113,14 @@ TEST(Smuvi, Comms) {
     Smuvi<field::FrmOnv, field::Number<uint_t>> smuvi("my_smuvi", field::FrmOnv(nullptr, basis), field::Number<uint_t>(nullptr));
     buffered::FrmOnv mbf(basis);
 
+    buffered::Number<uint_t> val;
+
     for (const auto& data: input_data) {
         const auto& alpha_string = all_channel_setbits[data.first.first];
         const auto& beta_string = all_channel_setbits[data.first.second];
-        const auto& entry = data.second;
+        val = data.second;
         mbf = {alpha_string, beta_string};
-        smuvi.insert(mbf, entry);
+        smuvi.insert(mbf, val);
     }
 
     smuvi.collate();

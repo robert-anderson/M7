@@ -245,11 +245,20 @@ class Caspt2Filler {
 
 
     struct SpinChannelToIndsSmuvi : Smuvi<field::FrmOnvSpinChannel, field::Number<uint_t>> {
+    private:
+        buffered::Number<uint_t> m_inserter;
+
+    public:
         SpinChannelToIndsSmuvi(str_t name, size_t nsite):
                 Smuvi<field::FrmOnvSpinChannel, field::Number<uint_t>>(
                         std::move(name),
                         field::FrmOnvSpinChannel(nullptr, nsite),
                         field::Number<uint_t>(nullptr)){}
+
+        void insert(const field::FrmOnvSpinChannel& key, uint_t value) {
+            m_inserter = value;
+            Smuvi<field::FrmOnvSpinChannel, field::Number<uint_t>>::insert(key, m_inserter);
+        }
     };
 
     struct SpinChannelToSpinChannelSmuvi : Smuvi<field::FrmOnvSpinChannel, field::FrmOnvSpinChannel> {
