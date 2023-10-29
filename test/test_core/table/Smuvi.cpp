@@ -9,8 +9,8 @@
 
 TEST(Smuvi, LookupKeysIndices) {
     const uint_t nsite = 6;
-    Smuvi<field::FrmOnvSpinChannel, field::Number<uint_t>> smuvi(
-            "test smuvi", field::FrmOnvSpinChannel(nullptr, nsite), field::Number<uint_t>(nullptr));
+    using smuvi_t = Smuvi<field::FrmOnvSpinChannel, field::Number<uint_t>>;
+    smuvi_t smuvi("test smuvi", field::FrmOnvSpinChannel(nullptr, nsite), field::Number<uint_t>(nullptr));
     buffered::FrmOnvSpinChannel tmp_key(nsite);
     const v_t<std::pair<uintv_t, uint_t>> insertions = {
         {{0, 3, 5}, 4},
@@ -29,12 +29,11 @@ TEST(Smuvi, LookupKeysIndices) {
 
     smuvi.collate();
 
-//
-//    auto fn = [&](uint_t index, const Smuvi<field::FrmOnvSpinChannel>::SmuviEntriesWithKey& entries) {
-//        auto index_chk = smuvi.access(entries.m_key_row.m_key).m_key_index;
-//        ASSERT_EQ(index, index_chk);
-//    };
-//    smuvi.foreach(fn);
+    auto fn = [&smuvi](const field::FrmOnvSpinChannel& key, smuvi_t::AccessResult values) -> void {
+        auto lookup_values = smuvi.access(key);
+        ASSERT_EQ(lookup_values, values);
+    };
+    smuvi.foreach_key(fn);
 
 }
 

@@ -11,28 +11,6 @@
 #include "M7_lib/communication/Distribution.h"
 
 
-//struct SmuviEntries {
-//    /**
-//     * pointer to first element mapped to by a given key
-//     */
-//    const size_t* m_cbegin;
-//    /**
-//     * pointer to first element after m_cbegin not mapped to by the given key
-//     */
-//    const size_t* m_cend;
-//
-//    operator bool () const {
-//        return m_cbegin && m_cend && (m_cbegin != m_cend);
-//    }
-//
-//    template<typename fn_t>
-//    void foreach(const fn_t& fn) const {
-//        functor::assert_prototype<void(uint_t)>(fn);
-//        for (auto ptr = m_cbegin; ptr != m_cend; ++ptr) fn(*ptr);
-//    }
-//};
-
-
 /**
  * Shared Memory Unordered map to Vectors of Items "SMUVI"
  * The SMUVI is a type of parallel hash map from a key domain to a variable-length vector of indices which has fewer
@@ -183,10 +161,13 @@ class Smuvi {
      * one shared-memory MappedTable for each rank in the shared memory region
      */
     v_t<buffered::MappedTable<AccessRow>> m_access_tables;
+    v_t<AccessRow> m_access_foreach_rows;
     /**
      * a single flat storage for all the values associated with all keys in the shared memory region
      */
     v_t<buffered::Table<ValueRow>> m_values_tables;
+    v_t<ValueRow> m_values_lookup_rows;
+    v_t<ValueRow> m_values_foreach_rows;
 
 public:
 
@@ -195,15 +176,20 @@ public:
             m_irank_world_to_iaccess_table(mpi::nrank(), ~0ul) {
         // index of the shared memory realm
         const auto ishmem = mpi::g_ishmems[mpi::irank()];
+        m_access_tables.reserve(mpi::g_iranks_world_in_shmem_realms[ishmem].size());
+        m_access_foreach_rows.reserve(m_access_tables.capacity());
         // iterate over the rank indices in this shmem realm and create an accessor table for each one
         for (auto& irank_world: mpi::g_iranks_world_in_shmem_realms[ishmem]) {
             m_irank_world_to_iaccess_table[irank_world] = m_access_tables.size();
             m_access_tables.emplace_back(AccessRow(key), true);
+            m_access_foreach_rows.emplace_back(m_access_tables.back().m_row);
         }
         /*
          * make sure enough elements are allocated for all the accessor tables
          */
         m_values_tables.reserve(m_access_tables.size());
+        m_values_lookup_rows.reserve(m_access_tables.size());
+        m_values_foreach_rows.reserve(m_access_tables.size());
         /*
          * loop over all the world-realm rank indices in this rank's shared memory region
          */
@@ -213,7 +199,9 @@ public:
              * with all the keys sent to irank_world
              */
             m_values_tables.emplace_back(ValueRow(value), true);
-            DEBUG_ASSERT_FALSE(m_values_tables.back().m_row.is_deref_valid(), "rows should be null");
+            DEBUG_ASSERT_FALSE(m_values_tables.back().m_row.is_deref_valid(), "rows should be pointing to null");
+            m_values_lookup_rows.emplace_back(m_values_tables.back().m_row);
+            m_values_foreach_rows.emplace_back(m_values_tables.back().m_row);
         }
     }
 
@@ -235,6 +223,11 @@ public:
             return m_value_row;
         }
 
+        bool operator==(const AccessResult& other) const {
+            if (!m_value_row.is_deref_valid() && other.m_value_row.is_deref_valid()) return true;
+            return m_value_row.index() == other.m_value_row.index() && m_index_end == other.m_index_end;
+        }
+
         template<typename fn_t>
         void foreach(const fn_t& fn) const {
             functor::assert_prototype<void(const value_t&)>(fn);
@@ -245,24 +238,37 @@ public:
     /**
      * lookup the value given a key
      */
+    AccessResult access(const key_t& key, const ValueRow& value_iterator_row) const {
+        // get the world rank index associated with the storage of this key
+        auto irank = Distribution::irank_in_shmem_region(key);
+        DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
+        const auto itable = m_irank_world_to_iaccess_table[irank];
+        const auto& accessor = m_access_tables[itable];
+        const AccessRow lookup_row = accessor.lookup(key);
+        if (!lookup_row) {
+            // failed lookup
+            value_iterator_row.select_null();
+            return {value_iterator_row, ~0ul};
+        }
+        const uint_t ibegin = lookup_row.m_value_displ;
+        const uint_t iend = ibegin + lookup_row.m_value_count;
+        value_iterator_row.jump(ibegin);
+        return {value_iterator_row, iend};
+    }
+
+
+    /**
+     * lookup the value given a key
+     */
     AccessResult access(const key_t& key) const {
         // get the world rank index associated with the storage of this key
         auto irank = Distribution::irank_in_shmem_region(key);
         DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
-        auto& accessor = m_access_tables[m_irank_world_to_iaccess_table[irank]];
-        auto& values = m_values_tables[m_irank_world_to_iaccess_table[irank]];
-        const ValueRow& value_row = values.m_row;
-        const AccessRow& lookup_row = accessor.lookup(key);
-        if (!lookup_row) {
-            // failed lookup
-            value_row.select_null();
-            return {value_row, ~0ul};
-        }
-        const uint_t ibegin = lookup_row.m_value_displ;
-        const uint_t iend = ibegin + lookup_row.m_value_count;
-        value_row.jump(ibegin);
-        return {value_row, iend};
+        const auto itable = m_irank_world_to_iaccess_table[irank];
+        const auto& value_row = m_values_lookup_rows[itable];
+        return access(key, value_row);
     }
+
 
     template<typename fn_t>
     void foreach_value(const key_t& key, const fn_t& fn) const {
@@ -272,20 +278,17 @@ public:
 
 
     template<typename fn_t>
-    void foreach(const fn_t& fn) {
-        functor::assert_prototype<void(const key_t&, const value_t&)>(fn);
+    void foreach_key(const fn_t& fn) {
+        functor::assert_prototype<void(const key_t&, AccessResult access_result)>(fn);
         DEBUG_ASSERT_EQ(m_access_tables.size(), m_values_tables.size(), "should have same number of access and values tables");
         for (auto itable = 0ul; itable < m_access_tables.size(); ++itable) {
-            const auto& access_table = m_access_tables[itable];
-            const auto& values_table = m_values_tables[itable];
-            AccessRow& access_row = access_table.m_row;
-            ValueRow& value_row = values_table.m_row;
+            const auto& access_row = m_access_foreach_rows[itable];
+            const auto& value_row = m_values_foreach_rows[itable];
             for (access_row.restart(); access_row; ++access_row) {
                 const uint_t displ = access_row.m_value_displ;
                 const uint_t count = access_row.m_value_count;
-                for (value_row.jump(displ); value_row.in_range(displ + count); ++value_row){
-                    fn(access_row.m_key, value_row.m_value);
-                }
+                value_row.jump(displ);
+                fn(access_row.m_key, {value_row, displ + count});
             }
         }
     }
