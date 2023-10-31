@@ -223,6 +223,7 @@ public:
         const uint_t m_index_end;
 
         operator bool () const {
+            if (!m_value_row.is_deref_valid()) return false;
             return m_value_row.in_range(m_index_end);
         }
 
