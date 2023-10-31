@@ -167,7 +167,8 @@ class Smuvi {
      */
     v_t<buffered::Table<ValueRow>> m_values_tables;
     v_t<ValueRow> m_values_lookup_rows;
-    v_t<ValueRow> m_values_foreach_rows;
+    v_t<ValueRow> m_values_foreach_rows_1;
+    v_t<ValueRow> m_values_foreach_rows_2;
 
 public:
 
@@ -189,7 +190,8 @@ public:
          */
         m_values_tables.reserve(m_access_tables.size());
         m_values_lookup_rows.reserve(m_access_tables.size());
-        m_values_foreach_rows.reserve(m_access_tables.size());
+        m_values_foreach_rows_1.reserve(m_access_tables.size());
+        m_values_foreach_rows_2.reserve(m_access_tables.size());
         /*
          * loop over all the world-realm rank indices in this rank's shared memory region
          */
@@ -201,7 +203,8 @@ public:
             m_values_tables.emplace_back(ValueRow(value), true);
             DEBUG_ASSERT_FALSE(m_values_tables.back().m_row.is_deref_valid(), "rows should be pointing to null");
             m_values_lookup_rows.emplace_back(m_values_tables.back().m_row);
-            m_values_foreach_rows.emplace_back(m_values_tables.back().m_row);
+            m_values_foreach_rows_1.emplace_back(m_values_tables.back().m_row);
+            m_values_foreach_rows_2.emplace_back(m_values_tables.back().m_row);
         }
     }
 
@@ -220,7 +223,7 @@ public:
         const uint_t m_index_end;
 
         operator bool () const {
-            return m_value_row;
+            return m_value_row.in_range(m_index_end);
         }
 
         bool operator==(const AccessResult& other) const {
@@ -256,26 +259,80 @@ public:
         return {value_iterator_row, iend};
     }
 
+    uint_t itable(const key_t& key) const {
+        auto irank = Distribution::irank_in_shmem_region(key);
+        DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
+        return m_irank_world_to_iaccess_table[irank];
+    }
+
 
     /**
      * lookup the value given a key
      */
     AccessResult access(const key_t& key) const {
         // get the world rank index associated with the storage of this key
-        auto irank = Distribution::irank_in_shmem_region(key);
-        DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
-        const auto itable = m_irank_world_to_iaccess_table[irank];
+        const auto itable = this->itable(key);
         const auto& value_row = m_values_lookup_rows[itable];
         return access(key, value_row);
     }
 
-
     template<typename fn_t>
     void foreach_value(const key_t& key, const fn_t& fn) const {
         functor::assert_prototype<void(const value_t&)>(fn);
-        access(key).foreach(fn);
+        const auto itable = this->itable(key);
+        const auto& value_row = m_values_foreach_rows_1[itable];
+        access(key, value_row).foreach(fn);
     }
 
+    /**
+     * yield by call to fn_t each time a common value is found among the (ordered) values of the two keys
+     */
+    template<typename fn_t>
+    void foreach_common_value(const key_t& key, const Smuvi<key_t, value_t>& other, const key_t& key_other, const fn_t& fn) const {
+        functor::assert_prototype<void(const value_t&)>(fn);
+        const auto itable_this = this->itable(key);
+        const auto& value_row_this = m_values_foreach_rows_1[itable_this];
+        const auto itable_other = other.itable(key_other);
+        const auto& value_row_other = m_values_foreach_rows_2[itable_other];
+        auto access_result_this = access(key, value_row_this);
+        auto access_result_other = access(key_other, value_row_other);
+
+        while (access_result_this && access_result_other) {
+            if (value_row_this.m_value < value_row_other.m_value) ++value_row_this;
+            else if (value_row_this.m_value > value_row_other.m_value) ++value_row_other;
+            else fn(value_row_this.m_value);
+        }
+    }
+
+    /**
+     * overload in case both key-value sets are to be taken from the same SMUVI
+     */
+    template<typename fn_t>
+    void foreach_common_value(const key_t& key_1, const key_t& key_2, const fn_t& fn) const {
+        foreach_common_value(key_1, *this, key_2, fn);
+    }
+
+    template<typename fn_t>
+    void foreach_value_pair(const key_t& key, const fn_t& fn, bool ordered = false, bool allow_eq = false) const {
+        functor::assert_prototype<void(const value_t&, const value_t&)>(fn);
+        const auto itable = this->itable(key);
+        const auto& outer = m_values_foreach_rows_1[itable];
+        const auto& inner = m_values_foreach_rows_2[itable];
+        const AccessResult access_result = access(key, outer);
+        const auto ibegin = access_result.m_value_row.index();
+        const auto iend = access_result.m_index_end;
+        for (; outer.in_range(iend); ++outer) {
+            if (ordered) {
+                for (inner.jump(ibegin); inner.in_range(outer.index() + allow_eq); ++inner)
+                    fn(outer.m_value, inner.m_value);
+            }
+            else {
+                for (inner.jump(ibegin); inner.in_range(iend); ++inner) {
+                    if (inner.index() != outer.index()) fn(outer.m_value, inner.m_value);
+                }
+            }
+        }
+    }
 
     template<typename fn_t>
     void foreach_key(const fn_t& fn) {
@@ -283,7 +340,7 @@ public:
         DEBUG_ASSERT_EQ(m_access_tables.size(), m_values_tables.size(), "should have same number of access and values tables");
         for (auto itable = 0ul; itable < m_access_tables.size(); ++itable) {
             const auto& access_row = m_access_foreach_rows[itable];
-            const auto& value_row = m_values_foreach_rows[itable];
+            const auto& value_row = m_values_foreach_rows_1[itable];
             for (access_row.restart(); access_row; ++access_row) {
                 const uint_t displ = access_row.m_value_displ;
                 const uint_t count = access_row.m_value_count;
