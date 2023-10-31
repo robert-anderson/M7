@@ -235,6 +235,7 @@ public:
         template<typename fn_t>
         void foreach(const fn_t& fn) const {
             functor::assert_prototype<void(const value_t&)>(fn);
+            if (!*this) return;
             for (; m_value_row.in_range(m_index_end); ++m_value_row) fn(m_value_row.m_value);
         }
     };
@@ -296,7 +297,9 @@ public:
         const auto itable_other = other.itable(key_other);
         const auto& value_row_other = m_values_foreach_rows_2[itable_other];
         auto access_result_this = access(key, value_row_this);
+        if (!access_result_this) return;
         auto access_result_other = access(key_other, value_row_other);
+        if (!access_result_other) return;
         while (access_result_this && access_result_other) {
             if (value_row_this.m_value < value_row_other.m_value) ++value_row_this;
             else if (value_row_this.m_value > value_row_other.m_value) ++value_row_other;
@@ -319,6 +322,7 @@ public:
         const auto& outer = m_values_foreach_rows_1[itable];
         const auto& inner = m_values_foreach_rows_2[itable];
         const AccessResult access_result = access(key, outer);
+        if (!access_result) return;
         const auto ibegin = access_result.m_value_row.index();
         const auto iend = access_result.m_index_end;
         for (; outer.in_range(iend); ++outer) {
