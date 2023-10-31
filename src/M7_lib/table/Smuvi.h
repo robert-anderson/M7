@@ -296,7 +296,6 @@ public:
         const auto& value_row_other = m_values_foreach_rows_2[itable_other];
         auto access_result_this = access(key, value_row_this);
         auto access_result_other = access(key_other, value_row_other);
-
         while (access_result_this && access_result_other) {
             if (value_row_this.m_value < value_row_other.m_value) ++value_row_this;
             else if (value_row_this.m_value > value_row_other.m_value) ++value_row_other;
