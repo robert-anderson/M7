@@ -295,16 +295,20 @@ public:
         const auto itable_this = this->itable(key);
         const auto& value_row_this = m_values_foreach_rows_1[itable_this];
         const auto itable_other = other.itable(key_other);
-        const auto& value_row_other = m_values_foreach_rows_2[itable_other];
+        const auto& value_row_other = other.m_values_foreach_rows_2[itable_other];
         auto access_result_this = access(key, value_row_this);
         if (!access_result_this) return;
-        auto access_result_other = access(key_other, value_row_other);
+        auto access_result_other = other.access(key_other, value_row_other);
         if (!access_result_other) return;
 
         while (access_result_this && access_result_other) {
             if (value_row_this.m_value < value_row_other.m_value) ++value_row_this;
             else if (value_row_this.m_value > value_row_other.m_value) ++value_row_other;
-            else fn(value_row_this.m_value);
+            else {
+                fn(value_row_this.m_value);
+                ++value_row_this;
+                ++value_row_other;
+            }
         }
     }
 

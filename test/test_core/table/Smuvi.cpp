@@ -107,7 +107,7 @@ TEST(Smuvi, BitsetToBitset) {
     tmp_key = uintv_t{0, 3, 5};
     tmp_val = uintv_t{0, 3, 4};
 
-    smuvi.insert(tmp_key, tmp_key);
+    smuvi.insert(tmp_key, tmp_val);
 
     smuvi.collate();
 
