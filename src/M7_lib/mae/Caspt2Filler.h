@@ -453,18 +453,13 @@ public:
             // mixed alpha/beta
             m_alpha_singles.foreach_value(alpha_channel,
             [&](const field::FrmOnvSpinChannel &alpha_string){
-                // std::cout << "alpha string: " << alpha_string << "  beta string: " << beta_channel << std::endl;
-                // m_beta_with_alpha.foreach_value(alpha_string, [&](const field::FrmOnvSpinChannel &common_string){std::cout << "BetaWithAlpha " << common_string << std::endl;});
-                // m_beta_singles.foreach_value(beta_channel, [&](const field::FrmOnvSpinChannel &common_string){std::cout << "BetaSingles   " << common_string << std::endl;});
-                // std::cout << std::endl;
                 m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
                 [&](const field::FrmOnvSpinChannel &common_string){
-                    std::cout << common_string << std::endl;
-                    // m_dets_contain_beta.foreach_common_value(common_string, m_dets_contain_alpha, alpha_string,
-                    // [&](const field::Number<uint_t>& iket){
-                    //     ket_row.jump(iket);
-                    //     make_contrib_fn();
-                    // });
+                    m_dets_contain_beta.foreach_common_value(common_string, m_dets_contain_alpha, alpha_string,
+                    [&](const field::Number<uint_t>& iket){
+                        ket_row.jump(iket);
+                        make_contrib_fn();
+                    });
                 });
             });
         }
@@ -502,32 +497,32 @@ public:
                 if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
             });
             // 4x(alpha) 2x(beta), here alpha_doubles instead of alpha_singles, otherwise exact copy of 2RDM code
-            // m_alpha_doubles.foreach_value(alpha_channel,
-            // [&](const field::FrmOnvSpinChannel &alpha_string){
-            //     m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
-            //     [&](const field::FrmOnvSpinChannel &common_string){
-            //         m_dets_contain_beta.foreach_common_value(common_string, m_dets_contain_alpha, alpha_string,
-            //         [&](const field::Number<uint_t>& iket){
-            //             ket_row.jump(iket);
-            //             make_contrib_fn();
-            //         });
-            //     });
-            // });
+            m_alpha_doubles.foreach_value(alpha_channel,
+            [&](const field::FrmOnvSpinChannel &alpha_string){
+                m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
+                [&](const field::FrmOnvSpinChannel &common_string){
+                    m_dets_contain_beta.foreach_common_value(common_string, m_dets_contain_alpha, alpha_string,
+                    [&](const field::Number<uint_t>& iket){
+                        ket_row.jump(iket);
+                        make_contrib_fn();
+                    });
+                });
+            });
             // 2x(alpha) 4x(beta), flip the roles of alpha and beta
-            // m_beta_doubles.foreach_value(beta_channel,
-            // [&](const field::FrmOnvSpinChannel &beta_string){
-            //    m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_singles, alpha_channel,
-            //    [&](const field::FrmOnvSpinChannel &common_string){
-            //        m_dets_contain_beta.foreach_common_value(beta_string, m_dets_contain_alpha, common_string,
-            //        [&](const field::Number<uint_t>& iket){
-            //            ket_row.jump(iket);
-            //            // prevent double counting promotions of 2x(alpha) 2x(beta) excitations
-            //            const auto hamming_dist_alpha = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
-            //            const auto hamming_dist_beta = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
-            //            if (hamming_dist_alpha + hamming_dist_beta == rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
-            //        });
-            //    });
-            // });
+            m_beta_doubles.foreach_value(beta_channel,
+            [&](const field::FrmOnvSpinChannel &beta_string){
+               m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_singles, alpha_channel,
+               [&](const field::FrmOnvSpinChannel &common_string){
+                   m_dets_contain_beta.foreach_common_value(beta_string, m_dets_contain_alpha, common_string,
+                   [&](const field::Number<uint_t>& iket){
+                       ket_row.jump(iket);
+                       // prevent double counting promotions of 2x(alpha) 2x(beta) excitations
+                       const auto hamming_dist_alpha = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
+                       const auto hamming_dist_beta = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
+                       if (hamming_dist_alpha + hamming_dist_beta == rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
+                   });
+               });
+            });
         }
     }
 
