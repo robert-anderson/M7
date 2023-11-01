@@ -39,6 +39,64 @@ TEST(Smuvi, LookupKeysIndices) {
 
 }
 
+
+TEST(Smuvi, Intersection) {
+    const uint_t nsite = 9;
+    using smuvi_t = Smuvi<field::FrmOnvSpinChannel, field::FrmOnvSpinChannel>;
+    smuvi_t smuvi1("test smuvi one", field::FrmOnvSpinChannel(nullptr, nsite), field::FrmOnvSpinChannel(nullptr, nsite));
+    smuvi_t smuvi2("test smuvi two", field::FrmOnvSpinChannel(nullptr, nsite), field::FrmOnvSpinChannel(nullptr, nsite));
+
+    const v_t<std::pair<uintv_t, uintv_t>> insertions1 = {
+            {{1,4,5,6,7,8}, {1,2,4,5,7,8}},
+            {{1,4,5,6,7,8}, {1,2,3,5,7,8}}
+            // {{0,1,4,5,6,8}, {0,1,4,5,7,8}},
+            // {{0,1,5,6,7,8}, {1,2,4,6,7,8}},
+            // {{1,4,5,6,7,8}, {1,2,4,5,7,8}},
+    };
+    const v_t<std::pair<uintv_t, uintv_t>> insertions2 = {
+            {{1,2,4,6,7,8}, {1,2,4,5,7,8}},
+            {{1,2,4,6,7,8}, {1,2,3,5,7,8}}
+            // {{1,2,4,5,7,8}, {0,3,4,6,7,8}},
+            // {{1,2,4,5,7,8}, {1,2,4,6,7,8}},
+            // {{0,1,4,5,7,8}, {0,1,2,3,4,5}},
+    };
+    const v_t<std::pair<uintv_t, uintv_t>> smuvi_keypairs = {
+            {{1,4,5,6,7,8}, {1,2,4,6,7,8}}
+            // {{0,1,4,5,6,8}, {1,2,4,5,7,8}},
+            // {{0,1,5,6,7,8}, {1,2,4,5,7,8}},
+            // {{1,4,5,6,7,8}, {0,1,4,5,7,8}},
+    };
+
+    buffered::FrmOnvSpinChannel tmp_key(nsite);
+    buffered::FrmOnvSpinChannel tmp_val(nsite);
+    for (auto& insertion: insertions1) {
+        tmp_key = insertion.first;
+        tmp_val = insertion.second;
+        smuvi1.insert(tmp_key, tmp_val);
+    }
+    for (auto& insertion: insertions2) {
+        tmp_key = insertion.first;
+        tmp_val = insertion.second;
+        smuvi2.insert(tmp_key, tmp_val);
+    }
+    smuvi1.collate();
+    smuvi2.collate();
+
+    buffered::FrmOnvSpinChannel tmp_key1(nsite);
+    buffered::FrmOnvSpinChannel tmp_key2(nsite);
+    for (auto& key_pair: smuvi_keypairs) {
+        tmp_key1 = key_pair.first;
+        tmp_key2 = key_pair.second;
+        uint_t counter = 0ul;
+        smuvi1.foreach_common_value(tmp_key1, smuvi2, tmp_key2,
+                                    [&](const field::FrmOnvSpinChannel &common_string){
+                                        counter += 1ul;
+                                    });
+        ASSERT_EQ(counter, 2ul);
+    }
+
+}
+
 TEST(Smuvi, BitsetToBitset) {
     const uint_t nsite = 6;
     using smuvi_t = Smuvi<field::FrmOnvSpinChannel, field::FrmOnvSpinChannel>;

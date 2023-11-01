@@ -300,6 +300,7 @@ public:
         if (!access_result_this) return;
         auto access_result_other = access(key_other, value_row_other);
         if (!access_result_other) return;
+
         while (access_result_this && access_result_other) {
             if (value_row_this.m_value < value_row_other.m_value) ++value_row_this;
             else if (value_row_this.m_value > value_row_other.m_value) ++value_row_other;
