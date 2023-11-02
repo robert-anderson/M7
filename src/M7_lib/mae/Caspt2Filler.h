@@ -385,9 +385,8 @@ public:
         rdm->make_contribs(src, conn, com_ops, contrib);
     }
 
-    void fill_rdm1(PureRdm* rdm) const {
+    void fill_rdm(PureRdm* rdm) const {
         REQUIRE_TRUE(rdm, "RDM pointer should not be null");
-        REQUIRE_TRUE(rdm->m_ranksig == opsig::c_sing, "RDM object should be one-body");
 
         const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
         const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
@@ -416,119 +415,57 @@ public:
                 const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
                 if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
             });
-        }
-    }
 
-    void fill_rdm2(PureRdm* rdm) const {
-        REQUIRE_TRUE(rdm, "RDM pointer should not be null");
-        REQUIRE_TRUE(rdm->m_ranksig == opsig::c_doub, "RDM object should be two-body");
-
-        const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
-        const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
-        auto bra_row = m_hist.m_row;
-        auto ket_row = bra_row;
-
-        auto make_contrib_fn = [&]() {
-            const auto contrib = bra_row.m_weight[0] * ket_row.m_weight[0];
-            make_contribs(rdm, bra_row.m_mbf, ket_row.m_mbf, contrib);
-        };
-
-        buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
-        buffered::FrmOnvSpinChannel beta_channel(bra_row.m_mbf.m_basis.m_nsite);
-        for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
-            bra_row.m_mbf.copy_alpha_to(alpha_channel);
-            bra_row.m_mbf.copy_beta_to(beta_channel);
-            // pure alpha
-            m_dets_contain_beta.foreach_value(beta_channel, [&](const field::Number<uint_t>& iket){
-                ket_row.jump(iket);
-                const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
-                if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
-            });
-            // pure beta
-            m_dets_contain_alpha.foreach_value(alpha_channel, [&](const field::Number<uint_t>& iket){
-                ket_row.jump(iket);
-                const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
-                if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
-            });
-            // mixed alpha/beta
-            m_alpha_singles.foreach_value(alpha_channel,
-            [&](const field::FrmOnvSpinChannel &alpha_string){
-                m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
-                [&](const field::FrmOnvSpinChannel &common_string){
-                    m_dets_contain_beta.foreach_common_value(common_string, m_dets_contain_alpha, alpha_string,
-                    [&](const field::Number<uint_t>& iket){
-                        ket_row.jump(iket);
-                        make_contrib_fn();
+            if (rdm->m_ranksig == opsig::c_doub) {
+                // alpha-beta
+                m_alpha_singles.foreach_value(alpha_channel,
+                [&](const field::FrmOnvSpinChannel &alpha_string){
+                    m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
+                    [&](const field::FrmOnvSpinChannel &common_string){
+                        m_dets_contain_beta.foreach_common_value(common_string, m_dets_contain_alpha, alpha_string,
+                        [&](const field::Number<uint_t>& iket){
+                            ket_row.jump(iket);
+                            make_contrib_fn();
+                        });
                     });
                 });
-            });
-        }
-    }
+            }
 
-    void fill_rdm3(PureRdm* rdm) const {
-        REQUIRE_TRUE(rdm, "RDM pointer should not be null");
-        REQUIRE_TRUE(rdm->m_ranksig == opsig::c_trip, "RDM object should be three-body");
-
-        const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
-        const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
-        auto bra_row = m_hist.m_row;
-        auto ket_row = bra_row;
-
-        auto make_contrib_fn = [&]() {
-            const auto contrib = bra_row.m_weight[0] * ket_row.m_weight[0];
-            make_contribs(rdm, bra_row.m_mbf, ket_row.m_mbf, contrib);
-        };
-
-        buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
-        buffered::FrmOnvSpinChannel beta_channel(bra_row.m_mbf.m_basis.m_nsite);
-        for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
-            bra_row.m_mbf.copy_alpha_to(alpha_channel);
-            bra_row.m_mbf.copy_beta_to(beta_channel);
-            // pure alpha
-            m_dets_contain_beta.foreach_value(beta_channel, [&](const field::Number<uint_t>& iket){
-                ket_row.jump(iket);
-                const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
-                if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
-            });
-            // pure beta
-            m_dets_contain_alpha.foreach_value(alpha_channel, [&](const field::Number<uint_t>& iket){
-                ket_row.jump(iket);
-                const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
-                if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
-            });
-            // 4x(alpha) 2x(beta), here alpha_doubles instead of alpha_singles, otherwise exact copy of 2RDM code
-            m_alpha_doubles.foreach_value(alpha_channel,
-            [&](const field::FrmOnvSpinChannel &alpha_string){
-                m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
-                [&](const field::FrmOnvSpinChannel &common_string){
-                    m_dets_contain_beta.foreach_common_value(common_string, m_dets_contain_alpha, alpha_string,
-                    [&](const field::Number<uint_t>& iket){
-                        ket_row.jump(iket);
-                        make_contrib_fn();
+            if (rdm->m_ranksig == opsig::c_trip) {
+                // 4x(alpha) 2x(beta), here alpha_doubles instead of alpha_singles, otherwise exact copy of 2RDM code
+                m_alpha_doubles.foreach_value(alpha_channel,
+                [&](const field::FrmOnvSpinChannel &alpha_string){
+                    m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
+                    [&](const field::FrmOnvSpinChannel &common_string){
+                        m_dets_contain_beta.foreach_common_value(common_string, m_dets_contain_alpha, alpha_string,
+                        [&](const field::Number<uint_t>& iket){
+                            ket_row.jump(iket);
+                            make_contrib_fn();
+                        });
                     });
                 });
-            });
-            // 2x(alpha) 4x(beta), flip the roles of alpha and beta
-            m_beta_doubles.foreach_value(beta_channel,
-            [&](const field::FrmOnvSpinChannel &beta_string){
-               m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_singles, alpha_channel,
-               [&](const field::FrmOnvSpinChannel &common_string){
-                   m_dets_contain_beta.foreach_common_value(beta_string, m_dets_contain_alpha, common_string,
-                   [&](const field::Number<uint_t>& iket){
-                       ket_row.jump(iket);
-                       // prevent double counting promotions of 2x(alpha) 2x(beta) excitations
-                       const auto hamming_dist_alpha = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
-                       const auto hamming_dist_beta = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
-                       if (hamming_dist_alpha + hamming_dist_beta == rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
+                // 2x(alpha) 4x(beta), flip the roles of alpha and beta
+                m_beta_doubles.foreach_value(beta_channel,
+                [&](const field::FrmOnvSpinChannel &beta_string){
+                   m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_singles, alpha_channel,
+                   [&](const field::FrmOnvSpinChannel &common_string){
+                       m_dets_contain_beta.foreach_common_value(beta_string, m_dets_contain_alpha, common_string,
+                       [&](const field::Number<uint_t>& iket){
+                           ket_row.jump(iket);
+                           // prevent double counting promotions of 2x(alpha) 2x(beta) excitations
+                           const auto hamming_dist_alpha = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
+                           const auto hamming_dist_beta = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
+                           if (hamming_dist_alpha + hamming_dist_beta == rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
+                       });
                    });
-               });
-            });
+                });
+            }
         }
     }
 
     void fill_fock_rdm4(FockRdm4* rdm) const {
         REQUIRE_TRUE(rdm, "RDM pointer should not be null");
-        // todo
+        // todo: probably no separate routine required, loop in other functions already over bra, simply build auxiliary arrays from ket and pass triples signature
     }
 
 public:
@@ -539,15 +476,15 @@ public:
     void fill() {
         {
             auto ptr = m_rdms->get_pure_rdm(opsig::c_sing);
-            if (ptr) fill_rdm1(ptr);
+            if (ptr) fill_rdm(ptr);
         }
         {
             auto ptr = m_rdms->get_pure_rdm(opsig::c_doub);
-            if (ptr) fill_rdm2(ptr);
+            if (ptr) fill_rdm(ptr);
         }
         {
             auto ptr = m_rdms->get_pure_rdm(opsig::c_trip);
-            if (ptr) fill_rdm3(ptr);
+            if (ptr) fill_rdm(ptr);
         }
         {
             auto ptr = m_rdms->m_fock_4rdm;
@@ -577,6 +514,9 @@ public:
         m_beta_doubles("spin channel to spin channel map beta doubles", hist.m_row.m_mbf.m_format.m_shape[1]) {
 
         logging::info("Constructing auxiliary arrays for RDM calculation");
+
+        // todo: discuss with robert how to deal with F.4RDM, by default all SMUVIs should be constructed from ket
+        // todo: 1RDM only DetsContainAlpha/Beta, 2RDM = 1RDM + Alpha/BetaSingles and BetaWithAlpha, 3RDM all SMUVIs
         const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
         const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
         auto bra = m_hist.m_row;

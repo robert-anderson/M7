@@ -108,7 +108,7 @@ TEST(Caspt2Filler, Rdm1) {
 
     FillerTestPureRdm rdm1(doc.m_av_ests.m_rdm, opsig::c_sing, sector);
 
-    filler.fill_rdm1(&rdm1);
+    filler.fill_rdm(&rdm1);
     rdm1.end_cycle();
 
     for (const auto& res: rdm1.m_gen_strings) {
@@ -170,7 +170,7 @@ TEST(Caspt2Filler, Rdm2) {
 
     FillerTestPureRdm rdm2(doc.m_av_ests.m_rdm, opsig::c_doub, sector);
 
-    filler.fill_rdm2(&rdm2);
+    filler.fill_rdm(&rdm2);
     rdm2.end_cycle();
 
     for (const auto& res: rdm2.m_gen_strings) {
@@ -237,7 +237,7 @@ TEST(Caspt2Filler, Rdm3) {
 
     FillerTestPureRdm rdm3(doc.m_av_ests.m_rdm, opsig::c_trip, sector);
 
-    filler.fill_rdm3(&rdm3);
+    filler.fill_rdm(&rdm3);
     rdm3.end_cycle();
 
     for (const auto& res: rdm3.m_gen_strings) {
