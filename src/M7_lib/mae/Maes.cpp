@@ -4,7 +4,7 @@
 
 #include "Maes.h"
 #include "NotfMaeFiller.h"
-#include "Caspt2Filler.h"
+#include "SpinMapRdmFiller.h"
 
 Maes::Maes(const conf::Mae &opts, const wf::Vectors& wf) :
         m_accum_epoch("MAE accumulation"),
@@ -104,10 +104,8 @@ void Maes::fill_from_wf_hist(const Table<MbfWeightRow>& hist) {
             }
         }
     }
-    else if (m_opts.m_filling_algorithm.m_value == "caspt2") {
-        Caspt2Filler filler(hist, &m_rdms);
-        filler.fill();
-    }
+    else if (m_opts.m_filling_algorithm.m_value == "caspt2")
+        SpinMapRdmFiller::fill(hist, &m_rdms);
     else if (m_opts.m_filling_algorithm.m_value == "bitset_isect_hashmap_ri")
         NotfMaeFiller::fill(hist, NotfMaeFiller::Hashmap, &m_rdms);
     else if (m_opts.m_filling_algorithm.m_value == "bitset_isect_pair_loop_ri")

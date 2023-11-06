@@ -3,7 +3,7 @@
 //
 
 #include "test_core/defs.h"
-#include "M7_lib/mae/Caspt2Filler.h"
+#include "M7_lib/mae/SpinMapRdmFiller.h"
 
 
 /*
@@ -73,7 +73,7 @@ protected:
     }
 };
 
-TEST(Caspt2Filler, Rdm1) {
+TEST(SpinMapRdmFiller, Rdm1) {
     conf::Document doc;
     doc.m_av_ests.m_rdm.m_ranks = {"1"};
     const uint_t nelec = 12ul;
@@ -104,7 +104,7 @@ TEST(Caspt2Filler, Rdm1) {
         hist.m_row.m_mbf = pair.second;
     }
 
-    Caspt2Filler filler(hist, nullptr);
+    SpinMapRdmFiller filler(hist);
 
     FillerTestPureRdm rdm1(doc.m_av_ests.m_rdm, opsig::c_sing, sector);
 
@@ -135,7 +135,7 @@ TEST(Caspt2Filler, Rdm1) {
 }
 
 
-TEST(Caspt2Filler, Rdm2) {
+TEST(SpinMapRdmFiller, Rdm2) {
     conf::Document doc;
     doc.m_av_ests.m_rdm.m_ranks = {"2"};
     const uint_t nelec = 12ul;
@@ -166,7 +166,7 @@ TEST(Caspt2Filler, Rdm2) {
         hist.m_row.m_mbf = pair.second;
     }
 
-    Caspt2Filler filler(hist, nullptr);
+    SpinMapRdmFiller filler(hist);
 
     FillerTestPureRdm rdm2(doc.m_av_ests.m_rdm, opsig::c_doub, sector);
 
@@ -202,7 +202,7 @@ TEST(Caspt2Filler, Rdm2) {
 }
 
 
-TEST(Caspt2Filler, Rdm3) {
+TEST(SpinMapRdmFiller, Rdm3) {
     conf::Document doc;
     doc.m_av_ests.m_rdm.m_ranks = {"3"};
     const uint_t nelec = 12ul;
@@ -233,7 +233,7 @@ TEST(Caspt2Filler, Rdm3) {
         hist.m_row.m_mbf = pair.second;
     }
 
-    Caspt2Filler filler(hist, nullptr);
+    SpinMapRdmFiller filler(hist);
 
     FillerTestPureRdm rdm3(doc.m_av_ests.m_rdm, opsig::c_trip, sector);
 

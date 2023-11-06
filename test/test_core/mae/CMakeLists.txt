@@ -1,5 +1,5 @@
 target_sources(unittest
         PRIVATE
-        Caspt2Filler.cpp
+        SpinMapRdmFiller.cpp
         NotfMaeFiller.cpp
         )

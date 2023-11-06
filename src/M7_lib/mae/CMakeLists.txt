@@ -1,7 +1,7 @@
 target_sources(M7_lib
     PRIVATE
         Caspt2Filler.cpp
-        Caspt2Filler.h
+        SpinMapRdmFiller.h
         MaeTable.cpp
         MaeTable.h
         Maes.cpp

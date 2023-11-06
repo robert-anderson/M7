@@ -2,8 +2,8 @@
 // Created by Robert John Anderson on 22/08/2023.
 //
 
-#ifndef M7_CASPT2FILLER_H
-#define M7_CASPT2FILLER_H
+#ifndef M7_SPINMAPRDMFILLER_H
+#define M7_SPINMAPRDMFILLER_H
 
 #include "M7_lib/wavefunction/WalkerTable.h"
 #include "M7_lib/communication/Communicator.h"
@@ -224,19 +224,11 @@ namespace pose {
  * and the 4RDM*Fock is computable from the transition 2RDM of |pq> and |F>
  *
  */
-class Caspt2Filler {
+class SpinMapRdmFiller {
     /**
      * Histogrammable set of determinants of which to compute the outer product in filling the MAEs
      */
     const Table<MbfWeightRow>& m_hist;
-    /**
-     * the result of F * m_hist where F = sum_pq f_pq E_pq
-     */
-    communicator::BasicSend<MbfWeightRow, MbfWeightRow> m_fock_x_hist;
-    /**
-     * normal ordered, spin-resolved RDMs being filled
-     */
-    Rdms* m_rdms = nullptr;
     /**
      * working objects for connections and common indices
      */
@@ -298,12 +290,12 @@ class Caspt2Filler {
      * @param pq_vals
      *  a sparse representation of the elements of the contraction ((p, q), g_pq)
      */
-    void make_psi1(communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const v_t<pq_val_t>& pq_vals) {
+    static void make_psi1(const Table<MbfWeightRow>& psi0, communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const v_t<pq_val_t>& pq_vals) {
         psi1.m_store.clear();
-        const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
-        const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
+        const auto displ = mpi::evenly_shared_displ(psi0.nrow_in_use());
+        const auto count = mpi::evenly_shared_count(psi0.nrow_in_use());
 
-        auto hist_row = m_hist.m_row;
+        auto hist_row = psi0.m_row;
         buffered::Mbf work_mbf(hist_row.m_mbf.m_basis);
         const auto& basis = work_mbf.m_basis;
         v_t<std::pair<conn::Mbf, ham_t>> conn_vals;
@@ -356,23 +348,23 @@ class Caspt2Filler {
     /**
      * overload to make psi1 = G * psi where g_ij are elements of a dense matrix
      */
-    void make_psi1(communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const dense::SquareMatrix<ham_t>& coeffs, ham_comp_t tol=1e-10) {
+    static void make_psi1(const Table<MbfWeightRow>& psi0, communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const dense::SquareMatrix<ham_t>& coeffs, ham_comp_t tol=1e-10) {
         v_t<pq_val_t> pq_vals;
         auto fn = [&pq_vals](uint_t irow, uint_t icol, ham_t elem) {
             pq_vals.emplace_back(uintp_t(irow, icol), elem);
         };
         coeffs.foreach(fn, tol);
-        make_psi1(psi1, pq_vals);
+        make_psi1(psi0, psi1, pq_vals);
     }
 
     /**
      * overload to make psi1 = G * psi where g_ii are elements of a dense vector
      */
-    void make_psi1(communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const dense::Vector<ham_t>& coeffs, ham_comp_t tol=1e-10) {
+    static void make_psi1(const Table<MbfWeightRow>& psi0, communicator::BasicSend<MbfWeightRow, MbfWeightRow>& psi1, const dense::Vector<ham_t>& coeffs, ham_comp_t tol=1e-10) {
         v_t<pq_val_t> pq_vals;
         for (uint_t ielem = 0ul; ielem < coeffs.nelement(); ++ielem)
             pq_vals.emplace_back(uintp_t(ielem, ielem), coeffs[ielem]);
-        make_psi1(psi1, pq_vals);
+        make_psi1(psi0, psi1, pq_vals);
     }
 
     // todo: make private again
@@ -467,36 +459,10 @@ public:
         }
     }
 
-public:
-
-    /**
-     * fill all RDMs
-     */
-    void fill() {
-        {
-            auto ptr = m_rdms->get_pure_rdm(opsig::c_sing);
-            if (ptr) fill_rdm(ptr);
-        }
-        {
-            auto ptr = m_rdms->get_pure_rdm(opsig::c_doub);
-            if (ptr) fill_rdm(ptr);
-        }
-        {
-            auto ptr = m_rdms->get_pure_rdm(opsig::c_trip);
-            if (ptr) fill_rdm(ptr);
-        }
-        {
-            auto ptr = m_rdms->m_fock_4rdm;
-            if (ptr) fill_rdm(ptr);
-        }
-    }
-
 
 public:
-    Caspt2Filler(const Table<MbfWeightRow>& hist, Rdms* rdms):
+    SpinMapRdmFiller(const Table<MbfWeightRow>& hist):
         m_hist(hist),
-        m_fock_x_hist("Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0}),
-        m_rdms(rdms),
         m_work_conns(mbf::get_basis(hist.m_row.m_mbf).size()),
         m_work_com_ops(mbf::get_basis(hist.m_row.m_mbf).size()),
         m_dets_contain_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.m_shape[1]),
@@ -512,41 +478,23 @@ public:
         m_alpha_doubles("spin channel to spin channel map alpha doubles", hist.m_row.m_mbf.m_format.m_shape[1]),
         m_beta_doubles("spin channel to spin channel map beta doubles", hist.m_row.m_mbf.m_format.m_shape[1]) {
 
-        // if no Fock*4RDM object is allocated, skip this block
-        // todo: why does m_rdms->m_fock_4rdm cause a segfault?
-        // std::cout << m_rdms->m_fock_4rdm << std::endl;
-        // if (m_rdms->m_fock_4rdm) {
-        //         logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
-        //     {
-        //         // if the Fock object is non-diagonal, construct F*psi using the dense matrix overload
-        //         auto ptr = dynamic_cast<const NonDiagFockRdm4*>(m_rdms->m_fock_4rdm);
-        //         if (ptr) make_psi1(m_fock_x_hist, ptr->m_fock);
-        //     }
-        //     {
-        //         // if the Fock object is diagonal, construct F*psi using the sparse vector overload
-        //         auto ptr = dynamic_cast<const DiagFockRdm4*>(m_rdms->m_fock_4rdm);
-        //         make_psi1(m_fock_x_hist, ptr->m_fock);
-        //     }
-        //     logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(m_fock_x_hist.m_store.nrow_in_use()));
-        // }
-
         logging::info("Constructing auxiliary arrays for RDM calculation");
         const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
         const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
-        auto histset = m_hist.m_row;
+        auto hist_row = m_hist.m_row;
 
-        buffered::FrmOnvSpinChannel alpha_channel(histset.m_mbf.m_basis.m_nsite);
-        buffered::FrmOnvSpinChannel beta_channel(histset.m_mbf.m_basis.m_nsite);
+        buffered::FrmOnvSpinChannel alpha_channel(hist_row.m_mbf.m_basis.m_nsite);
+        buffered::FrmOnvSpinChannel beta_channel(hist_row.m_mbf.m_basis.m_nsite);
         /**
          *  Construct SMUVIs which given a FrmOnvSpinChannel yield
          *      the rows of the histogrammed set containing this spin string: m_dets_contain_(spin),
          *      the opposite spin strings occurring with it: m_(spin1)_with_(spin2)
          */
-        for (histset.restart(displ); histset.in_range(displ + count); ++histset) {
-            histset.m_mbf.copy_alpha_to(alpha_channel);
-            histset.m_mbf.copy_beta_to(beta_channel);
-            m_dets_contain_alpha.insert(alpha_channel, histset.index());
-            m_dets_contain_beta.insert(beta_channel, histset.index());
+        for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
+            hist_row.m_mbf.copy_alpha_to(alpha_channel);
+            hist_row.m_mbf.copy_beta_to(beta_channel);
+            m_dets_contain_alpha.insert(alpha_channel, hist_row.index());
+            m_dets_contain_beta.insert(beta_channel, hist_row.index());
             m_beta_with_alpha.insert(alpha_channel, beta_channel);
             m_alpha_with_beta.insert(beta_channel, alpha_channel);
         }
@@ -558,7 +506,7 @@ public:
          *  Generate all (N - 1) electron states from the spin strings.
          */
         SpinChannelToSpinChannelSmuvi* spin_single_dict = nullptr;
-        buffered::FrmOnvSpinChannel tmp_spin_channel(histset.m_mbf.m_basis.m_nsite);
+        buffered::FrmOnvSpinChannel tmp_spin_channel(hist_row.m_mbf.m_basis.m_nsite);
         auto gen_one_less_electron= [&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){
             tmp_spin_channel = key;
             auto inner_fn = [&](uint_t isite) {
@@ -651,6 +599,57 @@ public:
 
         logging::info("successfully constructed auxiliary arrays for RDM calculation");
     }
+
+
+    /**
+     * fill all RDMs
+     */
+    static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms) {
+        if (!rdms) return;
+        bool have_pure = false;
+        have_pure |= rdms->get_pure_rdm(opsig::c_sing) != nullptr;
+        have_pure |= rdms->get_pure_rdm(opsig::c_doub) != nullptr;
+        have_pure |= rdms->get_pure_rdm(opsig::c_trip) != nullptr;
+        if (have_pure) {
+            // at least one of the pure RDM instances is allocated, so make aux arrays for the hist-hist RDMs and fill
+            SpinMapRdmFiller filler(hist);
+            {
+                auto ptr = rdms->get_pure_rdm(opsig::c_sing);
+                if (ptr) filler.fill_rdm(ptr);
+            }
+            {
+                auto ptr = rdms->get_pure_rdm(opsig::c_doub);
+                if (ptr) filler.fill_rdm(ptr);
+            }
+            {
+                auto ptr = rdms->get_pure_rdm(opsig::c_trip);
+                if (ptr) filler.fill_rdm(ptr);
+            }
+        }
+        if (rdms->m_fock_4rdm) {
+            // the Fock*4RDM instance is allocated, so make F0, then make aux arrays for the F0-hist RDMs and fill
+            /*
+             * the result of F * m_hist where F = sum_pq f_pq E_pq
+             */
+            communicator::BasicSend<MbfWeightRow, MbfWeightRow> fock_x_hist(
+                    "Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0});
+
+            logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
+            {
+                // if the Fock object is non-diagonal, construct F*psi using the dense matrix overload
+                auto ptr = dynamic_cast<const NonDiagFockRdm4*>(rdms->m_fock_4rdm);
+                if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
+            }
+            {
+                // if the Fock object is diagonal, construct F*psi using the sparse vector overload
+                auto ptr = dynamic_cast<const DiagFockRdm4 *>(rdms->m_fock_4rdm);
+                if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
+            }
+            logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
+
+            SpinMapRdmFiller(fock_x_hist.m_send_recv.recv()).fill_rdm(rdms->m_fock_4rdm);
+        }
+    }
 };
 
-#endif //M7_CASPT2FILLER_H
+#endif //M7_SPINMAPRDMFILLER_H
