@@ -278,6 +278,7 @@ namespace conf {
 
     struct Mae : Section {
         Param<uint_t> m_delay;
+        Param<bool> m_direct_maes;
         Param<uint_t> m_ncycle;
         Param<uint_t> m_stats_period;
         Param<str_t> m_stats_path;

@@ -146,7 +146,10 @@ void Solver::execute(uint_t ncycle) {
         logging::flush();
     }
     m_wf.attempt_gathered_hist_save(m_icycle);
-    if (m_icycle == ncycle) logging::info("maximum cycle number ({}) reached", m_icycle);
+    if (m_icycle == ncycle) {
+        logging::info("maximum cycle number ({}) reached", m_icycle);
+        if (m_maes.m_direct_maes) m_maes.m_accum_epoch.start(m_icycle);
+    }
     if (m_maes.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
         finalizing_loop_over_occupied_mbfs(m_icycle - 1);

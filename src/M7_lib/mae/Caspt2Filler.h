@@ -385,7 +385,8 @@ public:
         rdm->make_contribs(src, conn, com_ops, contrib);
     }
 
-    void fill_rdm(PureRdm* rdm) const {
+    template<typename T>
+    void fill_rdm(T* rdm) const {
         REQUIRE_TRUE(rdm, "RDM pointer should not be null");
 
         const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
@@ -400,7 +401,10 @@ public:
 
         buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(bra_row.m_mbf.m_basis.m_nsite);
+        uint_t counter = 0;
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
+            counter += 1;
+            logging::info("currently in iteration {}", counter);
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
             // alpha-alpha
@@ -465,7 +469,6 @@ public:
 
     void fill_fock_rdm4(FockRdm4* rdm) const {
         REQUIRE_TRUE(rdm, "RDM pointer should not be null");
-        // todo: probably no separate routine required, loop in other functions already over bra, simply build auxiliary arrays from ket and pass triples signature
     }
 
 public:
@@ -476,15 +479,15 @@ public:
     void fill() {
         {
             auto ptr = m_rdms->get_pure_rdm(opsig::c_sing);
-            if (ptr) fill_rdm(ptr);
+            if (ptr) fill_rdm<PureRdm>(ptr);
         }
         {
             auto ptr = m_rdms->get_pure_rdm(opsig::c_doub);
-            if (ptr) fill_rdm(ptr);
+            if (ptr) fill_rdm<PureRdm>(ptr);
         }
         {
             auto ptr = m_rdms->get_pure_rdm(opsig::c_trip);
-            if (ptr) fill_rdm(ptr);
+            if (ptr) fill_rdm<PureRdm>(ptr);
         }
         {
             auto ptr = m_rdms->m_fock_4rdm;
@@ -513,25 +516,41 @@ public:
         m_alpha_doubles("spin channel to spin channel map alpha doubles", hist.m_row.m_mbf.m_format.m_shape[1]),
         m_beta_doubles("spin channel to spin channel map beta doubles", hist.m_row.m_mbf.m_format.m_shape[1]) {
 
-        logging::info("Constructing auxiliary arrays for RDM calculation");
+        // if no Fock*4RDM object is allocated, skip this block
+        // todo: why does m_rdms->m_fock_4rdm cause a segfault?
+        // std::cout << m_rdms->m_fock_4rdm << std::endl;
+        // if (m_rdms->m_fock_4rdm) {
+        //         logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
+        //     {
+        //         // if the Fock object is non-diagonal, construct F*psi using the dense matrix overload
+        //         auto ptr = dynamic_cast<const NonDiagFockRdm4*>(m_rdms->m_fock_4rdm);
+        //         if (ptr) make_psi1(m_fock_x_hist, ptr->m_fock);
+        //     }
+        //     {
+        //         // if the Fock object is diagonal, construct F*psi using the sparse vector overload
+        //         auto ptr = dynamic_cast<const DiagFockRdm4*>(m_rdms->m_fock_4rdm);
+        //         make_psi1(m_fock_x_hist, ptr->m_fock);
+        //     }
+        //     logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(m_fock_x_hist.m_store.nrow_in_use()));
+        // }
 
-        // todo: discuss with robert how to deal with F.4RDM, by default all SMUVIs should be constructed from ket
-        // todo: 1RDM only DetsContainAlpha/Beta, 2RDM = 1RDM + Alpha/BetaSingles and BetaWithAlpha, 3RDM all SMUVIs
+        logging::info("Constructing auxiliary arrays for RDM calculation");
         const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
         const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
-        auto bra = m_hist.m_row;
-        buffered::FrmOnvSpinChannel alpha_channel(bra.m_mbf.m_basis.m_nsite);
-        buffered::FrmOnvSpinChannel beta_channel(bra.m_mbf.m_basis.m_nsite);
+        auto histset = m_hist.m_row;
+
+        buffered::FrmOnvSpinChannel alpha_channel(histset.m_mbf.m_basis.m_nsite);
+        buffered::FrmOnvSpinChannel beta_channel(histset.m_mbf.m_basis.m_nsite);
         /**
          *  Construct SMUVIs which given a FrmOnvSpinChannel yield
          *      the rows of the histogrammed set containing this spin string: m_dets_contain_(spin),
          *      the opposite spin strings occurring with it: m_(spin1)_with_(spin2)
          */
-        for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
-            bra.m_mbf.copy_alpha_to(alpha_channel);
-            bra.m_mbf.copy_beta_to(beta_channel);
-            m_dets_contain_alpha.insert(alpha_channel, bra.index());
-            m_dets_contain_beta.insert(beta_channel, bra.index());
+        for (histset.restart(displ); histset.in_range(displ + count); ++histset) {
+            histset.m_mbf.copy_alpha_to(alpha_channel);
+            histset.m_mbf.copy_beta_to(beta_channel);
+            m_dets_contain_alpha.insert(alpha_channel, histset.index());
+            m_dets_contain_beta.insert(beta_channel, histset.index());
             m_beta_with_alpha.insert(alpha_channel, beta_channel);
             m_alpha_with_beta.insert(beta_channel, alpha_channel);
         }
@@ -543,7 +562,7 @@ public:
          *  Generate all (N - 1) electron states from the spin strings.
          */
         SpinChannelToSpinChannelSmuvi* spin_single_dict = nullptr;
-        buffered::FrmOnvSpinChannel tmp_spin_channel(bra.m_mbf.m_basis.m_nsite);
+        buffered::FrmOnvSpinChannel tmp_spin_channel(histset.m_mbf.m_basis.m_nsite);
         auto gen_one_less_electron= [&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){
             tmp_spin_channel = key;
             auto inner_fn = [&](uint_t isite) {
@@ -621,21 +640,6 @@ public:
         m_beta_double_dict.foreach_key(gen_spin_doubles);
         m_beta_doubles.collate();
         logging::info("successfully constructed auxiliary arrays for RDM calculation");
-
-        // if there's no Fock*4RDM object allocated, there's nothing left to do
-        if (!m_rdms || !m_rdms->m_fock_4rdm) return;
-        logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
-        {
-            // if the Fock object is non-diagonal, construct F*psi using the dense matrix overlaod
-            auto ptr = dynamic_cast<const NonDiagFockRdm4*>(m_rdms->m_fock_4rdm);
-            if (ptr) make_psi1(m_fock_x_hist, ptr->m_fock);
-        }
-        {
-            // if the Fock object is non-diagonal, construct F*psi using the dense vector overlaod
-            auto ptr = dynamic_cast<const DiagFockRdm4*>(m_rdms->m_fock_4rdm);
-            make_psi1(m_fock_x_hist, ptr->m_fock);
-        }
-        logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(m_fock_x_hist.m_store.nrow_in_use()));
     }
 };
 
