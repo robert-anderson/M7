@@ -378,16 +378,15 @@ class Caspt2Filler {
     // todo: make private again
 public:
 
-    void make_contribs(PureRdm* rdm, const field::Mbf& src, const field::Mbf& dst, wf_t contrib) const {
+    void make_contribs(Rdm* rdm, const field::Mbf& src, const field::Mbf& dst, wf_t contrib) const {
         auto& conn = m_work_conns[src];
         auto& com_ops = m_work_com_ops[src];
         conn.connect(src, dst, com_ops);
         rdm->make_contribs(src, conn, com_ops, contrib);
     }
 
-    template<typename T>
-    void fill_rdm(T* rdm) const {
-        REQUIRE_TRUE(rdm, "RDM pointer should not be null");
+    void fill_rdm(Rdm* rdm) const {
+        if (!rdm) return;
 
         const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
         const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
@@ -436,7 +435,7 @@ public:
                 });
             }
 
-            if (rdm->m_ranksig == opsig::c_trip) {
+            if (rdm->m_ranksig == opsig::c_trip || rdm->m_ranksig == opsig::c_quad) {
                 // 4x(alpha) 2x(beta), here alpha_doubles instead of alpha_singles, otherwise exact copy of 2RDM code
                 m_alpha_doubles.foreach_value(alpha_channel,
                 [&](const field::FrmOnvSpinChannel &alpha_string){
@@ -468,10 +467,6 @@ public:
         }
     }
 
-    void fill_fock_rdm4(FockRdm4* rdm) const {
-        REQUIRE_TRUE(rdm, "RDM pointer should not be null");
-    }
-
 public:
 
     /**
@@ -480,19 +475,19 @@ public:
     void fill() {
         {
             auto ptr = m_rdms->get_pure_rdm(opsig::c_sing);
-            if (ptr) fill_rdm<PureRdm>(ptr);
+            if (ptr) fill_rdm(ptr);
         }
         {
             auto ptr = m_rdms->get_pure_rdm(opsig::c_doub);
-            if (ptr) fill_rdm<PureRdm>(ptr);
+            if (ptr) fill_rdm(ptr);
         }
         {
             auto ptr = m_rdms->get_pure_rdm(opsig::c_trip);
-            if (ptr) fill_rdm<PureRdm>(ptr);
+            if (ptr) fill_rdm(ptr);
         }
         {
             auto ptr = m_rdms->m_fock_4rdm;
-            if (ptr) fill_fock_rdm4(ptr);
+            if (ptr) fill_rdm(ptr);
         }
     }
 
