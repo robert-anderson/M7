@@ -404,7 +404,8 @@ public:
         uint_t counter = 0;
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
             counter += 1;
-            logging::info("currently in iteration {}", counter);
+            if (counter%1000 == 0)
+                logging::info("currently in iteration {}", counter);
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
             // alpha-alpha
@@ -639,6 +640,20 @@ public:
         spin_doubles = &m_beta_doubles;
         m_beta_double_dict.foreach_key(gen_spin_doubles);
         m_beta_doubles.collate();
+
+        m_dets_contain_alpha.remap_accessors();
+        m_dets_contain_beta.remap_accessors();
+        m_beta_with_alpha.remap_accessors();
+        m_alpha_with_beta.remap_accessors();
+        m_alpha_single_dict.remap_accessors();
+        m_beta_single_dict.remap_accessors();
+        m_alpha_singles.remap_accessors();
+        m_beta_singles.remap_accessors();
+        m_alpha_double_dict.remap_accessors();
+        m_beta_double_dict.remap_accessors();
+        m_alpha_doubles.remap_accessors();
+        m_beta_doubles.remap_accessors();
+
         logging::info("successfully constructed auxiliary arrays for RDM calculation");
     }
 };

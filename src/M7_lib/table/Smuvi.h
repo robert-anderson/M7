@@ -249,7 +249,7 @@ public:
         DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
         const auto itable = m_irank_world_to_iaccess_table[irank];
         const auto& accessor = m_access_tables[itable];
-        const AccessRow lookup_row = accessor.lookup(key);
+        const AccessRow& lookup_row = accessor.lookup(key);
         if (!lookup_row) {
             // failed lookup
             value_iterator_row.select_null();
@@ -259,6 +259,11 @@ public:
         const uint_t iend = ibegin + lookup_row.m_value_count;
         value_iterator_row.jump(ibegin);
         return {value_iterator_row, iend};
+    }
+
+    void remap_accessors() {
+        MappedTable<AccessRow>& table = m_access_tables[0];
+        table.remap();
     }
 
     uint_t itable(const key_t& key) const {
