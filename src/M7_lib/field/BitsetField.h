@@ -298,7 +298,7 @@ struct BitsetField : FieldBase {
         setbit_foreach::single<uint_t>(m_dsize, fn, get_work_fn);
     }
 
-    uint_t nsetbit_not_in(const FrmOnvField& other) const {
+    uint_t nsetbit_not_in(const BitsetField<T, nind>& other) const {
         uint_t count = 0ul;
         auto fn = [&count](uint_t){++count;};
         foreach_setbit_not_in(other, fn);
