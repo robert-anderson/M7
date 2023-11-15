@@ -420,7 +420,7 @@ public:
 
             // alpha-beta
             m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
-                const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_channel);
+                const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
                 m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
                                                       [&](const field::FrmOnvSpinChannel &common_string){
                     indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
@@ -433,30 +433,30 @@ public:
 
             if (rdm->m_ranksig == opsig::c_doub) continue;
 
-            // // 4x(alpha) 2x(beta), here alpha_doubles instead of alpha_singles, otherwise exact copy of 2RDM code
-            // m_alpha_doubles.foreach_value(alpha_channel,
-            // [&](const field::FrmOnvSpinChannel &alpha_string){
-            //     m_beta_with_alpha.foreach_common_index(alpha_string, m_beta_singles, beta_channel,
-            //     [&](const field::FrmOnvSpinChannel &common_string){
-            //         m_dets_contain_beta.foreach_common_index(common_string, m_dets_contain_alpha, alpha_string,
-            //         [&](const field::Number<uint_t>& iket){
-            //             ket_row.jump(iket);
-            //             make_contrib_fn();
-            //         });
-            //     });
-            // });
-            // // 2x(alpha) 4x(beta), flip the roles of alpha and beta
-            // m_beta_doubles.foreach_value(beta_channel,
-            // [&](const field::FrmOnvSpinChannel &beta_string){
-            //    m_alpha_with_beta.foreach_common_index(beta_string, m_alpha_singles, alpha_channel,
-            //    [&](const field::FrmOnvSpinChannel &common_string){
-            //        m_dets_contain_beta.foreach_common_index(beta_string, m_dets_contain_alpha, common_string,
-            //        [&](const field::Number<uint_t>& iket){
-            //            ket_row.jump(iket);
-            //            make_contrib_fn();
-            //        });
-            //    });
-            // });
+            // 4x(alpha) 2x(beta), here alpha_doubles instead of alpha_singles, otherwise exact copy of 2RDM code
+            m_alpha_doubles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
+               const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
+               m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
+                                                     [&](const field::FrmOnvSpinChannel &common_string){
+                   indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
+                   const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
+                   ket_row.jump(iket);
+                   DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 1, "only beta singles yield valid contributions.");
+                   make_contrib_fn();
+               }, order_fn);
+            });
+            // 2x(alpha) 4x(beta), flip the roles of alpha and beta
+            m_beta_doubles.foreach_value(beta_channel, [&](const field::FrmOnvSpinChannel &beta_string){
+               const auto indices_dets_with_beta = m_dets_contain_beta.access(beta_string);
+               m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_singles, alpha_channel,
+                                                     [&](const field::FrmOnvSpinChannel &common_string){
+                   indices_dets_with_beta.m_value_row.jump(common_string.m_row->index());
+                   const uint_t iket = indices_dets_with_beta.m_value_row.m_value;
+                   ket_row.jump(iket);
+                   DEBUG_ASSERT_EQ(bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf), 1, "only alpha singles yield valid contributions.");
+                   make_contrib_fn();
+               }, order_fn);
+            });
         }
     }
 
