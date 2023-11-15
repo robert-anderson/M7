@@ -364,7 +364,8 @@ public:
         }
     }
 
-    void collate() {
+    template<typename fn_t>
+    void collate(const fn_t& order_fn) {
         /*
          * first send the inserted key-index pairs to the receiving ranks
          */
@@ -384,7 +385,8 @@ public:
         auto comp_fn = [&](uint_t i, uint_t j) -> bool {
             comp_recv_row_1.jump(i);
             comp_recv_row_2.jump(j);
-            return comp_recv_row_1.m_value < comp_recv_row_2.m_value;
+            return order_fn(comp_recv_row_1.m_value, comp_recv_row_2.m_value);
+            // return comp_recv_row_1.m_value < comp_recv_row_2.m_value;
         };
         v_t<std::set<uint_t, decltype(comp_fn)>> value_index_sets;
 

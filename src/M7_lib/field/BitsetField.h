@@ -305,6 +305,25 @@ struct BitsetField : FieldBase {
         return count;
     }
 
+    /**
+     * Compares two bitstrings and returns true if A comes before B, i.e.
+     * if, in the last occupation where they differ, A has the lower orbital number.
+     */
+    bool reverse_lexical_order(const BitsetField<T, nind>& other) const {
+        DEBUG_ASSERT_EQ(m_dsize, other.m_dsize, "incompatible bitset sizes");
+        DEBUG_ASSERT_EQ(m_format, other.m_format, "incompatible bitset formats");
+        bool comes_before = false;
+        // std::cout << "number of bits: " << nbit() << std::endl;
+        for (uint_t i = 0ul; i < nbit(); ++i) {
+            // std::cout << "bit occupation at position : " << i  << " " << get(i) << " " << other.get(i) << std::endl;
+            if (get(i) != other.get(i)) {
+                comes_before = get(i) ? false : true;
+                break;
+            }
+        }
+        return comes_before;
+    }
+
     uint_t nsetbit() const {
         uint_t result = 0;
         for (uint_t idataword = 0ul; idataword < m_dsize; ++idataword) {

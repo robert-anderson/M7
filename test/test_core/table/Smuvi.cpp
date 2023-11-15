@@ -29,7 +29,10 @@ TEST(Smuvi, LookupKeysIndices) {
         smuvi.insert(tmp_key, tmp_val);
     }
 
-    smuvi.collate();
+    const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
+        return i < j;
+    };
+    smuvi.collate(order_fn);
 
     auto fn = [&smuvi](const field::FrmOnvSpinChannel& key, smuvi_t::AccessResult values) -> void {
         auto lookup_values = smuvi.access(key);
@@ -79,8 +82,12 @@ TEST(Smuvi, Intersection) {
         tmp_val = insertion.second;
         smuvi2.insert(tmp_key, tmp_val);
     }
-    smuvi1.collate();
-    smuvi2.collate();
+
+    const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
+        return i.reverse_lexical_order(j);
+    };
+    smuvi1.collate(order_fn);
+    smuvi2.collate(order_fn);
 
     buffered::FrmOnvSpinChannel tmp_key1(nsite);
     buffered::FrmOnvSpinChannel tmp_key2(nsite);
@@ -109,7 +116,10 @@ TEST(Smuvi, BitsetToBitset) {
 
     smuvi.insert(tmp_key, tmp_val);
 
-    smuvi.collate();
+    const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
+        return i < j;
+    };
+    smuvi.collate(order_fn);
 
     auto fn = [&smuvi](const field::FrmOnvSpinChannel& key, smuvi_t::AccessResult values) -> void {
         auto lookup_values = smuvi.access(key);
@@ -181,7 +191,10 @@ TEST(Smuvi, Comms) {
         smuvi.insert(mbf, val);
     }
 
-    smuvi.collate();
+    const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
+        return i < j;
+    };
+    smuvi.collate(order_fn);
 
 #if 0
     std::cout << mbf << std::endl;
