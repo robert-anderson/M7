@@ -51,23 +51,12 @@ TEST(Smuvi, Intersection) {
 
     const v_t<std::pair<uintv_t, uintv_t>> insertions1 = {
             {{1,4,5,6,7,8}, {1,2,4,5,7,8}},
-            {{1,4,5,6,7,8}, {1,2,3,5,7,8}}
-            // {{0,1,4,5,6,8}, {0,1,4,5,7,8}},
-            // {{0,1,5,6,7,8}, {1,2,4,6,7,8}},
-            // {{1,4,5,6,7,8}, {1,2,4,5,7,8}},
+            {{1,4,5,6,7,8}, {0,1,2,4,5,7}}
     };
     const v_t<std::pair<uintv_t, uintv_t>> insertions2 = {
-            {{1,2,4,6,7,8}, {1,2,4,5,7,8}},
-            {{1,2,4,6,7,8}, {1,2,3,5,7,8}}
-            // {{1,2,4,5,7,8}, {0,3,4,6,7,8}},
-            // {{1,2,4,5,7,8}, {1,2,4,6,7,8}},
-            // {{0,1,4,5,7,8}, {0,1,2,3,4,5}},
-    };
-    const v_t<std::pair<uintv_t, uintv_t>> smuvi_keypairs = {
-            {{1,4,5,6,7,8}, {1,2,4,6,7,8}}
-            // {{0,1,4,5,6,8}, {1,2,4,5,7,8}},
-            // {{0,1,5,6,7,8}, {1,2,4,5,7,8}},
-            // {{1,4,5,6,7,8}, {0,1,4,5,7,8}},
+            {{1,2,4,6,7,8}, {1,2,3,5,6,7}},
+            {{1,2,4,5,7,8}, {1,2,4,6,7,8}},
+            {{0,1,4,5,7,8}, {1,2,4,5,7,8}}
     };
 
     buffered::FrmOnvSpinChannel tmp_key(nsite);
@@ -84,22 +73,30 @@ TEST(Smuvi, Intersection) {
     }
 
     const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
-        return i.reverse_lexical_order(j);
+        return i.lexical_order(j);
     };
     smuvi1.collate(order_fn);
     smuvi2.collate(order_fn);
 
+    const v_t<std::pair<std::pair<uintv_t, uintv_t>, uint_t>> smuvi_keypairs = {
+            {{{1,4,5,6,7,8}, {1,2,4,6,7,8}}, 0},
+            {{{1,4,5,6,7,8}, {1,2,4,5,7,8}}, 0},
+            {{{1,4,5,6,7,8}, {0,1,4,5,7,8}}, 1}
+    };
     buffered::FrmOnvSpinChannel tmp_key1(nsite);
     buffered::FrmOnvSpinChannel tmp_key2(nsite);
-    for (auto& key_pair: smuvi_keypairs) {
+    for (auto& pair: smuvi_keypairs) {
+        const auto key_pair = pair.first;
         tmp_key1 = key_pair.first;
         tmp_key2 = key_pair.second;
         uint_t counter = 0ul;
+        smuvi1.foreach_value(tmp_key1, [&](const field::FrmOnvSpinChannel& val){std::cout << val << " ";});
+        std::cout << std::endl;
+        smuvi2.foreach_value(tmp_key2, [&](const field::FrmOnvSpinChannel& val){std::cout << val << " ";});
+        std::cout << std::endl;
         smuvi1.foreach_common_value(tmp_key1, smuvi2, tmp_key2,
-                                    [&](const field::FrmOnvSpinChannel &common_string){
-                                        counter += 1ul;
-                                    });
-        ASSERT_EQ(counter, 2ul);
+                                    [&](const field::FrmOnvSpinChannel &common_string){counter += 1ul;}, order_fn);
+        ASSERT_EQ(counter, pair.second);
     }
 
 }

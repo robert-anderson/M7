@@ -294,26 +294,28 @@ public:
     /**
      * yield by call to fn_t each time a common value is found among the (ordered) values of the two keys
      */
-    template<typename fn_t>
-    void foreach_common_value(const key_t& key, const Smuvi<key_t, value_t>& other, const key_t& key_other, const fn_t& fn) const {
+    template<typename fn_t, typename comp_fn>
+    void foreach_common_value(const key_t& key, const Smuvi<key_t, value_t>& other, const key_t& key_other, const fn_t& fn, const comp_fn& comp) const {
         functor::assert_prototype<void(const value_t&)>(fn);
+        // todo: how to specify the prototype correctly?
+        // functor::assert_prototype<bool>(comp);
         const auto itable_this = this->itable(key);
         const auto& value_row_this = m_values_foreach_rows_1[itable_this];
         const auto itable_other = other.itable(key_other);
         const auto& value_row_other = other.m_values_foreach_rows_2[itable_other];
-        auto access_result_this = access(key, value_row_this);
+        AccessResult access_result_this = access(key, value_row_this);
         if (!access_result_this) return;
-        auto access_result_other = other.access(key_other, value_row_other);
+        AccessResult access_result_other = other.access(key_other, value_row_other);
         if (!access_result_other) return;
 
         while (access_result_this && access_result_other) {
-            if (value_row_this.m_value < value_row_other.m_value) ++value_row_this;
-            else if (value_row_this.m_value > value_row_other.m_value) ++value_row_other;
-            else {
+            if (value_row_this.m_value == value_row_other.m_value) {
                 fn(value_row_this.m_value);
                 ++value_row_this;
                 ++value_row_other;
             }
+            else if (comp(value_row_this.m_value, value_row_other.m_value)) ++value_row_this;
+            else ++value_row_other;
         }
     }
 
