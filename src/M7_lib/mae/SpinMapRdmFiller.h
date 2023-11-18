@@ -391,7 +391,7 @@ public:
         };
 
         const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
-            return i.lexical_order(j);
+            return i < j;
         };
 
         buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
@@ -512,7 +512,7 @@ public:
                 m_hist.m_row.m_mbf.copy_beta_to(beta_channel1);
                 m_hist.m_row.jump(j);
                 m_hist.m_row.m_mbf.copy_beta_to(beta_channel2);
-                return beta_channel1.lexical_order(beta_channel2);
+                return beta_channel1 < beta_channel2;
             };
             m_dets_contain_alpha.collate(order_fn);
         }
@@ -525,13 +525,13 @@ public:
                 m_hist.m_row.m_mbf.copy_alpha_to(alpha_channel1);
                 m_hist.m_row.jump(j);
                 m_hist.m_row.m_mbf.copy_alpha_to(alpha_channel2);
-                return alpha_channel1.lexical_order(alpha_channel2);
+                return alpha_channel1 < alpha_channel2;
             };
             m_dets_contain_beta.collate(order_fn);
         }
         // unlike for (bit string -> det index), (bit string -> bit string) maps can reuse the same order_fn
         const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
-            return i.lexical_order(j);
+            return i < j;
         };
         m_alpha_with_beta.collate(order_fn);
         m_beta_with_alpha.collate(order_fn);
