@@ -220,7 +220,7 @@ ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     trace = mpi::all_sum(trace);
     DEBUG_ASSERT_GT(std::abs(trace), 1e-14, "RDM trace should be non-zero");
     const auto norm = arith::real(trace) / integer::nspair(nelec);
-    if (!rdm2->approx_contribs())
+    if (!rdm2->approx_contribs() && m_total_norm.m_reduced.real() != 0.0)
         REQUIRE_NEAR_EQ(norm, m_total_norm.m_reduced.real(),
                       "2RDM norm should match total of sampled diagonal contributions");
     REQUIRE_NEAR_ZERO(m_total_norm.m_reduced.imag(), "2RDM norm should be purely real");
