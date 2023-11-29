@@ -104,7 +104,7 @@ TEST(SpinMapRdmFiller, Rdm1) {
         hist.m_row.m_mbf = pair.second;
     }
 
-    SpinMapRdmFiller filler(hist);
+    SpinMapRdmFiller filler(hist, hist);
 
     FillerTestPureRdm rdm1(doc.m_av_ests.m_rdm, opsig::c_sing, sector);
 
@@ -166,7 +166,7 @@ TEST(SpinMapRdmFiller, Rdm2) {
         hist.m_row.m_mbf = pair.second;
     }
 
-    SpinMapRdmFiller filler(hist);
+    SpinMapRdmFiller filler(hist, hist);
 
     FillerTestPureRdm rdm2(doc.m_av_ests.m_rdm, opsig::c_doub, sector);
 
@@ -233,7 +233,7 @@ TEST(SpinMapRdmFiller, Rdm3) {
         hist.m_row.m_mbf = pair.second;
     }
 
-    SpinMapRdmFiller filler(hist);
+    SpinMapRdmFiller filler(hist, hist);
 
     FillerTestPureRdm rdm3(doc.m_av_ests.m_rdm, opsig::c_trip, sector);
 

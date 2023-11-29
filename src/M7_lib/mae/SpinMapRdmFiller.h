@@ -228,7 +228,9 @@ class SpinMapRdmFiller {
     /**
      * Histogrammable set of determinants of which to compute the outer product in filling the MAEs
      */
-    const Table<MbfWeightRow>& m_hist;
+    const Table<MbfWeightRow>& m_bra;
+    const Table<MbfWeightRow>& m_ket;
+
     /**
      * working objects for connections and common indices
      */
@@ -380,10 +382,10 @@ public:
     void fill_rdm(Rdm* rdm) const {
         if (!rdm) return;
 
-        const auto displ = mpi::evenly_shared_displ(m_hist.nrow_in_use());
-        const auto count = mpi::evenly_shared_count(m_hist.nrow_in_use());
-        auto bra_row = m_hist.m_row;
-        auto ket_row = bra_row;
+        const auto displ = mpi::evenly_shared_displ(m_bra.nrow_in_use());
+        const auto count = mpi::evenly_shared_count(m_bra.nrow_in_use());
+        auto bra_row = m_bra.m_row;
+        auto ket_row = m_ket.m_row;
 
         auto make_contrib_fn = [&]() {
             const auto contrib = bra_row.m_weight[0] * ket_row.m_weight[0];
@@ -393,6 +395,9 @@ public:
         const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
             return i < j;
         };
+
+        logging::info("bra rows in use {}", m_bra.nrow_in_use());
+        logging::info("ket rows in use {}", m_ket.nrow_in_use());
 
         buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(bra_row.m_mbf.m_basis.m_nsite);
@@ -462,27 +467,28 @@ public:
 
 
 public:
-    SpinMapRdmFiller(const Table<MbfWeightRow>& hist):
-        m_hist(hist),
-        m_work_conns(mbf::get_basis(hist.m_row.m_mbf).size()),
-        m_work_com_ops(mbf::get_basis(hist.m_row.m_mbf).size()),
-        m_dets_contain_alpha("spin channel to index map (alpha)", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_dets_contain_beta("spin channel to index map (beta)", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_with_alpha("spin channel to spin channel map (alpha)", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_with_beta("spin channel to spin channel map (beta)", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_single_dict("auxiliary spin channel to spin channel map alpha singles", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_single_dict("auxiliary spin channel to spin channel map beta singles", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_singles("spin channel to spin channel map alpha singles", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_singles("spin channel to spin channel map beta singles", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_double_dict("auxiliary spin channel to spin channel map alpha doubles", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_double_dict("auxiliary spin channel to spin channel map beta doubles", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_doubles("spin channel to spin channel map alpha doubles", hist.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_doubles("spin channel to spin channel map beta doubles", hist.m_row.m_mbf.m_format.m_shape[1]) {
+    SpinMapRdmFiller(const Table<MbfWeightRow>& hist_bra, const Table<MbfWeightRow>& hist_ket):
+        m_bra(hist_bra),
+        m_ket(hist_ket),
+        m_work_conns(mbf::get_basis(m_ket.m_row.m_mbf).size()),
+        m_work_com_ops(mbf::get_basis(m_ket.m_row.m_mbf).size()),
+        m_dets_contain_alpha("spin channel to index map (alpha)", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_dets_contain_beta("spin channel to index map (beta)", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_with_alpha("spin channel to spin channel map (alpha)", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_with_beta("spin channel to spin channel map (beta)", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_single_dict("auxiliary spin channel to spin channel map alpha singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_single_dict("auxiliary spin channel to spin channel map beta singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_singles("spin channel to spin channel map alpha singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_singles("spin channel to spin channel map beta singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_double_dict("auxiliary spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_double_dict("auxiliary spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_doubles("spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_doubles("spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]) {
 
         logging::info("Constructing auxiliary arrays for RDM calculation");
-        const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
-        const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
-        auto hist_row = m_hist.m_row;
+        const auto displ = mpi::evenly_shared_displ(hist_ket.nrow_in_use());
+        const auto count = mpi::evenly_shared_count(hist_ket.nrow_in_use());
+        auto hist_row = m_ket.m_row;
 
         buffered::FrmOnvSpinChannel alpha_channel(hist_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(hist_row.m_mbf.m_basis.m_nsite);
@@ -508,10 +514,10 @@ public:
             buffered::FrmOnvSpinChannel beta_channel1(hist_row.m_mbf.m_basis.m_nsite);
             buffered::FrmOnvSpinChannel beta_channel2(hist_row.m_mbf.m_basis.m_nsite);
             const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
-                m_hist.m_row.jump(i);
-                m_hist.m_row.m_mbf.copy_beta_to(beta_channel1);
-                m_hist.m_row.jump(j);
-                m_hist.m_row.m_mbf.copy_beta_to(beta_channel2);
+                m_ket.m_row.jump(i);
+                m_ket.m_row.m_mbf.copy_beta_to(beta_channel1);
+                m_ket.m_row.jump(j);
+                m_ket.m_row.m_mbf.copy_beta_to(beta_channel2);
                 return beta_channel1 < beta_channel2;
             };
             m_dets_contain_alpha.collate(order_fn);
@@ -521,10 +527,10 @@ public:
             buffered::FrmOnvSpinChannel alpha_channel1(hist_row.m_mbf.m_basis.m_nsite);
             buffered::FrmOnvSpinChannel alpha_channel2(hist_row.m_mbf.m_basis.m_nsite);
             const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
-                m_hist.m_row.jump(i);
-                m_hist.m_row.m_mbf.copy_alpha_to(alpha_channel1);
-                m_hist.m_row.jump(j);
-                m_hist.m_row.m_mbf.copy_alpha_to(alpha_channel2);
+                m_ket.m_row.jump(i);
+                m_ket.m_row.m_mbf.copy_alpha_to(alpha_channel1);
+                m_ket.m_row.jump(j);
+                m_ket.m_row.m_mbf.copy_alpha_to(alpha_channel2);
                 return alpha_channel1 < alpha_channel2;
             };
             m_dets_contain_beta.collate(order_fn);
@@ -639,13 +645,20 @@ public:
      */
     static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms) {
         if (!rdms) return;
+
+        // TODO: how to avoid code duplication?
+        auto& row = hist.m_row;
+        wf_comp_t norm = 0.0;
+        for (row.restart(); row; ++row) norm += math::pow<2>(std::abs(row.m_weight[0]));
+        if (mpi::i_am_root()) rdms->m_total_norm.m_local = norm;
+
         bool have_pure = false;
         have_pure |= rdms->get_pure_rdm(opsig::c_sing) != nullptr;
         have_pure |= rdms->get_pure_rdm(opsig::c_doub) != nullptr;
         have_pure |= rdms->get_pure_rdm(opsig::c_trip) != nullptr;
-        // if (have_pure) {
+        if (have_pure) {
             // at least one of the pure RDM instances is allocated, so make aux arrays for the hist-hist RDMs and fill
-            SpinMapRdmFiller filler(hist);
+            SpinMapRdmFiller filler(hist, hist);
             {
                 auto ptr = rdms->get_pure_rdm(opsig::c_sing);
                 if (ptr) filler.fill_rdm(ptr);
@@ -658,30 +671,29 @@ public:
                 auto ptr = rdms->get_pure_rdm(opsig::c_trip);
                 if (ptr) filler.fill_rdm(ptr);
             }
-        // }
-        // if (rdms->m_fock_4rdm) {
-        //     // the Fock*4RDM instance is allocated, so make F0, then make aux arrays for the F0-hist RDMs and fill
-        //     /*
-        //      * the result of F * m_hist where F = sum_pq f_pq E_pq
-        //      */
-        //     communicator::BasicSend<MbfWeightRow, MbfWeightRow> fock_x_hist(
-        //             "Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0});
+        }
+        if (rdms->m_fock_4rdm) {
+            /*
+             * the result of F * m_hist where F = sum_pq f_pq E_pq
+             */
+            communicator::BasicSend<MbfWeightRow, MbfWeightRow> fock_x_hist(
+                    "Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0});
 
-        //     logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
-        //     {
-        //         // if the Fock object is non-diagonal, construct F*psi using the dense matrix overload
-        //         auto ptr = dynamic_cast<const NonDiagFockRdm4*>(rdms->m_fock_4rdm);
-        //         if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
-        //     }
-        //     {
-        //         // if the Fock object is diagonal, construct F*psi using the sparse vector overload
-        //         auto ptr = dynamic_cast<const DiagFockRdm4 *>(rdms->m_fock_4rdm);
-        //         if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
-        //     }
-        //     logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
+            logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
+            {
+                // if the Fock object is non-diagonal, construct F*psi using the matrix overload
+                auto ptr = dynamic_cast<const NonDiagFockRdm4*>(rdms->m_fock_4rdm);
+                if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
+            }
+            {
+                // if the Fock object is diagonal, construct F*psi using the vector overload
+                auto ptr = dynamic_cast<const DiagFockRdm4 *>(rdms->m_fock_4rdm);
+                if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
+            }
+            logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
 
-        //     SpinMapRdmFiller(fock_x_hist.m_send_recv.recv()).fill_rdm(rdms->m_fock_4rdm);
-        // }
+            SpinMapRdmFiller(hist, fock_x_hist.m_send_recv.recv()).fill_rdm(rdms->m_fock_4rdm);
+        }
     }
 };
 
