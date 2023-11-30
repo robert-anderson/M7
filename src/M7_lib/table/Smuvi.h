@@ -400,7 +400,7 @@ public:
 
             bool operator()(uint_t i, uint_t j) const {
                 m_row_1.jump(i);
-                m_row_2.jump(i);
+                m_row_2.jump(j);
                 return m_order_fn(m_row_1.m_value, m_row_2.m_value);
             }
         };
