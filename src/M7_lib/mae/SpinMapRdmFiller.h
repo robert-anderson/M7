@@ -396,9 +396,6 @@ public:
             return i < j;
         };
 
-        logging::info("bra rows in use {}", m_bra.nrow_in_use());
-        logging::info("ket rows in use {}", m_ket.nrow_in_use());
-
         buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(bra_row.m_mbf.m_basis.m_nsite);
         uint_t counter = 0;
@@ -692,7 +689,7 @@ public:
             }
             logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
 
-            SpinMapRdmFiller(hist, fock_x_hist.m_send_recv.recv()).fill_rdm(rdms->m_fock_4rdm);
+            SpinMapRdmFiller(hist, fock_x_hist.m_store).fill_rdm(rdms->m_fock_4rdm);
         }
     }
 };
