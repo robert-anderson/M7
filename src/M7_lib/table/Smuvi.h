@@ -388,7 +388,15 @@ public:
             const fn_t& m_order_fn;
 
             CompFn(const send_recv::BasicSend<InsertRow>& inserter, const fn_t& order_fn):
-                m_row_1(inserter.recv().m_row), m_row_2(inserter.recv().m_row), m_order_fn(order_fn){}
+                    m_row_1(inserter.recv().m_row), m_row_2(inserter.recv().m_row), m_order_fn(order_fn){}
+
+            CompFn(const CompFn& other): m_row_1(other.m_row_1), m_row_2(other.m_row_2), m_order_fn(other.m_order_fn){}
+
+            CompFn& operator=(const CompFn& other) {
+                m_row_1.jump(other.m_row_1.index());
+                m_row_2.jump(other.m_row_2.index());
+                return *this;
+            }
 
             bool operator()(uint_t i, uint_t j) const {
                 m_row_1.jump(i);
