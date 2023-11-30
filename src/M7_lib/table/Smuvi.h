@@ -382,15 +382,29 @@ public:
          * unordered list of the value element indices in the recv table associated with each key in the accessor,
          * which will later be copied into the shared memory m_entries arrays
          */
-        const auto comp_recv_row_1 = m_inserter.recv().m_row;
-        const auto comp_recv_row_2 = m_inserter.recv().m_row;
-        auto comp_fn = [&](uint_t i, uint_t j) -> bool {
-            comp_recv_row_1.jump(i);
-            comp_recv_row_2.jump(j);
-            return order_fn(comp_recv_row_1.m_value, comp_recv_row_2.m_value);
-            // return comp_recv_row_1.m_value < comp_recv_row_2.m_value;
+        struct CompFn {
+            const InsertRow m_row_1;
+            const InsertRow m_row_2;
+            const fn_t& m_order_fn;
+
+            CompFn(const send_recv::BasicSend<InsertRow>& inserter, const fn_t& order_fn):
+                    m_row_1(inserter.recv().m_row), m_row_2(inserter.recv().m_row), m_order_fn(order_fn){}
+
+            CompFn(const CompFn& other): m_row_1(other.m_row_1), m_row_2(other.m_row_2), m_order_fn(other.m_order_fn){}
+
+            CompFn& operator=(const CompFn& other) {
+                m_row_1.jump(other.m_row_1.index());
+                m_row_2.jump(other.m_row_2.index());
+                return *this;
+            }
+
+            bool operator()(uint_t i, uint_t j) const {
+                m_row_1.jump(i);
+                m_row_2.jump(j);
+                return m_order_fn(m_row_1.m_value, m_row_2.m_value);
+            }
         };
-        v_t<std::set<uint_t, decltype(comp_fn)>> value_index_sets;
+        v_t<std::set<uint_t, CompFn>> value_index_sets;
 
         /*
          * loop over the received rows
@@ -405,7 +419,7 @@ public:
              * if there aren't enough value index vector sets for the current size of the accessor, allocate more
              */
             if (value_index_sets.size() < accessor.nrecord())
-                value_index_sets.resize(accessor.nrecord(), std::set<uint_t, decltype(comp_fn)>(comp_fn));
+                value_index_sets.resize(accessor.nrecord(), std::set<uint_t, CompFn>(CompFn(m_inserter, order_fn)));
             /*
              * get the indices vector to recv_row.m_key, and append the new index
              */
