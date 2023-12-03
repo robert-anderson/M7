@@ -53,10 +53,12 @@ void SpinFreeRdm::make_contribs_from_one_row(const RdmRow& row, wf_t norm) {
         if (is_diagonal) {
             add(p0, q0, elem);
         }
+        else if (m_enforce_hermiticity) {
+            add(p0, q0, 0.5 * elem);
+            add(q0, p0, 0.5 * elem);
+        }
         else {
-            // enforce hermiticity symmetry
-            add(p0, q0, 0.5*elem);
-            add(q0, p0, 0.5*elem);
+            add(p0, q0, elem);
         }
     }
     else {
@@ -118,13 +120,16 @@ void SpinFreeRdm::make_contribs_from_one_row(const RdmRow& row, wf_t norm) {
             }
             if (is_diagonal) {
                 // diagonal element
-                add_to_send_table(m_insert_inds, elem*factor);
+                add_to_send_table(m_insert_inds, elem * factor);
+            }
+            else if (m_enforce_hermiticity) {
+                // off-diagonal element: enforce hermiticity symmetry by averaging
+                add_to_send_table(m_insert_inds, 0.5 * elem * factor);
+                m_insert_inds.m_frm.conjugate();
+                add_to_send_table(m_insert_inds, 0.5 * elem * factor);
             }
             else {
-                // off-diagonal element: enforce hermiticity symmetry by averaging
-                add_to_send_table(m_insert_inds, 0.5*elem*factor);
-                m_insert_inds.m_frm.conjugate();
-                add_to_send_table(m_insert_inds, 0.5*elem*factor);
+                add_to_send_table(m_insert_inds, elem * factor);
             }
         }
     }

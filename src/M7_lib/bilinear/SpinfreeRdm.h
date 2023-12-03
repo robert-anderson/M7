@@ -20,6 +20,10 @@ class SpinFreeRdm : public Rdm {
      * number of src elements to contribute to spin-traces before communicating
      */
     const uint_t m_nelem_per_comm;
+    /**
+     * whether to average contributions from each side of the diagonal
+     */
+    const bool m_enforce_hermiticity = false;
 
     static uint_t nspinsig(uint_t rank){
         using namespace spin_free_rdm_arrays;
