@@ -300,39 +300,46 @@ class SpinMapRdmFiller {
         auto hist_row = psi0.m_row;
         buffered::Mbf work_mbf(hist_row.m_mbf.m_basis);
         const auto& basis = work_mbf.m_basis;
-        v_t<std::pair<conn::Mbf, ham_t>> conn_vals;
+        v_t<std::pair<size_t, ham_t>> diag_vals;
+        v_t<std::pair<conn::Mbf, ham_t>> non_diag_vals;
         for (auto& pq_val: pq_vals) {
             const auto p = pq_val.first.first;
             const auto q = pq_val.first.second;
             const auto contract_val = pq_val.second;
             for (uint_t ispin = 0ul; ispin < 2ul; ++ispin) {
-                conn_vals.emplace_back(work_mbf, contract_val);
-                if (p!=q) {
+                if (p == q) {
+                    // diagonal
+                    diag_vals.emplace_back(p, contract_val);
+                }
+                else {
+                    non_diag_vals.emplace_back(work_mbf, contract_val);
                     // not a diagonal
-                    conn_vals.back().first.m_cre.set(basis.ispinorb(ispin, p));
-                    conn_vals.back().first.m_ann.set(basis.ispinorb(ispin, q));
+                    non_diag_vals.back().first.m_cre.set(basis.ispinorb(ispin, p));
+                    non_diag_vals.back().first.m_ann.set(basis.ispinorb(ispin, q));
                 }
             }
         }
 
+        auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
+            auto irank_dst = psi1.m_dist.irank(dst);
+            auto& send_row = psi1.m_send_recv.send(irank_dst).m_row;
+            send_row.push_back_jump();
+            send_row.m_mbf = dst;
+            send_row.m_weight = hist_row.m_weight;
+            send_row.m_weight *= val;
+            if (phase) send_row.m_weight *= -1.0;
+        };
+
         for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
-            for (auto& conn_val: conn_vals) {
-                const auto& conn = conn_val.first;
-                bool phase = false;
-                Mbf* dst = &hist_row.m_mbf;
-                if (conn.size()) {
-                    if (mbf::destroys(conn, hist_row.m_mbf)) continue;
-                    conn.apply(hist_row.m_mbf, work_mbf);
-                    phase = conn.phase(hist_row.m_mbf);
-                    dst = &work_mbf;
-                }
-                auto irank_dst = psi1.m_dist.irank(*dst);
-                auto& send_row = psi1.m_send_recv.send(irank_dst).m_row;
-                send_row.push_back_jump();
-                send_row.m_mbf = *dst;
-                send_row.m_weight = hist_row.m_weight;
-                send_row.m_weight *= conn_val.second;
-                if (phase) send_row.m_weight *= -1.0;
+            for (auto& diag_val: diag_vals) {
+                if (!hist_row.m_mbf.get(diag_val.first)) continue;
+                add_send_fn(hist_row.m_mbf, diag_val.second, false);
+            }
+            for (auto& non_diag_val: non_diag_vals) {
+                const auto& conn = non_diag_val.first;
+                if (mbf::destroys(conn, hist_row.m_mbf)) continue;
+                conn.apply(hist_row.m_mbf, work_mbf);
+                add_send_fn(work_mbf, non_diag_val.second, conn.phase(hist_row.m_mbf));
             }
         }
 
@@ -401,7 +408,7 @@ public:
         uint_t counter = 0;
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
             counter += 1;
-            if (counter%1000 == 0) logging::info("currently in iteration {}", counter);
+            if (counter % 1000 == 0) logging::info("currently in iteration {}", counter);
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
 
