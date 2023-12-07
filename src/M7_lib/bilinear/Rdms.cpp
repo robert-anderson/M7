@@ -38,7 +38,7 @@ wf_comp_t Rdms::contrib_norm(uint_t iroot) const {
     return std::sqrt(l2_norm_squares[ipart1] * l2_norm_squares[ipart2]);
 }
 
-Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch) :
+Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch, FillingAlgorithm filling_algo) :
         m_opts(opts), m_wf(wf), m_spinfree(opts.m_spinfree), m_work_conns(m_wf.m_sector.size()),
         m_work_com_ops(m_wf.m_sector.size()), m_accum_epoch(accum_epoch) {
     DEBUG_ASSERT_TRUE_ALL(std::none_of(m_pure_rdms.cbegin(), m_pure_rdms.cend(),
@@ -64,9 +64,19 @@ Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epo
         const auto diag = fock.is_diagonal();
         logging::info("The given Fock matrix was found to be {}diagonal", (diag ? "" : "non-"));
 
-        if (!diag) m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, NonDiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
-        else m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, DiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
-        m_fock_4rdm = dynamic_cast<FockRdm4*>(m_rdms.front().get());
+        if (filling_algo == Caspt2) {
+            m_rdms.emplace_front(
+                ptr::smart::make_poly_unique<Rdm, TransitionFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
+        }
+        else {
+            if (!diag)
+                m_rdms.emplace_front(
+                    ptr::smart::make_poly_unique<Rdm, NonDiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
+            else
+                m_rdms.emplace_front(
+                    ptr::smart::make_poly_unique<Rdm, DiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
+        }
+        m_fock_4rdm = m_rdms.front().get();
     }
     m_exsig_to_rdms = make_exsig_to_rdms();
 

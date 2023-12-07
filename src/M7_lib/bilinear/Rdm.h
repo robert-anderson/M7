@@ -71,13 +71,15 @@ protected:
     void add_to_send_table(const field::RdmInds& inds, wf_t contrib);
 
     virtual void frm_make_contribs(const field::FrmOnv& /*src_onv*/, const conn::FrmOnv& /*conn*/,
-                                   const com_ops::Frm& /*com*/, wf_t /*contrib*/) {}
+                                   const com_ops::Frm& /*com*/, wf_t /*contrib*/);
 
     virtual void frmbos_make_contribs(const field::FrmBosOnv& /*src_onv*/, const conn::FrmBosOnv& /*conn*/,
-                                      const com_ops::FrmBos& /*com*/, wf_t /*contrib*/) {}
+                                      const com_ops::FrmBos& /*com*/, wf_t /*contrib*/);
 
     virtual void bos_make_contribs(const field::BosOnv& /*src_onv*/, const conn::BosOnv& /*conn*/,
-                                   const com_ops::Bos& /*com*/, wf_t /*contrib*/) {}
+                                   const com_ops::Bos& /*com*/, wf_t /*contrib*/) {
+
+    }
 
 public:
 
@@ -162,18 +164,6 @@ public:
      *  number of each species of SQ operator to store in the structure (equal to ranksig for ordinary, uncontracted RDMs)
      */
     PureRdm(const conf::Rdms& opts, OpSig ranksig, sys::Sector sector, uint_t nvalue, str_t name="");
-
-protected:
-    void frm_make_contribs(const FrmOnv& src_onv, const conn::FrmOnv& conn,
-                           const com_ops::Frm& com, wf_t contrib) override;
-
-    void frmbos_make_contribs(const FrmBosOnv& src_onv, const conn::FrmBosOnv& conn,
-                              const com_ops::FrmBos& com, wf_t contrib) override;
-
-    void bos_make_contribs(const BosOnv& /*onv*/, const conn::BosOnv& /*bosOnv*/,
-                           const com_ops::Bos& /*bos*/, wf_t /*wf*/) override {
-        ABORT("not yet implemented");
-    }
 };
 
 /**

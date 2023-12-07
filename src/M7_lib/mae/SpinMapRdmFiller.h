@@ -655,6 +655,7 @@ public:
         wf_comp_t norm = 0.0;
         for (row.restart(); row; ++row) norm += math::pow<2>(std::abs(row.m_weight[0]));
         if (mpi::i_am_root()) rdms->m_total_norm.m_local = norm;
+        logging::info("norm {}", norm);
 
         bool have_pure = false;
         have_pure |= rdms->get_pure_rdm(opsig::c_sing) != nullptr;
@@ -684,16 +685,9 @@ public:
                     "Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0});
 
             logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
-            {
-                // if the Fock object is non-diagonal, construct F*psi using the matrix overload
-                auto ptr = dynamic_cast<const NonDiagFockRdm4*>(rdms->m_fock_4rdm);
-                if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
-            }
-            {
-                // if the Fock object is diagonal, construct F*psi using the vector overload
-                auto ptr = dynamic_cast<const DiagFockRdm4 *>(rdms->m_fock_4rdm);
-                if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
-            }
+            auto ptr = dynamic_cast<const TransitionFockRdm4*>(rdms->m_fock_4rdm);
+            REQUIRE_TRUE(ptr, "SpinMapRdmFiller requires TransitionFockRdm4");
+            if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
             logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
 
             SpinMapRdmFiller(hist, fock_x_hist.m_store).fill_rdm(rdms->m_fock_4rdm);

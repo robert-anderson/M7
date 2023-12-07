@@ -27,6 +27,19 @@ struct FockMatrix : dense::SquareMatrix<ham_t> {
     }
 };
 
+
+class TransitionFockRdm4 : public Rdm {
+public:
+
+    /**
+     * Generalized Fock in the active space
+     */
+    const dense::SquareMatrix<ham_t> m_fock;
+    const v_t<ham_t> m_diag_fock;
+
+    TransitionFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue);
+};
+
 class FockRdm4 : public ContractedRdm {
 public:
     FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector, uint_t nvalue);

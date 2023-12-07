@@ -6,9 +6,19 @@
 #include "NotfMaeFiller.h"
 #include "SpinMapRdmFiller.h"
 
+Rdms::FillingAlgorithm filling_algo(const str_t& name) {
+    if (name == "on_the_fly") return Rdms::OnTheFly;
+    if (name == "caspt2") return Rdms::Caspt2;
+    if (name == "bitset_isect_hashmap_ri") return Rdms::BitsetIsectHashmapRi;
+    if (name == "bitset_isect_pair_loop_ri") return Rdms::BitsetIsectPairLoopRi;
+    if (name == "outer_product") return Rdms::OuterProduct;
+    ABORT("Invalid filling algo name");
+    return Rdms::OnTheFly;
+}
+
 Maes::Maes(const conf::Mae &opts, const wf::Vectors& wf) :
         m_accum_epoch("MAE accumulation"),
-        m_rdms(opts.m_rdm, wf, m_accum_epoch),
+        m_rdms(opts.m_rdm, wf, m_accum_epoch, filling_algo(opts.m_filling_algorithm)),
         m_spec_moms(opts.m_spec_mom, wf, m_accum_epoch), m_opts(opts),
         m_on_the_fly(m_opts.m_filling_algorithm.m_value == "on_the_fly"),
         m_direct_maes(opts.m_direct_maes){

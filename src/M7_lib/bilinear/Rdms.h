@@ -60,12 +60,14 @@ public:
     /**
      * pointer to fock * 4RDM if allocated
      */
-    FockRdm4* m_fock_4rdm = nullptr;
+    Rdm* m_fock_4rdm = nullptr;
 
     const Epoch& m_accum_epoch;
     reduction::Scalar<wf_t> m_total_norm;
 
-    Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch);
+    enum FillingAlgorithm {OnTheFly, Caspt2, BitsetIsectHashmapRi, BitsetIsectPairLoopRi, OuterProduct};
+
+    Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch, FillingAlgorithm filling_algo=OnTheFly);
 
     ~Rdms() {
         if (m_opts.m_save.m_enabled) save();
