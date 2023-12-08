@@ -309,7 +309,7 @@ class SpinMapRdmFiller {
             for (uint_t ispin = 0ul; ispin < 2ul; ++ispin) {
                 if (p == q) {
                     // diagonal
-                    diag_vals.emplace_back(p, contract_val);
+                    diag_vals.emplace_back(basis.ispinorb(ispin, p), contract_val);
                 }
                 else {
                     non_diag_vals.emplace_back(work_mbf, contract_val);
