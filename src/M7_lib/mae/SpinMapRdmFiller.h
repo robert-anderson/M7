@@ -396,7 +396,8 @@ public:
 
         auto make_contrib_fn = [&]() {
             const auto contrib = bra_row.m_weight[0] * ket_row.m_weight[0];
-            make_contribs(rdm, bra_row.m_mbf, ket_row.m_mbf, contrib);
+            // TODO: very subtle bug in non-hermitian F.4RDM! For now, simply switched ket and bra
+            make_contribs(rdm, ket_row.m_mbf, bra_row.m_mbf, contrib);
         };
 
         const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
