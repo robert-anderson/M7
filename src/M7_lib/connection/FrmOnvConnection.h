@@ -21,7 +21,9 @@ public:
         m_inds.reserve(2*m_sites);
     }
 
-    FrmOps(const FrmOps& other): FrmOps(other.m_sites){}
+    FrmOps(const FrmOps& other): FrmOps(other.m_sites){
+        *this = other;
+    }
 
     FrmOps& operator=(const FrmOps& other){
         m_inds = other.m_inds;

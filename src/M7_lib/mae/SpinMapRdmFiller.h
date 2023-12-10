@@ -685,7 +685,7 @@ public:
             communicator::BasicSend<MbfWeightRow, MbfWeightRow> fock_x_hist(
                     "Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0});
 
-            logging::info("preparing Fock-perturbed vector F |0> from diagonal Fock matrix");
+            logging::info("preparing Fock-perturbed vector F |0>");
             auto ptr = dynamic_cast<const TransitionFockRdm4*>(rdms->m_fock_4rdm);
             REQUIRE_TRUE(ptr, "SpinMapRdmFiller requires TransitionFockRdm4");
             if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
