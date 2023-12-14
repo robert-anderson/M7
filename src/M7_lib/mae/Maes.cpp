@@ -105,7 +105,11 @@ void Maes::fill_from_wf_hist(const Table<MbfWeightRow>& hist) {
 
         auto bra = hist.m_row;
         auto ket = bra;
+        uint_t counter = 0;
+        logging::info("starting loops now");
         for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
+            counter += 1;
+            if (counter % 1000 == 0) logging::info("currently in iteration {}", counter);
             for (ket.restart(); ket; ++ket) {
                 const auto exsig = mbf::exsig(bra.m_mbf, ket.m_mbf);
                 if (!m_rdms.takes_contribs_from(exsig)) continue;

@@ -407,6 +407,10 @@ public:
         buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(bra_row.m_mbf.m_basis.m_nsite);
         uint_t counter = 0;
+        uint_t l1 = 0;
+        uint_t l2 = 0;
+        uint_t l3 = 0;
+        logging::info("starting loops now");
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
             counter += 1;
             if (counter % 1000 == 0) logging::info("currently in iteration {}", counter);
@@ -417,16 +421,29 @@ public:
             m_dets_contain_beta.foreach_value(beta_channel, [&](const field::Number<uint_t>& iket){
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
-                if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
+                if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) {
+                    l1 += 1;
+                    make_contrib_fn();
+                }
             });
             // beta-beta
             m_dets_contain_alpha.foreach_value(alpha_channel, [&](const field::Number<uint_t>& iket){
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
-                if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
+                if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) {
+                    l1 += 1;
+                    make_contrib_fn();
+                }
             });
 
             if (rdm->m_ranksig == opsig::c_sing) continue;
+
+            // uint_t number = 0ul;
+            // m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){number += 1;});
+            // m_beta_with_alpha.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){number += 1;});
+            // std::cout << "number of elements in m_beta_with_alpha: " << number << std::endl;
+            // m_beta_with_alpha.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){number += 1;});
+            // m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){std::cout << alpha_string << std::endl;});
 
             // alpha-beta
             m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
@@ -437,37 +454,96 @@ public:
                     const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
                     ket_row.jump(iket);
                     DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 1, "only beta singles yield valid contributions.");
+                    l2 += 1;
                     make_contrib_fn();
                 }, order_fn);
             });
 
             if (rdm->m_ranksig == opsig::c_doub) continue;
 
-            // 4x(alpha) 2x(beta), here alpha_doubles instead of alpha_singles, otherwise exact copy of 2RDM code
-            m_alpha_doubles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
-               const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
-               m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
-                                                     [&](const field::FrmOnvSpinChannel &common_string){
-                   indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
-                   const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
-                   ket_row.jump(iket);
-                   DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 1, "only beta singles yield valid contributions.");
-                   make_contrib_fn();
-               }, order_fn);
+            // m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
+            //     const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
+            //     m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
+            //                                           [&](const field::FrmOnvSpinChannel &common_string){
+            //         m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, common_string, [&](const field::FrmOnvSpinChannel &common_string2) {
+            //             indices_dets_with_alpha.m_value_row.jump(common_string2.m_row->index());
+            //             const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
+            //             ket_row.jump(iket);
+            //             DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 1,
+            //                             "only beta singles yield valid contributions.");
+            //             l3 += 1;
+            //             make_contrib_fn();
+            //         }, order_fn);
+            //     }, order_fn);
+            // });
+            // m_beta_singles.foreach_value(beta_channel, [&](const field::FrmOnvSpinChannel &beta_string){
+            //    const auto indices_dets_with_beta = m_dets_contain_beta.access(beta_string);
+            //    m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_singles, alpha_channel,
+            //                                          [&](const field::FrmOnvSpinChannel &common_string){
+            //        m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_singles, common_string, [&](const field::FrmOnvSpinChannel &common_string2) {
+            //            indices_dets_with_beta.m_value_row.jump(common_string2.m_row->index());
+            //            const uint_t iket = indices_dets_with_beta.m_value_row.m_value;
+            //            ket_row.jump(iket);
+            //            DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 1,
+            //                            "only beta singles yield valid contributions.");
+            //            l3 += 1;
+            //            make_contrib_fn();
+            //        }, order_fn);
+            //    }, order_fn);
+            // });
+
+            //         }
+            //         ket_row.jump(iket);
+            //         const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
+            //         if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist == 2) make_contrib_fn();
+            //     });
+            // });
+
+            // m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
+            //     m_dets_contain_alpha.foreach_value(alpha_string, [&](const field::Number<uint_t>& iket){
+            //         ket_row.jump(iket);
+            //         const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
+            //         if (hamming_dist == 2) make_contrib_fn();
+            //     });
+            // });
+            // m_beta_singles.foreach_value(beta_channel, [&](const field::FrmOnvSpinChannel &beta_string){
+            //     m_dets_contain_beta.foreach_value(beta_string, [&](const field::Number<uint_t>& iket){
+            //         ket_row.jump(iket);
+            //         const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
+            //         if (hamming_dist == 2) make_contrib_fn();
+            //     });
+            // });
+
+            m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
+                const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
+                // m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
+                m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_doubles, beta_channel,
+                                                      [&](const field::FrmOnvSpinChannel &common_string){
+                    indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
+                    const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
+                    ket_row.jump(iket);
+                    DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 2, "only beta singles yield valid contributions.");
+                    l3 += 1;
+                    make_contrib_fn();
+                }, order_fn);
             });
-            // 2x(alpha) 4x(beta), flip the roles of alpha and beta
-            m_beta_doubles.foreach_value(beta_channel, [&](const field::FrmOnvSpinChannel &beta_string){
+            m_beta_singles.foreach_value(beta_channel, [&](const field::FrmOnvSpinChannel &beta_string){
                const auto indices_dets_with_beta = m_dets_contain_beta.access(beta_string);
-               m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_singles, alpha_channel,
+               // m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_singles, alpha_channel,
+                m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_doubles, alpha_channel,
                                                      [&](const field::FrmOnvSpinChannel &common_string){
                    indices_dets_with_beta.m_value_row.jump(common_string.m_row->index());
                    const uint_t iket = indices_dets_with_beta.m_value_row.m_value;
                    ket_row.jump(iket);
-                   DEBUG_ASSERT_EQ(bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf), 1, "only alpha singles yield valid contributions.");
+                   DEBUG_ASSERT_EQ(bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf), 2, "only alpha singles yield valid contributions.");
+                   l3 += 1;
                    make_contrib_fn();
                }, order_fn);
             });
         }
+        std::cout << "number of one particle elements: " << l1 << std::endl;
+        std::cout << "number of two particle elements: " << l2 << std::endl;
+        std::cout << "number of three particle elements: " << l3 << std::endl;
     }
 
 
@@ -656,7 +732,6 @@ public:
         wf_comp_t norm = 0.0;
         for (row.restart(); row; ++row) norm += math::pow<2>(std::abs(row.m_weight[0]));
         if (mpi::i_am_root()) rdms->m_total_norm.m_local = norm;
-        logging::info("norm {}", norm);
 
         bool have_pure = false;
         have_pure |= rdms->get_pure_rdm(opsig::c_sing) != nullptr;
