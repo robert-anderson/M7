@@ -279,10 +279,10 @@ class SpinMapRdmFiller {
     SpinChannelToSpinChannelSmuvi m_beta_single_dict;
     SpinChannelToSpinChannelSmuvi m_alpha_singles;
     SpinChannelToSpinChannelSmuvi m_beta_singles;
-    SpinChannelToSpinChannelSmuvi m_alpha_double_dict;
-    SpinChannelToSpinChannelSmuvi m_beta_double_dict;
-    SpinChannelToSpinChannelSmuvi m_alpha_minus_two;
-    SpinChannelToSpinChannelSmuvi m_beta_minus_two;
+    SpinChannelToSpinChannelSmuvi m_alpha_double_holes;
+    SpinChannelToSpinChannelSmuvi m_beta_double_holes;
+    SpinChannelToSpinChannelSmuvi m_alpha_double_particles;
+    SpinChannelToSpinChannelSmuvi m_beta_double_particles;
     SpinChannelToSpinChannelSmuvi m_alpha_doubles;
     SpinChannelToSpinChannelSmuvi m_beta_doubles;
 
@@ -409,9 +409,6 @@ public:
         buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(bra_row.m_mbf.m_basis.m_nsite);
         uint_t counter = 0;
-        uint_t l1 = 0;
-        uint_t l2 = 0;
-        uint_t l3 = 0;
         logging::info("starting loops now");
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
             counter += 1;
@@ -424,7 +421,6 @@ public:
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
                 if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) {
-                    l1 += 1;
                     make_contrib_fn();
                 }
             });
@@ -433,7 +429,6 @@ public:
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
                 if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) {
-                    l1 += 1;
                     make_contrib_fn();
                 }
             });
@@ -449,86 +444,35 @@ public:
                     const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
                     ket_row.jump(iket);
                     DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 1, "only beta singles yield valid contributions.");
-                    l2 += 1;
                     make_contrib_fn();
                 }, order_fn);
             });
 
             if (rdm->m_ranksig == opsig::c_doub) continue;
 
-            // cheaper filter for single alpha / double beta?
             m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
-               const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
-               m_beta_with_alpha.foreach_value(alpha_string, [&](const field::FrmOnvSpinChannel &beta_string){
-                   m_beta_minus_two.foreach_common_value(beta_string, m_beta_minus_two, beta_channel, [&](const field::FrmOnvSpinChannel &common_string){
-                       indices_dets_with_alpha.m_value_row.jump(beta_string.m_row->index());
-                       const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
-                       ket_row.jump(iket);
-                       l3 += 1;
-                       make_contrib_fn();
-                   }, order_fn);
-               });
+                const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
+                m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_doubles, beta_channel,
+                                                      [&](const field::FrmOnvSpinChannel &common_string){
+                    indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
+                    const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
+                    ket_row.jump(iket);
+                    DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 2, "only beta singles yield valid contributions.");
+                    make_contrib_fn();
+                }, order_fn);
             });
             m_beta_singles.foreach_value(beta_channel, [&](const field::FrmOnvSpinChannel &beta_string){
                const auto indices_dets_with_beta = m_dets_contain_beta.access(beta_string);
-               m_alpha_with_beta.foreach_value(beta_string, [&](const field::FrmOnvSpinChannel &alpha_string){
-                   m_alpha_minus_two.foreach_common_value(alpha_string, m_alpha_minus_two, alpha_channel, [&](const field::FrmOnvSpinChannel &common_string){
-                       indices_dets_with_beta.m_value_row.jump(alpha_string.m_row->index());
-                       const uint_t iket = indices_dets_with_beta.m_value_row.m_value;
-                       ket_row.jump(iket);
-                       l3 += 1;
-                       make_contrib_fn();
-                   }, order_fn);
-               });
+                m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_doubles, alpha_channel,
+                                                     [&](const field::FrmOnvSpinChannel &common_string){
+                   indices_dets_with_beta.m_value_row.jump(common_string.m_row->index());
+                   const uint_t iket = indices_dets_with_beta.m_value_row.m_value;
+                   ket_row.jump(iket);
+                   DEBUG_ASSERT_EQ(bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf), 2, "only alpha singles yield valid contributions.");
+                   make_contrib_fn();
+               }, order_fn);
             });
-
-            // m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
-            //     m_dets_contain_alpha.foreach_value(alpha_string, [&](const field::Number<uint_t>& iket){
-            //         ket_row.jump(iket);
-            //         const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
-            //         l3 += 1;
-            //         if (hamming_dist == 2) make_contrib_fn();
-            //     });
-            // });
-            // m_beta_singles.foreach_value(beta_channel, [&](const field::FrmOnvSpinChannel &beta_string){
-            //     m_dets_contain_beta.foreach_value(beta_string, [&](const field::Number<uint_t>& iket){
-            //         ket_row.jump(iket);
-            //         const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
-            //         l3 += 1;
-            //         if (hamming_dist == 2) make_contrib_fn();
-            //     });
-            // });
-
-            // m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
-            //     const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
-            //     // m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
-            //     m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_doubles, beta_channel,
-            //                                           [&](const field::FrmOnvSpinChannel &common_string){
-            //         indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
-            //         const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
-            //         ket_row.jump(iket);
-            //         DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 2, "only beta singles yield valid contributions.");
-            //         l3 += 1;
-            //         make_contrib_fn();
-            //     }, order_fn);
-            // });
-            // m_beta_singles.foreach_value(beta_channel, [&](const field::FrmOnvSpinChannel &beta_string){
-            //    const auto indices_dets_with_beta = m_dets_contain_beta.access(beta_string);
-            //    // m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_singles, alpha_channel,
-            //     m_alpha_with_beta.foreach_common_value(beta_string, m_alpha_doubles, alpha_channel,
-            //                                          [&](const field::FrmOnvSpinChannel &common_string){
-            //        indices_dets_with_beta.m_value_row.jump(common_string.m_row->index());
-            //        const uint_t iket = indices_dets_with_beta.m_value_row.m_value;
-            //        ket_row.jump(iket);
-            //        DEBUG_ASSERT_EQ(bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf), 2, "only alpha singles yield valid contributions.");
-            //        l3 += 1;
-            //        make_contrib_fn();
-            //    }, order_fn);
-            // });
         }
-        std::cout << "number of one particle elements: " << l1 << std::endl;
-        std::cout << "number of two particle elements: " << l2 << std::endl;
-        std::cout << "number of three particle elements: " << l3 << std::endl;
     }
 
 
@@ -546,10 +490,10 @@ public:
         m_beta_single_dict("auxiliary spin channel to spin channel map beta singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_alpha_singles("spin channel to spin channel map alpha singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_beta_singles("spin channel to spin channel map beta singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_double_dict("auxiliary spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_double_dict("auxiliary spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_minus_two("map alpha to all n - 2 alpha strings", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_minus_two("map beta to all n - 2 beta strings", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_double_holes("auxiliary spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_double_holes("auxiliary spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_double_particles("map alpha to all n - 2 alpha strings", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_double_particles("map beta to all n - 2 beta strings", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_alpha_doubles("spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_beta_doubles("spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]) {
 
@@ -623,12 +567,14 @@ public:
             };
             key.foreach_setbit(inner_fn);
         };
+        logging::info("construct singles aux arrays");
         spin_single_dict = &m_alpha_single_dict;
         m_dets_contain_alpha.foreach_key(gen_one_less_electron);
         m_alpha_single_dict.collate(order_fn);
         spin_single_dict = &m_beta_single_dict;
         m_dets_contain_beta.foreach_key(gen_one_less_electron);
         m_beta_single_dict.collate(order_fn);
+        logging::info("completed constructing singles aux arrays");
         /**
          *  Loop over all (N - 1) electron keys of the m_(spin)_single_dict SMUVI and add pairs as key value pairs into
          *  the m_(spin)_singles SMUVIs. For example, the key [0011100] may point to [1011100, 0111100, 0011101, ...], then
@@ -643,6 +589,7 @@ public:
                  spin_singles->insert(value_1, value_2);
              });
         };
+        logging::info("construct singles arrays");
         spin_single_dict = &m_alpha_single_dict;
         spin_singles = &m_alpha_singles;
         m_alpha_single_dict.foreach_key(gen_spin_singles);
@@ -651,77 +598,77 @@ public:
         spin_singles = &m_beta_singles;
         m_beta_single_dict.foreach_key(gen_spin_singles);
         m_beta_singles.collate(order_fn);
+        logging::info("completed constructing singles arrays");
         /**
-         *   Generate all (N - 2) electron states from the spin strings.
+         *   Factorise the two-particle excitation operator into two-particle holes and particles,
+         *   i.e. for every string store all possible (N - 2) strings and the other way around. Building the
+         *   pure spin double excitations then reduces to a nested loop over all holes and particles
+         *   (the latter are only included if they exist in the histogrammed set)
          */
-        SpinChannelToSpinChannelSmuvi* spin_double_dict = nullptr;
+        SpinChannelToSpinChannelSmuvi* hole_double_dict = nullptr;
+        SpinChannelToSpinChannelSmuvi* part_double_dict = nullptr;
         auto gen_two_less_electron= [&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){
             tmp_spin_channel = key;
             auto inner_fn = [&](uint_t isite1, uint_t isite2) {
                 tmp_spin_channel.clr(isite1);
                 tmp_spin_channel.clr(isite2);
-                spin_double_dict->insert(key, tmp_spin_channel);
+                hole_double_dict->insert(key, tmp_spin_channel);
+                part_double_dict->insert(tmp_spin_channel, key);
                 tmp_spin_channel.set(isite1);
                 tmp_spin_channel.set(isite2);
             };
             key.foreach_setbit_pair(inner_fn);
         };
-        spin_double_dict = &m_alpha_minus_two;
+        logging::info("construct doubles aux arrays");
+        hole_double_dict = &m_alpha_double_holes;
+        part_double_dict = &m_alpha_double_particles;
         m_dets_contain_alpha.foreach_key(gen_two_less_electron);
-        m_alpha_minus_two.collate(order_fn);
-        spin_double_dict = &m_beta_minus_two;
+        m_alpha_double_holes.collate(order_fn);
+        m_alpha_double_particles.collate(order_fn);
+        hole_double_dict = &m_beta_double_holes;
+        part_double_dict = &m_beta_double_particles;
         m_dets_contain_beta.foreach_key(gen_two_less_electron);
-        m_beta_minus_two.collate(order_fn);
-
-        // SpinChannelToSpinChannelSmuvi* spin_double_dict = nullptr;
-        // auto gen_two_less_electron= [&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){
-        //     tmp_spin_channel = key;
-        //     auto inner_fn = [&](uint_t isite1, uint_t isite2) {
-        //         tmp_spin_channel.clr(isite1);
-        //         tmp_spin_channel.clr(isite2);
-        //         spin_double_dict->insert(tmp_spin_channel, key);
-        //         tmp_spin_channel.set(isite1);
-        //         tmp_spin_channel.set(isite2);
-        //     };
-        //     key.foreach_setbit_pair(inner_fn);
-        // };
-        // spin_double_dict = &m_alpha_double_dict;
-        // m_dets_contain_alpha.foreach_key(gen_two_less_electron);
-        // m_alpha_double_dict.collate(order_fn);
-        // spin_double_dict = &m_beta_double_dict;
-        // m_dets_contain_beta.foreach_key(gen_two_less_electron);
-        // m_beta_double_dict.collate(order_fn);
-        // /**
-        //  * Loop over each key of the (N - 2) electron SMUVI and add the values to the m_(spin)_doubles SMUVI analogous
-        //  * to the singles, but take care that only genuine doubles are counted.
-        //  */
-        // SpinChannelToSpinChannelSmuvi* spin_doubles = nullptr;
+        m_beta_double_holes.collate(order_fn);
+        m_beta_double_particles.collate(order_fn);
+        logging::info("completed constructing doubles aux arrays");
+        /**
+         * Loop over each key of the (N - 2) electron SMUVI and add the values to the m_(spin)_doubles SMUVI analogous
+         * to the singles, but take care that only genuine doubles are counted.
+         */
         // auto gen_spin_doubles = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult strings){
         //     spin_double_dict->foreach_value_pair(key, [&](const field::FrmOnvSpinChannel& value_1, const field::FrmOnvSpinChannel& value_2){
         //         if (value_1.nsetbit_not_in(value_2) == 2) spin_doubles->insert(value_1, value_2);
         //     });
         // };
-        // spin_double_dict = &m_alpha_double_dict;
-        // spin_doubles = &m_alpha_doubles;
-        // m_alpha_double_dict.foreach_key(gen_spin_doubles);
-        // m_alpha_doubles.collate(order_fn);
-        // spin_double_dict = &m_beta_double_dict;
-        // spin_doubles = &m_beta_doubles;
-        // m_beta_double_dict.foreach_key(gen_spin_doubles);
-        // m_beta_doubles.collate(order_fn);
+        SpinChannelToSpinChannelSmuvi* spin_doubles = nullptr;
+        auto gen_spin_doubles = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult hole_strings){
+            hole_strings.foreach([&](const field::FrmOnvSpinChannel &hole_string){
+                part_double_dict->foreach_value(hole_string, [&](const field::FrmOnvSpinChannel &part_string){
+                    if (part_string != key) spin_doubles->insert(key, part_string);
+                });
+            });
+        };
+        logging::info("construct doubles arrays");
+        hole_double_dict = &m_alpha_double_holes;
+        part_double_dict = &m_alpha_double_particles;
+        spin_doubles = &m_alpha_doubles;
+        m_alpha_double_holes.foreach_key(gen_spin_doubles);
+        m_alpha_doubles.collate(order_fn);
+        hole_double_dict = &m_beta_double_holes;
+        part_double_dict = &m_beta_double_particles;
+        spin_doubles = &m_beta_doubles;
+        m_beta_double_holes.foreach_key(gen_spin_doubles);
+        m_beta_doubles.collate(order_fn);
+        logging::info("completed constructing doubles arrays");
 
         m_dets_contain_alpha.remap_accessors();
         m_dets_contain_beta.remap_accessors();
         m_beta_with_alpha.remap_accessors();
         m_alpha_with_beta.remap_accessors();
-        m_alpha_single_dict.remap_accessors();
-        m_beta_single_dict.remap_accessors();
         m_alpha_singles.remap_accessors();
         m_beta_singles.remap_accessors();
-        // m_alpha_double_dict.remap_accessors();
-        // m_beta_double_dict.remap_accessors();
-        // m_alpha_doubles.remap_accessors();
-        // m_beta_doubles.remap_accessors();
+        m_alpha_doubles.remap_accessors();
+        m_beta_doubles.remap_accessors();
 
         logging::info("successfully constructed auxiliary arrays for RDM calculation");
     }
