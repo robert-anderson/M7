@@ -357,11 +357,14 @@ public:
         for (auto itable = 0ul; itable < m_access_tables.size(); ++itable) {
             const auto& access_row = m_access_foreach_rows[itable];
             const auto& value_row = m_values_foreach_rows_1[itable];
-            for (access_row.restart(); access_row; ++access_row) {
-                const uint_t displ = access_row.m_value_displ;
-                const uint_t count = access_row.m_value_count;
-                value_row.jump(displ);
-                fn(access_row.m_key, {value_row, displ + count});
+            // TODO: verify this change in parallel
+            const auto proc_displ = mpi::evenly_shared_displ(access_row.m_table->nrow_in_use());
+            const auto proc_count = mpi::evenly_shared_count(access_row.m_table->nrow_in_use());
+            for (access_row.restart(proc_displ); access_row.in_range(proc_displ + proc_count); ++access_row) {
+                const uint_t row_displ = access_row.m_value_displ;
+                const uint_t row_count = access_row.m_value_count;
+                value_row.jump(row_displ);
+                fn(access_row.m_key, {value_row, row_displ + row_count});
             }
         }
     }
@@ -372,6 +375,9 @@ public:
          * first send the inserted key-index pairs to the receiving ranks
          */
         m_inserter.communicate();
+//        for (auto count : m_inserter.m_last_send_counts) {
+//            logging::info_("send counts {}", count);
+//        }
         /*
          * a shared memory MappedTable is set up for each rank, so that they can be set up without dataraces by a single
          * rank, and thereafter accessed by all ranks in the shared memory region
@@ -410,6 +416,8 @@ public:
          * loop over the received rows
          */
         auto& recv_row = m_inserter.recv().m_row;
+//        logging::info_("recv count {}", m_inserter.m_last_recv_count);
+//        logging::flush_all();
         for (recv_row.restart(); recv_row; ++recv_row) {
             /*
              * lookup the received key in the accessor table, or insert it if this is the first instance
@@ -470,7 +478,6 @@ public:
          * clear the entries shared memory arrays in case this is not the first call to collate
          */
         for (auto& values_table: m_values_tables) values_table.clear();
-
 
         /*
          * now write the sets of entries stored privately on this rank to the shared memory arrays accessible by all
