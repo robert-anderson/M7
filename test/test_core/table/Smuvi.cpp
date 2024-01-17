@@ -133,7 +133,7 @@ TEST(Smuvi, Comms) {
     const uint_t nelec_per_channel = 2;
 
     /*
-     * generate and store all the single-channel configurations for spin-conserving ONV enumeration
+     * generate and store all the single-channel configurations for spin-conserving ONV enumeration on all ranks
      */
     v_t<uintv_t> all_channel_setbits;
     {
@@ -141,30 +141,66 @@ TEST(Smuvi, Comms) {
         basic_foreach::rtnd::Ordered<true, true> foreach(basis.m_nsite, nelec_per_channel);
         foreach.loop(fn);
     }
-
+    /*
+     * the number of entries is the square of the spin channel enumeration length
+     */
     const auto nelem = all_channel_setbits.size() * all_channel_setbits.size();
+    /*
+     * number of elements to draw as a fraction of the total number of elements
+     */
+    const double nelem_select_fraction = 0.8;
+    /*
+     * max number of uint_t entries to generate for each ONV
+     */
     const uint_t max_nentry = 5;
+    /*
+     * max value of each uint_t entry
+     */
     const uint_t max_entry = 20;
 
-    const auto elem_entry_counts = hash::in_range<uint_t>(0, nelem, 0, max_nentry);
+    /*
+     * select a rank-specific subset of the elements
+     */
+    const auto select_elems = hash::unique_in_range(mpi::irank(), uint_t(nelem * nelem_select_fraction), 0, nelem, true);
+
+    const auto nelem_select = select_elems.size();
+
+    /*
+     * now generate the rank-specific numbers of integer entries
+     */
+    const auto elem_entry_counts = hash::in_range<uint_t>(mpi::irank(), nelem_select, 0, max_nentry);
     v_t<uintv_t> elem_entries;
-    elem_entries.reserve(nelem);
-    for (uint_t ielem = 0; ielem < nelem; ++ielem) {
+    elem_entries.reserve(nelem_select);
+    /*
+     * loop over the elements and generate the required number of entries
+     */
+    for (uint_t ielem = 0; ielem < nelem_select; ++ielem) {
         const auto nentry = elem_entry_counts[ielem];
         elem_entries.emplace_back(hash::unique_in_range<uint_t>(ielem, nentry, 0, max_entry));
     }
-
+    /*
+     * bring all the input together into a single object where each key is given as a pair of spin channel indices and
+     * each value is an associated entry
+     */
     v_t<std::pair<uintp_t, uint_t>> input_data;
 
+    auto select_it = select_elems.cbegin();
     uint_t ielem = 0;
     for (uint_t ialpha = 0; ialpha < all_channel_setbits.size(); ++ialpha) {
         for (uint_t ibeta = 0; ibeta < all_channel_setbits.size(); ++ibeta) {
-            for (const auto& entry: elem_entries[ielem]) {
-                input_data.push_back({{ialpha, ibeta}, entry});
+            // skip over unselected string pairs
+            if (select_it != select_elems.cend() && ielem == *select_it) {
+                const auto ielem_select = uint_t(std::distance(select_elems.cbegin(), select_it));
+                for (const auto &entry: elem_entries[ielem_select]) {
+                    input_data.emplace_back(uintp_t{ialpha, ibeta}, entry);
+                }
+                ++select_it;
             }
             ++ielem;
         }
     }
+    ASSERT_EQ(ielem, nelem);
+    ASSERT_EQ(uint_t(std::distance(select_elems.cbegin(), select_it)), nelem_select);
 
     /*
      * shuffle the input data to arbitrary order
@@ -192,8 +228,8 @@ TEST(Smuvi, Comms) {
         return i < j;
     };
     smuvi.collate(order_fn);
-
 #if 0
+
     std::cout << mbf << std::endl;
     std::cout << smuvi.nitem(mbf) << std::endl;
     std::cout << "++++++++++" << std::endl;

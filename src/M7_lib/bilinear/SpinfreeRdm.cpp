@@ -118,18 +118,15 @@ void SpinFreeRdm::make_contribs_from_one_row(const RdmRow& row, wf_t norm) {
                 m_insert_inds.m_frm.m_cre[i] = given_inds.m_frm.m_cre[cre_perm[i]];
                 m_insert_inds.m_frm.m_ann[i] = given_inds.m_frm.m_ann[ann_perm[i]];
             }
-            if (is_diagonal) {
+            if (is_diagonal || !m_enforce_hermiticity) {
                 // diagonal element
                 add_to_send_table(m_insert_inds, elem * factor);
             }
-            else if (m_enforce_hermiticity) {
+            else {
                 // off-diagonal element: enforce hermiticity symmetry by averaging
                 add_to_send_table(m_insert_inds, 0.5 * elem * factor);
                 m_insert_inds.m_frm.conjugate();
                 add_to_send_table(m_insert_inds, 0.5 * elem * factor);
-            }
-            else {
-                add_to_send_table(m_insert_inds, elem * factor);
             }
         }
     }

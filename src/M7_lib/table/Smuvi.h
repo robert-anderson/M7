@@ -416,8 +416,20 @@ public:
          * loop over the received rows
          */
         auto& recv_row = m_inserter.recv().m_row;
-//        logging::info_("recv count {}", m_inserter.m_last_recv_count);
-//        logging::flush_all();
+
+        /*
+         * must allocate enough rows in accessor since we may not resize it within the loop.
+         * otherwise a deadlock could arise
+         */
+        {
+            auto sizes = mpi::all_gathered(m_inserter.recv().nrow_in_use());
+            auto size_it = sizes.cbegin();
+            for (auto& table : m_access_tables) {
+                logging::info_("{}", *size_it);
+                table.resize(*size_it++);
+            }
+        }
+
         for (recv_row.restart(); recv_row; ++recv_row) {
             /*
              * lookup the received key in the accessor table, or insert it if this is the first instance
@@ -426,8 +438,9 @@ public:
             /*
              * if there aren't enough value index vector sets for the current size of the accessor, allocate more
              */
-            if (value_index_sets.size() < accessor.nrecord())
-                value_index_sets.resize(accessor.nrecord(), std::set<uint_t, CompFn>(CompFn(m_inserter, order_fn)));
+            if (value_index_sets.size() < accessor.nrow_in_use()) {
+                value_index_sets.resize(accessor.nrow_in_use(), std::set<uint_t, CompFn>(CompFn(m_inserter, order_fn)));
+            }
             /*
              * get the indices vector to recv_row.m_key, and append the new index
              */
@@ -478,6 +491,18 @@ public:
          * clear the entries shared memory arrays in case this is not the first call to collate
          */
         for (auto& values_table: m_values_tables) values_table.clear();
+
+        /*
+         * must allocate enough rows in values tables since we may not resize it within the loop.
+         * otherwise a deadlock could arise
+         */
+        {
+            auto size_it = nentries.cbegin();
+            for (auto& table : m_values_tables) {
+                logging::info_("{}", *size_it);
+                table.resize(*size_it++);
+            }
+        }
 
         /*
          * now write the sets of entries stored privately on this rank to the shared memory arrays accessible by all
