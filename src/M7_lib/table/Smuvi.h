@@ -9,6 +9,7 @@
 #include "BufferedTable.h"
 #include "M7_lib/communication/SendRecv.h"
 #include "M7_lib/communication/Distribution.h"
+#include <unordered_set>
 
 
 /**
@@ -533,6 +534,127 @@ public:
          * corresponding sorted and unique index values
          */
     }
+
+    void collate_nosort() {
+        /*
+         * first send the inserted key-index pairs to the receiving ranks
+         */
+        m_inserter.communicate();
+        /*
+         * a shared memory MappedTable is set up for each rank, so that they can be set up without dataraces by a single
+         * rank, and thereafter accessed by all ranks in the shared memory region
+         */
+        MappedTable<AccessRow>& accessor = m_access_tables[m_irank_world_to_iaccess_table[mpi::irank()]];
+        /*
+         * initialize a private set of indices for each key sent to this rank. The sets are used to build up an
+         * unordered list of the value element indices in the recv table associated with each key in the accessor,
+         * which will later be copied into the shared memory m_entries arrays
+         */
+        const auto comp_recv_row_1 = m_inserter.recv().m_row;
+        const auto comp_recv_row_2 = m_inserter.recv().m_row;
+        auto comp_fn = [&](uint_t i, uint_t j) -> bool {
+            comp_recv_row_1.jump(i);
+            comp_recv_row_2.jump(j);
+            return comp_recv_row_1.m_value < comp_recv_row_2.m_value;
+        };
+        v_t<std::unordered_set<uint_t>> value_index_sets;
+
+        /*
+         * loop over the received rows
+         */
+        auto& recv_row = m_inserter.recv().m_row;
+        for (recv_row.restart(); recv_row; ++recv_row) {
+            /*
+             * lookup the received key in the accessor table, or insert it if this is the first instance
+             */
+            auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);
+            /*
+             * if there aren't enough value index vector sets for the current size of the accessor, allocate more
+             */
+            if (value_index_sets.size() < accessor.nrecord())
+                value_index_sets.resize(accessor.nrecord(), std::unordered_set<uint_t>());
+            /*
+             * get the indices vector to recv_row.m_key, and append the new index
+             */
+            value_index_sets[accessor_row.index()].insert(recv_row.index());
+        }
+
+        /*
+         * a vector storing the number of entry_sets associated with each MPI rank
+         */
+        uintv_t nentries;
+        {
+            // the displacement from the beginning of the entry_sets
+            uint_t displ = 0ul;
+            /*
+             * iterator initially pointing to the beginning of the entry sets (i.e. the first key in the accessor
+             * created by this rank)
+             */
+            auto value_index_set_it = value_index_sets.cbegin();
+            // loop over all the rows in the accessor created by this rank
+            auto& accessor_row = accessor.m_row;
+            for (accessor_row.restart(); accessor_row; ++accessor_row) {
+                /*
+                 * set the displacement that will denote the index in the entry_sets array at which the entry_sets
+                 * corresponding to the current row in the accessor (i.e. the key) begin
+                 */
+                accessor_row.m_value_displ = displ;
+                /*
+                 * set the number of entry_sets corresponding to the key
+                 */
+                accessor_row.m_value_count = value_index_set_it->size();
+                /*
+                 * increment the rank-private displ count
+                 */
+                displ += accessor_row.m_value_count;
+                /*
+                 * advance the entry iterator
+                 */
+                ++value_index_set_it;
+            }
+            DEBUG_ASSERT_TRUE(value_index_set_it == value_index_sets.cend(), "should have iterated through all entry sets");
+            /*
+             * gather the final displs (i.e. the total number of unique values across all keys sent to this rank)
+             */
+            mpi::all_gather(displ, nentries);
+        }
+
+        /*
+         * clear the entries shared memory arrays in case this is not the first call to collate
+         */
+        for (auto& values_table: m_values_tables) values_table.clear();
+
+
+        /*
+         * now write the sets of entries stored privately on this rank to the shared memory arrays accessible by all
+         * ranks on the same shared memory region
+         */
+        {
+            /*
+             * get a reference to the values array updated by this rank
+             */
+            auto& values_table = m_values_tables[m_irank_world_to_iaccess_table[mpi::irank()]];
+            DEBUG_ASSERT_TRUE(values_table.empty(), "value tables should be been cleared");
+            values_table.push_back(nentries[mpi::irank()]);
+            uint_t ielement = 0;
+            auto& value_row = values_table.m_row;
+            for (const auto& value_index_set : value_index_sets) {
+                /*
+                 * loop over all value indices in all sets, copying the indexed values contiguously to the values table
+                 */
+                for (const auto& i: value_index_set) {
+                    recv_row.jump(i);
+                    value_row.jump(ielement++);
+                    value_row.m_value = recv_row.m_value;
+                }
+            }
+        }
+        /*
+         * now the accessor tables are updated with the keys, and the entries arrays are updated with their
+         * corresponding sorted and unique index values
+         */
+    }
+
 };
 
 #endif //M7_SMUVI_H

@@ -279,8 +279,8 @@ class SpinMapRdmFiller {
     SpinChannelToSpinChannelSmuvi m_beta_single_dict;
     SpinChannelToSpinChannelSmuvi m_alpha_singles;
     SpinChannelToSpinChannelSmuvi m_beta_singles;
-    // SpinChannelToSpinChannelSmuvi m_alpha_double_dict;
-    // SpinChannelToSpinChannelSmuvi m_beta_double_dict;
+    SpinChannelToSpinChannelSmuvi m_alpha_double_dict;
+    SpinChannelToSpinChannelSmuvi m_beta_double_dict;
     SpinChannelToSpinChannelSmuvi m_alpha_double_holes;
     SpinChannelToSpinChannelSmuvi m_beta_double_holes;
     SpinChannelToSpinChannelSmuvi m_alpha_double_particles;
@@ -492,8 +492,8 @@ public:
         m_beta_single_dict("auxiliary spin channel to spin channel map beta singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_alpha_singles("spin channel to spin channel map alpha singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_beta_singles("spin channel to spin channel map beta singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        // m_alpha_double_dict("auxiliary spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        // m_beta_double_dict("auxiliary spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_double_dict("auxiliary spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_double_dict("auxiliary spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_alpha_double_holes("auxiliary spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_beta_double_holes("auxiliary spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_alpha_double_particles("map alpha to all n - 2 alpha strings", m_ket.m_row.m_mbf.m_format.m_shape[1]),
@@ -579,10 +579,10 @@ public:
         logging::info("construct singles aux arrays");
         spin_single_dict = &m_alpha_single_dict;
         m_dets_contain_alpha.foreach_key(gen_one_less_electron);
-        m_alpha_single_dict.collate(order_fn);
+        m_alpha_single_dict.collate_nosort();
         spin_single_dict = &m_beta_single_dict;
         m_dets_contain_beta.foreach_key(gen_one_less_electron);
-        m_beta_single_dict.collate(order_fn);
+        m_beta_single_dict.collate_nosort();
         logging::info("completed constructing singles aux arrays");
         /**
          *  Loop over all (N - 1) electron keys of the m_(spin)_single_dict SMUVI and add pairs as key value pairs into
@@ -635,13 +635,13 @@ public:
         hole_double_dict = &m_alpha_double_holes;
         part_double_dict = &m_alpha_double_particles;
         m_dets_contain_alpha.foreach_key(gen_two_less_electron);
-        m_alpha_double_holes.collate(order_fn);
-        m_alpha_double_particles.collate(order_fn);
+        m_alpha_double_holes.collate_nosort();
+        m_alpha_double_particles.collate_nosort();
         hole_double_dict = &m_beta_double_holes;
         part_double_dict = &m_beta_double_particles;
         m_dets_contain_beta.foreach_key(gen_two_less_electron);
-        m_beta_double_holes.collate(order_fn);
-        m_beta_double_particles.collate(order_fn);
+        m_beta_double_holes.collate_nosort();
+        m_beta_double_particles.collate_nosort();
         // SpinChannelToSpinChannelSmuvi* spin_double_dict = nullptr;
         // auto gen_two_less_electron= [&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){
         //     tmp_spin_channel = key;
@@ -656,10 +656,10 @@ public:
         // };
         // spin_double_dict = &m_alpha_double_dict;
         // m_dets_contain_alpha.foreach_key(gen_two_less_electron);
-        // m_alpha_double_dict.collate(order_fn);
+        // m_alpha_double_dict.collate_nosort();
         // spin_double_dict = &m_beta_double_dict;
         // m_dets_contain_beta.foreach_key(gen_two_less_electron);
-        // m_beta_double_dict.collate(order_fn);
+        // m_beta_double_dict.collate_nosort();
         logging::info("completed constructing doubles aux arrays");
         /**
          * Loop over each key of the (N - 2) electron SMUVI and add the values to the m_(spin)_doubles SMUVI analogous
