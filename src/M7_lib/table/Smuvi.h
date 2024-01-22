@@ -562,6 +562,14 @@ public:
         /*
          * loop over the received rows
          */
+        {
+            auto sizes = mpi::all_gathered(m_inserter.recv().nrow_in_use());
+            auto size_it = sizes.cbegin();
+            for (auto& table : m_access_tables) {
+                logging::info_("{}", *size_it);
+                table.resize(*size_it++);
+            }
+        }
         auto& recv_row = m_inserter.recv().m_row;
         for (recv_row.restart(); recv_row; ++recv_row) {
             /*
@@ -624,6 +632,13 @@ public:
          */
         for (auto& values_table: m_values_tables) values_table.clear();
 
+        {
+            auto size_it = nentries.cbegin();
+            for (auto& table : m_values_tables) {
+                logging::info_("{}", *size_it);
+                table.resize(*size_it++);
+            }
+        }
 
         /*
          * now write the sets of entries stored privately on this rank to the shared memory arrays accessible by all
