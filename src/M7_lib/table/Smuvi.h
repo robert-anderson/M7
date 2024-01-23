@@ -45,7 +45,7 @@
  *  rank 2: [(A, 5), (D, 0), (B, 1), (C, 4) ]
  *  rank 3: [(B, 5), (D, 1), (D, 3), (C, 2) ]
  *
- * The final data accessible data structure must be equivalent to a copy of the following map:
+ * The final accessible data structure must be equivalent to a copy of the following map:
  *  {
  *      A : [0, 2, 3, 4, 5 ],
  *      B : [1, 2, 3, 5 ],
@@ -435,6 +435,7 @@ public:
             /*
              * lookup the received key in the accessor table, or insert it if this is the first instance
              */
+            accessor.remap_if_due();
             auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);
             /*
              * if there aren't enough value index vector sets for the current size of the accessor, allocate more
@@ -550,18 +551,13 @@ public:
          * unordered list of the value element indices in the recv table associated with each key in the accessor,
          * which will later be copied into the shared memory m_entries arrays
          */
-        const auto comp_recv_row_1 = m_inserter.recv().m_row;
-        const auto comp_recv_row_2 = m_inserter.recv().m_row;
-        auto comp_fn = [&](uint_t i, uint_t j) -> bool {
-            comp_recv_row_1.jump(i);
-            comp_recv_row_2.jump(j);
-            return comp_recv_row_1.m_value < comp_recv_row_2.m_value;
-        };
         v_t<std::unordered_set<uint_t>> value_index_sets;
 
         /*
          * loop over the received rows
          */
+        auto& recv_row = m_inserter.recv().m_row;
+
         {
             auto sizes = mpi::all_gathered(m_inserter.recv().nrow_in_use());
             auto size_it = sizes.cbegin();
@@ -570,11 +566,12 @@ public:
                 table.resize(*size_it++);
             }
         }
-        auto& recv_row = m_inserter.recv().m_row;
+
         for (recv_row.restart(); recv_row; ++recv_row) {
             /*
              * lookup the received key in the accessor table, or insert it if this is the first instance
              */
+            accessor.remap_if_due();
             auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);
             /*
              * if there aren't enough value index vector sets for the current size of the accessor, allocate more
