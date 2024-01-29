@@ -537,6 +537,7 @@ public:
                 return beta_channel1 < beta_channel2;
             };
             m_dets_contain_alpha.collate(order_fn);
+            if (mpi::irank() == 1) {mpi::barrier();};
         }
         {
             // same as for beta
@@ -579,10 +580,10 @@ public:
         logging::info("construct singles aux arrays");
         spin_single_dict = &m_alpha_single_dict;
         m_dets_contain_alpha.foreach_key(gen_one_less_electron);
-        m_alpha_single_dict.collate_nosort();
+        m_alpha_single_dict.collate(order_fn);
         spin_single_dict = &m_beta_single_dict;
         m_dets_contain_beta.foreach_key(gen_one_less_electron);
-        m_beta_single_dict.collate_nosort();
+        m_beta_single_dict.collate(order_fn);
         logging::info("completed constructing singles aux arrays");
         /**
          *  Loop over all (N - 1) electron keys of the m_(spin)_single_dict SMUVI and add pairs as key value pairs into
@@ -635,13 +636,13 @@ public:
         hole_double_dict = &m_alpha_double_holes;
         part_double_dict = &m_alpha_double_particles;
         m_dets_contain_alpha.foreach_key(gen_two_less_electron);
-        m_alpha_double_holes.collate_nosort();
-        m_alpha_double_particles.collate_nosort();
+        m_alpha_double_holes.collate(order_fn);
+        m_alpha_double_particles.collate(order_fn);
         hole_double_dict = &m_beta_double_holes;
         part_double_dict = &m_beta_double_particles;
         m_dets_contain_beta.foreach_key(gen_two_less_electron);
-        m_beta_double_holes.collate_nosort();
-        m_beta_double_particles.collate_nosort();
+        m_beta_double_holes.collate(order_fn);
+        m_beta_double_particles.collate(order_fn);
         // SpinChannelToSpinChannelSmuvi* spin_double_dict = nullptr;
         // auto gen_two_less_electron= [&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){
         //     tmp_spin_channel = key;

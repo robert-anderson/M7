@@ -376,9 +376,6 @@ public:
          * first send the inserted key-index pairs to the receiving ranks
          */
         m_inserter.communicate();
-//        for (auto count : m_inserter.m_last_send_counts) {
-//            logging::info_("send counts {}", count);
-//        }
         /*
          * a shared memory MappedTable is set up for each rank, so that they can be set up without dataraces by a single
          * rank, and thereafter accessed by all ranks in the shared memory region
@@ -418,28 +415,38 @@ public:
          */
         auto& recv_row = m_inserter.recv().m_row;
 
+        Timer::sleep(10);
+
         /*
          * must allocate enough rows in accessor since we may not resize it within the loop.
          * otherwise a deadlock could arise
          */
         {
+            // TODO: verified that rank 0 gets 60 and rank 1 gets 40 rows
             auto sizes = mpi::all_gathered(m_inserter.recv().nrow_in_use());
             auto size_it = sizes.cbegin();
             for (auto& table : m_access_tables) {
-                logging::info_("{}", *size_it);
                 table.resize(*size_it++);
             }
         }
 
+        // logging::info_("is accessor protected? {}", accessor.is_protected());
+        // logging::info_("is accessor node shared? {}", accessor.m_bw.node_shared());
+        // REQUIRE_TRUE(accessor.i_can_modify(), "rank must be able to modify shared memory table");
+
+        // logging::info_("rank {} recv_row size {}", mpi::irank(), recv_row.m_size);
         for (recv_row.restart(); recv_row; ++recv_row) {
             /*
              * lookup the received key in the accessor table, or insert it if this is the first instance
              */
+            // TODO: the problem is already here, it cannot find any of the keys on rank 1 and makes 40 new rows;
+            auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);  //  inserting new rows fails
             accessor.remap_if_due();
-            auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);
+            // auto& accessor_row2 = accessor.lookup_or_insert(recv_row.m_key);
             /*
              * if there aren't enough value index vector sets for the current size of the accessor, allocate more
              */
+            logging::info_("rows in use {}", accessor.nrow_in_use());
             if (value_index_sets.size() < accessor.nrow_in_use()) {
                 value_index_sets.resize(accessor.nrow_in_use(), std::set<uint_t, CompFn>(CompFn(m_inserter, order_fn)));
             }
@@ -468,15 +475,20 @@ public:
                  * set the displacement that will denote the index in the entry_sets array at which the entry_sets
                  * corresponding to the current row in the accessor (i.e. the key) begin
                  */
+                // logging::info_("m_value_displ {}", accessor_row.m_value_displ);
+                // logging::info_("m_value_displ addition {}", accessor_row.m_value_displ + 1);
                 accessor_row.m_value_displ = displ;
                 /*
                  * set the number of entry_sets corresponding to the key
                  */
+                // logging::info_("m_value_count {}", accessor_row.m_value_count);
+                // logging::info_("m_value_count addition {}", accessor_row.m_value_count + 1);
                 accessor_row.m_value_count = value_index_set_it->size();
                 /*
                  * increment the rank-private displ count
                  */
-                displ += accessor_row.m_value_count;
+                displ += value_index_set_it->size();
+                // displ += accessor_row.m_value_count;
                 /*
                  * advance the entry iterator
                  */
@@ -501,7 +513,6 @@ public:
         {
             auto size_it = nentries.cbegin();
             for (auto& table : m_values_tables) {
-                logging::info_("{}", *size_it);
                 table.resize(*size_it++);
             }
         }
@@ -536,6 +547,7 @@ public:
          */
     }
 
+#if 0
     void collate_nosort() {
         /*
          * first send the inserted key-index pairs to the receiving ranks
@@ -666,6 +678,7 @@ public:
          * corresponding sorted and unique index values
          */
     }
+#endif
 
 };
 
