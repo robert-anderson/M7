@@ -216,12 +216,34 @@ TEST(Smuvi, Comms) {
 
     buffered::Number<uint_t> val;
 
+    uintv_t values {};
+    uintv_t alpha_channels {};
+    uintv_t beta_channels {};
     for (const auto& data: input_data) {
         const auto& alpha_string = all_channel_setbits[data.first.first];
         const auto& beta_string = all_channel_setbits[data.first.second];
+        logging::info_("val {} data: {}", mbf, val);
         val = data.second;
         mbf = {alpha_string, beta_string};
         smuvi.insert(mbf, val);
+
+        alpha_channels.emplace_back(data.first.first);
+        beta_channels.emplace_back(data.first.second);
+        values.emplace_back(val);
+    }
+
+    uintv_t values_global {};
+    uintv_t alpha_channels_global {};
+    uintv_t beta_channels_global {};
+    mpi::all_gatherv(values, values_global);
+    mpi::all_gatherv(alpha_channels, alpha_channels_global);
+    mpi::all_gatherv(beta_channels, beta_channels_global);
+    v_t<buffered::FrmOnv> mbfs_global {};
+    for (uint_t i = 0; i < alpha_channels_global.size(); ++i) {
+        const auto& alpha_string = all_channel_setbits[alpha_channels_global[i]];
+        const auto& beta_string  = all_channel_setbits[beta_channels_global[i]];
+        mbf = {alpha_string, beta_string};
+        mbfs_global.emplace_back(mbf);
     }
 
     const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
@@ -229,7 +251,6 @@ TEST(Smuvi, Comms) {
     };
     smuvi.collate(order_fn);
 #if 0
-
     std::cout << mbf << std::endl;
     std::cout << smuvi.nitem(mbf) << std::endl;
     std::cout << "++++++++++" << std::endl;
