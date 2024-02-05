@@ -126,8 +126,6 @@ TEST(Smuvi, BitsetToBitset) {
 
 }
 
-
-
 TEST(Smuvi, Comms) {
     const sys::frm::Basis basis(4);
     const uint_t nelec_per_channel = 2;
@@ -202,12 +200,13 @@ TEST(Smuvi, Comms) {
     ASSERT_EQ(ielem, nelem);
     ASSERT_EQ(uint_t(std::distance(select_elems.cbegin(), select_it)), nelem_select);
 
+    const auto ordered_input_data = input_data;
     /*
      * shuffle the input data to arbitrary order
      */
     const auto nshuffle = input_data.size();
     for (uint_t ishuffle = 0; ishuffle < nshuffle; ++ishuffle) {
-        auto shuffle_pair = hash::in_range(ishuffle, 2, 0, input_data.size());
+        auto shuffle_pair = hash::unique_in_range(ishuffle, 2, 0, input_data.size());
         std::swap(input_data[shuffle_pair[0]], input_data[shuffle_pair[1]]);
     }
 
@@ -250,6 +249,16 @@ TEST(Smuvi, Comms) {
         return i < j;
     };
     smuvi.collate(order_fn);
+
+
+    // look up all keys in the input
+    for (const auto& data: ordered_input_data) {
+        const auto& alpha_string = all_channel_setbits[data.first.first];
+        const auto& beta_string = all_channel_setbits[data.first.second];
+        mbf = {alpha_string, beta_string};
+        auto access_result = smuvi.access(mbf);
+    }
+
 #if 0
     std::cout << mbf << std::endl;
     std::cout << smuvi.nitem(mbf) << std::endl;

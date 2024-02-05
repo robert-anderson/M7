@@ -223,6 +223,11 @@ public:
         const ValueRow& m_value_row;
         const uint_t m_index_end;
 
+        uint_t nremain() const {
+            if (!*this) return 0;
+            return m_index_end > m_value_row.index() ? m_index_end - m_value_row.index() : 0ul;
+        }
+
         operator bool () const {
             if (!m_value_row.is_deref_valid()) return false;
             return m_value_row.in_range(m_index_end);
@@ -573,12 +578,11 @@ public:
         {
             auto sizes = mpi::all_gathered(m_inserter.recv().nrow_in_use());
             auto size_it = sizes.cbegin();
+            REQUIRE_EQ_ALL(sizes.size(), m_access_tables.size(), "size mismatch");
             for (auto& table : m_access_tables) {
-                logging::info_("{}", *size_it);
                 table.resize(*size_it++);
             }
         }
-
         for (recv_row.restart(); recv_row; ++recv_row) {
             /*
              * lookup the received key in the accessor table, or insert it if this is the first instance
@@ -586,7 +590,8 @@ public:
             accessor.remap_if_due();
             auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);
             /*
-             * if there aren't enough value index vector sets for the current size of the accessor, allocate more
+             * if there aren't enough value index vector sets for the current size of the accessor, allocate more, this
+             * can be validly done inside the loop, since there is no shared memory for v_t<std::set>
              */
             if (value_index_sets.size() < accessor.nrecord())
                 value_index_sets.resize(accessor.nrecord(), std::unordered_set<uint_t>());
@@ -623,13 +628,13 @@ public:
                 /*
                  * increment the rank-private displ count
                  */
-                displ += accessor_row.m_value_count;
+                displ += value_index_set_it->size();
                 /*
                  * advance the entry iterator
                  */
                 ++value_index_set_it;
             }
-            DEBUG_ASSERT_TRUE(value_index_set_it == value_index_sets.cend(), "should have iterated through all entry sets");
+            REQUIRE_TRUE_ALL(value_index_set_it == value_index_sets.cend(), "should have iterated through all entry sets");
             /*
              * gather the final displs (i.e. the total number of unique values across all keys sent to this rank)
              */
@@ -643,8 +648,8 @@ public:
 
         {
             auto size_it = nentries.cbegin();
+            REQUIRE_EQ_ALL(nentries.size(), m_values_tables.size(), "size mismatch");
             for (auto& table : m_values_tables) {
-                logging::info_("{}", *size_it);
                 table.resize(*size_it++);
             }
         }
