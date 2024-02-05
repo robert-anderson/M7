@@ -123,7 +123,44 @@ TEST(Smuvi, BitsetToBitset) {
         ASSERT_EQ(lookup_values, values);
     };
     smuvi.foreach_key(fn);
+}
 
+/**
+ * @param input_data
+ *  rank-private input data that is in general different on each rank
+ * @return
+ *  A copy of the all-gathered input data as a map that is the same on every rank
+ */
+std::map<uintp_t, uintv_t> make_global_data(const v_t<std::pair<uintp_t, uint_t>>& input_data) {
+    using namespace integer;
+    // pick a large enough number of "columns" in the rectangular map
+    const size_t ncol = 1ul << (CHAR_BIT*sizeof(uint_t)/2);
+    uintv_t local_keys;
+    uintv_t local_values;
+    for (auto& pair: input_data) {
+        // encode the pair key as a single integer since MPI requires simple datatypes
+        local_keys.push_back(rectmap(pair.first.first, pair.first.second, ncol));
+        local_values.push_back(pair.second);
+    }
+    uintv_t global_keys;
+    uintv_t global_values;
+    mpi::all_gatherv(local_keys, global_keys);
+    mpi::all_gatherv(local_values, global_values);
+    REQUIRE_EQ(global_values.size(), global_keys.size(), "global keys and value data should be the same length");
+    // assemble this global data as a map from pairs to sorted entries
+    std::map<uintp_t, std::set<uint_t>> global_map;
+    for (uint_t irow = 0; irow < global_keys.size(); ++irow) {
+        uintp_t inds;
+        // decode to a pair
+        inv_rectmap(inds.first, inds.second, ncol, global_keys[irow]);
+        auto it = global_map.find(inds);
+        if (it == global_map.end()) it = global_map.insert({inds, {}}).first;
+        it->second.insert(global_values[irow]);
+    }
+    // finally, assemble this global data as a map from pairs to sorted vector entries
+    std::map<uintp_t, uintv_t> out;
+    for (auto& pair: global_map) out.insert({pair.first, uintv_t(pair.second.cbegin(), pair.second.cend())});
+    return out;
 }
 
 TEST(Smuvi, Comms) {
@@ -215,9 +252,6 @@ TEST(Smuvi, Comms) {
 
     buffered::Number<uint_t> val;
 
-    uintv_t values {};
-    uintv_t alpha_channels {};
-    uintv_t beta_channels {};
     for (const auto& data: input_data) {
         const auto& alpha_string = all_channel_setbits[data.first.first];
         const auto& beta_string = all_channel_setbits[data.first.second];
@@ -225,24 +259,6 @@ TEST(Smuvi, Comms) {
         val = data.second;
         mbf = {alpha_string, beta_string};
         smuvi.insert(mbf, val);
-
-        alpha_channels.emplace_back(data.first.first);
-        beta_channels.emplace_back(data.first.second);
-        values.emplace_back(val);
-    }
-
-    uintv_t values_global {};
-    uintv_t alpha_channels_global {};
-    uintv_t beta_channels_global {};
-    mpi::all_gatherv(values, values_global);
-    mpi::all_gatherv(alpha_channels, alpha_channels_global);
-    mpi::all_gatherv(beta_channels, beta_channels_global);
-    v_t<buffered::FrmOnv> mbfs_global {};
-    for (uint_t i = 0; i < alpha_channels_global.size(); ++i) {
-        const auto& alpha_string = all_channel_setbits[alpha_channels_global[i]];
-        const auto& beta_string  = all_channel_setbits[beta_channels_global[i]];
-        mbf = {alpha_string, beta_string};
-        mbfs_global.emplace_back(mbf);
     }
 
     const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
@@ -251,32 +267,16 @@ TEST(Smuvi, Comms) {
     smuvi.collate(order_fn);
 
 
+    auto global_data = make_global_data(input_data);
     // look up all keys in the input
-    for (const auto& data: ordered_input_data) {
-        const auto& alpha_string = all_channel_setbits[data.first.first];
-        const auto& beta_string = all_channel_setbits[data.first.second];
+    for (const auto& pair: global_data) {
+        const auto& alpha_string = all_channel_setbits[pair.first.first];
+        const auto& beta_string = all_channel_setbits[pair.first.second];
         mbf = {alpha_string, beta_string};
         auto access_result = smuvi.access(mbf);
+        // firstly, length of found data should match that of the global data value-vector
+        ASSERT_EQ(access_result.nremain(), pair.second.size());
+        // then ensure that all values are the same and occur in the same order
+        ASSERT_EQ(access_result.to_vector(), pair.second);
     }
-
-#if 0
-    std::cout << mbf << std::endl;
-    std::cout << smuvi.nitem(mbf) << std::endl;
-    std::cout << "++++++++++" << std::endl;
-    for (uint_t iitem = 0; iitem < smuvi.nitem(mbf); ++iitem){
-        std::cout << smuvi.item_cbegin(mbf)[iitem] << std::endl;
-    }
-
-    if (mpi::i_am_root()) {
-//        std::cout << smuvi.m_inserter.m_send_recv.recv().to_string() << std::endl;
-        std::cout << convert::to_string(mpi::g_nrank_in_shmem_realms) << std::endl;
-        std::cout << convert::to_string(mpi::g_irank_root_in_shmem_realms) << std::endl;
-    }
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) {
-        if (mpi::i_am(irank)) {
-            std::cout << mpi::irank() << " " << mpi::irank(mpi::SharedMemory) << std::endl;
-        }
-        mpi::barrier();
-    }
-#endif
 }

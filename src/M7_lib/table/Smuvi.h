@@ -244,6 +244,18 @@ public:
             if (!*this) return;
             for (; m_value_row.in_range(m_index_end); ++m_value_row) fn(m_value_row.m_value);
         }
+
+        /**
+         * For use in debugging only, use foreach in efficient implementations
+         * @return
+         *  remaining entries as a vector
+         */
+        uintv_t to_vector() const {
+            uintv_t out;
+            out.reserve(nremain());
+            foreach([&out](const value_t& v){out.push_back(v);});
+            return out;
+        }
     };
 
     /**
@@ -419,8 +431,6 @@ public:
          * loop over the received rows
          */
         auto& recv_row = m_inserter.recv().m_row;
-
-        Timer::sleep(10);
 
         /*
          * must allocate enough rows in accessor since we may not resize it within the loop.
