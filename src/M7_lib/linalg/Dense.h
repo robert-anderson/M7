@@ -134,7 +134,7 @@ namespace dense {
          *  true if this rank participates in globally-modifying operations of the buffer
          */
         bool i_can_globally_modify() const {
-            return !m_buffer.m_node_shared || mpi::i_am_root(mpi::SharedMemory);
+            return m_buffer.m_permissions.i_am_owner();
         }
 
         void set_sizes(uint_t nrow, uint_t ncol);
@@ -190,7 +190,7 @@ namespace dense {
 
         void resize(uint_t nrow, uint_t ncol);
 
-        MatrixBase(uint_t nrow, uint_t ncol, uint_t element_size, bool node_shared);
+        MatrixBase(uint_t nrow, uint_t ncol, uint_t element_size, Buffer::Permissions permissions = {});
 
         MatrixBase(const MatrixBase& other);
 
@@ -255,15 +255,15 @@ namespace dense {
             return cbegin_as<T>();
         }
 
-        Matrix(uint_t nrow, uint_t ncol, bool node_shared=false):
-            MatrixBase(nrow, ncol, sizeof(T), node_shared){}
+        Matrix(uint_t nrow, uint_t ncol, Buffer::Permissions permissions = {}):
+            MatrixBase(nrow, ncol, sizeof(T), permissions){}
 
         Matrix(uint_t nrow, const v_t<T>& rows): Matrix(nrow, rows.size()/nrow) {
             *this = rows;
         }
 
-        Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank, bool node_shared=false):
-                Matrix(0, 0, node_shared){
+        Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank, Buffer::Permissions permissions = {}):
+                Matrix(0, 0, permissions){
             hdf5::DatasetLoader dl(nr, name, false, this_rank);
             const auto& shape = dl.m_format.m_h5_shape;
             const auto nrow = (shape.size() > 0) ? shape[0] : 1ul;
@@ -593,7 +593,7 @@ namespace dense {
         using MatrixBase::set_sizes;
         using MatrixBase::i_can_globally_modify;
     public:
-        explicit Vector(uint_t nelement, bool node_shared=false): Matrix<T>(1, nelement, node_shared){}
+        explicit Vector(uint_t nelement, Buffer::Permissions permissions = {}): Matrix<T>(1, nelement, permissions){}
 
         explicit Vector(const v_t<T>& v): Vector(v.size()) {
             Matrix<T>::operator=(v);
@@ -606,19 +606,19 @@ namespace dense {
         void reorder(const uintv_t& order) {
             if (i_can_globally_modify())
                 sort::reorder(MatrixBase::begin(), MatrixBase::m_element_size, order);
-            if (m_bw.node_shared()) mpi::barrier(mpi::SharedMemory);
+            if (m_bw.shared()) mpi::barrier(mpi::SharedMemory);
         }
 
         void sort_inplace(bool asc, bool absval) {
             if (i_can_globally_modify())
                 sort::inplace(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
-            if (m_bw.node_shared()) mpi::barrier(mpi::SharedMemory);
+            if (m_bw.shared()) mpi::barrier(mpi::SharedMemory);
         }
 
         Vector<T>& sorted(bool asc, bool absval) {
             if (i_can_globally_modify())
                 sort::inplace(Matrix<T>::tbegin(), MatrixBase::m_nelement, asc, absval);
-            if (m_bw.node_shared()) mpi::barrier(mpi::SharedMemory);
+            if (m_bw.shared()) mpi::barrier(mpi::SharedMemory);
             return *this;
         }
 
@@ -630,8 +630,8 @@ namespace dense {
             sort::inds(order, Matrix<T>::ctbegin(), MatrixBase::m_nelement, asc, absval);
         }
 
-        Vector(const hdf5::NodeReader& nr, const str_t name, bool this_rank, bool node_shared=false):
-                Matrix<T>(nr, name, this_rank, node_shared){
+        Vector(const hdf5::NodeReader& nr, const str_t name, bool this_rank, Buffer::Permissions permissions = {}):
+                Matrix<T>(nr, name, this_rank, permissions){
             // vectors must have one row
             if (m_nrow!=1) set_sizes(m_ncol, m_nrow);
             REQUIRE_EQ(m_nrow, 1ul, "read data has non-vector shape");

@@ -15,6 +15,10 @@ public:
     const uint_t m_element_size;
     uint_t m_nbyte = 0;
     buf_t *m_data = nullptr;
+    /**
+     * The rank index in the global communicator that has the exclusive right to write on m_data
+     */
+    const uint_t m_irank_owner;
 private:
 
     static void alloc(uint_t nelement, uint_t element_size, MPI_Win* win, void** data);
@@ -27,13 +31,16 @@ private:
 
 protected:
     MPI_Win m_win;
-public:
 
-    SharedArrayBase(uint_t element_size);
+    SharedArrayBase(uint_t element_size, uint_t irank_owner);
+
+    // owner defaults to the root rank of the shared memory region
+    explicit SharedArrayBase(uint_t element_size);
+public:
 
     SharedArrayBase(): SharedArrayBase(1ul){}
 
-    SharedArrayBase(uint_t nelement, uint_t element_size);
+    SharedArrayBase(uint_t nelement, uint_t element_size, uint_t irank_owner);
 
     SharedArrayBase& operator=(const SharedArrayBase& other);
 
@@ -82,7 +89,8 @@ protected:
 template<typename T>
 class SharedArray : public SharedArrayBase {
 public:
-    SharedArray(uint_t size) : SharedArrayBase(size, sizeof(T)) {}
+    SharedArray(uint_t size, uint_t irank_owner) : SharedArrayBase(size, sizeof(T), irank_owner) {}
+    SharedArray(uint_t size) : SharedArray(size, mpi::irank_world_shmem_root()){}
 
     uint_t size() const {
         return m_nelement;
@@ -124,9 +132,10 @@ template<typename T>
 class SharedScalar : protected SharedArray<T> {
 
 public:
-    SharedScalar() : SharedArray<T>(1ul){}
+    SharedScalar(uint_t irank_owner) : SharedArray<T>(1, irank_owner){}
+    SharedScalar() : SharedScalar(mpi::irank_world_shmem_root()){}
 
-    explicit SharedScalar(const T& v) : SharedScalar() {
+    explicit SharedScalar(uint_t irank_owner, const T& v) : SharedScalar(irank_owner) {
         if (mpi::i_am_root(mpi::SharedMemory)) set_(v);
         mpi::barrier(mpi::SharedMemory);
     }

@@ -16,13 +16,13 @@ public:
     typedef table_impl_t table_t;
     using TableBase::m_bw;
 
-    BufferedTable(str_t name, const table_t& table, bool node_shared): table_t(table),
-        m_buffer(std::move(name), 1ul, node_shared) {
+    BufferedTable(str_t name, const table_t& table, Buffer::Permissions permissions): table_t(table),
+        m_buffer(std::move(name), 1ul, permissions) {
         TableBase::set_buffer(&m_buffer);
         ASSERT(static_cast<const Row&>(Table<row_t>::m_row).m_table);
     }
 
-    BufferedTable(const table_t& table, bool node_shared): BufferedTable("", table, node_shared){}
+    BufferedTable(const table_t& table, Buffer::Permissions permissions): BufferedTable("", table, permissions){}
 
     BufferedTable& operator=(const BufferedTable<row_t, table_t> &other) {
         table_t::operator=(other);
@@ -34,7 +34,7 @@ public:
     }
 
     BufferedTable(const BufferedTable<row_t, table_t> &other) :
-        BufferedTable(other.m_buffer.m_name, other, other.m_buffer.m_node_shared){
+        BufferedTable(other.m_buffer.m_name, other, other.m_buffer.m_permissions){
         *this = other;
         table_t::m_row.restart();
     }
@@ -51,20 +51,20 @@ public:
 namespace buffered {
     template <typename row_t>
     struct Table : BufferedTable<row_t, ::Table<row_t>> {
-        Table(str_t name, const row_t &row, bool node_shared=false):
-            BufferedTable<row_t, ::Table<row_t>>(name, ::Table<row_t>(row), node_shared){}
-        Table(const row_t &row, bool node_shared=false): Table("", row, node_shared){}
+        Table(str_t name, const row_t &row, Buffer::Permissions permissions = {}):
+            BufferedTable<row_t, ::Table<row_t>>(name, ::Table<row_t>(row), permissions){}
+        Table(const row_t &row, Buffer::Permissions permissions = {}): Table("", row, permissions){}
     };
     template <typename row_t>
     struct MappedTable : BufferedTable<row_t, ::MappedTable<row_t>> {
-        MappedTable(str_t name, const row_t &row, MappedTableOptions opts, bool node_shared=false):
-            BufferedTable<row_t, ::MappedTable<row_t>>(name, ::MappedTable<row_t>(row, opts), node_shared){}
-        MappedTable(const row_t &row, bool node_shared=false):
-            MappedTable("", row, node_shared){}
-        MappedTable(str_t name, const row_t &row, bool node_shared=false):
-            MappedTable(name, row, {}, node_shared){}
-        MappedTable(const row_t &row, MappedTableOptions opts, bool node_shared=false):
-            MappedTable("", row, opts, node_shared){}
+        MappedTable(str_t name, const row_t &row, MappedTableOptions opts, Buffer::Permissions permissions = {}):
+            BufferedTable<row_t, ::MappedTable<row_t>>(name, ::MappedTable<row_t>(row, opts), permissions){}
+        MappedTable(const row_t &row, Buffer::Permissions permissions = {}):
+            MappedTable("", row, permissions){}
+        MappedTable(str_t name, const row_t &row, Buffer::Permissions permissions = {}):
+            MappedTable(name, row, {}, permissions){}
+        MappedTable(const row_t &row, MappedTableOptions opts, Buffer::Permissions permissions = {}):
+            MappedTable("", row, opts, permissions){}
     };
 }
 

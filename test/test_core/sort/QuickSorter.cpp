@@ -58,7 +58,7 @@ TEST(QuickSorter, StaticDispatchSort){
     using namespace quick_sorter_test;
     const uint_t nchar = 9;
 
-    bt_t table("test", {nchar}, false);
+    bt_t table("test", {nchar}, Buffer::Permissions{});
     setup_table(table);
 
     AscOrderFn comp_fn(table.m_row);
@@ -115,7 +115,7 @@ TEST(QuickSorter, DynamicDispatchSort){
     using namespace quick_sorter_test;
     const uint_t nchar = 9;
 
-    bt_t table("test", {nchar}, false);
+    bt_t table("test", {nchar}, Buffer::Permissions{});
     setup_table(table);
 
     auto row1 = table.m_row;

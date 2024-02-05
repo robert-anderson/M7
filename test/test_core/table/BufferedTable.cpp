@@ -8,7 +8,7 @@
 
 TEST(BufferedTable, Empty) {
     typedef SingleFieldRow<field::Number<int>> row_t;
-    buffered::Table<row_t> table({});
+    buffered::Table<row_t> table(row_t{});
     ASSERT_EQ(table.capacity(), 0);
     ASSERT_EQ(table.nrow_in_use(), 0);
     ASSERT_EQ(table.m_bw.m_size, 0);
@@ -29,7 +29,7 @@ TEST(BufferedTable, Empty) {
 
 TEST(BufferedTable, NodeShared) {
     typedef SingleFieldRow<field::Number<hash::digest_t>> row_t;
-    buffered::Table<row_t> table({}, true);
+    buffered::Table<row_t> table(row_t{}, Buffer::Permissions(mpi::irank_world_shmem_root()));
     const uint_t nrow = 23;
     table.resize(nrow);
     for (uint_t irow=0ul; irow<nrow; ++irow) {
@@ -47,8 +47,8 @@ TEST(BufferedTable, NodeShared) {
 
 TEST(BufferedTable, AllGathervEmpty) {
     typedef SingleFieldRow<field::Number<int>> row_t;
-    buffered::Table<row_t> src_table("src", {});
-    buffered::Table<row_t> dst_table("dst", {});
+    buffered::Table<row_t> src_table("src", row_t{});
+    buffered::Table<row_t> dst_table("dst", row_t{});
     dst_table.all_gatherv(src_table);
     ASSERT_EQ(dst_table.nrow_in_use(), 0ul);
 }
@@ -67,7 +67,7 @@ TEST(BufferedTable, AllGatherv) {
     ASSERT_EQ(nrow_global,mpi::all_sum(nrow_local));
 
     typedef SingleFieldRow<field::Number<int>> row_t;
-    buffered::Table<row_t> src_table("src", {});
+    buffered::Table<row_t> src_table("src", row_t{});
     if (nrow_local) {
         src_table.resize(nrow_local);
         for (uint_t irow = 0ul; irow < nrow_local; ++irow) {
@@ -75,7 +75,7 @@ TEST(BufferedTable, AllGatherv) {
             src_table.m_row.m_field = get_value(mpi::irank(), irow);
         }
     }
-    buffered::Table<row_t> dst_table("dst", {});
+    buffered::Table<row_t> dst_table("dst", row_t{});
     dst_table.all_gatherv(src_table);
     ASSERT_EQ(dst_table.nrow_in_use(), nrow_global);
     auto& row = dst_table.m_row;
@@ -103,7 +103,7 @@ TEST(BufferedTable, Gatherv) {
     ASSERT_EQ(nrow_global,mpi::all_sum(nrow_local));
 
     typedef SingleFieldRow<field::Number<int>> row_t;
-    buffered::Table<row_t> src_table("src", {});
+    buffered::Table<row_t> src_table("src", row_t{});
     if (nrow_local) {
         src_table.resize(nrow_local);
         for (uint_t irow = 0ul; irow < nrow_local; ++irow) {
@@ -111,7 +111,7 @@ TEST(BufferedTable, Gatherv) {
             src_table.m_row.m_field = get_value(mpi::irank(), irow);
         }
     }
-    buffered::Table<row_t> dst_table("dst", {});
+    buffered::Table<row_t> dst_table("dst", row_t{});
 
     dst_table.gatherv(src_table);
     if (mpi::i_am_root()) {

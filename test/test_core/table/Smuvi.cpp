@@ -261,7 +261,6 @@ TEST(Smuvi, Comms) {
         mbf = {alpha_string, beta_string};
         smuvi.insert(mbf, val);
     }
-    logging::info_("size global MBF table {}", mbfs_global.size());
 
     const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
         return i < j;

@@ -47,7 +47,7 @@ namespace local_extremal_rows_test {
 }
 TEST(LocalExtremalRows, EmptyTable) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {});
+    int_scalar_table_t table("test", int_scalar_row_t{});
     auto row1 = table.m_row;
     auto row2 = row1;
     LocalExtremalRows<int> lxv(row1.m_field, row2.m_field, false, false, 0);
@@ -57,7 +57,7 @@ TEST(LocalExtremalRows, EmptyTable) {
 
 TEST(LocalExtremalRows, Ascending) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {});
+    int_scalar_table_t table("test", int_scalar_row_t{});
     setup(table);
     auto row1 = table.m_row;
     auto row2 = row1;
@@ -76,7 +76,7 @@ TEST(LocalExtremalRows, Ascending) {
 
 TEST(LocalExtremalRows, AscendingAbs) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {});
+    int_scalar_table_t table("test", int_scalar_row_t{});
     setup(table);
     auto row1 = table.m_row;
     auto row2 = row1;
@@ -95,7 +95,7 @@ TEST(LocalExtremalRows, AscendingAbs) {
 
 TEST(LocalExtremalRows, Descending) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {});
+    int_scalar_table_t table("test", int_scalar_row_t{});
     setup(table);
     auto row1 = table.m_row;
     auto row2 = row1;
@@ -114,7 +114,7 @@ TEST(LocalExtremalRows, Descending) {
 
 TEST(LocalExtremalRows, DescendingAbs) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {});
+    int_scalar_table_t table("test", int_scalar_row_t{});
     setup(table);
     auto row1 = table.m_row;
     auto row2 = row1;
@@ -133,7 +133,7 @@ TEST(LocalExtremalRows, DescendingAbs) {
 
 TEST(LocalExtremalRows, AscendingComplex) {
     using namespace local_extremal_rows_test;
-    complex_scalar_table_t table("test", {});
+    complex_scalar_table_t table("test", complex_scalar_row_t{});
     setup(table);
     auto row1 = table.m_row;
     auto row2 = row1;
@@ -153,7 +153,7 @@ TEST(LocalExtremalRows, AscendingComplex) {
 
 TEST(LocalExtremalRows, DescendingComplex) {
     using namespace local_extremal_rows_test;
-    complex_scalar_table_t table("test", {});
+    complex_scalar_table_t table("test", complex_scalar_row_t{});
     setup(table);
     auto row1 = table.m_row;
     auto row2 = row1;
@@ -173,7 +173,7 @@ TEST(LocalExtremalRows, DescendingComplex) {
 
 TEST(LocalExtremalRows, WithClearedRows) {
     using namespace local_extremal_rows_test;
-    int_scalar_table_t table("test", {});
+    int_scalar_table_t table("test", int_scalar_row_t{});
     setup(table);
     ASSERT_EQ(table.nrecord(), 9ul);
     ASSERT_EQ(table.nfreed_row(), 0ul);

@@ -44,12 +44,12 @@ void Buffer::Window::set_end(uint_t irow) {
     m_hwm_ptr = m_begin_ptr + irow * m_row_size;
 }
 
-bool Buffer::Window::node_shared() const {
-    return m_buffer->m_node_shared;
+bool Buffer::Window::shared() const {
+    return m_buffer->m_permissions.shared();
 }
 
 bool Buffer::Window::i_can_modify() const {
-    return m_buffer && (!node_shared() || mpi::i_am_root(mpi::SharedMemory));
+    return m_buffer->m_permissions.i_am_owner();
 }
 
 bool Buffer::Window::allocated() const {
@@ -86,10 +86,10 @@ double Buffer::Window::get_expansion_factor() const {
     return m_buffer->m_expansion_factor;
 }
 
-Buffer::Buffer(str_t name, uint_t nwindow_max, bool node_shared) :
-        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_node_shared(node_shared) {
-    if (!name.empty()) logging::info_("Creating {} buffer \"{}\"",
-                                      node_shared ? "node-shared" : "rank-private", name);
+Buffer::Buffer(str_t name, uint_t nwindow_max, Permissions permissions) :
+        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_permissions(permissions) {
+    if (!name.empty()) logging::info_(
+            "Creating {} buffer \"{}\"",m_permissions.shared() ? "node-shared" : "rank-private", name);
     REQUIRE_TRUE(nwindow_max, "A buffer must allow at least one window");
     m_windows.reserve(m_nwindow_max);
 }
@@ -149,8 +149,8 @@ void Buffer::resize(uint_t new_size, double factor) {
     /*
      * handle the shared and private cases separately
      */
-    if (m_node_shared) {
-        SharedArrayBase tmp(new_size, 1);
+    if (m_permissions.shared()) {
+        SharedArrayBase tmp(new_size, 1, m_permissions.irank_owner());
         tmp_ptr = tmp.m_data;
         move_windows_fn(tmp_ptr);
         m_data_shared = std::move(tmp);

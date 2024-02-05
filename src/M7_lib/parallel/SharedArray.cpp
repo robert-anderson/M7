@@ -4,7 +4,14 @@
 
 #include "SharedArray.h"
 
-SharedArrayBase::SharedArrayBase(uint_t element_size) : m_element_size(element_size){}
+SharedArrayBase::SharedArrayBase(uint_t element_size, uint_t irank_owner) :
+    m_element_size(element_size), m_irank_owner(irank_owner){
+    auto owners = mpi::all_gathered(m_irank_owner);
+    REQUIRE_EQ_ALL(owners[mpi::irank_world_shmem_root()], m_irank_owner,
+        "all ranks in the shared memory region must recognise the same owner rank index");
+}
+
+SharedArrayBase::SharedArrayBase(uint_t element_size) : SharedArrayBase(element_size, mpi::irank_world_shmem_root()){}
 
 void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, void **data) {
     const auto nbyte = nelement * element_size;
@@ -46,7 +53,8 @@ void SharedArrayBase::free() {
     free(&m_win, &data);
 }
 
-SharedArrayBase::SharedArrayBase(uint_t nelement, uint_t element_size) : SharedArrayBase(element_size) {
+SharedArrayBase::SharedArrayBase(uint_t nelement, uint_t element_size, uint_t irank_owner) :
+    SharedArrayBase(element_size, irank_owner) {
     alloc(nelement);
 }
 
