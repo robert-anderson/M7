@@ -183,7 +183,7 @@ public:
         // iterate over the rank indices in this shmem realm and create an accessor table for each one
         for (auto& irank_world: mpi::g_iranks_world_in_shmem_realms[ishmem]) {
             m_irank_world_to_iaccess_table[irank_world] = m_access_tables.size();
-            m_access_tables.emplace_back(AccessRow(key), true);
+            m_access_tables.emplace_back(AccessRow(key), Buffer::Permissions(irank_world));
             m_access_foreach_rows.emplace_back(m_access_tables.back().m_row);
         }
         /*
@@ -201,7 +201,7 @@ public:
              * create a new shared memory array of indices with sufficient elements to store all the entries associated
              * with all the keys sent to irank_world
              */
-            m_values_tables.emplace_back(ValueRow(value), true);
+            m_values_tables.emplace_back(ValueRow(value), Buffer::Permissions(irank_world));
             DEBUG_ASSERT_FALSE(m_values_tables.back().m_row.is_deref_valid(), "rows should be pointing to null");
             m_values_lookup_rows.emplace_back(m_values_tables.back().m_row);
             m_values_foreach_rows_1.emplace_back(m_values_tables.back().m_row);
@@ -446,7 +446,7 @@ public:
         }
 
         // logging::info_("is accessor protected? {}", accessor.is_protected());
-        // logging::info_("is accessor node shared? {}", accessor.m_bw.node_shared());
+        // logging::info_("is accessor node shared? {}", accessor.m_bw.shared());
         // REQUIRE_TRUE(accessor.i_can_modify(), "rank must be able to modify shared memory table");
 
         // logging::info_("rank {} recv_row size {}", mpi::irank(), recv_row.m_size);

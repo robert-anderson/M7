@@ -14,6 +14,7 @@
 
 struct TableBase;
 
+
 class Buffer {
 public:
     /**
@@ -24,6 +25,31 @@ public:
      * number of bits in the system word
      */
     static constexpr uint_t c_nbit_word = CHAR_BIT * c_nbyte_word;
+
+    /**
+     * Relates to whether a Buffer's memory is shared or local. If shared, this class stores the world communicator rank
+     * index that is designated the owner (i.e. the rank with the sole right to modify the buffer)
+     */
+    class Permissions {
+        const uint_t m_i;
+        Permissions(bool i_rank_owner): m_i(i_rank_owner){}
+    public:
+        // value of ~0ul means the buffer is to be private, not shared memory
+        Permissions(): m_i(~0ul){}
+        Permissions(uint_t i_rank_owner): m_i(i_rank_owner){}
+
+        bool shared() const {
+            return m_i < mpi::nrank();
+        }
+
+        bool i_am_owner() const {
+            return !shared() || m_i == mpi::irank();
+        }
+
+        uint_t irank_owner() const {
+            return shared() ? m_i : mpi::irank();
+        }
+    };
 
     /**
      * class representing the portion of a buffer allotted to a single table
@@ -103,11 +129,11 @@ public:
          * @return
          *  true if the buffer's underlying memory is shared over the MPI node
          */
-        bool node_shared() const;
+        bool shared() const;
 
         /**
          * @return
-         *  true if the memory is not node-shared, or if this is a node-root MPI rank
+         *  true if the memory is not node-shared, or if this is MPI rank is the owner of the shared allocation
          */
         bool i_can_modify() const;
 
@@ -179,7 +205,7 @@ public:
     /**
      * determines whether the buffer is held in node-shared or rank-private memory
      */
-    const bool m_node_shared;
+    const Permissions m_permissions;
 private:
     /**
      * begin pointer of the allocated memory
@@ -204,9 +230,9 @@ private:
     v_t<Window *> m_windows;
 
 public:
-    Buffer(str_t name, uint_t nwindow_max, bool node_shared=false);
+    Buffer(str_t name, uint_t nwindow_max, Permissions permissions = {});
 
-    Buffer(uint_t nwindow_max, bool node_shared=false) : Buffer("", nwindow_max, node_shared){}
+    Buffer(uint_t nwindow_max, Permissions permissions = {}) : Buffer("", nwindow_max, permissions){}
 
     uint_t size() const;
 

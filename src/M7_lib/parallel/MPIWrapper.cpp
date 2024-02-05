@@ -4,6 +4,7 @@
 
 
 #include <utility>
+#include <numeric>
 #include <set>
 #include "M7_lib/util/Integer.h"
 #include "M7_lib/io/Logging.h"
@@ -112,27 +113,42 @@ void mpi::abort(str_t message){
 void mpi::setup_mpi_globals() {
     int tmp;
     g_world_comm = MPI_COMM_WORLD;
+    // get the size of the world communicator (i.e. the total number of MPI ranks)
     MPI_Comm_size(g_world_comm, &tmp);
     g_nrank_world = tmp;
-    ASSERT(g_nrank_world > 0)
+    ASSERT(tmp > 0);
+    // get the index of this rank in the world communicator
     MPI_Comm_rank(g_world_comm, &tmp);
     g_irank_world = tmp;
-    char processor_name[MPI_MAX_PROCESSOR_NAME];
-    MPI_Get_processor_name(processor_name, &tmp);
-    g_processor_name = str_t(processor_name, tmp);
+    // split the world communicator by shared memory region into sub-communicators
     MPI_Comm_split_type(g_world_comm, MPI_COMM_TYPE_SHARED, irank(), MPI_INFO_NULL, &g_shmem_comm);
+    // get the size of the shared memory communicator in which this rank resides
     MPI_Comm_size(g_shmem_comm, &tmp);
     g_nrank_shmem = tmp;
+    // get the index of this rank in the shared memory communicator in which it resides
     MPI_Comm_rank(g_shmem_comm, &tmp);
     g_irank_shmem = tmp;
 
-    mpi::all_gather(g_irank_world, g_iranks_shmem);
-
-    SharedScalar<uint_t> tmp_shared;
-    // only the node roots write their world communicator indices to the shared array
-    if (i_am_root(mpi::SharedMemory)) tmp_shared.set_(g_irank_world);
-    mpi::barrier(SharedMemory);
-    mpi::all_gather(uint_t(tmp_shared), g_shmem_root_iranks_world);
+    {
+        // make a group containing all ranks in the world communicator
+        MPI_Group world_group;
+        MPI_Comm_group(MPI_COMM_WORLD, &world_group);
+        // make a group containing all ranks in the shared memory communicator
+        MPI_Group shmem_group;
+        MPI_Comm_group(g_shmem_comm, &shmem_group);
+        std::vector<int> world_iranks(nrank());
+        std::iota(world_iranks.begin(), world_iranks.end(), 0);
+        std::vector<int> shmem_iranks(nrank());
+        // translate the world rank indices into shared memory rank indices
+        MPI_Group_translate_ranks(world_group, nrank(), world_iranks.data(), shmem_group, shmem_iranks.data());
+        // find the world index of the root of the shared memory communicator in which this rank resides
+        auto it = std::find(shmem_iranks.cbegin(), shmem_iranks.cend(), 0);
+        // the root should have been found somewhere
+        assert(it != shmem_iranks.cend());
+        const uint_t shmem_root_irank = std::distance(shmem_iranks.cbegin(), it);
+        // gather all into the global vector mapping all ranks to their root rank in shared memory
+        mpi::all_gather(shmem_root_irank, g_shmem_root_iranks_world);
+    }
 
     {
         // use map to get a unique, ordered vector of realms with their ranks
@@ -175,7 +191,6 @@ uintv_t mpi::filter(bool cond) {
 MPI_Comm mpi::g_world_comm;
 uint_t mpi::g_irank_world = 0;
 uint_t mpi::g_nrank_world = 1;
-str_t mpi::g_processor_name = "";
 MPI_Comm mpi::g_shmem_comm;
 uint_t mpi::g_irank_shmem = 0;
 uint_t mpi::g_nrank_shmem = 1;

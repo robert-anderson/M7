@@ -62,10 +62,6 @@ namespace mpi {
      */
     extern uint_t g_nrank_world;
     /**
-     * name of this rank
-     */
-    extern str_t g_processor_name;
-    /**
      * communicator among ranks in the same shared-memory realm
      */
     extern MPI_Comm g_shmem_comm;
@@ -247,10 +243,6 @@ namespace mpi {
      */
     static uint_t irank_world_shmem_root() {
         return g_shmem_root_iranks_world[irank()];
-    }
-
-    static const str_t &processor_name() {
-        return g_processor_name;
     }
 
     static MPI_Comm* communicator(Realm realm) {

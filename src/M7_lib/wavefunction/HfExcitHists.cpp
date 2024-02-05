@@ -7,8 +7,8 @@
 #include "Wavefunction.h"
 
 hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name) :
-        m_inds(hdf5::GroupReader(parent, name), "indices", mpi::i_am_root(mpi::SharedMemory), true),
-        m_vals(hdf5::GroupReader(parent, name), "values", mpi::i_am_root(mpi::SharedMemory), true) {
+        m_inds(hdf5::GroupReader(parent, name), "indices", mpi::i_am_root(mpi::SharedMemory), {mpi::irank_world_shmem_root()}),
+        m_vals(hdf5::GroupReader(parent, name), "values", mpi::i_am_root(mpi::SharedMemory), {mpi::irank_world_shmem_root()}) {
     REQUIRE_EQ(m_inds.nrow(), m_vals.nelement(),
                "number of index arrays is not the same as the number of values");
     uintv_t order;
@@ -245,7 +245,7 @@ hf_excit_hist::Accumulators::Accumulators(
     for (auto& nexcit: m_nexcits){
         const OpSig exsig({nexcit, nexcit}, {0, 0});
         const auto name = exsig.to_string()+" excitations of HF state";
-        m_tables.emplace_back(name, RdmRow(exsig, 1), false);
+        m_tables.emplace_back(name, RdmRow(exsig, 1), Buffer::Permissions{});
         m_tables.back().resize(500);
         m_tables.back().set_expansion_factor(2.0);
         m_lookup_keys.emplace_back(exsig);

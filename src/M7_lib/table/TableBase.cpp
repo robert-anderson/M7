@@ -201,7 +201,7 @@ void TableBase::all_gatherv(const TableBase &src) {
     auto nrec_total = std::accumulate(nrecs.cbegin(), nrecs.cend(), 0ul);
     if (!nrec_total) return;
     push_back(nrec_total);
-    if (m_bw.node_shared()) {
+    if (m_bw.shared()) {
         /*
          * if a subset of rows (just the node roots) are gathering, we can't use gatherv (one recving rank) or
          * all_gatherv (all ranks gather), so we have to use the general all_to_allv
