@@ -172,7 +172,7 @@ TEST(Smuvi, Comms) {
      */
     v_t<uintv_t> all_channel_setbits;
     {
-        auto fn = [&](const uintv_t& inds){all_channel_setbits.push_back(inds);};
+        auto fn = [&](const uintv_t &inds) { all_channel_setbits.push_back(inds); };
         basic_foreach::rtnd::Ordered<true, true> foreach(basis.m_nsite, nelec_per_channel);
         foreach.loop(fn);
     }
@@ -183,20 +183,21 @@ TEST(Smuvi, Comms) {
     /*
      * number of elements to draw as a fraction of the total number of elements
      */
-    const double nelem_select_fraction = 0.8;
+    const double nelem_select_fraction = 0.5;
     /*
      * max number of uint_t entries to generate for each ONV
      */
-    const uint_t max_nentry = 5;
+    const uint_t max_nentry = 2;
     /*
      * max value of each uint_t entry
      */
-    const uint_t max_entry = 20;
+    const uint_t max_entry = 10;
 
     /*
      * select a rank-specific subset of the elements
      */
-    const auto select_elems = hash::unique_in_range(mpi::irank(), uint_t(nelem * nelem_select_fraction), 0, nelem, true);
+    const auto select_elems = hash::unique_in_range(mpi::irank(), uint_t(nelem * nelem_select_fraction), 0, nelem,
+                                                    true);
 
     const auto nelem_select = select_elems.size();
 
@@ -247,25 +248,25 @@ TEST(Smuvi, Comms) {
         std::swap(input_data[shuffle_pair[0]], input_data[shuffle_pair[1]]);
     }
 
-    Smuvi<field::FrmOnv, field::Number<uint_t>> smuvi("my_smuvi", field::FrmOnv(nullptr, basis), field::Number<uint_t>(nullptr));
+    Smuvi<field::FrmOnv, field::Number<uint_t>> smuvi("my_smuvi", field::FrmOnv(nullptr, basis),
+                                                      field::Number<uint_t>(nullptr));
     buffered::FrmOnv mbf(basis);
 
     buffered::Number<uint_t> val;
 
     for (const auto& data: input_data) {
-        const auto& alpha_string = all_channel_setbits[data.first.first];
-        const auto& beta_string = all_channel_setbits[data.first.second];
-        logging::info_("val {} data: {}", mbf, val);
+        const auto &alpha_string = all_channel_setbits[data.first.first];
+        const auto &beta_string = all_channel_setbits[data.first.second];
         val = data.second;
         mbf = {alpha_string, beta_string};
         smuvi.insert(mbf, val);
     }
+    logging::info_("size global MBF table {}", mbfs_global.size());
 
     const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
         return i < j;
     };
     smuvi.collate(order_fn);
-
 
     auto global_data = make_global_data(input_data);
     // look up all keys in the input

@@ -266,7 +266,6 @@ public:
     row_t& lookup_or_insert(const key_field_t& key) {
         lookup(key, m_lookup_row);
         if (m_lookup_row) return m_lookup_row;
-        logging::info_("could not find element");
         return insert(key);
     }
 
