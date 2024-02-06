@@ -5,7 +5,7 @@
 #include "SharedArray.h"
 
 SharedArrayBase::SharedArrayBase(uint_t element_size, uint_t irank_owner) :
-    m_element_size(element_size), m_irank_owner(irank_owner){
+m_element_size(element_size), m_irank_owner(irank_owner){
     auto owners = mpi::all_gathered(m_irank_owner);
     REQUIRE_EQ_ALL(owners[mpi::irank_world_shmem_root()], m_irank_owner,
         "all ranks in the shared memory region must recognise the same owner rank index");

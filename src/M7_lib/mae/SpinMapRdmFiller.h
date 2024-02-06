@@ -537,7 +537,6 @@ public:
                 return beta_channel1 < beta_channel2;
             };
             m_dets_contain_alpha.collate(order_fn);
-            if (mpi::irank() == 1) {mpi::barrier();};
         }
         {
             // same as for beta
