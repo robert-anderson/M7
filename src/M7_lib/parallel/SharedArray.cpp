@@ -13,9 +13,9 @@ SharedArrayBase::SharedArrayBase(uint_t element_size, uint_t irank_owner) :
 
 SharedArrayBase::SharedArrayBase(uint_t element_size) : SharedArrayBase(element_size, mpi::irank_world_shmem_root()){}
 
-void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, void **data) {
+void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, void **data, uint_t irank_owner) {
     const auto nbyte = nelement * element_size;
-    const auto local_nbyte = mpi::i_am_root(mpi::SharedMemory) ? nbyte : 0ul;
+    const auto local_nbyte = mpi::i_am(irank_owner) ? nbyte : 0ul;
     auto ierr = MPI_Win_allocate_shared(local_nbyte, element_size, MPI_INFO_NULL, mpi::g_shmem_comm, data, win);
     REQUIRE_EQ(ierr, MPI_SUCCESS, "MPI Shared memory error");
     DEBUG_ASSERT_TRUE(*data, "data pointer not set");
@@ -29,7 +29,7 @@ void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, 
     REQUIRE_EQ(uint_t(disp_unit), element_size, "incorrect window element size");
     REQUIRE_EQ(uint_t(alloc_size), nbyte, "incorrect total window size");
     MPI_Win_unlock_all(*win);
-    if (mpi::i_am_root(mpi::SharedMemory)) std::memset(*data, 0, nbyte);
+    if (mpi::i_am(irank_owner)) std::memset(*data, 0, nbyte);
     mpi::barrier(mpi::SharedMemory);
 }
 
@@ -44,8 +44,9 @@ void SharedArrayBase::free(MPI_Win *win, void **data) {
 void SharedArrayBase::alloc(uint_t nelement) {
     m_nelement = nelement;
     m_nbyte = nelement * m_element_size;
-    alloc(nelement, m_element_size, &m_win, reinterpret_cast<void**>(&m_data));
-    DEBUG_ASSERT_TRUE(m_data, "data pointer not set");
+    DEBUG_ASSERT_LT_ALL(m_irank_owner, mpi::nrank(), "owner rank index OoB");
+    alloc(nelement, m_element_size, &m_win, reinterpret_cast<void**>(&m_data), m_irank_owner);
+    DEBUG_ASSERT_TRUE_ALL(m_data, "data pointer not set");
 }
 
 void SharedArrayBase::free() {
@@ -63,7 +64,7 @@ SharedArrayBase &SharedArrayBase::operator=(const SharedArrayBase &other) {
         free();
         alloc(other.m_nelement);
     }
-    if (mpi::i_am_root(mpi::SharedMemory)) std::memcpy(m_data, other.m_data, m_nbyte);
+    if (mpi::i_am(m_irank_owner)) std::memcpy(m_data, other.m_data, m_nbyte);
     return *this;
 }
 
@@ -79,11 +80,11 @@ SharedArrayBase &SharedArrayBase::operator=(SharedArrayBase &&other) {
     return *this;
 }
 
-SharedArrayBase::SharedArrayBase(const SharedArrayBase &other) : SharedArrayBase(other.m_nelement, other.m_element_size) {
+SharedArrayBase::SharedArrayBase(const SharedArrayBase &other) : SharedArrayBase(other.m_nelement, other.m_element_size, other.m_irank_owner) {
     *this = other;
 }
 
-SharedArrayBase::SharedArrayBase(SharedArrayBase &&other) : SharedArrayBase(other.m_element_size) {
+SharedArrayBase::SharedArrayBase(SharedArrayBase &&other) : SharedArrayBase(0,other.m_element_size, other.m_irank_owner) {
     *this = std::move(other);
 }
 

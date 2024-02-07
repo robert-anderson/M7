@@ -21,7 +21,7 @@ public:
     const uint_t m_irank_owner;
 private:
 
-    static void alloc(uint_t nelement, uint_t element_size, MPI_Win* win, void** data);
+    static void alloc(uint_t nelement, uint_t element_size, MPI_Win* win, void** data, uint_t irank_owner);
 
     static void free(MPI_Win* win, void** data);
 
@@ -32,13 +32,12 @@ private:
 protected:
     MPI_Win m_win;
 
-    SharedArrayBase(uint_t element_size, uint_t irank_owner);
-
     // owner defaults to the root rank of the shared memory region
     explicit SharedArrayBase(uint_t element_size);
-public:
 
     SharedArrayBase(): SharedArrayBase(1ul){}
+public:
+    SharedArrayBase(uint_t element_size, uint_t irank_owner);
 
     SharedArrayBase(uint_t nelement, uint_t element_size, uint_t irank_owner);
 

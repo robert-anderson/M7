@@ -87,7 +87,8 @@ double Buffer::Window::get_expansion_factor() const {
 }
 
 Buffer::Buffer(str_t name, uint_t nwindow_max, Permissions permissions) :
-        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_permissions(permissions) {
+        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_permissions(permissions),
+        m_data_shared(1, permissions.irank_owner()) {
     if (!name.empty()) logging::info_(
             "Creating {} buffer \"{}\"",m_permissions.shared() ? "node-shared" : "rank-private", name);
     REQUIRE_TRUE(nwindow_max, "A buffer must allow at least one window");
