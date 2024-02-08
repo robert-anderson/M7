@@ -45,11 +45,11 @@ void Buffer::Window::set_end(uint_t irow) {
 }
 
 bool Buffer::Window::shared() const {
-    return m_buffer->m_permissions.shared();
+    return m_buffer->m_owner.is_shared();
 }
 
 bool Buffer::Window::i_can_modify() const {
-    return m_buffer->m_permissions.i_am_owner();
+    return m_buffer->m_owner.i_am_owner();
 }
 
 bool Buffer::Window::allocated() const {
@@ -86,10 +86,10 @@ double Buffer::Window::get_expansion_factor() const {
     return m_buffer->m_expansion_factor;
 }
 
-Buffer::Buffer(str_t name, uint_t nwindow_max, Permissions permissions) :
-        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_permissions(permissions) {
+Buffer::Buffer(str_t name, uint_t nwindow_max, Owner owner) :
+        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_owner(owner) {
     if (!name.empty()) logging::info_(
-            "Creating {} buffer \"{}\"",m_permissions.shared() ? "node-shared" : "rank-private", name);
+            "Creating {} buffer \"{}\"",m_owner.is_shared() ? "node-shared" : "rank-private", name);
     REQUIRE_TRUE(nwindow_max, "A buffer must allow at least one window");
     m_windows.reserve(m_nwindow_max);
 }
@@ -149,12 +149,12 @@ void Buffer::resize(uint_t new_size, double factor) {
     /*
      * handle the shared and private cases separately
      */
-    if (m_permissions.shared()) {
-        SharedArrayBase tmp(new_size, 1, m_permissions.irank_owner());
-        tmp_ptr = tmp.m_data;
+    if (m_owner.is_shared()) {
+        auto tmp = std::unique_ptr<SharedArrayBase>(new SharedArrayBase(new_size, 1, m_owner));
+        tmp_ptr = tmp->m_data;
         move_windows_fn(tmp_ptr);
         m_data_shared = std::move(tmp);
-        m_data = m_data_shared.m_data;
+        m_data = m_data_shared->m_data;
     }
     else {
         v_t<buf_t> tmp;

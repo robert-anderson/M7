@@ -165,7 +165,7 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     m_stats(m_format, nshift_space()),
     m_large_ci_set(m_opts.m_wavefunction.m_large_ci_set.m_enabled ?
         new mbf::table_t("large CI set", mbf::row_t({m_ham.m_basis, Walker::c_mbf_field_name})) : nullptr),
-    m_gathered_hist(MbfWeightRow(m_store.m_row), {}),
+    m_gathered_hist(MbfWeightRow(m_store.m_row), Owner::local()),
     m_stoch_round_mags(make_stoch_thresh_mags()),
     m_refs(opts.m_reference, *this, setup()),
     m_chkpt_files(opts.m_wavefunction.m_chkpt){

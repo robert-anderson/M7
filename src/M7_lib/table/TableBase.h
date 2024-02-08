@@ -312,7 +312,7 @@ public:
     uint_t bw_size() const;
 
     /**
-     * call the resize method on the buffer window and reflect the reallocation in m_nrow
+     * call the resize method on the buffer window.
      * @param nrow
      *  minimum number of rows in the new buffer.
      */

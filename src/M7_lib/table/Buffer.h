@@ -12,6 +12,8 @@
 #include <M7_lib/parallel/MPIWrapper.h>
 #include <M7_lib/parallel/SharedArray.h>
 
+#include "Owner.h"
+
 struct TableBase;
 
 
@@ -25,31 +27,6 @@ public:
      * number of bits in the system word
      */
     static constexpr uint_t c_nbit_word = CHAR_BIT * c_nbyte_word;
-
-    /**
-     * Relates to whether a Buffer's memory is shared or local. If shared, this class stores the world communicator rank
-     * index that is designated the owner (i.e. the rank with the sole right to modify the buffer)
-     */
-    class Permissions {
-        const uint_t m_i;
-        Permissions(bool i_rank_owner): m_i(i_rank_owner){}
-    public:
-        // value of ~0ul means the buffer is to be private, not shared memory
-        Permissions(): m_i(~0ul){}
-        Permissions(uint_t i_rank_owner): m_i(i_rank_owner){}
-
-        bool shared() const {
-            return m_i < mpi::nrank();
-        }
-
-        bool i_am_owner() const {
-            return !shared() || m_i == mpi::irank();
-        }
-
-        uint_t irank_owner() const {
-            return shared() ? m_i : mpi::irank();
-        }
-    };
 
     /**
      * class representing the portion of a buffer allotted to a single table
@@ -203,9 +180,10 @@ public:
     str_t m_name = "";
     const uint_t m_nwindow_max;
     /**
-     * determines whether the buffer is held in node-shared or rank-private memory
+     * determines whether the buffer is held in node-shared or rank-private memory and which rank has writing
+     * permissions
      */
-    const Permissions m_permissions;
+    const Owner m_owner;
 private:
     /**
      * begin pointer of the allocated memory
@@ -222,7 +200,7 @@ private:
     /**
      * in the case that the buffer is initialized with m_shared=true
      */
-    SharedArrayBase m_data_shared;
+    std::unique_ptr<SharedArrayBase> m_data_shared;
     /**
      * a buffer can provide the underlying data requirement of multiple Tables, whose allocations are specified by
      * instances of the Window class
@@ -230,9 +208,9 @@ private:
     v_t<Window *> m_windows;
 
 public:
-    Buffer(str_t name, uint_t nwindow_max, Permissions permissions = {});
+    Buffer(str_t name, uint_t nwindow_max, Owner owner = Owner::local());
 
-    Buffer(uint_t nwindow_max, Permissions permissions = {}) : Buffer("", nwindow_max, permissions){}
+    Buffer(uint_t nwindow_max, Owner owner = Owner::local()) : Buffer("", nwindow_max, owner){}
 
     uint_t size() const;
 
