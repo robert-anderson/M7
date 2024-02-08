@@ -16,13 +16,13 @@ public:
     typedef table_impl_t table_t;
     using TableBase::m_bw;
 
-    BufferedTable(str_t name, const table_t& table, Buffer::Permissions permissions): table_t(table),
-        m_buffer(std::move(name), 1ul, permissions) {
+    BufferedTable(str_t name, const table_t& table, Owner owner = Owner::local()):
+        table_t(table), m_buffer(std::move(name), 1ul, owner) {
         TableBase::set_buffer(&m_buffer);
         ASSERT(static_cast<const Row&>(Table<row_t>::m_row).m_table);
     }
 
-    BufferedTable(const table_t& table, Buffer::Permissions permissions): BufferedTable("", table, permissions){}
+    BufferedTable(const table_t& table, Owner owner = Owner::local()): BufferedTable("", table, owner){}
 
     BufferedTable& operator=(const BufferedTable<row_t, table_t> &other) {
         table_t::operator=(other);
@@ -34,7 +34,7 @@ public:
     }
 
     BufferedTable(const BufferedTable<row_t, table_t> &other) :
-        BufferedTable(other.m_buffer.m_name, other, other.m_buffer.m_permissions){
+        BufferedTable(other.m_buffer.m_name, other, other.m_buffer.m_owner){
         *this = other;
         table_t::m_row.restart();
     }
@@ -51,20 +51,20 @@ public:
 namespace buffered {
     template <typename row_t>
     struct Table : BufferedTable<row_t, ::Table<row_t>> {
-        Table(str_t name, const row_t &row, Buffer::Permissions permissions = {}):
-            BufferedTable<row_t, ::Table<row_t>>(name, ::Table<row_t>(row), permissions){}
-        Table(const row_t &row, Buffer::Permissions permissions = {}): Table("", row, permissions){}
+        Table(str_t name, const row_t &row, Owner owner = Owner::local()):
+            BufferedTable<row_t, ::Table<row_t>>(name, ::Table<row_t>(row), owner){}
+        Table(const row_t &row, Owner owner = Owner::local()): Table("", row, owner){}
     };
     template <typename row_t>
     struct MappedTable : BufferedTable<row_t, ::MappedTable<row_t>> {
-        MappedTable(str_t name, const row_t &row, MappedTableOptions opts, Buffer::Permissions permissions = {}):
-            BufferedTable<row_t, ::MappedTable<row_t>>(name, ::MappedTable<row_t>(row, opts), permissions){}
-        MappedTable(const row_t &row, Buffer::Permissions permissions = {}):
-            MappedTable("", row, permissions){}
-        MappedTable(str_t name, const row_t &row, Buffer::Permissions permissions = {}):
-            MappedTable(name, row, {}, permissions){}
-        MappedTable(const row_t &row, MappedTableOptions opts, Buffer::Permissions permissions = {}):
-            MappedTable("", row, opts, permissions){}
+        MappedTable(str_t name, const row_t &row, MappedTableOptions opts, Owner owner = Owner::local()):
+            BufferedTable<row_t, ::MappedTable<row_t>>(name, ::MappedTable<row_t>(row, opts), owner){}
+        MappedTable(const row_t &row, Owner owner = Owner::local()):
+            MappedTable("", row, owner){}
+        MappedTable(str_t name, const row_t &row, Owner owner = Owner::local()):
+            MappedTable(name, row, {}, owner){}
+        MappedTable(const row_t &row, MappedTableOptions opts, Owner owner = Owner::local()):
+            MappedTable("", row, opts, owner){}
     };
 }
 

@@ -9,6 +9,8 @@ target_sources(M7_lib
         GlobalAccumulation.h
         MappedTable.cpp
         MappedTable.h
+        Owner.cpp
+        Owner.h
         RowProtector.cpp
         RowProtector.h
         Table.h

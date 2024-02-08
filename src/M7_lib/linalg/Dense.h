@@ -134,7 +134,7 @@ namespace dense {
          *  true if this rank participates in globally-modifying operations of the buffer
          */
         bool i_can_globally_modify() const {
-            return m_buffer.m_permissions.i_am_owner();
+            return m_buffer.m_owner.i_am_owner();
         }
 
         void set_sizes(uint_t nrow, uint_t ncol);
@@ -190,7 +190,7 @@ namespace dense {
 
         void resize(uint_t nrow, uint_t ncol);
 
-        MatrixBase(uint_t nrow, uint_t ncol, uint_t element_size, Buffer::Permissions permissions = {});
+        MatrixBase(uint_t nrow, uint_t ncol, uint_t element_size, Owner owner = Owner::local());
 
         MatrixBase(const MatrixBase& other);
 
@@ -255,15 +255,15 @@ namespace dense {
             return cbegin_as<T>();
         }
 
-        Matrix(uint_t nrow, uint_t ncol, Buffer::Permissions permissions = {}):
-            MatrixBase(nrow, ncol, sizeof(T), permissions){}
+        Matrix(uint_t nrow, uint_t ncol, Owner owner = Owner::local()):
+            MatrixBase(nrow, ncol, sizeof(T), owner){}
 
         Matrix(uint_t nrow, const v_t<T>& rows): Matrix(nrow, rows.size()/nrow) {
             *this = rows;
         }
 
-        Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank, Buffer::Permissions permissions = {}):
-                Matrix(0, 0, permissions){
+        Matrix(const hdf5::NodeReader& nr, const str_t name, bool this_rank, Owner owner = Owner::local()):
+                Matrix(0, 0, owner){
             hdf5::DatasetLoader dl(nr, name, false, this_rank);
             const auto& shape = dl.m_format.m_h5_shape;
             const auto nrow = (shape.size() > 0) ? shape[0] : 1ul;
@@ -593,7 +593,7 @@ namespace dense {
         using MatrixBase::set_sizes;
         using MatrixBase::i_can_globally_modify;
     public:
-        explicit Vector(uint_t nelement, Buffer::Permissions permissions = {}): Matrix<T>(1, nelement, permissions){}
+        explicit Vector(uint_t nelement, Owner owner = Owner::local()): Matrix<T>(1, nelement, owner){}
 
         explicit Vector(const v_t<T>& v): Vector(v.size()) {
             Matrix<T>::operator=(v);
@@ -630,8 +630,8 @@ namespace dense {
             sort::inds(order, Matrix<T>::ctbegin(), MatrixBase::m_nelement, asc, absval);
         }
 
-        Vector(const hdf5::NodeReader& nr, const str_t name, bool this_rank, Buffer::Permissions permissions = {}):
-                Matrix<T>(nr, name, this_rank, permissions){
+        Vector(const hdf5::NodeReader& nr, const str_t name, bool this_rank, Owner owner = Owner::local()):
+                Matrix<T>(nr, name, this_rank, owner){
             // vectors must have one row
             if (m_nrow!=1) set_sizes(m_ncol, m_nrow);
             REQUIRE_EQ(m_nrow, 1ul, "read data has non-vector shape");

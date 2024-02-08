@@ -38,13 +38,13 @@ void dense::MatrixBase::resize(uint_t nrow, uint_t ncol) {
     if (m_bw.shared()) mpi::barrier(mpi::SharedMemory);
 }
 
-dense::MatrixBase::MatrixBase(uint_t nrow, uint_t ncol, uint_t element_size, Buffer::Permissions permissions) :
-        m_buffer("", 1, permissions), m_bw(&m_buffer), m_element_size(element_size) {
+dense::MatrixBase::MatrixBase(uint_t nrow, uint_t ncol, uint_t element_size, Owner owner) :
+        m_buffer("", 1, owner), m_bw(&m_buffer), m_element_size(element_size) {
     resize(nrow, ncol);
 }
 
 dense::MatrixBase::MatrixBase(const dense::MatrixBase &other) :
-    MatrixBase(other.m_nrow, other.m_ncol, other.m_element_size, other.m_buffer.m_permissions){
+    MatrixBase(other.m_nrow, other.m_ncol, other.m_element_size, other.m_buffer.m_owner){
     m_bw = other.m_bw;
 }
 

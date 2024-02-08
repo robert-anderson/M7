@@ -46,7 +46,7 @@ namespace shared_rows {
     public:
         Set(str_t name, const src_t& src, uintv_t irows = {}) :
                 DistribDependent(src), m_src(src),
-                m_name(name), m_gathered(name + " all gathered rows", m_src.m_row, Buffer::Permissions{}),
+                m_name(name), m_gathered(name + " all gathered rows", m_src.m_row, Owner::local()),
                 m_gather_send(name+" gather send", m_src.m_row),
                 m_src_row(m_src.m_row), m_send_row(m_gather_send.m_row) {
             for (auto irow: irows) add_(irow);

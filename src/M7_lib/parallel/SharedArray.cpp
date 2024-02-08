@@ -4,14 +4,15 @@
 
 #include "SharedArray.h"
 
-SharedArrayBase::SharedArrayBase(uint_t element_size, uint_t irank_owner) :
-    m_element_size(element_size), m_irank_owner(irank_owner){
+SharedArrayBase::SharedArrayBase(uint_t element_size, Owner owner) :
+    m_element_size(element_size), m_irank_owner(owner.irank_owner()){
+    REQUIRE_TRUE_ALL(owner.is_shared(), "Shared access ownership is required for SharedArray");
     auto owners = mpi::all_gathered(m_irank_owner);
     REQUIRE_EQ_ALL(owners[mpi::irank_world_shmem_root()], m_irank_owner,
         "all ranks in the shared memory region must recognise the same owner rank index");
 }
 
-SharedArrayBase::SharedArrayBase(uint_t element_size) : SharedArrayBase(element_size, mpi::irank_world_shmem_root()){}
+SharedArrayBase::SharedArrayBase(uint_t element_size) : SharedArrayBase(element_size, Owner::shared()){}
 
 void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, void **data, uint_t irank_owner) {
     const auto nbyte = nelement * element_size;
@@ -54,8 +55,8 @@ void SharedArrayBase::free() {
     free(&m_win, &data);
 }
 
-SharedArrayBase::SharedArrayBase(uint_t nelement, uint_t element_size, uint_t irank_owner) :
-    SharedArrayBase(element_size, irank_owner) {
+SharedArrayBase::SharedArrayBase(uint_t nelement, uint_t element_size, Owner owner) :
+    SharedArrayBase(element_size, owner) {
     alloc(nelement);
 }
 
@@ -80,11 +81,13 @@ SharedArrayBase &SharedArrayBase::operator=(SharedArrayBase &&other) {
     return *this;
 }
 
-SharedArrayBase::SharedArrayBase(const SharedArrayBase &other) : SharedArrayBase(other.m_nelement, other.m_element_size, other.m_irank_owner) {
+SharedArrayBase::SharedArrayBase(const SharedArrayBase &other) :
+    SharedArrayBase(other.m_nelement, other.m_element_size, Owner::shared(other.m_irank_owner)) {
     *this = other;
 }
 
-SharedArrayBase::SharedArrayBase(SharedArrayBase &&other) : SharedArrayBase(0,other.m_element_size, other.m_irank_owner) {
+SharedArrayBase::SharedArrayBase(SharedArrayBase &&other) :
+    SharedArrayBase(0,other.m_element_size, Owner::shared(other.m_irank_owner)) {
     *this = std::move(other);
 }
 

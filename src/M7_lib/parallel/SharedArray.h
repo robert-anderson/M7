@@ -8,6 +8,7 @@
 #include <cstddef>
 #include "MPIWrapper.h"
 #include "MPIAssert.h"
+#include "M7_lib/table/Owner.h"
 
 class SharedArrayBase {
 public:
@@ -37,9 +38,9 @@ protected:
 
     SharedArrayBase(): SharedArrayBase(1ul){}
 public:
-    SharedArrayBase(uint_t element_size, uint_t irank_owner);
+    SharedArrayBase(uint_t element_size, Owner owner);
 
-    SharedArrayBase(uint_t nelement, uint_t element_size, uint_t irank_owner);
+    SharedArrayBase(uint_t nelement, uint_t element_size, Owner owner);
 
     SharedArrayBase& operator=(const SharedArrayBase& other);
 
@@ -53,7 +54,7 @@ public:
 
 protected:
     void set_(uint_t i, uint_t n, const void* src) {
-        DEBUG_ASSERT_TRUE(mpi::i_am_root(mpi::SharedMemory), "element-modifying access should only take place on the root rank");
+        DEBUG_ASSERT_TRUE(mpi::i_am(m_irank_owner), "element-modifying access should only take place on the owner rank");
         DEBUG_ASSERT_LT(i, m_nelement, "begin OOB");
         DEBUG_ASSERT_LE(i+n, m_nelement, "end OOB");
         std::memcpy(m_data+(i*m_element_size), src, n*m_element_size);
@@ -88,8 +89,8 @@ protected:
 template<typename T>
 class SharedArray : public SharedArrayBase {
 public:
-    SharedArray(uint_t size, uint_t irank_owner) : SharedArrayBase(size, sizeof(T), irank_owner) {}
-    SharedArray(uint_t size) : SharedArray(size, mpi::irank_world_shmem_root()){}
+    SharedArray(uint_t size, Owner owner) : SharedArrayBase(size, sizeof(T), owner) {}
+    SharedArray(uint_t size) : SharedArray(size, Owner::shared()){}
 
     uint_t size() const {
         return m_nelement;
@@ -131,11 +132,10 @@ template<typename T>
 class SharedScalar : protected SharedArray<T> {
 
 public:
-    SharedScalar(uint_t irank_owner) : SharedArray<T>(1, irank_owner){}
-    SharedScalar() : SharedScalar(mpi::irank_world_shmem_root()){}
+    explicit SharedScalar(Owner onwer = Owner::shared()) : SharedArray<T>(1, onwer){}
 
-    explicit SharedScalar(uint_t irank_owner, const T& v) : SharedScalar(irank_owner) {
-        if (mpi::i_am_root(mpi::SharedMemory)) set_(v);
+    SharedScalar(Owner owner, const T& v) : SharedScalar(owner) {
+        if (owner.i_am_owner()) set_(v);
         mpi::barrier(mpi::SharedMemory);
     }
 

@@ -29,7 +29,7 @@ TEST(BufferedTable, Empty) {
 
 TEST(BufferedTable, NodeShared) {
     typedef SingleFieldRow<field::Number<hash::digest_t>> row_t;
-    buffered::Table<row_t> table(row_t{}, Buffer::Permissions(mpi::irank_world_shmem_root()));
+    buffered::Table<row_t> table(row_t{}, Owner::shared());
     const uint_t nrow = 23;
     table.resize(nrow);
     for (uint_t irow=0ul; irow<nrow; ++irow) {

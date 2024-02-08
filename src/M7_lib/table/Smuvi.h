@@ -110,7 +110,6 @@
 
 template<typename key_t, typename value_t>
 class Smuvi {
-
     /**
      * Row type for the inserter tables
      */
@@ -183,7 +182,7 @@ public:
         // iterate over the rank indices in this shmem realm and create an accessor table for each one
         for (auto& irank_world: mpi::g_iranks_world_in_shmem_realms[ishmem]) {
             m_irank_world_to_iaccess_table[irank_world] = m_access_tables.size();
-            m_access_tables.emplace_back(AccessRow(key), Buffer::Permissions(irank_world));
+            m_access_tables.emplace_back(AccessRow(key), Owner::shared(irank_world));
             m_access_foreach_rows.emplace_back(m_access_tables.back().m_row);
         }
         /*
@@ -201,7 +200,7 @@ public:
              * create a new shared memory array of indices with sufficient elements to store all the entries associated
              * with all the keys sent to irank_world
              */
-            m_values_tables.emplace_back(ValueRow(value), Buffer::Permissions(irank_world));
+            m_values_tables.emplace_back(ValueRow(value), Owner::shared(irank_world));
             DEBUG_ASSERT_FALSE(m_values_tables.back().m_row.is_deref_valid(), "rows should be pointing to null");
             m_values_lookup_rows.emplace_back(m_values_tables.back().m_row);
             m_values_foreach_rows_1.emplace_back(m_values_tables.back().m_row);
@@ -306,7 +305,8 @@ public:
         functor::assert_prototype<void(const value_t&)>(fn);
         const auto itable = this->itable(key);
         const auto& value_row = m_values_foreach_rows_1[itable];
-        access(key, value_row).foreach(fn);
+        auto access_result = access(key, value_row);
+        access_result.foreach(fn);
     }
 
     /**
@@ -437,7 +437,6 @@ public:
          * otherwise a deadlock could arise
          */
         {
-            // TODO: verified that rank 0 gets 60 and rank 1 gets 40 rows
             auto sizes = mpi::all_gathered(m_inserter.recv().nrow_in_use());
             auto size_it = sizes.cbegin();
             for (auto& table : m_access_tables) {
