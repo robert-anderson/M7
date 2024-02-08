@@ -444,19 +444,12 @@ public:
             }
         }
 
-        // logging::info_("is accessor protected? {}", accessor.is_protected());
-        // logging::info_("is accessor node shared? {}", accessor.m_bw.shared());
-        // REQUIRE_TRUE(accessor.i_can_modify(), "rank must be able to modify shared memory table");
-
-        // logging::info_("rank {} recv_row size {}", mpi::irank(), recv_row.m_size);
         for (recv_row.restart(); recv_row; ++recv_row) {
             /*
              * lookup the received key in the accessor table, or insert it if this is the first instance
              */
             // TODO: the problem is already here, it cannot find any of the keys on rank 1 and makes 40 new rows;
             auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);  //  inserting new rows fails
-            accessor.remap_if_due();
-            // auto& accessor_row2 = accessor.lookup_or_insert(recv_row.m_key);
             /*
              * if there aren't enough value index vector sets for the current size of the accessor, allocate more
              */
@@ -469,6 +462,7 @@ public:
              */
             value_index_sets[accessor_row.index()].insert(recv_row.index());
         }
+        accessor.remap_if_due();
 
         /*
          * a vector storing the number of entry_sets associated with each MPI rank
