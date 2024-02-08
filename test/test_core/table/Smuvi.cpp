@@ -77,11 +77,17 @@ TEST(Smuvi, Intersection) {
     };
     smuvi1.collate(order_fn);
     smuvi2.collate(order_fn);
-
+    /*
+     * Each element is a pair with:
+     *  first element the pair of keys:
+     *   first element the key to access smuvi1
+     *   second element the key to access smuvi2
+     *  second element the number of items in the intersection of the items between the two smuvi item vectors
+     */
     const v_t<std::pair<std::pair<uintv_t, uintv_t>, uint_t>> smuvi_keypairs = {
             {{{1,4,5,6,7,8}, {1,2,4,6,7,8}}, 0},
             {{{1,4,5,6,7,8}, {1,2,4,5,7,8}}, 0},
-            {{{1,4,5,6,7,8}, {0,1,4,5,7,8}}, 1}
+            {{{1,4,5,6,7,8}, {0,1,4,5,7,8}}, 1} // {1,2,4,5,7,8}
     };
     buffered::FrmOnvSpinChannel tmp_key1(nsite);
     buffered::FrmOnvSpinChannel tmp_key2(nsite);
@@ -90,15 +96,10 @@ TEST(Smuvi, Intersection) {
         tmp_key1 = key_pair.first;
         tmp_key2 = key_pair.second;
         uint_t counter = 0ul;
-        smuvi1.foreach_value(tmp_key1, [&](const field::FrmOnvSpinChannel& val){std::cout << val << " ";});
-        std::cout << std::endl;
-        smuvi2.foreach_value(tmp_key2, [&](const field::FrmOnvSpinChannel& val){std::cout << val << " ";});
-        std::cout << std::endl;
         smuvi1.foreach_common_value(tmp_key1, smuvi2, tmp_key2,
-                                    [&](const field::FrmOnvSpinChannel &common_string){counter += 1ul;}, order_fn);
+            [&](const field::FrmOnvSpinChannel &common_string){++counter;}, order_fn);
         ASSERT_EQ(counter, pair.second);
     }
-
 }
 
 TEST(Smuvi, BitsetToBitset) {
@@ -265,7 +266,6 @@ TEST(Smuvi, Comms) {
         return i < j;
     };
     smuvi.collate(order_fn);
-
 
     auto global_data = make_global_data(input_data);
     // look up all keys in the input
