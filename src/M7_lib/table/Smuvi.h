@@ -440,20 +440,21 @@ public:
             auto sizes = mpi::all_gathered(m_inserter.recv().nrow_in_use());
             auto size_it = sizes.cbegin();
             for (auto& table : m_access_tables) {
-                table.resize(*size_it++);
+                table.resize(*size_it);
+                REQUIRE_EQ(table.capacity(), *size_it, "Table should have been resized");
+                ++size_it;
             }
         }
+        value_index_sets.reserve(accessor.capacity());
 
         for (recv_row.restart(); recv_row; ++recv_row) {
             /*
              * lookup the received key in the accessor table, or insert it if this is the first instance
              */
-            // TODO: the problem is already here, it cannot find any of the keys on rank 1 and makes 40 new rows;
-            auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);  //  inserting new rows fails
+            auto& accessor_row = accessor.lookup_or_insert(recv_row.m_key);
             /*
              * if there aren't enough value index vector sets for the current size of the accessor, allocate more
              */
-            logging::info_("rows in use {}", accessor.nrow_in_use());
             if (value_index_sets.size() < accessor.nrow_in_use()) {
                 value_index_sets.resize(accessor.nrow_in_use(), std::set<uint_t, CompFn>(CompFn(m_inserter, order_fn)));
             }

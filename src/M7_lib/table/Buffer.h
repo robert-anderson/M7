@@ -200,7 +200,7 @@ private:
     /**
      * in the case that the buffer is initialized with m_shared=true
      */
-    SharedArrayBase m_data_shared;
+    std::unique_ptr<SharedArrayBase> m_data_shared;
     /**
      * a buffer can provide the underlying data requirement of multiple Tables, whose allocations are specified by
      * instances of the Window class
