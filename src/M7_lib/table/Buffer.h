@@ -234,6 +234,8 @@ public:
 
     Buffer& operator=(const Buffer& other);
 
+    Buffer& operator=(buf_t value);
+
     uint_t size() const;
 
     uint_t window_size() const;

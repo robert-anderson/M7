@@ -33,6 +33,11 @@ Buffer::Window &Buffer::Window::operator=(const Buffer::Window &other) {
     return *this;
 }
 
+Buffer &Buffer::operator=(buf_t value) {
+    if (m_owner.i_am_owner()) std::fill(m_data, m_data+m_size, value);
+    return *this;
+}
+
 bool Buffer::Window::operator==(const Buffer::Window& other) const {
     if (m_size != other.m_size) return false;
     if (size_in_use() != other.size_in_use()) return false;
