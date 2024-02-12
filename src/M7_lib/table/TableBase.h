@@ -311,6 +311,8 @@ public:
      */
     uint_t bw_size() const;
 
+    Owner owner() const;
+
     /**
      * call the resize method on the buffer window.
      * @param nrow
@@ -446,6 +448,12 @@ public:
      *  true is m_free_records member is consistent with m_is_free_record
      */
     bool freed_rows_consistent() const;
+
+    void sync_sizes() {
+        auto size = mpi::all_max(nrow_in_use());
+        resize(size);
+        if (nrow_in_use() != size) push_back(nrow_in_use() - size);
+    };
 
     /**
      * "Location" class which describes the location of a record in a distributed table i.e. by a local record index and

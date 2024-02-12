@@ -87,6 +87,10 @@ uint_t TableBase::bw_size() const {
     return m_bw.m_size;
 }
 
+Owner TableBase::owner() const {
+    return m_bw.owner();
+}
+
 void TableBase::resize(uint_t nrec, double factor) {
     REQUIRE_TRUE(nrec, "new size should be non-zero");
     REQUIRE_TRUE(row_size(), "cannot resize, row size is zero");
