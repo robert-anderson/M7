@@ -17,6 +17,26 @@
 struct TableBase;
 
 
+/**
+ * Basic container for local or shared memory allocations
+ */
+struct BufferContainer {
+
+    virtual ~BufferContainer() = default;
+};
+
+struct LocalBufferContainer : BufferContainer {
+    v_t<buf_t> m_data;
+};
+
+struct SharedBufferContainer : BufferContainer {
+    SharedArrayBase m_data;
+    SharedBufferContainer(uint_t nelement, uint_t element_size, Owner owner): m_data(nelement, element_size, owner){}
+};
+
+/**
+ * Basic container for local or shared memory allocations which support regions called "windows"
+ */
 class Buffer {
 public:
     /**
@@ -108,6 +128,8 @@ public:
          */
         bool shared() const;
 
+        Owner owner() const;
+
         /**
          * @return
          *  true if the memory is not node-shared, or if this is MPI rank is the owner of the shared allocation
@@ -194,13 +216,9 @@ private:
      */
     uint_t m_size = 0ul;
     /**
-     * in the case that the buffer is initialized with m_shared=false
+     * Raw data storage that can be either MPI rank local or shared
      */
-    v_t<buf_t> m_data_priv;
-    /**
-     * in the case that the buffer is initialized with m_shared=true
-     */
-    std::unique_ptr<SharedArrayBase> m_data_shared;
+    std::unique_ptr<BufferContainer> m_container;
     /**
      * a buffer can provide the underlying data requirement of multiple Tables, whose allocations are specified by
      * instances of the Window class
@@ -211,6 +229,12 @@ public:
     Buffer(str_t name, uint_t nwindow_max, Owner owner = Owner::local());
 
     Buffer(uint_t nwindow_max, Owner owner = Owner::local()) : Buffer("", nwindow_max, owner){}
+
+    Buffer(const Buffer& other);
+
+    Buffer& operator=(const Buffer& other);
+
+    Buffer& operator=(buf_t value);
 
     uint_t size() const;
 

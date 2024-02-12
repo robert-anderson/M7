@@ -33,6 +33,11 @@ Buffer::Window &Buffer::Window::operator=(const Buffer::Window &other) {
     return *this;
 }
 
+Buffer &Buffer::operator=(buf_t value) {
+    if (m_owner.i_am_owner()) std::fill(m_data, m_data+m_size, value);
+    return *this;
+}
+
 bool Buffer::Window::operator==(const Buffer::Window& other) const {
     if (m_size != other.m_size) return false;
     if (size_in_use() != other.size_in_use()) return false;
@@ -45,11 +50,15 @@ void Buffer::Window::set_end(uint_t irow) {
 }
 
 bool Buffer::Window::shared() const {
-    return m_buffer->m_owner.is_shared();
+    return owner().is_shared();
+}
+
+Owner Buffer::Window::owner() const {
+    return m_buffer->m_owner;
 }
 
 bool Buffer::Window::i_can_modify() const {
-    return m_buffer->m_owner.i_am_owner();
+    return owner().i_am_owner();
 }
 
 bool Buffer::Window::allocated() const {
@@ -93,6 +102,19 @@ Buffer::Buffer(str_t name, uint_t nwindow_max, Owner owner) :
     REQUIRE_TRUE(nwindow_max, "A buffer must allow at least one window");
     m_windows.reserve(m_nwindow_max);
 }
+
+Buffer::Buffer(const Buffer& other) : Buffer(other.m_name, other.m_nwindow_max, other.m_owner){
+    *this = other;
+}
+
+Buffer& Buffer::operator=(const Buffer& other) {
+    BufferContainer* ptr;
+    ptr = dynamic_cast<LocalBufferContainer*>(this->m_container.get());
+    resize(other.size());
+    if (m_owner.i_am_owner()) std::memcpy(m_data, other.m_data, other.size());
+    return *this;
+}
+
 
 uint_t Buffer::size() const {
     return m_size;
@@ -150,26 +172,26 @@ void Buffer::resize(uint_t new_size, double factor) {
      * handle the shared and private cases separately
      */
     if (m_owner.is_shared()) {
-        auto tmp = std::unique_ptr<SharedArrayBase>(new SharedArrayBase(new_size, 1, m_owner));
-        tmp_ptr = tmp->m_data;
+        auto new_container = new SharedBufferContainer(new_size, 1, m_owner);
+        tmp_ptr = new_container->m_data.m_data;
         move_windows_fn(tmp_ptr);
-        m_data_shared = std::move(tmp);
-        m_data = m_data_shared->m_data;
+        m_data = tmp_ptr;
+        m_container = std::unique_ptr<BufferContainer>(new_container);
     }
     else {
-        v_t<buf_t> tmp;
+        LocalBufferContainer new_container;
         try {
-            tmp.resize(new_size, 0);
+            new_container.m_data.resize(new_size, 0);
         }
         catch (const std::bad_alloc &e) {
             logging::error_("bad allocation");
             ABORT(logging::format("could not allocate sufficient memory to resize buffer \"{}\"", m_name));
         }
-        tmp_ptr = tmp.data();
+        DEBUG_ASSERT_FALSE(new_container.m_data.empty(), "new data buffer should be non-empty");
+        tmp_ptr = new_container.m_data.data();
         move_windows_fn(tmp_ptr);
-        m_data_priv = std::move(tmp);
-        m_data = m_data_priv.data();
-        DEBUG_ASSERT_FALSE(m_data_priv.empty(), "new data buffer should be non-empty");
+        m_data = tmp_ptr;
+        m_container = std::unique_ptr<BufferContainer>(new LocalBufferContainer(std::move(new_container)));
     }
     DEBUG_ASSERT_TRUE(m_data, "new data pointer should be non-null");
     m_size = new_size;
