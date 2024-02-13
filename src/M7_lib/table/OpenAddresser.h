@@ -6,7 +6,7 @@
 #define M7_OPENADDRESSER_H
 
 #include "M7_lib/util/Hash.h"
-#include "M7_lib/table/TableBase.h"
+#include "M7_lib/table/BufferedTable.h"
 
 struct OpenAddresser {
     /**
@@ -32,12 +32,12 @@ struct OpenAddresser {
     /**
      * Shared or local memory storage of the memory
      */
-    Buffer m_addrs;
-    Buffer::Window m_addrs_window;
+    using row_t = SingleFieldRow<field::Number<uint_t>>;
+    buffered::Table<row_t> m_addrs;
     /**
      * number of inserted addresses
      */
-    uint_t m_naddr_inserted;
+    uint_t m_naddr_inserted = 0;
 
     OpenAddresser(const TableBase& table, size_t key_offset, size_t key_size, double fmax = 0.3);
 
@@ -53,6 +53,14 @@ private:
     bool eq(uint_t irow, const buf_t* key) const;
 
     bool eq(uint_t irow, uint_t j_row) const;
+    /**
+     * Find the index of the key in the m_addrs table
+     * @param key
+     *  key to lookup in m_addrs
+     * @return
+     *  Row index in m_addrs corresponding to key if found, else ~0ul
+     */
+    size_t lookup_iaddr(const buf_t* key);
 
 public:
     /**
@@ -72,7 +80,6 @@ public:
      *  true if the insertion was successful i.e. a new element was written to m_addrs, false if the key already exists
      */
     bool insert(uint_t irow);
-
     /**
      * Find the key in the map and return its position within m_table.
      * @param key
@@ -81,6 +88,21 @@ public:
      *  Row index corresponding to key if found, else ~0ul
      */
     size_t lookup(const buf_t* key);
+    /**
+     * Lazily delete the given key by assigning a tombstone value
+     * @param key
+     *  pointer to beginning of key to be inserted
+     * @return
+     *  true if the deletion was successful, false if the key does not exist
+     */
+    bool erase(const buf_t* key);
+    /**
+     * @param irow
+     *  Row index to erase
+     * @return
+     *  true if the deletion was successful, false if the key does not exist
+     */
+    bool erase(uint_t irow);
     /**
      * Set the size of the map correctly given the capacity of the table and the max load factor
      */
