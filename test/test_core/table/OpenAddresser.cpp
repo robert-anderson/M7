@@ -10,7 +10,7 @@ TEST(OpenAddresser, LocalInsertAndLookup) {
     const uint_t nchar = 12;
     using row_t = SingleFieldRow<StringField>;
     buffered::Table<row_t> table({nchar}, Owner::local());
-    const double f_max = 0.7;
+    const double f_max = 0.3;
     OpenAddresser oa(table, 0, table.m_row.m_field.m_size, f_max);
     strv_t keys = {
         "lorem_______", "ipsum_______", "dolor_______", "sit_________", "amet,_______", "consectetur_",
@@ -37,9 +37,9 @@ TEST(OpenAddresser, LocalInsertAndLookup) {
                 // not already inserted
                 // scan to a free slot in the table
                 for (row.restart(); row && !row.m_field.is_clear(); ++row){}
-                ASSERT(row.is_deref_valid());
+                ASSERT_TRUE(row.is_deref_valid());
                 row.m_field = keys[i_key];
-                ASSERT(oa.insert(row.index()));
+                ASSERT_TRUE(oa.insert(row.index()));
                 current_entries[i_key] = row.index();
             }
             else {
