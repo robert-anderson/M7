@@ -26,7 +26,7 @@ struct OpenAddresser {
      * The load factor of an open addressing hash map is:
      *  f = (number of slots for keys) / (number of inserted keys)
      * So the maximum such factor is:
-     *  fmax = (number of slots for keys) / (number of rows allocated in the mapped table)
+     *  fmax = (number of slots for keys) / (number of rows allocated in the table)
      */
     const double m_fmax;
     /**
@@ -60,7 +60,7 @@ private:
      * @return
      *  Row index in m_addrs corresponding to key if found, else ~0ul
      */
-    size_t lookup_iaddr(const buf_t* key);
+    size_t lookup_iaddr(const buf_t* key) const;
 
 public:
     /**
@@ -87,7 +87,7 @@ public:
      * @return
      *  Row index corresponding to key if found, else ~0ul
      */
-    size_t lookup(const buf_t* key);
+    size_t lookup(const buf_t* key) const;
     /**
      * Lazily delete the given key by assigning a tombstone value
      * @param key
@@ -111,6 +111,10 @@ public:
      * resize the map and reenter all in-use rows of m_table
      */
     void remap();
+    /**
+     * set all addrs to the unused value ~0ul
+     */
+    void clear();
 };
 
 

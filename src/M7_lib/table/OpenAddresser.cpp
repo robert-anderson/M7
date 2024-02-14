@@ -42,7 +42,8 @@ bool OpenAddresser::eq(uint_t irow, uint_t j_row) const {
     return eq(irow, get_key(j_row));
 }
 
-size_t OpenAddresser::lookup_iaddr(const buf_t *key) {
+size_t OpenAddresser::lookup_iaddr(const buf_t *key) const {
+    if (m_addrs.empty()) return ~0ul;
     const auto hash = hash::fnv(key, m_key_size) % naddr();
     auto lookup_fn = [&](size_t iaddr) -> int {
         const auto addr = get_addr(iaddr);
@@ -98,7 +99,7 @@ bool OpenAddresser::insert(uint_t irow) {
     return insert(irow, get_key(irow));
 }
 
-size_t OpenAddresser::lookup(const buf_t *key) {
+size_t OpenAddresser::lookup(const buf_t *key) const {
     const auto hash = hash::fnv(key, m_key_size) % naddr();
     auto iaddr = lookup_iaddr(key);
     return iaddr == ~0ul ? ~0ul : get_addr(iaddr);
@@ -138,4 +139,9 @@ void OpenAddresser::remap() {
     }
     DEBUG_ASSERT_EQ(m_naddr_inserted, m_table.nrow_in_use(),
                     "All rows in use in the Table should have an associated entry in the hashmap");
+}
+
+void OpenAddresser::clear() {
+    std::fill(m_addrs.m_bw.begin(), m_addrs.m_bw.begin() + m_addrs.m_bw.m_size, 0xff);
+    m_naddr_inserted = 0;
 }

@@ -9,6 +9,7 @@ target_sources(unittest
         DynamicRowSet.cpp
         GlobalAccumulation.cpp
         MappedTable.cpp
+        OpenAddressedTable.cpp
         OpenAddresser.cpp
         Smuvi.cpp
         Table.cpp

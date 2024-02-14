@@ -135,6 +135,10 @@ public:
         return reinterpret_cast<const T*>(cend());
     }
 
+    uint_t row_offset() const {
+        return m_row_offset;
+    }
+
     const Row *row() const;
 
     Row *row_of_copy() const;

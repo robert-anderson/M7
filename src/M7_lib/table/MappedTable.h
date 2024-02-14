@@ -137,6 +137,10 @@ private:
      * attempt to find the element identified by key in the hash map.
      * @param key
      *  key to lookup
+     * @param buckets
+     *  linked lists in which to resolve hash collisions
+     * @param row
+     *  Row which is pointed to the found row if it exists else it is set to a null value
      * @return
      *  result object
      */
@@ -177,8 +181,6 @@ public:
 private:
     /**
      * same as the above function, but does not affect hash table statistics - useful for testing and ASSERTs
-     * @param key
-     *  key to lookup
      */
     Lookup uncounted_lookup(const key_field_t &key, const v_t<std::forward_list<uint_t>>& buckets, const row_t& row) {
         const auto nlookup_total = m_nlookup_total;
