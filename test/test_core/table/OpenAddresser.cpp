@@ -6,6 +6,10 @@
 #include "M7_lib/table/BufferedTable.h"
 #include "M7_lib/table/OpenAddresser.h"
 
+const buf_t* get_key(const strv_t& keys, uint_t i){
+    return reinterpret_cast<const buf_t*>(keys[i].data());
+}
+
 TEST(OpenAddresser, LocalInsertAndLookup) {
     const uint_t nchar = 12;
     using row_t = SingleFieldRow<StringField>;
@@ -44,7 +48,7 @@ TEST(OpenAddresser, LocalInsertAndLookup) {
             }
             else {
                 // already inserted
-                const auto ind = oa.lookup(reinterpret_cast<const buf_t*>(keys[i_key].data()));
+                const auto ind = oa.lookup(get_key(keys, i_key));
                 ASSERT_EQ(ind, current_entries[i_key]);
             }
         }
@@ -52,7 +56,7 @@ TEST(OpenAddresser, LocalInsertAndLookup) {
             // erasure
             if (current_entries[i_key] != ~0ul) {
                 // already inserted: can be erased
-                const auto ind = oa.lookup(reinterpret_cast<const buf_t*>(keys[i_key].data()));
+                const auto ind = oa.lookup(get_key(keys, i_key));
                 ASSERT_NE(ind, ~0ul);
                 ASSERT_EQ(ind, current_entries[i_key]);
                 oa.erase(ind);
@@ -62,11 +66,8 @@ TEST(OpenAddresser, LocalInsertAndLookup) {
             }
         }
     }
+    for (uint_t i = 0; i < keys.size(); ++i) ASSERT_EQ(oa.lookup(get_key(keys, i)), current_entries[i]);
 
-    for (uint_t i = 0; i < keys.size(); ++i) {
-        auto key = reinterpret_cast<const buf_t*>(keys[i].data());
-        ASSERT_EQ(oa.lookup(key), current_entries[i]);
-    }
     str_t key = "not_real_key";
     ASSERT_EQ(oa.lookup(reinterpret_cast<const buf_t*>(key.data())), ~0ul);
 }
@@ -110,7 +111,7 @@ TEST(OpenAddresser, SharedInsertAndLookup) {
                 }
                 else {
                     // already inserted
-                    const auto ind = oa.lookup(reinterpret_cast<const buf_t*>(keys[i_key].data()));
+                    const auto ind = oa.lookup(get_key(keys, i_key));
                     ASSERT_EQ(ind, current_entries[i_key]);
                 }
             }
@@ -118,7 +119,7 @@ TEST(OpenAddresser, SharedInsertAndLookup) {
                 // erasure
                 if (current_entries[i_key] != ~0ul) {
                     // already inserted: can be erased
-                    const auto ind = oa.lookup(reinterpret_cast<const buf_t*>(keys[i_key].data()));
+                    const auto ind = oa.lookup(get_key(keys, i_key));
                     ASSERT_NE(ind, ~0ul);
                     ASSERT_EQ(ind, current_entries[i_key]);
                     oa.erase(ind);
@@ -131,10 +132,7 @@ TEST(OpenAddresser, SharedInsertAndLookup) {
     }
     mpi::bcast(current_entries, 0);
 
-    for (uint_t i = 0; i < keys.size(); ++i) {
-        auto key = reinterpret_cast<const buf_t*>(keys[i].data());
-        ASSERT_EQ(oa.lookup(key), current_entries[i]);
-    }
+    for (uint_t i = 0; i < keys.size(); ++i) ASSERT_EQ(oa.lookup(get_key(keys, i)), current_entries[i]);
     str_t key = "not_real_key";
     ASSERT_EQ(oa.lookup(reinterpret_cast<const buf_t*>(key.data())), ~0ul);
 }
