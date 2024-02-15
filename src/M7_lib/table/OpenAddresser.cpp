@@ -69,7 +69,6 @@ size_t OpenAddresser::lookup_iaddr(const buf_t *key) const {
 bool OpenAddresser::insert(uint_t irow, const buf_t *key) {
     DEBUG_ASSERT_TRUE(naddr(), "Must have a non-zero number of addresses allocated");
     const auto hash = hash::fnv(key, m_key_size) % naddr();
-    ++m_naddr_inserted;
 
     auto insert_fn = [&](size_t iaddr) -> int {
         const auto addr = get_addr(iaddr);
@@ -137,11 +136,8 @@ void OpenAddresser::remap() {
         if (m_table.is_freed(irow)) continue;
         insert(irow);
     }
-    DEBUG_ASSERT_EQ(m_naddr_inserted, m_table.nrow_in_use(),
-                    "All rows in use in the Table should have an associated entry in the hashmap");
 }
 
 void OpenAddresser::clear() {
     std::fill(m_addrs.m_bw.begin(), m_addrs.m_bw.begin() + m_addrs.m_bw.m_size, 0xff);
-    m_naddr_inserted = 0;
 }

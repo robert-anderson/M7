@@ -34,10 +34,6 @@ struct OpenAddresser {
      */
     using row_t = SingleFieldRow<field::Number<uint_t>>;
     buffered::Table<row_t> m_addrs;
-    /**
-     * number of inserted addresses
-     */
-    uint_t m_naddr_inserted = 0;
 
     OpenAddresser(const TableBase& table, size_t key_offset, size_t key_size, double fmax = 0.3);
 

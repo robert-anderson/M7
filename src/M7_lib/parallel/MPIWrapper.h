@@ -550,9 +550,9 @@ namespace mpi {
      * BCAST
      */
     template<typename T>
-    static bool bcast(T *data, uint_t ndata = 1, uint_t iroot = 0) {
-        return MPI_Bcast(reinterpret_cast<void *>(data), snrw(ndata), type<T>(), snrw(iroot), MPI_COMM_WORLD) ==
-               MPI_SUCCESS;
+    static bool bcast(T *data, uint_t ndata=1, uint_t iroot=0, Realm realm=World) {
+        auto ptr = reinterpret_cast<void *>(data);
+        return MPI_Bcast(ptr, snrw(ndata), type<T>(), snrw(iroot), *communicator(realm)) == MPI_SUCCESS;
     }
 
     template<typename T>

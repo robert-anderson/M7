@@ -33,7 +33,7 @@ namespace open_addressed_table_test {
 
 TEST(OpenAddressedTable, Empty) {
     using namespace open_addressed_table_test;
-    key_only_table_t table("test", {}, 0.5);
+    key_only_table_t table("test", {}, 0.5, Owner::local());
     buffered::Number<uint_t> key;
     key = 100;
     ASSERT_FALSE(table.lookup(key));
@@ -41,7 +41,7 @@ TEST(OpenAddressedTable, Empty) {
 
 TEST(OpenAddressedTable, InsertLocal) {
     using namespace open_addressed_table_test;
-    key_only_table_t table("test", {}, 0.5);
+    key_only_table_t table("test", {}, 0.5, Owner::local());
     table.set_expansion_factor(0.5);
     buffered::Number<uint_t> key;
     auto nums = hash::unique_in_range(0, 100, 23, 340);
@@ -55,6 +55,49 @@ TEST(OpenAddressedTable, InsertLocal) {
     }
 
     for (const auto& num: nums) {
+        key = num;
+        ASSERT_TRUE(table.lookup(key));
+    }
+}
+
+TEST(OpenAddressedTable, InsertShared) {
+    using namespace open_addressed_table_test;
+    key_only_table_t table("test", {}, 0.5, Owner::shared());
+    table.set_expansion_factor(0.5);
+    buffered::Number<uint_t> key;
+    auto nums = hash::unique_in_range(0, 100, 23, 340);
+    // resize to the final number of keys since resizes are synchronizing operations
+    table.resize(nums.size());
+    if (table.i_can_modify()) {
+        for (const auto &num: nums) {
+            key = num;
+            ASSERT_FALSE(table.lookup(key));
+            table.insert(key);
+            ASSERT_TRUE(table.lookup(key));
+        }
+    }
+    auto more_nums = hash::unique_in_range(1, 100, 340, 500);
+    /*
+     * resize to the final number of keys since resizes are synchronizing operations, this triggers a remap of the
+     * OpenAddresser
+     */
+    table.resize(nums.size() + more_nums.size());
+    if (table.i_can_modify()) {
+        for (const auto &num: more_nums) {
+            key = num;
+            ASSERT_FALSE(table.lookup(key));
+            table.insert(key);
+            ASSERT_TRUE(table.lookup(key));
+        }
+    }
+    table.end_sync();
+    ASSERT_EQ(table.nrow_in_use(), nums.size() + more_nums.size());
+
+    for (const auto& num: nums) {
+        key = num;
+        ASSERT_TRUE(table.lookup(key));
+    }
+    for (const auto& num: more_nums) {
         key = num;
         ASSERT_TRUE(table.lookup(key));
     }

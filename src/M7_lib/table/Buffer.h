@@ -116,6 +116,12 @@ public:
         const buf_t* cend() const {return m_hwm_ptr;}
 
         /**
+         * In shared memory contexts, the owning rank can push back the high water mark. After such a writing phase, the
+         * other ranks in the shared memory realm need to be updated with the new hwm
+         */
+        void end_sync();
+
+        /**
          * redefine the "high water mark"
          * @param irow
          *  index of the new "high water mark", must be no larger than the current number of allocated rows

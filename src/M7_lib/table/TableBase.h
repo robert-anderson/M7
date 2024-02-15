@@ -263,6 +263,13 @@ public:
     uint_t push_back(uint_t n=1ul);
 
     /**
+     *
+     */
+    void end_sync() {
+        m_bw.end_sync();
+    }
+
+    /**
      * If there are indices on the m_free_records stack: pop one and use it, else: push_back
      * @return
      *  index of free row

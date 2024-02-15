@@ -44,6 +44,14 @@ bool Buffer::Window::operator==(const Buffer::Window& other) const {
     return std::memcmp(cbegin(), other.cbegin(), size_in_use()) == 0;
 }
 
+void Buffer::Window::end_sync() {
+    if (owner().is_local()) return;
+    auto size = size_in_use();
+    // get the size from the root rank of this shared memory realm
+    mpi::bcast(&size, 1, mpi::irank_world_shmem_root(), mpi::Realm::SharedMemory);
+    m_hwm_ptr = m_begin_ptr + size;
+}
+
 void Buffer::Window::set_end(uint_t irow) {
     DEBUG_ASSERT_LE(irow, m_nrow, "high water mark may not exceed end of allocated memory");
     m_hwm_ptr = m_begin_ptr + irow * m_row_size;
