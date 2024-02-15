@@ -173,7 +173,7 @@ TEST(Smuvi, Comms) {
      */
     v_t<uintv_t> all_channel_setbits;
     {
-        auto fn = [&](const uintv_t &inds) { all_channel_setbits.push_back(inds); };
+        auto fn = [&](const uintv_t& inds){all_channel_setbits.push_back(inds);};
         basic_foreach::rtnd::Ordered<true, true> foreach(basis.m_nsite, nelec_per_channel);
         foreach.loop(fn);
     }
@@ -184,11 +184,11 @@ TEST(Smuvi, Comms) {
     /*
      * number of elements to draw as a fraction of the total number of elements
      */
-    const double nelem_select_fraction = 0.8;
+    const double nelem_select_fraction = 0.3;
     /*
      * max number of uint_t entries to generate for each ONV
      */
-    const uint_t max_nentry = 2;
+    const uint_t max_nentry = 6;
     /*
      * max value of each uint_t entry
      */
@@ -197,8 +197,7 @@ TEST(Smuvi, Comms) {
     /*
      * select a rank-specific subset of the elements
      */
-    const auto select_elems = hash::unique_in_range(mpi::irank(), uint_t(nelem * nelem_select_fraction), 0, nelem,
-                                                    true);
+    const auto select_elems = hash::unique_in_range(mpi::irank(), uint_t(nelem * nelem_select_fraction), 0, nelem, true);
 
     const auto nelem_select = select_elems.size();
 
@@ -249,21 +248,19 @@ TEST(Smuvi, Comms) {
         std::swap(input_data[shuffle_pair[0]], input_data[shuffle_pair[1]]);
     }
 
-    Smuvi<field::FrmOnv, field::Number<uint_t>> smuvi("my_smuvi", field::FrmOnv(nullptr, basis),
-                                                      field::Number<uint_t>(nullptr));
+    Smuvi<field::FrmOnv, field::Number<uint_t>> smuvi("my_smuvi", field::FrmOnv(nullptr, basis), field::Number<uint_t>(nullptr));
     buffered::FrmOnv mbf(basis);
 
     buffered::Number<uint_t> val;
 
     for (const auto& data: input_data) {
-        const auto &alpha_string = all_channel_setbits[data.first.first];
-        const auto &beta_string = all_channel_setbits[data.first.second];
+        const auto& alpha_string = all_channel_setbits[data.first.first];
+        const auto& beta_string = all_channel_setbits[data.first.second];
         val = data.second;
         mbf = {alpha_string, beta_string};
-        logging::info_("insert MBF {}", mbf);
         smuvi.insert(mbf, val);
-        break;
     }
+
     const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
         return i < j;
     };
@@ -271,15 +268,17 @@ TEST(Smuvi, Comms) {
 
     auto global_data = make_global_data(input_data);
     // look up all keys in the input
-    // smuvi.foreach_key([&](const buffered::FrmOnv& key, Smuvi<field::FrmOnv, field::Number<uint_t>>::AccessResult res){logging::info_("key {}", key);});
-    for (const auto& pair: global_data) {
-        const auto& alpha_string = all_channel_setbits[pair.first.first];
-        const auto& beta_string = all_channel_setbits[pair.first.second];
-        mbf = {alpha_string, beta_string};
-        auto access_result = smuvi.access(mbf);
-        // firstly, length of found data should match that of the global data value-vector
-        // ASSERT_EQ(access_result.nremain(), pair.second.size());
-        // then ensure that all values are the same and occur in the same order
-        // ASSERT_EQ(access_result.to_vector(), pair.second);
+    for (uint_t irank=0; irank < mpi::nrank(); ++irank) {
+        if (!mpi::i_am(irank)) continue;
+        for (const auto &pair: global_data) {
+            const auto &alpha_string = all_channel_setbits[pair.first.first];
+            const auto &beta_string = all_channel_setbits[pair.first.second];
+            mbf = {alpha_string, beta_string};
+            auto access_result = smuvi.access(mbf);
+            // firstly, length of found data should match that of the global data value-vector
+            ASSERT_EQ(access_result.nremain(), pair.second.size());
+            // then ensure that all values are the same and occur in the same order
+            ASSERT_EQ(access_result.to_vector(), pair.second);
+        }
     }
 }

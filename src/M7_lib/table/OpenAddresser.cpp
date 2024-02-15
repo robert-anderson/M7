@@ -139,5 +139,5 @@ void OpenAddresser::remap() {
 }
 
 void OpenAddresser::clear() {
-    std::fill(m_addrs.m_bw.begin(), m_addrs.m_bw.begin() + m_addrs.m_bw.m_size, 0xff);
+    if (m_addrs.i_can_modify()) std::fill(m_addrs.m_bw.begin(), m_addrs.m_bw.begin() + m_addrs.m_bw.m_size, 0xff);
 }

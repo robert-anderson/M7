@@ -557,10 +557,6 @@ public:
         };
         m_alpha_with_beta.collate(order_fn);
         m_beta_with_alpha.collate(order_fn);
-        m_dets_contain_alpha.remap_accessors();
-        m_dets_contain_beta.remap_accessors();
-        m_beta_with_alpha.remap_accessors();
-        m_alpha_with_beta.remap_accessors();
 
         /**
          *  Generate all (N - 1) electron states from the spin strings.
@@ -607,8 +603,6 @@ public:
         spin_singles = &m_beta_singles;
         m_beta_single_dict.foreach_key(gen_spin_singles);
         m_beta_singles.collate(order_fn);
-        m_alpha_singles.remap_accessors();
-        m_beta_singles.remap_accessors();
         logging::info("completed constructing singles arrays");
 
         /**
@@ -698,8 +692,6 @@ public:
         // spin_doubles = &m_beta_doubles;
         // m_beta_double_dict.foreach_key(gen_spin_doubles);
         // m_beta_doubles.collate(order_fn);
-        m_alpha_doubles.remap_accessors();
-        m_beta_doubles.remap_accessors();
         logging::info("completed constructing doubles arrays");
     }
 

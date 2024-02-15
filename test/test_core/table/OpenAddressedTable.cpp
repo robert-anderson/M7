@@ -58,6 +58,13 @@ TEST(OpenAddressedTable, InsertLocal) {
         key = num;
         ASSERT_TRUE(table.lookup(key));
     }
+
+    // try to insert one of the same keys again
+    key = nums[0];
+    ASSERT_TRUE(table.lookup(key));
+    table.lookup_or_insert(key);
+    ASSERT_TRUE(table.lookup(key));
+    ASSERT_EQ(table.nrow_in_use(), nums.size());
 }
 
 TEST(OpenAddressedTable, InsertShared) {
@@ -101,4 +108,12 @@ TEST(OpenAddressedTable, InsertShared) {
         key = num;
         ASSERT_TRUE(table.lookup(key));
     }
+
+    // try to insert one of the same keys again
+    key = nums[0];
+    ASSERT_TRUE(table.lookup(key));
+    if (table.i_can_modify()) table.lookup_or_insert(key);
+    table.end_sync();
+    ASSERT_TRUE(table.lookup(key));
+    ASSERT_EQ(table.nrow_in_use(), nums.size() + more_nums.size());
 }

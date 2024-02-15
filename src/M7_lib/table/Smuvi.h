@@ -9,6 +9,7 @@
 #include "BufferedTable.h"
 #include "M7_lib/communication/SendRecv.h"
 #include "M7_lib/communication/Distribution.h"
+#include "OpenAddressedTable.h"
 #include <unordered_set>
 
 
@@ -158,9 +159,9 @@ class Smuvi {
     send_recv::BasicSend<InsertRow> m_inserter;
     uintv_t m_irank_world_to_iaccess_table;
     /**
-     * one shared-memory MappedTable for each rank in the shared memory region
+     * one shared-memory OpenAddressedTable for each rank in the shared memory region
      */
-    v_t<buffered::MappedTable<AccessRow>> m_access_tables;
+    v_t<buffered::OpenAddressedTable<AccessRow>> m_access_tables;
     v_t<AccessRow> m_access_foreach_rows;
     /**
      * a single flat storage for all the values associated with all keys in the shared memory region
@@ -266,24 +267,17 @@ public:
         auto irank = Distribution::irank_in_shmem_region(key);
         DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
         const auto itable = m_irank_world_to_iaccess_table[irank];
-        const MappedTable<AccessRow>& accessor = m_access_tables[itable];
+        const auto& accessor = m_access_tables[itable];
         const AccessRow& lookup_row = accessor.lookup(key);
         if (!lookup_row) {
             // failed lookup
-            logging::info_("key not found {}", key);
             value_iterator_row.select_null();
             return {value_iterator_row, ~0ul};
         }
-        logging::info_("found {}", key);
         const uint_t ibegin = lookup_row.m_value_displ;
         const uint_t iend = ibegin + lookup_row.m_value_count;
         value_iterator_row.jump(ibegin);
         return {value_iterator_row, iend};
-    }
-
-    void remap_accessors() {
-        MappedTable<AccessRow>& table = m_access_tables[0];
-        table.remap();
     }
 
     uint_t itable(const key_t& key) const {
@@ -379,10 +373,9 @@ public:
             const auto& access_row = m_access_foreach_rows[itable];
             const auto& value_row = m_values_foreach_rows_1[itable];
             // TODO: verify this change in parallel
-            //const auto proc_displ = mpi::evenly_shared_displ(access_row.m_table->nrow_in_use());
-            //const auto proc_count = mpi::evenly_shared_count(access_row.m_table->nrow_in_use());
-            //for (access_row.restart(proc_displ); access_row.in_range(proc_displ + proc_count); ++access_row) {
-            for (access_row.restart(); access_row; ++access_row) {
+            const auto proc_displ = mpi::evenly_shared_displ(access_row.m_table->nrow_in_use());
+            const auto proc_count = mpi::evenly_shared_count(access_row.m_table->nrow_in_use());
+            for (access_row.restart(proc_displ); access_row.in_range(proc_displ + proc_count); ++access_row) {
                 const uint_t row_displ = access_row.m_value_displ;
                 const uint_t row_count = access_row.m_value_count;
                 value_row.jump(row_displ);
@@ -401,7 +394,7 @@ public:
          * a shared memory MappedTable is set up for each rank, so that they can be set up without dataraces by a single
          * rank, and thereafter accessed by all ranks in the shared memory region
          */
-        MappedTable<AccessRow> &accessor = m_access_tables[m_irank_world_to_iaccess_table[mpi::irank()]];
+        OpenAddressedTable<AccessRow>& accessor = m_access_tables[m_irank_world_to_iaccess_table[mpi::irank()]];
         /*
          * initialize a private set of indices for each key sent to this rank. The sets are used to build up an
          * unordered list of the value element indices in the recv table associated with each key in the accessor,
@@ -410,15 +403,14 @@ public:
         struct CompFn {
             const InsertRow m_row_1;
             const InsertRow m_row_2;
-            const fn_t &m_order_fn;
+            const fn_t& m_order_fn;
 
-            CompFn(const send_recv::BasicSend<InsertRow> &inserter, const fn_t &order_fn) :
-                    m_row_1(inserter.recv().m_row), m_row_2(inserter.recv().m_row), m_order_fn(order_fn) {}
+            CompFn(const send_recv::BasicSend<InsertRow>& inserter, const fn_t& order_fn):
+                    m_row_1(inserter.recv().m_row), m_row_2(inserter.recv().m_row), m_order_fn(order_fn){}
 
-            CompFn(const CompFn &other) : m_row_1(other.m_row_1), m_row_2(other.m_row_2),
-                                          m_order_fn(other.m_order_fn) {}
+            CompFn(const CompFn& other): m_row_1(other.m_row_1), m_row_2(other.m_row_2), m_order_fn(other.m_order_fn){}
 
-            CompFn &operator=(const CompFn &other) {
+            CompFn& operator=(const CompFn& other) {
                 m_row_1.jump(other.m_row_1.index());
                 m_row_2.jump(other.m_row_2.index());
                 return *this;
@@ -431,31 +423,21 @@ public:
             }
         };
         v_t<std::set<uint_t, CompFn>> value_index_sets;
+
         /*
-         * Resizing a mapped table calls SharedArray::alloc which is a collective operation
-         * within a shared-memory realm, causing the processes to deadlock if called in the recv_row loop.
+         * loop over the received rows
          */
-        auto &recv_row = m_inserter.recv().m_row;
+        auto& recv_row = m_inserter.recv().m_row;
+
         /*
          * must allocate enough rows in accessor since we may not resize it within the loop.
          * otherwise a deadlock could arise
          */
-            /* const auto &size = mpi::all_gathered(m_inserter.recv().nrow_in_use()); */
-            /* auto size_it = size.cbegin(); */
-            /* value_index_sets.resize(*std::max_element(size.cbegin(), size.cend()), */
-            /*                         std::set<uint_t, CompFn>(CompFn(m_inserter, order_fn))); */
-            /* for (MappedTable<AccessRow> &table: m_access_tables) { */
-            /*     // Consider edge case where all data was distributed to only one rank. Resizing to length zero raises exception. */
-            /*     if (*size_it > 0) table.resize(*size_it); */
-            /*     size_it++; */
-            /* } */
         {
             auto sizes = mpi::all_gathered(m_inserter.recv().nrow_in_use());
             auto size_it = sizes.cbegin();
             for (auto& table : m_access_tables) {
-                table.resize(*size_it);
-                REQUIRE_EQ(table.capacity(), *size_it, "Table should have been resized");
-                ++size_it;
+                if (*size_it) table.resize(*size_it++);
             }
         }
         value_index_sets.reserve(accessor.capacity());
@@ -476,7 +458,7 @@ public:
              */
             value_index_sets[accessor_row.index()].insert(recv_row.index());
         }
-        accessor.remap_if_due();
+
         /*
          * a vector storing the number of entry_sets associated with each MPI rank
          */
@@ -489,27 +471,32 @@ public:
              * created by this rank)
              */
             auto value_index_set_it = value_index_sets.cbegin();
+            // loop over all the rows in the accessor created by this rank
             auto& accessor_row = accessor.m_row;
             for (accessor_row.restart(); accessor_row; ++accessor_row) {
                 /*
                  * set the displacement that will denote the index in the entry_sets array at which the entry_sets
                  * corresponding to the current row in the accessor (i.e. the key) begin
                  */
+                // logging::info_("m_value_displ {}", accessor_row.m_value_displ);
+                // logging::info_("m_value_displ addition {}", accessor_row.m_value_displ + 1);
                 accessor_row.m_value_displ = displ;
                 /*
                  * set the number of entry_sets corresponding to the key
                  */
+                // logging::info_("m_value_count {}", accessor_row.m_value_count);
+                // logging::info_("m_value_count addition {}", accessor_row.m_value_count + 1);
                 accessor_row.m_value_count = value_index_set_it->size();
                 /*
                  * increment the rank-private displ count
                  */
-                displ += accessor_row.m_value_count;
+                displ += value_index_set_it->size();
                 /*
                  * advance the entry iterator
                  */
                 ++value_index_set_it;
             }
-            // REQUIRE_TRUE(value_index_set_it == value_index_sets.cend()), "should have iterated through all entry sets");
+            DEBUG_ASSERT_TRUE(value_index_set_it == value_index_sets.cend(), "should have iterated through all entry sets");
             /*
              * gather the final displs (i.e. the total number of unique values across all keys sent to this rank)
              */
@@ -519,6 +506,7 @@ public:
          * clear the entries shared memory arrays in case this is not the first call to collate
          */
         for (auto& values_table: m_values_tables) values_table.clear();
+
         /*
          * must allocate enough rows in values tables since we may not resize it within the loop.
          * otherwise a deadlock could arise
@@ -526,21 +514,21 @@ public:
         {
             auto size_it = nentries.cbegin();
             for (auto& table : m_values_tables) {
-                if (*size_it > 0) table.resize(*size_it);
-                size_it++;
+                if (*size_it) table.resize(*size_it);
+                *size_it++;
             }
         }
         /*
          * now write the sets of entries stored privately on this rank to the shared memory arrays accessible by all
          * ranks on the same shared memory region
          */
-        {
+        if (nentries[mpi::irank()]) {
             /*
              * get a reference to the values array updated by this rank
              */
             auto& values_table = m_values_tables[m_irank_world_to_iaccess_table[mpi::irank()]];
             DEBUG_ASSERT_TRUE(values_table.empty(), "value tables should be been cleared");
-            if (nentries[mpi::irank()] > 0) values_table.push_back(nentries[mpi::irank()]);
+            values_table.push_back(nentries[mpi::irank()]);
             uint_t ielement = 0;
             auto& value_row = values_table.m_row;
             for (const auto& value_index_set : value_index_sets) {
@@ -550,8 +538,7 @@ public:
                  */
                 for (const auto& i: value_index_set) {
                     recv_row.jump(i);
-                    value_row.jump(ielement);
-                    ielement++;
+                    value_row.jump(ielement++);
                     value_row.m_value = recv_row.m_value;
                 }
             }
@@ -560,6 +547,7 @@ public:
          * now the accessor tables are updated with the keys, and the entries arrays are updated with their
          * corresponding sorted and unique index values
          */
+        mpi::barrier();
     }
 
 #if 0
