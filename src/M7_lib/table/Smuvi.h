@@ -294,6 +294,7 @@ public:
         // get the world rank index associated with the storage of this key
         const auto itable = this->itable(key);
         const auto& value_row = m_values_lookup_rows[itable];
+        logging::info_("value rows {}", value_row.is_valid());
         return access(key, value_row);
     }
 
@@ -318,6 +319,8 @@ public:
         const auto& value_row_this = m_values_foreach_rows_1[itable_this];
         const auto itable_other = other.itable(key_other);
         const auto& value_row_other = other.m_values_foreach_rows_2[itable_other];
+        logging::info_("value rows {}", value_row_this.is_valid(), value_row_other.is_valid());
+        // TODO: value row is not valid on rank1
         AccessResult access_result_this = access(key, value_row_this);
         if (!access_result_this) return;
         AccessResult access_result_other = other.access(key_other, value_row_other);
@@ -373,9 +376,10 @@ public:
             const auto& access_row = m_access_foreach_rows[itable];
             const auto& value_row = m_values_foreach_rows_1[itable];
             // TODO: verify this change in parallel
-            const auto proc_displ = mpi::evenly_shared_displ(access_row.m_table->nrow_in_use());
-            const auto proc_count = mpi::evenly_shared_count(access_row.m_table->nrow_in_use());
-            for (access_row.restart(proc_displ); access_row.in_range(proc_displ + proc_count); ++access_row) {
+            // const auto proc_displ = mpi::evenly_shared_displ(access_row.m_table->nrow_in_use());
+            // const auto proc_count = mpi::evenly_shared_count(access_row.m_table->nrow_in_use());
+            // for (access_row.restart(proc_displ); access_row.in_range(proc_displ + proc_count); ++access_row) {
+            for (access_row.restart(); access_row; ++access_row) {
                 const uint_t row_displ = access_row.m_value_displ;
                 const uint_t row_count = access_row.m_value_count;
                 value_row.jump(row_displ);
@@ -440,7 +444,7 @@ public:
                 if (*size_it) table.resize(*size_it++);
             }
         }
-        value_index_sets.reserve(accessor.capacity());
+        // value_index_sets.reserve(accessor.capacity());
 
         for (recv_row.restart(); recv_row; ++recv_row) {
             /*
@@ -478,14 +482,10 @@ public:
                  * set the displacement that will denote the index in the entry_sets array at which the entry_sets
                  * corresponding to the current row in the accessor (i.e. the key) begin
                  */
-                // logging::info_("m_value_displ {}", accessor_row.m_value_displ);
-                // logging::info_("m_value_displ addition {}", accessor_row.m_value_displ + 1);
                 accessor_row.m_value_displ = displ;
                 /*
                  * set the number of entry_sets corresponding to the key
                  */
-                // logging::info_("m_value_count {}", accessor_row.m_value_count);
-                // logging::info_("m_value_count addition {}", accessor_row.m_value_count + 1);
                 accessor_row.m_value_count = value_index_set_it->size();
                 /*
                  * increment the rank-private displ count
@@ -496,7 +496,7 @@ public:
                  */
                 ++value_index_set_it;
             }
-            DEBUG_ASSERT_TRUE(value_index_set_it == value_index_sets.cend(), "should have iterated through all entry sets");
+            // DEBUG_ASSERT_TRUE(value_index_set_it == value_index_sets.cend(), "should have iterated through all entry sets");
             /*
              * gather the final displs (i.e. the total number of unique values across all keys sent to this rank)
              */

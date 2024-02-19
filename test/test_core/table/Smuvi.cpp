@@ -39,7 +39,6 @@ TEST(Smuvi, LookupKeysIndices) {
         ASSERT_EQ(lookup_values, values);
     };
     smuvi.foreach_key(fn);
-
 }
 
 
@@ -77,6 +76,7 @@ TEST(Smuvi, Intersection) {
     };
     smuvi1.collate(order_fn);
     smuvi2.collate(order_fn);
+
     /*
      * Each element is a pair with:
      *  first element the pair of keys:
@@ -112,7 +112,7 @@ TEST(Smuvi, BitsetToBitset) {
     tmp_key = uintv_t{0, 3, 5};
     tmp_val = uintv_t{0, 3, 4};
 
-    smuvi.insert(tmp_key, tmp_val);
+    if (mpi::irank() == 0) smuvi.insert(tmp_key, tmp_val);
 
     const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
         return i < j;
