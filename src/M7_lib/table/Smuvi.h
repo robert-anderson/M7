@@ -267,8 +267,9 @@ public:
         auto irank = Distribution::irank_in_shmem_region(key);
         DEBUG_ASSERT_LT(irank, ~0ul, "MPI rank should be assigned an allocated accessor");
         const auto itable = m_irank_world_to_iaccess_table[irank];
-        const auto& accessor = m_access_tables[itable];
+        const OpenAddressedTable<AccessRow>& accessor = m_access_tables[itable];
         const AccessRow& lookup_row = accessor.lookup(key);
+        logging::info_("lookup row is valid {}", lookup_row.is_valid());
         if (!lookup_row) {
             // failed lookup
             value_iterator_row.select_null();
@@ -294,7 +295,6 @@ public:
         // get the world rank index associated with the storage of this key
         const auto itable = this->itable(key);
         const auto& value_row = m_values_lookup_rows[itable];
-        logging::info_("value rows {}", value_row.is_valid());
         return access(key, value_row);
     }
 
@@ -319,12 +319,13 @@ public:
         const auto& value_row_this = m_values_foreach_rows_1[itable_this];
         const auto itable_other = other.itable(key_other);
         const auto& value_row_other = other.m_values_foreach_rows_2[itable_other];
-        logging::info_("value rows {}", value_row_this.is_valid(), value_row_other.is_valid());
+        logging::info_("value rows {} {}", value_row_this.is_valid(), value_row_other.is_valid());
         // TODO: value row is not valid on rank1
         AccessResult access_result_this = access(key, value_row_this);
         if (!access_result_this) return;
         AccessResult access_result_other = other.access(key_other, value_row_other);
         if (!access_result_other) return;
+        logging::info_("access remain {} {}", access_result_this.nremain(), access_result_other.nremain());
 
         while (access_result_this && access_result_other) {
             if (value_row_this.m_value == value_row_other.m_value) {
@@ -444,7 +445,7 @@ public:
                 if (*size_it) table.resize(*size_it++);
             }
         }
-        // value_index_sets.reserve(accessor.capacity());
+        value_index_sets.reserve(accessor.capacity());
 
         for (recv_row.restart(); recv_row; ++recv_row) {
             /*

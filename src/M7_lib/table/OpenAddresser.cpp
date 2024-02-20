@@ -8,9 +8,9 @@ str_t name(const str_t& name) {
     return name.empty() ? "" : name + " open addresser";
 }
 
-OpenAddresser::OpenAddresser(const TableBase &table, size_t key_offset, size_t key_size, double fmax) :
+OpenAddresser::OpenAddresser(const TableBase &table, Owner owner, size_t key_offset, size_t key_size, double fmax) :
         m_table(table), m_key_offset(key_offset), m_key_size(key_size), m_fmax(fmax),
-        m_addrs(name(m_table.name())){
+        m_addrs(name(m_table.name()), {}, owner){  // rank of the table owner
     remap();
 }
 

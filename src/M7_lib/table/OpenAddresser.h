@@ -35,7 +35,7 @@ struct OpenAddresser {
     using row_t = SingleFieldRow<field::Number<uint_t>>;
     buffered::Table<row_t> m_addrs;
 
-    OpenAddresser(const TableBase& table, size_t key_offset, size_t key_size, double fmax = 0.3);
+    OpenAddresser(const TableBase& table, Owner owner, size_t key_offset, size_t key_size, double fmax = 0.3);
 
 private:
     uint_t naddr() const;
