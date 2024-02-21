@@ -111,9 +111,9 @@ TEST(SpinMapRdmFiller, Rdm1) {
     filler.fill_rdm(&rdm1);
     rdm1.end_cycle();
 
-    for (const auto& res: rdm1.m_gen_strings) {
-        std::cout << res.m_abra << res.m_bbra << res.m_aket << res.m_bket << std::endl;
-    }
+    // for (const auto& res: rdm1.m_gen_strings) {
+    //     logging::info_("abra {}, bbra {}, aket {}, bket {}", res.m_abra, res.m_bbra, res.m_aket, res.m_bket);
+    // }
 
     std::set<FillerTestPureRdm::Result> gen_strings_chk = {
         {{0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}, {0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}},

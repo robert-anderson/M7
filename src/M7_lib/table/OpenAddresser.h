@@ -30,7 +30,7 @@ struct OpenAddresser : Table<SingleFieldRow<field::Number<uint_t>>> {
      */
     const double m_fmax;
 
-    OpenAddresser(const TableBase& table, size_t key_offset, size_t key_size, double fmax = 0.3);
+    OpenAddresser(const TableBase& table, Owner owner, size_t key_offset, size_t key_size, double fmax = 0.3);
 
 private:
     const buf_t* get_key(uint_t irow) const;

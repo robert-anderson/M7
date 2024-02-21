@@ -23,7 +23,7 @@ public:
         ASSERT(static_cast<const Row&>(Table<row_t>::m_row).m_table);
     }
 
-    BufferedTable(const table_t& table, Owner owner = Owner::local()): BufferedTable("", table, owner){}
+    explicit BufferedTable(const table_t& table, Owner owner = Owner::local()): BufferedTable("", table, owner){}
 
     BufferedTable& operator=(const BufferedTable<row_t, table_t> &other) {
         table_t::operator=(other);

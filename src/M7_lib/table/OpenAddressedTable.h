@@ -28,7 +28,7 @@ struct OpenAddressedTable : Table<row_t> {
 
     OpenAddressedTable(const row_t &row, double fmax) :
             Table<row_t>(row), m_lookup_row(m_row), m_insert_row(m_row), m_erase_row(m_row),
-            m_oa(*this, row_fields::key(m_row).row_offset(), row_fields::key(m_row).m_size, fmax){}
+            m_oa(*this, (*this).owner(), row_fields::key(m_row).row_offset(), row_fields::key(m_row).m_size, fmax){}
 
     OpenAddressedTable(const row_t &row) : OpenAddressedTable(row, 0.5){}
 
