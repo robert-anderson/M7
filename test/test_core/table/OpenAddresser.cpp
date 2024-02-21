@@ -80,7 +80,7 @@ TEST(OpenAddresser, SharedInsertAndLookup) {
     buffered::Table<row_t> table({nchar}, Owner::shared(0));
     const double fmax = 0.3;
 
-    Buffer buffer(1, Owner::local());
+    Buffer buffer(1, Owner::shared());
     OpenAddresser oa(table, 0, table.m_row.m_field.m_size, fmax);
     oa.set_buffer(&buffer);
     strv_t keys = {
