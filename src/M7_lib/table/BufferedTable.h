@@ -7,6 +7,7 @@
 
 #include <utility>
 #include "MappedTable.h"
+#include "OpenAddressedTable.h"
 
 template<typename row_t, typename table_impl_t>
 class BufferedTable : public table_impl_t {
@@ -55,6 +56,7 @@ namespace buffered {
             BufferedTable<row_t, ::Table<row_t>>(name, ::Table<row_t>(row), owner){}
         Table(const row_t &row, Owner owner = Owner::local()): Table("", row, owner){}
     };
+
     template <typename row_t>
     struct MappedTable : BufferedTable<row_t, ::MappedTable<row_t>> {
         MappedTable(str_t name, const row_t &row, MappedTableOptions opts, Owner owner = Owner::local()):
@@ -65,6 +67,20 @@ namespace buffered {
             MappedTable(name, row, {}, owner){}
         MappedTable(const row_t &row, MappedTableOptions opts, Owner owner = Owner::local()):
             MappedTable("", row, opts, owner){}
+    };
+
+    template<typename row_t>
+    struct OpenAddressedTable : BufferedTable<row_t, ::OpenAddressedTable<row_t>> {
+        Buffer m_addr_buffer;
+        OpenAddressedTable(str_t name, const row_t &row, double fmax, Owner owner = Owner::local()) :
+            BufferedTable<row_t, ::OpenAddressedTable<row_t>>(name, ::OpenAddressedTable<row_t>(row, fmax), owner),
+            m_addr_buffer(::OpenAddressedTable<row_t>::name() + " addresses", 1ul, owner) {
+            ::OpenAddressedTable<row_t>::m_oa.set_buffer(&m_addr_buffer);
+        }
+        OpenAddressedTable(const row_t &row, Owner owner = Owner::local()) :
+                OpenAddressedTable("", row, owner) {}
+        OpenAddressedTable(str_t name, const row_t &row, Owner owner = Owner::local()) :
+        OpenAddressedTable(name, row, 0.5, owner) {}
     };
 }
 

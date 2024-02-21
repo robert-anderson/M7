@@ -3,8 +3,8 @@
 //
 
 #include "gtest/gtest.h"
+#include "M7_lib/table/BufferedTable.h"
 #include "M7_lib/table/BufferedFields.h"
-#include "M7_lib/table/OpenAddressedTable.h"
 
 namespace open_addressed_table_test {
     struct KeyOnlyRow : Row {

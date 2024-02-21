@@ -6,7 +6,7 @@
 #define M7_OPENADDRESSEDTABLE_H
 
 #include <M7_lib/field/Fields.h>
-#include "Table.h"
+#include "MappedTable.h"
 #include "OpenAddresser.h"
 
 template<typename row_t>
@@ -145,18 +145,5 @@ struct OpenAddressedTable : Table<row_t> {
         m_oa.remap();
     }
 };
-
-namespace buffered {
-    template<typename row_t>
-    struct OpenAddressedTable : BufferedTable<row_t, ::OpenAddressedTable<row_t>> {
-        OpenAddressedTable(str_t name, const row_t &row, double fmax, Owner owner = Owner::local()) :
-            BufferedTable<row_t, ::OpenAddressedTable<row_t>>(name, ::OpenAddressedTable<row_t>(row, fmax), owner) {}
-        OpenAddressedTable(const row_t &row, Owner owner = Owner::local()) :
-            OpenAddressedTable("", row, owner) {}
-        OpenAddressedTable(str_t name, const row_t &row, Owner owner = Owner::local()) :
-            OpenAddressedTable(name, row, 0.5, owner) {}
-    };
-}
-
 
 #endif //M7_OPENADDRESSEDTABLE_H

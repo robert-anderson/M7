@@ -6,9 +6,9 @@
 #define M7_OPENADDRESSER_H
 
 #include "M7_lib/util/Hash.h"
-#include "M7_lib/table/BufferedTable.h"
+#include "M7_lib/table/Table.h"
 
-struct OpenAddresser {
+struct OpenAddresser : Table<SingleFieldRow<field::Number<uint_t>>> {
     /**
      * Reference to the Table object on which this object provides access
      */
@@ -29,17 +29,10 @@ struct OpenAddresser {
      *  fmax = (number of slots for keys) / (number of rows allocated in the table)
      */
     const double m_fmax;
-    /**
-     * Shared or local memory storage of the memory
-     */
-    using row_t = SingleFieldRow<field::Number<uint_t>>;
-    buffered::Table<row_t> m_addrs;
 
     OpenAddresser(const TableBase& table, size_t key_offset, size_t key_size, double fmax = 0.3);
 
 private:
-    uint_t naddr() const;
-
     const buf_t* get_key(uint_t irow) const;
 
     uint_t get_addr(uint_t iaddr) const;
@@ -110,7 +103,7 @@ public:
     /**
      * set all addrs to the unused value ~0ul
      */
-    void clear();
+    void clear() override;
 };
 
 
