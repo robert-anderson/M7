@@ -269,7 +269,6 @@ public:
         const auto itable = m_irank_world_to_iaccess_table[irank];
         const OpenAddressedTable<AccessRow>& accessor = m_access_tables[itable];
         const AccessRow& lookup_row = accessor.lookup(key);
-        logging::info_("lookup row is valid {}", lookup_row.is_valid());
         if (!lookup_row) {
             // failed lookup
             value_iterator_row.select_null();
@@ -319,13 +318,10 @@ public:
         const auto& value_row_this = m_values_foreach_rows_1[itable_this];
         const auto itable_other = other.itable(key_other);
         const auto& value_row_other = other.m_values_foreach_rows_2[itable_other];
-        logging::info_("value rows {} {}", value_row_this.is_valid(), value_row_other.is_valid());
-        // TODO: value row is not valid on rank1
         AccessResult access_result_this = access(key, value_row_this);
         if (!access_result_this) return;
         AccessResult access_result_other = other.access(key_other, value_row_other);
         if (!access_result_other) return;
-        logging::info_("access remain {} {}", access_result_this.nremain(), access_result_other.nremain());
 
         while (access_result_this && access_result_other) {
             if (value_row_this.m_value == value_row_other.m_value) {
@@ -549,6 +545,8 @@ public:
          * now the accessor tables are updated with the keys, and the entries arrays are updated with their
          * corresponding sorted and unique index values
          */
+        for (auto& table: m_access_tables) table.end_sync();
+        for (auto& table: m_values_tables) table.end_sync();
         mpi::barrier();
     }
 

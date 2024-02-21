@@ -263,9 +263,10 @@ public:
     uint_t push_back(uint_t n=1ul);
 
     /**
-     *
+     * In shared memory contexts, the owning rank can push back the high water mark. After such a writing phase, the
+     * other ranks in the shared memory realm need to be updated with the new hwm
      */
-    void end_sync() {
+    virtual void end_sync() {
         m_bw.end_sync();
     }
 
@@ -455,12 +456,6 @@ public:
      *  true is m_free_records member is consistent with m_is_free_record
      */
     bool freed_rows_consistent() const;
-
-    void sync_sizes() {
-        auto size = mpi::all_max(nrow_in_use());
-        resize(size);
-        if (nrow_in_use() != size) push_back(nrow_in_use() - size);
-    };
 
     /**
      * "Location" class which describes the location of a record in a distributed table i.e. by a local record index and

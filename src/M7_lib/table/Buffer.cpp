@@ -48,7 +48,7 @@ void Buffer::Window::end_sync() {
     if (owner().is_local()) return;
     auto size = size_in_use();
     // get the size from the root rank of this shared memory realm
-    mpi::bcast(&size, 1, mpi::irank_world_shmem_root(), mpi::Realm::SharedMemory);
+    mpi::bcast(&size, 1, owner().irank_owner(), mpi::Realm::SharedMemory);
     m_hwm_ptr = m_begin_ptr + size;
 }
 

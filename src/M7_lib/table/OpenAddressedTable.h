@@ -30,7 +30,7 @@ struct OpenAddressedTable : Table<row_t> {
             Table<row_t>(row), m_lookup_row(m_row), m_insert_row(m_row), m_erase_row(m_row),
             m_oa(*this, row_fields::key(m_row).row_offset(), row_fields::key(m_row).m_size, fmax){}
 
-    OpenAddressedTable(const row_t &row) : OpenAddressedTable(row, 0.5){}
+    explicit OpenAddressedTable(const row_t &row) : OpenAddressedTable(row, 0.5){}
 
     OpenAddressedTable& operator=(const OpenAddressedTable& other) {
         Table<row_t>::operator=(other);
@@ -127,6 +127,10 @@ struct OpenAddressedTable : Table<row_t> {
         return m_insert_row;
     }
 
+    void end_sync() override {
+        TableBase::end_sync();
+        m_oa.end_sync();
+    }
 
     row_t& lookup_or_insert(const key_field_t& key) {
         lookup(key, m_lookup_row);
