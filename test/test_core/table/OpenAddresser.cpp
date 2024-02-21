@@ -15,7 +15,7 @@ TEST(OpenAddresser, LocalInsertAndLookup) {
     using row_t = SingleFieldRow<StringField>;
     buffered::Table<row_t> table({nchar}, Owner::local());
     const double fmax = 0.3;
-    OpenAddresser oa(table, table.owner(), 0, table.m_row.m_field.m_size, fmax);
+    OpenAddresser oa(table, 0, table.m_row.m_field.m_size, fmax);
     strv_t keys = {
         "lorem_______", "ipsum_______", "dolor_______", "sit_________", "amet,_______", "consectetur_",
         "adipiscing__", "elit,_______", "sed_________", "do__________", "eiusmod_____", "tempor______",
@@ -77,7 +77,7 @@ TEST(OpenAddresser, SharedInsertAndLookup) {
     using row_t = SingleFieldRow<StringField>;
     buffered::Table<row_t> table({nchar}, Owner::shared(0));
     const double fmax = 0.3;
-    OpenAddresser oa(table, table.owner(), 0, table.m_row.m_field.m_size, fmax);
+    OpenAddresser oa(table, 0, table.m_row.m_field.m_size, fmax);
     strv_t keys = {
             "lorem_______", "ipsum_______", "dolor_______", "sit_________", "amet,_______", "consectetur_",
             "adipiscing__", "elit,_______", "sed_________", "do__________", "eiusmod_____", "tempor______",
