@@ -39,9 +39,36 @@ struct FillerTestPureRdm : public PureRdm {
         bool operator ==(const Result& other) const {
             return (m_abra == other.m_abra) && (m_bbra == other.m_bbra) && (m_aket == other.m_aket) && (m_bket == other.m_bket);
         }
-
     };
     std::set<Result> m_gen_strings;
+
+    void sync_gen_strings() {
+        using pair_t = std::pair<std::pair<uintv_t, uintv_t>, std::pair<uintv_t, uintv_t>>;
+
+        v_t<pair_t> strings_local;
+        strings_local.reserve(m_gen_strings.size());
+        for (const auto element : m_gen_strings) {
+            pair_t packed = {{element.m_abra, element.m_aket}, {element.m_bbra, element.m_bket}};
+            strings_local.emplace_back(packed);
+        }
+        m_gen_strings.clear();
+
+        uint_t global_size = mpi::all_sum(m_gen_strings.size());
+        v_t<pair_t> strings_global;
+        strings_global.resize(global_size);
+
+        auto local_begin = reinterpret_cast<const uint_t*>(strings_local.data());
+        auto global_begin = reinterpret_cast<const uint_t*>(strings_local.data());
+        auto local_sendcnt = strings_local.size() * sizeof(pair_t);
+        auto global_recvcnt = global_size * sizeof(pair_t);
+        mpi::all_gatherv(local_begin, &local_sendcnt, global_begin, &global_recvcnt, nullptr);
+
+        for (const auto &element : strings_global) {
+            Result unpacked {element.first.first, element.first.second,
+                             element.second.first, element.second.second};
+            m_gen_strings.insert(unpacked);
+        }
+    }
 
     FillerTestPureRdm(const conf::Rdms& opts, OpSig ranksig, sys::Sector sector) :
         PureRdm(opts, ranksig, sector, 1, "test_rdm"), m_work_mbfs(sector){}
@@ -109,11 +136,8 @@ TEST(SpinMapRdmFiller, Rdm1) {
     FillerTestPureRdm rdm1(doc.m_av_ests.m_rdm, opsig::c_sing, sector);
 
     filler.fill_rdm(&rdm1);
-    rdm1.end_cycle();
-
-    // for (const auto& res: rdm1.m_gen_strings) {
-    //     logging::info_("abra {}, bbra {}, aket {}, bket {}", res.m_abra, res.m_bbra, res.m_aket, res.m_bket);
-    // }
+    rdm1.end_cycle();  // end_cycle() does not update FillerTestPureRdm.m_gen_strings
+    rdm1.sync_gen_strings();
 
     std::set<FillerTestPureRdm::Result> gen_strings_chk = {
         {{0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}, {0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}},
@@ -129,7 +153,6 @@ TEST(SpinMapRdmFiller, Rdm1) {
         {{0, 1, 4, 5, 6, 8}, {0, 1, 4, 5, 7, 8}, {0, 1, 4, 5, 6, 8}, {0, 1, 4, 5, 7, 8}},
         {{0, 1, 2, 3, 4, 5}, {0, 2, 3, 5, 6, 7}, {0, 1, 2, 3, 4, 5}, {0, 2, 3, 5, 6, 7}}
     };
-
     ASSERT_EQ(rdm1.m_gen_strings.size(), gen_strings_chk.size());
     ASSERT_EQ(rdm1.m_gen_strings, gen_strings_chk);
 }
@@ -172,10 +195,7 @@ TEST(SpinMapRdmFiller, Rdm2) {
 
     filler.fill_rdm(&rdm2);
     rdm2.end_cycle();
-
-    for (const auto& res: rdm2.m_gen_strings) {
-        std::cout << res.m_abra << res.m_bbra << res.m_aket << res.m_bket << std::endl;
-    }
+    rdm2.sync_gen_strings();
 
     std::set<FillerTestPureRdm::Result> gen_strings_chk = {
         {{0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}, {0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}},
@@ -239,10 +259,7 @@ TEST(SpinMapRdmFiller, Rdm3) {
 
     filler.fill_rdm(&rdm3);
     rdm3.end_cycle();
-
-    for (const auto& res: rdm3.m_gen_strings) {
-        std::cout << res.m_abra << res.m_bbra << res.m_aket << res.m_bket << std::endl;
-    }
+    rdm3.sync_gen_strings();
 
     std::set<FillerTestPureRdm::Result> gen_strings_chk = {
             {{0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}, {0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}},
@@ -369,10 +386,7 @@ TEST(SpinMapRdmFiller, F4Rdm) {
 
     filler.fill_rdm(&f4rdm);
     f4rdm.end_cycle();
-
-    for (const auto& res: f4rdm.m_gen_strings) {
-        std::cout << res.m_abra << res.m_bbra << res.m_aket << res.m_bket << std::endl;
-    }
+    f4rdm.sync_gen_strings();
 
     std::set<FillerTestPureRdm::Result> gen_strings_chk = {
         {{0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}, {0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}},

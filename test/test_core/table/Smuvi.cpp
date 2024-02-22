@@ -126,6 +126,48 @@ TEST(Smuvi, BitsetToBitset) {
     smuvi.foreach_key(fn);
 }
 
+// TODO: finish this test when Robert decided on how to implement collate_nosort
+// TEST(Smuvi, CollateNoSort) {
+//     const uint_t nsite = 6;
+//     using smuvi_t = Smuvi<field::FrmOnvSpinChannel, field::FrmOnvSpinChannel>;
+//     smuvi_t smuvi1("test smuvi one", field::FrmOnvSpinChannel(nullptr, nsite), field::FrmOnvSpinChannel(nullptr, nsite));
+//     smuvi_t smuvi2("test smuvi two", field::FrmOnvSpinChannel(nullptr, nsite), field::FrmOnvSpinChannel(nullptr, nsite));
+//
+//     // the values of insertions1 are the keys of insertions2
+//     const v_t<std::pair<uintv_t, uintv_t>> insertions1 = {
+//             {{1,4,5,6,7,8}, {1,2,4,5,7,8}},
+//             {{1,4,5,6,7,8}, {0,1,2,4,5,7}}
+//     };
+//     const v_t<std::pair<uintv_t, uintv_t>> insertions2 = {
+//             {{1,2,4,6,7,8}, {1,2,3,5,6,7}},
+//             {{1,2,4,5,7,8}, {1,2,4,6,7,8}},
+//             {{0,1,4,5,7,8}, {1,2,4,5,7,8}}
+//     };
+//
+//     buffered::FrmOnvSpinChannel tmp_key(nsite);
+//     buffered::FrmOnvSpinChannel tmp_val(nsite);
+//     for (auto& insertion: insertions1) {
+//         tmp_key = insertion.first;
+//         tmp_val = insertion.second;
+//         smuvi1.insert(tmp_key, tmp_val);
+//     }
+//     for (auto& insertion: insertions2) {
+//         tmp_key = insertion.first;
+//         tmp_val = insertion.second;
+//         smuvi2.insert(tmp_key, tmp_val);
+//     }
+//     auto gen_spin_doubles = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult hole_strings){
+//         hole_strings.foreach([&](const field::FrmOnvSpinChannel &hole_string){
+//             part_double_dict->foreach_value(hole_string, [&](const field::FrmOnvSpinChannel &part_string){
+//                 if (part_string != key) spin_doubles->insert(key, part_string);
+//             });
+//         });
+//     };
+//     smuvi1.foreach_key(gen_spin_doubles);
+//     smuvi1.collate_nosort();
+//     smuvi2.collate_nosort();
+// }
+
 /**
  * @param input_data
  *  rank-private input data that is in general different on each rank

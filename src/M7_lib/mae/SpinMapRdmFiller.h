@@ -418,17 +418,13 @@ public:
             m_dets_contain_beta.foreach_value(beta_channel, [&](const field::Number<uint_t>& iket){
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
-                if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) {
-                    make_contrib_fn();
-                }
+                if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
             });
             // beta-beta
             m_dets_contain_alpha.foreach_value(alpha_channel, [&](const field::Number<uint_t>& iket){
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
-                if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) {
-                    make_contrib_fn();
-                }
+                if (hamming_dist <= rdm->m_ranksig.nfrm_cre() && hamming_dist > 0) make_contrib_fn();
             });
 
             if (rdm->m_ranksig == opsig::c_sing) continue;
