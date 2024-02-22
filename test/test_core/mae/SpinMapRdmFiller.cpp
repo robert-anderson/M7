@@ -53,15 +53,16 @@ struct FillerTestPureRdm : public PureRdm {
         }
         m_gen_strings.clear();
 
-        uint_t global_size = mpi::all_sum(m_gen_strings.size());
         v_t<pair_t> strings_global;
-        strings_global.resize(global_size);
-
-        auto local_begin = reinterpret_cast<const uint_t*>(strings_local.data());
-        auto global_begin = reinterpret_cast<const uint_t*>(strings_local.data());
-        auto local_sendcnt = strings_local.size() * sizeof(pair_t);
-        auto global_recvcnt = global_size * sizeof(pair_t);
-        mpi::all_gatherv(local_begin, &local_sendcnt, global_begin, &global_recvcnt, nullptr);
+        {
+            auto local_sendcnt = strings_local.size() * sizeof(pair_t);
+            const auto counts = mpi::all_gathered(local_sendcnt);
+            const auto displs = mpi::counts_to_displs_consec(counts);
+            strings_global.resize(displs.back() + counts.back());
+            auto local_begin = reinterpret_cast<const uint_t *>(strings_local.data());
+            auto global_begin = reinterpret_cast<uint_t *>(strings_global.data());
+            mpi::all_gatherv(local_begin, local_sendcnt, global_begin, counts, displs);
+        }
 
         for (const auto &element : strings_global) {
             Result unpacked {element.first.first, element.first.second,
