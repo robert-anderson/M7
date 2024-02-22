@@ -39,35 +39,48 @@ struct FillerTestPureRdm : public PureRdm {
         bool operator ==(const Result& other) const {
             return (m_abra == other.m_abra) && (m_bbra == other.m_bbra) && (m_aket == other.m_aket) && (m_bket == other.m_bket);
         }
+
+        static void encode(std::back_insert_iterator<uintv_t>& it, const uintv_t& v) {
+            *it++ = v.size();
+            std::copy(v.cbegin(), v.cend(), it);
+        }
+
+        void encode(std::back_insert_iterator<uintv_t>& it) const {
+            encode(it, m_abra);
+            encode(it, m_bbra);
+            encode(it, m_aket);
+            encode(it, m_bket);
+        }
+
+        static void decode(uintv_t::const_iterator& it, uintv_t& v) {
+            v.resize(*it++);
+            std::copy(it, std::next(it, v.size()), v.begin());
+            std::advance(it, v.size());
+        }
+
+        void decode(uintv_t::const_iterator& it) {
+            decode(it, m_abra);
+            decode(it, m_bbra);
+            decode(it, m_aket);
+            decode(it, m_bket);
+        }
     };
     std::set<Result> m_gen_strings;
 
     void sync_gen_strings() {
-        using pair_t = std::pair<std::pair<uintv_t, uintv_t>, std::pair<uintv_t, uintv_t>>;
-
-        v_t<pair_t> strings_local;
-        strings_local.reserve(m_gen_strings.size());
-        for (const auto element : m_gen_strings) {
-            pair_t packed = {{element.m_abra, element.m_aket}, {element.m_bbra, element.m_bket}};
-            strings_local.emplace_back(packed);
+        uintv_t strings_local;
+        for (const auto& element : m_gen_strings) {
+            auto it = std::back_inserter(strings_local);
+            element.encode(it);
         }
         m_gen_strings.clear();
+        const auto strings_global = mpi::all_gatheredv(strings_local);
 
-        v_t<pair_t> strings_global;
-        {
-            auto local_sendcnt = strings_local.size() * sizeof(pair_t);
-            const auto counts = mpi::all_gathered(local_sendcnt);
-            const auto displs = mpi::counts_to_displs_consec(counts);
-            strings_global.resize(displs.back() + counts.back());
-            auto local_begin = reinterpret_cast<const uint_t *>(strings_local.data());
-            auto global_begin = reinterpret_cast<uint_t *>(strings_global.data());
-            mpi::all_gatherv(local_begin, local_sendcnt, global_begin, counts, displs);
-        }
-
-        for (const auto &element : strings_global) {
-            Result unpacked {element.first.first, element.first.second,
-                             element.second.first, element.second.second};
-            m_gen_strings.insert(unpacked);
+        auto it = strings_global.cbegin();
+        while (it != strings_global.cend()) {
+            Result tmp;
+            tmp.decode(it);
+            m_gen_strings.insert(tmp);
         }
     }
 
