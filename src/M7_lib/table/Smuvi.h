@@ -108,9 +108,9 @@
  * return a pointer to the beginning of the entries to which the key corresponds
  */
 
-
 template<typename key_t, typename value_t>
-class Smuvi {
+class SmuviBase {
+protected:
     /**
      * Row type for the inserter tables
      */
@@ -171,9 +171,7 @@ class Smuvi {
     v_t<ValueRow> m_values_foreach_rows_1;
     v_t<ValueRow> m_values_foreach_rows_2;
 
-public:
-
-    Smuvi(str_t name, const key_t& key, const value_t& value):
+    SmuviBase(str_t name, const key_t& key, const value_t& value):
             m_inserter(name, InsertRow(key, value), {100, 2.0}),
             m_irank_world_to_iaccess_table(mpi::nrank(), ~0ul) {
         // index of the shared memory realm
@@ -209,6 +207,8 @@ public:
             m_values_foreach_rows_2.emplace_back(m_values_tables.back().m_row);
         }
     }
+
+public:
 
     void insert(const key_t& key, const value_t& value) {
         // send a copy to one rank in each shared memory realm
@@ -310,9 +310,7 @@ public:
      * yield by call to fn_t each time a common value is found among the (ordered) values of the two keys
      */
     template<typename fn_t, typename comp_fn>
-    void foreach_common_value(const key_t& key, const Smuvi<key_t, value_t>& other, const key_t& key_other, const fn_t& fn, const comp_fn& comp) const {
-        functor::assert_prototype<void(const value_t&)>(fn);
-        // todo: how to specify the prototype correctly?
+    void foreach_common_value(const key_t& key, const SmuviBase<key_t, value_t>& other, const key_t& key_other, const fn_t& fn, const comp_fn& comp) const {
         // functor::assert_prototype<bool>(comp);
         const auto itable_this = this->itable(key);
         const auto& value_row_this = m_values_foreach_rows_1[itable_this];
@@ -682,6 +680,24 @@ public:
     }
 #endif
 
+};
+
+/**
+ * SMUVI implementation which does not sort the items vectors during collation
+ */
+template<typename key_t, typename value_t>
+class Smuvi : public SmuviBase<key_t, value_t> {
+public:
+    Smuvi(str_t name, const key_t& key, const value_t& value): SmuviBase<key_t, value_t>(std::move(name), key, value){}
+};
+
+/**
+ * SMUVI implementation which does not sort the items vectors during collation
+ */
+template<typename key_t, typename value_t>
+class UnorderedSmuvi : public SmuviBase<key_t, value_t> {
+public:
+    UnorderedSmuvi(str_t name, const key_t& key, const value_t& value): SmuviBase<key_t, value_t>(std::move(name), key, value){}
 };
 
 #endif //M7_SMUVI_H
