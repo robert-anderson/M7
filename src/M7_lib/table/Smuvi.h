@@ -349,6 +349,30 @@ public:
     }
 
     template<typename fn_t>
+    struct CompFn {
+        const InsertRow m_row_1;
+        const InsertRow m_row_2;
+        const fn_t& m_order_fn;
+
+        CompFn(const send_recv::BasicSend<InsertRow>& inserter, const fn_t& order_fn):
+                m_row_1(inserter.recv().m_row), m_row_2(inserter.recv().m_row), m_order_fn(order_fn){}
+
+        CompFn(const CompFn& other): m_row_1(other.m_row_1), m_row_2(other.m_row_2), m_order_fn(other.m_order_fn){}
+
+        CompFn& operator=(const CompFn& other) {
+            m_row_1.jump(other.m_row_1.index());
+            m_row_2.jump(other.m_row_2.index());
+            return *this;
+        }
+
+        bool operator()(uint_t i, uint_t j) const {
+            m_row_1.jump(i);
+            m_row_2.jump(j);
+            return m_order_fn(m_row_1.m_value, m_row_2.m_value);
+        }
+    };
+
+    template<typename fn_t>
     void collate(const fn_t& order_fn) {
         /*
          * first send the inserted key-index pairs to the receiving ranks
@@ -364,29 +388,7 @@ public:
          * unordered list of the value element indices in the recv table associated with each key in the accessor,
          * which will later be copied into the shared memory m_entries arrays
          */
-        struct CompFn {
-            const InsertRow m_row_1;
-            const InsertRow m_row_2;
-            const fn_t& m_order_fn;
-
-            CompFn(const send_recv::BasicSend<InsertRow>& inserter, const fn_t& order_fn):
-                    m_row_1(inserter.recv().m_row), m_row_2(inserter.recv().m_row), m_order_fn(order_fn){}
-
-            CompFn(const CompFn& other): m_row_1(other.m_row_1), m_row_2(other.m_row_2), m_order_fn(other.m_order_fn){}
-
-            CompFn& operator=(const CompFn& other) {
-                m_row_1.jump(other.m_row_1.index());
-                m_row_2.jump(other.m_row_2.index());
-                return *this;
-            }
-
-            bool operator()(uint_t i, uint_t j) const {
-                m_row_1.jump(i);
-                m_row_2.jump(j);
-                return m_order_fn(m_row_1.m_value, m_row_2.m_value);
-            }
-        };
-        v_t<std::set<uint_t, CompFn>> value_index_sets;
+        v_t<std::set<uint_t, CompFn<fn_t>>> value_index_sets;
 
         /*
          * loop over the received rows
@@ -416,7 +418,7 @@ public:
              * if there aren't enough value index vector sets for the current size of the accessor, allocate more
              */
             if (value_index_sets.size() < accessor.nrow_in_use()) {
-                value_index_sets.resize(accessor.nrow_in_use(), std::set<uint_t, CompFn>(CompFn(m_inserter, order_fn)));
+                value_index_sets.resize(accessor.nrow_in_use(), std::set<uint_t, CompFn<fn_t>>(CompFn<fn_t>(m_inserter, order_fn)));
             }
             /*
              * get the indices vector to recv_row.m_key, and append the new index
