@@ -306,40 +306,6 @@ public:
         access_result.foreach(fn);
     }
 
-    /**
-     * yield by call to fn_t each time a common value is found among the (ordered) values of the two keys
-     */
-    template<typename fn_t, typename comp_fn>
-    void foreach_common_value(const key_t& key, const SmuviBase<key_t, value_t>& other, const key_t& key_other, const fn_t& fn, const comp_fn& comp) const {
-        // functor::assert_prototype<bool>(comp);
-        const auto itable_this = this->itable(key);
-        const auto& value_row_this = m_values_foreach_rows_1[itable_this];
-        const auto itable_other = other.itable(key_other);
-        const auto& value_row_other = other.m_values_foreach_rows_2[itable_other];
-        AccessResult access_result_this = access(key, value_row_this);
-        if (!access_result_this) return;
-        AccessResult access_result_other = other.access(key_other, value_row_other);
-        if (!access_result_other) return;
-
-        while (access_result_this && access_result_other) {
-            if (value_row_this.m_value == value_row_other.m_value) {
-                fn(value_row_this.m_value);
-                ++value_row_this;
-                ++value_row_other;
-            }
-            else if (comp(value_row_this.m_value, value_row_other.m_value)) ++value_row_this;
-            else ++value_row_other;
-        }
-    }
-
-    /**
-     * overload in case both key-value sets are to be taken from the same SMUVI
-     */
-    template<typename fn_t>
-    void foreach_common_value(const key_t& key_1, const key_t& key_2, const fn_t& fn) const {
-        foreach_common_value(key_1, *this, key_2, fn);
-    }
-
     template<typename fn_t>
     void foreach_value_pair(const key_t& key, const fn_t& fn, bool ordered = false, bool allow_eq = false) const {
         functor::assert_prototype<void(const value_t&, const value_t&)>(fn);
@@ -683,12 +649,48 @@ public:
 };
 
 /**
- * SMUVI implementation which does not sort the items vectors during collation
+ * SMUVI implementation which sorts the items vectors during collation
  */
 template<typename key_t, typename value_t>
 class Smuvi : public SmuviBase<key_t, value_t> {
+    using SmuviBase<key_t, value_t>::m_values_foreach_rows_1;
 public:
+    using SmuviBase<key_t, value_t>::access;
+
     Smuvi(str_t name, const key_t& key, const value_t& value): SmuviBase<key_t, value_t>(std::move(name), key, value){}
+
+    /**
+     * yield by call to fn_t each time a common value is found among the (ordered) values of the two keys
+     */
+    template<typename fn_t, typename comp_fn>
+    void foreach_common_value(const key_t& key, const Smuvi<key_t, value_t>& other, const key_t& key_other, const fn_t& fn, const comp_fn& comp) const {
+        const auto itable_this = this->itable(key);
+        const auto& value_row_this = m_values_foreach_rows_1[itable_this];
+        const auto itable_other = other.itable(key_other);
+        const auto& value_row_other = other.m_values_foreach_rows_2[itable_other];
+        auto access_result_this = access(key, value_row_this);
+        if (!access_result_this) return;
+        auto access_result_other = other.access(key_other, value_row_other);
+        if (!access_result_other) return;
+
+        while (access_result_this && access_result_other) {
+            if (value_row_this.m_value == value_row_other.m_value) {
+                fn(value_row_this.m_value);
+                ++value_row_this;
+                ++value_row_other;
+            }
+            else if (comp(value_row_this.m_value, value_row_other.m_value)) ++value_row_this;
+            else ++value_row_other;
+        }
+    }
+
+    /**
+     * overload in case both key-value sets are to be taken from the same SMUVI
+     */
+    template<typename fn_t>
+    void foreach_common_value(const key_t& key_1, const key_t& key_2, const fn_t& fn) const {
+        foreach_common_value(key_1, *this, key_2, fn);
+    }
 };
 
 /**
