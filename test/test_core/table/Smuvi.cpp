@@ -126,47 +126,43 @@ TEST(Smuvi, BitsetToBitset) {
     smuvi.foreach_key(fn);
 }
 
-// TODO: finish this test when Robert decided on how to implement collate_nosort
-// TEST(Smuvi, CollateNoSort) {
-//     const uint_t nsite = 6;
-//     using smuvi_t = Smuvi<field::FrmOnvSpinChannel, field::FrmOnvSpinChannel>;
-//     smuvi_t smuvi1("test smuvi one", field::FrmOnvSpinChannel(nullptr, nsite), field::FrmOnvSpinChannel(nullptr, nsite));
-//     smuvi_t smuvi2("test smuvi two", field::FrmOnvSpinChannel(nullptr, nsite), field::FrmOnvSpinChannel(nullptr, nsite));
-//
-//     // the values of insertions1 are the keys of insertions2
-//     const v_t<std::pair<uintv_t, uintv_t>> insertions1 = {
-//             {{1,4,5,6,7,8}, {1,2,4,5,7,8}},
-//             {{1,4,5,6,7,8}, {0,1,2,4,5,7}}
-//     };
-//     const v_t<std::pair<uintv_t, uintv_t>> insertions2 = {
-//             {{1,2,4,6,7,8}, {1,2,3,5,6,7}},
-//             {{1,2,4,5,7,8}, {1,2,4,6,7,8}},
-//             {{0,1,4,5,7,8}, {1,2,4,5,7,8}}
-//     };
-//
-//     buffered::FrmOnvSpinChannel tmp_key(nsite);
-//     buffered::FrmOnvSpinChannel tmp_val(nsite);
-//     for (auto& insertion: insertions1) {
-//         tmp_key = insertion.first;
-//         tmp_val = insertion.second;
-//         smuvi1.insert(tmp_key, tmp_val);
-//     }
-//     for (auto& insertion: insertions2) {
-//         tmp_key = insertion.first;
-//         tmp_val = insertion.second;
-//         smuvi2.insert(tmp_key, tmp_val);
-//     }
-//     auto gen_spin_doubles = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult hole_strings){
-//         hole_strings.foreach([&](const field::FrmOnvSpinChannel &hole_string){
-//             part_double_dict->foreach_value(hole_string, [&](const field::FrmOnvSpinChannel &part_string){
-//                 if (part_string != key) spin_doubles->insert(key, part_string);
-//             });
-//         });
-//     };
-//     smuvi1.foreach_key(gen_spin_doubles);
-//     smuvi1.collate_nosort();
-//     smuvi2.collate_nosort();
-// }
+TEST(Smuvi, CollateNoSort) {
+    const uint_t nsite = 9;
+    using smuvi_t = UnorderedSmuvi<field::FrmOnvSpinChannel, field::Number<uint_t>>;
+    smuvi_t smuvi("test smuvi", field::FrmOnvSpinChannel(nullptr, nsite), field::Number<uint_t>(nullptr));
+
+    v_t<std::pair<uintv_t, uint_t>> insertions = {
+            {{1,4,5,6,7,8}, 1},
+            {{1,4,5,6,7,8}, 2},
+            {{1,4,5,6,7,8}, 3},
+            {{1,4,5,6,7,8}, 4},
+            {{1,4,5,6,7,8}, 5},
+            {{1,4,5,6,7,8}, 6},
+            {{1,4,5,6,7,8}, 7},
+            {{1,4,5,6,7,8}, 8},
+            {{1,4,5,6,7,8}, 9},
+            {{1,4,5,6,7,8}, 10},
+    };
+    const auto npermutations = insertions.size();
+    for (uint_t i = 0; i < npermutations; i++) {
+        const auto permutation = hash::unique_in_range(i, 2, 0, npermutations);
+        std::swap(insertions[permutation[0]], insertions[permutation[1]]);
+    }
+    buffered::FrmOnvSpinChannel tmp_key(nsite);
+    buffered::Number<uint_t> tmp_val;
+    for (auto& insertion: insertions) {
+        tmp_key = insertion.first;
+        tmp_val = insertion.second;
+        if (mpi::irank() == 0) smuvi.insert(tmp_key, tmp_val);
+    }
+    // UnorderedSmuvi does not guarantee the order of AccessResult, insertion order may not be preserved.
+    smuvi.collate();
+    uint_t count = 0;  // count accidental equivalence between sorted value array and AccessResult
+    smuvi.foreach_value(tmp_key, [&](const field::Number<uint_t> &num){
+        if (num == num.m_row->index()) count += 1;
+    });
+    ASSERT_NE(count, insertions.size());
+}
 
 /**
  * @param input_data
