@@ -94,7 +94,7 @@ void Maes::make_otf_average_contribs(Walker &row, const shared_rows::Walker* hf,
     row.m_icycle_occ = icycle + 1;
 }
 
-void Maes::fill_from_wf_hist(const Table<MbfWeightRow>& hist) {
+void Maes::fill_from_wf_hist(const buffered::OpenAddressedTable<MbfWeightRow>& hist) {
     REQUIRE_TRUE_ALL(all_stores_empty(), "stores should be empty if no on-the-fly contributions have been made");
 
     logging::info("Filling MAEs using histogrammed partial CI vector composed of {} MBFs", hist.nrow_in_use());

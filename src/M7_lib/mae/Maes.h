@@ -49,7 +49,7 @@ struct Maes {
 
     Maes(const conf::Mae &opts, const wf::Vectors& wf);
 
-    operator bool() const;
+    explicit operator bool() const;
 
     bool all_stores_empty() const;
 
@@ -117,7 +117,7 @@ struct Maes {
      */
     void make_otf_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle);
 
-    void fill_from_wf_hist(const Table<MbfWeightRow>& hist);
+    void fill_from_wf_hist(const buffered::OpenAddressedTable<MbfWeightRow>& hist);
 
     void output(uint_t icycle, const Hamiltonian& ham, bool final=false);
 };
