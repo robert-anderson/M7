@@ -758,7 +758,9 @@ void wf::Vectors::update_gathered_hist(wf_comp_t thresh, uint_t icycle) {
 
     logging::info("Local histogrammed rows collected - gathering on shmem root");
     logging::flush_all();
-    m_gathered_hist.gatherv(local_averaged, mpi::irank_world_shmem_root());
+    m_gathered_hist.resize(mpi::all_sum(local_averaged.nrow_in_use()));
+    m_gathered_hist.gatherv(local_averaged);
+    m_gathered_hist.end_sync();  // rank 0 has written to table, sync HMW for other ranks
 
     ndiscard = mpi::all_sum(ndiscard);
     if (ndiscard) logging::info("Discarded {} low-weight MBFs from the histogrammed set", ndiscard);

@@ -124,7 +124,7 @@ TEST(SpinMapRdmFiller, Rdm1) {
     const sys::Sector sector(basis, particles);
 
     const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
-    buffered::Table<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
+    buffered::OpenAddressedTable<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
 
     const v_t<std::pair<wf_t, std::pair<uintv_t, uintv_t>>> weights_setbits_vec = {
             { 1.0, {{0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}}},
@@ -182,7 +182,7 @@ TEST(SpinMapRdmFiller, Rdm2) {
     const sys::Sector sector(basis, particles);
 
     const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
-    buffered::Table<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
+    buffered::OpenAddressedTable<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
 
     const v_t<std::pair<wf_t, std::pair<uintv_t, uintv_t>>> weights_setbits_vec = {
             { 1.0, {{0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}}},
@@ -246,7 +246,7 @@ TEST(SpinMapRdmFiller, Rdm3) {
     const sys::Sector sector(basis, particles);
 
     const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
-    buffered::Table<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
+    buffered::OpenAddressedTable<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
 
     const v_t<std::pair<wf_t, std::pair<uintv_t, uintv_t>>> weights_setbits_vec = {
             { 1.0, {{0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}}},
@@ -337,8 +337,8 @@ TEST(SpinMapRdmFiller, F4Rdm) {
     const sys::Sector sector(basis, particles);
 
     const NdFormat<c_ndim_wf> wf_fmt({1ul, 1ul});
-    buffered::Table<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
-    buffered::Table<MbfWeightRow> singles("test singles on hist", MbfWeightRow(basis, wf_fmt));
+    buffered::OpenAddressedTable<MbfWeightRow> hist("test hist", MbfWeightRow(basis, wf_fmt));
+    buffered::OpenAddressedTable<MbfWeightRow> singles("test singles on hist", MbfWeightRow(basis, wf_fmt));
 
     const v_t<std::pair<wf_t, std::pair<uintv_t, uintv_t>>> weights_setbits_vec = {
             { 1.0, {{0, 1, 2, 5, 6, 8}, {1, 2, 3, 5, 6, 7}}},

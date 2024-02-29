@@ -228,8 +228,8 @@ class SpinMapRdmFiller {
     /**
      * Histogrammable set of determinants of which to compute the outer product in filling the MAEs
      */
-    const Table<MbfWeightRow>& m_bra;
-    const Table<MbfWeightRow>& m_ket;
+    const buffered::OpenAddressedTable<MbfWeightRow>& m_bra;
+    const buffered::OpenAddressedTable<MbfWeightRow>& m_ket;
 
     /**
      * working objects for connections and common indices
@@ -271,14 +271,23 @@ class SpinMapRdmFiller {
                         field::FrmOnv(nullptr, basis)){}
     };
 
+    /**
+     * SMUVIs required for efficient pair finding within the histogrammed set
+     */
     SpinChannelToIndsSmuvi m_dets_contain_alpha;
     SpinChannelToIndsSmuvi m_dets_contain_beta;
     SpinChannelToSpinChannelSmuvi m_beta_with_alpha;
     SpinChannelToSpinChannelSmuvi m_alpha_with_beta;
+    /**
+     * Accelerate the construction of m_alpha/beta_singles
+     */
     SpinChannelToSpinChannelSmuvi m_alpha_single_dict;
     SpinChannelToSpinChannelSmuvi m_beta_single_dict;
     SpinChannelToSpinChannelSmuvi m_alpha_singles;
     SpinChannelToSpinChannelSmuvi m_beta_singles;
+    /**
+     * Accelerate the construction of m_alpha/beta_doubles
+     */
     SpinChannelToSpinChannelSmuvi m_alpha_double_dict;
     SpinChannelToSpinChannelSmuvi m_beta_double_dict;
     SpinChannelToSpinChannelSmuvi m_alpha_double_holes;
@@ -301,6 +310,9 @@ class SpinMapRdmFiller {
         const auto displ = mpi::evenly_shared_displ(psi0.nrow_in_use());
         const auto count = mpi::evenly_shared_count(psi0.nrow_in_use());
 
+        /**
+         * convert spatial orbital fock matrix into spin-orbital representation
+         */
         auto hist_row = psi0.m_row;
         buffered::Mbf work_mbf(hist_row.m_mbf.m_basis);
         const auto& basis = work_mbf.m_basis;
@@ -324,6 +336,9 @@ class SpinMapRdmFiller {
             }
         }
 
+        /**
+         * apply the fock matrix element-wise on the histogrammed set
+         */
         auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
             auto irank_dst = psi1.m_dist.irank(dst);
             auto& send_row = psi1.m_send_recv.send(irank_dst).m_row;
@@ -333,7 +348,6 @@ class SpinMapRdmFiller {
             send_row.m_weight *= val;
             if (phase) send_row.m_weight *= -1.0;
         };
-
         for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
             for (auto& diag_val: diag_vals) {
                 if (!hist_row.m_mbf.get(diag_val.first)) continue;
@@ -349,7 +363,7 @@ class SpinMapRdmFiller {
 
         psi1.communicate();
         /*
-         * do mini annihilation loop
+         * do mini (rank-local) annihilation loop
          */
         auto& recv_row = psi1.m_send_recv.recv().m_row;
         for (recv_row.restart(); recv_row; ++recv_row) {
@@ -410,6 +424,8 @@ public:
 
         buffered::FrmOnvSpinChannel alpha_channel(bra_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(bra_row.m_mbf.m_basis.m_nsite);
+
+        uint_t counter = 0;
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
@@ -434,10 +450,11 @@ public:
                 const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
                 m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
                                                       [&](const field::FrmOnvSpinChannel &common_string){
+                    counter += 1;
                     indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
                     const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
                     ket_row.jump(iket);
-                    DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 1, "only beta singles yield valid contributions.");
+                    REQUIRE_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 1, "only beta singles yield valid contributions.");
                     make_contrib_fn();
                 }, order_fn);
             });
@@ -451,7 +468,7 @@ public:
                     indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
                     const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
                     ket_row.jump(iket);
-                    DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 2, "only beta doubles yield valid contributions.");
+                    REQUIRE_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 2, "only beta doubles yield valid contributions.");
                     make_contrib_fn();
                 }, order_fn);
             });
@@ -462,16 +479,18 @@ public:
                    indices_dets_with_beta.m_value_row.jump(common_string.m_row->index());
                    const uint_t iket = indices_dets_with_beta.m_value_row.m_value;
                    ket_row.jump(iket);
-                   DEBUG_ASSERT_EQ(bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf), 2, "only alpha doubles yield valid contributions.");
+                   REQUIRE_EQ(bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf), 2, "only alpha doubles yield valid contributions.");
                    make_contrib_fn();
                }, order_fn);
             });
         }
+        logging::info_("counter: {}", counter);
     }
 
 
 public:
-    SpinMapRdmFiller(const Table<MbfWeightRow>& hist_bra, const Table<MbfWeightRow>& hist_ket):
+    SpinMapRdmFiller(const buffered::OpenAddressedTable<MbfWeightRow>& hist_bra,
+                     const buffered::OpenAddressedTable<MbfWeightRow>& hist_ket):
         m_bra(hist_bra),
         m_ket(hist_ket),
         m_work_conns(mbf::get_basis(m_ket.m_row.m_mbf).size()),
@@ -522,10 +541,10 @@ public:
             buffered::FrmOnvSpinChannel beta_channel1(hist_row.m_mbf.m_basis.m_nsite);
             buffered::FrmOnvSpinChannel beta_channel2(hist_row.m_mbf.m_basis.m_nsite);
             const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
-                m_ket.m_row.jump(i);
-                m_ket.m_row.m_mbf.copy_beta_to(beta_channel1);
-                m_ket.m_row.jump(j);
-                m_ket.m_row.m_mbf.copy_beta_to(beta_channel2);
+                hist_row.jump(i);
+                hist_row.m_mbf.copy_beta_to(beta_channel1);
+                hist_row.jump(j);
+                hist_row.m_mbf.copy_beta_to(beta_channel2);
                 return beta_channel1 < beta_channel2;
             };
             m_dets_contain_alpha.collate(order_fn);
@@ -535,10 +554,10 @@ public:
             buffered::FrmOnvSpinChannel alpha_channel1(hist_row.m_mbf.m_basis.m_nsite);
             buffered::FrmOnvSpinChannel alpha_channel2(hist_row.m_mbf.m_basis.m_nsite);
             const auto order_fn = [&](const field::Number<uint_t>& i, const field::Number<uint_t>& j) -> bool {
-                m_ket.m_row.jump(i);
-                m_ket.m_row.m_mbf.copy_alpha_to(alpha_channel1);
-                m_ket.m_row.jump(j);
-                m_ket.m_row.m_mbf.copy_alpha_to(alpha_channel2);
+                hist_row.jump(i);
+                hist_row.m_mbf.copy_alpha_to(alpha_channel1);
+                hist_row.jump(j);
+                hist_row.m_mbf.copy_alpha_to(alpha_channel2);
                 return alpha_channel1 < alpha_channel2;
             };
             m_dets_contain_beta.collate(order_fn);
@@ -691,13 +710,13 @@ public:
     /**
      * fill all RDMs
      */
-    static void fill(const Table<MbfWeightRow>& hist, Rdms* rdms) {
+    static void fill(const buffered::OpenAddressedTable<MbfWeightRow>& hist, Rdms* rdms) {
         if (!rdms) return;
 
-        // TODO: how to avoid code duplication?
         auto& row = hist.m_row;
         wf_comp_t norm = 0.0;
         for (row.restart(); row; ++row) norm += math::pow<2>(std::abs(row.m_weight[0]));
+        // logging::info_("rank local norm {}", norm);
         if (mpi::i_am_root()) rdms->m_total_norm.m_local = norm;
 
         bool have_pure = false;
@@ -721,8 +740,8 @@ public:
             }
         }
         if (rdms->m_fock_4rdm) {
-            /*
-             * the result of F * m_hist where F = sum_pq f_pq E_pq
+            /**
+             * |psi1> = \hat{F} |m_hist> where \hat{F} = sum_pq f_pq \hat{E}_pq
              */
             communicator::BasicSend<MbfWeightRow, MbfWeightRow> fock_x_hist(
                     "Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0});
@@ -730,10 +749,23 @@ public:
             logging::info("preparing Fock-perturbed vector F |0>");
             auto ptr = dynamic_cast<const TransitionFockRdm4*>(rdms->m_fock_4rdm);
             REQUIRE_TRUE(ptr, "SpinMapRdmFiller requires TransitionFockRdm4");
+            /**
+             * create |psi1>, each shmem holds a distributed copy of the entire vector
+             */
             if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
+            // TODO: only valid in each shmem realm
             logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
+            /**
+             * gather the components of |psi1> on shmem root as a shmem shared array, such that all determinants are
+             * accessible from all ranks.
+             */
+            buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist.m_store.m_row},
+                                                            Owner::shared(mpi::irank_world_shmem_root())};
+            psi1.resize(mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
+            psi1.gatherv(fock_x_hist.m_store);
+            psi1.end_sync();  // rank 0 has written to table, adjust HWM
 
-            SpinMapRdmFiller(hist, fock_x_hist.m_store).fill_rdm(rdms->m_fock_4rdm);
+            SpinMapRdmFiller(hist, psi1).fill_rdm(rdms->m_fock_4rdm);
         }
     }
 };

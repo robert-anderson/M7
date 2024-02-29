@@ -339,7 +339,6 @@ public:
             const auto proc_displ = mpi::evenly_shared_displ(access_row.m_table->nrow_in_use());
             const auto proc_count = mpi::evenly_shared_count(access_row.m_table->nrow_in_use());
             for (access_row.restart(proc_displ); access_row.in_range(proc_displ + proc_count); ++access_row) {
-            // for (access_row.restart(); access_row; ++access_row) {
                 const uint_t row_displ = access_row.m_value_displ;
                 const uint_t row_count = access_row.m_value_count;
                 value_row.jump(row_displ);
