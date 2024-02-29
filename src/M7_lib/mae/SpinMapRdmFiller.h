@@ -413,7 +413,13 @@ public:
         auto ket_row = m_ket.m_row;
 
         auto make_contrib_fn = [&]() {
-            const auto contrib = bra_row.m_weight[0] * ket_row.m_weight[0];
+            // TODO: hacky solution
+            v_t<double_t> braweight = {0}, ketweight = {0};
+            bra_row.m_weight.copy_to(braweight);
+            ket_row.m_weight.copy_to(ketweight);
+            const auto contrib = braweight[0] * ketweight[0];
+//            const auto contrib = bra_row.m_weight[0] * ket_row.m_weight[0];
+
             // switched ket and bra due to left/right non-hermiticity bug in F.4RDM
             make_contribs(rdm, ket_row.m_mbf, bra_row.m_mbf, contrib);
         };
@@ -427,6 +433,8 @@ public:
 
         uint_t counter = 0;
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
+            counter += 1;
+            if (counter % 1000) logging::info_("counter: {}", counter);
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
 
@@ -450,7 +458,6 @@ public:
                 const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
                 m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
                                                       [&](const field::FrmOnvSpinChannel &common_string){
-                    counter += 1;
                     indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
                     const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
                     ket_row.jump(iket);
@@ -484,7 +491,6 @@ public:
                }, order_fn);
             });
         }
-        logging::info_("counter: {}", counter);
     }
 
 
@@ -716,7 +722,6 @@ public:
         auto& row = hist.m_row;
         wf_comp_t norm = 0.0;
         for (row.restart(); row; ++row) norm += math::pow<2>(std::abs(row.m_weight[0]));
-        // logging::info_("rank local norm {}", norm);
         if (mpi::i_am_root()) rdms->m_total_norm.m_local = norm;
 
         bool have_pure = false;
