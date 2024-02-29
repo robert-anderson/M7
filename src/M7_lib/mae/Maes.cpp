@@ -113,6 +113,7 @@ void Maes::fill_from_wf_hist(const buffered::OpenAddressedTable<MbfWeightRow>& h
             for (ket.restart(); ket; ++ket) {
                 const auto exsig = mbf::exsig(bra.m_mbf, ket.m_mbf);
                 if (!m_rdms.takes_contribs_from(exsig)) continue;
+                // TODO: since hist is a shared array with owner rank 0, all other ranks get m_weight[0] = 0
                 const auto contrib = bra.m_weight[0] * ket.m_weight[0];
                 m_rdms.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
             }
