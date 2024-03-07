@@ -566,7 +566,7 @@ public:
             };
             m_dets_contain_beta.collate(order_fn);
         }
-        // unlike for (bit string -> det index), (bit string -> bit string) maps can reuse the same order_fn
+        // unlike (bit string -> det index), (bit string -> bit string) maps can reuse the same order_fn
         const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
             return i < j;
         };
@@ -577,8 +577,8 @@ public:
         uint_t counter_beta = 0;
         m_dets_contain_alpha.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){ counter_alpha += 1; });
         m_dets_contain_beta.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){ counter_beta += 1; });
-        logging::info("{} different alpha strings in histogrammed set", counter_alpha);
-        logging::info("{} different beta strings in histogrammed set", counter_beta);
+        logging::info("{} different alpha strings in histogrammed set", mpi::all_sum(counter_alpha));
+        logging::info("{} different beta strings in histogrammed set", mpi::all_sum(counter_beta));
         /**
          *  Generate all (N - 1) electron states from the spin strings.
          */
@@ -629,16 +629,10 @@ public:
         uint_t counter_betasingles = 0;
         m_alpha_singles.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){ counter_alphasingles += idets.nremain(); });
         m_beta_singles.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){ counter_betasingles += idets.nremain(); });
-        logging::info("{} alpha singles in value arrays", counter_alphasingles);
-        logging::info("{} beta singles in value arrays", counter_betasingles);
+        logging::info("{} alpha singles in value arrays", mpi::all_sum(counter_alphasingles));
+        logging::info("{} beta singles in value arrays", mpi::all_sum(counter_betasingles));
         logging::info("completed constructing singles arrays");
 
-        /**
-         *   Factorise the two-particle excitation operator into two-particle holes and particles,
-         *   i.e. for every string store all possible (N - 2) strings and the other way around. Building the
-         *   pure spin double excitations then reduces to a nested loop over all holes and particles
-         *   (the latter are only included if they exist in the histogrammed set)
-         */
         logging::info("construct doubles auxiliary arrays");
         UnorderedSpinChannelToSpinChannelSmuvi* spin_double_dict = nullptr;
         auto gen_two_less_electron= [&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){
@@ -661,30 +655,38 @@ public:
         logging::info("completed constructing doubles auxiliary arrays");
         /**
          * Loop over each key of the (N - 2) electron SMUVI and add the values to the m_(spin)_doubles SMUVI analogous
-         * to the singles, but take care that only genuine doubles are counted.
+         * to the singles, but take care that only genuine doubles are counted. Single excitations will occur under
+         * multiple (N - 2) residues, but are filtered out.
          */
         logging::info("construct doubles arrays");
         SpinChannelToSpinChannelSmuvi* spin_doubles = nullptr;
+        uint_t counter_insert = 0ul;
         auto gen_spin_doubles = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult strings){
             spin_double_dict->foreach_value_pair(key, [&](const field::FrmOnvSpinChannel& value_1, const field::FrmOnvSpinChannel& value_2){
-                if (value_1.nsetbit_not_in(value_2) == 2) spin_doubles->insert(value_1, value_2);
+                if (value_1.nsetbit_not_in(value_2) == 2) {
+                    counter_insert += 1;
+                    spin_doubles->insert(value_1, value_2);
+                }
             });
         };
         spin_double_dict = &m_alpha_double_dict;
         spin_doubles = &m_alpha_doubles;
         m_alpha_double_dict.foreach_key(gen_spin_doubles);
-        m_alpha_doubles.collate(order_fn);
+        logging::info("total filtered insertion workload alpha doubles {}", mpi::all_sum(counter_insert));
+        counter_insert = 0ul;
         spin_double_dict = &m_beta_double_dict;
         spin_doubles = &m_beta_doubles;
         m_beta_double_dict.foreach_key(gen_spin_doubles);
+        logging::info("total filtered insertion workload beta doubles {}", mpi::all_sum(counter_insert));
+        m_alpha_doubles.collate(order_fn);
         m_beta_doubles.collate(order_fn);
 
         uint_t counter_alphadoubles= 0;
         uint_t counter_betadoubles = 0;
         m_alpha_doubles.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){ counter_alphadoubles += idets.nremain(); });
         m_beta_doubles.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){ counter_betadoubles += idets.nremain(); });
-        logging::info("{} alpha doubles in value arrays", counter_alphadoubles);
-        logging::info("{} beta doubles in value arrays", counter_betadoubles);
+        logging::info("{} alpha doubles in value arrays", mpi::all_sum(counter_alphadoubles));
+        logging::info("{} beta doubles in value arrays", mpi::all_sum(counter_betadoubles));
         logging::info("completed constructing doubles arrays");
     }
 
