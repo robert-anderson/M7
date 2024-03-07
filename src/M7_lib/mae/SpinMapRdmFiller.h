@@ -463,7 +463,7 @@ public:
                     indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
                     const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
                     ket_row.jump(iket);
-                    REQUIRE_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 1, "only beta singles yield valid contributions.");
+                    DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 1, "only beta singles yield valid contributions.");
                     make_contrib_fn();
                 }, order_fn);
             });
@@ -477,7 +477,7 @@ public:
                     indices_dets_with_alpha.m_value_row.jump(common_string.m_row->index());
                     const uint_t iket = indices_dets_with_alpha.m_value_row.m_value;
                     ket_row.jump(iket);
-                    REQUIRE_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 2, "only beta doubles yield valid contributions.");
+                    DEBUG_ASSERT_EQ(bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf), 2, "only beta doubles yield valid contributions.");
                     make_contrib_fn();
                 }, order_fn);
             });
@@ -488,7 +488,7 @@ public:
                    indices_dets_with_beta.m_value_row.jump(common_string.m_row->index());
                    const uint_t iket = indices_dets_with_beta.m_value_row.m_value;
                    ket_row.jump(iket);
-                   REQUIRE_EQ(bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf), 2, "only alpha doubles yield valid contributions.");
+                   DEBUG_ASSERT_EQ(bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf), 2, "only alpha doubles yield valid contributions.");
                    make_contrib_fn();
                }, order_fn);
             });
@@ -573,6 +573,12 @@ public:
         m_alpha_with_beta.collate(order_fn);
         m_beta_with_alpha.collate(order_fn);
 
+        uint_t counter_alpha = 0;
+        uint_t counter_beta = 0;
+        m_dets_contain_alpha.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){ counter_alpha += 1; });
+        m_dets_contain_beta.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){ counter_beta += 1; });
+        logging::info("{} different alpha strings in histogrammed set", counter_alpha);
+        logging::info("{} different beta strings in histogrammed set", counter_beta);
         /**
          *  Generate all (N - 1) electron states from the spin strings.
          */
@@ -587,14 +593,14 @@ public:
             };
             key.foreach_setbit(inner_fn);
         };
-        logging::info("construct singles aux arrays");
+        logging::info("construct singles auxiliary arrays");
         spin_single_dict = &m_alpha_single_dict;
         m_dets_contain_alpha.foreach_key(gen_one_less_electron);
         m_alpha_single_dict.collate();
         spin_single_dict = &m_beta_single_dict;
         m_dets_contain_beta.foreach_key(gen_one_less_electron);
         m_beta_single_dict.collate();
-        logging::info("completed constructing singles aux arrays");
+        logging::info("completed constructing singles auxiliary arrays");
         /**
          *  Loop over all (N - 1) electron keys of the m_(spin)_single_dict SMUVI and add pairs as key value pairs into
          *  the m_(spin)_singles SMUVIs. For example, the key [0011100] may point to [1011100, 0111100, 0011101, ...], then
@@ -618,6 +624,13 @@ public:
         spin_singles = &m_beta_singles;
         m_beta_single_dict.foreach_key(gen_spin_singles);
         m_beta_singles.collate(order_fn);
+
+        uint_t counter_alphasingles= 0;
+        uint_t counter_betasingles = 0;
+        m_alpha_singles.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){ counter_alphasingles += idets.nremain(); });
+        m_beta_singles.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){ counter_betasingles += idets.nremain(); });
+        logging::info("{} alpha singles in value arrays", counter_alphasingles);
+        logging::info("{} beta singles in value arrays", counter_betasingles);
         logging::info("completed constructing singles arrays");
 
         /**
@@ -626,7 +639,7 @@ public:
          *   pure spin double excitations then reduces to a nested loop over all holes and particles
          *   (the latter are only included if they exist in the histogrammed set)
          */
-        logging::info("construct doubles aux arrays");
+        logging::info("construct doubles auxiliary arrays");
         UnorderedSpinChannelToSpinChannelSmuvi* spin_double_dict = nullptr;
         auto gen_two_less_electron= [&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){
             tmp_spin_channel = key;
@@ -645,7 +658,7 @@ public:
         spin_double_dict = &m_beta_double_dict;
         m_dets_contain_beta.foreach_key(gen_two_less_electron);
         m_beta_double_dict.collate();
-        logging::info("completed constructing doubles aux arrays");
+        logging::info("completed constructing doubles auxiliary arrays");
         /**
          * Loop over each key of the (N - 2) electron SMUVI and add the values to the m_(spin)_doubles SMUVI analogous
          * to the singles, but take care that only genuine doubles are counted.
@@ -665,6 +678,13 @@ public:
         spin_doubles = &m_beta_doubles;
         m_beta_double_dict.foreach_key(gen_spin_doubles);
         m_beta_doubles.collate(order_fn);
+
+        uint_t counter_alphadoubles= 0;
+        uint_t counter_betadoubles = 0;
+        m_alpha_doubles.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){ counter_alphadoubles += idets.nremain(); });
+        m_beta_doubles.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){ counter_betadoubles += idets.nremain(); });
+        logging::info("{} alpha doubles in value arrays", counter_alphadoubles);
+        logging::info("{} beta doubles in value arrays", counter_betadoubles);
         logging::info("completed constructing doubles arrays");
     }
 
