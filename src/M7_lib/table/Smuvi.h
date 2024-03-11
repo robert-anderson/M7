@@ -112,6 +112,12 @@ template<typename key_t, typename value_t>
 class SmuviBase {
 protected:
     /**
+     * default size of the Smuvi m_inserter to prevent frequent resizes
+     */
+    static constexpr uint_t default_inserter_size = 100000ul;
+    static constexpr double default_expansion_factor = 2.0;
+
+    /**
      * Row type for the inserter tables
      */
     struct InsertRow : Row {
@@ -171,8 +177,9 @@ protected:
     v_t<ValueRow> m_values_foreach_rows_1;
     v_t<ValueRow> m_values_foreach_rows_2;
 
-    SmuviBase(str_t name, const key_t& key, const value_t& value):
-            m_inserter(name, InsertRow(key, value), {100, 2.0}),
+    SmuviBase(str_t name, const key_t& key, const value_t& value, const uint_t inserter_size = default_inserter_size,
+              const double expansion_factor = default_expansion_factor):
+            m_inserter(name, InsertRow(key, value), {inserter_size, expansion_factor}),
             m_irank_world_to_iaccess_table(mpi::nrank(), ~0ul) {
         // index of the shared memory realm
         const auto ishmem = mpi::g_ishmems[mpi::irank()];
@@ -582,7 +589,10 @@ class Smuvi : public SmuviBase<key_t, value_t> {
 public:
     using SmuviBase<key_t, value_t>::access;
 
-    Smuvi(str_t name, const key_t& key, const value_t& value): SmuviBase<key_t, value_t>(std::move(name), key, value){}
+    Smuvi(str_t name, const key_t& key, const value_t& value,
+          const uint_t inserter_size = SmuviBase<key_t, value_t>::default_inserter_size,
+          const double expansion_factor = SmuviBase<key_t, value_t>::default_expansion_factor):
+            SmuviBase<key_t, value_t>(std::move(name), key, value, inserter_size, expansion_factor){}
 
     /**
      * yield by call to fn_t each time a common value is found among the (ordered) values of the two keys
@@ -629,7 +639,10 @@ public:
 template<typename key_t, typename value_t>
 class UnorderedSmuvi : public SmuviBase<key_t, value_t> {
 public:
-    UnorderedSmuvi(str_t name, const key_t& key, const value_t& value): SmuviBase<key_t, value_t>(std::move(name), key, value){}
+    UnorderedSmuvi(str_t name, const key_t& key, const value_t& value,
+                   const uint_t inserter_size = SmuviBase<key_t, value_t>::default_inserter_size,
+                   const double expansion_factor = SmuviBase<key_t, value_t>::default_expansion_factor):
+                   SmuviBase<key_t, value_t>(std::move(name), key, value, inserter_size, expansion_factor){}
 
     void collate() {
         SmuviBase<key_t, value_t>::collate_base(std::false_type());

@@ -521,6 +521,23 @@ public:
         const auto count = mpi::evenly_shared_count(hist_ket.nrow_in_use());
         auto hist_row = m_ket.m_row;
 
+        /**
+         * To prevent too many resizes of Smuvi::m_inserter_row, some assumptions on the insertion workload
+         * have to be made:
+         *      1. m_dets_contain_alpha/beta:
+         *          empirically, the number of unique spin strings scales as ket_size^{0.7},
+         *      2. m_beta/alpha_with_alpha/beta:
+         *          on average each spin string occurs with ket_size / ket_size^{0.7} = ket_size^{0.3}
+         *          other strings,
+         *      3. m_alpha/beta_single/double_dict:
+         *          from each string one can make n_spinelec (n-1) strings and
+         *          (1/2 n_spinelec (n_spinelec-1)) (n-2) strings,
+         *      4. m_alpha/beta_singles/doubles:
+         *          each string can at most have (n_spinelec * n_spinholes) singles and
+         *          each string can at most have ((n_spinelec choose 2) * (n_spinholes choose 2) doubles.
+         *          I assume a load factor of 0.25 for singles and 0.1 for doubles.
+         */
+
         buffered::FrmOnvSpinChannel alpha_channel(hist_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(hist_row.m_mbf.m_basis.m_nsite);
         /**
