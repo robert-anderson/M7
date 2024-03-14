@@ -529,14 +529,15 @@ public:
         m_alpha_double_dict("auxiliary spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_beta_double_dict("auxiliary spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
         m_alpha_doubles("spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_doubles("spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]) {
+        m_beta_doubles("spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1])
+        {
 
         logging::info("Constructing auxiliary arrays for RDM calculation");
         const auto displ = mpi::evenly_shared_displ(hist_ket.nrow_in_use());
         const auto count = mpi::evenly_shared_count(hist_ket.nrow_in_use());
         auto hist_row = m_ket.m_row;
 
-        const uint_t unique_string_estimate = std::pow(count, 0.7);  // empirical exponent
+        const uint_t unique_string_estimate = std::pow(count, 0.8);  // empirical exponent
         const uint_t n_alpha_elec = hist_row.m_mbf.m_basis.m_nspinorb / 2;  // TODO: nalpha yields 0?
         const uint_t n_beta_elec = hist_row.m_mbf.m_basis.m_nspinorb / 2;
         m_dets_contain_alpha.set_inserter_size(unique_string_estimate);
@@ -545,8 +546,8 @@ public:
         m_beta_with_alpha.set_inserter_size(count / unique_string_estimate);
         m_alpha_single_dict.set_inserter_size(unique_string_estimate * n_alpha_elec);
         m_beta_single_dict.set_inserter_size(unique_string_estimate * n_beta_elec);
-        m_alpha_double_dict.set_inserter_size(unique_string_estimate * n_alpha_elec * (n_alpha_elec - 1));
-        m_beta_double_dict.set_inserter_size(unique_string_estimate * n_alpha_elec * (n_alpha_elec - 1));
+//        m_alpha_double_dict.set_inserter_size(unique_string_estimate * n_alpha_elec * (n_alpha_elec - 1));
+//        m_beta_double_dict.set_inserter_size(unique_string_estimate * n_alpha_elec * (n_alpha_elec - 1));
         /**
          *  Construct SMUVIs which given a FrmOnvSpinChannel yield
          *      the rows of the histogrammed set containing this spin string: m_dets_contain_(spin),
@@ -780,7 +781,7 @@ public:
             {
                 auto ptr = rdms->get_pure_rdm(opsig::c_trip);
                 if (ptr) {
-                    const uint_t anticipated_rows = math::pow<6>(row.m_mbf.m_basis.m_nsite);
+                    const uint_t anticipated_rows = math::pow<5>(row.m_mbf.m_basis.m_nsite);
                     ptr->m_send_recv.resize(anticipated_rows);
                     for (uint_t i = 0ul; i < mpi::nrank(); ++i) ptr->m_send_recv.send(i).remap(anticipated_rows);
                     ptr->m_store.resize(anticipated_rows);
@@ -815,7 +816,7 @@ public:
             psi1.gatherv(fock_x_hist.m_store);
             psi1.end_sync();  // rank 0 has written to table, adjust HWM
 
-            const uint_t anticipated_rows = math::pow<6>(row.m_mbf.m_basis.m_nsite);
+            const uint_t anticipated_rows = math::pow<5>(row.m_mbf.m_basis.m_nsite);
             rdms->m_fock_4rdm->m_send_recv.resize(anticipated_rows);
             for (uint_t i = 0ul; i < mpi::nrank(); ++i) rdms->m_fock_4rdm->m_send_recv.send(i).remap(anticipated_rows);
             rdms->m_fock_4rdm->m_store.resize(anticipated_rows);
