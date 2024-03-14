@@ -114,7 +114,7 @@ protected:
     /**
      * default size of the Smuvi m_inserter to prevent frequent resizes
      */
-    static constexpr uint_t default_inserter_size = 100000ul;
+    static constexpr uint_t default_inserter_size = 1e4;
     static constexpr double default_expansion_factor = 2.0;
 
     /**
@@ -216,6 +216,11 @@ protected:
     }
 
 public:
+
+    void set_inserter_size(uint_t new_size) {
+        REQUIRE_GE(new_size, m_inserter.row_size(), "new size cannot be smaller than the current number of elements");
+        m_inserter.resize(new_size);
+    }
 
     void insert(const key_t& key, const value_t& value) {
         // send a copy to one rank in each shared memory realm
