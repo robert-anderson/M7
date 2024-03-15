@@ -518,18 +518,18 @@ public:
         m_ket(hist_ket),
         m_work_conns(mbf::get_basis(m_ket.m_row.m_mbf).size()),
         m_work_com_ops(mbf::get_basis(m_ket.m_row.m_mbf).size()),
-        m_dets_contain_alpha("spin channel to index map (alpha)", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_dets_contain_beta("spin channel to index map (beta)", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_with_alpha("spin channel to spin channel map (alpha)", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_with_beta("spin channel to spin channel map (beta)", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_single_dict("auxiliary spin channel to spin channel map alpha singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_single_dict("auxiliary spin channel to spin channel map beta singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_singles("spin channel to spin channel map alpha singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_singles("spin channel to spin channel map beta singles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_double_dict("auxiliary spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_double_dict("auxiliary spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_alpha_doubles("spin channel to spin channel map alpha doubles", m_ket.m_row.m_mbf.m_format.m_shape[1]),
-        m_beta_doubles("spin channel to spin channel map beta doubles", m_ket.m_row.m_mbf.m_format.m_shape[1])
+        m_dets_contain_alpha("dets containing alpha", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_dets_contain_beta("dets containing beta", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_with_alpha("betas with alpha", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_with_beta("alphas with beta", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_single_dict("alpha (N - 1) hole strings", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_single_dict("beta (N - 1) hole strings", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_singles("alpha single excitations", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_singles("beta single excitations", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_double_dict("alpha (N - 2) hole strings", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_double_dict("beta (N - 2) hole strings", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_alpha_doubles("alpha double excitations", m_ket.m_row.m_mbf.m_format.m_shape[1]),
+        m_beta_doubles("beta double excitations", m_ket.m_row.m_mbf.m_format.m_shape[1])
         {
 
         logging::info("Constructing auxiliary arrays for RDM calculation");
@@ -537,15 +537,15 @@ public:
         const auto count = mpi::evenly_shared_count(hist_ket.nrow_in_use());
         auto hist_row = m_ket.m_row;
 
-        const uint_t unique_string_estimate = std::pow(count, 0.8);  // empirical exponent
+        const uint_t unique_string_estimate = std::pow(count, 0.65);  // empirical exponent
         const uint_t n_alpha_elec = hist_row.m_mbf.m_basis.m_nspinorb / 2;  // TODO: nalpha yields 0?
         const uint_t n_beta_elec = hist_row.m_mbf.m_basis.m_nspinorb / 2;
-        m_dets_contain_alpha.set_inserter_size(unique_string_estimate);
-        m_dets_contain_beta.set_inserter_size(unique_string_estimate);
-        m_alpha_with_beta.set_inserter_size(count / unique_string_estimate);
-        m_beta_with_alpha.set_inserter_size(count / unique_string_estimate);
-        m_alpha_single_dict.set_inserter_size(unique_string_estimate * n_alpha_elec);
-        m_beta_single_dict.set_inserter_size(unique_string_estimate * n_beta_elec);
+        m_dets_contain_alpha.set_inserter_size(unique_string_estimate / mpi::nrank());
+        m_dets_contain_beta.set_inserter_size(unique_string_estimate / mpi::nrank());
+        m_alpha_with_beta.set_inserter_size(count / unique_string_estimate / mpi::nrank());
+        m_beta_with_alpha.set_inserter_size(count / unique_string_estimate / mpi::nrank());
+        m_alpha_single_dict.set_inserter_size(unique_string_estimate * n_alpha_elec / mpi::nrank());
+        m_beta_single_dict.set_inserter_size(unique_string_estimate * n_beta_elec / mpi::nrank());
 //        m_alpha_double_dict.set_inserter_size(unique_string_estimate * n_alpha_elec * (n_alpha_elec - 1));
 //        m_beta_double_dict.set_inserter_size(unique_string_estimate * n_alpha_elec * (n_alpha_elec - 1));
         /**
@@ -645,10 +645,10 @@ public:
             n_insertions += idets.nremain()/2 * (idets.nremain() - 1);  // number of pairs in AccessResult
         };
         m_alpha_single_dict.foreach_key(estimate_insertions);
-        m_alpha_singles.set_inserter_size(n_insertions);
+        m_alpha_singles.set_inserter_size(n_insertions / mpi::nrank());
         n_insertions = 0ul;
         m_beta_single_dict.foreach_key(estimate_insertions);
-        m_beta_singles.set_inserter_size(n_insertions);
+        m_beta_singles.set_inserter_size(n_insertions / mpi::nrank());
         n_insertions = 0ul;
 
         SpinChannelToSpinChannelSmuvi* spin_singles = nullptr;
@@ -759,7 +759,7 @@ public:
             {
                 auto ptr = rdms->get_pure_rdm(opsig::c_sing);
                 if (ptr) {
-                    const uint_t anticipated_rows = math::pow<2>(row.m_mbf.m_basis.m_nsite);
+                    const uint_t anticipated_rows = math::pow<2>(row.m_mbf.m_basis.m_nsite) / (2*mpi::nrank());
                     ptr->m_send_recv.resize(anticipated_rows);
                     for (uint_t i = 0ul; i < mpi::nrank(); ++i) ptr->m_send_recv.send(i).remap(anticipated_rows);
                     ptr->m_store.resize(anticipated_rows);
@@ -770,7 +770,7 @@ public:
             {
                 auto ptr = rdms->get_pure_rdm(opsig::c_doub);
                 if (ptr) {
-                    const uint_t anticipated_rows = math::pow<4>(row.m_mbf.m_basis.m_nsite);
+                    const uint_t anticipated_rows = math::pow<4>(row.m_mbf.m_basis.m_nsite)  / (4*mpi::nrank());
                     ptr->m_send_recv.resize(anticipated_rows);
                     for (uint_t i = 0ul; i < mpi::nrank(); ++i) ptr->m_send_recv.send(i).remap(anticipated_rows);
                     ptr->m_store.resize(anticipated_rows);
@@ -781,7 +781,7 @@ public:
             {
                 auto ptr = rdms->get_pure_rdm(opsig::c_trip);
                 if (ptr) {
-                    const uint_t anticipated_rows = math::pow<5>(row.m_mbf.m_basis.m_nsite);
+                    const uint_t anticipated_rows = math::pow<6>(row.m_mbf.m_basis.m_nsite) / (6*mpi::nrank());
                     ptr->m_send_recv.resize(anticipated_rows);
                     for (uint_t i = 0ul; i < mpi::nrank(); ++i) ptr->m_send_recv.send(i).remap(anticipated_rows);
                     ptr->m_store.resize(anticipated_rows);
@@ -816,7 +816,7 @@ public:
             psi1.gatherv(fock_x_hist.m_store);
             psi1.end_sync();  // rank 0 has written to table, adjust HWM
 
-            const uint_t anticipated_rows = math::pow<5>(row.m_mbf.m_basis.m_nsite);
+            const uint_t anticipated_rows = math::pow<6>(row.m_mbf.m_basis.m_nsite) / (6*mpi::nrank());
             rdms->m_fock_4rdm->m_send_recv.resize(anticipated_rows);
             for (uint_t i = 0ul; i < mpi::nrank(); ++i) rdms->m_fock_4rdm->m_send_recv.send(i).remap(anticipated_rows);
             rdms->m_fock_4rdm->m_store.resize(anticipated_rows);
