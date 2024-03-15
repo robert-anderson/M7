@@ -759,7 +759,7 @@ public:
             {
                 auto ptr = rdms->get_pure_rdm(opsig::c_sing);
                 if (ptr) {
-                    const uint_t anticipated_rows = math::pow<2>(row.m_mbf.m_basis.m_nsite) / (2*mpi::nrank());
+                    const uint_t anticipated_rows = math::pow<3>(row.m_mbf.m_basis.m_nsite) / (2*mpi::nrank());
                     ptr->m_send_recv.resize(anticipated_rows);
                     for (uint_t i = 0ul; i < mpi::nrank(); ++i) ptr->m_send_recv.send(i).remap(anticipated_rows);
                     ptr->m_store.resize(anticipated_rows);
@@ -781,7 +781,7 @@ public:
             {
                 auto ptr = rdms->get_pure_rdm(opsig::c_trip);
                 if (ptr) {
-                    const uint_t anticipated_rows = math::pow<6>(row.m_mbf.m_basis.m_nsite) / (6*mpi::nrank());
+                    const uint_t anticipated_rows = math::pow<5>(row.m_mbf.m_basis.m_nsite) / (6*mpi::nrank());
                     ptr->m_send_recv.resize(anticipated_rows);
                     for (uint_t i = 0ul; i < mpi::nrank(); ++i) ptr->m_send_recv.send(i).remap(anticipated_rows);
                     ptr->m_store.resize(anticipated_rows);
@@ -816,7 +816,7 @@ public:
             psi1.gatherv(fock_x_hist.m_store);
             psi1.end_sync();  // rank 0 has written to table, adjust HWM
 
-            const uint_t anticipated_rows = math::pow<6>(row.m_mbf.m_basis.m_nsite) / (6*mpi::nrank());
+            const uint_t anticipated_rows = math::pow<5>(row.m_mbf.m_basis.m_nsite) / (6*mpi::nrank());
             rdms->m_fock_4rdm->m_send_recv.resize(anticipated_rows);
             for (uint_t i = 0ul; i < mpi::nrank(); ++i) rdms->m_fock_4rdm->m_send_recv.send(i).remap(anticipated_rows);
             rdms->m_fock_4rdm->m_store.resize(anticipated_rows);
