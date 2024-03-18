@@ -537,15 +537,18 @@ public:
         const auto count = mpi::evenly_shared_count(hist_ket.nrow_in_use());
         auto hist_row = m_ket.m_row;
 
-        const uint_t unique_string_estimate = std::pow(count, 0.65);  // empirical exponent
-        const uint_t n_alpha_elec = hist_row.m_mbf.m_basis.m_nspinorb / 2;  // TODO: nalpha yields 0?
-        const uint_t n_beta_elec = hist_row.m_mbf.m_basis.m_nspinorb / 2;
-        m_dets_contain_alpha.set_inserter_size(unique_string_estimate / mpi::nrank());
-        m_dets_contain_beta.set_inserter_size(unique_string_estimate / mpi::nrank());
-        m_alpha_with_beta.set_inserter_size(count / unique_string_estimate / mpi::nrank());
-        m_beta_with_alpha.set_inserter_size(count / unique_string_estimate / mpi::nrank());
-        m_alpha_single_dict.set_inserter_size(unique_string_estimate * n_alpha_elec / mpi::nrank());
-        m_beta_single_dict.set_inserter_size(unique_string_estimate * n_beta_elec / mpi::nrank());
+        buffered::FrmOnvSpinChannel alpha_channel(hist_row.m_mbf.m_basis.m_nsite);
+        buffered::FrmOnvSpinChannel beta_channel(hist_row.m_mbf.m_basis.m_nsite);
+
+        const uint_t unique_strings = std::pow(hist_ket.nrow_in_use(), 0.65);  // empirical exponent
+        const uint_t n_alpha_elec = alpha_channel.nsetbit();
+        const uint_t n_beta_elec = beta_channel.nsetbit();
+        m_dets_contain_alpha.set_inserter_size(unique_strings / mpi::nrank());
+        m_dets_contain_beta.set_inserter_size(unique_strings / mpi::nrank());
+        m_alpha_with_beta.set_inserter_size((count / unique_strings) / mpi::nrank());
+        m_beta_with_alpha.set_inserter_size((count / unique_strings) / mpi::nrank());
+        m_alpha_single_dict.set_inserter_size((unique_strings * n_alpha_elec) / mpi::nrank());
+        m_beta_single_dict.set_inserter_size((unique_strings * n_beta_elec) / mpi::nrank());
 //        m_alpha_double_dict.set_inserter_size(unique_string_estimate * n_alpha_elec * (n_alpha_elec - 1));
 //        m_beta_double_dict.set_inserter_size(unique_string_estimate * n_alpha_elec * (n_alpha_elec - 1));
         /**
@@ -553,8 +556,6 @@ public:
          *      the rows of the histogrammed set containing this spin string: m_dets_contain_(spin),
          *      the opposite spin strings occurring with it: m_(spin1)_with_(spin2)
          */
-        buffered::FrmOnvSpinChannel alpha_channel(hist_row.m_mbf.m_basis.m_nsite);
-        buffered::FrmOnvSpinChannel beta_channel(hist_row.m_mbf.m_basis.m_nsite);
         for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
             hist_row.m_mbf.copy_alpha_to(alpha_channel);
             hist_row.m_mbf.copy_beta_to(beta_channel);

@@ -218,9 +218,8 @@ protected:
 public:
 
     void set_inserter_size(uint_t new_size) {
-//        REQUIRE_GE(new_size, m_inserter.row_size(), "new size cannot be smaller than the current number of elements");
-        if (new_size < m_inserter.row_size()) return;
-        m_inserter.resize(new_size);
+        if (new_size / mpi::nrank() < m_inserter.row_size()) return;
+        m_inserter.resize(new_size / mpi::nrank());
     }
 
     void insert(const key_t& key, const value_t& value) {
