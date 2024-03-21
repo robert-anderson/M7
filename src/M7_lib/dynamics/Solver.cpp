@@ -289,6 +289,7 @@ void Solver::loop_over_occupied_mbfs() {
 
 void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
     if (!m_maes.m_on_the_fly){
+        logging::info("Computing RDMs from histogrammed set.");
         m_wf.update_gathered_hist_if_changed(
                 m_maes.m_opts.m_notf_fill_discard_thresh, icycle);
         m_maes.fill_from_wf_hist(m_wf.m_gathered_hist);

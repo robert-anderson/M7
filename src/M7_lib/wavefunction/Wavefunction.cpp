@@ -779,10 +779,17 @@ void wf::Vectors::update_gathered_hist_if_changed(wf_comp_t thresh, uint_t icycl
 
 void wf::Vectors::attempt_gathered_hist_save(uint_t icycle) {
     if (!m_opts.m_wavefunction.m_save_hist.m_enabled) return;
+    logging::info("Writing histogrammed coefficients to file.");
     update_gathered_hist_if_changed(m_opts.m_wavefunction.m_save_hist.m_thresh, icycle);
     hdf5::FileWriter fw(m_opts.m_wavefunction.m_save_hist.m_path);
     auto& row = m_gathered_hist.m_row;
     hdf5::GroupWriter gw(fw, "wf");
     row.m_mbf.save(gw, mpi::i_am_root());
     row.m_weight.save(gw, mpi::i_am_root());
+    /**
+     * clear the buffer now, otherwise, if in the RDM calculation determinants shall be discarded
+     * by a different weight criterion than for dumping to disk, the shared array will be resized
+     * to a size smaller than current number of elements.
+     */
+    m_gathered_hist.clear();
 }
