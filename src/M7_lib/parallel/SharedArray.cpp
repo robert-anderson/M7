@@ -24,7 +24,7 @@ void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, 
     mpi::barrier(mpi::SharedMemory);
     int disp_unit;
     MPI_Aint alloc_size;
-    ierr = MPI_Win_shared_query(*win, irank_owner, &alloc_size, &disp_unit, data);
+    ierr = MPI_Win_shared_query(*win, MPI_PROC_NULL, &alloc_size, &disp_unit, data);
     REQUIRE_EQ(ierr, MPI_SUCCESS, "MPI Shared memory error");
     REQUIRE_TRUE_ALL(*data, "data pointer not set");
     REQUIRE_EQ(uint_t(disp_unit), element_size, "incorrect window element size");
