@@ -35,10 +35,6 @@ struct Maes {
      */
     const bool m_on_the_fly;
     /**
-     * if true, the MAEs will be computed without any FCIQMC iterations from the M7.hist.h5 file.
-     */
-    const bool m_direct_maes;
-    /**
      * cycle on which the current period started
      */
     uint_t m_icycle_period_start = ~0ul;

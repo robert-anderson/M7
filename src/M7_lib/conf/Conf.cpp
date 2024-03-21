@@ -333,7 +333,6 @@ conf::Mae::Mae(Group *parent) :
                         "many-body wavefunction(s) and averaged on-the-fly over a number of MC cycles", Explicit),
         m_delay(this, "delay", 1000ul,
             "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate"),
-        m_direct_maes(this, "direct_maes", false, "if true, RDMs will be computed from M7.hist.h5 without any FCIQMC iterations"),
         m_ncycle(this, "ncycle", ~0ul,
             "number of MC cycles for which to accumulate MAEs before terminating the calculation"),
         m_stats_period(this, "stats_period", 100ul,
