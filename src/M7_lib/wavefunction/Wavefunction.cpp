@@ -701,7 +701,8 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
 
         auto fn = [&](const Spawn& recv_row) {
             auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
-            store_row.protect();
+            // determinants from M7.wf.h5 to restart a calculation should not necessarily be histogrammed
+            if (!have_weights) store_row.protect();
             const auto ipart = recv_row.m_ipart_dst[0];
             if (have_weights) set_weight(store_row, ipart, recv_row.m_delta_weight);
             ++nrow_recv;
@@ -743,6 +744,7 @@ void wf::Vectors::update_gathered_hist(wf_comp_t thresh, uint_t icycle) {
     local_row.restart();
 
     auto add_local_hist_walker_fn = [&ndiscard, &thresh, &local_row, &icycle](const Walker& walker){
+        // semi-stochastic walkers are also protected and thus invariably histogrammed
         if (walker.is_protected()) {
             const auto av_weight = walker.m_average_weight[0] / walker.occupied_ncycle(icycle);
             if (std::abs(av_weight) < thresh) {
