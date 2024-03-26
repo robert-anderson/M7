@@ -153,10 +153,10 @@ void Solver::execute(uint_t ncycle) {
      */
     if (m_maes.m_opts.m_delay == 0 && m_maes.m_opts.m_ncycle == 0) {
         m_maes.m_accum_epoch.update(0, true);
-        m_icycle += 1;  // fake a single iteration
+        m_icycle += 2;  // fake two iterations, such that average occupation is computed correctly
         Walker& walker = m_wf.m_store.m_row;
         for (walker.restart(); walker; ++walker) {
-            walker.m_icycle_occ = m_icycle;
+            walker.m_icycle_occ = 1;
             walker.m_average_weight += walker.m_weight;
         }
     }
