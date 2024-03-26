@@ -147,15 +147,19 @@ void Solver::execute(uint_t ncycle) {
     }
     m_wf.attempt_gathered_hist_save(m_icycle);
     if (m_icycle == ncycle) logging::info("maximum cycle number ({}) reached", m_icycle);
-
     /**
      * if RDMs are to be calculated from a wave function file without solver iterations,
-     * the accumulation period is updated manually
+     * the average weight is the instantaneous population; manually update m_accum_epoch
      */
     if (m_maes.m_opts.m_delay == 0 && m_maes.m_opts.m_ncycle == 0) {
         m_maes.m_accum_epoch.update(0, true);
+        m_icycle += 1;  // fake a single iteration
+        Walker& walker = m_wf.m_store.m_row;
+        for (walker.restart(); walker; ++walker) {
+            walker.m_icycle_occ = m_icycle;
+            walker.m_average_weight += walker.m_weight;
+        }
     }
-
     if (m_maes.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
         finalizing_loop_over_occupied_mbfs(m_icycle - 1);
@@ -262,8 +266,6 @@ void Solver::loop_over_occupied_mbfs() {
 
         m_wf.m_refs.contrib_row(walker);
         m_inst_ests.make_numerator_contribs(walker);
-
-        if (m_maes.m_opts.m_delay == 0 && m_maes.m_opts.m_ncycle == 0) break;
 
         for (uint_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
 
