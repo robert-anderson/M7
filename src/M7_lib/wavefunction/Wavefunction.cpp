@@ -707,6 +707,7 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
             if (have_weights) set_weight(store_row, ipart, recv_row.m_delta_weight);
             ++nrow_recv;
         };
+        m_store.remap_if_due();
         recv().foreach_row_in_use(fn);
     };
     const uint_t nitem_per_op = 100000;

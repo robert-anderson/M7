@@ -437,7 +437,7 @@ public:
         uint_t counter = 0;
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
             counter += 1;
-            if (counter % 1000 == 0) logging::info_("counter: {}", counter);
+            if (counter % 1000 == 0) logging::info("counter: {}", counter);
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
 
