@@ -707,10 +707,11 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
             if (have_weights) set_weight(store_row, ipart, recv_row.m_delta_weight);
             ++nrow_recv;
         };
-        m_store.remap_if_due();
+//        m_store.remap_if_due();
         recv().foreach_row_in_use(fn);
     };
     const uint_t nitem_per_op = 100000;
+    m_store.MappedTable<Walker>::remap(loader.nitem_local());
     logging::info("Loading walkers from HDF5 archive (upto {} items per read operation)", nitem_per_op);
     logging::info_("Reading {} items locally, {} items globally", loader.nitem_local(), loader.nitem());
     loader.load(nitem_per_op, fill_fn);
