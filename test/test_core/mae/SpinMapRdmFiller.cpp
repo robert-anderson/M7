@@ -395,7 +395,6 @@ TEST(SpinMapRdmFiller, F4Rdm) {
     }
 
     SpinMapRdmFiller filler(hist, singles);
-
     FillerTestPureRdm f4rdm(doc.m_av_ests.m_rdm, opsig::c_quad, sector);
 
     filler.fill_rdm(&f4rdm);

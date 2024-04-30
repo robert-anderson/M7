@@ -47,8 +47,8 @@ bool Buffer::Window::operator==(const Buffer::Window& other) const {
 void Buffer::Window::end_sync() {
     if (owner().is_local()) return;
     auto size = size_in_use();
-    // get the size from the root rank of this shared memory realm
-    mpi::bcast(&size, 1, owner().irank_owner(), mpi::Realm::SharedMemory);
+    // get size from owner; displacement is unique for each shmem realm, adjust index
+    mpi::bcast(&size, 1, mpi::g_iranks_shmem[owner().irank_owner()], mpi::Realm::SharedMemory);
     m_hwm_ptr = m_begin_ptr + size;
 }
 

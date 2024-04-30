@@ -45,7 +45,9 @@ public:
 
     template<typename field_t>
     static uint_t irank_in_shmem_region(const field_t& field, uint_t ishmem) {
-        return field.hash() % mpi::g_nrank_in_shmem_realms[ishmem];
+        // map hash into number of ranks in this shmem and translate to global rank idx
+        const uint_t irank_shmem = field.hash() % mpi::g_nrank_in_shmem_realms[ishmem];
+        return mpi::g_iranks_world_in_shmem_realms[ishmem][irank_shmem];
     }
 
     template<typename field_t>
