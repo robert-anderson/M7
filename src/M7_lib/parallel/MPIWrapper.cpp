@@ -122,8 +122,8 @@ void mpi::setup_mpi_globals() {
     g_irank_world = tmp;
     // split the world communicator by shared memory region into sub-communicators
     MPI_Comm_split_type(g_world_comm, MPI_COMM_TYPE_SHARED, irank(), MPI_INFO_NULL, &g_shmem_comm);
-//    MPI_Comm_split(MPI_COMM_WORLD, irank(), irank(), &g_shmem_comm);
-    // two ranks per shmem
+    // for debugging purposes:
+    // MPI_Comm_split(MPI_COMM_WORLD, irank()/2, irank(), &g_shmem_comm);
     // get the size of the shared memory communicator in which this rank resides
     MPI_Comm_size(g_shmem_comm, &tmp);
     g_nrank_shmem = tmp;

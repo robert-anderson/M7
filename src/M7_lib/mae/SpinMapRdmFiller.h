@@ -814,8 +814,8 @@ public:
             buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist.m_store.m_row},
                                                             Owner::shared(mpi::irank_world_shmem_root())};
             psi1.resize(mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
-            psi1.gatherv(fock_x_hist.m_store);
-            psi1.end_sync();  // rank 0 has written to table, adjust HWM
+            psi1.all_gatherv(fock_x_hist.m_store);
+            psi1.end_sync();
 
             const uint_t anticipated_rows = math::pow<5>(row.m_mbf.m_basis.m_nsite) / (6*mpi::nrank());
             rdms->m_fock_4rdm->m_send_recv.resize(anticipated_rows);
