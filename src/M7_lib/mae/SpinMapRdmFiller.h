@@ -540,17 +540,9 @@ public:
         buffered::FrmOnvSpinChannel alpha_channel(hist_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(hist_row.m_mbf.m_basis.m_nsite);
 
-        const uint_t unique_strings = std::pow(hist_ket.nrow_in_use(), 0.65);  // empirical exponent
-        const uint_t n_alpha_elec = alpha_channel.nsetbit();
-        const uint_t n_beta_elec = beta_channel.nsetbit();
-        m_dets_contain_alpha.set_inserter_size(unique_strings / mpi::nrank());
-        m_dets_contain_beta.set_inserter_size(unique_strings / mpi::nrank());
-        m_alpha_with_beta.set_inserter_size((count / unique_strings) / mpi::nrank());
-        m_beta_with_alpha.set_inserter_size((count / unique_strings) / mpi::nrank());
-        m_alpha_single_dict.set_inserter_size((unique_strings * n_alpha_elec) / mpi::nrank());
-        m_beta_single_dict.set_inserter_size((unique_strings * n_beta_elec) / mpi::nrank());
-//        m_alpha_double_dict.set_inserter_size(unique_string_estimate * n_alpha_elec * (n_alpha_elec - 1));
-//        m_beta_double_dict.set_inserter_size(unique_string_estimate * n_alpha_elec * (n_alpha_elec - 1));
+        const uint_t unique_strings = std::pow(hist_ket.nrow_in_use(), 0.7);  // empirical exponent
+        const uint_t nelec_alpha = alpha_channel.nsetbit();
+        const uint_t nelec_beta = beta_channel.nsetbit();
         /**
          *  Construct SMUVIs which given a FrmOnvSpinChannel yield
          *      the rows of the histogrammed set containing this spin string: m_dets_contain_(spin),
@@ -646,10 +638,8 @@ public:
             n_insertions += idets.nremain()/2 * (idets.nremain() - 1);  // number of pairs in AccessResult
         };
         m_alpha_single_dict.foreach_key(estimate_insertions);
-        m_alpha_singles.set_inserter_size(n_insertions / mpi::nrank());
         n_insertions = 0ul;
         m_beta_single_dict.foreach_key(estimate_insertions);
-        m_beta_singles.set_inserter_size(n_insertions / mpi::nrank());
         n_insertions = 0ul;
 
         SpinChannelToSpinChannelSmuvi* spin_singles = nullptr;
@@ -759,36 +749,15 @@ public:
             SpinMapRdmFiller filler(hist, hist);
             {
                 auto ptr = rdms->get_pure_rdm(opsig::c_sing);
-                if (ptr) {
-                    const uint_t anticipated_rows = math::pow<3>(row.m_mbf.m_basis.m_nsite) / (2*mpi::nrank());
-                    ptr->m_send_recv.resize(anticipated_rows);
-                    for (uint_t i = 0ul; i < mpi::nrank(); ++i) ptr->m_send_recv.send(i).remap(anticipated_rows);
-                    ptr->m_store.resize(anticipated_rows);
-                    ptr->m_store.remap(anticipated_rows);
-                    filler.fill_rdm(ptr);
-                }
+                if (ptr) filler.fill_rdm(ptr);
             }
             {
                 auto ptr = rdms->get_pure_rdm(opsig::c_doub);
-                if (ptr) {
-                    const uint_t anticipated_rows = math::pow<4>(row.m_mbf.m_basis.m_nsite)  / (4*mpi::nrank());
-                    ptr->m_send_recv.resize(anticipated_rows);
-                    for (uint_t i = 0ul; i < mpi::nrank(); ++i) ptr->m_send_recv.send(i).remap(anticipated_rows);
-                    ptr->m_store.resize(anticipated_rows);
-                    ptr->m_store.remap(anticipated_rows);
-                    filler.fill_rdm(ptr);
-                }
+                if (ptr) filler.fill_rdm(ptr);
             }
             {
                 auto ptr = rdms->get_pure_rdm(opsig::c_trip);
-                if (ptr) {
-                    const uint_t anticipated_rows = math::pow<5>(row.m_mbf.m_basis.m_nsite) / (6*mpi::nrank());
-                    ptr->m_send_recv.resize(anticipated_rows);
-                    for (uint_t i = 0ul; i < mpi::nrank(); ++i) ptr->m_send_recv.send(i).remap(anticipated_rows);
-                    ptr->m_store.resize(anticipated_rows);
-                    ptr->m_store.remap(anticipated_rows);
-                    filler.fill_rdm(ptr);
-                }
+                if (ptr) filler.fill_rdm(ptr);
             }
         }
         if (rdms->m_fock_4rdm) {
@@ -805,7 +774,6 @@ public:
              * create |psi1>, each shmem holds a distributed copy of the entire vector
              */
             if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
-            // TODO: only valid in each shmem realm
             logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
             /**
              * gather the components of |psi1> on shmem root as a shmem shared array, such that all determinants are
@@ -817,11 +785,6 @@ public:
             psi1.all_gatherv(fock_x_hist.m_store);
             psi1.end_sync();
 
-            const uint_t anticipated_rows = math::pow<5>(row.m_mbf.m_basis.m_nsite) / (6*mpi::nrank());
-            rdms->m_fock_4rdm->m_send_recv.resize(anticipated_rows);
-            for (uint_t i = 0ul; i < mpi::nrank(); ++i) rdms->m_fock_4rdm->m_send_recv.send(i).remap(anticipated_rows);
-            rdms->m_fock_4rdm->m_store.resize(anticipated_rows);
-            rdms->m_fock_4rdm->m_store.remap(anticipated_rows);
             SpinMapRdmFiller(hist, psi1).fill_rdm(rdms->m_fock_4rdm);
         }
     }

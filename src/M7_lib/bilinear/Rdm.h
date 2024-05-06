@@ -35,7 +35,7 @@ public:
      */
     const bool m_stoch_thresh_contribs;
     /**
-     * if true, discard and CiCj contribution where |CiCj| is below a specified magnitude
+     * if true, discard any CiCj contribution where |CiCj| is below a specified magnitude
      */
     const bool m_neglect_tiny_contribs;
 
