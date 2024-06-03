@@ -344,8 +344,11 @@ class SpinMapRdmFiller {
          * apply the fock matrix element-wise on the histogrammed set
          */
         auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
-            logging::info_("hist row weight {}", hist_row.m_weight[0]);
-            if (hist_row.m_weight[0] * val > 0.001) {
+            // TODO: hist_row cannot be dereferenced on non-owning ranks
+            v_t<double_t> hist_weight = {0};
+            hist_row.m_weight.copy_to(hist_weight);
+            logging::info_("hist row weight {}", hist_weight[0]);
+            if (std::abs(hist_weight[0] * val) > 0.001) {
                 auto irank_dst = psi1.m_dist.irank(dst);
                 auto &send_row = psi1.m_send_recv.send(irank_dst).m_row;
                 send_row.push_back_jump();
@@ -448,13 +451,11 @@ public:
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
 
-            // alpha-alpha
             m_dets_contain_beta.foreach_value(beta_channel, [&](const field::Number<uint_t>& iket){
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
                 if (hamming_dist <= rdm->m_ranksig.nfrm_cre()) make_contrib_fn();
             });
-            // beta-beta
             m_dets_contain_alpha.foreach_value(alpha_channel, [&](const field::Number<uint_t>& iket){
                 ket_row.jump(iket);
                 const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
@@ -463,7 +464,6 @@ public:
 
             if (rdm->m_ranksig == opsig::c_sing) continue;
 
-            // alpha-beta
             m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
                 const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
                 m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_singles, beta_channel,
@@ -634,7 +634,6 @@ public:
          */
 
         logging::info("construct singles arrays");
-        // first obtain a good estimate on the number of singles insertions
         uint_t n_insertions = 0ul;
         auto estimate_insertions = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){
             n_insertions += idets.nremain()/2 * (idets.nremain() - 1);  // number of pairs in AccessResult
@@ -693,7 +692,6 @@ public:
          * multiple (N - 2) residues, but are filtered out.
          */
         logging::info("construct doubles arrays");
-        // estimate the number of double insertions
         m_alpha_double_dict.foreach_key(estimate_insertions);
         m_alpha_doubles.resize_inserter(n_insertions);
         n_insertions = 0ul;
@@ -735,9 +733,7 @@ public:
         auto& row = hist.m_row;
         wf_comp_t norm = 0.0;
         for (row.restart(); row; ++row) norm += math::pow<2>(std::abs(row.m_weight[0]));
-        mpi::bcast(&norm, 1, mpi::g_irank_root_in_shmem_realms[mpi::g_ishmems[mpi::irank()]], mpi::Realm::SharedMemory);
-        logging::info_("norm {}", norm);
-        rdms->m_total_norm.m_local = norm;
+        if (mpi::i_am_root()) rdms->m_total_norm.m_local = norm;
 
         bool have_pure = false;
         have_pure |= rdms->get_pure_rdm(opsig::c_sing) != nullptr;
