@@ -701,17 +701,14 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
 
         auto fn = [&](const Spawn& recv_row) {
             auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
-            // determinants from M7.wf.h5 to restart a calculation should not necessarily be histogrammed
-            if (!have_weights) store_row.protect();
             const auto ipart = recv_row.m_ipart_dst[0];
-            if (have_weights) set_weight(store_row, ipart, recv_row.m_delta_weight);
+            // determinants from popsfile should not necessarily be histogrammed
+            have_weights ? set_weight(store_row, ipart, recv_row.m_delta_weight) : store_row.protect();
             ++nrow_recv;
         };
-//        m_store.remap_if_due();
         recv().foreach_row_in_use(fn);
     };
     const uint_t nitem_per_op = 100000;
-    m_store.MappedTable<Walker>::remap(loader.nitem_local());
     logging::info("Loading walkers from HDF5 archive (upto {} items per read operation)", nitem_per_op);
     logging::info_("Reading {} items locally, {} items globally", loader.nitem_local(), loader.nitem());
     loader.load(nitem_per_op, fill_fn);

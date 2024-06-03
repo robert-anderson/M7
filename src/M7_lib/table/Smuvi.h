@@ -217,7 +217,7 @@ protected:
 
 public:
 
-    void set_inserter_size(uint_t new_size) {
+    void resize_inserter(uint_t new_size) {
         if (new_size / mpi::nrank() < m_inserter.row_size()) return;
         m_inserter.resize(new_size / mpi::nrank());
     }
