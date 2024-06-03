@@ -344,28 +344,33 @@ class SpinMapRdmFiller {
          * apply the fock matrix element-wise on the histogrammed set
          */
         auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
-            auto irank_dst = psi1.m_dist.irank(dst);
-            auto& send_row = psi1.m_send_recv.send(irank_dst).m_row;
-            send_row.push_back_jump();
-            send_row.m_mbf = dst;
-            send_row.m_weight = hist_row.m_weight;
-            send_row.m_weight *= val;
-            if (phase) send_row.m_weight *= -1.0;
+            logging::info_("hist row weight {}", hist_row.m_weight[0]);
+            if (hist_row.m_weight[0] * val > 0.001) {
+                auto irank_dst = psi1.m_dist.irank(dst);
+                auto &send_row = psi1.m_send_recv.send(irank_dst).m_row;
+                send_row.push_back_jump();
+                send_row.m_mbf = dst;
+                send_row.m_weight = hist_row.m_weight;
+                send_row.m_weight *= val;
+                if (phase) send_row.m_weight *= -1.0;
+            }
         };
+        uint_t counter = 0;
         for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
             for (auto& diag_val: diag_vals) {
                 if (!hist_row.m_mbf.get(diag_val.first)) continue;
                 add_send_fn(hist_row.m_mbf, diag_val.second, false);
+                counter += 1;
             }
             for (auto& non_diag_val: non_diag_vals) {
                 const auto& conn = non_diag_val.first;
                 if (mbf::destroys(conn, hist_row.m_mbf)) continue;
                 conn.apply(hist_row.m_mbf, work_mbf);
                 add_send_fn(work_mbf, non_diag_val.second, conn.phase(hist_row.m_mbf));
+                counter += 1;
             }
         }
-
-        logging::info_("reached communicate");
+        logging::info_("inserted elements into send tables {}", counter);
         psi1.communicate();
         logging::info_("passed communicate");
         /*
@@ -473,20 +478,6 @@ public:
 
             if (rdm->m_ranksig == opsig::c_doub) continue;
 
-//             m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
-//                 m_dets_contain_alpha.foreach_value(alpha_string, [&](const field::Number<uint_t>& iket){
-//                     ket_row.jump(iket);
-//                     const auto hamming_dist = bra_row.m_mbf.nbeta_not_in(ket_row.m_mbf);
-//                     if (hamming_dist == 2) make_contrib_fn();
-//                 });
-//             });
-//             m_beta_singles.foreach_value(beta_channel, [&](const field::FrmOnvSpinChannel &beta_string){
-//                 m_dets_contain_beta.foreach_value(beta_string, [&](const field::Number<uint_t>& iket){
-//                     ket_row.jump(iket);
-//                     const auto hamming_dist = bra_row.m_mbf.nalpha_not_in(ket_row.m_mbf);
-//                     if (hamming_dist == 2) make_contrib_fn();
-//                 });
-//             });
             m_alpha_singles.foreach_value(alpha_channel, [&](const field::FrmOnvSpinChannel &alpha_string){
                 const auto indices_dets_with_alpha = m_dets_contain_alpha.access(alpha_string);
                 m_beta_with_alpha.foreach_common_value(alpha_string, m_beta_doubles, beta_channel,
@@ -609,6 +600,7 @@ public:
         m_dets_contain_beta.foreach_key([&](const field::FrmOnvSpinChannel& key, SpinChannelToIndsSmuvi::AccessResult idets){ counter_beta += 1; });
         logging::info("{} unique alpha strings in histogrammed set", mpi::all_sum(counter_alpha));
         logging::info("{} unique beta strings in histogrammed set", mpi::all_sum(counter_beta));
+
         /**
          *  Generate all (N - 1) electron states from the spin strings.
          */
@@ -743,7 +735,9 @@ public:
         auto& row = hist.m_row;
         wf_comp_t norm = 0.0;
         for (row.restart(); row; ++row) norm += math::pow<2>(std::abs(row.m_weight[0]));
-        if (mpi::i_am_root()) rdms->m_total_norm.m_local = norm;
+        mpi::bcast(&norm, 1, mpi::g_irank_root_in_shmem_realms[mpi::g_ishmems[mpi::irank()]], mpi::Realm::SharedMemory);
+        logging::info_("norm {}", norm);
+        rdms->m_total_norm.m_local = norm;
 
         bool have_pure = false;
         have_pure |= rdms->get_pure_rdm(opsig::c_sing) != nullptr;
@@ -770,8 +764,7 @@ public:
              * |psi1> = \hat{F} |m_hist> where \hat{F} = sum_pq f_pq \hat{E}_pq
              */
             communicator::BasicSend<MbfWeightRow, MbfWeightRow> fock_x_hist(
-                    "Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000, 1.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0});
-
+                    "Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000000, 0.5}, MbfWeightRow(hist.m_row), Sizing{1000, 0.5});
             logging::info("preparing Fock-perturbed vector F |0>");
             auto ptr = dynamic_cast<const TransitionFockRdm4*>(rdms->m_fock_4rdm);
             REQUIRE_TRUE(ptr, "SpinMapRdmFiller requires TransitionFockRdm4");
@@ -780,10 +773,6 @@ public:
              */
             if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
             logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
-            /**
-             * gather the components of |psi1> on shmem root as a shmem shared array, such that all determinants are
-             * accessible from all ranks.
-             */
             buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist.m_store.m_row},
                                                             Owner::shared(mpi::irank_world_shmem_root())};
             psi1.resize(mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
