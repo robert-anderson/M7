@@ -343,34 +343,27 @@ class SpinMapRdmFiller {
         /**
          * apply the fock matrix element-wise on the histogrammed set
          */
-        auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
-            // TODO: hist_row cannot be dereferenced on non-owning ranks
-            v_t<double_t> hist_weight = {0};
-            hist_row.m_weight.copy_to(hist_weight);
-            logging::info_("hist row weight {}", hist_weight[0]);
-            if (std::abs(hist_weight[0] * val) > 0.001) {
-                auto irank_dst = psi1.m_dist.irank(dst);
-                auto &send_row = psi1.m_send_recv.send(irank_dst).m_row;
-                send_row.push_back_jump();
-                send_row.m_mbf = dst;
-                send_row.m_weight = hist_row.m_weight;
-                send_row.m_weight *= val;
-                if (phase) send_row.m_weight *= -1.0;
-            }
-        };
         uint_t counter = 0;
+        auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
+            auto irank_dst = psi1.m_dist.irank(dst);
+            auto &send_row = psi1.m_send_recv.send(irank_dst).m_row;
+            send_row.push_back_jump();
+            send_row.m_mbf = dst;
+            send_row.m_weight = hist_row.m_weight;
+            send_row.m_weight *= val;
+            if (phase) send_row.m_weight *= -1.0;
+            counter += 1;
+        };
         for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
             for (auto& diag_val: diag_vals) {
                 if (!hist_row.m_mbf.get(diag_val.first)) continue;
                 add_send_fn(hist_row.m_mbf, diag_val.second, false);
-                counter += 1;
             }
             for (auto& non_diag_val: non_diag_vals) {
                 const auto& conn = non_diag_val.first;
                 if (mbf::destroys(conn, hist_row.m_mbf)) continue;
                 conn.apply(hist_row.m_mbf, work_mbf);
                 add_send_fn(work_mbf, non_diag_val.second, conn.phase(hist_row.m_mbf));
-                counter += 1;
             }
         }
         logging::info_("inserted elements into send tables {}", counter);
