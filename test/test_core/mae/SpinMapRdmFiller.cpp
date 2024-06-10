@@ -9,7 +9,7 @@
 /*
  * Inherits from FillerPureRDM and adds a function to print out all contributing pairs of MBF contributing * to a
  * RDM instead of just adding the contribution. These are ordered in a std::set to allow comparison with the reference
- * data from * python irrespective of the ordering of the generated pairs.
+ * data from python irrespective of the ordering of the generated pairs.
  */
 struct FillerTestPureRdm : public PureRdm {
     suite::Mbfs m_work_mbfs;

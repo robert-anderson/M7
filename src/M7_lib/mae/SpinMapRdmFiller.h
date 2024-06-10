@@ -761,15 +761,28 @@ public:
              * create |psi1>, each shmem holds a distributed copy of the entire vector
              */
             if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
-            for (fock_x_hist.m_store.m_row.restart(); fock_x_hist.m_store.m_row; ++fock_x_hist.m_store.m_row) {
-                logging::info_("weight on row {}: {}", fock_x_hist.m_store.m_row.m_mbf, fock_x_hist.m_store.m_row.m_weight);
-            }
 
-            logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
-            buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist.m_store.m_row},
-                                                            Owner::shared(mpi::irank_world_shmem_root())};
-            psi1.resize(mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
-            psi1.all_gatherv(fock_x_hist.m_store);
+            /**
+             * excited WF grows very large (~ 40x), truncate small norm components and put the remainder into a new table
+             */
+            buffered::Table<MbfWeightRow> fock_x_hist_screened(fock_x_hist.m_store.m_row);
+            auto screened_row = fock_x_hist_screened.m_row;
+            uint_t count = 0;
+            auto screen_fock_fn = [&](const MbfWeightRow &fock_row){
+                if (std::abs(fock_row.m_weight[0]) > 0.5) {
+                    screened_row.push_back_jump();
+                    screened_row.m_mbf = fock_row.m_mbf;
+                    screened_row.m_weight = fock_row.m_weight;
+                } else count += 1;
+            };
+            fock_x_hist.m_store.foreach_row_in_use(screen_fock_fn);
+            fock_x_hist.m_store.clear();  // no longer needed
+
+            logging::info("successfully prepared F |0> with {} total rows after discarding {} tiny elements",
+                          mpi::all_sum(fock_x_hist_screened.nrow_in_use()), mpi::all_sum(count));
+            buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist_screened.m_row}, Owner::shared(mpi::irank_world_shmem_root())};
+            psi1.resize(mpi::all_sum(fock_x_hist_screened.nrow_in_use()));
+            psi1.all_gatherv(fock_x_hist_screened);
             psi1.end_sync();
 
             SpinMapRdmFiller(hist, psi1).fill_rdm(rdms->m_fock_4rdm);
