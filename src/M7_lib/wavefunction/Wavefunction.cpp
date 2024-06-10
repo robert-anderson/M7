@@ -709,6 +709,7 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
         recv().foreach_row_in_use(fn);
     };
     const uint_t nitem_per_op = 100000;
+    m_store.MappedTable<Walker>::remap(loader.nitem_local());
     logging::info("Loading walkers from HDF5 archive (upto {} items per read operation)", nitem_per_op);
     logging::info_("Reading {} items locally, {} items globally", loader.nitem_local(), loader.nitem());
     loader.load(nitem_per_op, fill_fn);

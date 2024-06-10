@@ -768,6 +768,10 @@ public:
              * create |psi1>, each shmem holds a distributed copy of the entire vector
              */
             if (ptr) make_psi1(hist, fock_x_hist, ptr->m_fock);
+            for (fock_x_hist.m_store.m_row.restart(); fock_x_hist.m_store.m_row; ++fock_x_hist.m_store.m_row) {
+                logging::info_("weight on row {}: {}", fock_x_hist.m_store.m_row.m_mbf, fock_x_hist.m_store.m_row.m_weight);
+            }
+
             logging::info("successfully prepared F |0> with {} total rows", mpi::all_sum(fock_x_hist.m_store.nrow_in_use()));
             buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist.m_store.m_row},
                                                             Owner::shared(mpi::irank_world_shmem_root())};
