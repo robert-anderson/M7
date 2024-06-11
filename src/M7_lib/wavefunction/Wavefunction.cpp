@@ -740,6 +740,7 @@ void wf::Vectors::update_gathered_hist(wf_comp_t thresh, uint_t icycle) {
 
     uint_t ndiscard = 0ul;
     buffered::Table<MbfWeightRow> local_averaged(MbfWeightRow{m_store.m_row});
+    local_averaged.set_expansion_factor(2);
     auto& local_row = local_averaged.m_row;
     local_row.restart();
 
@@ -754,6 +755,7 @@ void wf::Vectors::update_gathered_hist(wf_comp_t thresh, uint_t icycle) {
             local_row.push_back_jump();
             local_row.m_mbf = walker.m_mbf;
             local_row.m_weight = walker.m_average_weight;
+
         }
     };
     m_store.foreach_row_in_use(add_local_hist_walker_fn);

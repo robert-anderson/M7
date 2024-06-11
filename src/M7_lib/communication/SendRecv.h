@@ -137,6 +137,8 @@ public:
         REQUIRE_TRUE_ALL(m_send.begin(), "Send buffer is not allocated on all ranks!");
         REQUIRE_TRUE_ALL(m_recv.begin(), "Recv buffer is not allocated on all ranks!");
 
+        logging::info("counts {} {}", sendcounts[0], recvcounts[0]);
+
         auto tmp = mpi::all_to_allv(m_send.begin(), sendcounts, senddispls,
                                     m_recv.begin(), recvcounts, recvdispls);
         /*
