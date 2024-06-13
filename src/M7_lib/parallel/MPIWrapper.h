@@ -800,8 +800,6 @@ namespace mpi {
         auto tmp_senddispls = snrw(senddispls);
         auto tmp_recvcounts = snrw(recvcounts);
         auto tmp_recvdispls = snrw(recvdispls);
-        std::cout << "pre overflow " << sendcounts << " " << recvcounts << "\n";
-        std::cout << "monitor overflow " << tmp_sendcounts << " " << tmp_recvcounts << "\n";
         return all_to_allv(send, tmp_sendcounts.data(), tmp_senddispls.data(), recv,
                            tmp_recvcounts.data(), tmp_recvdispls.data());
     }

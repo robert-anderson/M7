@@ -344,6 +344,7 @@ class SpinMapRdmFiller {
          * apply the fock matrix element-wise on the histogrammed set
          */
         auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
+            if (std::abs(hist_row.m_weight[0] * val) < 1e-4) return;
             auto irank_dst = psi1.m_dist.irank(dst);
             auto &send_row = psi1.m_send_recv.send(irank_dst).m_row;
             send_row.push_back_jump();
@@ -369,7 +370,6 @@ class SpinMapRdmFiller {
                 add_send_fn(work_mbf, non_diag_val.second, conn.phase(hist_row.m_mbf));
             }
         }
-        logging::info("sizeof uint_t {} count_t {}", sizeof(uint_t), sizeof(count));
         psi1.communicate();
         /* do mini (rank-local) annihilation loop */
         auto& recv_row = psi1.m_send_recv.recv().m_row;

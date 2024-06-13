@@ -142,8 +142,6 @@ public:
         REQUIRE_TRUE_ALL(m_send.begin(), "Send buffer is not allocated on all ranks!");
         REQUIRE_TRUE_ALL(m_recv.begin(), "Recv buffer is not allocated on all ranks!");
 
-        logging::info("counts {} {}", sendcounts[0], recvcounts[0]);
-
         // send in units of uint_t
         auto send_ptr = reinterpret_cast<const uint_t*>(m_send.begin());
         auto recv_ptr = reinterpret_cast<uint_t*>(m_recv.begin());
