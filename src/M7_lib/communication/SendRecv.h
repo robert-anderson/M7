@@ -122,7 +122,7 @@ public:
         uintv_t recvdispls(mpi::nrank(), 0ul);
         for (uint_t i = 1ul; i < mpi::nrank(); ++i) {
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
-            senddispls /= Buffer::c_nbyte_word;
+            senddispls[i] /= Buffer::c_nbyte_word;
         }
         // number of bytes required in recv buffer
         const auto recv_size = (recvdispls.back() + recvcounts.back()) * Buffer::c_nbyte_word;
