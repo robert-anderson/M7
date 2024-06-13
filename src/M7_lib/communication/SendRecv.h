@@ -118,10 +118,12 @@ public:
 
         mpi::all_to_all(sendcounts, recvcounts);
 
-        const auto senddispls = m_send.displs();
+        auto senddispls = m_send.displs();
         uintv_t recvdispls(mpi::nrank(), 0ul);
-        for (uint_t i = 1ul; i < mpi::nrank(); ++i)
+        for (uint_t i = 1ul; i < mpi::nrank(); ++i) {
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
+            senddispls /= Buffer::c_nbyte_word;
+        }
         // number of bytes required in recv buffer
         const auto recv_size = (recvdispls.back() + recvcounts.back()) * Buffer::c_nbyte_word;
         m_last_recv_count = recv_size / row_size();
