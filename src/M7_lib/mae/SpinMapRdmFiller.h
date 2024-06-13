@@ -358,25 +358,34 @@ class SpinMapRdmFiller {
          * The number of excited determinants can easily overflow this range, making it necessary to
          * split the communication into smaller pieces.
          */
+        auto& recv_row = psi1.m_send_recv.recv().m_row;
+        const auto mini_annihilation = [&](){
+            psi1.communicate();
+            /* do mini (rank-local) annihilation loop */
+            for (recv_row.restart(); recv_row; ++recv_row) {
+                auto& dst = psi1.m_store.lookup_or_insert(recv_row.m_mbf);
+                dst.m_weight += recv_row.m_weight;
+                psi1.m_store.remap_if_due();
+            }
+        };
+        // diagonals
         for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
             for (auto& diag_val: diag_vals) {
                 if (!hist_row.m_mbf.get(diag_val.first)) continue;
                 add_send_fn(hist_row.m_mbf, diag_val.second, false);
             }
-            for (auto& non_diag_val: non_diag_vals) {
-                const auto& conn = non_diag_val.first;
+        }
+        mini_annihilation();
+        // off-diagonals
+        for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
+            for (auto &non_diag_val: non_diag_vals) {
+                const auto &conn = non_diag_val.first;
                 if (mbf::destroys(conn, hist_row.m_mbf)) continue;
                 conn.apply(hist_row.m_mbf, work_mbf);
                 add_send_fn(work_mbf, non_diag_val.second, conn.phase(hist_row.m_mbf));
             }
         }
-        psi1.communicate();
-        /* do mini (rank-local) annihilation loop */
-        auto& recv_row = psi1.m_send_recv.recv().m_row;
-        for (recv_row.restart(); recv_row; ++recv_row) {
-            auto& dst = psi1.m_store.lookup_or_insert(recv_row.m_mbf);
-            dst.m_weight += recv_row.m_weight;
-        }
+        mini_annihilation();
     }
 
     /**
@@ -753,7 +762,7 @@ public:
              * |psi1> = \hat{F} |m_hist> where \hat{F} = sum_pq f_pq \hat{E}_pq
              */
             communicator::BasicSend<MbfWeightRow, MbfWeightRow> fock_x_hist(
-                    "Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000000, 0.5}, MbfWeightRow(hist.m_row), Sizing{1000, 0.5});
+                    "Fock-perturbed hist WF", MbfWeightRow(hist.m_row),DistribOptions(), Sizing{1000000, 2.0}, MbfWeightRow(hist.m_row), Sizing{1000, 1.0});
             logging::info("preparing Fock-perturbed vector F |0>");
             auto ptr = dynamic_cast<const TransitionFockRdm4*>(rdms->m_fock_4rdm);
             REQUIRE_TRUE(ptr, "SpinMapRdmFiller requires TransitionFockRdm4");
@@ -766,10 +775,11 @@ public:
              * excited WF grows very large (~ 40x), truncate small norm components and put the remainder into a new table
              */
             buffered::Table<MbfWeightRow> fock_x_hist_screened(fock_x_hist.m_store.m_row);
+            fock_x_hist_screened.set_expansion_factor(1);
             auto screened_row = fock_x_hist_screened.m_row;
             uint_t count = 0;
             auto screen_fock_fn = [&](const MbfWeightRow &fock_row){
-                if (std::abs(fock_row.m_weight[0]) > 0.5) {
+                if (std::abs(fock_row.m_weight[0]) > 0.01) {
                     screened_row.push_back_jump();
                     screened_row.m_mbf = fock_row.m_mbf;
                     screened_row.m_weight = fock_row.m_weight;
