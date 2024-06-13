@@ -124,7 +124,7 @@ public:
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
         // number of bytes required in recv buffer
         const auto recv_size = (recvdispls.back() + recvcounts.back()) * Buffer::c_nbyte_word;
-        m_last_recv_count = recv_size / nint_per_row;
+        m_last_recv_count = recv_size / row_size();
 
         if (recv_size > static_cast<const TableBase &>(recv()).bw_size()) {
             /*
