@@ -109,19 +109,22 @@ public:
     void communicate() {
         m_last_send_counts = m_send.nrows_in_use();
         uintv_t sendcounts(m_last_send_counts);
-        for (auto &it: sendcounts) it *= row_size();
+        // express displs and counts in units of Buffer::c_nbyte_word
+        const auto nint_per_row = row_size() / Buffer::c_nbyte_word;
+        for (auto &it: sendcounts) it *= nint_per_row;
         uintv_t recvcounts(mpi::nrank(), 0ul);
 
         m_recv.clear();
 
         mpi::all_to_all(sendcounts, recvcounts);
 
-        auto senddispls = m_send.displs();
+        const auto senddispls = m_send.displs();
         uintv_t recvdispls(mpi::nrank(), 0ul);
         for (uint_t i = 1ul; i < mpi::nrank(); ++i)
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
-        auto recv_size = recvdispls.back() + recvcounts.back();
-        m_last_recv_count = recv_size / row_size();
+        // number of bytes required in recv buffer
+        const auto recv_size = (recvdispls.back() + recvcounts.back()) * Buffer::c_nbyte_word;
+        m_last_recv_count = recv_size / nint_per_row;
 
         if (recv_size > static_cast<const TableBase &>(recv()).bw_size()) {
             /*
@@ -139,8 +142,10 @@ public:
 
         logging::info("counts {} {}", sendcounts[0], recvcounts[0]);
 
-        auto tmp = mpi::all_to_allv(m_send.begin(), sendcounts, senddispls,
-                                    m_recv.begin(), recvcounts, recvdispls);
+        // send in units of uint_t
+        auto send_ptr = reinterpret_cast<const uint_t*>(m_send.begin());
+        auto recv_ptr = reinterpret_cast<uint_t*>(m_recv.begin());
+        auto tmp = mpi::all_to_allv(send_ptr, sendcounts, senddispls, recv_ptr, recvcounts, recvdispls);
         /*
          * check that the data addressed to this rank from this rank has been copied correctly
          */
