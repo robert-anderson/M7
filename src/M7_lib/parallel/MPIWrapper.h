@@ -793,15 +793,41 @@ namespace mpi {
     }
 
     template<typename T>
+    static bool all_to_allv_c(
+            const T *send, const MPI_Count *sendcounts, const MPI_Aint *senddispls,
+            T *recv, const MPI_Count *recvcounts, const MPI_Aint *recvdispls) {
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Alltoallv_c(
+                send_ptr, sendcounts, senddispls, type<T>(),
+                recv_ptr, recvcounts, recvdispls, type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+    }
+
+    template<typename T>
     static bool all_to_allv(
             const T *send, const uintv_t &sendcounts, const uintv_t &senddispls,
             T *recv, const uintv_t &recvcounts, const uintv_t &recvdispls) {
-        auto tmp_sendcounts = snrw(sendcounts);
-        auto tmp_senddispls = snrw(senddispls);
-        auto tmp_recvcounts = snrw(recvcounts);
-        auto tmp_recvdispls = snrw(recvdispls);
-        return all_to_allv(send, tmp_sendcounts.data(), tmp_senddispls.data(), recv,
-                           tmp_recvcounts.data(), tmp_recvdispls.data());
+
+        // check whether message surpasses MPI integer range and dispatch large count AllToAllV_c in that case
+        double total_send = 0.0;
+        for (const auto &data : sendcounts) total_send += data;
+        uint_t num_message = ceil(total_send / std::numeric_limits<count_t>::max());
+
+        if (num_message > 1) {
+            auto tmp_sendcounts = convert::safe_narrow<MPI_Count>(sendcounts);
+            auto tmp_recvcounts = convert::safe_narrow<MPI_Count>(recvcounts);
+            auto tmp_senddispls = convert::safe_narrow<MPI_Aint>(senddispls);
+            auto tmp_recvdispls = convert::safe_narrow<MPI_Aint>(recvdispls);
+            return all_to_allv_c(send, tmp_sendcounts.data(), tmp_senddispls.data(), recv,
+                                 tmp_recvcounts.data(), tmp_recvdispls.data());
+        } else {
+            auto tmp_sendcounts = snrw(sendcounts);
+            auto tmp_senddispls = snrw(senddispls);
+            auto tmp_recvcounts = snrw(recvcounts);
+            auto tmp_recvdispls = snrw(recvdispls);
+            return all_to_allv(send, tmp_sendcounts.data(), tmp_senddispls.data(), recv,
+                               tmp_recvcounts.data(), tmp_recvdispls.data());
+        }
     }
 
     bool initialized();

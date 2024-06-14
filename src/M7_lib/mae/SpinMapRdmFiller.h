@@ -344,7 +344,6 @@ class SpinMapRdmFiller {
          * apply the fock matrix element-wise on the histogrammed set
          */
         auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
-            if (std::abs(hist_row.m_weight[0] * val) < 1e-4) return;
             auto irank_dst = psi1.m_dist.irank(dst);
             auto &send_row = psi1.m_send_recv.send(irank_dst).m_row;
             send_row.push_back_jump();
@@ -353,31 +352,14 @@ class SpinMapRdmFiller {
             send_row.m_weight *= val;
             if (phase) send_row.m_weight *= -1.0;
         };
-        /**
-         * M7 uses unsigned longs for indices and narrows them to MPI's signed 32-bit integers.
-         * The number of excited determinants can easily overflow this range, making it necessary to
-         * split the communication into smaller pieces.
-         */
-        auto& recv_row = psi1.m_send_recv.recv().m_row;
-        const auto mini_annihilation = [&](){
-            psi1.communicate();
-            /* do mini (rank-local) annihilation loop */
-            for (recv_row.restart(); recv_row; ++recv_row) {
-                auto& dst = psi1.m_store.lookup_or_insert(recv_row.m_mbf);
-                dst.m_weight += recv_row.m_weight;
-                psi1.m_store.remap_if_due();
-            }
-        };
-        // diagonals
+
         for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
+            // diagonals
             for (auto& diag_val: diag_vals) {
                 if (!hist_row.m_mbf.get(diag_val.first)) continue;
                 add_send_fn(hist_row.m_mbf, diag_val.second, false);
             }
-        }
-        mini_annihilation();
-        // off-diagonals
-        for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
+            // off-diagonals
             for (auto &non_diag_val: non_diag_vals) {
                 const auto &conn = non_diag_val.first;
                 if (mbf::destroys(conn, hist_row.m_mbf)) continue;
@@ -385,7 +367,14 @@ class SpinMapRdmFiller {
                 add_send_fn(work_mbf, non_diag_val.second, conn.phase(hist_row.m_mbf));
             }
         }
-        mini_annihilation();
+        auto& recv_row = psi1.m_send_recv.recv().m_row;
+        psi1.communicate();
+        /* do mini (rank-local) annihilation loop */
+        for (recv_row.restart(); recv_row; ++recv_row) {
+            auto& dst = psi1.m_store.lookup_or_insert(recv_row.m_mbf);
+            dst.m_weight += recv_row.m_weight;
+            psi1.m_store.remap_if_due();
+        }
     }
 
     /**
@@ -778,18 +767,26 @@ public:
             fock_x_hist_screened.set_expansion_factor(1);
             auto screened_row = fock_x_hist_screened.m_row;
             uint_t count = 0;
+            wf_comp_t f4rdm_norm = 0.0;
+            wf_comp_t discarded_norm = 0.0;
             auto screen_fock_fn = [&](const MbfWeightRow &fock_row){
-                if (std::abs(fock_row.m_weight[0]) > 0.01) {
+                f4rdm_norm += math::pow<2>(std::abs(fock_row.m_weight[0]));
+                if (std::abs(fock_row.m_weight[0]) > 0.1) {
                     screened_row.push_back_jump();
                     screened_row.m_mbf = fock_row.m_mbf;
                     screened_row.m_weight = fock_row.m_weight;
-                } else count += 1;
+                } else {
+                    discarded_norm += math::pow<2>(std::abs(fock_row.m_weight[0]));
+                    count += 1;
+                }
             };
             fock_x_hist.m_store.foreach_row_in_use(screen_fock_fn);
             fock_x_hist.m_store.clear();  // no longer needed
 
             logging::info("successfully prepared F |0> with {} total rows after discarding {} tiny elements",
                           mpi::all_sum(fock_x_hist_screened.nrow_in_use()), mpi::all_sum(count));
+            logging::info("lost {} of the total excited WF square norm {} in the process",
+                          mpi::all_sum(discarded_norm), mpi::all_sum(f4rdm_norm));
             buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist_screened.m_row}, Owner::shared(mpi::irank_world_shmem_root())};
             psi1.resize(mpi::all_sum(fock_x_hist_screened.nrow_in_use()));
             psi1.all_gatherv(fock_x_hist_screened);
