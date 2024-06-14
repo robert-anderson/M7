@@ -771,7 +771,7 @@ public:
             wf_comp_t discarded_norm = 0.0;
             auto screen_fock_fn = [&](const MbfWeightRow &fock_row){
                 f4rdm_norm += math::pow<2>(std::abs(fock_row.m_weight[0]));
-                if (std::abs(fock_row.m_weight[0]) > 0.1) {
+                if (std::abs(fock_row.m_weight[0]) > 0.01) {
                     screened_row.push_back_jump();
                     screened_row.m_mbf = fock_row.m_mbf;
                     screened_row.m_weight = fock_row.m_weight;
