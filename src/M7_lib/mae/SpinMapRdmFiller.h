@@ -344,6 +344,7 @@ class SpinMapRdmFiller {
          * apply the fock matrix element-wise on the histogrammed set
          */
         auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
+            if (std::abs(hist_row.m_weight.sum()) < 1e-4) return;
             auto irank_dst = psi1.m_dist.irank(dst);
             auto &send_row = psi1.m_send_recv.send(irank_dst).m_row;
             send_row.push_back_jump();
