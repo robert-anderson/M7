@@ -419,14 +419,9 @@ public:
         auto ket_row = m_ket.m_row;
 
         auto make_contrib_fn = [&]() {
-            // bra_row and ket_row cannot be dereferenced on non-owning ranks; create temp copies (ugly)
-            v_t<double_t> braweight = {0}, ketweight = {0};
-            bra_row.m_weight.copy_to(braweight);
-            ket_row.m_weight.copy_to(ketweight);
-            const auto contrib = braweight[0] * ketweight[0];
-            // const auto contrib = bra_row.m_weight[0] * ket_row.m_weight[0];
             // switched ket and bra due to left/right non-hermiticity bug in F.4RDM
-            make_contribs(rdm, ket_row.m_mbf, bra_row.m_mbf, contrib);
+            make_contribs(rdm, ket_row.m_mbf, bra_row.m_mbf, bra_row.m_weight.sum() * ket_row.m_weight.sum());
+            rdm->m_store.remap_if_due();
         };
 
         const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
@@ -524,18 +519,6 @@ public:
 
         buffered::FrmOnvSpinChannel alpha_channel(hist_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(hist_row.m_mbf.m_basis.m_nsite);
-
-        // const uint_t unique_strings = std::pow(hist_ket.nrow_in_use(), 0.7);  // empirical exponent
-        // const uint_t nelec_alpha = alpha_channel.nsetbit();
-        // const uint_t nelec_beta = beta_channel.nsetbit();
-        // m_dets_contain_alpha.resize_inserter(unique_strings / mpi::nrank());
-        // m_dets_contain_beta.resize_inserter(unique_strings / mpi::nrank());
-        // m_alpha_with_beta.resize_inserter((count / unique_strings) / mpi::nrank());
-        // m_beta_with_alpha.resize_inserter((count / unique_strings) / mpi::nrank());
-        // m_alpha_single_dict.resize_inserter((unique_strings * nelec_alpha) / mpi::nrank());
-        // m_beta_single_dict.resize_inserter((unique_strings * nelec_beta) / mpi::nrank());
-        // m_alpha_double_dict.resize_inserter(unique_strings * nelec_alpha * (nelec_alpha - 1) / mpi::nrank());
-        // m_beta_double_dict.resize_inserter(unique_strings * nelec_beta * (nelec_beta - 1) / mpi::nrank());
         /**
          *  Construct SMUVIs which given a FrmOnvSpinChannel yield
          *      the rows of the histogrammed set containing this spin string: m_dets_contain_(spin),
@@ -626,15 +609,6 @@ public:
          */
 
         logging::info("construct singles arrays");
-        // uint_t n_insertions = 0ul;
-        // auto estimate_insertions = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){
-        //     n_insertions += idets.nremain()/2 * (idets.nremain() - 1);  // number of pairs in AccessResult
-        // };
-        // m_alpha_single_dict.foreach_key(estimate_insertions);
-        // n_insertions = 0ul;
-        // m_beta_single_dict.foreach_key(estimate_insertions);
-        // n_insertions = 0ul;
-
         SpinChannelToSpinChannelSmuvi* spin_singles = nullptr;
         auto gen_spin_singles = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult strings){
              spin_single_dict->foreach_value_pair(key, [&](const field::FrmOnvSpinChannel& value_1, const field::FrmOnvSpinChannel& value_2){
@@ -684,12 +658,6 @@ public:
          * multiple (N - 2) residues, but are filtered out.
          */
         logging::info("construct doubles arrays");
-        // m_alpha_double_dict.foreach_key(estimate_insertions);
-        // m_alpha_doubles.resize_inserter(n_insertions);
-        // n_insertions = 0ul;
-        // m_beta_double_dict.foreach_key(estimate_insertions);
-        // m_beta_doubles.resize_inserter(n_insertions);
-
         SpinChannelToSpinChannelSmuvi* spin_doubles = nullptr;
         auto gen_spin_doubles = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult strings){
             spin_double_dict->foreach_value_pair(key, [&](const field::FrmOnvSpinChannel& value_1, const field::FrmOnvSpinChannel& value_2){
