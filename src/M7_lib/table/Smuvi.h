@@ -115,7 +115,7 @@ protected:
      * default size of the Smuvi m_inserter to prevent frequent resizes
      */
     static constexpr uint_t default_inserter_size = 1e4;
-    static constexpr double default_expansion_factor = 2.0;
+    static constexpr double default_expansion_factor = 1.0;
 
     /**
      * Row type for the inserter tables
@@ -217,10 +217,10 @@ protected:
 
 public:
 
-    void resize_inserter(uint_t new_size) {
-        if (new_size / mpi::nrank() < m_inserter.row_size()) return;
-        m_inserter.resize(new_size / mpi::nrank());
-    }
+    // void resize_inserter(uint_t new_size) {
+    //     if (new_size / mpi::nrank() < m_inserter.row_size()) return;
+    //     m_inserter.resize(new_size / mpi::nrank());
+    // }
 
     void insert(const key_t& key, const value_t& value) {
         // send a copy to one rank in each shared memory realm

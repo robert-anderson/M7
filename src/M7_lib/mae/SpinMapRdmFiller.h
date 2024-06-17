@@ -344,7 +344,7 @@ class SpinMapRdmFiller {
          * apply the fock matrix element-wise on the histogrammed set
          */
         auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
-            if (std::abs(hist_row.m_weight.sum()) < 1e-4) return;
+            if (std::abs(hist_row.m_weight.sum() * val) < 1e-4) return;
             auto irank_dst = psi1.m_dist.irank(dst);
             auto &send_row = psi1.m_send_recv.send(irank_dst).m_row;
             send_row.push_back_jump();
@@ -525,17 +525,17 @@ public:
         buffered::FrmOnvSpinChannel alpha_channel(hist_row.m_mbf.m_basis.m_nsite);
         buffered::FrmOnvSpinChannel beta_channel(hist_row.m_mbf.m_basis.m_nsite);
 
-        const uint_t unique_strings = std::pow(hist_ket.nrow_in_use(), 0.7);  // empirical exponent
-        const uint_t nelec_alpha = alpha_channel.nsetbit();
-        const uint_t nelec_beta = beta_channel.nsetbit();
-        m_dets_contain_alpha.resize_inserter(unique_strings / mpi::nrank());
-        m_dets_contain_beta.resize_inserter(unique_strings / mpi::nrank());
-        m_alpha_with_beta.resize_inserter((count / unique_strings) / mpi::nrank());
-        m_beta_with_alpha.resize_inserter((count / unique_strings) / mpi::nrank());
-        m_alpha_single_dict.resize_inserter((unique_strings * nelec_alpha) / mpi::nrank());
-        m_beta_single_dict.resize_inserter((unique_strings * nelec_beta) / mpi::nrank());
-        m_alpha_double_dict.resize_inserter(unique_strings * nelec_alpha * (nelec_alpha - 1) / mpi::nrank());
-        m_beta_double_dict.resize_inserter(unique_strings * nelec_beta * (nelec_beta - 1) / mpi::nrank());
+        // const uint_t unique_strings = std::pow(hist_ket.nrow_in_use(), 0.7);  // empirical exponent
+        // const uint_t nelec_alpha = alpha_channel.nsetbit();
+        // const uint_t nelec_beta = beta_channel.nsetbit();
+        // m_dets_contain_alpha.resize_inserter(unique_strings / mpi::nrank());
+        // m_dets_contain_beta.resize_inserter(unique_strings / mpi::nrank());
+        // m_alpha_with_beta.resize_inserter((count / unique_strings) / mpi::nrank());
+        // m_beta_with_alpha.resize_inserter((count / unique_strings) / mpi::nrank());
+        // m_alpha_single_dict.resize_inserter((unique_strings * nelec_alpha) / mpi::nrank());
+        // m_beta_single_dict.resize_inserter((unique_strings * nelec_beta) / mpi::nrank());
+        // m_alpha_double_dict.resize_inserter(unique_strings * nelec_alpha * (nelec_alpha - 1) / mpi::nrank());
+        // m_beta_double_dict.resize_inserter(unique_strings * nelec_beta * (nelec_beta - 1) / mpi::nrank());
         /**
          *  Construct SMUVIs which given a FrmOnvSpinChannel yield
          *      the rows of the histogrammed set containing this spin string: m_dets_contain_(spin),
@@ -626,14 +626,14 @@ public:
          */
 
         logging::info("construct singles arrays");
-        uint_t n_insertions = 0ul;
-        auto estimate_insertions = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){
-            n_insertions += idets.nremain()/2 * (idets.nremain() - 1);  // number of pairs in AccessResult
-        };
-        m_alpha_single_dict.foreach_key(estimate_insertions);
-        n_insertions = 0ul;
-        m_beta_single_dict.foreach_key(estimate_insertions);
-        n_insertions = 0ul;
+        // uint_t n_insertions = 0ul;
+        // auto estimate_insertions = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult idets){
+        //     n_insertions += idets.nremain()/2 * (idets.nremain() - 1);  // number of pairs in AccessResult
+        // };
+        // m_alpha_single_dict.foreach_key(estimate_insertions);
+        // n_insertions = 0ul;
+        // m_beta_single_dict.foreach_key(estimate_insertions);
+        // n_insertions = 0ul;
 
         SpinChannelToSpinChannelSmuvi* spin_singles = nullptr;
         auto gen_spin_singles = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult strings){
@@ -684,11 +684,11 @@ public:
          * multiple (N - 2) residues, but are filtered out.
          */
         logging::info("construct doubles arrays");
-        m_alpha_double_dict.foreach_key(estimate_insertions);
-        m_alpha_doubles.resize_inserter(n_insertions);
-        n_insertions = 0ul;
-        m_beta_double_dict.foreach_key(estimate_insertions);
-        m_beta_doubles.resize_inserter(n_insertions);
+        // m_alpha_double_dict.foreach_key(estimate_insertions);
+        // m_alpha_doubles.resize_inserter(n_insertions);
+        // n_insertions = 0ul;
+        // m_beta_double_dict.foreach_key(estimate_insertions);
+        // m_beta_doubles.resize_inserter(n_insertions);
 
         SpinChannelToSpinChannelSmuvi* spin_doubles = nullptr;
         auto gen_spin_doubles = [&](const field::FrmOnvSpinChannel& key, SpinChannelToSpinChannelSmuvi::AccessResult strings){
@@ -731,22 +731,22 @@ public:
         have_pure |= rdms->get_pure_rdm(opsig::c_sing) != nullptr;
         have_pure |= rdms->get_pure_rdm(opsig::c_doub) != nullptr;
         have_pure |= rdms->get_pure_rdm(opsig::c_trip) != nullptr;
-        // if (have_pure) {
-        //     // at least one of the pure RDM instances is allocated, so make aux arrays for the hist-hist RDMs and fill
-        //     SpinMapRdmFiller filler(hist, hist);
-        //     {
-        //         auto ptr = rdms->get_pure_rdm(opsig::c_sing);
-        //         if (ptr) filler.fill_rdm(ptr);
-        //     }
-        //     {
-        //         auto ptr = rdms->get_pure_rdm(opsig::c_doub);
-        //         if (ptr) filler.fill_rdm(ptr);
-        //     }
-        //     {
-        //         auto ptr = rdms->get_pure_rdm(opsig::c_trip);
-        //         if (ptr) filler.fill_rdm(ptr);
-        //     }
-        // }
+        if (have_pure) {
+            // at least one of the pure RDM instances is allocated, so make aux arrays for the hist-hist RDMs and fill
+            SpinMapRdmFiller filler(hist, hist);
+            {
+                auto ptr = rdms->get_pure_rdm(opsig::c_sing);
+                if (ptr) filler.fill_rdm(ptr);
+            }
+            {
+                auto ptr = rdms->get_pure_rdm(opsig::c_doub);
+                if (ptr) filler.fill_rdm(ptr);
+            }
+            {
+                auto ptr = rdms->get_pure_rdm(opsig::c_trip);
+                if (ptr) filler.fill_rdm(ptr);
+            }
+        }
         if (rdms->m_fock_4rdm) {
             /**
              * |psi1> = \hat{F} |m_hist> where \hat{F} = sum_pq f_pq \hat{E}_pq
@@ -772,17 +772,16 @@ public:
             wf_comp_t discarded_norm = 0.0;
             auto screen_fock_fn = [&](const MbfWeightRow &fock_row){
                 f4rdm_norm += math::pow<2>(std::abs(fock_row.m_weight[0]));
-                if (std::abs(fock_row.m_weight[0]) > 0.01) {
+                // if (std::abs(fock_row.m_weight[0]) > 0.01) {
                     screened_row.push_back_jump();
                     screened_row.m_mbf = fock_row.m_mbf;
                     screened_row.m_weight = fock_row.m_weight;
-                } else {
-                    discarded_norm += math::pow<2>(std::abs(fock_row.m_weight[0]));
-                    count += 1;
-                }
+                // } else {
+                //     discarded_norm += math::pow<2>(std::abs(fock_row.m_weight[0]));
+                //     count += 1;
+                // }
             };
             fock_x_hist.m_store.foreach_row_in_use(screen_fock_fn);
-            fock_x_hist.m_store.clear();  // no longer needed
 
             logging::info("successfully prepared F |0> with {} total rows after discarding {} tiny elements",
                           mpi::all_sum(fock_x_hist_screened.nrow_in_use()), mpi::all_sum(count));

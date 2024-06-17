@@ -698,7 +698,6 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
             }
         }
         m_send_recv.communicate();
-
         auto fn = [&](const Spawn& recv_row) {
             auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
             const auto ipart = recv_row.m_ipart_dst[0];
@@ -707,9 +706,9 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
             ++nrow_recv;
         };
         recv().foreach_row_in_use(fn);
+        m_store.remap_if_due();
     };
     const uint_t nitem_per_op = 100000;
-    m_store.MappedTable<Walker>::remap(loader.nitem_local());
     logging::info("Loading walkers from HDF5 archive (upto {} items per read operation)", nitem_per_op);
     logging::info_("Reading {} items locally, {} items globally", loader.nitem_local(), loader.nitem());
     loader.load(nitem_per_op, fill_fn);
@@ -740,7 +739,7 @@ void wf::Vectors::update_gathered_hist(wf_comp_t thresh, uint_t icycle) {
 
     uint_t ndiscard = 0ul;
     buffered::Table<MbfWeightRow> local_averaged(MbfWeightRow{m_store.m_row});
-    local_averaged.set_expansion_factor(2);
+    local_averaged.set_expansion_factor(1);
     auto& local_row = local_averaged.m_row;
     local_row.restart();
 

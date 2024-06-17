@@ -642,9 +642,10 @@ namespace mpi {
             const T *send, uint_t sendcount, T *recv, uint_t recvcount) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
-        return MPI_Allgather(
-                send_ptr, snrw(sendcount), type<T>(), recv_ptr, snrw(recvcount), type<T>(), MPI_COMM_WORLD) ==
-               MPI_SUCCESS;
+        // TODO: convert to gather_c
+        // return MPI_Allgather_c(send_ptr, snrw(sendcount), type<T>(), recv_ptr, snrw(recvcount), type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Allgather_c(send_ptr, convert::safe_narrow<MPI_Count>(sendcount), type<T>(),
+                recv_ptr, convert::safe_narrow<MPI_Count>(recvcount), type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
