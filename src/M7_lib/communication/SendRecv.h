@@ -128,7 +128,6 @@ public:
         // number of bytes required in recv buffer
         const auto recv_size = (recvdispls.back() + recvcounts.back()) * Buffer::c_nbyte_word;
         m_last_recv_count = recv_size / row_size();
-
         if (recv_size > static_cast<const TableBase &>(recv()).bw_size()) {
             /*
              * the recv table is full
@@ -146,10 +145,6 @@ public:
         // send in units of uint_t
         auto send_ptr = reinterpret_cast<const uint_t*>(m_send.begin());
         auto recv_ptr = reinterpret_cast<uint_t*>(m_recv.begin());
-        for (const auto &val : sendcounts) logging::info_("sendcounts {}", val);
-        for (const auto &val : senddispls) logging::info_("senddispls {}", val);
-        for (const auto &val : recvcounts) logging::info_("recvcounts {}", val);
-        for (const auto &val : recvdispls) logging::info_("recvdispls {}", val);
         auto tmp = mpi::all_to_allv(send_ptr, sendcounts, senddispls, recv_ptr, recvcounts, recvdispls);
         /*
          * check that the data addressed to this rank from this rank has been copied correctly, adjusting
