@@ -344,7 +344,7 @@ class SpinMapRdmFiller {
          * apply the fock matrix element-wise on the histogrammed set
          */
         auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
-            if (std::abs(hist_row.m_weight.sum() * val) < 1e-4) return;
+            if (std::abs(hist_row.m_weight.sum() * val) < 5e-4) return;
             auto irank_dst = psi1.m_dist.irank(dst);
             auto &send_row = psi1.m_send_recv.send(irank_dst).m_row;
             send_row.push_back_jump();
@@ -739,21 +739,21 @@ public:
             wf_comp_t f4rdm_norm = 0.0;
             wf_comp_t discarded_norm = 0.0;
             auto screen_fock_fn = [&](const MbfWeightRow &fock_row){
-                f4rdm_norm += math::pow<2>(std::abs(fock_row.m_weight[0]));
-                // if (std::abs(fock_row.m_weight[0]) > 0.01) {
+                f4rdm_norm += std::abs(fock_row.m_weight[0]);
+                if (std::abs(fock_row.m_weight[0]) > 1e-3) {
                     screened_row.push_back_jump();
                     screened_row.m_mbf = fock_row.m_mbf;
                     screened_row.m_weight = fock_row.m_weight;
-                // } else {
-                //     discarded_norm += math::pow<2>(std::abs(fock_row.m_weight[0]));
-                //     count += 1;
-                // }
+                } else {
+                    discarded_norm += std::abs(fock_row.m_weight[0]);
+                    count += 1;
+                }
             };
             fock_x_hist.m_store.foreach_row_in_use(screen_fock_fn);
 
             logging::info("successfully prepared F |0> with {} total rows after discarding {} tiny elements",
                           mpi::all_sum(fock_x_hist_screened.nrow_in_use()), mpi::all_sum(count));
-            logging::info("lost {} of the total excited WF square norm {} in the process",
+            logging::info("lost {} of the total excited WF L1 norm {} in the process",
                           mpi::all_sum(discarded_norm), mpi::all_sum(f4rdm_norm));
             buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist_screened.m_row}, Owner::shared(mpi::irank_world_shmem_root())};
             psi1.resize(mpi::all_sum(fock_x_hist_screened.nrow_in_use()));

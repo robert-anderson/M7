@@ -119,11 +119,11 @@ public:
 
         mpi::all_to_all(sendcounts, recvcounts);
 
-        auto senddispls = m_send.displs();
+        auto senddispls = m_send.displs();  // send buffer displacements in units of rows
         uintv_t recvdispls(mpi::nrank(), 0ul);
         for (uint_t i = 1ul; i < mpi::nrank(); ++i) {
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
-            senddispls[i] /= Buffer::c_nbyte_word;
+            senddispls[i] /= Buffer::c_nbyte_word;  // send buffer displacements in units of uint
         }
         // number of bytes required in recv buffer
         const auto recv_size = (recvdispls.back() + recvcounts.back()) * Buffer::c_nbyte_word;
@@ -146,13 +146,19 @@ public:
         // send in units of uint_t
         auto send_ptr = reinterpret_cast<const uint_t*>(m_send.begin());
         auto recv_ptr = reinterpret_cast<uint_t*>(m_recv.begin());
+        for (const auto &val : sendcounts) logging::info_("sendcounts {}", val);
+        for (const auto &val : senddispls) logging::info_("senddispls {}", val);
+        for (const auto &val : recvcounts) logging::info_("recvcounts {}", val);
+        for (const auto &val : recvdispls) logging::info_("recvdispls {}", val);
         auto tmp = mpi::all_to_allv(send_ptr, sendcounts, senddispls, recv_ptr, recvcounts, recvdispls);
         /*
-         * check that the data addressed to this rank from this rank has been copied correctly
+         * check that the data addressed to this rank from this rank has been copied correctly, adjusting
+         * for row -> byte conversion
          */
         ASSERT(!send(mpi::irank()).begin() ||
                std::memcmp(send(mpi::irank()).begin(),
-                           recv().begin() + recvdispls[mpi::irank()], recvcounts[mpi::irank()]) == 0);
+                           recv().begin() + recvdispls[mpi::irank()] * Buffer::c_nbyte_word,
+                           recvcounts[mpi::irank()] * Buffer::c_nbyte_word) == 0);
 
         REQUIRE_TRUE_ALL(tmp, "MPI AllToAllV failed");
         recv().m_bw.set_end(m_last_recv_count);
