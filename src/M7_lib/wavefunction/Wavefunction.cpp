@@ -706,13 +706,12 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
             ++nrow_recv;
         };
         recv().foreach_row_in_use(fn);
-        m_store.remap_if_due();
     };
-    const uint_t nitem_per_op = 200000;
+    const uint_t nitem_per_op = 100000;
     logging::info("Loading walkers from HDF5 archive (upto {} items per read operation)", nitem_per_op);
     logging::info_("Reading {} items locally, {} items globally", loader.nitem_local(), loader.nitem());
+    m_store.remap(loader.nitem_local());
     loader.load(nitem_per_op, fill_fn);
-    m_store.set_expansion_factor(1);
     REQUIRE_EQ_ALL(mpi::all_sum(nrow_recv), loader.nitem(), "not all walkers loaded");
     logging::info("{} wavefunction rows successfully loaded from HDF5 archive", loader.nitem());
     logging::info("{} total wavefunction rows", mpi::all_sum(m_store.nrow_in_use()));
