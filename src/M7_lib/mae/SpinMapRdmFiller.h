@@ -699,22 +699,22 @@ public:
         have_pure |= rdms->get_pure_rdm(opsig::c_sing) != nullptr;
         have_pure |= rdms->get_pure_rdm(opsig::c_doub) != nullptr;
         have_pure |= rdms->get_pure_rdm(opsig::c_trip) != nullptr;
-        if (have_pure) {
-            // at least one of the pure RDM instances is allocated, so make aux arrays for the hist-hist RDMs and fill
-            SpinMapRdmFiller filler(hist, hist);
-            {
-                auto ptr = rdms->get_pure_rdm(opsig::c_sing);
-                if (ptr) filler.fill_rdm(ptr);
-            }
-            {
-                auto ptr = rdms->get_pure_rdm(opsig::c_doub);
-                if (ptr) filler.fill_rdm(ptr);
-            }
-            {
-                auto ptr = rdms->get_pure_rdm(opsig::c_trip);
-                if (ptr) filler.fill_rdm(ptr);
-            }
-        }
+        // if (have_pure) {
+        //     // at least one of the pure RDM instances is allocated, so make aux arrays for the hist-hist RDMs and fill
+        //     SpinMapRdmFiller filler(hist, hist);
+        //     {
+        //         auto ptr = rdms->get_pure_rdm(opsig::c_sing);
+        //         if (ptr) filler.fill_rdm(ptr);
+        //     }
+        //     {
+        //         auto ptr = rdms->get_pure_rdm(opsig::c_doub);
+        //         if (ptr) filler.fill_rdm(ptr);
+        //     }
+        //     {
+        //         auto ptr = rdms->get_pure_rdm(opsig::c_trip);
+        //         if (ptr) filler.fill_rdm(ptr);
+        //     }
+        // }
         if (rdms->m_fock_4rdm) {
             /**
              * |psi1> = \hat{F} |m_hist> where \hat{F} = sum_pq f_pq \hat{E}_pq
