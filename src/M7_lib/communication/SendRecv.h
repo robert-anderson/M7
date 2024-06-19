@@ -103,10 +103,26 @@ public:
     }
 
     /**
-     * perform MPI alltoallv communication of the contents of all send buffers to all recv buffers then clear the send
+     * Perform MPI alltoallv communication of the contents of all send buffers to all recv buffers then clear the send
      * table.
+     *
+     * Originally, MPI send/recv counts and displacements were handled in units of bytes, but in SpinMapRdmFiller.h
+     * the 32-bit signed integer range can be insufficient to address all elements of the perturbed WF. Conversion into
+     * units of uint_t increases the index range at least eightfold, but introduces complications in the senddispl
+     * handling, since senddispls[mpi::irank()] / Buffer::c_nbyte_word was not guaranteed to be integral.
+     *
+     * As a preliminary workaournd, rows are added to m_send, until this condition is fulfilled.
      */
     void communicate() {
+        // do not expand m_send by a factor of 1.5, just because one row is missing
+        m_send.set_expansion_factor(0);
+        while (m_send.bw_size() % Buffer::c_nbyte_word != 0) {
+            logging::info_("send not an integral multiple of uint_t {}", m_send.bw_size());
+            m_send.expand(1);
+            m_send.
+        }
+        m_send.set_expansion_factor(0.5);
+
         m_last_send_counts = m_send.nrows_in_use();
         uintv_t sendcounts(m_last_send_counts);
         // express displs and counts in units of Buffer::c_nbyte_word
@@ -119,11 +135,11 @@ public:
 
         mpi::all_to_all(sendcounts, recvcounts);
 
-        auto senddispls = m_send.displs();  // send buffer displacements in units of rows
+        auto senddispls = m_send.displs();  // disps in bytes
         uintv_t recvdispls(mpi::nrank(), 0ul);
         for (uint_t i = 1ul; i < mpi::nrank(); ++i) {
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
-            senddispls[i] /= Buffer::c_nbyte_word;  // send buffer displacements in units of uint
+            senddispls[i] /= Buffer::c_nbyte_word;  // displs in uint_t
         }
         // number of bytes required in recv buffer
         const auto recv_size = (recvdispls.back() + recvcounts.back()) * Buffer::c_nbyte_word;
