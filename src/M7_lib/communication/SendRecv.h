@@ -117,7 +117,7 @@ public:
         // do not expand m_send by a factor of 1.5, just because one row is missing
         m_send.set_expansion_factor(0);
         while (m_send.bw_size() % Buffer::c_nbyte_word != 0) {
-            logging::info_("send not an integral multiple of uint_t {}", m_send.bw_size());
+            logging::info_("rank local send buffer not integral multiple of uint_t {}", m_send.bw_size());
             m_send.expand(1);
             m_send.
         }
