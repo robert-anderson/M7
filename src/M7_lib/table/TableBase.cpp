@@ -209,10 +209,12 @@ void TableBase::all_gatherv(const TableBase &src) {
         /*
          * if a subset of rows (just the node roots) are gathering, we can't use gatherv (one recving rank) or
          * all_gatherv (all ranks gather), so we have to use the general all_to_allv
+         *
+         * initially, assume all ranks receive all data from this rank
+         *
+         * Analogous to SendRecv::communicate, units of Buffer::c_nbyte_word are used to increase
+         * the address range for SpinMapRdmFiller, particularly the Fock excited WF.
          */
-        // initially, assume all ranks receive all data from this rank
-        // like in communicate, we use units of uint_t, not bytes
-        for (auto &v: counts) v /= Buffer::c_nbyte_word;
         uintv_t sendcounts(mpi::nrank(), src.nrow_in_use() * row_size() / Buffer::c_nbyte_word);
         // set to zero all sendcounts for ranks that are not node-roots
         for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank){
@@ -223,9 +225,14 @@ void TableBase::all_gatherv(const TableBase &src) {
         uintv_t recvcounts(mpi::nrank(), 0ul);
         uintv_t recvdispls(mpi::nrank(), 0ul);
         // only node-roots receive non-zero counts from senders
-        if (mpi::i_am_root(mpi::SharedMemory)) recvcounts = counts;
+        if (mpi::i_am_root(mpi::SharedMemory)) {
+            recvcounts = counts;
+            for (auto &val : recvcounts) val /= Buffer::c_nbyte_word;
+        }
         recvdispls = mpi::counts_to_displs_consec(recvcounts);
-        mpi::all_to_allv(src.cbegin(), sendcounts, senddispls, begin(), recvcounts, recvdispls);
+        auto send_ptr = reinterpret_cast<const uint_t*>(src.cbegin());
+        auto recv_ptr = reinterpret_cast<uint_t*>(begin());
+        mpi::all_to_allv(send_ptr, sendcounts, senddispls, recv_ptr, recvcounts, recvdispls);
     }
     else {
         mpi::all_gatherv(src.cbegin(), src.m_bw.size_in_use(), begin(), counts, displs);
