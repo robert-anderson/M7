@@ -154,6 +154,8 @@ void Buffer::resize(uint_t new_size, double factor) {
     new_size*= 1.0 + factor;
     // always allocate an integral number of words
     new_size = integer::divceil(new_size, Buffer::c_nbyte_word) * Buffer::c_nbyte_word;
+    // it must also be integral for each rank, otherwise SendRecv::communicate() cannot use uint_t addressing
+    new_size = integer::divceil(new_size, mpi::g_nrank_shmem) * mpi::g_nrank_shmem;
     // quit if the new buffer new_size is the same as the old buffer new_size
     if (new_size == this->size()) return;
     DEBUG_ASSERT_TRUE(new_size, "New size must be non-zero");

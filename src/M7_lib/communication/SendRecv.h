@@ -109,20 +109,11 @@ public:
      * Originally, MPI send/recv counts and displacements were handled in units of bytes, but in SpinMapRdmFiller.h
      * the 32-bit signed integer range can be insufficient to address all elements of the perturbed WF. Conversion into
      * units of uint_t increases the index range at least eightfold, but introduces complications in the senddispl
-     * handling, since senddispls[mpi::irank()] / Buffer::c_nbyte_word was not guaranteed to be integral.
-     *
-     * As a preliminary workaournd, rows are added to m_send, until this condition is fulfilled.
+     * handling, since senddispls[mpi::irank()] / Buffer::c_nbyte_word is not always integral.
      */
     void communicate() {
-        // do not expand m_send by a factor of 1.5, just because one row is missing
-        m_send.set_expansion_factor(0);
-        while (m_send.bw_size() % Buffer::c_nbyte_word != 0) {
-            logging::info_("rank local send buffer not integral multiple of uint_t {}", m_send.bw_size());
-            m_send.expand(1);
-            m_send.
-        }
-        m_send.set_expansion_factor(0.5);
-
+        // enforce addresses in Buffer::c_nbyte_word
+        if (m_send.bw_size() % Buffer::c_nbyte_word != 0) m_send.resize(m_send.nrow_per_table());
         m_last_send_counts = m_send.nrows_in_use();
         uintv_t sendcounts(m_last_send_counts);
         // express displs and counts in units of Buffer::c_nbyte_word
