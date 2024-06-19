@@ -113,7 +113,7 @@ public:
      */
     void communicate() {
         // enforce addresses in Buffer::c_nbyte_word
-        if (m_send.bw_size() % Buffer::c_nbyte_word != 0) m_send.resize(m_send.nrow_per_table());
+        while (m_send.bw_size() % Buffer::c_nbyte_word != 0) m_send.resize(m_send.nrow_per_table() + 1, 0);
         m_last_send_counts = m_send.nrows_in_use();
         uintv_t sendcounts(m_last_send_counts);
         // express displs and counts in units of Buffer::c_nbyte_word

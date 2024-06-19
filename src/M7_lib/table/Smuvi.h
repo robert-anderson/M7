@@ -470,7 +470,6 @@ protected:
                 if (*size_it) table.resize(*size_it);
                 ++size_it;
             }
-            logging::info_("finished resize loop");
         }
         value_index_sets.reserve(accessor.capacity());
 
