@@ -355,12 +355,10 @@ class SpinMapRdmFiller {
         };
 
         for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
-            // diagonals
             for (auto& diag_val: diag_vals) {
                 if (!hist_row.m_mbf.get(diag_val.first)) continue;
                 add_send_fn(hist_row.m_mbf, diag_val.second, false);
             }
-            // off-diagonals
             for (auto &non_diag_val: non_diag_vals) {
                 const auto &conn = non_diag_val.first;
                 if (mbf::destroys(conn, hist_row.m_mbf)) continue;
@@ -368,9 +366,9 @@ class SpinMapRdmFiller {
                 add_send_fn(work_mbf, non_diag_val.second, conn.phase(hist_row.m_mbf));
             }
         }
-        auto& recv_row = psi1.m_send_recv.recv().m_row;
         psi1.communicate();
         /* do mini (rank-local) annihilation loop */
+        auto& recv_row = psi1.m_send_recv.recv().m_row;
         for (recv_row.restart(); recv_row; ++recv_row) {
             auto& dst = psi1.m_store.lookup_or_insert(recv_row.m_mbf);
             dst.m_weight += recv_row.m_weight;

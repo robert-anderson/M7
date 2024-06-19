@@ -466,13 +466,9 @@ protected:
         {
             auto sizes = mpi::all_gathered(m_inserter.recv().nrow_in_use());
             auto size_it = sizes.cbegin();
-            uint_t count = 0;
             for (auto& table : m_access_tables) {
-                mpi::barrier();
-                logging::info_("table resize {}, rows in use {}, new rows {}", count, table.nrow_in_use(), *size_it);
                 if (*size_it) table.resize(*size_it);
                 ++size_it;
-                count += 1;
             }
             logging::info_("finished resize loop");
         }
