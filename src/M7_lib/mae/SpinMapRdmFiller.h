@@ -754,7 +754,7 @@ public:
             logging::info("lost {} of the total excited WF L1 norm {} in the process",
                           mpi::all_sum(discarded_norm), mpi::all_sum(f4rdm_norm));
             buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist_screened.m_row}, Owner::shared(mpi::irank_world_shmem_root())};
-            psi1.resize(mpi::all_sum(fock_x_hist_screened.nrow_in_use()));
+            psi1.resize(mpi::all_sum(fock_x_hist_screened.nrow_in_use()), 0);
             psi1.all_gatherv(fock_x_hist_screened);
             psi1.end_sync();
 

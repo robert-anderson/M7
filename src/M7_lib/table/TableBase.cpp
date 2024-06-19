@@ -200,7 +200,7 @@ void TableBase::all_gatherv(const TableBase &src) {
                     "the size of records being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.nrow_in_use(), nrecs);
     counts = nrecs;
-    for (auto &v: counts) v *= row_size();
+    for (auto &v: counts) v *= row_size() / Buffer::c_nbyte_word;
     mpi::counts_to_displs_consec(counts, displs);
     auto nrec_total = std::accumulate(nrecs.cbegin(), nrecs.cend(), 0ul);
     if (!nrec_total) return;
@@ -211,7 +211,8 @@ void TableBase::all_gatherv(const TableBase &src) {
          * all_gatherv (all ranks gather), so we have to use the general all_to_allv
          */
         // initially, assume all ranks receive all data from this rank
-        uintv_t sendcounts(mpi::nrank(), src.nrow_in_use() * row_size());
+        // like in communicate, we use units of uint_t, not bytes
+        uintv_t sendcounts(mpi::nrank(), src.nrow_in_use() * row_size() / Buffer::c_nbyte_word);
         // set to zero all sendcounts for ranks that are not node-roots
         for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank){
             if (!mpi::is_root(irank, mpi::SharedMemory)) sendcounts[irank] = 0;
