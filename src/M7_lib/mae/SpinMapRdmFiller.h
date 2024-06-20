@@ -344,7 +344,7 @@ class SpinMapRdmFiller {
          * apply the fock matrix element-wise on the histogrammed set
          */
         auto add_send_fn = [&](const Mbf& dst, ham_t val, bool phase) {
-            if (std::abs(hist_row.m_weight.sum() * val) < 5e-4) return;
+            if (std::abs(hist_row.m_weight.sum() * val) < 1e-4) return;
             auto irank_dst = psi1.m_dist.irank(dst);
             auto &send_row = psi1.m_send_recv.send(irank_dst).m_row;
             send_row.push_back_jump();
@@ -432,7 +432,10 @@ public:
         uint_t counter = 0;
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
             counter += 1;
-            if (counter % 1000 == 0) logging::info("counter: {}", counter);
+            if (counter % 1000 == 0) {
+                logging::info("counter: {} {}", counter);
+                logging::flush();
+            }
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
 
@@ -697,22 +700,22 @@ public:
         have_pure |= rdms->get_pure_rdm(opsig::c_sing) != nullptr;
         have_pure |= rdms->get_pure_rdm(opsig::c_doub) != nullptr;
         have_pure |= rdms->get_pure_rdm(opsig::c_trip) != nullptr;
-        // if (have_pure) {
-        //     // at least one of the pure RDM instances is allocated, so make aux arrays for the hist-hist RDMs and fill
-        //     SpinMapRdmFiller filler(hist, hist);
-        //     {
-        //         auto ptr = rdms->get_pure_rdm(opsig::c_sing);
-        //         if (ptr) filler.fill_rdm(ptr);
-        //     }
-        //     {
-        //         auto ptr = rdms->get_pure_rdm(opsig::c_doub);
-        //         if (ptr) filler.fill_rdm(ptr);
-        //     }
-        //     {
-        //         auto ptr = rdms->get_pure_rdm(opsig::c_trip);
-        //         if (ptr) filler.fill_rdm(ptr);
-        //     }
-        // }
+        if (have_pure) {
+            // at least one of the pure RDM instances is allocated, so make aux arrays for the hist-hist RDMs and fill
+            SpinMapRdmFiller filler(hist, hist);
+            {
+                auto ptr = rdms->get_pure_rdm(opsig::c_sing);
+                if (ptr) filler.fill_rdm(ptr);
+            }
+            {
+                auto ptr = rdms->get_pure_rdm(opsig::c_doub);
+                if (ptr) filler.fill_rdm(ptr);
+            }
+            {
+                auto ptr = rdms->get_pure_rdm(opsig::c_trip);
+                if (ptr) filler.fill_rdm(ptr);
+            }
+        }
         if (rdms->m_fock_4rdm) {
             /**
              * |psi1> = \hat{F} |m_hist> where \hat{F} = sum_pq f_pq \hat{E}_pq
