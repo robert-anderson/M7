@@ -418,8 +418,8 @@ public:
 
         auto make_contrib_fn = [&]() {
             // switched ket and bra due to left/right non-hermiticity bug in F.4RDM
-            make_contribs(rdm, ket_row.m_mbf, bra_row.m_mbf, bra_row.m_weight.sum() * ket_row.m_weight.sum());
             rdm->m_store.remap_if_due();
+            make_contribs(rdm, ket_row.m_mbf, bra_row.m_mbf, bra_row.m_weight.sum() * ket_row.m_weight.sum());
         };
 
         const auto order_fn = [&](const field::FrmOnvSpinChannel& i, const field::FrmOnvSpinChannel& j) -> bool {
@@ -432,10 +432,7 @@ public:
         uint_t counter = 0;
         for (bra_row.restart(displ); bra_row.in_range(displ + count); ++bra_row) {
             counter += 1;
-            if (counter % 1000 == 0) {
-                logging::info("counter: {} {}", counter);
-                logging::flush();
-            }
+            if (counter % 1000 == 0) logging::info("counter: {}", counter);
             bra_row.m_mbf.copy_alpha_to(alpha_channel);
             bra_row.m_mbf.copy_beta_to(beta_channel);
 
