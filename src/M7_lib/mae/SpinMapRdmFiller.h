@@ -410,6 +410,8 @@ public:
 
     void fill_rdm(Rdm* rdm) const {
         if (!rdm) return;
+        // remap the send tables before insertion to increase performance
+        for (size_t i = 0; i < mpi::nrank(); ++i) rdm->m_send_recv.send(i).remap(rdm->m_send_recv.recv().capacity());
 
         const auto displ = mpi::evenly_shared_displ(m_bra.nrow_in_use());
         const auto count = mpi::evenly_shared_count(m_bra.nrow_in_use());

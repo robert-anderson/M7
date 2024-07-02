@@ -13,8 +13,8 @@ uint_t Rdm::nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uin
     nrow *= integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_ann);
     nrow *= integer::combinatorial_with_repetition(basis_size.m_bos, nbos_cre);
     nrow *= integer::combinatorial_with_repetition(basis_size.m_bos, nbos_ann);
-    nrow /= integer::factorial(nfrm_cre + nfrm_ann);
-    nrow /= integer::factorial(nbos_cre + nbos_ann);
+    // nrow /= integer::factorial(nfrm_cre + nfrm_ann);
+    // nrow /= integer::factorial(nbos_cre + nbos_ann);
     return nrow;
 }
 
