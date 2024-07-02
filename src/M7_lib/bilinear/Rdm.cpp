@@ -8,13 +8,14 @@
 #include "Bilinears.h"
 
 uint_t Rdm::nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uint_t nbos_ann, sys::Size basis_size) {
+    logging::info("nfrm_cre {}", nfrm_cre);
     double nrow = 1.0;
     nrow *= integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_cre);
     nrow *= integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_ann);
     nrow *= integer::combinatorial_with_repetition(basis_size.m_bos, nbos_cre);
     nrow *= integer::combinatorial_with_repetition(basis_size.m_bos, nbos_ann);
-    // nrow /= integer::factorial(nfrm_cre + nfrm_ann);
-    // nrow /= integer::factorial(nbos_cre + nbos_ann);
+    if (nfrm_cre > 2 || nfrm_ann > 2) nrow /= nfrm_cre + 1;
+    if (nbos_cre > 2 || nbos_ann > 2) nrow /= nbos_cre + 1;
     return nrow;
 }
 
