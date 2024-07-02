@@ -418,7 +418,6 @@ public:
 
         auto make_contrib_fn = [&]() {
             // switched ket and bra due to left/right non-hermiticity bug in F.4RDM
-            rdm->m_store.remap_if_due();
             make_contribs(rdm, ket_row.m_mbf, bra_row.m_mbf, bra_row.m_weight.sum() * ket_row.m_weight.sum());
         };
 
@@ -685,7 +684,7 @@ public:
     /**
      * fill all RDMs
      */
-    static void fill(const buffered::OpenAddressedTable<MbfWeightRow>& hist, Rdms* rdms) {
+    static void fill(const buffered::OpenAddressedTable<MbfWeightRow>& hist, Rdms* rdms, wf_comp_t f_x_hist_compress_thresh) {
         if (!rdms) return;
 
         auto& row = hist.m_row;
@@ -730,6 +729,7 @@ public:
             /**
              * excited WF grows very large (~ 40x), truncate small norm components and put the remainder into a new table
              */
+            logging::info("compressing F |0> with L1 threshold {}", f_x_hist_compress_thresh);
             buffered::Table<MbfWeightRow> fock_x_hist_screened(fock_x_hist.m_store.m_row);
             fock_x_hist_screened.set_expansion_factor(1);
             auto screened_row = fock_x_hist_screened.m_row;
@@ -738,7 +738,7 @@ public:
             wf_comp_t discarded_norm = 0.0;
             auto screen_fock_fn = [&](const MbfWeightRow &fock_row){
                 f4rdm_norm += std::abs(fock_row.m_weight[0]);
-                if (std::abs(fock_row.m_weight[0]) > 1e-3) {
+                if (std::abs(fock_row.m_weight[0]) > f_x_hist_compress_thresh) {
                     screened_row.push_back_jump();
                     screened_row.m_mbf = fock_row.m_mbf;
                     screened_row.m_weight = fock_row.m_weight;

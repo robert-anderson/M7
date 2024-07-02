@@ -119,7 +119,7 @@ void Maes::fill_from_wf_hist(const buffered::OpenAddressedTable<MbfWeightRow>& h
         }
     }
     else if (m_opts.m_filling_algorithm.m_value == "caspt2")
-        SpinMapRdmFiller::fill(hist, &m_rdms);
+        SpinMapRdmFiller::fill(hist, &m_rdms, m_opts.m_notf_fill_discard_thresh);
     else if (m_opts.m_filling_algorithm.m_value == "bitset_isect_hashmap_ri")
         NotfMaeFiller::fill(hist, NotfMaeFiller::Hashmap, &m_rdms);
     else if (m_opts.m_filling_algorithm.m_value == "bitset_isect_pair_loop_ri")
