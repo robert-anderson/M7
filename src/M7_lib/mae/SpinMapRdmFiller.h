@@ -411,7 +411,7 @@ public:
     void fill_rdm(Rdm* rdm) const {
         if (!rdm) return;
         // remap the send tables before insertion to increase performance
-        for (size_t i = 0; i < mpi::nrank(); ++i) rdm->m_send_recv.send(i).remap(rdm->m_send_recv.recv().capacity());
+        for (size_t i = 0; i < mpi::nrank(); ++i) rdm->m_send_recv.send(i).remap(rdm->m_send_recv.send(i).capacity());
 
         const auto displ = mpi::evenly_shared_displ(m_bra.nrow_in_use());
         const auto count = mpi::evenly_shared_count(m_bra.nrow_in_use());
@@ -740,7 +740,7 @@ public:
             wf_comp_t discarded_norm = 0.0;
             auto screen_fock_fn = [&](const MbfWeightRow &fock_row){
                 f4rdm_norm += std::abs(fock_row.m_weight[0]);
-                if (std::abs(fock_row.m_weight[0]) > f_x_hist_compress_thresh) {
+                if (std::abs(fock_row.m_weight[0]) > f_x_hist_compress_thresh / 2) {
                     screened_row.push_back_jump();
                     screened_row.m_mbf = fock_row.m_mbf;
                     screened_row.m_weight = fock_row.m_weight;
