@@ -731,7 +731,7 @@ public:
             /**
              * excited WF grows very large (~ 40x), truncate small norm components and put the remainder into a new table
              */
-            logging::info("compressing F |0> with L1 threshold {}", f_x_hist_compress_thresh);
+            logging::info("compressing F |0> with L1 threshold {}", f_x_hist_compress_thresh / 10);
             buffered::Table<MbfWeightRow> fock_x_hist_screened(fock_x_hist.m_store.m_row);
             fock_x_hist_screened.set_expansion_factor(1);
             auto screened_row = fock_x_hist_screened.m_row;
@@ -751,10 +751,10 @@ public:
             };
             fock_x_hist.m_store.foreach_row_in_use(screen_fock_fn);
 
-            logging::info("successfully prepared F |0> with {} total rows after discarding {} tiny elements",
-                          mpi::all_sum(fock_x_hist_screened.nrow_in_use()), mpi::all_sum(count));
-            logging::info("lost {} of the total excited WF L1 norm {} in the process",
-                          mpi::all_sum(discarded_norm), mpi::all_sum(f4rdm_norm));
+            logging::info_("successfully prepared F |0> with {} total rows after discarding {} tiny elements",
+                         fock_x_hist_screened.nrow_in_use(), count);
+            logging::info_("lost {} of the total excited WF L1 norm {} in the process",
+                          discarded_norm, f4rdm_norm);
             buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist_screened.m_row}, Owner::shared(mpi::irank_world_shmem_root())};
             psi1.resize(mpi::all_sum(fock_x_hist_screened.nrow_in_use()));
             psi1.all_gatherv(fock_x_hist_screened);
@@ -762,6 +762,8 @@ public:
 
             SpinMapRdmFiller(hist, psi1).fill_rdm(rdms->m_fock_4rdm);
         }
+        mpi::barrier();
+        logging::info("finished RDM filling");
     }
 };
 
