@@ -410,8 +410,9 @@ public:
 
     void fill_rdm(Rdm* rdm) const {
         if (!rdm) return;
-        // remap the send tables before insertion to increase performance
+        // remap the send and store tables before insertion to increase performance
         for (size_t i = 0; i < mpi::nrank(); ++i) rdm->m_send_recv.send(i).remap(rdm->m_send_recv.send(i).capacity());
+        rdm->m_store.remap(rdm->m_send_recv.recv().capacity());
 
         const auto displ = mpi::evenly_shared_displ(m_bra.nrow_in_use());
         const auto count = mpi::evenly_shared_count(m_bra.nrow_in_use());
@@ -751,10 +752,10 @@ public:
             };
             fock_x_hist.m_store.foreach_row_in_use(screen_fock_fn);
 
-            logging::info_("successfully prepared F |0> with {} total rows after discarding {} tiny elements",
-                         fock_x_hist_screened.nrow_in_use(), count);
-            logging::info_("lost {} of the total excited WF L1 norm {} in the process",
-                          discarded_norm, f4rdm_norm);
+            logging::info("successfully prepared F |0> with {} total rows after discarding {} tiny elements",
+                          mpi::all_sum(fock_x_hist_screened.nrow_in_use()), mpi::all_sum(count));
+            logging::info("lost {} of the total excited WF L1 norm {} in the process",
+                          mpi::all_sum(discarded_norm), mpi::all_sum(f4rdm_norm));
             buffered::OpenAddressedTable<MbfWeightRow> psi1{MbfWeightRow{fock_x_hist_screened.m_row}, Owner::shared(mpi::irank_world_shmem_root())};
             psi1.resize(mpi::all_sum(fock_x_hist_screened.nrow_in_use()));
             psi1.all_gatherv(fock_x_hist_screened);
@@ -762,8 +763,6 @@ public:
 
             SpinMapRdmFiller(hist, psi1).fill_rdm(rdms->m_fock_4rdm);
         }
-        mpi::barrier();
-        logging::info("finished RDM filling");
     }
 };
 
