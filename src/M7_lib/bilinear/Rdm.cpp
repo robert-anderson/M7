@@ -15,7 +15,7 @@ uint_t Rdm::nrow_estimate(uint_t nfrm_cre, uint_t nfrm_ann, uint_t nbos_cre, uin
     nrow *= integer::combinatorial_with_repetition(basis_size.m_bos, nbos_ann);
     nrow /= nfrm_cre + nfrm_ann + 1;
     nrow /= nbos_cre + nbos_ann + 1;
-    if (nfrm_cre > 2 || nfrm_ann > 2) nrow /= 4;
+    if (nfrm_cre > 2 || nfrm_ann > 2) nrow /= 2;
     return nrow;
 }
 
