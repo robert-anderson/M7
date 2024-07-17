@@ -374,6 +374,8 @@ class SpinMapRdmFiller {
             dst.m_weight += recv_row.m_weight;
             psi1.m_store.remap_if_due();
         }
+        /* these receive rows take a lot of memory, clear them after use */
+        psi1.m_send_recv.recv().clear();
     }
 
     /**
