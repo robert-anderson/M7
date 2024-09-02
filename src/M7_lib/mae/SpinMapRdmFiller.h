@@ -354,16 +354,11 @@ class SpinMapRdmFiller {
             if (phase) send_row.m_weight *= -1.0;
         };
 
+        // split fock matrix application into off-diagonal and diagonal to save memory
         for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
             for (auto& diag_val: diag_vals) {
                 if (!hist_row.m_mbf.get(diag_val.first)) continue;
                 add_send_fn(hist_row.m_mbf, diag_val.second, false);
-            }
-            for (auto &non_diag_val: non_diag_vals) {
-                const auto &conn = non_diag_val.first;
-                if (mbf::destroys(conn, hist_row.m_mbf)) continue;
-                conn.apply(hist_row.m_mbf, work_mbf);
-                add_send_fn(work_mbf, non_diag_val.second, conn.phase(hist_row.m_mbf));
             }
         }
         psi1.communicate();
@@ -375,6 +370,25 @@ class SpinMapRdmFiller {
             psi1.m_store.remap_if_due();
         }
         /* send_recv rows take a lot of memory, clear them after use */
+        psi1.m_send_recv.recv().clear();
+        psi1.m_send_recv.resize(1);
+
+        for (hist_row.restart(displ); hist_row.in_range(displ + count); ++hist_row) {
+            for (auto &non_diag_val: non_diag_vals) {
+                const auto &conn = non_diag_val.first;
+                if (mbf::destroys(conn, hist_row.m_mbf)) continue;
+                conn.apply(hist_row.m_mbf, work_mbf);
+                add_send_fn(work_mbf, non_diag_val.second, conn.phase(hist_row.m_mbf));
+            }
+        }
+        psi1.communicate();
+        /* do another mini (rank-local) annihilation loop */
+        for (recv_row.restart(); recv_row; ++recv_row) {
+            auto& dst = psi1.m_store.lookup_or_insert(recv_row.m_mbf);
+            dst.m_weight += recv_row.m_weight;
+            psi1.m_store.remap_if_due();
+        }
+        /* again, shrink the buffers after use */
         psi1.m_send_recv.recv().clear();
         psi1.m_send_recv.resize(1);
     }
