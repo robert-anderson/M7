@@ -9,7 +9,7 @@ function(add_parallel_hdf5 target)
         set(HDF5_USE_STATIC_LIBRARIES 1)
         set(HDF5_VERSION "1.10.5")
 
-        set(HDF5_C_FLAG_LIST "-w -Wno-implicit-function-declaration")
+        set(HDF5_C_FLAG_LIST "-w -Wno-implicit-function-declaration -Wno-incompatible-function-pointer-types")
 
         file(MAKE_DIRECTORY ${OWN_HDF5_ROOT})
         file(MAKE_DIRECTORY ${OWN_HDF5_BUILD})
