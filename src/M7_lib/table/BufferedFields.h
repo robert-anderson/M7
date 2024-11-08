@@ -118,6 +118,7 @@ namespace buffered {
             return *this;
         }
     };
+    using FrmOnvSpinChannel = Bitset<uint_t>;
 
     struct FrmOnv : BufferedField<field::FrmOnv> {
         using field::FrmOnv::operator=;
@@ -261,7 +262,7 @@ namespace buffered {
         using field::RdmInds::m_frm;
         using field::RdmInds::m_bos;
         RdmInds(OpSig exsig): BufferedField<field::RdmInds>(exsig){}
-        RdmInds(const RdmInds& other): BufferedField<field::RdmInds>(other.m_exsig){
+        RdmInds(const RdmInds& other): BufferedField<field::RdmInds>(other.m_ranksig){
             static_cast<field::RdmInds&>(*this) = other;
         }
     };

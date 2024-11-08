@@ -59,8 +59,8 @@ template<typename row_t, typename send_table_t> class SendRecv;
  * to resize, and in response to this, the Buffer will ensure that table records are moved to new positions in the
  * resized buffer, and that each of the other windows are pointed to the beginning of that data.
  *
- * The number of records is determined by the size of the currently-allocated buffer window. This is analogous to the
- * capacity of a std::vector. The "nrow_in_use" method is the analog of the size() of a std::vector.
+ * The number of re * capacity of a std::vector. The "nrow_in_use" method is the analog of the size() of a std::vector.
+cords is determined by the size of the currently-allocated buffer window. This is analogous to the
  *
  * the m_row_size member of m_bw is the definitive length of the Table's row in bytes, and the Row class ensures that
  * this is always an integer multiple of the system word length
@@ -263,6 +263,14 @@ public:
     uint_t push_back(uint_t n=1ul);
 
     /**
+     * In shared memory contexts, the owning rank can push back the high water mark. After such a writing phase, the
+     * other ranks in the shared memory realm need to be updated with the new hwm
+     */
+    virtual void end_sync() {
+        m_bw.end_sync();
+    }
+
+    /**
      * If there are indices on the m_free_records stack: pop one and use it, else: push_back
      * @return
      *  index of free row
@@ -311,8 +319,10 @@ public:
      */
     uint_t bw_size() const;
 
+    Owner owner() const;
+
     /**
-     * call the resize method on the buffer window and reflect the reallocation in m_nrow
+     * call the resize method on the buffer window.
      * @param nrow
      *  minimum number of rows in the new buffer.
      */

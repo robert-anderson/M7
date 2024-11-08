@@ -61,7 +61,7 @@ TEST(Dataset, RealContiguousSaveLoad) {
          */
         hdf5::FileReader fr("tmp.h5");
         hdf5::DatasetLoader::load_dist_list(fr, "stuff", load_vec, true,
-            mpi::i_am_root() || mpi::i_am(mpi::nrank()-1), load_attrs, max_nitem_per_op);
+            mpi::i_am_root() || mpi::i_am(mpi::nrank() - 1), load_attrs, max_nitem_per_op);
         const auto load_vec_all = mpi::all_gatheredv(save_vec);
         ASSERT_EQ(save_vec_all, load_vec_all);
         ASSERT_TRUE(attrs_correct());

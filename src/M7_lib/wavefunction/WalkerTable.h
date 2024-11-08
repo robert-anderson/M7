@@ -66,7 +66,7 @@ struct OnvRow : public Row {
 
     field::Mbf &key_field() {
         return m_mbf;
-    };
+    }
 
     OnvRow(const sys::Sector& sector) : m_mbf(this, sector), m_nparent(this) {}
 };
@@ -74,7 +74,15 @@ struct OnvRow : public Row {
 struct MbfWeightRow : Row {
     field::Mbf m_mbf;
     field::Numbers<wf_t, c_ndim_wf> m_weight;
+
+    field::Mbf &key_field() {
+        return m_mbf;
+    };
+
+    MbfWeightRow(const sys::Basis& basis, const NdFormat<c_ndim_wf>& weight_fmt);
+
     MbfWeightRow(const Walker& walker);
+
 };
 
 typedef MappedTable<Walker> WalkerTable;

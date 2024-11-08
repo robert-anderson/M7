@@ -33,7 +33,7 @@ namespace setbit_foreach {
         for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                uint_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t ibit = idataword * (CHAR_BIT * sizeof(T)) + bit::next_setbit(work);
                 fn(ibit);
             }
         }
@@ -66,7 +66,7 @@ namespace setbit_foreach {
         for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                uint_t jbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t jbit = idataword * (CHAR_BIT * sizeof(T)) + bit::next_setbit(work);
                 if (jbit==ibit) return;
                 fn(jbit, ibit);
             }
@@ -103,7 +103,7 @@ namespace setbit_foreach {
         for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                uint_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t ibit = idataword * (CHAR_BIT * sizeof(T)) + bit::next_setbit(work);
                 fn_outer(ibit);
                 pair_inner<T>(dsize, ibit, fn_inner, get_work_fn);
             }
@@ -133,7 +133,7 @@ namespace setbit_foreach {
         for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                uint_t kbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t kbit = idataword * (CHAR_BIT * sizeof(T)) + bit::next_setbit(work);
                 if (kbit==ibit) return;
                 if (kbit==jbit) return;
                 fn_3(kbit, jbit, ibit);
@@ -153,7 +153,7 @@ namespace setbit_foreach {
         for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                uint_t jbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t jbit = idataword * (CHAR_BIT * sizeof(T)) + bit::next_setbit(work);
                 if (jbit==ibit) return;
                 fn_2(jbit, ibit);
                 triple_2<T>(dsize, ibit, jbit, fn_3, get_work_fn);
@@ -174,7 +174,7 @@ namespace setbit_foreach {
         for (uint_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                uint_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
+                uint_t ibit = idataword * (CHAR_BIT * sizeof(T)) + bit::next_setbit(work);
                 fn_1(ibit);
                 triple_1<T>(dsize, ibit, fn_2, fn_3, get_work_fn);
             }
@@ -193,6 +193,107 @@ namespace setbit_foreach {
         triple<T>(dsize, fn_1, fn_2, fn, get_work_fn);
     }
 
+
+
+
+    template<typename T, typename body_fn_4_t, typename get_work_fn_t>
+    static void quad_3(uint_t dsize, uint_t ibit, uint_t jbit, uint_t kbit, const body_fn_4_t& fn_4,
+                       const get_work_fn_t& get_work_fn) {
+        static_assert(std::is_integral<T>::value, "buffer type must be integral");
+        functor::assert_prototype<void(uint_t, uint_t, uint_t, uint_t), body_fn_4_t>();
+        functor::assert_prototype<T(uint_t), get_work_fn_t>();
+        DEBUG_ASSERT_LT(kbit, jbit, "quadruplet should be strictly ordered");
+        DEBUG_ASSERT_LT(jbit, ibit, "quadruplet should be strictly ordered");
+
+        T work;
+        for (uint_t idataword = 0; idataword < dsize; ++idataword) {
+            work = get_work_fn(idataword);
+            while (work) {
+                uint_t lbit = idataword * (CHAR_BIT * sizeof(T)) + bit::next_setbit(work);
+                if (lbit==ibit) return;
+                if (lbit==jbit) return;
+                if (lbit==kbit) return;
+                fn_4(lbit, kbit, jbit, ibit);
+            }
+        }
+    }
+
+    template<typename T, typename body_fn_3_t, typename body_fn_4_t, typename get_work_fn_t>
+    static void quad_2(uint_t dsize, uint_t ibit, uint_t jbit, const body_fn_3_t& fn_3, const body_fn_4_t& fn_4,
+                         const get_work_fn_t& get_work_fn) {
+        static_assert(std::is_integral<T>::value, "buffer type must be integral");
+        functor::assert_prototype<void(uint_t, uint_t, uint_t), body_fn_3_t>();
+        functor::assert_prototype<void(uint_t, uint_t, uint_t, uint_t), body_fn_4_t>();
+        functor::assert_prototype<T(uint_t), get_work_fn_t>();
+        DEBUG_ASSERT_LT(jbit, ibit, "quadruplet should be strictly ordered");
+
+        T work;
+        for (uint_t idataword = 0; idataword < dsize; ++idataword) {
+            work = get_work_fn(idataword);
+            while (work) {
+                uint_t kbit = idataword * (CHAR_BIT * sizeof(T)) + bit::next_setbit(work);
+                if (kbit==ibit) return;
+                if (kbit==jbit) return;
+                fn_3(kbit, jbit, ibit);
+                quad_3<T>(dsize, ibit, jbit, fn_4, get_work_fn);
+            }
+        }
+    }
+
+    template<typename T, typename body_fn_2_t, typename body_fn_3_t, typename body_fn_4_t, typename get_work_fn_t>
+    static void quad_1(uint_t dsize, uint_t ibit, const body_fn_2_t& fn_2, const body_fn_3_t& fn_3,
+                       const body_fn_4_t& fn_4, const get_work_fn_t& get_work_fn) {
+        static_assert(std::is_integral<T>::value, "buffer type must be integral");
+        functor::assert_prototype<void(uint_t, uint_t), body_fn_2_t>();
+        functor::assert_prototype<void(uint_t, uint_t, uint_t), body_fn_3_t>();
+        functor::assert_prototype<void(uint_t, uint_t, uint_t, uint_t), body_fn_4_t>();
+        functor::assert_prototype<T(uint_t), get_work_fn_t>();
+
+        T work;
+        for (uint_t idataword = 0; idataword < dsize; ++idataword) {
+            work = get_work_fn(idataword);
+            while (work) {
+                uint_t jbit = idataword * (CHAR_BIT * sizeof(T)) + bit::next_setbit(work);
+                if (jbit==ibit) return;
+                fn_2(jbit, ibit);
+                quad_2<T>(dsize, ibit, jbit, fn_3, fn_4, get_work_fn);
+            }
+        }
+    }
+
+
+    template<typename T, typename body_fn_1_t, typename body_fn_2_t, typename body_fn_3_t, typename body_fn_4_t, typename get_work_fn_t>
+    static void quad(uint_t dsize, const body_fn_1_t& fn_1, const body_fn_2_t& fn_2, const body_fn_3_t& fn_3,
+                     const body_fn_4_t& fn_4, const get_work_fn_t& get_work_fn) {
+        static_assert(std::is_integral<T>::value, "buffer type must be integral");
+        functor::assert_prototype<void(uint_t), body_fn_1_t>();
+        functor::assert_prototype<void(uint_t, uint_t), body_fn_2_t>();
+        functor::assert_prototype<void(uint_t, uint_t, uint_t), body_fn_3_t>();
+        functor::assert_prototype<void(uint_t, uint_t, uint_t, uint_t), body_fn_4_t>();
+        functor::assert_prototype<T(uint_t), get_work_fn_t>();
+        T work;
+        for (uint_t idataword = 0; idataword < dsize; ++idataword) {
+            work = get_work_fn(idataword);
+            while (work) {
+                uint_t ibit = idataword * (CHAR_BIT * sizeof(T)) + bit::next_setbit(work);
+                fn_1(ibit);
+                quad_1<T>(dsize, ibit, fn_2, fn_3, fn_4, get_work_fn);
+            }
+        }
+    }
+
+    /**
+     * convenient wrapper for above definition in the commonly-encountered case where there is no need to call a functor
+     * on the single set bits, pairs or triples thereof, only the quads. here the outer and middle functors are set to a
+     * null lambda.
+     */
+    template<typename T, typename body_fn_t, typename get_work_fn_t>
+    static void quad(uint_t dsize, const body_fn_t& fn, const get_work_fn_t& get_work_fn) {
+        auto fn_1 = [](uint_t){};
+        auto fn_2 = [](uint_t, uint_t){};
+        auto fn_3 = [](uint_t, uint_t, uint_t){};
+        quad<T>(dsize, fn_1, fn_2, fn_3, fn, get_work_fn);
+    }
 }
 
 #endif //M7_SETBITFOREACH_H

@@ -15,6 +15,8 @@
  */
 namespace bitset_isect {
 
+    typedef v_t<uintp_t> siv_t;
+    typedef v_t<v_t<uintp_t>> vsiv_t;
     /**
      * @param isetbits
      *  unordered indices to be converted into a bitset
@@ -26,13 +28,8 @@ namespace bitset_isect {
     uintv_t make_bitset(const uintv_t& isetbits, uint_t nbit);
 
     /**
-     * as above, but infer bitset length
-     */
-    uintv_t make_bitset(const uintv_t& isetbits);
-
-    /**
      * compute the intersection on the word range [iword_begin, iword_end) of two bitsets as a sparse intersection
-     * vector "isect" whose elements are of the form:
+     * vector "siv" whose elements are of the form:
      *  {non-zero word index, bitwise AND of the words at that index in bitset1 and bitset2}
      * @param bitset1
      *  a vector bitset
@@ -42,63 +39,67 @@ namespace bitset_isect {
      *  index of the first word to include in the intersection
      * @param iword_end
      *  index of the first word after iword_begin to exclude in the intersection
-     * @param isect
+     * @param siv
      *  sparse intersection vector
      */
-    void make_isect(const uintv_t& bitset1, const uintv_t& bitset2, uint_t iword_begin, uint_t iword_end, v_t<uintp_t>& isect);
+    void isect(const uintv_t& bitset1, const uintv_t& bitset2, uint_t iword_begin, uint_t iword_end, siv_t& siv);
 
     /**
      * as above, but do not restrict the word range
      */
-    void make_isect(const uintv_t& bitset1, const uintv_t& bitset2, v_t<uintp_t>& isect);
+    void isect(const uintv_t& bitset1, const uintv_t& bitset2, siv_t& siv);
 
     /**
-     * as above, but return the intersection vector by value
+     * as above, but return the sparse intersection vector by value
      */
-    v_t<uintp_t> make_isect(const uintv_t& bitset1, const uintv_t& bitset2);
+    siv_t isect(const uintv_t& bitset1, const uintv_t& bitset2);
 
     /**
-     * as above, but take intersection of the bitset with itself (i.e. convert to intersection vector)
+     * as above, but take intersection of the bitset with itself (i.e. convert to sparse intersection vector)
      */
-    v_t<uintp_t> make_isect(const uintv_t& bitset);
+    siv_t bitset_to_siv(const uintv_t& bitset);
 
     /**
-     * as above, but place result into referenced intersection vector
+     * as above, but place result into referenced sparse intersection vector
      */
-    void make_isect(const uintv_t& bitset, v_t<uintp_t>& isect);
+    void bitset_to_siv(const uintv_t& bitset, siv_t& siv);
 
     /**
      * repeat above process for many pairs of bitsets
      */
-    v_t<v_t<uintp_t>> make_isects(const v_t<uintv_t>& bitsets1, const v_t<uintv_t>& bitsets2, uint_t iword_begin, uint_t iword_end);
+    vsiv_t isect_many(const v_t<uintv_t>& bitsets1, const v_t<uintv_t>& bitsets2, uint_t iword_begin, uint_t iword_end);
     /**
      * as above but take intersections of the bitsets with themselves (i.e. convert to intersection vectors)
      */
-    v_t<v_t<uintp_t>> make_isects(const v_t<uintv_t>& bitsets, uint_t iword_begin, uint_t iword_end);
+    vsiv_t bitset_to_siv_many(const v_t<uintv_t>& bitsets, uint_t iword_begin, uint_t iword_end);
+    /**
+     * as above, but infer the begin and end words from the size in words of the first bitset in the given vector
+     */
+    vsiv_t bitset_to_siv_many(const v_t<uintv_t>& bitsets);
 
 
     /**
-     * update isect in-place by taking its intersection with the given bitset
+     * update siv in-place by taking its intersection with the given bitset
      */
-    void isect(v_t<uintp_t>& isect, const uintv_t& bitset);
+    void isect(siv_t& siv, const uintv_t& bitset);
 
     /**
-     * compute intersection between isect_in and bitset and store the result in isect_out
+     * compute intersection between siv_in and bitset and store the result in siv_out
      */
-    void make_isect(const v_t<uintp_t>& isect_in, const uintv_t& bitset, v_t<uintp_t>& isect_out);
+    void isect(const siv_t& siv_in, const uintv_t& bitset, siv_t& siv_out);
 
     /**
      * @tparam fn_t
      *  callable type which accepts a uint_t
-     * @param isect
+     * @param siv
      *  intersection vector
      * @param fn
      *  function to call each set bit in the intersection vector
      */
     template<typename fn_t>
-    void foreach_in_isect(const v_t<uintp_t>& isect, const fn_t& fn) {
+    void foreach_in_siv(const siv_t& siv, const fn_t& fn) {
         functor::assert_prototype<void(uint_t)>(fn);
-        for (auto& pair: isect) {
+        for (auto& pair: siv) {
             auto work = pair.second;
             while (work) {
                 const auto ibit = bit::next_setbit(work);
@@ -108,14 +109,14 @@ namespace bitset_isect {
     }
 
     /**
-     * get intersection vector as std::set instance for testing / debugging
+     * get sparse intersection vector as std::set instance for testing / debugging
      */
-    std::set<uint_t> to_std_set(const v_t<uintp_t>& isect);
+    std::set<uint_t> to_std_set(const siv_t& siv);
 
     /**
-     * get intersection vector as std::vector instance for testing / debugging
+     * get sparse intersection vector as std::vector instance for testing / debugging
      */
-    uintv_t to_std_vector(const v_t<uintp_t>& isect);
+    uintv_t to_std_vector(const siv_t& siv);
 
     /**
      * recurse through sets for intersection until maximum number of sets intersected is reached with the ordering that
@@ -125,61 +126,68 @@ namespace bitset_isect {
      * @param isets
      *  current set selection in strict ascending order whose size is the current number of sets intersected and whose
      *  capacity is the maximum number of sets to compute intersections of
-     * @param isect
+     * @param siv
      *  result of taking the intersection of all sets indexed in isets as a sparse intersection vector
      * @param bitsets
      *  all sets in bitset form
+     * @param max_only
+     *  if true, only call the fn on a intersection when the size and capacity of the isets vector are identical
      * @param fn
      *  function to be called each time a non-empty set is formed with n sets with n in [1, isets.capacity()]
      */
     template<typename fn_t>
-    void foreach_unique_one_level(uintv_t& isets, const v_t<uintp_t>& isect, const v_t<uintv_t>& bitsets, const fn_t& fn) {
-        functor::assert_prototype<void(const uintv_t& /*isets*/, const v_t<uintp_t>& /*isect*/)>(fn);
-        // handle the current set combination which have intersection isect
-        fn(isets, isect);
+    void foreach_unique_one_level(uintv_t& isets, const siv_t& siv, const v_t<uintv_t>& bitsets, bool max_only, const fn_t& fn) {
+        functor::assert_prototype<void(const uintv_t& /*isets*/, const siv_t& /*siv*/)>(fn);
+        // handle the current set combination which have intersection siv
+        if (!max_only || (isets.size() == isets.capacity())) fn(isets, siv);
         // capacity of the vector gives the maximum number of sets to consider intersecting
         if (isets.size() == isets.capacity()) return;
+        const auto size = isets.size();
         // set index of this level is constrained to be less than that of the next most senior level
         const auto iset_max = isets.back();
-        v_t<uintp_t> next_isect;
+        // total number of sets from which the unique intersections are being prepared
+        const auto nset = bitsets.size();
+        siv_t next_siv;
         // add another level to the vector or set indices
-        isets.push_back(~0ul);
-        for (isets.back()=0ul; isets.back() < iset_max; ++isets.back()) {
-            // compute intersection and store result in next_isect
-            bitset_isect::make_isect(isect, bitsets[isets.back()], next_isect);
+        isets.push_back(iset_max+1);
+        for (; isets.back() < nset; ++isets.back()) {
+            // compute intersection and store result in next_siv
+            bitset_isect::isect(siv, bitsets[isets.back()], next_siv);
             // if there are any elements in the result, go another level deeper
-            if (!next_isect.empty()) foreach_unique_one_level(isets, next_isect, bitsets, fn);
+            if (!next_siv.empty()) foreach_unique_one_level(isets, next_siv, bitsets, max_only, fn);
         }
         // revert to initial level
-        isets.resize(isets.size()-1);
+        isets.resize(size);
     }
 
     /**
-     * loop over top-level isects (simply the bitsets converted to sparse intersection vector form) and dispatch full
+     * loop over top-level sivs (simply the bitsets converted to sparse intersection vector form) and dispatch full
      * recursive enumeration of non-empty intersections
      * @tparam fn_t
      *  callable type which accepts a vector of set indices (in strict ascending order) and a sparse intersection vector
-     * @param top_isects
+     * @param top_sivs
      *  top-level intersections. usually this will correspond to the full bitsets converted to intersection vector form
      *  but not necessarily - this could hold a subset of bits unique to each MPI rank as an efficient means of
      *  achieving parallel partitioning
      * @param nmax
      *  maximum number of sets between which to form intersection
+     * @param max_only
+     *  if true, only call the fn on a intersection of exactly nmax sets
      * @param fn
      *  function to be called each time a non-empty set is formed with n sets with n in [1, isets.capacity()]
      */
     template<typename fn_t>
-    void foreach_unique(const v_t<uintv_t>& bitsets, const v_t<v_t<uintp_t>>& top_isects, uint_t nmax, const fn_t& fn) {
-        functor::assert_prototype<void(const uintv_t& /*isets*/, const v_t<uintp_t>& /*isect*/)>(fn);
+    void foreach_unique(const v_t<uintv_t>& bitsets, const vsiv_t& top_sivs, uint_t nmax, bool max_only, const fn_t& fn) {
+        functor::assert_prototype<void(const uintv_t& /*isets*/, const siv_t& /*siv*/)>(fn);
         const auto nset = bitsets.size();
-        DEBUG_ASSERT_EQ(top_isects.size(), nset, "incompatible number of top-level intersections");
+        DEBUG_ASSERT_EQ(top_sivs.size(), nset, "incompatible number of top-level intersections");
         uintv_t isets;
         isets.reserve(nmax);
         for (uint_t iset=0ul; iset < nset; ++iset) {
             isets.clear();
             isets.push_back(iset);
-            const auto& isect = top_isects[iset];
-            foreach_unique_one_level(isets, isect, bitsets, fn);
+            const auto& siv = top_sivs[iset];
+            foreach_unique_one_level(isets, siv, bitsets, max_only, fn);
         }
     }
 }

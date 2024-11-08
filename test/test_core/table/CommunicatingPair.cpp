@@ -15,7 +15,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
 
     comm_pair.resize(1ul, 0.0);
 
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) ASSERT_EQ(comm_pair.send(irank).capacity(), 1ul);
+    for (uint_t irank=0ul; irank < mpi::nrank(); ++irank) ASSERT_EQ(comm_pair.send(irank).capacity(), 1ul);
     ASSERT_EQ(comm_pair.send(0).capacity(), 1ul);
     ASSERT_EQ(comm_pair.recv().capacity(), mpi::nrank());
 
@@ -99,7 +99,7 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
 
     v_t<uint_t> nrows_expect;
     nrows_expect.reserve(mpi::nrank());
-    for (auto irank=0ul; irank<mpi::nrank(); ++irank)
+    for (auto irank = 0ul; irank < mpi::nrank(); ++irank)
         nrows_expect.push_back(hash::in_range(irank, nrow_rank_lo, nrow_rank_hi));
     ASSERT_EQ(*std::max_element(nrows_expect.cbegin(), nrows_expect.cend()), nrow_max);
     auto nrow_displs_expect = mpi::counts_to_displs_consec(nrows_expect);
@@ -119,7 +119,7 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
     auto& row = comm_pair.recv().m_row;
     auto irank_src = 0ul;
     for (row.restart(); row; ++row) {
-        if (irank_src+1<mpi::nrank()){
+        if (irank_src + 1 < mpi::nrank()){
             if (row.index()==nrow_displs_expect[irank_src+1]) ++irank_src;
         }
         auto irow_send = row.index()-nrow_displs_expect[irank_src];

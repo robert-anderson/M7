@@ -7,6 +7,7 @@
 
 #include <utility>
 #include "MappedTable.h"
+#include "OpenAddressedTable.h"
 
 template<typename row_t, typename table_impl_t>
 class BufferedTable : public table_impl_t {
@@ -16,13 +17,13 @@ public:
     typedef table_impl_t table_t;
     using TableBase::m_bw;
 
-    BufferedTable(str_t name, const table_t& table, bool node_shared): table_t(table),
-        m_buffer(std::move(name), 1ul, node_shared) {
+    BufferedTable(str_t name, const table_t& table, Owner owner = Owner::local()):
+        table_t(table), m_buffer(std::move(name), 1ul, owner) {
         TableBase::set_buffer(&m_buffer);
         ASSERT(static_cast<const Row&>(Table<row_t>::m_row).m_table);
     }
 
-    BufferedTable(const table_t& table, bool node_shared): BufferedTable("", table, node_shared){}
+    explicit BufferedTable(const table_t& table, Owner owner = Owner::local()): BufferedTable("", table, owner){}
 
     BufferedTable& operator=(const BufferedTable<row_t, table_t> &other) {
         table_t::operator=(other);
@@ -34,7 +35,7 @@ public:
     }
 
     BufferedTable(const BufferedTable<row_t, table_t> &other) :
-        BufferedTable(other.m_buffer.m_name, other, other.m_buffer.m_node_shared){
+        BufferedTable(other.m_buffer.m_name, other, other.m_buffer.m_owner){
         *this = other;
         table_t::m_row.restart();
     }
@@ -51,20 +52,35 @@ public:
 namespace buffered {
     template <typename row_t>
     struct Table : BufferedTable<row_t, ::Table<row_t>> {
-        Table(str_t name, const row_t &row, bool node_shared=false):
-            BufferedTable<row_t, ::Table<row_t>>(name, ::Table<row_t>(row), node_shared){}
-        Table(const row_t &row, bool node_shared=false): Table("", row, node_shared){}
+        Table(str_t name, const row_t &row, Owner owner = Owner::local()):
+            BufferedTable<row_t, ::Table<row_t>>(name, ::Table<row_t>(row), owner){}
+        Table(const row_t &row, Owner owner = Owner::local()): Table("", row, owner){}
     };
+
     template <typename row_t>
     struct MappedTable : BufferedTable<row_t, ::MappedTable<row_t>> {
-        MappedTable(str_t name, const row_t &row, MappedTableOptions opts, bool node_shared=false):
-            BufferedTable<row_t, ::MappedTable<row_t>>(name, ::MappedTable<row_t>(row, opts), node_shared){}
-        MappedTable(const row_t &row, bool node_shared=false):
-            MappedTable("", row, node_shared){}
-        MappedTable(str_t name, const row_t &row, bool node_shared=false):
-            MappedTable(name, row, {}, node_shared){}
-        MappedTable(const row_t &row, MappedTableOptions opts, bool node_shared=false):
-            MappedTable("", row, opts, node_shared){}
+        MappedTable(str_t name, const row_t &row, MappedTableOptions opts, Owner owner = Owner::local()):
+            BufferedTable<row_t, ::MappedTable<row_t>>(name, ::MappedTable<row_t>(row, opts), owner){}
+        MappedTable(const row_t &row, Owner owner = Owner::local()):
+            MappedTable("", row, owner){}
+        MappedTable(str_t name, const row_t &row, Owner owner = Owner::local()):
+            MappedTable(name, row, {}, owner){}
+        MappedTable(const row_t &row, MappedTableOptions opts, Owner owner = Owner::local()):
+            MappedTable("", row, opts, owner){}
+    };
+
+    template<typename row_t>
+    struct OpenAddressedTable : BufferedTable<row_t, ::OpenAddressedTable<row_t>> {
+        Buffer m_addr_buffer;
+        OpenAddressedTable(str_t name, const row_t &row, double fmax, Owner owner = Owner::local()) :
+            BufferedTable<row_t, ::OpenAddressedTable<row_t>>(name, ::OpenAddressedTable<row_t>(row, fmax), owner),
+            m_addr_buffer(::OpenAddressedTable<row_t>::name() + " addresses", 1ul, owner) {
+            ::OpenAddressedTable<row_t>::m_oa.set_buffer(&m_addr_buffer);
+        }
+        OpenAddressedTable(const row_t &row, Owner owner = Owner::local()) :
+                OpenAddressedTable("", row, owner) {}
+        OpenAddressedTable(str_t name, const row_t &row, Owner owner = Owner::local()) :
+        OpenAddressedTable(name, row, 0.5, owner) {}
     };
 }
 

@@ -12,8 +12,31 @@
 #include <M7_lib/parallel/MPIWrapper.h>
 #include <M7_lib/parallel/SharedArray.h>
 
+#include "Owner.h"
+
 struct TableBase;
 
+
+/**
+ * Basic container for local or shared memory allocations
+ */
+struct BufferContainer {
+
+    virtual ~BufferContainer() = default;
+};
+
+struct LocalBufferContainer : BufferContainer {
+    v_t<buf_t> m_data;
+};
+
+struct SharedBufferContainer : BufferContainer {
+    SharedArrayBase m_data;
+    SharedBufferContainer(uint_t nelement, uint_t element_size, Owner owner): m_data(nelement, element_size, owner){}
+};
+
+/**
+ * Basic container for local or shared memory allocations which support regions called "windows"
+ */
 class Buffer {
 public:
     /**
@@ -93,6 +116,12 @@ public:
         const buf_t* cend() const {return m_hwm_ptr;}
 
         /**
+         * In shared memory contexts, the owning rank can push back the high water mark. After such a writing phase, the
+         * other ranks in the shared memory realm need to be updated with the new hwm
+         */
+        void end_sync();
+
+        /**
          * redefine the "high water mark"
          * @param irow
          *  index of the new "high water mark", must be no larger than the current number of allocated rows
@@ -103,11 +132,13 @@ public:
          * @return
          *  true if the buffer's underlying memory is shared over the MPI node
          */
-        bool node_shared() const;
+        bool shared() const;
+
+        Owner owner() const;
 
         /**
          * @return
-         *  true if the memory is not node-shared, or if this is a node-root MPI rank
+         *  true if the memory is not node-shared, or if this is MPI rank is the owner of the shared allocation
          */
         bool i_can_modify() const;
 
@@ -177,9 +208,10 @@ public:
     str_t m_name = "";
     const uint_t m_nwindow_max;
     /**
-     * determines whether the buffer is held in node-shared or rank-private memory
+     * determines whether the buffer is held in node-shared or rank-private memory and which rank has writing
+     * permissions
      */
-    const bool m_node_shared;
+    const Owner m_owner;
 private:
     /**
      * begin pointer of the allocated memory
@@ -190,13 +222,9 @@ private:
      */
     uint_t m_size = 0ul;
     /**
-     * in the case that the buffer is initialized with m_shared=false
+     * Raw data storage that can be either MPI rank local or shared
      */
-    v_t<buf_t> m_data_priv;
-    /**
-     * in the case that the buffer is initialized with m_shared=true
-     */
-    SharedArrayBase m_data_shared;
+    std::unique_ptr<BufferContainer> m_container;
     /**
      * a buffer can provide the underlying data requirement of multiple Tables, whose allocations are specified by
      * instances of the Window class
@@ -204,9 +232,15 @@ private:
     v_t<Window *> m_windows;
 
 public:
-    Buffer(str_t name, uint_t nwindow_max, bool node_shared=false);
+    Buffer(str_t name, uint_t nwindow_max, Owner owner = Owner::local());
 
-    Buffer(uint_t nwindow_max, bool node_shared=false) : Buffer("", nwindow_max, node_shared){}
+    Buffer(uint_t nwindow_max, Owner owner = Owner::local()) : Buffer("", nwindow_max, owner){}
+
+    Buffer(const Buffer& other);
+
+    Buffer& operator=(const Buffer& other);
+
+    Buffer& operator=(buf_t value);
 
     uint_t size() const;
 

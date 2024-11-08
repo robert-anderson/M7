@@ -38,7 +38,7 @@ wf_comp_t Rdms::contrib_norm(uint_t iroot) const {
     return std::sqrt(l2_norm_squares[ipart1] * l2_norm_squares[ipart2]);
 }
 
-Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch) :
+Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch, FillingAlgorithm filling_algo) :
         m_opts(opts), m_wf(wf), m_spinfree(opts.m_spinfree), m_work_conns(m_wf.m_sector.size()),
         m_work_com_ops(m_wf.m_sector.size()), m_accum_epoch(accum_epoch) {
     DEBUG_ASSERT_TRUE_ALL(std::none_of(m_pure_rdms.cbegin(), m_pure_rdms.cend(),
@@ -51,7 +51,7 @@ Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epo
         REQUIRE_LE(ranksig.nbos(), 1ul, "RDMs with more than one boson operator are not yet supported");
         m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, PureRdm>(opts, ranksig, m_wf.m_sector, 1ul));
         auto rdm_ptr = m_rdms.front().get();
-        m_pure_rdms[ranksig] = rdm_ptr;
+        m_pure_rdms[ranksig] = dynamic_cast<PureRdm*>(rdm_ptr);
     }
     if (opts.m_fock_4rdm.m_enabled) {
         logging::info("Loading generalized Fock matrix for accumulation of its contraction with the 4RDM");
@@ -64,8 +64,19 @@ Rdms::Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epo
         const auto diag = fock.is_diagonal();
         logging::info("The given Fock matrix was found to be {}diagonal", (diag ? "" : "non-"));
 
-        if (!diag) m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, NonDiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
-        else m_rdms.emplace_front(ptr::smart::make_poly_unique<Rdm, DiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
+        if (filling_algo == Caspt2) {
+            m_rdms.emplace_front(
+                ptr::smart::make_poly_unique<Rdm, TransitionFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
+        }
+        else {
+            if (!diag)
+                m_rdms.emplace_front(
+                    ptr::smart::make_poly_unique<Rdm, NonDiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
+            else
+                m_rdms.emplace_front(
+                    ptr::smart::make_poly_unique<Rdm, DiagFockRdm4>(opts, fock, m_wf.m_sector, 1ul));
+        }
+        m_fock_4rdm = m_rdms.front().get();
     }
     m_exsig_to_rdms = make_exsig_to_rdms();
 
@@ -103,21 +114,32 @@ Rdms::operator bool() const {
     return !m_rdms.empty();
 }
 
+PureRdm *Rdms::get_pure_rdm(OpSig opsig) {
+    return m_pure_rdms[opsig];
+}
+
 bool Rdms::takes_contribs_from(OpSig exsig) const {
     return (exsig != opsig::c_invalid) && !m_exsig_to_rdms[exsig].empty();
 }
 
+v_t<OpSig> Rdms::all_ranksigs() const {
+    std::set<OpSig> set;
+    for (auto& ptr: m_rdms) set.insert(ptr->m_ranksig);
+    return {set.cbegin(), set.cend()};
+}
+
 void Rdms::make_full_contrib(const RdmInds& full_inds, const OpSig& exsig, const wf_t& contrib, bool phase) {
-    auto ranksig = full_inds.m_exsig;
+    auto ranksig = full_inds.m_ranksig;
     auto pure_rdm = m_pure_rdms[ranksig];
     if (pure_rdm) {
         pure_rdm->make_full_contrib(full_inds, exsig, contrib, phase);
     }
-    else {
-        for (auto& rdm: m_exsig_to_rdms[ranksig]) {
-            rdm->make_full_contrib(full_inds, exsig, contrib, phase);
-        }
-    }
+    else if (m_fock_4rdm && full_inds.m_ranksig==opsig::c_quad && takes_contribs_from(exsig))
+        m_fock_4rdm->make_full_contrib(full_inds, exsig, contrib, phase);
+}
+
+void Rdms::make_full_contrib(const RdmInds& full_inds, const wf_t& contrib, bool phase) {
+    make_full_contrib(full_inds, full_inds.exsig(), contrib, phase);
 }
 
 void Rdms::make_contribs(const Mbf& src_onv, const conn::Mbf& conn, const com_ops::Mbf& com, const wf_t& contrib) {
@@ -208,7 +230,7 @@ ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     trace = mpi::all_sum(trace);
     DEBUG_ASSERT_GT(std::abs(trace), 1e-14, "RDM trace should be non-zero");
     const auto norm = arith::real(trace) / integer::nspair(nelec);
-    if (!rdm2->approx_contribs())
+    if (!rdm2->approx_contribs() && m_total_norm.m_reduced.real() != 0.0)
         REQUIRE_NEAR_EQ(norm, m_total_norm.m_reduced.real(),
                       "2RDM norm should match total of sampled diagonal contributions");
     REQUIRE_NEAR_ZERO(m_total_norm.m_reduced.imag(), "2RDM norm should be purely real");
@@ -289,7 +311,11 @@ void Rdms::save(const hdf5::NodeWriter& parent) {
          * create and save the spinfree versions of all RDMs and intermediates
          */
         hdf5::GroupWriter gw(parent, "spinfree");
-        for (const auto& rdm: m_rdms) SpinFreeRdm(*rdm, m_total_norm.m_reduced).save(gw);
+        for (const auto& rdm: m_rdms) {
+            SpinFreeRdm sf(*rdm);
+            sf.fill(*rdm, m_total_norm.m_reduced);
+            sf.save(gw);
+        }
     }
 }
 
@@ -301,4 +327,3 @@ void Rdms::save() {
     REQUIRE_TRUE(m_opts.m_save.m_enabled, "save() called on Rdms object but saving was not enabled");
     save(hdf5::FileWriter(m_opts.m_save.m_path));
 }
-

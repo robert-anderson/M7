@@ -7,17 +7,17 @@
 #include "Wavefunction.h"
 
 hf_excit_hist::IndVals::IndVals(const hdf5::NodeReader &parent, str_t name) :
-        m_inds(hdf5::GroupReader(parent, name), "indices", mpi::on_node_i_am_root(), true),
-        m_vals(hdf5::GroupReader(parent, name), "values", mpi::on_node_i_am_root(), true) {
+        m_inds(hdf5::GroupReader(parent, name), "indices", mpi::i_am_root(mpi::SharedMemory), Owner::shared()),
+        m_vals(hdf5::GroupReader(parent, name), "values", mpi::i_am_root(mpi::SharedMemory), Owner::shared()) {
     REQUIRE_EQ(m_inds.nrow(), m_vals.nelement(),
                "number of index arrays is not the same as the number of values");
     uintv_t order;
     // intermediate normalization
     m_vals /= hdf5::DatasetLoader::load_vector<wf_t>(parent, "norm")[0];
-    if (mpi::on_node_i_am_root()) m_vals.sort_inds(order, false, true);
+    if (mpi::i_am_root(mpi::SharedMemory)) m_vals.sort_inds(order, false, true);
     m_inds.reorder_rows(order);
     m_vals.reorder(order);
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
     m_geo_mean = math::geo_mean(m_vals.tbegin(), m_vals.nelement());
 }
 
@@ -245,7 +245,7 @@ hf_excit_hist::Accumulators::Accumulators(
     for (auto& nexcit: m_nexcits){
         const OpSig exsig({nexcit, nexcit}, {0, 0});
         const auto name = exsig.to_string()+" excitations of HF state";
-        m_tables.emplace_back(name, RdmRow(exsig, 1), false);
+        m_tables.emplace_back(name, RdmRow(exsig, 1), Owner::shared());
         m_tables.back().resize(500);
         m_tables.back().set_expansion_factor(2.0);
         m_lookup_keys.emplace_back(exsig);

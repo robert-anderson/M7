@@ -8,7 +8,7 @@
 
 TEST(GlobalAccumulation, Test) {
     const uint_t nchar = 10ul;
-    const uint_t nrank_pair = (mpi::nrank()*(mpi::nrank()-1))/2;
+    const uint_t nrank_pair = (mpi::nrank() * (mpi::nrank() - 1)) / 2;
     struct row_t : Row {
         field::String m_key;
         field::Number<int> m_value;

@@ -37,7 +37,7 @@ class Rdms {
     /**
      * each array element is indexed by a ranksig, and points to the pure RDM of that rank
      */
-    typedef std::array<Rdm*, opsig::c_ndistinct> pure_rdms_t;
+    typedef std::array<PureRdm*, opsig::c_ndistinct> pure_rdms_t;
     pure_rdms_t m_pure_rdms {};
 
     suite::Conns m_work_conns;
@@ -57,10 +57,17 @@ class Rdms {
     wf_comp_t contrib_norm(uint_t iroot) const;
 
 public:
+    /**
+     * pointer to fock * 4RDM if allocated
+     */
+    Rdm* m_fock_4rdm = nullptr;
+
     const Epoch& m_accum_epoch;
     reduction::Scalar<wf_t> m_total_norm;
 
-    Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch);
+    enum FillingAlgorithm {OnTheFly, Caspt2, BitsetIsectHashmapRi, BitsetIsectPairLoopRi, OuterProduct};
+
+    Rdms(const conf::Rdms& opts, const wf::Vectors& wf, const Epoch& accum_epoch, FillingAlgorithm filling_algo=OnTheFly);
 
     ~Rdms() {
         if (m_opts.m_save.m_enabled) save();
@@ -68,9 +75,15 @@ public:
 
     operator bool() const;
 
+    PureRdm* get_pure_rdm(OpSig opsig);
+
     bool takes_contribs_from(OpSig exsig) const;
 
+    v_t<OpSig> all_ranksigs() const;
+
     void make_full_contrib(const field::RdmInds& full_inds, const OpSig& exsig, const wf_t& contrib, bool phase);
+
+    void make_full_contrib(const field::RdmInds& full_inds, const wf_t& contrib, bool phase);
 
     void make_contribs(const field::Mbf& src_onv, const conn::Mbf& conn,
                        const com_ops::Mbf& com, const wf_t& contrib);

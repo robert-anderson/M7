@@ -33,10 +33,23 @@ Buffer::Window &Buffer::Window::operator=(const Buffer::Window &other) {
     return *this;
 }
 
+Buffer &Buffer::operator=(buf_t value) {
+    if (m_owner.i_am_owner()) std::fill(m_data, m_data+m_size, value);
+    return *this;
+}
+
 bool Buffer::Window::operator==(const Buffer::Window& other) const {
     if (m_size != other.m_size) return false;
     if (size_in_use() != other.size_in_use()) return false;
     return std::memcmp(cbegin(), other.cbegin(), size_in_use()) == 0;
+}
+
+void Buffer::Window::end_sync() {
+    if (owner().is_local()) return;
+    auto size = size_in_use();
+    // get size from owner; displacement is unique for each shmem realm, adjust index
+    mpi::bcast(&size, 1, mpi::g_iranks_shmem[owner().irank_owner()], mpi::Realm::SharedMemory);
+    m_hwm_ptr = m_begin_ptr + size;
 }
 
 void Buffer::Window::set_end(uint_t irow) {
@@ -44,12 +57,16 @@ void Buffer::Window::set_end(uint_t irow) {
     m_hwm_ptr = m_begin_ptr + irow * m_row_size;
 }
 
-bool Buffer::Window::node_shared() const {
-    return m_buffer->m_node_shared;
+bool Buffer::Window::shared() const {
+    return owner().is_shared();
+}
+
+Owner Buffer::Window::owner() const {
+    return m_buffer->m_owner;
 }
 
 bool Buffer::Window::i_can_modify() const {
-    return m_buffer && (!node_shared() || mpi::on_node_i_am_root());
+    return owner().i_am_owner();
 }
 
 bool Buffer::Window::allocated() const {
@@ -86,13 +103,26 @@ double Buffer::Window::get_expansion_factor() const {
     return m_buffer->m_expansion_factor;
 }
 
-Buffer::Buffer(str_t name, uint_t nwindow_max, bool node_shared) :
-        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_node_shared(node_shared) {
-    if (!name.empty()) logging::info_("Creating {} buffer \"{}\"",
-                                      node_shared ? "node-shared" : "rank-private", name);
+Buffer::Buffer(str_t name, uint_t nwindow_max, Owner owner) :
+        m_name(std::move(name)), m_nwindow_max(nwindow_max), m_owner(owner) {
+    if (!name.empty()) logging::info_(
+            "Creating {} buffer \"{}\"",m_owner.is_shared() ? "node-shared" : "rank-private", name);
     REQUIRE_TRUE(nwindow_max, "A buffer must allow at least one window");
     m_windows.reserve(m_nwindow_max);
 }
+
+Buffer::Buffer(const Buffer& other) : Buffer(other.m_name, other.m_nwindow_max, other.m_owner){
+    *this = other;
+}
+
+Buffer& Buffer::operator=(const Buffer& other) {
+    BufferContainer* ptr;
+    ptr = dynamic_cast<LocalBufferContainer*>(this->m_container.get());
+    resize(other.size());
+    if (m_owner.i_am_owner()) std::memcpy(m_data, other.m_data, other.size());
+    return *this;
+}
+
 
 uint_t Buffer::size() const {
     return m_size;
@@ -149,27 +179,27 @@ void Buffer::resize(uint_t new_size, double factor) {
     /*
      * handle the shared and private cases separately
      */
-    if (m_node_shared) {
-        SharedArrayBase tmp(new_size, 1);
-        tmp_ptr = tmp.m_data;
+    if (m_owner.is_shared()) {
+        auto new_container = new SharedBufferContainer(new_size, 1, m_owner);
+        tmp_ptr = new_container->m_data.m_data;
         move_windows_fn(tmp_ptr);
-        m_data_shared = std::move(tmp);
-        m_data = m_data_shared.m_data;
+        m_data = tmp_ptr;
+        m_container = std::unique_ptr<BufferContainer>(new_container);
     }
     else {
-        v_t<buf_t> tmp;
+        LocalBufferContainer new_container;
         try {
-            tmp.resize(new_size, 0);
+            new_container.m_data.resize(new_size, 0);
         }
         catch (const std::bad_alloc &e) {
             logging::error_("bad allocation");
             ABORT(logging::format("could not allocate sufficient memory to resize buffer \"{}\"", m_name));
         }
-        tmp_ptr = tmp.data();
+        DEBUG_ASSERT_FALSE(new_container.m_data.empty(), "new data buffer should be non-empty");
+        tmp_ptr = new_container.m_data.data();
         move_windows_fn(tmp_ptr);
-        m_data_priv = std::move(tmp);
-        m_data = m_data_priv.data();
-        DEBUG_ASSERT_FALSE(m_data_priv.empty(), "new data buffer should be non-empty");
+        m_data = tmp_ptr;
+        m_container = std::unique_ptr<BufferContainer>(new LocalBufferContainer(std::move(new_container)));
     }
     DEBUG_ASSERT_TRUE(m_data, "new data pointer should be non-null");
     m_size = new_size;

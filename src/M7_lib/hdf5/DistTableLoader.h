@@ -74,6 +74,8 @@ public:
                 all_done = loader->read(nitem_to_find ? buf.data() : nullptr, nitem_to_find);
                 auto src = buf.data();
                 for (uint_t irow = 0ul; irow < nitem_to_find; ++irow) {
+                    REQUIRE_TRUE(field->check_buffer(src),
+                        logging::format("data in buffer is invalid for the {} field", field->m_name));
                     field->from_buffer(src, irow);
                     src += field->m_size;
                 }

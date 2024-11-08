@@ -13,10 +13,7 @@ FieldBase::FieldBase(Row *row, uint_t size, const std::type_info &type_info, str
         m_type_info(type_info), m_size(size), m_name(std::move(name)),
         m_force_own_words(force_own_words), m_null_string(std::max(1ul, m_size), 0) {
     if (!row) return;
-    REQUIRE_FALSE(belongs_to_row(), "Field must not be already associated with a row");
-    m_row_offset = row->add_field(this);
-    m_row = row;
-    m_row_index = m_row->m_fields.size()-1;
+    add_to_row(row);
 }
 
 FieldBase::FieldBase(const FieldBase &other) :
@@ -120,4 +117,11 @@ void FieldBase::load(const hdf5::NodeReader& nr, const str_t& name, bool part, b
 
 void FieldBase::load(const hdf5::NodeReader& nr, bool part, bool this_rank) {
     load(nr, m_name, part, this_rank);
+}
+
+void FieldBase::add_to_row(Row* row) {
+    REQUIRE_FALSE(belongs_to_row(), "Field must not be already associated with a row");
+    m_row_offset = row->add_field(this);
+    m_row = row;
+    m_row_index = m_row->m_fields.size()-1;
 }

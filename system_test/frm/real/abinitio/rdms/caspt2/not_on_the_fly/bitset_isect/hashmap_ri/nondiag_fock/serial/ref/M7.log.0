@@ -1,0 +1,202 @@
+[1692255103] [info] Reallocating buffer " send" 0B -> 64.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 64.000000KB
+[1692255103] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 64.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer "wavefunction" 0B -> 12.800000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 0B -> 800B
+[1692255103] [info] Reallocating buffer "wavefunction recv" 0B -> 800B
+[1692255103] [info] Reallocating buffer "reference gather send" 0B -> 64B
+[1692255103] [info] Reallocating buffer "reference all gathered rows" 0B -> 64B
+[1692255103] [info] Reallocating buffer "Hartree-Fock ONV gather send" 0B -> 64B
+[1692255103] [info] Reallocating buffer "Hartree-Fock ONV all gathered rows" 0B -> 64B
+[1692255103] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer "rdm_1100" 0B -> 800B
+[1692255103] [info] Reallocating buffer "rdm_1100 send" 0B -> 800B
+[1692255103] [info] Reallocating buffer "rdm_1100 recv" 0B -> 800B
+[1692255103] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer "rdm_2200" 0B -> 1.344000KB
+[1692255103] [info] Reallocating buffer "rdm_2200 send" 0B -> 1.344000KB
+[1692255103] [info] Reallocating buffer "rdm_2200 recv" 0B -> 1.344000KB
+[1692255103] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer "rdm_3300" 0B -> 320B
+[1692255103] [info] Reallocating buffer "rdm_3300 send" 0B -> 320B
+[1692255103] [info] Reallocating buffer "rdm_3300 recv" 0B -> 320B
+[1692255103] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255103] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255103] [info] Reallocating buffer "rdm_4400f" 0B -> 320B
+[1692255103] [info] Reallocating buffer "rdm_4400f send" 0B -> 320B
+[1692255103] [info] Reallocating buffer "rdm_4400f recv" 0B -> 320B
+[1692255103] [info] Reallocating buffer "hole moment dst finder send" 0B -> 24.000000KB
+[1692255103] [info] Reallocating buffer "hole moment dst finder recv" 0B -> 24.000000KB
+[1692255103] [info] Reallocating buffer "particle moment dst finder send" 0B -> 24.000000KB
+[1692255103] [info] Reallocating buffer "particle moment dst finder recv" 0B -> 24.000000KB
+[1692255103] [info] Reallocating buffer "M7.mae.stats" 0B -> 24B
+[1692255103] [info] Reallocating buffer "M7.stats" 0B -> 152B
+[1692255103] [info] Reallocating buffer "M7.timing" 0B -> 40B
+[1692255103] [info] Reallocating buffer "wavefunction send" 800B -> 1.264000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 1.264000KB -> 1.920000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 1.920000KB -> 2.944000KB
+[1692255103] [info] Reallocating buffer "wavefunction recv" 800B -> 3.240000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 2.944000KB -> 4.440000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 4.440000KB -> 6.720000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 6.720000KB -> 10.144000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 10.144000KB -> 15.240000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 15.240000KB -> 22.920000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 22.920000KB -> 34.440000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 34.440000KB -> 51.720000KB
+[1692255103] [info] Reallocating buffer "wavefunction recv" 3.240000KB -> 55.080000KB
+[1692255103] [info] Reallocating buffer "wavefunction send" 51.720000KB -> 77.640000KB
+[1692255103] [info] Reallocating buffer "wavefunction recv" 55.080000KB -> 90.720000KB
+[1692255103] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 448B
+[1692255103] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 448B
+[1692255103] [info] Reallocating buffer "semistochastic gather send" 0B -> 1.792000KB
+[1692255103] [info] Reallocating buffer "semistochastic all gathered rows" 0B -> 1.792000KB
+[1692255103] [info] Size of local deterministic subspace: 28
+[1692255104] [info] Reallocating buffer "rdm_2200 send" 1.344000KB -> 2.040000KB
+[1692255104] [info] Reallocating buffer "rdm_2200 send" 2.040000KB -> 3.072000KB
+[1692255104] [info] Reallocating buffer "rdm_2200 send" 3.072000KB -> 4.632000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 320B -> 504B
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 504B -> 768B
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 768B -> 1.176000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 1.176000KB -> 1.776000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 1.776000KB -> 2.688000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 2.688000KB -> 4.056000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 4.056000KB -> 6.096000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 6.096000KB -> 9.168000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 9.168000KB -> 13.776000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 13.776000KB -> 20.688000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 320B -> 504B
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 504B -> 768B
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 768B -> 1.176000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 1.176000KB -> 1.776000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 1.776000KB -> 2.688000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 2.688000KB -> 4.056000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 4.056000KB -> 6.096000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 6.096000KB -> 9.168000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 9.168000KB -> 13.776000KB
+[1692255104] [info] remapping hash table for "rdm_4400f send"
+[1692255104] [info] replacing current bucket vector of size 100 with a new one of size 178
+[1692255104] [info] current inefficiency ratio (2.388231531819635) exceeds set limit (2)
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 13.776000KB -> 20.688000KB
+[1692255104] [info] remapping hash table for "rdm_4400f send"
+[1692255104] [info] replacing current bucket vector of size 178 with a new one of size 304
+[1692255104] [info] current inefficiency ratio (2.2874587458745874) exceeds set limit (2)
+[1692255104] [info] Reallocating buffer "rdm_4400f recv" 320B -> 23.904000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f" 320B -> 504B
+[1692255104] [info] Reallocating buffer "rdm_4400f" 504B -> 768B
+[1692255104] [info] Reallocating buffer "rdm_4400f" 768B -> 1.176000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f" 1.176000KB -> 1.776000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f" 1.776000KB -> 2.688000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f" 2.688000KB -> 4.056000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f" 4.056000KB -> 6.096000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f" 6.096000KB -> 9.168000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f" 9.168000KB -> 13.776000KB
+[1692255104] [info] remapping hash table for "rdm_4400f"
+[1692255104] [info] replacing current bucket vector of size 100 with a new one of size 234
+[1692255104] [info] current inefficiency ratio (3.1271777003484322) exceeds set limit (2)
+[1692255104] [info] Reallocating buffer "rdm_4400f" 13.776000KB -> 20.688000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 recv" 320B -> 23.904000KB
+[1692255104] [info] Reallocating buffer "rdm_3300" 320B -> 504B
+[1692255104] [info] Reallocating buffer "rdm_3300" 504B -> 768B
+[1692255104] [info] Reallocating buffer "rdm_3300" 768B -> 1.176000KB
+[1692255104] [info] Reallocating buffer "rdm_3300" 1.176000KB -> 1.776000KB
+[1692255104] [info] Reallocating buffer "rdm_3300" 1.776000KB -> 2.688000KB
+[1692255104] [info] Reallocating buffer "rdm_3300" 2.688000KB -> 4.056000KB
+[1692255104] [info] Reallocating buffer "rdm_3300" 4.056000KB -> 6.096000KB
+[1692255104] [info] Reallocating buffer "rdm_3300" 6.096000KB -> 9.168000KB
+[1692255104] [info] Reallocating buffer "rdm_3300" 9.168000KB -> 13.776000KB
+[1692255104] [info] remapping hash table for "rdm_3300"
+[1692255104] [info] replacing current bucket vector of size 100 with a new one of size 228
+[1692255104] [info] current inefficiency ratio (3.043554006968641) exceeds set limit (2)
+[1692255104] [info] Reallocating buffer "rdm_3300" 13.776000KB -> 20.688000KB
+[1692255104] [info] Reallocating buffer "rdm_2200 recv" 1.344000KB -> 5.160000KB
+[1692255104] [info] Reallocating buffer "rdm_2200" 1.344000KB -> 2.040000KB
+[1692255104] [info] Reallocating buffer "rdm_2200" 2.040000KB -> 3.072000KB
+[1692255104] [info] Reallocating buffer "rdm_2200" 3.072000KB -> 4.632000KB
+[1692255104] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f" 0B -> 15.936000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f send" 0B -> 64.000000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f recv" 0B -> 64.000000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f" 15.936000KB -> 23.928000KB
+[1692255104] [info] remapping hash table for "rdm_4400f"
+[1692255104] [info] replacing current bucket vector of size 100 with a new one of size 387
+[1692255104] [info] current inefficiency ratio (5.175526579739218) exceeds set limit (2)
+[1692255104] [info] Reallocating buffer "rdm_4400f" 23.928000KB -> 35.904000KB
+[1692255104] [info] Reallocating buffer "rdm_4400f" 35.904000KB -> 53.880000KB
+[1692255104] [info] remapping hash table for "rdm_4400f"
+[1692255104] [info] replacing current bucket vector of size 387 with a new one of size 1182
+[1692255104] [info] current inefficiency ratio (4.074519230769231) exceeds set limit (2)
+[1692255104] [info] Reallocating buffer "rdm_4400f" 53.880000KB -> 80.832000KB
+[1692255104] [info] remapping hash table for "rdm_4400f"
+[1692255104] [info] replacing current bucket vector of size 1182 with a new one of size 2011
+[1692255104] [info] current inefficiency ratio (2.2698130008904718) exceeds set limit (2)
+[1692255104] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer "rdm_3300" 0B -> 15.936000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 send" 0B -> 64.000000KB
+[1692255104] [info] Reallocating buffer "rdm_3300 recv" 0B -> 64.000000KB
+[1692255104] [info] Reallocating buffer "rdm_3300" 15.936000KB -> 23.928000KB
+[1692255104] [info] remapping hash table for "rdm_3300"
+[1692255104] [info] replacing current bucket vector of size 100 with a new one of size 384
+[1692255104] [info] current inefficiency ratio (5.120361083249749) exceeds set limit (2)
+[1692255104] [info] Reallocating buffer "rdm_3300" 23.928000KB -> 35.904000KB
+[1692255104] [info] Reallocating buffer "rdm_3300" 35.904000KB -> 53.880000KB
+[1692255104] [info] remapping hash table for "rdm_3300"
+[1692255104] [info] replacing current bucket vector of size 384 with a new one of size 1267
+[1692255104] [info] current inefficiency ratio (4.405448717948718) exceeds set limit (2)
+[1692255104] [info] Reallocating buffer "rdm_3300" 53.880000KB -> 80.832000KB
+[1692255104] [info] remapping hash table for "rdm_3300"
+[1692255104] [info] replacing current bucket vector of size 1267 with a new one of size 2070
+[1692255104] [info] current inefficiency ratio (2.179875333926981) exceeds set limit (2)
+[1692255104] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer "rdm_2200" 0B -> 3.440000KB
+[1692255104] [info] Reallocating buffer "rdm_2200 send" 0B -> 64.000000KB
+[1692255104] [info] Reallocating buffer "rdm_2200 recv" 0B -> 64.000000KB
+[1692255104] [info] Reallocating buffer " send" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " send" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 16.000000KB
+[1692255104] [info] Reallocating buffer " recv" 0B -> 8.000000KB
+[1692255104] [info] Reallocating buffer "rdm_1100" 0B -> 352B
+[1692255104] [info] Reallocating buffer "rdm_1100 send" 0B -> 64.000000KB
+[1692255104] [info] Reallocating buffer "rdm_1100 recv" 0B -> 64.000000KB
+[1692255104] [info] Reallocating buffer "Local loader for global extremal rows sorter" 0B -> 320B
+[1692255104] [info] Reallocating buffer "Global extremal rows sorter" 0B -> 320B
+[1692255104] [info] Reallocating buffer "Included local rows" 0B -> 1.280000KB
+[1692255104] [info] Reallocating buffer "global top weighted" 0B -> 1.280000KB

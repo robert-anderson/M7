@@ -14,7 +14,7 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, uint_t occ_cutoff) :
     ham_t value;
 
     logging::info("Reading Boson Hamiltonian coefficients from file \"" + file_reader.m_fname + "\"...");
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         while (file_reader.next(inds, value)) {
             if (!ham::is_significant(value)) continue;
             auto ranksig = file_reader.ranksig(inds);

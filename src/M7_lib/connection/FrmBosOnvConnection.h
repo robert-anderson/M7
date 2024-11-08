@@ -36,6 +36,8 @@ struct FrmBosOnvConnection {
 
     void apply(const FrmBosOnvField& src, FrmBosOnvField& dst) const;
 
+    bool destroys(const FrmBosOnvField& mbf) const;
+
     OpSig exsig() const;
 
     bool respects_occ_range(const FrmBosOnvField& src, uint_t nboson_max) const;

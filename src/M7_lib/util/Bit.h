@@ -51,6 +51,9 @@ namespace bit {
              0xffffffffffffffff};
 
 
+    /**
+     * trailz_c_table[c] is the position of the first set bit in the char c
+     */
     static constexpr uint8_t trailz_c_table[256] = {
         8,  0,  1,  0,  2,  0,  1,  0,  3,  0,  1,  0,  2,  0,  1,  0,  4,  0,  1,  0,  2,  0,  1,  0,
         3,  0,  1,  0,  2,  0,  1,  0,  5,  0,  1,  0,  2,  0,  1,  0,  3,  0,  1,  0,  2,  0,  1,  0,
@@ -65,7 +68,10 @@ namespace bit {
         4,  0,  1,  0,  2,  0,  1,  0,  3,  0,  1,  0,  2,  0,  1,  0
     };
 
-    static constexpr uint8_t popcnt_c_table[256] = {
+    /**
+     * popcount_c_table[c] is the number of set bits in the char c
+     */
+    static constexpr uint8_t popcount_c_table[256] = {
          0,  1,  1,  2,  1,  2,  2,  3,  1,  2,  2,  3,  2,  3,  3,  4,  1,  2,  2,  3,  2,  3,  3,  4,
          2,  3,  3,  4,  3,  4,  4,  5,  1,  2,  2,  3,  2,  3,  3,  4,  2,  3,  3,  4,  3,  4,  4,  5,
          2,  3,  3,  4,  3,  4,  4,  5,  3,  4,  4,  5,  4,  5,  5,  6,  1,  2,  2,  3,  2,  3,  3,  4,
@@ -138,33 +144,8 @@ namespace bit {
     }
 
     /*
-     * "count trailing zeros" implementations for 32-bit and 64-bit unsigned integers
-     * _tzcnt: inline the x86 instruction TZCNT
-     * _c: carry out the operation in software
+     * "count trailing zeros" software implementations for 32-bit and 64-bit unsigned integers
      */
-
-    static uint_t trailz_tzcnt(const uint64_t &n) {
-#ifdef ENABLE_TZCNT
-        uint_t res;
-        asm("tzcntq %1, %0;": "=r" (res): "r" (n));
-        return res;
-#else
-        (void) n;
-        return ~0ul;
-#endif
-    }
-
-    static uint_t trailz_tzcnt(const uint32_t &n) {
-#ifdef ENABLE_TZCNT
-        if (!n) return 32;
-        uint32_t res;
-        asm("tzcnt %1, %0;": "=r" (res): "r" (n));
-        return res;
-#else
-        (void) n;
-        return ~0ul;
-#endif
-    }
 
     static uint_t trailz_64_c(const uint64_t &n) {
         if (!n) return 64;
@@ -189,8 +170,8 @@ namespace bit {
     }
 
     static uint_t trailz_64(const uint64_t &n) {
-#if defined(ENABLE_TZCNT)
-        return trailz_tzcnt(n);
+#if defined(ENABLE_BUILTIN_CTZ)
+        return __builtin_ctzl(n);
 #else
         // resort to software implementation
         return trailz_64_c(n);
@@ -198,8 +179,8 @@ namespace bit {
     }
 
     static uint_t trailz_32(const uint32_t &n) {
-#if defined(ENABLE_TZCNT)
-        return trailz_tzcnt(n);
+#if defined(ENABLE_BUILTIN_CTZ)
+        return __builtin_ctz(n);
 #else
         // resort to software implementation
         return trailz_32_c(n);
@@ -222,7 +203,6 @@ namespace bit {
         return result;
     }
 
-
     template<typename T>
     static uint_t next_setbyte(T &work) {
         static_assert(std::is_integral<T>::value && std::is_unsigned<T>::value, "invalid type for bit operations");
@@ -232,54 +212,30 @@ namespace bit {
     }
 
     /*
-     * "count number of set bits" implementations for 32-bit and 64-bit unsigned integers
-     * _popcnt: inline the x86 instructions POPCNT (32-bit) and POPCNTQ (64-bit)
-     * _c: carry out the operation in software
+     * "count number of set bits" software implementations for 32-bit and 64-bit unsigned integers
      */
 
-    static uint_t nsetbit_popcnt(const uint64_t &n) {
-#ifdef ENABLE_POPCNT
-        uint_t res;
-        asm("popcntq %1, %0;": "=r" (res): "r" (n));
-        return res;
-#else
-        (void) n;
-        return ~0ul;
-#endif
-    }
-
-    static uint_t nsetbit_popcnt(const uint32_t &n) {
-#ifdef ENABLE_POPCNT
-        uint32_t res;
-        asm("popcnt %1, %0;": "=r" (res): "r" (n));
-        return res;
-#else
-        (void) n;
-        return ~0u;
-#endif
-    }
-
     static uint_t nsetbit_c(const uint64_t &n) {
-        return popcnt_c_table[n & 0xff] +
-            popcnt_c_table[(n >> 8) & 0xff] +
-            popcnt_c_table[(n >> 16) & 0xff] +
-            popcnt_c_table[(n >> 24) & 0xff] +
-            popcnt_c_table[(n >> 32) & 0xff] +
-            popcnt_c_table[(n >> 40) & 0xff] +
-            popcnt_c_table[(n >> 48) & 0xff] +
-            popcnt_c_table[(n >> 56) & 0xff];
+        return popcount_c_table[n & 0xff] +
+            popcount_c_table[(n >> 8) & 0xff] +
+            popcount_c_table[(n >> 16) & 0xff] +
+            popcount_c_table[(n >> 24) & 0xff] +
+            popcount_c_table[(n >> 32) & 0xff] +
+            popcount_c_table[(n >> 40) & 0xff] +
+            popcount_c_table[(n >> 48) & 0xff] +
+            popcount_c_table[(n >> 56) & 0xff];
     }
 
     static uint_t nsetbit_c(const uint32_t &n) {
-        return popcnt_c_table[n & 0xff] +
-            popcnt_c_table[(n >> 8) & 0xff] +
-            popcnt_c_table[(n >> 16) & 0xff] +
-            popcnt_c_table[(n >> 24) & 0xff];
+        return popcount_c_table[n & 0xff] +
+            popcount_c_table[(n >> 8) & 0xff] +
+            popcount_c_table[(n >> 16) & 0xff] +
+            popcount_c_table[(n >> 24) & 0xff];
     }
 
     static uint_t nsetbit_64(const uint64_t &n) {
-#if defined(ENABLE_POPCNT)
-        return nsetbit_popcnt(n);
+#if defined(ENABLE_BUILTIN_POPCOUNT)
+        return __builtin_popcountl(n);
 #else
         // resort to software implementation
         return nsetbit_c(n);
@@ -287,8 +243,8 @@ namespace bit {
     }
 
     static uint_t nsetbit_32(const uint32_t &n) {
-#if defined(ENABLE_POPCNT)
-        return nsetbit_popcnt(n);
+#if defined(ENABLE_BUILTIN_POPCOUNT)
+        return __builtin_popcount(n);
 #else
         // resort to software implementation
         return nsetbit_c(n);

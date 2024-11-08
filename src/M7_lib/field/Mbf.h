@@ -7,6 +7,7 @@
 
 #include <M7_lib/conf/Conf.h>
 #include <M7_lib/connection/OpCounts.h>
+#include <M7_lib/connection/Connections.h>
 #include <M7_lib/table/BufferedTable.h>
 
 /**
@@ -45,8 +46,23 @@ namespace mbf {
     void set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, uint_t idef);
 
     template<typename mbf_t>
+    bool destroys(const conn::from_field_t<mbf_t> &conn, const mbf_t& mbf) {
+        return conn.destroys(mbf);
+    }
+
+    template<typename mbf_t>
     OpSig exsig(const mbf_t &src, const mbf_t& dst) {
         return OpCounts(src, dst).opsig();
+    }
+
+    static sys::Basis get_basis(const field::FrmOnv& onv) {
+        return {onv.m_basis, {0ul}};
+    }
+    static sys::Basis get_basis(const field::BosOnv& onv) {
+        return {{0ul}, onv.m_basis};
+    }
+    static sys::Basis get_basis(const field::FrmBosOnv& onv) {
+        return {onv.m_frm.m_basis, onv.m_bos.m_basis};
     }
 
     static bool get_spinorb(const field::FrmOnv& onv, uint_t ispinorb) {

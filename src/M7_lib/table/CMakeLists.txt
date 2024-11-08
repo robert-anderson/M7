@@ -9,9 +9,15 @@ target_sources(M7_lib
         GlobalAccumulation.h
         MappedTable.cpp
         MappedTable.h
+        OpenAddressedTable.h
+        OpenAddresser.cpp
+        OpenAddresser.h
+        Owner.cpp
+        Owner.h
         RowProtector.cpp
         RowProtector.h
         Table.h
         TableBase.cpp
         TableBase.h
+        Smuvi.h
 )

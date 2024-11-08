@@ -34,6 +34,12 @@ public:
         return std::memcmp(m_field.ctbegin()+m_offset, other.m_field.ctbegin()+m_offset, m_size)==0;
     }
 
+    bool operator==(const uintv_t& inds) const {
+        DEBUG_ASSERT_EQ(m_size, inds.size(), "comparing partition with incompatible index vector");
+        for (uint_t i=0ul; i<inds.size(); ++i) if (inds[i] != (*this)[i]) return false;
+        return true;
+    }
+
     const uint_t &size() const {
         return m_size;
     }
@@ -96,7 +102,7 @@ struct RdmIndsPair {
 struct RdmIndsField : NdNumberField<rdm_ind_t, 1> {
     typedef NdNumberField<rdm_ind_t, 1> base_t;
     using base_t::operator=;
-    const OpSig m_exsig;
+    const OpSig m_ranksig;
     const uinta_t<4> m_nops;
     const uinta_t<4> m_nop_offsets;
     RdmIndsPair m_frm;
@@ -108,7 +114,7 @@ private:
     uinta_t<4> make_nop_offsets() const;
 
 public:
-    RdmIndsField(Row *row, OpSig exsig, str_t name = "indices");
+    RdmIndsField(Row *row, OpSig ranksig, str_t name = "indices");
 
     RdmIndsField(const RdmIndsField& other);
 
@@ -127,7 +133,9 @@ public:
 
     void common_frm_inds(uintv_t &common) const;
 
-    str_t get_exsig_string() const;
+    uint_t ncommon_frm_inds() const;
+
+    OpSig exsig() const;
 };
 
 
