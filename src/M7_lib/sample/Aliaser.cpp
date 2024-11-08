@@ -55,8 +55,8 @@ prob_t Aliaser::norm(uint_t irow) const {
 SingleAliaser::SingleAliaser(uint_t nprob) : Aliaser(1, nprob){}
 
 SingleAliaser::SingleAliaser(const v_t<prob_t> &probs) : Aliaser(1, probs.size()) {
-    if (mpi::on_node_i_am_root()) update_(probs);
-    mpi::barrier_on_node();
+    if (mpi::i_am_root(mpi::SharedMemory)) update_(probs);
+    mpi::barrier(mpi::SharedMemory);
 }
 
 void SingleAliaser::update_(const v_t<prob_t> &probs) {

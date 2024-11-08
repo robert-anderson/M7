@@ -21,7 +21,9 @@ public:
         m_inds.reserve(2*m_sites);
     }
 
-    FrmOps(const FrmOps& other): FrmOps(other.m_sites){}
+    FrmOps(const FrmOps& other): FrmOps(other.m_sites){
+        *this = other;
+    }
 
     FrmOps& operator=(const FrmOps& other){
         m_inds = other.m_inds;
@@ -241,6 +243,9 @@ public:
      *  antisymmetric phase of the connection
      */
     bool apply(const FrmOnvField &src, FrmOnvField &dst, FrmOps &com) const;
+
+    bool destroys(const FrmOnvField& mbf) const;
+
     /**
      * reset the internal state that to of a null excitation
      */

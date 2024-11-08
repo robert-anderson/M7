@@ -25,8 +25,10 @@ int main(int argc, char **argv) {
      */
     logging::info_lines(logging::make_defs_table());
 
-    logging::info("Number of MPI ranks in world communicator: {}", mpi::g_nrank);
-    logging::info("Number of MPI ranks per node: {}", mpi::g_nrank_on_node);
+    logging::info("Number of MPI ranks in world communicator: {}", mpi::nrank());
+    logging::info("Number of shared memory realms: {}", convert::to_string(mpi::nshmem()));
+    logging::info("Number of MPI ranks in each shared memory realm: {}", convert::to_string(mpi::g_nrank_in_shmem_realms));
+    logging::info("Root rank indices of each shared memory realm: {}", convert::to_string(mpi::g_irank_root_in_shmem_realms));
 
     conf::Document opts(argv[1]);
     opts.validate();

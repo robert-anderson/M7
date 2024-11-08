@@ -31,7 +31,7 @@ Solver::Solver(const conf::Document &opts, Propagator &prop, wf::Vectors &wf) :
     if (m_wf.nreplica() == 2 && !m_prop.ncase_excit_gen())
         logging::warn("Replica populations are redundant when doing exact propagation");
 
-    if (m_maes.m_rdms && m_maes.m_opts.m_on_the_fly && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
+    if (m_maes.m_rdms && m_maes.m_on_the_fly && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
         logging::warn("Attempting a stochastic propagation estimation of bilinear MAEs without replication, "
                   "this is biased");
 
@@ -147,6 +147,19 @@ void Solver::execute(uint_t ncycle) {
     }
     m_wf.attempt_gathered_hist_save(m_icycle);
     if (m_icycle == ncycle) logging::info("maximum cycle number ({}) reached", m_icycle);
+    /**
+     * if RDMs are to be calculated from a wave function file without solver iterations,
+     * the average weight is the instantaneous population; manually update m_accum_epoch
+     */
+    if (m_maes.m_opts.m_delay == 0 && m_maes.m_opts.m_ncycle == 0) {
+        m_maes.m_accum_epoch.update(0, true);
+        m_icycle += 2;  // fake two iterations, such that average occupation is computed correctly
+        Walker& walker = m_wf.m_store.m_row;
+        for (walker.restart(); walker; ++walker) {
+            walker.m_icycle_occ = 1;
+            walker.m_average_weight += walker.m_weight;
+        }
+    }
     if (m_maes.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
         finalizing_loop_over_occupied_mbfs(m_icycle - 1);
@@ -285,7 +298,8 @@ void Solver::loop_over_occupied_mbfs() {
 }
 
 void Solver::finalizing_loop_over_occupied_mbfs(uint_t icycle) {
-    if (!m_maes.m_opts.m_on_the_fly){
+    if (!m_maes.m_on_the_fly){
+        logging::info("Computing RDMs from histogrammed set.");
         m_wf.update_gathered_hist_if_changed(
                 m_maes.m_opts.m_notf_fill_discard_thresh, icycle);
         m_maes.fill_from_wf_hist(m_wf.m_gathered_hist);

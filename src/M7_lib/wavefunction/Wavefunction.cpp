@@ -165,7 +165,7 @@ wf::Vectors::Vectors(const conf::Document& opts, const Hamiltonian& ham):
     m_stats(m_format, nshift_space()),
     m_large_ci_set(m_opts.m_wavefunction.m_large_ci_set.m_enabled ?
         new mbf::table_t("large CI set", mbf::row_t({m_ham.m_basis, Walker::c_mbf_field_name})) : nullptr),
-    m_gathered_hist(MbfWeightRow(m_store.m_row), false),
+    m_gathered_hist(MbfWeightRow(m_store.m_row), Owner::shared(mpi::irank_world_shmem_root())),
     m_stoch_round_mags(make_stoch_thresh_mags()),
     m_refs(opts.m_reference, *this, setup()),
     m_chkpt_files(opts.m_wavefunction.m_chkpt){
@@ -698,12 +698,11 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
             }
         }
         m_send_recv.communicate();
-
         auto fn = [&](const Spawn& recv_row) {
             auto& store_row = lookup_or_create_row_setup_(0, recv_row.m_dst_mbf);
-            store_row.protect();
             const auto ipart = recv_row.m_ipart_dst[0];
-            if (have_weights) set_weight(store_row, ipart, recv_row.m_delta_weight);
+            // determinants from popsfile should not necessarily be histogrammed
+            have_weights ? set_weight(store_row, ipart, recv_row.m_delta_weight) : store_row.protect();
             ++nrow_recv;
         };
         recv().foreach_row_in_use(fn);
@@ -711,6 +710,7 @@ void wf::Vectors::load(const hdf5::NodeReader& parent) {
     const uint_t nitem_per_op = 100000;
     logging::info("Loading walkers from HDF5 archive (upto {} items per read operation)", nitem_per_op);
     logging::info_("Reading {} items locally, {} items globally", loader.nitem_local(), loader.nitem());
+    m_store.remap(loader.nitem_local());
     loader.load(nitem_per_op, fill_fn);
     REQUIRE_EQ_ALL(mpi::all_sum(nrow_recv), loader.nitem(), "not all walkers loaded");
     logging::info("{} wavefunction rows successfully loaded from HDF5 archive", loader.nitem());
@@ -739,10 +739,12 @@ void wf::Vectors::update_gathered_hist(wf_comp_t thresh, uint_t icycle) {
 
     uint_t ndiscard = 0ul;
     buffered::Table<MbfWeightRow> local_averaged(MbfWeightRow{m_store.m_row});
+    local_averaged.set_expansion_factor(1);
     auto& local_row = local_averaged.m_row;
     local_row.restart();
 
     auto add_local_hist_walker_fn = [&ndiscard, &thresh, &local_row, &icycle](const Walker& walker){
+        // semi-stochastic walkers are also protected and thus invariably histogrammed
         if (walker.is_protected()) {
             const auto av_weight = walker.m_average_weight[0] / walker.occupied_ncycle(icycle);
             if (std::abs(av_weight) < thresh) {
@@ -752,14 +754,16 @@ void wf::Vectors::update_gathered_hist(wf_comp_t thresh, uint_t icycle) {
             local_row.push_back_jump();
             local_row.m_mbf = walker.m_mbf;
             local_row.m_weight = walker.m_average_weight;
+
         }
     };
     m_store.foreach_row_in_use(add_local_hist_walker_fn);
 
-    logging::info("Local histogrammed rows collected - performing all MPI all gatherv");
+    logging::info("Local histogrammed rows collected - gathering on shmem root");
     logging::flush_all();
-    // TODO: node-shared gathered_averaged
+    m_gathered_hist.resize(mpi::all_sum(local_averaged.nrow_in_use()));
     m_gathered_hist.all_gatherv(local_averaged);
+    m_gathered_hist.end_sync();  // shmem root has written to table, sync HMW
 
     ndiscard = mpi::all_sum(ndiscard);
     if (ndiscard) logging::info("Discarded {} low-weight MBFs from the histogrammed set", ndiscard);
@@ -778,10 +782,17 @@ void wf::Vectors::update_gathered_hist_if_changed(wf_comp_t thresh, uint_t icycl
 
 void wf::Vectors::attempt_gathered_hist_save(uint_t icycle) {
     if (!m_opts.m_wavefunction.m_save_hist.m_enabled) return;
+    logging::info("Writing histogrammed coefficients to file.");
     update_gathered_hist_if_changed(m_opts.m_wavefunction.m_save_hist.m_thresh, icycle);
     hdf5::FileWriter fw(m_opts.m_wavefunction.m_save_hist.m_path);
     auto& row = m_gathered_hist.m_row;
     hdf5::GroupWriter gw(fw, "wf");
     row.m_mbf.save(gw, mpi::i_am_root());
     row.m_weight.save(gw, mpi::i_am_root());
+    /**
+     * clear the buffer now, otherwise, if in the RDM calculation determinants shall be discarded
+     * by a different weight criterion than for dumping to disk, the shared array will be resized
+     * to a size smaller than current number of elements.
+     */
+    m_gathered_hist.clear();
 }

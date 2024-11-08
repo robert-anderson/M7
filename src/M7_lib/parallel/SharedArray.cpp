@@ -4,26 +4,34 @@
 
 #include "SharedArray.h"
 
-SharedArrayBase::SharedArrayBase(uint_t element_size) : m_element_size(element_size){}
+SharedArrayBase::SharedArrayBase(uint_t element_size, Owner owner) :
+    m_element_size(element_size), m_irank_owner(owner.irank_owner()){
+    REQUIRE_TRUE_ALL(owner.is_shared(), "Shared access ownership is required for SharedArray");
+    auto owners = mpi::all_gathered(m_irank_owner);
+    REQUIRE_EQ_ALL(owners[mpi::irank_world_shmem_root()], m_irank_owner,
+        "all ranks in the shared memory region must recognise the same owner rank index");
+}
 
-void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, void **data) {
+SharedArrayBase::SharedArrayBase(uint_t element_size) : SharedArrayBase(element_size, Owner::shared()){}
+
+void SharedArrayBase::alloc(uint_t nelement, uint_t element_size, MPI_Win *win, void **data, uint_t irank_owner) {
     const auto nbyte = nelement * element_size;
-    const auto local_nbyte = mpi::on_node_i_am_root() ? nbyte : 0ul;
-    auto ierr = MPI_Win_allocate_shared(local_nbyte, element_size, MPI_INFO_NULL, mpi::g_node_comm, data, win);
+    const auto local_nbyte = mpi::i_am(irank_owner) ? nbyte : 0ul;
+    auto ierr = MPI_Win_allocate_shared(local_nbyte, element_size, MPI_INFO_NULL, mpi::g_shmem_comm, data, win);
     REQUIRE_EQ(ierr, MPI_SUCCESS, "MPI Shared memory error");
-    DEBUG_ASSERT_TRUE(*data, "data pointer not set");
     MPI_Win_lock_all(0, *win);
     MPI_Win_sync(*win);
-    mpi::barrier_on_node();
+    mpi::barrier(mpi::SharedMemory);
     int disp_unit;
     MPI_Aint alloc_size;
-    ierr = MPI_Win_shared_query(*win, 0, &alloc_size, &disp_unit, data);
+    ierr = MPI_Win_shared_query(*win, MPI_PROC_NULL, &alloc_size, &disp_unit, data);
     REQUIRE_EQ(ierr, MPI_SUCCESS, "MPI Shared memory error");
+    REQUIRE_TRUE_ALL(*data, "data pointer not set");
     REQUIRE_EQ(uint_t(disp_unit), element_size, "incorrect window element size");
     REQUIRE_EQ(uint_t(alloc_size), nbyte, "incorrect total window size");
     MPI_Win_unlock_all(*win);
-    if (mpi::on_node_i_am_root()) std::memset(*data, 0, nbyte);
-    mpi::barrier_on_node();
+    if (mpi::i_am(irank_owner)) std::memset(*data, 0, nbyte);
+    mpi::barrier(mpi::SharedMemory);
 }
 
 void SharedArrayBase::free(MPI_Win *win, void **data) {
@@ -37,8 +45,9 @@ void SharedArrayBase::free(MPI_Win *win, void **data) {
 void SharedArrayBase::alloc(uint_t nelement) {
     m_nelement = nelement;
     m_nbyte = nelement * m_element_size;
-    alloc(nelement, m_element_size, &m_win, reinterpret_cast<void**>(&m_data));
-    DEBUG_ASSERT_TRUE(m_data, "data pointer not set");
+    DEBUG_ASSERT_LT_ALL(m_irank_owner, mpi::nrank(), "owner rank index OoB");
+    alloc(nelement, m_element_size, &m_win, reinterpret_cast<void**>(&m_data), m_irank_owner);
+    DEBUG_ASSERT_TRUE_ALL(m_data, "data pointer not set");
 }
 
 void SharedArrayBase::free() {
@@ -46,7 +55,8 @@ void SharedArrayBase::free() {
     free(&m_win, &data);
 }
 
-SharedArrayBase::SharedArrayBase(uint_t nelement, uint_t element_size) : SharedArrayBase(element_size) {
+SharedArrayBase::SharedArrayBase(uint_t nelement, uint_t element_size, Owner owner) :
+    SharedArrayBase(element_size, owner) {
     alloc(nelement);
 }
 
@@ -55,7 +65,7 @@ SharedArrayBase &SharedArrayBase::operator=(const SharedArrayBase &other) {
         free();
         alloc(other.m_nelement);
     }
-    if (mpi::on_node_i_am_root()) std::memcpy(m_data, other.m_data, m_nbyte);
+    if (mpi::i_am(m_irank_owner)) std::memcpy(m_data, other.m_data, m_nbyte);
     return *this;
 }
 
@@ -71,11 +81,13 @@ SharedArrayBase &SharedArrayBase::operator=(SharedArrayBase &&other) {
     return *this;
 }
 
-SharedArrayBase::SharedArrayBase(const SharedArrayBase &other) : SharedArrayBase(other.m_nelement, other.m_element_size) {
+SharedArrayBase::SharedArrayBase(const SharedArrayBase &other) :
+    SharedArrayBase(other.m_nelement, other.m_element_size, Owner::shared(other.m_irank_owner)) {
     *this = other;
 }
 
-SharedArrayBase::SharedArrayBase(SharedArrayBase &&other) : SharedArrayBase(other.m_element_size) {
+SharedArrayBase::SharedArrayBase(SharedArrayBase &&other) :
+    SharedArrayBase(0,other.m_element_size, Owner::shared(other.m_irank_owner)) {
     *this = std::move(other);
 }
 

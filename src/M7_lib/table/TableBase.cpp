@@ -87,6 +87,10 @@ uint_t TableBase::bw_size() const {
     return m_bw.m_size;
 }
 
+Owner TableBase::owner() const {
+    return m_bw.owner();
+}
+
 void TableBase::resize(uint_t nrec, double factor) {
     REQUIRE_TRUE(nrec, "new size should be non-zero");
     REQUIRE_TRUE(row_size(), "cannot resize, row size is zero");
@@ -201,25 +205,34 @@ void TableBase::all_gatherv(const TableBase &src) {
     auto nrec_total = std::accumulate(nrecs.cbegin(), nrecs.cend(), 0ul);
     if (!nrec_total) return;
     push_back(nrec_total);
-    if (m_bw.node_shared()) {
+    if (m_bw.shared()) {
         /*
          * if a subset of rows (just the node roots) are gathering, we can't use gatherv (one recving rank) or
          * all_gatherv (all ranks gather), so we have to use the general all_to_allv
+         *
+         * initially, assume all ranks receive all data from this rank
+         *
+         * Analogous to SendRecv::communicate, units of Buffer::c_nbyte_word are used to increase
+         * the address range for SpinMapRdmFiller, particularly the Fock excited WF.
          */
-        // initially, assume all ranks receive all data from this rank
-        uintv_t sendcounts(mpi::nrank(), src.nrow_in_use()*row_size());
+        uintv_t sendcounts(mpi::nrank(), src.nrow_in_use() * row_size() / Buffer::c_nbyte_word);
         // set to zero all sendcounts for ranks that are not node-roots
-        for (uint_t irank=0ul; irank<mpi::nrank(); ++irank){
-            if (!mpi::is_node_root(irank)) sendcounts[irank] = 0;
+        for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank){
+            if (!mpi::is_root(irank, mpi::SharedMemory)) sendcounts[irank] = 0;
         }
         // all send displacements remain at 0ul
         uintv_t senddispls(mpi::nrank(), 0ul);
         uintv_t recvcounts(mpi::nrank(), 0ul);
         uintv_t recvdispls(mpi::nrank(), 0ul);
         // only node-roots receive non-zero counts from senders
-        if (mpi::on_node_i_am_root()) recvcounts = counts;
+        if (mpi::i_am_root(mpi::SharedMemory)) {
+            recvcounts = counts;
+            for (auto &val : recvcounts) val /= Buffer::c_nbyte_word;
+        }
         recvdispls = mpi::counts_to_displs_consec(recvcounts);
-        mpi::all_to_allv(src.cbegin(), sendcounts, senddispls, begin(), recvcounts, recvdispls);
+        auto send_ptr = reinterpret_cast<const uint_t*>(src.cbegin());
+        auto recv_ptr = reinterpret_cast<uint_t*>(begin());
+        mpi::all_to_allv(send_ptr, sendcounts, senddispls, recv_ptr, recvcounts, recvdispls);
     }
     else {
         mpi::all_gatherv(src.cbegin(), src.m_bw.size_in_use(), begin(), counts, displs);

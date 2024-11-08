@@ -26,7 +26,7 @@ TEST(CommunicatorNew, SharedRow) {
     comm_t comm("test communicator", {}, dist_opts, store_sizing, {}, comm_sizing);
     const uint_t nrow_per_rank_expect = 6;
     auto &row = comm.m_store.m_row;
-    for (uint_t i = 0; i<nrow_per_rank_expect*mpi::nrank(); ++i){
+    for (uint_t i = 0; i<nrow_per_rank_expect * mpi::nrank(); ++i){
         BufferedField<field::Number<uint_t>> key;
         key = 123+i*5;
         if (!mpi::i_am(comm.m_dist.irank(key))) continue;
@@ -34,7 +34,7 @@ TEST(CommunicatorNew, SharedRow) {
         row.m_key = key;
         row.m_value = 2.8*i;
     }
-    ASSERT_EQ(mpi::all_sum(comm.m_store.nrow_in_use()), nrow_per_rank_expect*mpi::nrank());
+    ASSERT_EQ(mpi::all_sum(comm.m_store.nrow_in_use()), nrow_per_rank_expect * mpi::nrank());
 
 //    comm_t::SharedRow shared_row(comm, {0, 0}, "test shared row");
 }
@@ -71,7 +71,7 @@ TEST(CommunicatorNew, Redistribution) {
 
     comm.m_store.redistribute();
 
-    for (uint_t i = 0; i<nrow_per_rank_expect*mpi::nrank(); ++i){
+    for (uint_t i = 0; i<nrow_per_rank_expect*mpi::nrank_world(); ++i){
         BufferedField<field::Number<uint_t>> key;
         key = 123+i*5;
         if (!mpi::i_am(comm.m_dist.irank(key))) continue;

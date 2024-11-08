@@ -127,7 +127,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints() {
         }
         else logging::info("FCIDUMP file is not spin resolved (e.g. RHF)");
 
-        if (mpi::on_node_i_am_root()) {
+        if (mpi::i_am_root(mpi::SharedMemory)) {
             CsvIntegralReader reader(m_info);
             return make_ints(&reader);
         }

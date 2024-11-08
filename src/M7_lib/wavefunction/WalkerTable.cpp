@@ -44,6 +44,11 @@ bool Walker::exceeds_initiator_thresh(uint_t ipart, wf_comp_t thresh) const {
 
 const str_t Walker::c_mbf_field_name = "many-body basis function";
 
-MbfWeightRow::MbfWeightRow(const Walker &walker) : Row(),
-    m_mbf(this, walker.m_mbf.m_basis, Walker::c_mbf_field_name),
-    m_weight(this, walker.m_wf_format, "weight"){}
+MbfWeightRow::MbfWeightRow(const sys::Basis &basis, const NdFormat<c_ndim_wf> &weight_fmt) :
+        Row(), m_mbf(this, basis, Walker::c_mbf_field_name),
+        m_weight(this, weight_fmt, "weight"){}
+
+
+MbfWeightRow::MbfWeightRow(const Walker &walker) :
+        Row(), m_mbf(this, walker.m_mbf.m_basis, Walker::c_mbf_field_name),
+        m_weight(this, walker.m_wf_format, "weight"){}

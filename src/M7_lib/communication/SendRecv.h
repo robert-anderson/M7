@@ -103,26 +103,38 @@ public:
     }
 
     /**
-     * perform MPI alltoallv communication of the contents of all send buffers to all recv buffers then clear the send
+     * Perform MPI alltoallv communication of the contents of all send buffers to all recv buffers then clear the send
      * table.
+     *
+     * Originally, MPI send/recv counts and displacements were handled in units of bytes, but in SpinMapRdmFiller.h
+     * the 32-bit signed integer range can be insufficient to address all elements of the perturbed WF. Conversion into
+     * units of uint_t increases the index range at least eightfold, but introduces complications in the senddispl
+     * handling, since senddispls[mpi::irank()] / Buffer::c_nbyte_word is not always integral.
      */
     void communicate() {
+        // enforce addresses in Buffer::c_nbyte_word
+        while (m_send.bw_size() % Buffer::c_nbyte_word != 0) m_send.resize(m_send.nrow_per_table() + 1, 0);
         m_last_send_counts = m_send.nrows_in_use();
         uintv_t sendcounts(m_last_send_counts);
-        for (auto &it: sendcounts) it *= row_size();
+        // express displs and counts in units of Buffer::c_nbyte_word
+        const auto nint_per_row = row_size() / Buffer::c_nbyte_word;
+        for (auto &it: sendcounts) it *= nint_per_row;
+
         uintv_t recvcounts(mpi::nrank(), 0ul);
 
         m_recv.clear();
 
         mpi::all_to_all(sendcounts, recvcounts);
 
-        auto senddispls = m_send.displs();
+        auto senddispls = m_send.displs();  // disps in bytes
         uintv_t recvdispls(mpi::nrank(), 0ul);
-        for (uint_t i = 1ul; i < mpi::nrank(); ++i)
+        for (uint_t i = 1ul; i < mpi::nrank(); ++i) {
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
-        auto recv_size = recvdispls.back() + recvcounts.back();
+            senddispls[i] /= Buffer::c_nbyte_word;  // displs in uint_t
+        }
+        // number of bytes required in recv buffer
+        const auto recv_size = (recvdispls.back() + recvcounts.back()) * Buffer::c_nbyte_word;
         m_last_recv_count = recv_size / row_size();
-
         if (recv_size > static_cast<const TableBase &>(recv()).bw_size()) {
             /*
              * the recv table is full
@@ -137,14 +149,18 @@ public:
         REQUIRE_TRUE_ALL(m_send.begin(), "Send buffer is not allocated on all ranks!");
         REQUIRE_TRUE_ALL(m_recv.begin(), "Recv buffer is not allocated on all ranks!");
 
-        auto tmp = mpi::all_to_allv(m_send.begin(), sendcounts, senddispls,
-                                    m_recv.begin(), recvcounts, recvdispls);
+        // send in units of uint_t
+        auto send_ptr = reinterpret_cast<const uint_t*>(m_send.begin());
+        auto recv_ptr = reinterpret_cast<uint_t*>(m_recv.begin());
+        auto tmp = mpi::all_to_allv(send_ptr, sendcounts, senddispls, recv_ptr, recvcounts, recvdispls);
         /*
-         * check that the data addressed to this rank from this rank has been copied correctly
+         * check that the data addressed to this rank from this rank has been copied correctly, adjusting
+         * for row -> byte conversion
          */
         ASSERT(!send(mpi::irank()).begin() ||
                std::memcmp(send(mpi::irank()).begin(),
-                           recv().begin() + recvdispls[mpi::irank()], recvcounts[mpi::irank()]) == 0);
+                           recv().begin() + recvdispls[mpi::irank()] * Buffer::c_nbyte_word,
+                           recvcounts[mpi::irank()] * Buffer::c_nbyte_word) == 0);
 
         REQUIRE_TRUE_ALL(tmp, "MPI AllToAllV failed");
         recv().m_bw.set_end(m_last_recv_count);

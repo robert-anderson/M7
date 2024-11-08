@@ -5,9 +5,14 @@
 #include "FockRdm4.h"
 
 
+TransitionFockRdm4::TransitionFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue):
+        Rdm(opts, opsig::c_trip, opsig::c_trip, sector, nvalue, 0, 0, "4400f"),
+        m_fock(fock), m_diag_fock(m_fock.is_diagonal() ? m_fock.get_diagonal() : v_t<ham_t>{}) {}
+
 FockRdm4::FockRdm4(const conf::Rdms &opts, OpSig max_contrib_exsig, sys::Sector sector, uint_t nvalue) :
         ContractedRdm(opts, opsig::c_4400, opsig::c_3300, max_contrib_exsig, sector,
-            nvalue, opts.m_fock_4rdm.m_stoch_thresh.m_value, opts.m_fock_4rdm.m_neglect_tiny_contribs.m_value, "4400f"){}
+            nvalue, opts.m_fock_4rdm.m_stoch_thresh.m_value,
+            opts.m_fock_4rdm.m_neglect_tiny_contribs.m_value, "4400f"){}
 
 
 NonDiagFockRdm4::NonDiagFockRdm4(const conf::Rdms &opts, const FockMatrix& fock, sys::Sector sector, uint_t nvalue) :

@@ -5,6 +5,8 @@ target_sources(M7_lib
         Epoch.cpp
         Epoch.h
         Gatherable.h
+        Lock.cpp
+        Lock.h
         MPIAssert.h
         MPIWrapper.cpp
         MPIWrapper.h

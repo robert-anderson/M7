@@ -12,7 +12,7 @@ exgen::Pchb2200::Pchb2200(const FrmHam& h, PRNG& prng):
     uint_t ij = 0ul;
     logging::info("Initializing pre-computed heat bath sampling weights for doubles...");
     const auto nspinorb = m_h.m_basis.m_nspinorb;
-    if (mpi::on_node_i_am_root()) {
+    if (mpi::i_am_root(mpi::SharedMemory)) {
         for (uint_t i = 0ul; i < nspinorb; ++i) {
             for (uint_t j = 0ul; j < i; ++j) {
                 weights.assign(m_nspinorb_pair, 0.0);

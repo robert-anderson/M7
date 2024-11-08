@@ -10,6 +10,8 @@
 
 #include "BitsetField.h"
 
+using FrmOnvSpinChannelField = BitsetField<uint_t, 1ul>;
+
 struct FrmOnvField : BitsetField<uint_t, 2> {
     typedef BitsetField<uint_t, 2> base_t;
     using base_t::get;
@@ -129,6 +131,10 @@ public:
      */
     uint_t get_beta_dataword(uint_t idataword) const;
 
+    void copy_alpha_to(FrmOnvSpinChannelField& spin_channel) const;
+
+    void copy_beta_to(FrmOnvSpinChannelField& spin_channel) const;
+
     template<typename body_fn_t>
     void foreach_alpha(const body_fn_t& fn) const {
         auto get_work_fn = [&](uint_t idataword){
@@ -146,6 +152,31 @@ public:
         setbit_foreach::single<uint_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
     uint_t nbeta() const;
+
+    /**
+     * foreach iterator over the alpha set bits in this FrmOnvField which are not also set in the given other FrmOnvField
+     */
+    template<typename body_fn_t>
+    void foreach_alpha_not_in(const FrmOnvField& other, const body_fn_t& fn) const {
+        auto get_work_fn = [&](uint_t idataword){
+            return this->get_alpha_dataword(idataword) &~ other.get_alpha_dataword(idataword);
+        };
+        setbit_foreach::single<uint_t>(m_dsize_spin_channel, fn, get_work_fn);
+    }
+    uint_t nalpha_not_in(const FrmOnvField& other) const;
+
+    /**
+     * foreach iterator over the beta set bits in this FrmOnvField which are not also set in the given other FrmOnvField
+     */
+    template<typename body_fn_t>
+    void foreach_beta_not_in(const FrmOnvField& other, const body_fn_t& fn) const {
+        auto get_work_fn = [&](uint_t idataword){
+            return this->get_beta_dataword(idataword) &~ other.get_beta_dataword(idataword);
+        };
+        setbit_foreach::single<uint_t>(m_dsize_spin_channel, fn, get_work_fn);
+    }
+    uint_t nbeta_not_in(const FrmOnvField& other) const;
+
 
 
     /**

@@ -3,11 +3,24 @@
 //
 
 #include "Maes.h"
+#include "NotfMaeFiller.h"
+#include "SpinMapRdmFiller.h"
+
+Rdms::FillingAlgorithm filling_algo(const str_t& name) {
+    if (name == "on_the_fly") return Rdms::OnTheFly;
+    if (name == "caspt2") return Rdms::Caspt2;
+    if (name == "bitset_isect_hashmap_ri") return Rdms::BitsetIsectHashmapRi;
+    if (name == "bitset_isect_pair_loop_ri") return Rdms::BitsetIsectPairLoopRi;
+    if (name == "outer_product") return Rdms::OuterProduct;
+    ABORT("Invalid filling algo name");
+    return Rdms::OnTheFly;
+}
 
 Maes::Maes(const conf::Mae &opts, const wf::Vectors& wf) :
         m_accum_epoch("MAE accumulation"),
-        m_rdms(opts.m_rdm, wf, m_accum_epoch),
-        m_spec_moms(opts.m_spec_mom, wf, m_accum_epoch), m_opts(opts) {
+        m_rdms(opts.m_rdm, wf, m_accum_epoch, filling_algo(opts.m_filling_algorithm)),
+        m_spec_moms(opts.m_spec_mom, wf, m_accum_epoch), m_opts(opts),
+        m_on_the_fly(m_opts.m_filling_algorithm.m_value == "on_the_fly") {
     if (*this) {
         m_stats = ptr::smart::make_unique<MaeStats>(
                 opts.m_stats_path, "FCIQMC Multidimensional Averaged Estimators",
@@ -24,7 +37,7 @@ bool Maes::all_stores_empty() const {
 }
 
 bool Maes::is_period_cycle(uint_t icycle) {
-    if (!m_opts.m_on_the_fly) return false;
+    if (!m_on_the_fly) return false;
     if (!m_accum_epoch) return false;
     if (!m_opts.m_stats_period) return false;
     if (m_icycle_period_start == ~0ul || m_icycle_period_start == icycle) {
@@ -39,7 +52,7 @@ void Maes::end_cycle() {
 }
 
 void Maes::make_otf_average_contribs(Walker &row, const shared_rows::Walker* hf, uint_t icycle) {
-    if (!m_opts.m_on_the_fly) return;
+    if (!m_on_the_fly) return;
     if (!m_accum_epoch) return;
     // the current cycle should be included in the denominator
     if (!row.occupied_ncycle(icycle)) {
@@ -80,24 +93,38 @@ void Maes::make_otf_average_contribs(Walker &row, const shared_rows::Walker* hf,
     row.m_icycle_occ = icycle + 1;
 }
 
-void Maes::fill_from_wf_hist(const Table<MbfWeightRow>& hist) {
+void Maes::fill_from_wf_hist(const buffered::OpenAddressedTable<MbfWeightRow>& hist) {
     REQUIRE_TRUE_ALL(all_stores_empty(), "stores should be empty if no on-the-fly contributions have been made");
 
     logging::info("Filling MAEs using histogrammed partial CI vector composed of {} MBFs", hist.nrow_in_use());
 
-    const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
-    const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
+    if (m_opts.m_filling_algorithm.m_value == "outer_product") {
+        const auto displ = mpi::evenly_shared_displ(hist.nrow_in_use());
+        const auto count = mpi::evenly_shared_count(hist.nrow_in_use());
 
-    auto bra = hist.m_row;
-    auto ket = bra;
-    for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
-        for (ket.restart(); ket; ++ket) {
-            const auto exsig = mbf::exsig(bra.m_mbf, ket.m_mbf);
-            if (!m_rdms.takes_contribs_from(exsig)) continue;
-            const auto contrib = bra.m_weight[0]*ket.m_weight[0];
-            m_rdms.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
+        auto bra = hist.m_row;
+        auto ket = bra;
+        uint_t counter = 0;
+        logging::info("starting loops now");
+        for (bra.restart(displ); bra.in_range(displ + count); ++bra) {
+            counter += 1;
+            if (counter % 1000 == 0) logging::info("currently in iteration {}", counter);
+            for (ket.restart(); ket; ++ket) {
+                const auto exsig = mbf::exsig(bra.m_mbf, ket.m_mbf);
+                if (!m_rdms.takes_contribs_from(exsig)) continue;
+                // bra and ket are owned by root rank on each node, just dereferencing pointer on non-owning rank returns 0
+                const auto contrib = bra.m_weight.sum() * ket.m_weight.sum();
+                m_rdms.make_contribs(bra.m_mbf, ket.m_mbf, contrib);
+            }
         }
     }
+    else if (m_opts.m_filling_algorithm.m_value == "caspt2")
+        SpinMapRdmFiller::fill(hist, &m_rdms, m_opts.m_notf_fill_discard_thresh);
+    else if (m_opts.m_filling_algorithm.m_value == "bitset_isect_hashmap_ri")
+        NotfMaeFiller::fill(hist, NotfMaeFiller::Hashmap, &m_rdms);
+    else if (m_opts.m_filling_algorithm.m_value == "bitset_isect_pair_loop_ri")
+        NotfMaeFiller::fill(hist, NotfMaeFiller::PairLoop, &m_rdms);
+    end_cycle();
 }
 
 void Maes::output(uint_t icycle, const Hamiltonian &ham, bool final) {

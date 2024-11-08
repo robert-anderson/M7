@@ -63,7 +63,7 @@ namespace wf {
         /**
          * MBFs and weights of all averaged, histogrammed rows gathered gaplessly into a single table
          */
-        buffered::Table<MbfWeightRow> m_gathered_hist;
+        buffered::OpenAddressedTable<MbfWeightRow> m_gathered_hist;
         /**
          * threshold and cycle index of last histogram gather (to determine whether m_gathered_hist must be updated)
          */

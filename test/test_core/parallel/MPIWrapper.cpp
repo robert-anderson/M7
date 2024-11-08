@@ -9,16 +9,16 @@
 
 TEST(MPIWrapper, AllSum){
     ASSERT_EQ(mpi::nrank(), mpi::all_sum(1ul));
-    uint_t i = mpi::irank()+1;
+    uint_t i = mpi::irank() + 1;
     uint_t res = mpi::all_sum(i);
-    ASSERT_EQ(res, (mpi::nrank()*(mpi::nrank()+1))/2);
+    ASSERT_EQ(res, (mpi::nrank() * (mpi::nrank() + 1)) / 2);
 }
 
 TEST(MPIWrapper, AllMax){
     uint_t i = hash::in_range(mpi::irank(), 5, 19);
     uint_t res = mpi::all_max(i);
     uintv_t chk(mpi::nrank());
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) chk[irank] = hash::in_range(irank, 5, 19);
+    for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) chk[irank] = hash::in_range(irank, 5, 19);
     std::sort(chk.begin(), chk.end());
     ASSERT_EQ(res, chk.back());
 }
@@ -27,7 +27,7 @@ TEST(MPIWrapper, AllMin){
     uint_t i = hash::in_range(mpi::irank(), 5, 19);
     uint_t res = mpi::all_min(i);
     uintv_t chk(mpi::nrank());
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank) chk[irank] = hash::in_range(irank, 5, 19);
+    for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank) chk[irank] = hash::in_range(irank, 5, 19);
     std::sort(chk.begin(), chk.end());
     ASSERT_EQ(res, chk.front());
 }
@@ -35,11 +35,11 @@ TEST(MPIWrapper, AllMin){
 TEST(MPIWrapper, Alltoall){
     uintv_t send(mpi::nrank(), 0ul);
     uintv_t recv(mpi::nrank(), 0ul);
-    for (uint_t irecv=0ul; irecv<mpi::nrank(); ++irecv){
+    for (uint_t irecv = 0ul; irecv < mpi::nrank(); ++irecv){
         send[irecv] = hash::in_range({irecv, mpi::irank()}, 3, 123);
     }
     mpi::all_to_all(send, recv);
-    for (uint_t isent=0ul; isent<mpi::nrank(); ++isent){
+    for (uint_t isent = 0ul; isent < mpi::nrank(); ++isent){
         ASSERT_EQ(recv[isent], hash::in_range({mpi::irank(), isent}, 3, 123));
     }
 }
@@ -53,11 +53,11 @@ TEST(MPIWrapper, Allgatherv){
     }
     uintv_t recvcounts(mpi::nrank(), n);
     uintv_t displs(mpi::nrank(), 0);
-    for (uint_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+n;
+    for (uint_t i = 1ul; i < mpi::nrank(); ++i) displs[i] = displs[i - 1] + n;
 
     mpi::all_gatherv(send.data(), n, recv.data(), recvcounts, displs);
     uint_t iflat = 0ul;
-    for (uint_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
+    for (uint_t isrc = 0ul; isrc < mpi::nrank(); ++isrc){
         for (uint_t i=0ul; i<n; ++i){
             ASSERT_EQ(recv[iflat], hash::in_range({isrc, i}, 3, 123));
             ++iflat;
@@ -73,12 +73,12 @@ TEST(MPIWrapper, Somegatherv){
         send[i] = hash::in_range({mpi::irank(), i}, 3, 123);
     }
     // suppose that only even-indexed ranks gather data
-    auto recving = [](uint_t irank=mpi::irank()) -> bool {return !(irank&1ul);};
+    auto recving = [](uint_t irank = mpi::irank()) -> bool {return !(irank & 1ul);};
     uintv_t sendcounts(mpi::nrank(), 0ul);
     uintv_t senddispls(mpi::nrank(), 0ul);
     uintv_t recvcounts(mpi::nrank(), 0ul);
     uintv_t recvdispls(mpi::nrank(), 0ul);
-    for (uint_t irank=0ul; irank<mpi::nrank(); ++irank){
+    for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank){
         // all ranks send all their data to only the receiving ranks
         if (recving(irank)) sendcounts[irank] = n;
     }
@@ -87,9 +87,9 @@ TEST(MPIWrapper, Somegatherv){
 
     mpi::all_to_allv(send.data(), sendcounts, senddispls, recv.data(), recvcounts, recvdispls);
     uint_t iflat = 0ul;
-    for (uint_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
-        for (uint_t i=0ul; i<n; ++i){
-            if (mpi::irank()%2) ASSERT_EQ(recv[iflat], 0);
+    for (uint_t isrc = 0ul; isrc < mpi::nrank(); ++isrc){
+        for (uint_t i = 0ul; i < n; ++i){
+            if (mpi::irank() % 2) ASSERT_EQ(recv[iflat], 0);
             else ASSERT_EQ(recv[iflat], hash::in_range({isrc, i}, 3, 123));
             ++iflat;
         }
@@ -105,12 +105,12 @@ TEST(MPIWrapper, AllgathervRagged){
 
     uintv_t recvcounts(mpi::nrank(), 0);
     mpi::all_gather(nsend, recvcounts);
-    for (uint_t i=0ul; i<mpi::nrank(); ++i){
+    for (uint_t i = 0ul; i < mpi::nrank(); ++i){
         ASSERT_EQ(recvcounts[i], hash::in_range(i, 5, 17));
     }
 
     uintv_t displs(mpi::nrank(), 0);
-    for (uint_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+recvcounts[i-1];
+    for (uint_t i = 1ul; i < mpi::nrank(); ++i) displs[i] = displs[i - 1] + recvcounts[i - 1];
 
     const uint_t nrecv = displs.back()+recvcounts.back();
     uintv_t recv(nrecv, 0ul);
@@ -118,8 +118,8 @@ TEST(MPIWrapper, AllgathervRagged){
     mpi::all_gatherv(send.data(), nsend, recv.data(), recvcounts, displs);
 
     uint_t iflat = 0ul;
-    for (uint_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
-        for (uint_t i=0ul; i<recvcounts[isrc]; ++i){
+    for (uint_t isrc = 0ul; isrc < mpi::nrank(); ++isrc){
+        for (uint_t i = 0ul; i < recvcounts[isrc]; ++i){
             ASSERT_EQ(recv[iflat], hash::in_range({isrc, i}, 3, 123));
             ++iflat;
         }
@@ -134,7 +134,7 @@ TEST(MPIWrapper, MaxLocMinLoc){
     T local = to_T(mpi::irank());
     std::pair<T, uint_t> max{std::numeric_limits<T>::min(), 0};
     std::pair<T, uint_t> min{std::numeric_limits<T>::max(), 0};
-    for (uint_t i=0ul; i<mpi::nrank(); ++i) {
+    for (uint_t i = 0ul; i < mpi::nrank(); ++i) {
         auto d = to_T(i);
         if (d>max.first) max = {d, i};
         if (d<min.first) min = {d, i};
@@ -153,9 +153,9 @@ TEST(MPIWrapper, MaxLocMinLoc){
 
 TEST(MPIWrapper, RanksWithNonzero){
     uintv_t iranks_chk = {};
-    for (uint_t irank=0ul; irank < mpi::nrank(); ++irank)
+    for (uint_t irank = 0ul; irank < mpi::nrank(); ++irank)
         if (hash::in_range(irank+123, 0, 2)) iranks_chk.push_back(irank);
-    const bool i_have_nonzero = hash::in_range(mpi::irank()+123, 0, 2);
+    const bool i_have_nonzero = hash::in_range(mpi::irank() + 123, 0, 2);
     const auto iranks = mpi::filter(i_have_nonzero);
     ASSERT_EQ(iranks, iranks_chk);
 }

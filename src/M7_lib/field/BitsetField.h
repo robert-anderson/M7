@@ -198,16 +198,45 @@ struct BitsetField : FieldBase {
         put(m_format.flatten(inds), v);
     }
 
+    /**
+     * @param buf
+     *  pointer to the beginning of the T-typed buffer
+     * @param idataword
+     *  dataword index
+     * @return
+     *  true if the indexed dataword is not the last one, or if the trailing part is correctly cleared
+     */
+    bool trailing_bits_clear(const T* buf, uint_t idataword) const {
+        if (idataword + 1 != m_dsize) return true;
+        const auto tmp = buf[idataword];
+        return tmp == bit::truncate(tmp, m_nbit_in_last_dword);
+    }
+
+    /**
+     * as above but assume the index of the final dataword
+     */
+    bool trailing_bits_clear(const T* buf) const {
+        return trailing_bits_clear(buf, m_dsize-1);
+    }
+
+    /**
+     * as above but assume ctbegin pointer as the buffer
+     */
+    bool trailing_bits_clear(uint_t idataword) const {
+        return trailing_bits_clear(ctbegin(), idataword);
+    }
+
+    /**
+     * as above but assume the index of the final dataword
+     */
+    bool trailing_bits_clear() const {
+        return trailing_bits_clear(m_dsize-1);
+    }
+
     T get_dataword(uint_t idataword) const {
         DEBUG_ASSERT_LT(idataword, m_dsize, "dataword index OOB");
-        auto tptr = ctbegin();
-        auto tmp = tptr[idataword];
-        if (idataword + 1 == m_dsize) {
-            DEBUG_ASSERT_EQ(tmp, bit::truncate(tmp, m_nbit_in_last_dword),
-                       "trailing bits were not clear: possible corruption");
-            tmp = bit::truncate(tmp, m_nbit_in_last_dword);
-        }
-        return tmp;
+        DEBUG_ASSERT_TRUE(trailing_bits_clear(idataword), "trailing bits were not clear: possible corruption");
+        return ctbegin()[idataword];
     }
 
     T get_antidataword(uint_t idataword) const {
@@ -223,6 +252,12 @@ struct BitsetField : FieldBase {
     template<typename fn_t>
     void foreach_setbit(const fn_t& fn) const {
         auto get_work_fn = [this](uint_t idataword){return get_dataword(idataword);};
+        setbit_foreach::single<T>(m_dsize, fn, get_work_fn);
+    }
+
+    template<typename fn_t>
+    void foreach_clrbit(const fn_t& fn) const {
+        auto get_work_fn = [this](uint_t idataword){return get_antidataword(idataword);};
         setbit_foreach::single<T>(m_dsize, fn, get_work_fn);
     }
 
@@ -250,6 +285,46 @@ struct BitsetField : FieldBase {
         setbit_foreach::triple<T>(m_dsize, fn_inner, get_work_fn);
     }
 
+    /**
+     * foreach iterator over the set bits in this BitsetField which are not also set in the given other BitsetField
+     */
+    template<typename body_fn_t>
+    void foreach_setbit_not_in(const BitsetField<T, nind>& other, const body_fn_t& fn) const {
+        DEBUG_ASSERT_EQ(m_dsize, other.m_dsize, "incompatible bitset sizes");
+        DEBUG_ASSERT_EQ(m_format, other.m_format, "incompatible bitset formats");
+        auto get_work_fn = [&](uint_t idataword){
+            return this->get_dataword(idataword) &~ other.get_dataword(idataword);
+        };
+        setbit_foreach::single<uint_t>(m_dsize, fn, get_work_fn);
+    }
+
+    uint_t nsetbit_not_in(const BitsetField<T, nind>& other) const {
+        uint_t count = 0ul;
+        auto fn = [&count](uint_t){++count;};
+        foreach_setbit_not_in(other, fn);
+        return count;
+    }
+
+    /**
+     * Compares two bitstrings and returns true if A comes before B, i.e.
+     * if, in the last occupation where they differ, A has the lower orbital number:
+     * 111011010 < 011101110 < 011011011
+     */
+    bool lexical_order(const BitsetField<T, nind>& other) const {
+        DEBUG_ASSERT_EQ(m_dsize, other.m_dsize, "incompatible bitset sizes");
+        DEBUG_ASSERT_EQ(m_format, other.m_format, "incompatible bitset formats");
+        bool comes_before = false;
+        // std::cout << "number of bits: " << nbit() << std::endl;
+        for (int i = nbit() - 1; i >= 0; --i) {
+            // std::cout << "bit occupation at position : " << i  << " " << get(i) << " " << other.get(i) << std::endl;
+            if (get(i) != other.get(i)) {
+                comes_before = get(i) ? false : true;
+                break;
+            }
+        }
+        return comes_before;
+    }
+
     uint_t nsetbit() const {
         uint_t result = 0;
         for (uint_t idataword = 0ul; idataword < m_dsize; ++idataword) {
@@ -264,6 +339,10 @@ struct BitsetField : FieldBase {
         for (uint_t i = 0ul; i < nbit(); ++i)
             res += get(i) ? "1" : "0";
         return res;
+    }
+
+    bool check_buffer(const buf_t *buf) override {
+        return trailing_bits_clear(reinterpret_cast<const T*>(buf));
     }
 
     void save_fn(const hdf5::NodeWriter& nw, const str_t& name, bool this_rank, uint_t max_nitem_per_op) const override {

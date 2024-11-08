@@ -110,7 +110,7 @@ namespace global_extremal_rows_test {
 
 TEST(GlobalExtremalRows, Nrow) {
     using namespace global_extremal_rows_test;
-    scalar_table_t table("test", {});
+    scalar_table_t table("test", scalar_row_t{});
     setup(table);
     auto nrow = table.nrow_in_use();
     nrow = mpi::all_sum(nrow);
@@ -119,7 +119,7 @@ TEST(GlobalExtremalRows, Nrow) {
 
 TEST(GlobalExtremalRows, FindAsc) {
     using namespace global_extremal_rows_test;
-    scalar_table_t table("test", {});
+    scalar_table_t table("test", scalar_row_t{});
     setup(table);
 
     auto row1 = table.m_row;
@@ -157,7 +157,7 @@ TEST(GlobalExtremalRows, FindAsc) {
 
 TEST(GlobalExtremalRows, FindDesc) {
     using namespace global_extremal_rows_test;
-    scalar_table_t table("test", {});
+    scalar_table_t table("test", scalar_row_t{});
     setup(table);
 
     auto row1 = table.m_row;

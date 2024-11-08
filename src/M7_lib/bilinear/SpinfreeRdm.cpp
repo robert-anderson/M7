@@ -53,10 +53,12 @@ void SpinFreeRdm::make_contribs_from_one_row(const RdmRow& row, wf_t norm) {
         if (is_diagonal) {
             add(p0, q0, elem);
         }
+        else if (m_enforce_hermiticity) {
+            add(p0, q0, 0.5 * elem);
+            add(q0, p0, 0.5 * elem);
+        }
         else {
-            // enforce hermiticity symmetry
-            add(p0, q0, 0.5*elem);
-            add(q0, p0, 0.5*elem);
+            add(p0, q0, elem);
         }
     }
     else {
@@ -116,28 +118,33 @@ void SpinFreeRdm::make_contribs_from_one_row(const RdmRow& row, wf_t norm) {
                 m_insert_inds.m_frm.m_cre[i] = given_inds.m_frm.m_cre[cre_perm[i]];
                 m_insert_inds.m_frm.m_ann[i] = given_inds.m_frm.m_ann[ann_perm[i]];
             }
-            if (is_diagonal) {
+            if (is_diagonal || !m_enforce_hermiticity) {
                 // diagonal element
-                add_to_send_table(m_insert_inds, elem*factor);
+                add_to_send_table(m_insert_inds, elem * factor);
             }
             else {
                 // off-diagonal element: enforce hermiticity symmetry by averaging
-                add_to_send_table(m_insert_inds, 0.5*elem*factor);
+                add_to_send_table(m_insert_inds, 0.5 * elem * factor);
                 m_insert_inds.m_frm.conjugate();
-                add_to_send_table(m_insert_inds, 0.5*elem*factor);
+                add_to_send_table(m_insert_inds, 0.5 * elem * factor);
             }
         }
     }
 }
 
-SpinFreeRdm::SpinFreeRdm(const Rdm& src, wf_t norm, uint_t nelem_per_comm) :
+SpinFreeRdm::SpinFreeRdm(const Rdm& src, uint_t nelem_per_comm) :
         Rdm(src.m_ranksig, src.m_indsig, src.m_sector, src.m_store.m_row.m_values.nelement(),
             false, false, src.m_store.m_dist_opts,
             {src.m_store.nrow_in_use(), src.m_store.m_bw.get_expansion_factor()},
-            {nelem_per_comm, 1.0}, src.name()), m_insert_inds(src.m_indsig) {
+            {4000ul, 1.0}, src.name()),
+            m_insert_inds(src.m_indsig), m_nelem_per_comm(4000ul) {
     REQUIRE_EQ_ALL(m_nfrm_cre, m_nfrm_ann, "spin tracing requires fermion number conservation");
     REQUIRE_LE_ALL(m_nfrm_cre_ind, 3ul, "spin tracing is only implemented upto rank 3 fermion operators");
     m_ordered_inds = false;
+}
+
+void SpinFreeRdm::fill(const Rdm &src, wf_t norm) {
+    m_store.clear();
     logging::info("computing the normalized spin-trace of {}", src.name());
     /*
      * loop over rows involves communication, so make sure each rank executes the loop body the same number of times
@@ -150,7 +157,7 @@ SpinFreeRdm::SpinFreeRdm(const Rdm& src, wf_t norm, uint_t nelem_per_comm) :
             make_contribs_from_one_row(row, norm);
             ++row;
         }
-        if (irow && !(irow % nelem_per_comm)){
+        if (irow && !(irow % m_nelem_per_comm)){
             // time to communicate
             Rdm::end_cycle();
         }

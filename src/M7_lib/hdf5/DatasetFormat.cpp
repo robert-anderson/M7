@@ -42,7 +42,7 @@ hdf5::dataset::DistListFormat::DistListFormat(
 hdf5::dataset::PartDistListFormat::PartDistListFormat(
         hdf5::dataset::ItemFormat item_format, uint_t nitem, str_t leading_dim_name) :
         DistListFormat(item_format, nitem, mpi::all_sum(nitem),
-            mpi::counts_to_displs_consec(mpi::all_gathered(nitem))[mpi::irank()], leading_dim_name){}
+                       mpi::counts_to_displs_consec(mpi::all_gathered(nitem))[mpi::irank()], leading_dim_name){}
 
 hdf5::dataset::FullDistListFormat::FullDistListFormat(
         hdf5::dataset::ItemFormat item_format, uint_t nitem, str_t leading_dim_name) :

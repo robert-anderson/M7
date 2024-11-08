@@ -96,6 +96,8 @@ public:
         return *this;
     }
 
+    void add_to_row(Row* row);
+
     bool is_comparable(const FieldBase &other) const;
 
     bool belongs_to_row() const;
@@ -133,6 +135,10 @@ public:
         return reinterpret_cast<const T*>(cend());
     }
 
+    uint_t row_offset() const {
+        return m_row_offset;
+    }
+
     const Row *row() const;
 
     Row *row_of_copy() const;
@@ -162,6 +168,10 @@ public:
         DEBUG_ASSERT_FALSE(m_row->m_table->is_freed(irow), "copying a freed row to buffer");
         auto src = m_row->m_table->cbegin(irow) + m_row_offset;
         std::memcpy(dst, src, m_size);
+    }
+
+    virtual bool check_buffer(const buf_t*) {
+        return true;
     }
 
     void from_buffer(const buf_t* src, uint_t irow) {
